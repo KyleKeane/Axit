@@ -6,7 +6,7 @@ namespace Axit.Tests;
 /// <summary>
 /// The key tables (docs/axit/SPEC.md AX-8.4): no window-specific key equals a bundle-wide key, no table repeats a
 /// key, and the keys two windows use for different actions are listed so that a collision between apps is seen
-/// before it is felt. AxClaude's table joins here at plan step 11.
+/// before it is felt.
 /// </summary>
 public sealed class KeyTests
 {
@@ -14,6 +14,7 @@ public sealed class KeyTests
         new Dictionary<string, IReadOnlyList<(string Name, Keys Key)>>
         {
             ["AxDown"] = AxDown.AxDownKeys.All,
+            ["AxClaude"] = AxClaude.AxClaudeKeys.All,
         };
 
     [Fact]

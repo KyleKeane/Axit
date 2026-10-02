@@ -297,7 +297,7 @@ question area shared), step 11, and the key work in steps 8 and 12.
 - [x] Step 7 AxDown.Core: `TextDocument`, `EditorSettings`, 14 tests (2026-10-02); `WindowPlacement` moved to `Axit.Core` on its second use
 - [x] Step 8 AxDown window: `EditorForm`, `AxDownApp`, `AxDownKeys`, `BundleKeys`, the shared pieces in `Axit.Forms`, the key collision test (2026-10-02); NVDA pass at step 10
 - [x] Step 9 AxDown installed: Start entry, file menu, Open with, `axdown`, `AxDown.ico`, `-StartFile` for the updater (2026-10-02); Kyle's checks pending
-- [ ] Step 10 NVDA check, release 2.0.0
-- [ ] Step 11 AxClaude's key table
+- [x] Step 10 NVDA check by Kyle, repository renamed to `KyleKeane/Axit`, Axit 2.0.0 released (2026-10-02)
+- [x] Step 11 AxClaude's key table `AxClaudeKeys`, both windows in the collision test (2026-10-02; no key changed)
 - [ ] Step 12 Markdown navigation, release 2.1.0
 - [x] Step 13 the pattern made explicit: `docs/axit/adding-an-app.md` (2026-10-02, written while the pattern was fresh; the CLAUDE.md length check stays for after step 11)

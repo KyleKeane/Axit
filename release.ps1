@@ -62,7 +62,7 @@ if (-not (Select-String -Path $changelog -Pattern ('^## ' + [regex]::Escape($Ver
 # The test projects alone: they need no window project, so they build while the app itself is running from bin\Debug.
 # GitHub Actions builds and tests the whole solution before it publishes.
 Write-Host "Running the tests..."
-foreach ($tests in 'tests\Axit.Tests\Axit.Tests.csproj', 'tests\AxClaude.Tests\AxClaude.Tests.csproj') {
+foreach ($tests in 'tests\Axit.Tests\Axit.Tests.csproj', 'tests\AxClaude.Tests\AxClaude.Tests.csproj', 'tests\AxDown.Tests\AxDown.Tests.csproj') {
     dotnet test (Join-Path $root $tests) --nologo -v q
     if ($LASTEXITCODE -ne 0) {
         Write-Host "The tests failed. Nothing was changed."

@@ -309,6 +309,8 @@ A notice (D23) takes the place of the conversation and the field, between the me
 
 ### 6.3 Keyboard map
 
+Every key is bundle-wide or window-specific (bundle AX-8). Bundle-wide, the same in every window of Axit and defined in `Axit.Forms.BundleKeys`: Tab, Shift+Tab, Ctrl+Tab, Ctrl+Shift+Tab and F6 between the controls; Ctrl+F, F3 and Shift+F3; Ctrl+S; Ctrl+Plus and Ctrl+Minus; Page Up and Page Down; F1; Alt+F4; Alt. Everything else below is AxClaude's and lives in `AxClaudeKeys`, the one place a key is changed: the window's key switch, the menu items and the conversation's quick keys read it, and the F1 text in `HelpText` names the same keys. The collision test in `tests/Axit.Tests` fails when one of AxClaude's keys equals a bundle key, and lists the keys AxDown uses differently (Ctrl+N, Ctrl+O, Ctrl+Shift+S).
+
 Global: Tab / Shift+Tab / Ctrl+Tab / Ctrl+Shift+Tab / F6 toggle field ↔ view; Ctrl+1 field, Ctrl+2 view (announced when already there); Ctrl+Shift+S send the waiting message now; Shift+Escape send ESC; Ctrl+F find, F3 / Shift+F3 next / previous; Ctrl+S save; Ctrl+W open the current folder; Ctrl+N new session; Ctrl+Shift+R restart; Ctrl+O guarded (says why, D14); Ctrl+Shift+C send Ctrl+C; Ctrl+Shift+M send Shift+Tab; Ctrl+Shift+O latest response; Ctrl+Shift+K bookmark the caret's line; Ctrl+Plus / Ctrl+Minus text size; F1 shortcuts; Alt+F4 exit; Alt menus.
 
 Input field: Enter send; Shift+Enter new line; Escape guarded; Tab / Shift+Tab to the conversation; Ctrl+Up / Ctrl+Down send arrows; plain Up / Down move the caret only; Page Up / Page Down one screen of the field (app, FR-2.1); standard editing keys.

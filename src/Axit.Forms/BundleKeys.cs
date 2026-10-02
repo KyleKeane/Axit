@@ -26,9 +26,15 @@ public static class BundleKeys
     public const Keys SmallerText = Keys.Control | Keys.OemMinus;
     public const Keys SmallerTextNumpad = Keys.Control | Keys.Subtract;
 
+    /// <summary>One screen in an edit control, and to its ends, through <see cref="EditPaging"/>.</summary>
+    public const Keys PageUp = Keys.PageUp;
+    public const Keys PageDown = Keys.PageDown;
+
     /// <summary>Every key above with its name, for the collision test and the F1 texts.</summary>
     public static readonly IReadOnlyList<(string Name, Keys Key)> All =
     [
+        ("Page up", PageUp),
+        ("Page down", PageDown),
         ("Keyboard shortcuts", Shortcuts),
         ("Next control", NextControl),
         ("Previous control", PreviousControl),

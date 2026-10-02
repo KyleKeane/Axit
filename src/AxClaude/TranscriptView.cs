@@ -26,30 +26,30 @@ internal sealed class TranscriptView : TextBox
     private sealed record QuickKey(Keys Key, string Name, Func<Line, bool> Matches, Func<Line, bool>? Previous = null);
 
     /// <summary>k and Shift+K: the bookmarks dropped with m (FR-3.9); the Navigate menu reaches them too.</summary>
-    private static readonly QuickKey BookmarkKey = new(Keys.K, "bookmark", l => l.Kind == LineKind.Bookmark);
+    private static readonly QuickKey BookmarkKey = new(AxClaudeKeys.Bookmark, "bookmark", l => l.Kind == LineKind.Bookmark);
 
     private static readonly QuickKey[] QuickKeys =
     [
-        new(Keys.H, "heading", l => l.HeadingLevel > 0),
+        new(AxClaudeKeys.Heading, "heading", l => l.HeadingLevel > 0),
         // A replayed you: row has its own marker in front of it (FR-4.8); it is not a second stop.
-        new(Keys.I, "input", l => l.Kind is LineKind.InputMarker or LineKind.UserEcho, Previous: p => p.Kind != LineKind.InputMarker),
-        new(Keys.O, "response", l => l.Kind == LineKind.OutputMarker),
-        new(Keys.R, "response", l => l.Kind == LineKind.OutputMarker),
-        new(Keys.C, "Claude reply", l => l.Kind == LineKind.ClaudeReply),
-        new(Keys.T, "tool line", l => l.Kind is LineKind.Tool or LineKind.ToolError),
-        new(Keys.P, "paragraph", l => l.Text.Length > 0, Previous: p => p.Text.Length == 0),
-        new(Keys.E, "error", l => l.Kind is LineKind.Error or LineKind.Warning or LineKind.ToolError),
-        new(Keys.D, "turn summary", l => l.Kind == LineKind.TurnSummary),
-        new(Keys.S, "system line", l => l.Kind == LineKind.System),
+        new(AxClaudeKeys.Input, "input", l => l.Kind is LineKind.InputMarker or LineKind.UserEcho, Previous: p => p.Kind != LineKind.InputMarker),
+        new(AxClaudeKeys.Response, "response", l => l.Kind == LineKind.OutputMarker),
+        new(AxClaudeKeys.ResponseAlso, "response", l => l.Kind == LineKind.OutputMarker),
+        new(AxClaudeKeys.ClaudeReply, "Claude reply", l => l.Kind == LineKind.ClaudeReply),
+        new(AxClaudeKeys.ToolLine, "tool line", l => l.Kind is LineKind.Tool or LineKind.ToolError),
+        new(AxClaudeKeys.Paragraph, "paragraph", l => l.Text.Length > 0, Previous: p => p.Text.Length == 0),
+        new(AxClaudeKeys.Error, "error", l => l.Kind is LineKind.Error or LineKind.Warning or LineKind.ToolError),
+        new(AxClaudeKeys.TurnSummary, "turn summary", l => l.Kind == LineKind.TurnSummary),
+        new(AxClaudeKeys.SystemLine, "system line", l => l.Kind == LineKind.System),
         // The app's record of each question Claude asked (D33): Claude redraws an answered question as its result.
-        new(Keys.Q, "question", l => l.Kind == LineKind.Question),
+        new(AxClaudeKeys.Question, "question", l => l.Kind == LineKind.Question),
         BookmarkKey,
-        new(Keys.D1, "heading level 1", l => l.HeadingLevel == 1),
-        new(Keys.D2, "heading level 2", l => l.HeadingLevel == 2),
-        new(Keys.D3, "heading level 3", l => l.HeadingLevel == 3),
-        new(Keys.D4, "heading level 4", l => l.HeadingLevel == 4),
-        new(Keys.D5, "heading level 5", l => l.HeadingLevel == 5),
-        new(Keys.D6, "heading level 6", l => l.HeadingLevel == 6),
+        new(AxClaudeKeys.HeadingLevel1, "heading level 1", l => l.HeadingLevel == 1),
+        new(AxClaudeKeys.HeadingLevel2, "heading level 2", l => l.HeadingLevel == 2),
+        new(AxClaudeKeys.HeadingLevel3, "heading level 3", l => l.HeadingLevel == 3),
+        new(AxClaudeKeys.HeadingLevel4, "heading level 4", l => l.HeadingLevel == 4),
+        new(AxClaudeKeys.HeadingLevel5, "heading level 5", l => l.HeadingLevel == 5),
+        new(AxClaudeKeys.HeadingLevel6, "heading level 6", l => l.HeadingLevel == 6),
     ];
 
     /// <summary>The lines the caret left through a jump, oldest first, for Backspace (FR-3.12); the cap keeps a long session from holding every jump.</summary>
@@ -294,7 +294,7 @@ internal sealed class TranscriptView : TextBox
 
     protected override void OnKeyDown(KeyEventArgs e)
     {
-        if (e.KeyCode == Keys.M && e.Modifiers == Keys.None)
+        if (e.KeyCode == AxClaudeKeys.BookmarkToggle && e.Modifiers == Keys.None)
         {
             // Before the hold stamp: the caret stays on its line, so the bookmark line may appear at once.
             e.Handled = e.SuppressKeyPress = true;
@@ -304,7 +304,7 @@ internal sealed class TranscriptView : TextBox
 
         _lastKeyTick = Environment.TickCount64;
         SyncAfterKey();
-        if (e.KeyCode == Keys.Escape)
+        if (e.KeyCode == AxClaudeKeys.Escape)
         {
             e.Handled = e.SuppressKeyPress = true;
             if (SelectionLength > 0)
@@ -328,28 +328,28 @@ internal sealed class TranscriptView : TextBox
 
         if (!e.Control && !e.Alt)
         {
-            if (e.KeyCode == Keys.Return && !e.Shift)
+            if (e.KeyCode == AxClaudeKeys.Enter && !e.Shift)
             {
                 e.Handled = e.SuppressKeyPress = true;
                 ChooseLine();
                 return;
             }
 
-            if (e.KeyCode is Keys.PageUp or Keys.PageDown && !e.Shift)
+            if (e.KeyCode is BundleKeys.PageUp or BundleKeys.PageDown && !e.Shift)
             {
                 e.Handled = e.SuppressKeyPress = true;
                 Page(e.KeyCode == Keys.PageDown ? 1 : -1);
                 return;
             }
 
-            if (e.KeyCode == Keys.Back && !e.Shift)
+            if (e.KeyCode == AxClaudeKeys.JumpBack && !e.Shift)
             {
                 e.Handled = e.SuppressKeyPress = true;
                 JumpBack();
                 return;
             }
 
-            if (e.KeyCode == Keys.L)
+            if (e.KeyCode == AxClaudeKeys.LineNumber)
             {
                 e.Handled = e.SuppressKeyPress = true;
                 AnnounceLineNumber();

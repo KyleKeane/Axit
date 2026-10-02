@@ -19,11 +19,12 @@ The app records the raw stream with `--record file.vt` or Options → Record raw
 - `MainForm`: window, menus, timers, sending, find, save, announcements, fonts, process lifecycle, the update check.
 - `TranscriptView`: applies the mirror's edits to the TextBox, quick keys, find, announcements, the hold after a key press.
 - `StartupOptions`: the command line and its usage text.
+- `AxClaudeKeys`: the window's keys (SPEC.md §6.3; bundle AX-8), the one place a key is changed. `MainForm.ProcessCmdKey`, the menu items, `OnInputKeyDown` and `TranscriptView`'s quick key table read it; the bundle-wide keys come from `Axit.Forms.BundleKeys`; the F1 text in `HelpText` names the same keys and is changed with the table.
 - In `src/Axit.Forms` since step 8 of the plan, moved unchanged: `OverlayPanel` (the notices, every dialog of the app's own, drawn inside the window in place of the conversation and the message field, SPEC.md D23; also the New session controls, FR-8.6; callers pass a `Notice` record to `MainForm.ShowNotice`, which adds the key line, the chime and the hold), `ControlArea` (what Claude waits on, in the message field's place: one list or one field at a time, named with the question, new for every question, Enter and Escape; `MainForm.ShowInArea`, SPEC.md D33) and `ListKeys` (the number, 0, Page Up and Page Down keys every list of the area adds), `Sounds` (the generated sounds through one winmm wave-out device that stays open), `EditPaging` (Page Up and Page Down for the conversation and the message field), `StatusLayout` (keeps both status labels inside the strip).
 - `HelpText`: the F1 shortcuts, the embedded user guide, the Claude-not-found text. `AxClaudeApp`: the entry point `Run` that the Program of Axit calls (docs/axit/SPEC.md AX-1.7); it names the log (`Log.UseApp`), takes over the 1.x settings file, holds the crash handler, `--help` and `--version`.
 - In `src/Axit.Core` since step 4 of the plan: `Log` (`%LOCALAPPDATA%\Axit\logs\axclaude.log`), `Updater` (the download into `%LOCALAPPDATA%\Axit\updates` and the hand-over to the new version's `install.ps1 -WaitForProcess`, FR-1.10, D25), `BundleInfo.Version`.
 
-Planned (docs/axit/plan.md step 11): the keys get a table (`AxClaudeKeys`, bundle SPEC AX-8), and the notice flow of `MainForm` (`ShowNotice`, `CloseNotice`, the swallowed shortcuts) may become a shared window base once AxDown's copy shows what is common.
+Possible later move: the notice flow of `MainForm` (`ShowNotice`, `CloseNotice`, `WithKeyLine`, the swallowed shortcuts) and the update flow exist twice, here and in AxDown's `EditorForm`; a shared window base in `Axit.Forms` is the way to unify them when a third window arrives.
 
 ## Rules
 

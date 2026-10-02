@@ -30,7 +30,7 @@ internal sealed class MainForm : Form
     private readonly StatusStrip _status = new();
     private readonly ToolStripStatusLabel _state = new();
     private readonly ToolStripStatusLabel _folderLabel = new();
-    private readonly ToolStripMenuItem _currentFolderItem = new() { ShortcutKeys = Keys.Control | Keys.W };
+    private readonly ToolStripMenuItem _currentFolderItem = new() { ShortcutKeys = AxClaudeKeys.OpenFolder };
     private readonly ToolStripMenuItem _recentFoldersItem = new("&Recent folders");
     private readonly ToolStripMenuItem _recordItem = new(RecordItemText);
     private readonly ToolStripMenuItem _installedItem = new($"&Installed: AxClaude {BundleInfo.Version}");
@@ -261,12 +261,12 @@ internal sealed class MainForm : Form
             // CancelButton, Tab and the editing keys work as usual. Only the text size keys stay live.
             switch (keyData)
             {
-                case Keys.Control | Keys.Oemplus:
-                case Keys.Control | Keys.Add:
+                case BundleKeys.LargerText:
+                case BundleKeys.LargerTextNumpad:
                     ChangeTextSize(1);
                     return true;
-                case Keys.Control | Keys.OemMinus:
-                case Keys.Control | Keys.Subtract:
+                case BundleKeys.SmallerText:
+                case BundleKeys.SmallerTextNumpad:
                     ChangeTextSize(-1);
                     return true;
             }
@@ -278,9 +278,9 @@ internal sealed class MainForm : Form
         {
             case Keys.Tab:
             case Keys.Shift | Keys.Tab:
-            case Keys.Control | Keys.Tab:
-            case Keys.Control | Keys.Shift | Keys.Tab:
-            case Keys.F6:
+            case BundleKeys.NextControl:
+            case BundleKeys.PreviousControl:
+            case BundleKeys.NextControlAlso:
                 // The window has two places, the conversation and the control at the bottom (the message field, or
                 // the control area in its place): every one of these keys moves between them, so a hidden control
                 // never takes the focus.
@@ -294,13 +294,13 @@ internal sealed class MainForm : Form
                 }
 
                 return true;
-            case Keys.Control | Keys.D1:
+            case AxClaudeKeys.GoToField:
                 GoTo(BottomControl);
                 return true;
-            case Keys.Control | Keys.D2:
+            case AxClaudeKeys.GoToConversation:
                 GoTo(_transcript);
                 return true;
-            case Keys.Control | Keys.O:
+            case AxClaudeKeys.CtrlOGuard:
                 // D14: Claude's detailed view redraws the conversation in screen reader mode, which doubles the
                 // transcript and speaks old replies again. The key is sent only to close the view should it be open.
                 if (_model.TranscriptViewOpen)
@@ -313,28 +313,28 @@ internal sealed class MainForm : Form
                 }
 
                 return true;
-            case Keys.Control | Keys.F:
+            case BundleKeys.Find:
                 FindDialog();
                 return true;
-            case Keys.F3:
+            case BundleKeys.FindNext:
                 FindNext(backward: false);
                 return true;
-            case Keys.Shift | Keys.F3:
+            case BundleKeys.FindPrevious:
                 FindNext(backward: true);
                 return true;
-            case Keys.Control | Keys.S:
+            case BundleKeys.Save:
                 SaveConversation();
                 return true;
-            case Keys.Shift | Keys.Escape:
+            case AxClaudeKeys.Interrupt:
                 // The interrupt key (FR-2.3). Ctrl+Escape opens the Start menu and never reaches the app.
                 Interrupt();
                 return true;
-            case Keys.Control | Keys.Oemplus:
-            case Keys.Control | Keys.Add:
+            case BundleKeys.LargerText:
+            case BundleKeys.LargerTextNumpad:
                 ChangeTextSize(1);
                 return true;
-            case Keys.Control | Keys.OemMinus:
-            case Keys.Control | Keys.Subtract:
+            case BundleKeys.SmallerText:
+            case BundleKeys.SmallerTextNumpad:
                 ChangeTextSize(-1);
                 return true;
         }
@@ -354,11 +354,11 @@ internal sealed class MainForm : Form
         _currentFolderItem.Click += (_, _) => OpenFolder();
         project.DropDownItems.Add(_currentFolderItem);
         project.DropDownItems.Add(new ToolStripMenuItem("&Change folder...", null, (_, _) => ChangeFolder()));
-        project.DropDownItems.Add(new ToolStripMenuItem("&New session...", null, (_, _) => NewSession()) { ShortcutKeys = Keys.Control | Keys.N });
+        project.DropDownItems.Add(new ToolStripMenuItem("&New session...", null, (_, _) => NewSession()) { ShortcutKeys = AxClaudeKeys.NewSession });
         _recentFoldersItem.DropDownOpening += (_, _) => FillRecentFolders();
         _recentFoldersItem.DropDownItems.Add(new ToolStripMenuItem("(none)") { Enabled = false });
         project.DropDownItems.Add(_recentFoldersItem);
-        project.DropDownItems.Add(new ToolStripMenuItem("&Force Claude to restart", null, (_, _) => RestartClaude()) { ShortcutKeys = Keys.Control | Keys.Shift | Keys.R });
+        project.DropDownItems.Add(new ToolStripMenuItem("&Force Claude to restart", null, (_, _) => RestartClaude()) { ShortcutKeys = AxClaudeKeys.RestartClaude });
         project.DropDownItems.Add(new ToolStripSeparator());
         project.DropDownItems.Add(new ToolStripMenuItem("&Save conversation as...", null, (_, _) => SaveConversation()) { ShortcutKeyDisplayString = "Ctrl+S" });
         project.DropDownItems.Add(new ToolStripSeparator());
@@ -366,25 +366,25 @@ internal sealed class MainForm : Form
 
         var session = new ToolStripMenuItem("&Session");
         session.DropDownItems.Add(new ToolStripMenuItem("Send &message", null, (_, _) => SendInput()) { ShortcutKeyDisplayString = "Enter in the message field" });
-        session.DropDownItems.Add(new ToolStripMenuItem("Send the waiting message &now", null, (_, _) => SendNow()) { ShortcutKeys = Keys.Control | Keys.Shift | Keys.S });
+        session.DropDownItems.Add(new ToolStripMenuItem("Send the waiting message &now", null, (_, _) => SendNow()) { ShortcutKeys = AxClaudeKeys.SendNow });
         session.DropDownItems.Add(new ToolStripMenuItem("&Interrupt Claude (send Escape)", null, (_, _) => Interrupt()) { ShortcutKeyDisplayString = "Shift+Esc" });
-        session.DropDownItems.Add(new ToolStripMenuItem("Send Ctrl+&C", null, (_, _) => Write("\x03")) { ShortcutKeys = Keys.Control | Keys.Shift | Keys.C });
+        session.DropDownItems.Add(new ToolStripMenuItem("Send Ctrl+&C", null, (_, _) => Write("\x03")) { ShortcutKeys = AxClaudeKeys.SendCtrlC });
         session.DropDownItems.Add(new ToolStripMenuItem("Send Ctrl+&D", null, (_, _) => Write("\x04")));
         session.DropDownItems.Add(new ToolStripMenuItem("Send &Tab", null, (_, _) => Write("\t")));
-        session.DropDownItems.Add(new ToolStripMenuItem("Send Shift+Tab (next permission &mode)", null, (_, _) => Write("\x1b[Z")) { ShortcutKeys = Keys.Control | Keys.Shift | Keys.M });
+        session.DropDownItems.Add(new ToolStripMenuItem("Send Shift+Tab (next permission &mode)", null, (_, _) => Write("\x1b[Z")) { ShortcutKeys = AxClaudeKeys.NextPermissionMode });
         session.DropDownItems.Add(new ToolStripMenuItem("Send &Up", null, (_, _) => Write("\x1b[A")) { ShortcutKeyDisplayString = "Ctrl+Up in the message field" });
         session.DropDownItems.Add(new ToolStripMenuItem("Send Do&wn", null, (_, _) => Write("\x1b[B")) { ShortcutKeyDisplayString = "Ctrl+Down in the message field" });
 
         var navigate = new ToolStripMenuItem("&Navigate");
         navigate.DropDownItems.Add(new ToolStripMenuItem("Go to &message field", null, (_, _) => GoTo(BottomControl)) { ShortcutKeyDisplayString = "Ctrl+1" });
         navigate.DropDownItems.Add(new ToolStripMenuItem("Go to &conversation", null, (_, _) => GoTo(_transcript)) { ShortcutKeyDisplayString = "Ctrl+2" });
-        navigate.DropDownItems.Add(new ToolStripMenuItem("&Latest response", null, (_, _) => _transcript.JumpToLatestResponse()) { ShortcutKeys = Keys.Control | Keys.Shift | Keys.O });
+        navigate.DropDownItems.Add(new ToolStripMenuItem("&Latest response", null, (_, _) => _transcript.JumpToLatestResponse()) { ShortcutKeys = AxClaudeKeys.LatestResponse });
         navigate.DropDownItems.Add(new ToolStripSeparator());
         navigate.DropDownItems.Add(new ToolStripMenuItem("&Find...", null, (_, _) => FindDialog()) { ShortcutKeyDisplayString = "Ctrl+F" });
         navigate.DropDownItems.Add(new ToolStripMenuItem("Find &next", null, (_, _) => FindNext(backward: false)) { ShortcutKeyDisplayString = "F3" });
         navigate.DropDownItems.Add(new ToolStripMenuItem("Find &previous", null, (_, _) => FindNext(backward: true)) { ShortcutKeyDisplayString = "Shift+F3" });
         navigate.DropDownItems.Add(new ToolStripSeparator());
-        navigate.DropDownItems.Add(new ToolStripMenuItem("&Bookmark this line", null, (_, _) => _transcript.ToggleBookmark()) { ShortcutKeys = Keys.Control | Keys.Shift | Keys.K, ShortcutKeyDisplayString = "Ctrl+Shift+K, or M in the conversation" });
+        navigate.DropDownItems.Add(new ToolStripMenuItem("&Bookmark this line", null, (_, _) => _transcript.ToggleBookmark()) { ShortcutKeys = AxClaudeKeys.BookmarkLine, ShortcutKeyDisplayString = "Ctrl+Shift+K, or M in the conversation" });
         navigate.DropDownItems.Add(new ToolStripMenuItem("Next bookmar&k", null, (_, _) => _transcript.JumpToBookmark(backward: false)) { ShortcutKeyDisplayString = "K in the conversation" });
         navigate.DropDownItems.Add(new ToolStripMenuItem("Pre&vious bookmark", null, (_, _) => _transcript.JumpToBookmark(backward: true)) { ShortcutKeyDisplayString = "Shift+K in the conversation" });
 
@@ -444,7 +444,7 @@ internal sealed class MainForm : Form
         options.DropDownItems.Add(new ToolStripMenuItem("&Open settings file", null, (_, _) => OpenSettingsFile()));
 
         var help = new ToolStripMenuItem("&Help");
-        help.DropDownItems.Add(new ToolStripMenuItem("&Keyboard shortcuts", null, (_, _) => ShowNotice(Notice.Plain("Keyboard shortcuts", HelpText.Shortcuts))) { ShortcutKeys = Keys.F1 });
+        help.DropDownItems.Add(new ToolStripMenuItem("&Keyboard shortcuts", null, (_, _) => ShowNotice(Notice.Plain("Keyboard shortcuts", HelpText.Shortcuts))) { ShortcutKeys = BundleKeys.Shortcuts });
         help.DropDownItems.Add(new ToolStripMenuItem("&User guide", null, (_, _) => ShowNotice(Notice.Plain("User guide", HelpText.UserGuide()))));
         help.DropDownItems.Add(new ToolStripSeparator());
         help.DropDownItems.Add(new ToolStripMenuItem("Claude Code &documentation (web)", null, (_, _) => OpenUrl("https://code.claude.com/docs/en/overview")));
@@ -556,28 +556,29 @@ internal sealed class MainForm : Form
 
     private void OnInputKeyDown(object? sender, KeyEventArgs e)
     {
-        switch (e.KeyCode)
+        // The keys come from the tables (AxClaudeKeys, BundleKeys), matched with their modifiers.
+        switch (e.KeyData)
         {
-            case Keys.Enter when e.Modifiers == Keys.None:
+            case AxClaudeKeys.Enter:
                 // Enter sends; Shift+Enter is the field's own new line (FR-2.1).
                 e.Handled = e.SuppressKeyPress = true;
                 SendInput();
                 break;
-            case Keys.Escape when e.Modifiers == Keys.None:
+            case AxClaudeKeys.Escape:
                 // A guard (FR-2.3, D20): Escape is a reflex key for screen reader users, and Claude takes it as an interrupt.
                 e.SuppressKeyPress = true;
                 Announce("Shift+Escape interrupts", true);
                 break;
-            case Keys.Up when e.Control:
+            case AxClaudeKeys.SendUp:
                 e.SuppressKeyPress = true;
                 Write("\x1b[A");
                 break;
-            case Keys.Down when e.Control:
+            case AxClaudeKeys.SendDown:
                 e.SuppressKeyPress = true;
                 Write("\x1b[B");
                 break;
-            case Keys.PageUp when e.Modifiers == Keys.None:
-            case Keys.PageDown when e.Modifiers == Keys.None:
+            case BundleKeys.PageUp:
+            case BundleKeys.PageDown:
                 // One screen of the field's rows, or its first / last row (FR-2.1): the control's own keys do nothing while the message fits.
                 e.Handled = e.SuppressKeyPress = true;
                 EditPaging.Page(_input, e.KeyCode == Keys.PageDown ? 1 : -1);

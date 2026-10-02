@@ -1,5 +1,9 @@
 # Changelog
 
+## 2.1.0 - unreleased
+
+- For developers: every key of AxClaude lives in one table, `AxClaudeKeys`, and the bundle-wide keys in `BundleKeys`; a test fails when a window key collides with a bundle key. No key changed.
+
 ## 2.0.0 - 2026-10-02
 
 - Axit: AxClaude is now one app of Axit, one program file that holds several accessible apps and updates them together. `Axit.exe claude <folder>`, or a folder alone, starts AxClaude exactly as in 1.7.0: nothing about how it reads, speaks or sends has changed; the console command `axclaude` stays.

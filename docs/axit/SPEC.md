@@ -136,7 +136,7 @@ allow it, see B-9).
   the chime; a question in the input field's place is a list or a field named with the question, Enter answers,
   Escape cancels. An app that needs to ask uses these and does not draw its own dialog.
 
-### AX-8 Keys (AxDown's table and the bundle's are built; AxClaude's table is plan step 11)
+### AX-8 Keys
 
 - AX-8.1 Every key an app handles is one of two kinds: **bundle-wide**, meaning the same in every window of Axit, or
   **window-specific**, meaning something in one window only. Each app's keyboard table in its spec marks every key
@@ -148,8 +148,9 @@ allow it, see B-9).
   a file); Ctrl+Plus and Ctrl+Minus text size; Enter and Escape on a notice; Page Up and Page Down one screen in an
   edit control; Alt+F4 exit; Alt and F10 the menu. Everything else is window-specific.
 - AX-8.3 Window-specific keys are defined once per window, in one table (`AxClaudeKeys`, `AxDownKeys`), as constants
-  with names that say what the key does. Changing a key is a change to that one line; the menu item, the key handler
-  and the F1 text read the table. Single-letter quick keys (AxClaude's `h`, `i`, `o`) are in the table too.
+  with names that say what the key does. Changing a key is a change to that one line: the menu item and the key
+  handler read the table, and the F1 text names the same keys and is changed with it. Single-letter quick keys
+  (AxClaude's `h`, `i`, `o`) are in the table too.
 - AX-8.4 A unit test in `tests/Axit.Tests` fails when a window-specific key equals a bundle-wide key, and lists the
   keys that two windows use for different actions, so that a collision between apps is seen before it is felt.
 - AX-8.5 A key is never handled anywhere but through its table, and no key is intercepted that NVDA uses (AX-7.4).
@@ -280,3 +281,7 @@ docs/axdown/            SPEC.md, user-guide.md (embedded by src/AxDown), nvda-te
 - 2026-10-02, step 9: the installer adds AxDown's Start entry, "Open in AxDown" on files, the `Axit.AxDown` ProgID
   under Open with for `.md`, `.markdown` and `.txt`, `axdown.cmd`, and `-StartFile` for the updater; `AxDown.ico` is
   drawn by `tools/make-icon.ps1` and shipped next to the executable. Kyle's checks (AX-2.2) pending for both apps.
+- 2026-10-02, step 10: Kyle's NVDA checks passed for both apps; the repository was renamed to `KyleKeane/Axit`
+  (B-7); Axit 2.0.0 released from `main`.
+- 2026-10-02, step 11: `AxClaudeKeys` holds AxClaude's keys; the window, the menus and the conversation view read
+  it; the collision test covers both windows (AX-8.4). No key changed.
