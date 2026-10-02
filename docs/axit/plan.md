@@ -294,10 +294,14 @@ question area shared), step 11, and the key work in steps 8 and 12.
 - Queued after step 10 (Kyle, 2026-10-02): two AxClaude bugs seen in the question interface during this work, recorded
   in `docs/axclaude/SPEC.md` §12 To do: a two-question AskUserQuestion that kept refiring in the control area, and
   an own-words (Other) answer that reached Claude with most characters dropped. Both need a raw recording first.
+- Queued after 2.1.0 (Kyle, 2026-10-02): what NVDA says when a window opens ("Axit" then the field in AxDown, the
+  name twice in AxClaude); recorded in `docs/axdown/SPEC.md` To do, to settle with NVDA's log.
+- Later: the rest of NVDA's navigation letters in AxDown (AD-D7); a shared window base in `Axit.Forms` for the
+  notice and update flows once a third window arrives.
 - [x] Step 7 AxDown.Core: `TextDocument`, `EditorSettings`, 14 tests (2026-10-02); `WindowPlacement` moved to `Axit.Core` on its second use
 - [x] Step 8 AxDown window: `EditorForm`, `AxDownApp`, `AxDownKeys`, `BundleKeys`, the shared pieces in `Axit.Forms`, the key collision test (2026-10-02); NVDA pass at step 10
 - [x] Step 9 AxDown installed: Start entry, file menu, Open with, `axdown`, `AxDown.ico`, `-StartFile` for the updater (2026-10-02); Kyle's checks pending
 - [x] Step 10 NVDA check by Kyle, repository renamed to `KyleKeane/Axit`, Axit 2.0.0 released (2026-10-02)
 - [x] Step 11 AxClaude's key table `AxClaudeKeys`, both windows in the collision test (2026-10-02; no key changed)
-- [x] Step 12 heading navigation in AxDown (`MarkdownOutline`, Ctrl+H, Ctrl+Shift+H, the Navigate menu; 2026-10-02); release 2.1.0 after Kyle's NVDA check of AxDown test plan section 8 and the Navigate menu
+- [x] Step 12 heading navigation in AxDown (`MarkdownOutline`, Ctrl+H, Ctrl+Shift+H, the Navigate menu; 2026-10-02), checked by Kyle with NVDA; released as 2.1.0
 - [x] Step 13 the pattern made explicit: `docs/axit/adding-an-app.md` (2026-10-02, written while the pattern was fresh; the CLAUDE.md length check stays for after step 11)

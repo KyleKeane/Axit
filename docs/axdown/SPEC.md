@@ -270,5 +270,12 @@ the off-screen probe approach of AxClaude checks layout and keys without disturb
   (`EditorForm`, AD-1 to AD-11 as specified), `AxDownKeys` and `BundleKeys` with the collision test; checked off
   screen with a probe, not yet with NVDA (step 10). Step 9 built: the installer's entries (AD-D9), `AxDown.ico`,
   and the updater restarting AxDown on its file (`-StartFile`).
-- 2026-10-02: Kyle's NVDA pass of sections 1 to 7 of the test plan clear; released in Axit 2.0.0. Step 12 built for
-  2.1.0: the heading keys of section 9 and the Navigate menu; the NVDA check of test plan section 8 is pending.
+- 2026-10-02: Kyle's NVDA pass of sections 1 to 7 of the test plan clear; released in Axit 2.0.0. Step 12 built and
+  checked (test plan section 8); released in Axit 2.1.0.
+
+To do:
+
+- [ ] **What NVDA says when the window opens.** Kyle hears the program's name, "Axit", and then "README.md edit
+  multi line", not "AxDown"; in AxClaude the name is heard twice. To settle with NVDA's log at Input/output level:
+  the likely sources are the window and its client area both carrying the title (a WinForms window exposes both), and
+  the executable's description for a new process. The aim: each window names its app once on opening, nothing twice.
