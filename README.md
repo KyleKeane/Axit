@@ -4,10 +4,10 @@ A small Windows app that runs Claude Code in screen reader mode inside a hidden 
 
 **Download:** the zip on the [latest release](https://github.com/KyleKeane/AxClaude/releases/latest). Extract it and run `install.ps1`; the user guide inside explains the rest. Installed copies offer newer releases themselves under Help.
 
-- `docs/user-guide.md`: the guide for users. It ships in the zip as `README.md` and under Help, User guide.
-- `SPEC.md`: the specification, the design decisions and the status.
+- `docs/axclaude/user-guide.md`: the guide for users. It ships in the zip as `README.md` and under Help, User guide.
+- `docs/axclaude/SPEC.md`: the specification, the design decisions and the status.
 - `CLAUDE.md`: the working rules for developing with Claude Code in this repository.
-- `docs/nvda-test-plan.md`: the manual test plan for NVDA.
+- `docs/axclaude/nvda-test-plan.md`: the manual test plan for NVDA.
 - `tools/PtyCapture`: records raw console output; the recordings are the parser's test fixtures.
 
 ## Build and run

@@ -37,7 +37,7 @@ $exe = Join-Path $out 'AxClaude.exe'
 Copy-Item (Join-Path $root 'install.ps1') $out -Force
 Copy-Item (Join-Path $root 'install.cmd') $out -Force
 Copy-Item (Join-Path $root 'LICENSE') $out -Force
-Copy-Item (Join-Path $root 'docs\user-guide.md') (Join-Path $out 'README.md') -Force
+Copy-Item (Join-Path $root 'docs\axclaude\user-guide.md') (Join-Path $out 'README.md') -Force
 Get-ChildItem $out -Filter '*.pdb' | Remove-Item -Force
 
 $version = (Get-Item $exe).VersionInfo.FileVersion

@@ -20,7 +20,7 @@ public sealed record QuestionRoute(QuestionDialog Dialog, SlashCommand? Command)
 /// Decides how a question Claude waits on is presented (SPEC.md D33). A list of answers goes to the answer notice (radio
 /// buttons, or check boxes when it takes several). It stays in the message field when the slash command sent last
 /// opens more than a list (<see cref="CommandInteraction.Multi"/>, <see cref="CommandInteraction.Viewer"/>,
-/// <see cref="CommandInteraction.Panel"/>, docs/claude-screens.md).
+/// <see cref="CommandInteraction.Panel"/>, docs/axclaude/claude-screens.md).
 /// </summary>
 public static class QuestionRouter
 {

@@ -51,7 +51,7 @@
 - Restart Claude is now "Force Claude to restart" (Ctrl+Shift+R) and asks first while Claude runs, since it quits Claude Code at once and ends anything it runs in the background.
 - Fixed: old content was read out again, and copies of earlier turns appeared in the conversation, when Claude repainted the whole conversation from the top of the screen in a long session. The repaint is now recognised and its copies are hidden; a reply line is also never spoken twice within one reply.
 - Fixed: Claude's mode line with background work ("auto mode on · 1 shell · ↓ to manage") appeared in the conversation.
-- `docs/claude-screens.md` lists every slash command with what its screen shows and the notice it gets.
+- `docs/axclaude/claude-screens.md` lists every slash command with what its screen shows and the notice it gets.
 
 ## 1.3.0 - 2026-09-20
 

@@ -2007,7 +2007,7 @@ internal sealed class MainForm : Form
     }
 
     /// <summary>
-    /// /config's list of settings (docs/claude-screens.md), read off Claude's screen each time it shows. Enter on a
+    /// /config's list of settings (docs/axclaude/claude-screens.md), read off Claude's screen each time it shows. Enter on a
     /// true-or-false setting asks for its value (<see cref="ShowSwitch"/>), since Claude flips it when its number is
     /// sent; on any other setting it sends the number and Claude's list of its values follows. Either way the list comes
     /// back on the setting just chosen. Escape saves and closes.

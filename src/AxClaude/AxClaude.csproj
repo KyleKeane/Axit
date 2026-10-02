@@ -25,7 +25,7 @@
 
   <ItemGroup>
     <!-- Help, User guide shows this file; publish.ps1 ships it next to the executable as README.md. -->
-    <EmbeddedResource Include="..\..\docs\user-guide.md" LogicalName="UserGuide.md" />
+    <EmbeddedResource Include="..\..\docs\axclaude\user-guide.md" LogicalName="UserGuide.md" />
   </ItemGroup>
 
 </Project>

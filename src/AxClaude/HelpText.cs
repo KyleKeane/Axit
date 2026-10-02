@@ -79,13 +79,13 @@ internal static class HelpText
           The Help menu opens the Claude Code documentation in your browser.
         """;
 
-    /// <summary>docs/user-guide.md, embedded in the executable at build time.</summary>
+    /// <summary>docs/axclaude/user-guide.md, embedded in the executable at build time.</summary>
     public static string UserGuide()
     {
         using var stream = Assembly.GetExecutingAssembly().GetManifestResourceStream("UserGuide.md");
         if (stream is null)
         {
-            return "The user guide is not included in this build. It is docs/user-guide.md in the source repository.";
+            return "The user guide is not included in this build. It is docs/axclaude/user-guide.md in the source repository.";
         }
 
         using var reader = new StreamReader(stream);

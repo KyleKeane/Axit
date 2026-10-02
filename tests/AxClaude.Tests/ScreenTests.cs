@@ -2,7 +2,7 @@ using AxClaude.Core.Transcript;
 
 namespace AxClaude.Tests;
 
-/// <summary>Screens of Claude's that wait on a key-hint row or a tab row rather than a prompt row (docs/claude-screens.md, D33). The rows are the ones Claude Code 2.1.281 drew.</summary>
+/// <summary>Screens of Claude's that wait on a key-hint row or a tab row rather than a prompt row (docs/axclaude/claude-screens.md, D33). The rows are the ones Claude Code 2.1.281 drew.</summary>
 public class ScreenTests
 {
     [Fact]

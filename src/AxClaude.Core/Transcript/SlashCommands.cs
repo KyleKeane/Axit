@@ -49,7 +49,7 @@ public sealed record SlashCommand(string Name, CommandInteraction Interaction, s
 /// <summary>The built-in slash commands the app knows (SPEC.md D33). Skills and plugins also appear as slash commands; they are not listed and count as unknown.</summary>
 public static class SlashCommands
 {
-    // Recorded: opened bare in a scratch folder with Claude Code 2.1.281 and cancelled (docs/claude-screens.md).
+    // Recorded: opened bare in a scratch folder with Claude Code 2.1.281 and cancelled (docs/axclaude/claude-screens.md).
     // Docs: from code.claude.com/docs/en/commands only; not opened, mostly because opening them already acts.
     // Mentioned: named in a hint on a recorded screen, in neither the docs' list nor the recordings.
     private const string Recorded = "2.1.281";

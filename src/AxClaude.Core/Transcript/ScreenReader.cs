@@ -6,7 +6,7 @@ namespace AxClaude.Core.Transcript;
 public sealed record ScreenKey(string Send, string Name, string Action);
 
 /// <summary>
-/// A screen of Claude's that waits for keys named on a hint row rather than on a prompt row (docs/claude-screens.md):
+/// A screen of Claude's that waits for keys named on a hint row rather than on a prompt row (docs/axclaude/claude-screens.md):
 /// <c>/status</c>, <c>/tasks</c>, <c>/help</c>, <c>/goal</c> and the like. Its title, its lines, and the keys of its
 /// hint row.
 /// </summary>
