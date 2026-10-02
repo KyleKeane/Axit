@@ -294,7 +294,7 @@ question area shared), step 11, and the key work in steps 8 and 12.
 - Queued after step 10 (Kyle, 2026-10-02): two AxClaude bugs seen in the question interface during this work, recorded
   in `docs/axclaude/SPEC.md` §12 To do: a two-question AskUserQuestion that kept refiring in the control area, and
   an own-words (Other) answer that reached Claude with most characters dropped. Both need a raw recording first.
-- [ ] Step 7 AxDown.Core
+- [x] Step 7 AxDown.Core: `TextDocument`, `EditorSettings`, 14 tests (2026-10-02); `WindowPlacement` moved to `Axit.Core` on its second use
 - [ ] Step 8 AxDown window
 - [ ] Step 9 AxDown installed
 - [ ] Step 10 NVDA check, release 2.0.0

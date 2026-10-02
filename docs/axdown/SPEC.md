@@ -257,4 +257,5 @@ the off-screen probe approach of AxClaude checks layout and keys without disturb
 
 ## 10. Status
 
-- 2026-10-02: specification written (plan step 6); AD-D7 settled the same day (headings first). Nothing built yet.
+- 2026-10-02: specification written (plan step 6); AD-D7 settled the same day. Step 7 built: `AxDown.Core` with
+  `TextDocument` (AD-3.1 to AD-3.4, AD-3.7, AD-3.9) and `EditorSettings` (AD-8), 14 tests. The window (step 8) is next.

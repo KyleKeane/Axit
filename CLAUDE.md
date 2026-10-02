@@ -18,7 +18,7 @@ Specifications are the source of truth: `docs/axit/SPEC.md` for the bundle (laun
 ## The apps and where their notes are
 
 - **AxClaude**: window code in `src/AxClaude` (notes: `src/AxClaude/CLAUDE.md`), pure code in `src/AxClaude.Core` (notes: `src/AxClaude.Core/CLAUDE.md`), tests in `tests/AxClaude.Tests`, documents in `docs/axclaude/` (`SPEC.md`, `user-guide.md`, `claude-screens.md`, `nvda-test-plan.md`). In AxClaude's code and documents, "SPEC.md" means `docs/axclaude/SPEC.md`.
-- **AxDown** (specified; code from step 7): `src/AxDown`, `src/AxDown.Core`, `tests/AxDown.Tests`, documents in `docs/axdown/` (`SPEC.md`, `user-guide.md`, `nvda-test-plan.md`). In AxDown's code and documents, "SPEC.md" means `docs/axdown/SPEC.md`.
+- **AxDown** (pure code built; the window from step 8): `src/AxDown.Core` (notes: `src/AxDown.Core/CLAUDE.md`), `src/AxDown` (the window, to come), `tests/AxDown.Tests`, documents in `docs/axdown/` (`SPEC.md`, `user-guide.md`, `nvda-test-plan.md`). In AxDown's code and documents, "SPEC.md" means `docs/axdown/SPEC.md`.
 - **Bundle**: `src/Axit` (the executable), `src/Axit.Core` and `src/Axit.Forms` (shared pieces), `tests/Axit.Tests`, `docs/axit/` (`SPEC.md`, `plan.md`, `README.md` shipped in the zip, `adding-an-app.md`), the scripts and `.github/workflows` (`build.yml` tests every push; `release.yml` builds a `v*` tag into a GitHub release).
 - Skills: `.claude/skills/accessibility-review` (run on any UI change before committing), `.claude/skills/record-fixture` (AxClaude's recordings).
 
