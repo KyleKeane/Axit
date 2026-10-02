@@ -34,6 +34,10 @@ Ctrl+F opens Find in the window: type the text, press Enter, and the caret lands
 
 Ctrl+G asks for a line number; the field is named with where you are, for example "Go to line (now line 12, column 4)", so Ctrl+G is also how you ask where you are. Type a number and press Enter, or press Escape to stay. The status bar carries the line, the column and the encoding too; NVDA+End reads it.
 
+## Move by heading
+
+In a Markdown file, Ctrl+H moves to the next heading (a line that starts with one or more `#`) and Ctrl+Shift+H to the previous one, the way H and Shift+H move on a web page in NVDA's browse mode. The caret lands at the start of the heading's line and AxDown says the heading as NVDA would, for example "Install, heading level 2". At the last heading Ctrl+H says "No next heading" and the caret stays. Headings inside fenced code blocks (between lines of three backticks or tildes) are skipped. More of NVDA's letters, for lists, links, quotes and tables, come in later versions.
+
 ## Text size and fonts
 
 Ctrl+Plus and Ctrl+Minus make the text larger and smaller, and AxDown says the new size. View, Font opens the Windows font dialog. Both are remembered.
@@ -41,8 +45,9 @@ Ctrl+Plus and Ctrl+Minus make the text larger and smaller, and AxDown says the n
 ## Menus
 
 - **File**: New, Open, Save, Save as, Exit.
-- **Edit**: Undo, Cut, Copy, Paste, Select all, Find, Find next, Find previous, Go to line.
-- **View**: Word wrap, Larger text, Smaller text, Font.
+- **Edit**: Undo, Cut, Copy, Paste, Select all.
+- **Navigate**: Find, Find next, Find previous, Go to line, Next heading, Previous heading.
+- **View**: Word wrap, Larger text, Smaller text, Windows text size, Font.
 - **Help**: Keyboard shortcuts (F1), this guide, the version you have, the latest release on GitHub, Update or Check for updates, Copy diagnostics, About.
 
 ## Settings

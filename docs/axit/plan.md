@@ -299,5 +299,5 @@ question area shared), step 11, and the key work in steps 8 and 12.
 - [x] Step 9 AxDown installed: Start entry, file menu, Open with, `axdown`, `AxDown.ico`, `-StartFile` for the updater (2026-10-02); Kyle's checks pending
 - [x] Step 10 NVDA check by Kyle, repository renamed to `KyleKeane/Axit`, Axit 2.0.0 released (2026-10-02)
 - [x] Step 11 AxClaude's key table `AxClaudeKeys`, both windows in the collision test (2026-10-02; no key changed)
-- [ ] Step 12 Markdown navigation, release 2.1.0
+- [x] Step 12 heading navigation in AxDown (`MarkdownOutline`, Ctrl+H, Ctrl+Shift+H, the Navigate menu; 2026-10-02); release 2.1.0 after Kyle's NVDA check of AxDown test plan section 8 and the Navigate menu
 - [x] Step 13 the pattern made explicit: `docs/axit/adding-an-app.md` (2026-10-02, written while the pattern was fresh; the CLAUDE.md length check stays for after step 11)

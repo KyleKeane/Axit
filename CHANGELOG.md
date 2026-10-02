@@ -2,6 +2,7 @@
 
 ## 2.1.0 - unreleased
 
+- AxDown: Ctrl+H and Ctrl+Shift+H move to the next and previous Markdown heading, as H and Shift+H do on a web page in NVDA's browse mode, and say it the same way ("Install, heading level 2"). Headings inside fenced code blocks are skipped; "No next heading" when there is none. Find, Go to line and the heading keys are in a new Navigate menu, as in AxClaude.
 - For developers: every key of AxClaude lives in one table, `AxClaudeKeys`, and the bundle-wide keys in `BundleKeys`; a test fails when a window key collides with a bundle key. No key changed.
 
 ## 2.0.0 - 2026-10-02

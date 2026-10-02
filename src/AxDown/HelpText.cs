@@ -25,6 +25,7 @@ internal static class HelpText
           Ctrl+O: open a file
           Ctrl+Shift+S: save under a new name
           Ctrl+G: go to a line; the field also says where you are, like "Go to line (now line 12, column 4)"
+          Ctrl+H and Ctrl+Shift+H: next and previous Markdown heading (a line starting with #), spoken as "Install, heading level 2"
           Ctrl+Shift+W: word wrap on or off
 
         The text

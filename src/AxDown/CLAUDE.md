@@ -13,7 +13,7 @@ dotnet test tests/AxDown.Tests/AxDown.Tests.csproj
 ## Where things are
 
 - `AxDownApp`: the entry point `Run` that Axit's `Program` calls (bundle AX-1.7): names the log, reads the settings, opens `EditorForm`; the crash handler, `--help`, `--version`.
-- `EditorForm`: everything of the window. Sections in the file: menus, the editor, the document (load, save, save as, the changed-on-disk question, the unsaved-changes question), find and go to line, title and status, word wrap, fonts and the window, notices, help and updates, the menu items made from the key tables.
+- `EditorForm`: everything of the window. Sections in the file: menus (File, Edit, Navigate, View, Help), the editor, the document (load, save, save as, the changed-on-disk question, the unsaved-changes question), find, go to line and the heading jumps (`JumpToHeading` on `MarkdownOutline`), title and status, word wrap, fonts and the window, notices, help and updates, the menu items made from the key tables.
 - `AxDownKeys`: the window's keys (SPEC.md AD-5); the bundle-wide ones are `Axit.Forms.BundleKeys`. Every key is handled in `EditorForm.ProcessCmdKey` from these tables and nowhere else; the menu items only display them (`ShortcutKeyDisplayString`), so that the keys stay off while a notice shows.
 - `HelpText`: the F1 text, the embedded guide, the disclaimer.
 - Shared pieces used from `Axit.Forms`: `OverlayPanel` and `Notice` (every question of the window's own), `ControlArea` (the Go to line field), `EditPaging`, `StatusLayout`, `Sounds.Notice`, `WindowAccessibleObject`; from `Axit.Core`: `SettingsFile`, `AppPaths`, `Log`, `Updater`, `UpdateCheck`, `BundleInfo`, `WindowPlacement`.

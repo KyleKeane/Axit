@@ -70,11 +70,15 @@ internal sealed class EditorForm : Form
         edit.DropDownItems.Add(new ToolStripMenuItem("&Copy", null, (_, _) => _editor.Copy()) { ShortcutKeyDisplayString = "Ctrl+C" });
         edit.DropDownItems.Add(new ToolStripMenuItem("&Paste", null, (_, _) => _editor.Paste()) { ShortcutKeyDisplayString = "Ctrl+V" });
         edit.DropDownItems.Add(new ToolStripMenuItem("Select &all", null, (_, _) => _editor.SelectAll()) { ShortcutKeyDisplayString = "Ctrl+A" });
-        edit.DropDownItems.Add(new ToolStripSeparator());
-        edit.DropDownItems.Add(Item("&Find...", ShowFind, BundleKeys.Find));
-        edit.DropDownItems.Add(Item("Find &next", () => FindNext(1), BundleKeys.FindNext));
-        edit.DropDownItems.Add(Item("Find pre&vious", () => FindNext(-1), BundleKeys.FindPrevious));
-        edit.DropDownItems.Add(Item("&Go to line...", ShowGoToLine, AxDownKeys.GoToLine));
+
+        var navigate = new ToolStripMenuItem("&Navigate");
+        navigate.DropDownItems.Add(Item("&Find...", ShowFind, BundleKeys.Find));
+        navigate.DropDownItems.Add(Item("Find &next", () => FindNext(1), BundleKeys.FindNext));
+        navigate.DropDownItems.Add(Item("Find pre&vious", () => FindNext(-1), BundleKeys.FindPrevious));
+        navigate.DropDownItems.Add(Item("&Go to line...", ShowGoToLine, AxDownKeys.GoToLine));
+        navigate.DropDownItems.Add(new ToolStripSeparator());
+        navigate.DropDownItems.Add(Item("Next &heading", () => JumpToHeading(1), AxDownKeys.NextHeading));
+        navigate.DropDownItems.Add(Item("&Previous heading", () => JumpToHeading(-1), AxDownKeys.PreviousHeading));
 
         var view = new ToolStripMenuItem("&View");
         _wordWrapItem = Item("&Word wrap", ToggleWordWrap, AxDownKeys.WordWrap);
@@ -102,7 +106,7 @@ internal sealed class EditorForm : Form
         help.DropDownItems.Add(new ToolStripMenuItem("Copy diag&nostics", null, (_, _) => CopyDiagnostics()));
         help.DropDownItems.Add(new ToolStripMenuItem("&About", null, (_, _) => ShowAbout()));
 
-        _menu.Items.AddRange([file, edit, view, help]);
+        _menu.Items.AddRange([file, edit, navigate, view, help]);
         MainMenuStrip = _menu;
 
         // ---- the editor (AD-2) ----
@@ -279,6 +283,12 @@ internal sealed class EditorForm : Form
                 return true;
             case AxDownKeys.WordWrap:
                 ToggleWordWrap();
+                return true;
+            case AxDownKeys.NextHeading:
+                JumpToHeading(1);
+                return true;
+            case AxDownKeys.PreviousHeading:
+                JumpToHeading(-1);
                 return true;
         }
 
@@ -543,6 +553,29 @@ internal sealed class EditorForm : Form
         _editor.ScrollToCaret();
         UpdateStatus();
         Announce($"Line {line} of {lines}", true);
+    }
+
+    /// <summary>
+    /// Ctrl+H and Ctrl+Shift+H (SPEC.md §9, AD-D7): the caret to the start of the next or previous heading line, spoken
+    /// as NVDA's browse mode would ("Install, heading level 2"); "No next heading" or "No previous heading" when there
+    /// is none, and the caret stays.
+    /// </summary>
+    private void JumpToHeading(int direction)
+    {
+        var text = _editor.Text;
+        var heading = direction > 0
+            ? MarkdownOutline.NextHeading(text, _editor.SelectionStart)
+            : MarkdownOutline.PreviousHeading(text, _editor.SelectionStart);
+        if (heading is null)
+        {
+            Announce(direction > 0 ? "No next heading" : "No previous heading", true);
+            return;
+        }
+
+        _editor.Select(heading.Start, 0);
+        _editor.ScrollToCaret();
+        UpdateStatus();
+        Announce($"{heading.Text}, heading level {heading.Level}", true);
     }
 
     /// <summary>The caret's line and column, counting the file's lines (not the wrapped rows), and the number of lines.</summary>
