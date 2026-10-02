@@ -300,4 +300,4 @@ question area shared), step 11, and the key work in steps 8 and 12.
 - [ ] Step 10 NVDA check, release 2.0.0
 - [ ] Step 11 AxClaude's key table
 - [ ] Step 12 Markdown navigation, release 2.1.0
-- [ ] Step 13 the pattern made explicit
+- [x] Step 13 the pattern made explicit: `docs/axit/adding-an-app.md` (2026-10-02, written while the pattern was fresh; the CLAUDE.md length check stays for after step 11)
