@@ -25,7 +25,7 @@ internal static class Updater
     public static Task<ReleaseInfo?> CheckAsync(CancellationToken cancellation) => UpdateCheck.FetchLatestAsync(Http, cancellation);
 
     /// <summary>
-    /// Downloads and extracts the release's zip and returns the folder that holds the new AxClaude.exe and install.ps1.
+    /// Downloads and extracts the release's zip and returns the folder that holds the new program file and install.ps1.
     /// A complete earlier download of the same version is reused.
     /// </summary>
     public static async Task<string> DownloadAsync(ReleaseInfo release, CancellationToken cancellation)
@@ -76,7 +76,7 @@ internal static class Updater
         File.Delete(zip);
         if (!IsComplete(folder))
         {
-            throw new InvalidOperationException("The downloaded zip does not contain AxClaude.exe and install.ps1.");
+            throw new InvalidOperationException("The downloaded zip does not contain a program file and install.ps1.");
         }
 
         return folder;
@@ -118,8 +118,12 @@ internal static class Updater
         Log.Info($"Update installer started from {folder}; it installs when this process ends and logs to {LogPath}");
     }
 
+    /// <summary>
+    /// A download is complete when it has install.ps1 and a program file. The program file is not named: the next
+    /// versions ship as Axit.exe (AxClaude became one app of the Axit bundle), and install.ps1 knows what to install.
+    /// </summary>
     private static bool IsComplete(string folder) =>
-        File.Exists(Path.Combine(folder, "AxClaude.exe")) && File.Exists(Path.Combine(folder, "install.ps1"));
+        File.Exists(Path.Combine(folder, "install.ps1")) && Directory.Exists(folder) && Directory.GetFiles(folder, "*.exe").Length > 0;
 
     private static HttpClient CreateClient()
     {

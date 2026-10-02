@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.7.0 - 2026-10-02
+
+- AxClaude is becoming one app of **Axit**, a bundle that will also hold AxDown, a plain editor for Markdown and text files. The next release installs as Axit, with AxClaude inside it unchanged. This version is the step in between: its updater accepts a release whose program file is not named AxClaude.exe, so Help, Update now will carry an installed AxClaude over into Axit.
+
 ## 1.6.0 - 2026-09-25
 
 - A question whose answers are too long for one line now lists every answer. Claude wraps a long answer onto the next line, and AxClaude used to stop reading answers there, so the first answers were missing from the list and read as part of the question.
