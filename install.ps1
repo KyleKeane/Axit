@@ -246,7 +246,7 @@ $entries = [ordered]@{
     DisplayIcon = "`"$exe`",0"
     InstallLocation = $target
     UninstallString = $appsUninstall
-    URLInfoAbout = 'https://github.com/KyleKeane/AxClaude'
+    URLInfoAbout = 'https://github.com/KyleKeane/Axit'
 }
 foreach ($name in $entries.Keys) { Set-ItemProperty -LiteralPath $appsKey -Name $name -Value $entries[$name] }
 foreach ($name in 'NoModify', 'NoRepair') { New-ItemProperty -LiteralPath $appsKey -Name $name -Value 1 -PropertyType DWord -Force | Out-Null }

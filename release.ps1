@@ -11,7 +11,7 @@
     3. commits CHANGELOG.md and the project file as "Release <version>",
     4. tags v<version> and pushes main and the tag.
   The push starts .github/workflows/release.yml. Follow it with `gh run watch`, or on the Actions page. When it is
-  done, the release is at https://github.com/KyleKeane/AxClaude/releases and the apps offer it as an update.
+  done, the release is at https://github.com/KyleKeane/Axit/releases and the apps offer it as an update.
 
 .EXAMPLE
   .\release.ps1 1.0.1
@@ -93,5 +93,5 @@ if ($NoPush) {
 
 git -C $root push origin main $tag
 if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
-Write-Host "Pushed. GitHub Actions is building the release: https://github.com/KyleKeane/AxClaude/actions"
-Write-Host "Follow it with: gh run watch    (the release then appears at https://github.com/KyleKeane/AxClaude/releases)"
+Write-Host "Pushed. GitHub Actions is building the release: https://github.com/KyleKeane/Axit/actions"
+Write-Host "Follow it with: gh run watch    (the release then appears at https://github.com/KyleKeane/Axit/releases)"

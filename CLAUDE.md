@@ -1,6 +1,6 @@
 # Axit
 
-Axit is a bundle of accessible Windows apps for a blind developer who uses the NVDA screen reader, shipped as one self-contained executable. Its first app is **AxClaude**, a front end for the Claude Code CLI (`claude --ax-screen-reader` in a ConPTY pseudo console, shown as a line-by-line transcript); the second, **AxDown**, a barebones editor for Markdown and text files, is being built. The transition from the AxClaude repository to the bundle runs on the branch `axit` following `docs/axit/plan.md`; `main` is AxClaude 1.7.0 until 2.0.0 is released.
+Axit is a bundle of accessible Windows apps for a blind developer who uses the NVDA screen reader, shipped as one self-contained executable. Its apps are **AxClaude**, a front end for the Claude Code CLI (`claude --ax-screen-reader` in a ConPTY pseudo console, shown as a line-by-line transcript), and **AxDown**, a barebones editor for Markdown and text files. The repository was AxClaude's until 2.0.0 (2026-10-02); `docs/axit/plan.md` records the transition and what is still to come. Releases go from `main`; larger work runs on a branch and merges when it has passed its NVDA checks.
 
 Specifications are the source of truth: `docs/axit/SPEC.md` for the bundle (launch, install, update, release, shared pieces, the accessibility rules, the modularity rules), `docs/axclaude/SPEC.md` for AxClaude, `docs/axdown/SPEC.md` for AxDown. A behaviour change updates the spec in the same commit.
 

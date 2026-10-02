@@ -11,7 +11,7 @@ Each app's guide is inside it: Help, User guide.
 
 ## Install
 
-Download `install.cmd` from the latest release on the releases page (https://github.com/KyleKeane/AxClaude/releases) and double-click it. It fetches the latest Axit and installs it; press a key when it is done. If you have the zip instead, extract it and double-click the `install.cmd` inside. If Windows SmartScreen warns about an unknown publisher, choose More info, then Run anyway.
+Download `install.cmd` from the latest release on the releases page (https://github.com/KyleKeane/Axit/releases) and double-click it. It fetches the latest Axit and installs it; press a key when it is done. If you have the zip instead, extract it and double-click the `install.cmd` inside. If Windows SmartScreen warns about an unknown publisher, choose More info, then Run anyway.
 
 This puts Axit in your Programs folder (`%LOCALAPPDATA%\Programs\Axit`) and adds, for each app, a Start menu entry (`Axit AxClaude` and `Axit AxDown`: press the Windows key and type `axc` or `axd`), an entry in the right-click menu of File Explorer (`Open in AxClaude` on folders, `Open in AxDown` on files, and AxDown under `Open with` for `.md`, `.markdown` and `.txt` files) and a console command (`axclaude`, `axdown`; `axit` alone opens the app that fits the path you give it). Settings, Apps lists Axit with an Uninstall. No administrator rights are needed, and no PowerShell setting has to change. To make AxDown the program that opens `.md` files when you press Enter on one, use Settings, Apps, Default apps; Windows does not let a program set that for itself.
 
@@ -33,6 +33,6 @@ Settings, Apps, Installed apps, Axit, Uninstall (or Add or remove programs in th
 
 ## About
 
-Axit is made by Dr. Kyle Keane, www.kylekeane.com. It is free under the MIT licence: use it, change it and pass it on, as long as the note that says who made it stays with it (the `LICENSE` file next to the program). The source is at https://github.com/KyleKeane/AxClaude.
+Axit is made by Dr. Kyle Keane, www.kylekeane.com. It is free under the MIT licence: use it, change it and pass it on, as long as the note that says who made it stays with it (the `LICENSE` file next to the program). The source is at https://github.com/KyleKeane/Axit.
 
 The software is provided "as is" and "as available", without warranty of any kind, express or implied. The developer has no obligation to provide support, maintenance, updates or corrections, and, to the fullest extent permitted by law, is not liable for any claim, damages or other liability arising from or in connection with the software or its use, including loss of data or work and anything done, said or charged by Claude Code or the services behind it. You use Axit at your own risk. Axit is an independent project, not affiliated with or endorsed by Anthropic.

@@ -4,7 +4,7 @@ AxDown is a plain editor for Markdown and text files, made for NVDA and for anyo
 
 ## Install
 
-AxDown comes with Axit. The README in the Axit zip, or on the releases page (https://github.com/KyleKeane/AxClaude/releases), explains the installation: download `install.cmd` and double-click it. This puts Axit in your Programs folder and adds a Start menu entry, "Axit AxDown" (press the Windows key and type `axd`), an "Open in AxDown" entry in the right-click menu of files, AxDown under "Open with" for `.md`, `.markdown` and `.txt` files, and the `axdown` command for consoles. To make AxDown the program that opens `.md` files when you press Enter on one, use Settings, Apps, Default apps, and choose AxDown for `.md`; Windows does not let a program set that for itself.
+AxDown comes with Axit. The README in the Axit zip, or on the releases page (https://github.com/KyleKeane/Axit/releases), explains the installation: download `install.cmd` and double-click it. This puts Axit in your Programs folder and adds a Start menu entry, "Axit AxDown" (press the Windows key and type `axd`), an "Open in AxDown" entry in the right-click menu of files, AxDown under "Open with" for `.md`, `.markdown` and `.txt` files, and the `axdown` command for consoles. To make AxDown the program that opens `.md` files when you press Enter on one, use Settings, Apps, Default apps, and choose AxDown for `.md`; Windows does not let a program set that for itself.
 
 ## Start
 

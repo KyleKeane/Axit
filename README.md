@@ -1,8 +1,8 @@
 # Axit
 
-One Windows program, several accessible apps for screen reader users, built for NVDA. **AxClaude** runs Claude Code in screen reader mode inside a hidden console and shows the conversation as plain text that NVDA reads line by line, with single-key navigation and a message field at the bottom; you are still talking to the real Claude Code. **AxDown**, a barebones editor for Markdown and text files, is being built (`docs/axit/plan.md`).
+One Windows program, several accessible apps for screen reader users, built for NVDA. **AxClaude** runs Claude Code in screen reader mode inside a hidden console and shows the conversation as plain text that NVDA reads line by line, with single-key navigation and a message field at the bottom; you are still talking to the real Claude Code. **AxDown** is a barebones editor for Markdown and text files that writes a file back exactly as it found it. Both share one installation, one updater and one release; adding an app follows `docs/axit/adding-an-app.md`.
 
-**Download:** `install.cmd` or the zip on the [latest release](https://github.com/KyleKeane/AxClaude/releases/latest); `docs/axit/README.md` (the README inside the zip) explains the rest. Installed copies offer newer releases themselves under Help.
+**Download:** `install.cmd` or the zip on the [latest release](https://github.com/KyleKeane/Axit/releases/latest); `docs/axit/README.md` (the README inside the zip) explains the rest. Installed copies offer newer releases themselves under Help.
 
 Where things are:
 
@@ -42,7 +42,7 @@ Send the zip. The recipient extracts it and double-clicks `install.cmd` (no admi
 gh run watch                 # follows the GitHub Actions run that builds and publishes the release
 ```
 
-Add a `## 2.0.0 - <date>` section to `CHANGELOG.md` first: it becomes the release notes, which the apps show in their update notice. GitHub Actions (`.github/workflows/release.yml`) tests, runs `publish.ps1`, and attaches the zip and `install.cmd` to the release at `github.com/KyleKeane/AxClaude/releases`; installed copies find it there. `build.yml` runs the tests on every push.
+Add a `## 2.0.0 - <date>` section to `CHANGELOG.md` first: it becomes the release notes, which the apps show in their update notice. GitHub Actions (`.github/workflows/release.yml`) tests, runs `publish.ps1`, and attaches the zip and `install.cmd` to the release at `github.com/KyleKeane/Axit/releases`; installed copies find it there. `build.yml` runs the tests on every push.
 
 ## Licence
 

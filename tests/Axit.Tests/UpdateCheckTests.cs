@@ -11,11 +11,11 @@ public class UpdateCheckTests
           "name": "AxClaude 1.2.3",
           "draft": false,
           "prerelease": false,
-          "html_url": "https://github.com/KyleKeane/AxClaude/releases/tag/v1.2.3",
+          "html_url": "https://github.com/KyleKeane/Axit/releases/tag/v1.2.3",
           "body": "## 1.2.3 - 2026-10-01\r\n\r\n- Reads faster.\r\n",
           "assets": [
             { "name": "checksums.txt", "size": 120, "browser_download_url": "https://example.invalid/checksums.txt" },
-            { "name": "AxClaude-1.2.3-win-x64.zip", "size": 43500000, "browser_download_url": "https://github.com/KyleKeane/AxClaude/releases/download/v1.2.3/AxClaude-1.2.3-win-x64.zip" }
+            { "name": "AxClaude-1.2.3-win-x64.zip", "size": 43500000, "browser_download_url": "https://github.com/KyleKeane/Axit/releases/download/v1.2.3/AxClaude-1.2.3-win-x64.zip" }
           ]
         }
         """;
@@ -29,8 +29,8 @@ public class UpdateCheckTests
         Assert.Equal(new Version(1, 2, 3), release.Version);
         Assert.Equal("v1.2.3", release.Tag);
         Assert.Equal("## 1.2.3 - 2026-10-01\n\n- Reads faster.", release.Notes);
-        Assert.Equal("https://github.com/KyleKeane/AxClaude/releases/tag/v1.2.3", release.PageUrl);
-        Assert.Equal("https://github.com/KyleKeane/AxClaude/releases/download/v1.2.3/AxClaude-1.2.3-win-x64.zip", release.ZipUrl);
+        Assert.Equal("https://github.com/KyleKeane/Axit/releases/tag/v1.2.3", release.PageUrl);
+        Assert.Equal("https://github.com/KyleKeane/Axit/releases/download/v1.2.3/AxClaude-1.2.3-win-x64.zip", release.ZipUrl);
         Assert.Equal(43500000, release.ZipSize);
     }
 

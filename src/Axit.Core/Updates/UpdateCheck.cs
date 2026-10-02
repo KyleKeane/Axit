@@ -14,7 +14,7 @@ public sealed record ReleaseInfo(Version Version, string Tag, string Notes, stri
 /// </summary>
 public static class UpdateCheck
 {
-    public const string Repository = "KyleKeane/AxClaude";
+    public const string Repository = "KyleKeane/Axit";
 
     /// <summary>The end of the zip's file name, as publish.ps1 names it: <c>Axit-2.0.0-win-x64.zip</c> (<c>AxClaude-1.7.0-win-x64.zip</c> before the bundle).</summary>
     public const string ZipSuffix = "-win-x64.zip";

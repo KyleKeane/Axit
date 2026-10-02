@@ -1,9 +1,10 @@
 # Axit — Bundle Specification
 
-Describes Axit, the bundle that AxClaude is becoming (plan: `docs/axit/plan.md`, written 2026-10-02). Each requirement
-says whether it is **built** or **planned (step n)** of the plan; the markers go when the work is done. This document
-covers only what crosses apps. Each app has its own specification: `docs/axclaude/SPEC.md`, `docs/axdown/SPEC.md`.
-Requirements here are numbered `AX-n.m` and decisions `B-n`, so that they never clash with an app's `FR-n.m` and `D-n`.
+Describes Axit as of 2.0.0 (2026-10-02), the bundle the AxClaude repository became (plan: `docs/axit/plan.md`). Every
+requirement is built unless its heading says otherwise; this document is kept in step with the code (a behaviour
+change updates it in the same commit). It covers only what crosses apps. Each app has its own specification:
+`docs/axclaude/SPEC.md`, `docs/axdown/SPEC.md`. Requirements here are numbered `AX-n.m` and decisions `B-n`, so that
+they never clash with an app's `FR-n.m` and `D-n`.
 
 ## 1. Summary
 
@@ -40,7 +41,7 @@ allow it, see B-9).
 
 ## 4. Functional requirements
 
-### AX-1 Launch and dispatch (built, step 3; the `down` verb answers "not in this build yet" until step 8)
+### AX-1 Launch and dispatch
 
 - AX-1.1 The first argument may be a verb naming an app: `claude`, `down`. The rest of the arguments go to that app
   unchanged, so `Axit.exe claude C:\src --record x.vt` is what `AxClaude.exe C:\src --record x.vt` was.
@@ -59,7 +60,7 @@ allow it, see B-9).
   `<App>App`, plus a `Usage` text. `Axit`'s `Program` owns the crash handling, the version and the log start, and calls
   that entry point; the app owns everything after.
 
-### AX-2 Installation (built, steps 5 and 9)
+### AX-2 Installation
 
 - AX-2.1 `install.ps1` installs for the current user into `%LOCALAPPDATA%\Programs\Axit` with no administrator
   rights, from the extracted zip or from `publish\win-x64`; `install.cmd` runs it with the execution policy bypassed
@@ -83,7 +84,7 @@ allow it, see B-9).
   -LogFile <file>` installs after that process ends and starts AxClaude on the folder, as the 1.7.0 updater expects.
   `-StartFile <file>` (step 9) starts AxDown on the file the same way; nothing is renamed.
 
-### AX-3 Updates (built)
+### AX-3 Updates
 
 - AX-3.1 One version for the bundle, `<Version>` in `src/Axit/Axit.csproj`. A newer GitHub release is offered as
   AxClaude does today (`docs/axclaude/SPEC.md` FR-1.10, D25): asked once at startup when the setting is on, a notice
@@ -95,7 +96,7 @@ allow it, see B-9).
 - AX-3.4 The update check and the version comparison are pure code in `Axit.Core/Updates/UpdateCheck`, unit tested;
   the download and the hand-over are `Axit.Core/Updates/Updater`.
 
-### AX-4 Releases (built, step 5)
+### AX-4 Releases
 
 - AX-4.1 `release.ps1 <version>` checks that `CHANGELOG.md` has a `## <version>` section, runs the tests, sets
   `<Version>`, commits `Release <version>`, tags `v<version>` and pushes. `.github/workflows/release.yml` checks the
@@ -107,7 +108,7 @@ allow it, see B-9).
   bundle itself).
 - AX-4.4 `build.yml` runs the tests of the whole solution on every push and pull request.
 
-### AX-5 Settings, logs and paths (built, step 4)
+### AX-5 Settings, logs and paths
 
 - AX-5.1 Each app has its own settings file, `%APPDATA%\Axit\<app>.json` (`axclaude.json`, `axdown.json`), and its own
   log, `%LOCALAPPDATA%\Axit\logs\<app>.log`. The updater's log is `%LOCALAPPDATA%\Axit\logs\update.log`.
@@ -117,7 +118,7 @@ allow it, see B-9).
   and the error is reported once) is one piece of shared code, `Axit.Core/SettingsFile`; each app's settings class is
   its own plain record of properties.
 
-### AX-6 Shared pieces (planned, steps 4 and 8)
+### AX-6 Shared pieces
 
 - AX-6.1 `Axit.Core` (pure, unit tested; built at step 4): `Dispatch`, `BundleInfo`, `AppPaths`, `SettingsFile`,
   `Log` (per-app file name), `Updates/` (`UpdateCheck`, the release check, and `Updater`, the download and the
@@ -135,7 +136,7 @@ allow it, see B-9).
   the chime; a question in the input field's place is a list or a field named with the question, Enter answers,
   Escape cancels. An app that needs to ask uses these and does not draw its own dialog.
 
-### AX-8 Keys (planned; the tables come with AxDown, step 8, and AxClaude's table at step 11)
+### AX-8 Keys (AxDown's table and the bundle's are built; AxClaude's table is plan step 11)
 
 - AX-8.1 Every key an app handles is one of two kinds: **bundle-wide**, meaning the same in every window of Axit, or
   **window-specific**, meaning something in one window only. Each app's keyboard table in its spec marks every key
@@ -153,7 +154,7 @@ allow it, see B-9).
   keys that two windows use for different actions, so that a collision between apps is seen before it is felt.
 - AX-8.5 A key is never handled anywhere but through its table, and no key is intercepted that NVDA uses (AX-7.4).
 
-### AX-7 Accessibility rules every app follows (built in AxClaude)
+### AX-7 Accessibility rules every app follows
 
 These are the rules of `docs/axclaude/SPEC.md` that are not about Claude; app specifications refer to them by number.
 

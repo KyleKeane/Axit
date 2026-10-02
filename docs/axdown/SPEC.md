@@ -1,10 +1,11 @@
 # AxDown — Specification
 
 AxDown is the second app of the Axit bundle (`docs/axit/SPEC.md`): a barebones editor for Markdown and plain text files
-for a blind developer who uses the NVDA screen reader. Written 2026-10-02, before the code (plan step 6 of
-`docs/axit/plan.md`); every requirement is **planned** until the status at the end says otherwise. Requirements are
-numbered `AD-n.m` and decisions `AD-Dn`. The bundle's rules that every app follows, AX-7 (accessibility) and AX-8
-(keys), are cited by number and not repeated. In AxDown's code and documents, "SPEC.md" means this file.
+for a blind developer who uses the NVDA screen reader. Describes AxDown as of Axit 2.0.0 (2026-10-02): everything in
+section 4 is built and checked with NVDA; section 9 is the next version. The document is kept in step with the code
+(a behaviour change updates it in the same commit). Requirements are numbered `AD-n.m` and decisions `AD-Dn`. The
+bundle's rules that every app follows, AX-7 (accessibility) and AX-8 (keys), are cited by number and not repeated.
+In AxDown's code and documents, "SPEC.md" means this file.
 
 ## 1. Summary
 

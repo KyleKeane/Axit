@@ -11,7 +11,7 @@ You are talking to the real Claude Code. Slash commands, questions, permission p
 
 ## Install AxClaude
 
-AxClaude is one app of **Axit**, one program that holds several apps for screen reader users. Download `install.cmd` from the latest release on the releases page (https://github.com/KyleKeane/AxClaude/releases) and double-click it. It fetches the latest Axit and installs it; press a key when it is done. If you have the zip instead, extract it and double-click the `install.cmd` inside. If Windows SmartScreen warns about an unknown publisher, choose More info, then Run anyway.
+AxClaude is one app of **Axit**, one program that holds several apps for screen reader users. Download `install.cmd` from the latest release on the releases page (https://github.com/KyleKeane/Axit/releases) and double-click it. It fetches the latest Axit and installs it; press a key when it is done. If you have the zip instead, extract it and double-click the `install.cmd` inside. If Windows SmartScreen warns about an unknown publisher, choose More info, then Run anyway.
 
 This puts Axit in your Programs folder and adds a Start menu entry, "Axit AxClaude" (press the Windows key and type `axc`), an "Open in AxClaude" entry in the right-click menu of folders, the `axclaude` command for consoles, and an entry in Settings, Apps named Axit. No administrator rights are needed, and no PowerShell setting has to change. If you had AxClaude installed before Axit existed, the installer removes it first, and AxClaude takes over your settings the first time it starts.
 
