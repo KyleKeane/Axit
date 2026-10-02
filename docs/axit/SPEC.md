@@ -272,3 +272,7 @@ docs/axdown/            SPEC.md, user-guide.md (embedded by src/AxDown), nvda-te
   (`Programs\Axit`, `Axit AxClaude`, `axit` and `axclaude`, the Apps entry `Axit`, `Axit-<version>-win-x64.zip`,
   `docs/axit/README.md` in the zip); a 1.x installation is removed first. Kyle's checks of the Start menu search,
   the folder menu and the console commands are pending (AX-2.2).
+- 2026-10-02, steps 6 to 8: AxDown specified (`docs/axdown/`), its pure code and window built; `Axit.Forms` holds
+  the shared window pieces, moved from AxClaude unchanged (AX-6.2), plus `BundleKeys` and `WindowAccessibleObject`;
+  `tests/Axit.Tests/KeyTests` is the collision test (AX-8.4), with AxDown's table in it and AxClaude's to come at
+  step 11. `Axit.exe down <file>` works; the installer's entries for AxDown are step 9.

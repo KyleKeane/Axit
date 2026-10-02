@@ -249,32 +249,8 @@ internal sealed class MainForm : Form
         base.WndProc(ref m);
     }
 
-    /// <summary>
-    /// NVDA finds a status bar by looking at the bottom-left pixel of the foreground window's rectangle. It takes that
-    /// rectangle from UI Automation, and for a WinForms window that is the full window rectangle including the invisible
-    /// resize border, so the pixel lies outside the visible window and NVDA+End reports no status bar. Reporting the
-    /// client area (with the title bar) instead puts that pixel in the status strip. Classic Win32 windows report their
-    /// client area through MSAA, which is why the trick is not needed there.
-    /// </summary>
-    protected override AccessibleObject CreateAccessibilityInstance() => new MainFormAccessibleObject(this);
-
-    private sealed class MainFormAccessibleObject(MainForm owner) : ControlAccessibleObject(owner)
-    {
-        public override Rectangle Bounds
-        {
-            get
-            {
-                if (!owner.IsHandleCreated)
-                {
-                    return Rectangle.Empty;
-                }
-
-                var client = owner.RectangleToScreen(owner.ClientRectangle);
-                var top = Math.Min(owner.Bounds.Top, client.Top);
-                return Rectangle.FromLTRB(client.Left, top, client.Right, client.Bottom);
-            }
-        }
-    }
+    /// <summary>The window's client area as its UI Automation rectangle, so that NVDA+End finds the status bar (Axit.Forms.WindowAccessibleObject).</summary>
+    protected override AccessibleObject CreateAccessibilityInstance() => new WindowAccessibleObject(this);
 
     protected override bool ProcessCmdKey(ref Message msg, Keys keyData)
     {

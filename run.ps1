@@ -21,6 +21,9 @@ param(
     [switch]$Test,
     [switch]$New,
 
+    # Start AxDown on this file instead of AxClaude on the project folder.
+    [string]$Down,
+
     [Parameter(ValueFromRemainingArguments = $true)]
     [string[]]$ClaudeArgs
 )
@@ -48,7 +51,13 @@ if (-not (Test-Path $exe)) {
     exit 1
 }
 
-# Axit.exe holds every app of the bundle; the verb picks AxClaude (docs/axit/SPEC.md AX-1).
+# Axit.exe holds every app of the bundle; the verb picks the app (docs/axit/SPEC.md AX-1).
+if ($Down) {
+    Write-Host "Starting AxDown on $Down"
+    & $exe down $Down
+    exit $LASTEXITCODE
+}
+
 $Project = (Resolve-Path $Project).Path
 Write-Host "Starting AxClaude on $Project"
 if ($New) {

@@ -1,5 +1,6 @@
 using System.Runtime.InteropServices;
 using AxClaude;
+using AxDown;
 using Axit.Core;
 
 namespace Axit;
@@ -30,7 +31,8 @@ internal static class Program
                 AxClaudeApp.Run(launch.Arguments);
                 break;
             case Dispatch.AxDown:
-                MessageBox.Show("AxDown is not part of this build yet.", "Axit", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                SetAppId("Axit.AxDown");
+                AxDownApp.Run(launch.Arguments);
                 break;
             default:
                 // --help or --version for the bundle itself (AX-1.4).

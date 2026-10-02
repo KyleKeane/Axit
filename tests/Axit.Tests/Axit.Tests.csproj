@@ -1,7 +1,10 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
+  <!-- The bundle's tests: the shared pure code, the layout rules, and the key tables of every window (AX-8.4), which
+       is why this project references the window projects; LayoutTests constrains src/, not tests/. -->
   <PropertyGroup>
-    <TargetFramework>net10.0</TargetFramework>
+    <TargetFramework>net10.0-windows</TargetFramework>
+    <UseWindowsForms>true</UseWindowsForms>
     <IsPackable>false</IsPackable>
     <IsTestProject>true</IsTestProject>
   </PropertyGroup>
@@ -14,6 +17,8 @@
 
   <ItemGroup>
     <ProjectReference Include="..\..\src\Axit.Core\Axit.Core.csproj" />
+    <ProjectReference Include="..\..\src\Axit.Forms\Axit.Forms.csproj" />
+    <ProjectReference Include="..\..\src\AxDown\AxDown.csproj" />
   </ItemGroup>
 
   <ItemGroup>
