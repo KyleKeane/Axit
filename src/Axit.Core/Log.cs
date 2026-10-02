@@ -1,15 +1,21 @@
-namespace AxClaude;
+namespace Axit.Core;
 
-/// <summary>Rolling diagnostic log in <c>%LOCALAPPDATA%\AxClaude\logs\axclaude.log</c> (FR-13.2). Never throws.</summary>
-internal static class Log
+/// <summary>
+/// Rolling diagnostic log in <c>%LOCALAPPDATA%\Axit\logs\&lt;app&gt;.log</c> (docs/axit/SPEC.md AX-5.1; AxClaude's
+/// FR-13.2). Never throws. Each app names its file with <see cref="UseApp"/> as the first thing its Run does.
+/// </summary>
+public static class Log
 {
     private const long RollOverBytes = 1024 * 1024;
     private static readonly object Gate = new();
 
-    public static string Directory { get; } =
-        Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "AxClaude", "logs");
+    public static string Directory { get; } = AppPaths.LogsFolder;
 
-    public static string FilePath { get; } = Path.Combine(Directory, "axclaude.log");
+    /// <summary><c>axit.log</c> until an app calls <see cref="UseApp"/>.</summary>
+    public static string FilePath { get; private set; } = Path.Combine(AppPaths.LogsFolder, "axit.log");
+
+    /// <summary>Names the file after the app: <c>axclaude.log</c>, <c>axdown.log</c>.</summary>
+    public static void UseApp(string app) => FilePath = Path.Combine(Directory, app + ".log");
 
     public static void Info(string message) => Write("INFO ", message);
 

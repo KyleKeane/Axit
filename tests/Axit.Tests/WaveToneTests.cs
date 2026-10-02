@@ -1,7 +1,7 @@
 using System.Text;
-using AxClaude.Core.Audio;
+using Axit.Core.Audio;
 
-namespace AxClaude.Tests;
+namespace Axit.Tests;
 
 public class WaveToneTests
 {

@@ -12,6 +12,8 @@ public static class AxClaudeApp
 {
     public static void Run(string[] args)
     {
+        Log.UseApp("axclaude");
+
         // FR-13.1: an exception in a UI handler is logged and reported instead of silently ending the process.
         Application.SetUnhandledExceptionMode(UnhandledExceptionMode.CatchException);
         Application.ThreadException += (_, e) => ReportCrash(e.Exception);
@@ -43,6 +45,16 @@ public static class AxClaudeApp
             Log.Error("Bad command line: " + ex.Message);
             MessageBox.Show(ex.Message, "AxClaude", MessageBoxButtons.OK, MessageBoxIcon.Error);
             return;
+        }
+
+        // AX-5.2: the first start under Axit takes over the settings of AxClaude 1.x.
+        try
+        {
+            AppSettings.TakeOverOldFile();
+        }
+        catch (Exception ex) when (ex is IOException or UnauthorizedAccessException)
+        {
+            Log.Error("The 1.x settings file could not be copied; starting with defaults", ex);
         }
 
         var settings = AppSettings.Load(AppSettings.DefaultPath, out var settingsError);

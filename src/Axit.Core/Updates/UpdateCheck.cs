@@ -2,13 +2,13 @@ using System.Net;
 using System.Net.Http.Headers;
 using System.Text.Json;
 
-namespace AxClaude.Core.Updates;
+namespace Axit.Core.Updates;
 
 /// <summary>A published release of the app on GitHub (FR-1.10): its version, its notes and where its zip is.</summary>
 public sealed record ReleaseInfo(Version Version, string Tag, string Notes, string PageUrl, string? ZipUrl, long ZipSize);
 
 /// <summary>
-/// Finds out whether a newer AxClaude has been released (FR-1.10, D25). A release is a GitHub release of the
+/// Finds out whether a newer Axit has been released (FR-1.10, D25). A release is a GitHub release of the
 /// repository with the zip that publish.ps1 builds attached. The parsing and the version comparison are pure and unit
 /// tested; the app makes the one network call through <see cref="FetchLatestAsync"/>.
 /// </summary>

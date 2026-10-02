@@ -1,6 +1,6 @@
-using System.Text.Json;
 using System.Text.Json.Serialization;
 using AxClaude.Core.Transcript;
+using Axit.Core;
 
 namespace AxClaude.Core;
 
@@ -15,22 +15,13 @@ public sealed class WindowPlacement
 }
 
 /// <summary>
-/// Everything the app remembers between runs. Stored as JSON in <c>%APPDATA%\AxClaude\settings.json</c>
-/// (see SPEC.md Appendix C). A missing or unreadable file falls back to the defaults.
+/// Everything the app remembers between runs. Stored as JSON in <c>%APPDATA%\Axit\axclaude.json</c> (see SPEC.md
+/// Appendix C) through the bundle's <see cref="SettingsFile"/>; the first start under Axit copies AxClaude 1.x's
+/// <c>%APPDATA%\AxClaude\settings.json</c> there (<see cref="TakeOverOldFile"/>). A missing or unreadable file falls
+/// back to the defaults.
 /// </summary>
 public sealed class AppSettings
 {
-    private static readonly JsonSerializerOptions JsonOptions = new()
-    {
-        WriteIndented = true,
-        PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
-        PropertyNameCaseInsensitive = true,
-        ReadCommentHandling = JsonCommentHandling.Skip,
-        AllowTrailingCommas = true,
-        DefaultIgnoreCondition = JsonIgnoreCondition.Never,
-        Converters = { new JsonStringEnumConverter(JsonNamingPolicy.CamelCase) },
-    };
-
     public const int MaxRecentFolders = 10;
 
     public string? LastProjectFolder { get; set; }
@@ -102,44 +93,25 @@ public sealed class AppSettings
     public int MaxTranscriptLines { get; set; } = 20000;
     public WindowPlacement? Window { get; set; }
 
-    public static string DefaultPath =>
+    public static string DefaultPath => AppPaths.SettingsFile("axclaude");
+
+    /// <summary>Where AxClaude 1.x kept the file, before the Axit bundle.</summary>
+    public static string OldPath =>
         Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "AxClaude", "settings.json");
+
+    /// <summary>Copies the 1.x file to <see cref="DefaultPath"/> when there is one and no new file yet (docs/axit/SPEC.md AX-5.2).</summary>
+    public static void TakeOverOldFile() => SettingsFile.TakeOverOldFile(OldPath, DefaultPath);
 
     /// <summary>Loads the file, or returns defaults. <paramref name="error"/> describes an unreadable file.</summary>
     public static AppSettings Load(string path, out string? error)
     {
-        error = null;
-        if (!File.Exists(path))
-        {
-            return new AppSettings();
-        }
-
-        try
-        {
-            var settings = JsonSerializer.Deserialize<AppSettings>(File.ReadAllText(path), JsonOptions) ?? new AppSettings();
-            settings.Sanitize();
-            return settings;
-        }
-        catch (Exception ex) when (ex is JsonException or IOException or UnauthorizedAccessException)
-        {
-            error = $"{path}: {ex.Message}";
-            return new AppSettings();
-        }
+        var settings = SettingsFile.Load<AppSettings>(path, out error);
+        settings.Sanitize();
+        return settings;
     }
 
     /// <summary>Writes the file atomically: a temporary file next to it is moved into place.</summary>
-    public void Save(string path)
-    {
-        var directory = Path.GetDirectoryName(path);
-        if (!string.IsNullOrEmpty(directory))
-        {
-            Directory.CreateDirectory(directory);
-        }
-
-        var temporary = path + ".tmp";
-        File.WriteAllText(temporary, JsonSerializer.Serialize(this, JsonOptions));
-        File.Move(temporary, path, overwrite: true);
-    }
+    public void Save(string path) => SettingsFile.Save(path, this);
 
     public void RememberFolder(string folder)
     {

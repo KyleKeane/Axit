@@ -91,8 +91,8 @@ allow it, see B-9).
   version's `install.ps1` (AX-2.7). A download counts as complete when it holds `install.ps1` and a program file.
 - AX-3.3 The 1.7.0 bridge (B-6): AxClaude 1.7.0 accepts a download whose program file is not `AxClaude.exe`, so an
   installed AxClaude updates into Axit through Help, Update now. The first Axit release is 2.0.0.
-- AX-3.4 The update check and the version comparison are pure code in `Axit.Core/Updates`, unit tested; the download
-  and the hand-over are in `Axit.Forms/Updater`.
+- AX-3.4 The update check and the version comparison are pure code in `Axit.Core/Updates/UpdateCheck`, unit tested;
+  the download and the hand-over are `Axit.Core/Updates/Updater`.
 
 ### AX-4 Releases (built; the names change at step 5)
 
@@ -106,7 +106,7 @@ allow it, see B-9).
   bundle itself).
 - AX-4.4 `build.yml` runs the tests of the whole solution on every push and pull request.
 
-### AX-5 Settings, logs and paths (planned, step 4)
+### AX-5 Settings, logs and paths (built, step 4)
 
 - AX-5.1 Each app has its own settings file, `%APPDATA%\Axit\<app>.json` (`axclaude.json`, `axdown.json`), and its own
   log, `%LOCALAPPDATA%\Axit\logs\<app>.log`. The updater's log is `%LOCALAPPDATA%\Axit\logs\update.log`.
@@ -118,13 +118,15 @@ allow it, see B-9).
 
 ### AX-6 Shared pieces (planned, steps 4 and 8)
 
-- AX-6.1 `Axit.Core` (pure, unit tested): `Dispatch`, `AppPaths`, `SettingsFile`, `Updates/` (the release check),
-  `Audio/WaveTone` (the sounds as WAV bytes).
-- AX-6.2 `Axit.Forms` (WinForms, no tests, checked with NVDA): `OverlayPanel` (the notices in the window, with the
-  `Notice` record callers pass), `ControlArea` and `ListKeys` (a question's answers as a list or a field in the input
-  field's place, with the number and page keys of every such list), `Sounds` (one wave-out device for the life of the
-  process), `EditPaging` (Page Up and Page Down in an edit control), `StatusLayout`, the font handling (text size and
-  the font picker), `Log`, `Crash` (the report into the window or a message box), `Updater`, `BundleKeys` (AX-8).
+- AX-6.1 `Axit.Core` (pure, unit tested; built at step 4): `Dispatch`, `BundleInfo`, `AppPaths`, `SettingsFile`,
+  `Log` (per-app file name), `Updates/` (`UpdateCheck`, the release check, and `Updater`, the download and the
+  hand-over to `install.ps1`; neither needs a window), `Audio/WaveTone` (the sounds as WAV bytes).
+- AX-6.2 `Axit.Forms` (WinForms, no tests, checked with NVDA; planned, step 8): `OverlayPanel` (the notices in the
+  window, with the `Notice` record callers pass), `ControlArea` and `ListKeys` (a question's answers as a list or a
+  field in the input field's place, with the number and page keys of every such list), `Sounds` (one wave-out device
+  for the life of the process), `EditPaging` (Page Up and Page Down in an edit control), `StatusLayout`, the font
+  handling (text size and the font picker), `BundleKeys` (AX-8). The crash report (twenty lines in each app's
+  `Run`) stays per app until a second copy shows what is common.
 - AX-6.3 A piece moves into a shared project only when a second app needs it, in a commit of its own, with the
   accessibility review; it moves unchanged where possible (B-3).
 - AX-6.4 The notices and the question area are the bundle's one way of asking the user something, so that every
@@ -261,3 +263,6 @@ docs/axdown/            SPEC.md, user-guide.md (embedded by src/AxDown), nvda-te
   `Axit.Core/Dispatch` decides the app and is tested in `tests/Axit.Tests`; `Axit.sln`, `run.ps1` and `build.yml`
   follow. `publish.ps1`, `install.ps1` and the release pipeline still carry AxClaude's names and are not usable on
   the branch until step 5.
+- 2026-10-02, step 4: `Axit.Core` holds `AppPaths`, `SettingsFile`, `Log`, `Updates/` and `Audio/WaveTone`;
+  AxClaude's settings file is `%APPDATA%\Axit\axclaude.json` (the 1.x file copied on the first start) and its log
+  `%LOCALAPPDATA%\Axit\logs\axclaude.log`; `tests/Axit.Tests` has `SettingsFileTests` and `LayoutTests`.

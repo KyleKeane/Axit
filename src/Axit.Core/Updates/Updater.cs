@@ -1,26 +1,23 @@
 using System.Diagnostics;
 using System.IO.Compression;
 using System.Net.Http.Headers;
-using AxClaude.Core.Updates;
-using Axit.Core;
 
-namespace AxClaude;
+namespace Axit.Core.Updates;
 
 /// <summary>
-/// The app's side of FR-1.10: asks GitHub for the latest release, downloads its zip into
-/// <c>%LOCALAPPDATA%\AxClaude\updates\&lt;version&gt;</c>, and hands over to that version's own install.ps1, which waits
-/// for this process to end, installs over the current installation and starts the new AxClaude on the same folder.
-/// The running executable is never overwritten while it runs (D25).
+/// The bundle's side of updating (docs/axit/SPEC.md AX-3; AxClaude's FR-1.10): asks GitHub for the latest release,
+/// downloads its zip into <c>%LOCALAPPDATA%\Axit\updates\&lt;version&gt;</c>, and hands over to that version's own
+/// install.ps1, which waits for this process to end, installs over the current installation and starts the app
+/// again. The running executable is never overwritten while it runs (AxClaude's D25).
 /// </summary>
-internal static class Updater
+public static class Updater
 {
     private static readonly HttpClient Http = CreateClient();
 
-    public static string Folder { get; } =
-        Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "AxClaude", "updates");
+    public static string Folder { get; } = AppPaths.UpdatesFolder;
 
     /// <summary>What the installer did after this process ended, for a bug report.</summary>
-    public static string LogPath { get; } = Path.Combine(Log.Directory, "update.log");
+    public static string LogPath { get; } = Path.Combine(AppPaths.LogsFolder, "update.log");
 
     /// <summary>The latest release, or null when none is published. Throws when GitHub cannot be reached.</summary>
     public static Task<ReleaseInfo?> CheckAsync(CancellationToken cancellation) => UpdateCheck.FetchLatestAsync(Http, cancellation);
@@ -60,7 +57,7 @@ internal static class Updater
             }
         }
 
-        var zip = Path.Combine(Folder, $"AxClaude-{version}{UpdateCheck.ZipSuffix}");
+        var zip = Path.Combine(Folder, $"Axit-{version}{UpdateCheck.ZipSuffix}");
         using (var response = await Http.GetAsync(release.ZipUrl, HttpCompletionOption.ResponseHeadersRead, cancellation).ConfigureAwait(false))
         {
             response.EnsureSuccessStatusCode();
@@ -85,8 +82,8 @@ internal static class Updater
 
     /// <summary>
     /// Starts the downloaded version's install.ps1 without a window. It waits for this process to end, installs, and
-    /// starts the new AxClaude on <paramref name="projectFolder"/>, with <c>-- --continue</c> when asked, so that the
-    /// conversation is picked up again. Its output goes to <see cref="LogPath"/>.
+    /// starts AxClaude on <paramref name="projectFolder"/> when one is given, with <c>-- --continue</c> when asked, so
+    /// that the conversation is picked up again (AX-2.7 keeps these parameters). Its output goes to <see cref="LogPath"/>.
     /// </summary>
     public static void LaunchInstaller(string folder, string? projectFolder, bool continueConversation)
     {
@@ -120,8 +117,8 @@ internal static class Updater
     }
 
     /// <summary>
-    /// A download is complete when it has install.ps1 and a program file. The program file is not named: the next
-    /// versions ship as Axit.exe (AxClaude became one app of the Axit bundle), and install.ps1 knows what to install.
+    /// A download is complete when it has install.ps1 and a program file. The program file is not named: the
+    /// installer knows what to install, and 1.7.0 relied on this to update into Axit (docs/axit/SPEC.md B-6).
     /// </summary>
     private static bool IsComplete(string folder) =>
         File.Exists(Path.Combine(folder, "install.ps1")) && Directory.Exists(folder) && Directory.GetFiles(folder, "*.exe").Length > 0;
@@ -129,7 +126,7 @@ internal static class Updater
     private static HttpClient CreateClient()
     {
         var client = new HttpClient { Timeout = TimeSpan.FromMinutes(10) };
-        client.DefaultRequestHeaders.UserAgent.Add(new ProductInfoHeaderValue("AxClaude", BundleInfo.Version));
+        client.DefaultRequestHeaders.UserAgent.Add(new ProductInfoHeaderValue("Axit", BundleInfo.Version));
         return client;
     }
 }

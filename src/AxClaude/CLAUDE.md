@@ -24,9 +24,10 @@ The app records the raw stream with `--record file.vt` or Options → Record raw
 - `OverlayPanel`: the notices, every dialog of the app's own, drawn inside the window in place of the conversation and the message field (SPEC.md D23); also the New session controls (FR-8.6). Callers pass a `Notice` record to `MainForm.ShowNotice`, which adds the key line, the chime and the hold.
 - `ControlArea`: what Claude waits on, in the message field's place: one list or one field at a time, named with the question, new for every question, Enter and Escape (`MainForm.ShowInArea`, SPEC.md D33). `ListKeys`: the number, 0, Page Up and Page Down keys every list of the area adds.
 - `Sounds`: plays the generated sounds through one winmm wave-out device that stays open; every sound is prepared once and queued with a single write.
-- `HelpText`: the F1 shortcuts, the embedded user guide, the Claude-not-found text. `Log`: the diagnostic log. `Updater`: the download into `%LOCALAPPDATA%\AxClaude\updates` and the hand-over to the new version's `install.ps1 -WaitForProcess` (FR-1.10, D25). `AxClaudeApp`: the entry point `Run` that the Program of Axit calls (docs/axit/SPEC.md AX-1.7); crash handler, `--help`, `--version`.
+- `HelpText`: the F1 shortcuts, the embedded user guide, the Claude-not-found text. `AxClaudeApp`: the entry point `Run` that the Program of Axit calls (docs/axit/SPEC.md AX-1.7); it names the log (`Log.UseApp`), takes over the 1.x settings file, holds the crash handler, `--help` and `--version`.
+- In `src/Axit.Core` since step 4 of the plan: `Log` (`%LOCALAPPDATA%\Axit\logs\axclaude.log`), `Updater` (the download into `%LOCALAPPDATA%\Axit\updates` and the hand-over to the new version's `install.ps1 -WaitForProcess`, FR-1.10, D25), `BundleInfo.Version`.
 
-Planned moves (docs/axit/plan.md): `OverlayPanel`, `ControlArea`, `ListKeys`, `Sounds`, `EditPaging`, `StatusLayout`, the font handling, `Log`, `Updater` and the crash report go to `Axit.Forms` when AxDown needs them, unchanged; the keys get a table (`AxClaudeKeys`, SPEC AX-8).
+Planned moves (docs/axit/plan.md): `OverlayPanel`, `ControlArea`, `ListKeys`, `Sounds`, `EditPaging`, `StatusLayout` and the font handling go to `Axit.Forms` when AxDown needs them, unchanged; the keys get a table (`AxClaudeKeys`, SPEC AX-8).
 
 ## Rules
 

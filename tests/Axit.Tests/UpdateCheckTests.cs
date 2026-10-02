@@ -1,6 +1,6 @@
-using AxClaude.Core.Updates;
+using Axit.Core.Updates;
 
-namespace AxClaude.Tests;
+namespace Axit.Tests;
 
 public class UpdateCheckTests
 {

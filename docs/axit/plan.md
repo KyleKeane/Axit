@@ -157,12 +157,14 @@ today; AxDown starts at step 6.
 ### Step 4. The shared projects, first contents
 
 - `Axit.Core`: `AppPaths` (settings, logs and updates under `Axit`, per app), `SettingsFile` (the load, save and
-  error pattern that `AppSettings` has today, made reusable), `Updates/` and `Audio/WaveTone` moved from
-  `AxClaude.Core`. `AppSettings` stays AxClaude's and uses `SettingsFile`. The first start copies the old settings
-  file to the new place.
-- `Axit.Forms`: `Log` (per-app file name), `Crash` (the report into the window or a message box), `Updater`.
-- Tests move with their code into `tests/Axit.Tests`; `PrivacyTests` (whole repository) and the new `LayoutTests`
-  (rule 2 of section 5) live there too.
+  error pattern that `AppSettings` has today, made reusable, plus the take-over of an old file), `Log` (per-app file
+  name), `Updates/` (`UpdateCheck` and `Updater`; neither needs a window, so they live in Core, not Forms) and
+  `Audio/WaveTone` moved from AxClaude. `AppSettings` stays AxClaude's and uses `SettingsFile`. The first start
+  copies the old settings file to the new place. The crash report stays per app until a second copy shows what is
+  common.
+- Tests move with their code into `tests/Axit.Tests`, with the new `SettingsFileTests` and `LayoutTests` (rule 2 of
+  section 5). `PrivacyTests` stays in `tests/AxClaude.Tests`: it tests `Redaction` too, and it scans the whole
+  repository from either place.
 - Done when: tests pass; AxClaude's log and settings are in the `Axit` folders; Help, About and the update check work.
 
 ### Step 5. Installer, publish and release for the bundle
@@ -286,7 +288,7 @@ question area shared), step 11, and the key work in steps 8 and 12.
 - [x] Step 1 bundle spec and document split (2026-10-02)
 - [x] Step 2 bridge 1.7.0 released from `main` (2026-10-02)
 - [x] Step 3 Axit.exe with AxClaude inside (2026-10-02; `publish.ps1`, `install.ps1` and the release pipeline wait for step 5)
-- [ ] Step 4 shared projects
+- [x] Step 4 shared code in `Axit.Core` (2026-10-02; `Axit.Forms` comes with AxDown at step 8)
 - [ ] Step 5 installer, publish and release
 - [ ] Step 6 AxDown spec
 - [ ] Step 7 AxDown.Core

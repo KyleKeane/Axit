@@ -109,7 +109,7 @@ Ctrl+Plus and Ctrl+Minus make the text bigger or smaller and say the new size. O
 
 ## Settings
 
-Everything you change is saved in `%APPDATA%\AxClaude\settings.json`. Options, "Open settings file" opens it. Some settings have no menu item: `claudePath` names the Claude Code program when it is not on PATH, `joinWrappedLines` set to false keeps long paragraphs on separate lines, `ptyColumns` and `ptyRows` size the hidden console Claude writes to (240 by 50), and `maxTranscriptLines` caps the conversation (20000 lines).
+Everything you change is saved in `%APPDATA%\Axit\axclaude.json` (the first start of Axit copies your settings from AxClaude 1.x there). Options, "Open settings file" opens it. Some settings have no menu item: `claudePath` names the Claude Code program when it is not on PATH, `joinWrappedLines` set to false keeps long paragraphs on separate lines, `ptyColumns` and `ptyRows` size the hidden console Claude writes to (240 by 50), and `maxTranscriptLines` caps the conversation (20000 lines).
 
 ## Updates
 
@@ -122,9 +122,9 @@ The Help menu always shows the version you have ("Installed: AxClaude 1.0.0"), t
 - "Claude Code was not found": install it with the command in the notice, then press Ctrl+Shift+R. If it is installed somewhere unusual, use "Locate claude.exe" instead: Claude starts at once and the place is remembered.
 - An error from AxClaude is a notice inside the window and a "System:" line in the conversation. Escape closes the notice.
 - Claude stopped, or the conversation looks wrong: Ctrl+Shift+R restarts Claude in the same folder. While Claude is running it asks first, because a restart quits Claude Code at once and ends anything it runs in the background: Enter restarts, Escape keeps Claude running. Starting AxClaude again brings the conversation back. While Claude is stopped, Enter sends nothing and keeps your text.
-- For a bug report: Help, Copy diagnostics puts the version, the paths and the last log lines on the clipboard. Options, "Record raw stream for a bug report" records everything Claude Code prints, which includes your account's e-mail address if you open `/status`, so read a recording before you share it. The log is in `%LOCALAPPDATA%\AxClaude\logs`.
+- For a bug report: Help, Copy diagnostics puts the version, the paths and the last log lines on the clipboard. Options, "Record raw stream for a bug report" records everything Claude Code prints, which includes your account's e-mail address if you open `/status`, so read a recording before you share it. The log is in `%LOCALAPPDATA%\Axit\logs`.
 - Your files stay out of your project's git: recordings and saved conversations are offered in your Documents folder, and their names start with `axclaude-`. When the project folder is a git repository, AxClaude also lists those names in the repository's own local exclude file (`.git\info\exclude`, which is never committed), so git ignores them even when you save one in the project. Options, "Keep AxClaude's recordings and saved conversations out of git", on by default, turns this off, for when you want to commit such a file.
-- An update did not start AxClaude again: `%LOCALAPPDATA%\AxClaude\logs\update.log` says what the installer did. Start AxClaude from the Start menu; if it is still the old version, download the zip from the release page and run `install.ps1` yourself.
+- An update did not start AxClaude again: `%LOCALAPPDATA%\Axit\logs\update.log` says what the installer did. Start AxClaude from the Start menu; if it is still the old version, download the zip from the release page and run `install.ps1` yourself.
 
 ## About AxClaude
 

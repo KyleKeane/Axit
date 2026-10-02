@@ -5,7 +5,7 @@ using AxClaude.Core;
 using AxClaude.Core.Privacy;
 using AxClaude.Core.Pty;
 using AxClaude.Core.Transcript;
-using AxClaude.Core.Updates;
+using Axit.Core.Updates;
 using Axit.Core;
 
 namespace AxClaude;

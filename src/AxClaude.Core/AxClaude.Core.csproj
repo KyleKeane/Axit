@@ -10,4 +10,9 @@
     <InternalsVisibleTo Include="AxClaude.Tests" />
   </ItemGroup>
 
+  <ItemGroup>
+    <!-- The bundle's shared pure code: settings file handling, paths, the log (docs/axit/SPEC.md AX-6.1). -->
+    <ProjectReference Include="..\Axit.Core\Axit.Core.csproj" />
+  </ItemGroup>
+
 </Project>

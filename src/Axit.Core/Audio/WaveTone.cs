@@ -1,4 +1,4 @@
-namespace AxClaude.Core.Audio;
+namespace Axit.Core.Audio;
 
 /// <summary>
 /// The app's sounds as WAV data (16-bit mono PCM), generated in code so that no media file ships: the tick for a

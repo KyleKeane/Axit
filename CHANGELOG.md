@@ -1,5 +1,10 @@
 # Changelog
 
+## 2.0.0 - unreleased
+
+- Axit: AxClaude is now one app of Axit, one program file that will also hold AxDown, a plain editor for Markdown and text files. `Axit.exe claude <folder>`, or a folder alone, starts AxClaude exactly as before; the console command `axclaude` stays.
+- Axit: settings and logs moved to the bundle's folders, `%APPDATA%\Axit\axclaude.json` and `%LOCALAPPDATA%\Axit\logs\axclaude.log`. The first start copies the settings of AxClaude 1.x; the old file is left where it was.
+
 ## 1.7.0 - 2026-10-02
 
 - AxClaude is becoming one app of **Axit**, a bundle that will also hold AxDown, a plain editor for Markdown and text files. The next release installs as Axit, with AxClaude inside it unchanged. This version is the step in between: its updater accepts a release whose program file is not named AxClaude.exe, so Help, Update now will carry an installed AxClaude over into Axit.
