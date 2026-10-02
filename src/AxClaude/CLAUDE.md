@@ -1,0 +1,54 @@
+# AxClaude, the window
+
+The WinForms side of AxClaude: the window that hosts Claude Code's screen reader mode as a transcript with NVDA-style single-key navigation and a message field at the bottom. The pure code (parser, transcript model, ConPTY) is `src/AxClaude.Core`, with its own `CLAUDE.md`. The spec is `docs/axclaude/SPEC.md` ("SPEC.md" below); the guide `docs/axclaude/user-guide.md` is embedded by `AxClaude.csproj` and shipped as the zip's README; the manual test plan is `docs/axclaude/nvda-test-plan.md`. The bundle rules are in the root `CLAUDE.md`.
+
+## Commands
+
+```
+.\run.ps1 "C:\path\to\project"          # build and start the app (run.ps1 for -NoBuild, -Test, -- claude args)
+.\run.ps1 "C:\path" -New                # a new conversation instead of the default --continue (PowerShell swallows a bare --)
+dotnet build AxClaude.sln
+dotnet test AxClaude.sln
+AXCLAUDE_UPDATE_EXPECTED=1 dotnet test   # regenerate tests/fixtures/*.expected.txt after a deliberate parser change; review the diff
+```
+
+The app records the raw stream with `--record file.vt` or Options → Record raw stream (the PtyCapture format).
+
+## Where things are
+
+- `MainForm`: window, menus, timers, sending, find, save, announcements, fonts, process lifecycle, the update check.
+- `TranscriptView`: applies the mirror's edits to the TextBox, quick keys, find, announcements, the hold after a key press.
+- `EditPaging`: Page Up and Page Down for the conversation and the message field.
+- `StatusLayout`: keeps both status labels inside the strip.
+- `StartupOptions`: the command line and its usage text.
+- `OverlayPanel`: the notices, every dialog of the app's own, drawn inside the window in place of the conversation and the message field (SPEC.md D23); also the New session controls (FR-8.6). Callers pass a `Notice` record to `MainForm.ShowNotice`, which adds the key line, the chime and the hold.
+- `ControlArea`: what Claude waits on, in the message field's place: one list or one field at a time, named with the question, new for every question, Enter and Escape (`MainForm.ShowInArea`, SPEC.md D33). `ListKeys`: the number, 0, Page Up and Page Down keys every list of the area adds.
+- `Sounds`: plays the generated sounds through one winmm wave-out device that stays open; every sound is prepared once and queued with a single write.
+- `HelpText`: the F1 shortcuts, the embedded user guide, the Claude-not-found text. `Log`: the diagnostic log. `Updater`: the download into `%LOCALAPPDATA%\AxClaude\updates` and the hand-over to the new version's `install.ps1 -WaitForProcess` (FR-1.10, D25). `Program`: crash handler, `--help`, `--version`.
+
+Planned moves (docs/axit/plan.md): `OverlayPanel`, `ControlArea`, `ListKeys`, `Sounds`, `EditPaging`, `StatusLayout`, the font handling, `Log`, `Updater` and the crash report go to `Axit.Forms` when AxDown needs them, unchanged; the keys get a table (`AxClaudeKeys`, SPEC AX-8).
+
+## Rules
+
+1. Every control gets an `AccessibleName`. Every action in the SPEC.md keyboard table works without a mouse. Never move the user's caret in the transcript except as the direct result of the user's own navigation command. Announce the result of a navigation jump through a UI Automation notification.
+2. Never block the UI thread on the pseudo console. Reads happen on a background thread; transcript updates are marshalled to the UI thread and batched.
+3. No second window (SPEC.md D23): questions, errors and help texts go through `MainForm.ShowNotice`; what Claude waits on goes to `ControlArea`; never a `Form` or a `MessageBox`.
+4. Run the `accessibility-review` skill on a change here before committing, and check it with NVDA following the test plan.
+
+## Windows and NVDA gotchas already learned (do not rediscover)
+
+- Enter is always a separate `\r` write: `text\r` in one write becomes a pasted two-line draft. Do not wrap the user's own words in bracketed-paste markers (`ESC[200~ … ESC[201~`): Claude then treats them as pasted material and may not act on instructions in them. Multi-line messages use single `\n` writes (Ctrl+J) between lines.
+- In a word-wrapped EDIT control, Down Arrow on the last screen row leaves the caret where it is, and NVDA then reads that whole row again; while a reply streams, the row grows, so every Down repeated what was just heard. The reading breaks (SPEC.md FR-3.10, D28, `TranscriptMirror.BreakAtEnd`) render what arrives after the heard end on a line of its own. Keep them, and keep their bookkeeping off the rows in front of the break line (`_breakStart`), which is what keeps the per-frame cost flat.
+- `FindForm` is not a usable class name in a `Form`: it hides `Control.FindForm()`.
+- `Control.Visible` is false for every child while the form itself is not shown, and `Button.PerformClick` does nothing then (`CanSelect` is false). The notice state is therefore a flag in `MainForm` (`_noticeOpen`), not the panel's `Visible`, and the off-screen probe reads each control's own state (`Control.GetState(States.Visible)` by reflection) and fires clicks through `OnClick`.
+- The control area's lists are `ListBox` and `CheckedListBox`: NVDA announced a `ListView` in Details view as a table. An exception in an event handler of an off-screen probe opens WinForms' error dialog, which waits unseen and looks like a hang; run such probes inside a message loop (`Application.Run` with a timer) and suspect an exception first.
+- A form's `AcceptButton` and `CancelButton` are the way to make Enter and Escape reach a notice's buttons from a read-only multi-line `TextBox` (`AcceptsReturn` off) and from the single-line field; Enter on a focused button presses that button, as in a real dialog. The window's own shortcuts and the menu's are skipped by returning from `ProcessCmdKey` without calling the base while a notice shows; Alt and F10 alone are `WM_SYSCOMMAND` `SC_KEYMENU` with a zero low word of `lParam`, swallowed in `WndProc`.
+- Ctrl+Escape is a Windows system key (Start menu) and never reaches the app; Alt+Escape and Ctrl+Shift+Escape are taken too. The app's interrupt key is Shift+Escape, and plain Escape in the message field is a guard that only announces it (FR-2.3, D20).
+- An answer to one of Claude's questions goes one keystroke per character, then Enter (`MainForm.SendAnswer`): its answer field takes typed keys and ignores several characters in one write as a paste (`12` in a long list, `1,3` for a multi-select; verified in the `several-questions` fixture). A question's rows can be blank for one frame while Claude redraws it, so act on what Claude waits on only after the attention timer. After "Other" the prompt row is `Enter text for option N (Other), or Escape for the list:` with the answers still above it: a question for the user's own words (`SessionModel.AwaitsText`), not the list, and the same one-keystroke rule applies (the `other-answer` fixture).
+- Ctrl+O is not sent to Claude (SPEC.md D14). In screen reader mode it never expands printed tool output: on an idle prompt it toggles the detailed transcript view, whose status row replaces the prompt and swallows typed messages, and while Claude works it redraws the conversation from the first message on screen, which doubles the app's transcript and makes Speak replies read old replies again (SPEC.md §4.4 items 17 and 19). Tool output in full comes from starting Claude with `--verbose` (item 18). Enter sends, Shift+Enter is a new line; Tab and Shift+Tab only move the focus between the conversation and the bottom control, and Claude's mode is Ctrl+Shift+M (SPEC.md D35: Shift+Tab sent to Claude switched tabs inside `/config` and threw the focus about). Claude's own history recall lands on the hidden prompt row and is unusable; the message field has no history of its own either (SPEC.md D13), plain Up and Down only move the caret.
+- NVDA reads the caret line in several messages after a key press (the caret, then its line, then the text). An edit-control change between those messages makes it read the wrong line, and replacing the line the caret is in used to throw the caret back to the line start (heard as repeated text while a reply streams). The view maps the caret by line identity (`TranscriptMirror.MapPosition`) and holds output for 250 ms after a key press while it has focus. Keep it that way.
+- A `ToolStripStatusLabel` that does not fit the strip (or has `Spring`) is not exposed to UI Automation; `StatusLayout` gives both labels fixed widths when their texts do not fit.
+- WinForms' `TextBoxBase.ScrollToCaret` (and every `Text` read) copies the whole edit-control text first: about 1 ms per call at 20 000 lines, on every frame while the message field has the focus. The view sends `EM_SCROLLCARET` itself. An edit near the top of a word-wrapped EDIT control re-wraps everything below it (0.7 s at 20 000 lines); streaming edits land at the bottom and cost nothing, so keep it that way and keep the transcript cap.
+- `EM_SCROLLCARET` is ignored by an edit control that does not have the focus, so an off-screen probe cannot rely on it (nor can code that runs while the other control has the focus): scroll explicitly with `EM_LINESCROLL` against `EM_GETFIRSTVISIBLELINE`, as `EditPaging` does. The native Page Down of a three-row field does nothing while the text fits it, which is why the field has the app's paging too.
+- winmm `PlaySound` opens and closes the audio device on every call and backs up when called in quick succession: the ticks stuttered and were reported as clogged (1.2.1), and its `SND_NOSTOP` flag silenced them for good once the device never finished a sound (1.1.0). `Sounds` keeps one `waveOut` device open for the life of the process, prepares every sound's buffer once and plays it with a single `waveOutWrite`. A chime calls `waveOutReset` first (it replaces whatever plays); a tick is dropped while its own buffer is still queued (`WHDR_INQUEUE`), so a tick during a chime follows the chime and ticks never pile up. The wave data and the headers are pinned or unmanaged for the life of the process, since the device reads and writes them after the call returns.
+- UIA notifications raised back to back are not all spoken: NVDA read the first few of a burst of per-line notifications and dropped the rest. Claude prints a whole message in one frame in screen reader mode, so anything spoken per line must be joined into one notification per frame (`Arrivals` in Core, SPEC.md D32).
