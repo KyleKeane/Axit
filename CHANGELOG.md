@@ -1,5 +1,9 @@
 # Changelog
 
+## 2.1.1 - 2026-10-02
+
+- AxDown: NVDA now speaks the window when it opens ("README.md - AxDown window") before the text field, as it does for AxClaude. The window had no accessible role, so NVDA passed over it.
+
 ## 2.1.0 - 2026-10-02
 
 - AxDown: Ctrl+H and Ctrl+Shift+H move to the next and previous Markdown heading, as H and Shift+H do on a web page in NVDA's browse mode, and say it the same way ("Install, heading level 2"). Headings inside fenced code blocks are skipped; "No next heading" when there is none. Find, Go to line and the heading keys are in a new Navigate menu, as in AxClaude.

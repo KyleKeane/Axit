@@ -156,7 +156,9 @@ never a separate window.
 
 ### AD-7 Announcements
 
-Spoken through one UI Automation notification on the editor (AX-7.3), and only these: "Saved" (after a save and
+On opening, NVDA speaks the window ("README.md - AxDown window"), then the field ("README.md edit multi line"): the
+window has the accessible role Window, as AxClaude's has, so that NVDA names it; nothing of AxDown's own is spoken
+then. Afterwards, spoken through one UI Automation notification on the editor (AX-7.3), and only these: "Saved" (after a save and
 after Save as); "Not found" (find); "Line n of m" after Go to line; "Word wrap on" / "Word wrap off"; "Text size n";
 "Install, heading level 2" after a heading jump, "No next heading" / "No previous heading" when there is none;
 "Copied" is NVDA's own. Opening a file speaks nothing of its own: the focus arrives in the editor and NVDA reads
@@ -273,9 +275,8 @@ the off-screen probe approach of AxClaude checks layout and keys without disturb
 - 2026-10-02: Kyle's NVDA pass of sections 1 to 7 of the test plan clear; released in Axit 2.0.0. Step 12 built and
   checked (test plan section 8); released in Axit 2.1.0.
 
-To do:
-
-- [ ] **What NVDA says when the window opens.** Kyle hears the program's name, "Axit", and then "README.md edit
-  multi line", not "AxDown"; in AxClaude the name is heard twice. To settle with NVDA's log at Input/output level:
-  the likely sources are the window and its client area both carrying the title (a WinForms window exposes both), and
-  the executable's description for a new process. The aim: each window names its app once on opening, nothing twice.
+- 2026-10-02, 2.1.1: the window opened silently, NVDA speaking only "README.md edit multi line" (NVDA's log showed no
+  window at all). Cause: the window had no accessible role, so NVDA took it for a nameless pane; AxClaude's window
+  sets `AccessibleRole.Window`, which is why NVDA speaks "axclaude - AxClaude window" there (the folder is called
+  axclaude; the name is not repeated). AxDown sets the same role now and NVDA says "README.md - AxDown window" first
+  (AD-7). Every window of the bundle sets it (`docs/axit/adding-an-app.md`).

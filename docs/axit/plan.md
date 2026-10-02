@@ -294,8 +294,9 @@ question area shared), step 11, and the key work in steps 8 and 12.
 - Queued after step 10 (Kyle, 2026-10-02): two AxClaude bugs seen in the question interface during this work, recorded
   in `docs/axclaude/SPEC.md` §12 To do: a two-question AskUserQuestion that kept refiring in the control area, and
   an own-words (Other) answer that reached Claude with most characters dropped. Both need a raw recording first.
-- Queued after 2.1.0 (Kyle, 2026-10-02): what NVDA says when a window opens ("Axit" then the field in AxDown, the
-  name twice in AxClaude); recorded in `docs/axdown/SPEC.md` To do, to settle with NVDA's log.
+- Settled in 2.1.1 (2026-10-02): what NVDA says when a window opens. AxDown's window lacked the accessible role
+  Window and NVDA passed over it; AxClaude's "AxClaude AxClaude" was the title "axclaude - AxClaude", the folder's
+  name. The role is now on the adding-an-app checklist.
 - Later: the rest of NVDA's navigation letters in AxDown (AD-D7); a shared window base in `Axit.Forms` for the
   notice and update flows once a third window arrives.
 - [x] Step 7 AxDown.Core: `TextDocument`, `EditorSettings`, 14 tests (2026-10-02); `WindowPlacement` moved to `Axit.Core` on its second use

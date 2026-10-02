@@ -45,6 +45,9 @@ its tests, then the window, then the installer.
 - `AxThingKeys`: the window's keys as constants with an `All` list; handle every key in `ProcessCmdKey` from
   `BundleKeys` and `AxThingKeys` and nowhere else; menu items show the key with `ShortcutKeyDisplayString`.
 - `HelpText`: the F1 text (bundle-wide keys first, then the app's), the embedded guide, the disclaimer.
+- The form sets `AccessibleRole = AccessibleRole.Window`: NVDA then speaks the window's title when it opens
+  ("name - AxThing window") before the focused control; without the role the window is a nameless pane to NVDA and
+  the app is never named (AxDown 2.1.1).
 - Every control gets an `AccessibleName`; the caret moves only on the user's command; nothing speaks on a plain key.
 - `CLAUDE.md`: where things are, the rules, the gotchas.
 

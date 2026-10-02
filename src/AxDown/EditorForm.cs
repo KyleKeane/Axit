@@ -50,6 +50,9 @@ internal sealed class EditorForm : Form
     public EditorForm(string? path, EditorSettings settings, string? settingsError)
     {
         _settings = settings;
+        // With the role Window, NVDA speaks the window when it opens ("README.md - AxDown window") before the field;
+        // without it the window is a nameless pane to NVDA and only the field is heard (AD-7, bundle AX-7.1).
+        AccessibleRole = AccessibleRole.Window;
         MinimumSize = new Size(500, 300);
         Size = new Size(900, 600);
         StartPosition = FormStartPosition.WindowsDefaultLocation;
