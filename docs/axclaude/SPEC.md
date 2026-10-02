@@ -239,15 +239,17 @@ The key table is data (`QuickKey(Keys, Name, Matches, Previous)` in `TranscriptV
 ### FR-9 Command line
 
 ```
-AxClaude.exe [<folder>] [--project <folder>] [--claude <path>] [--cols N] [--rows N]
-             [--no-ax] [--record <file.vt>] [--] [claude arguments…]
+Axit.exe claude [<folder>] [--project <folder>] [--claude <path>] [--cols N] [--rows N]
+                [--no-ax] [--record <file.vt>] [--] [claude arguments…]
 ```
+
+AxClaude is one app of the Axit bundle (`docs/axit/SPEC.md` AX-1): `Axit.exe` reads the verb `claude`, or a folder alone, or an option alone, and hands the arguments to `AxClaudeApp.Run`; the installed console command `axclaude` stands for `Axit claude`. Everything below is what the app does with those arguments.
 
 - FR-9.1: Everything after `--` goes to `claude` verbatim (`--resume <id>`, `--model opus`, `--permission-mode plan`). Without `--`, Claude gets `--continue`: the last conversation in the folder carries on. In a folder without one Claude prints `No conversation found to continue` and exits; the app then announces "Nothing to continue, new conversation", adds that as a system line and starts Claude again without the flag, and leaves the flag off for that folder until the folder changes. An explicit `--continue` (after `--` or from New session) gets no such rescue: Claude's own line and "Claude stopped" follow. A bare `--` gives no arguments: a new conversation.
 - FR-9.2: `--no-ax` omits `--ax-screen-reader` (testing only). `--record` writes the raw stream to a file (the PtyCapture format with the `.chunks.txt` index); Options → Record raw stream for a bug report… does the same at run time. `--cols`, `--rows`, `--claude` override the settings file.
 - FR-9.3: A GUI executable started from a console returns at once. `publish.ps1` builds `publish\win-x64` (the self-contained `AxClaude.exe`, `install.cmd`, `install.ps1`, the guide as `README.md`) and zips it as `publish\AxClaude-<version>-win-x64.zip`; `install.ps1` (run by `publish.ps1` unless `-NoInstall`) puts the files in `%LOCALAPPDATA%\Programs\AxClaude`, writes the `axclaude.cmd` shim in `%USERPROFILE%\.local\bin` (on `PATH` since Claude Code's installer uses it), the Start menu entry and the Explorer entry, and unblocks the files so SmartScreen warns at most once.
-- FR-9.4: In development: `dotnet run --project src/AxClaude -- <folder>` or `run.ps1`.
-- FR-9.5 SHOULD: `--help` (`-h`, `-?`, `/?`) shows the usage in a message box; `--version` the version; a bad command line its error. These are the only message boxes: no window exists yet (D23).
+- FR-9.4: In development: `dotnet run --project src/Axit -- claude <folder>` or `run.ps1`.
+- FR-9.5 SHOULD: `--help` (`-h`, `-?`, `/?`) shows the usage in a message box; `--version` the version; a bad command line its error. These are the only message boxes: no window exists yet (D23). `Axit.exe --help` alone is the bundle's usage (AX-1.4); `Axit.exe claude --help` is this one.
 
 ### FR-10 Menus and status
 
@@ -374,14 +376,18 @@ src/AxClaude.Core/        class library (net10.0), no WinForms
   Audio/      WaveTone (the sounds as WAV bytes, generated in code)
   Updates/    UpdateCheck (the latest GitHub release: parsing, version comparison), ReleaseInfo
   AppSettings.cs
-src/AxClaude/             WinForms app (net10.0-windows): MainForm, TranscriptView, EditPaging, OverlayPanel, HelpText,
-                          StatusLayout, StartupOptions, Sounds (the wave-out device), Updater (download, hand-over to
-                          install.ps1), Log, Program, AxClaude.ico (tools/make-icon.ps1)
+src/AxClaude/             class library (net10.0-windows), AxClaude's window inside Axit.exe: AxClaudeApp (the entry point
+                          Run, crash handler, --help, --version), MainForm, TranscriptView, EditPaging, OverlayPanel,
+                          ControlArea, ListKeys, HelpText, StatusLayout, StartupOptions, Sounds (the wave-out device),
+                          Updater (download, hand-over to install.ps1), Log
+src/Axit/                 the executable of the bundle (docs/axit/SPEC.md): Program (dispatch), AxClaude.ico (tools/make-icon.ps1)
+src/Axit.Core/            shared pure code: Dispatch (which app a command line starts), BundleInfo (the version)
 tests/AxClaude.Tests/     xunit: FixtureTests, ReplayTests, SessionModelTests, ArrivalsTests, TranscriptMirrorTests,
                           ReadingBreakTests, SettingsTests, UpdateCheckTests, WaveToneTests, ClaudeLauncherTests; TestHelpers
+tests/Axit.Tests/         the bundle's tests: DispatchTests
 tests/fixtures/           *.vt recordings, *.vt.chunks.txt timing, *.expected.txt transcripts
 tools/PtyCapture/         recorder, through PtyHost; tools/release-notes.ps1 (the CHANGELOG section of a version)
-docs/                     user-guide.md (embedded, shipped as README.md), nvda-test-plan.md
+docs/axclaude/            this spec, user-guide.md (embedded, shipped as README.md), claude-screens.md, nvda-test-plan.md
 .github/workflows/        build.yml (tests on push), release.yml (tag → zip → GitHub release); release.ps1 starts it
 publish.ps1, install.ps1, install.cmd  build the zip; install or remove for the current user
 ```
@@ -483,11 +489,11 @@ The view applies the edits with `Select` + `SelectedText` (EM_SETSEL / EM_REPLAC
 
 ## 9. Repository, build and run
 
-- `dotnet build AxClaude.sln`, `dotnet test AxClaude.sln`, `dotnet run --project src/AxClaude -- "C:\path"`, or `run.ps1`.
-- `publish.ps1`: `dotnet publish src/AxClaude -c Release -r win-x64 --self-contained -p:PublishSingleFile=true -p:IncludeNativeLibrariesForSelfExtract=true` into `publish\win-x64`, plus `install.cmd`, `install.ps1`, `LICENSE` and the guide as `README.md`, zipped as `publish\AxClaude-<version>-win-x64.zip`, then `install.ps1` unless `-NoInstall`. The version is `<Version>` in `AxClaude.csproj`.
+- `dotnet build Axit.sln`, `dotnet test Axit.sln`, `dotnet run --project src/Axit -- claude "C:\path"`, or `run.ps1`.
+- `publish.ps1`: `dotnet publish src/AxClaude -c Release -r win-x64 --self-contained -p:PublishSingleFile=true -p:IncludeNativeLibrariesForSelfExtract=true` into `publish\win-x64`, plus `install.cmd`, `install.ps1`, `LICENSE` and the guide as `README.md`, zipped as `publish\AxClaude-<version>-win-x64.zip`, then `install.ps1` unless `-NoInstall`. The version is `<Version>` in `src/Axit/Axit.csproj`, the bundle's (AX-3.1). The names in this item change when the installer becomes Axit's (plan step 5).
 - Warnings are errors in Release; nullable enabled everywhere.
 - Git: `main` is always buildable; imperative commit subjects; Co-Authored-By trailer for commits made with Claude.
-- Licence: MIT (`LICENSE`), copyright Dr. Kyle Keane, www.kylekeane.com; the same line is in `AxClaude.csproj` (`Authors`, `Copyright`), Help → About, the guide and the README. The only condition is that the notice stays with copies.
+- Licence: MIT (`LICENSE`), copyright Dr. Kyle Keane, www.kylekeane.com; the same line is in `src/Axit/Axit.csproj` (`Authors`, `Copyright`), Help → About, the guide and the README. The only condition is that the notice stays with copies.
 - Releases (FR-1.10, D25): `release.ps1 <version>` checks that CHANGELOG.md has a `## <version>` section, runs the tests, sets `<Version>`, commits "Release <version>", tags `v<version>` and pushes. `.github/workflows/release.yml` (a `v*` tag, or `gh workflow run release.yml -f tag=v1.0.1`) checks the tag against `<Version>`, tests, runs `publish.ps1 -NoInstall` and creates the GitHub release with the zip and the CHANGELOG section (`tools/release-notes.ps1`) as notes. `.github/workflows/build.yml` runs the tests on every push to `main` and every pull request.
 
 ## 10. Testing

@@ -7,7 +7,7 @@
   Before running it, add a "## <version> - <date>" section to CHANGELOG.md: its text becomes the release notes and
   is what the update notice in the app shows. Everything else must be committed. The script then
     1. runs the unit tests,
-    2. sets <Version> in src/AxClaude/AxClaude.csproj,
+    2. sets <Version> in src/Axit/Axit.csproj,
     3. commits CHANGELOG.md and the project file as "Release <version>",
     4. tags v<version> and pushes main and the tag.
   The push starts .github/workflows/release.yml. Follow it with `gh run watch`, or on the Actions page. When it is
@@ -27,7 +27,7 @@ param(
 
 $ErrorActionPreference = 'Stop'
 $root = $PSScriptRoot
-$project = Join-Path $root 'src\AxClaude\AxClaude.csproj'
+$project = Join-Path $root 'src\Axit\Axit.csproj'
 $changelog = Join-Path $root 'CHANGELOG.md'
 $tag = "v$Version"
 
@@ -77,10 +77,10 @@ if ($updated -eq $xml -and $xml -notmatch "<Version>$([regex]::Escape($Version))
 # Not Set-Content -Encoding utf8: in Windows PowerShell 5.1 that writes a byte order mark.
 [IO.File]::WriteAllText($project, $updated, (New-Object System.Text.UTF8Encoding($false)))
 
-git -C $root add -- CHANGELOG.md src/AxClaude/AxClaude.csproj
+git -C $root add -- CHANGELOG.md src/Axit/Axit.csproj
 git -C $root commit -q -m "Release $Version"
 if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
-git -C $root tag -a $tag -m "AxClaude $Version"
+git -C $root tag -a $tag -m "Axit $Version"
 if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
 Write-Host "Committed and tagged $tag."
 

@@ -21,7 +21,7 @@ A small Windows app that runs Claude Code in screen reader mode inside a hidden 
 .\run.ps1 -Test                            # run the unit tests
 ```
 
-If PowerShell refuses to run the script: `powershell -ExecutionPolicy Bypass -File .\run.ps1`. Without the script: `dotnet build AxClaude.sln`, then `dotnet run --project src/AxClaude -- "C:\path\to\project"`.
+If PowerShell refuses to run the script: `powershell -ExecutionPolicy Bypass -File .\run.ps1`. Without the script: `dotnet build Axit.sln`, then `dotnet run --project src/Axit -- claude "C:\path\to\project"`.
 
 Needs Windows 10 1809 or later, the .NET 10 SDK, Claude Code and, for testing, NVDA.
 

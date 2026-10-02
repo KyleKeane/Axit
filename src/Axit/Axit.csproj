@@ -1,0 +1,27 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <TargetFramework>net10.0-windows</TargetFramework>
+    <UseWindowsForms>true</UseWindowsForms>
+    <RootNamespace>Axit</RootNamespace>
+    <AssemblyName>Axit</AssemblyName>
+    <ApplicationHighDpiMode>PerMonitorV2</ApplicationHighDpiMode>
+    <ApplicationUseCompatibleTextRendering>false</ApplicationUseCompatibleTextRendering>
+    <ApplicationVisualStyles>true</ApplicationVisualStyles>
+    <InvariantGlobalization>true</InvariantGlobalization>
+    <ApplicationIcon>AxClaude.ico</ApplicationIcon>
+    <Version>1.7.0</Version>
+    <Product>Axit</Product>
+    <Description>Accessible Windows apps for screen reader users: AxClaude, a front end for the Claude Code CLI, and AxDown, a text editor</Description>
+    <Authors>Dr. Kyle Keane</Authors>
+    <Company>Dr. Kyle Keane, www.kylekeane.com</Company>
+    <Copyright>Copyright (c) 2026 Dr. Kyle Keane (www.kylekeane.com). MIT License.</Copyright>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\AxClaude\AxClaude.csproj" />
+    <ProjectReference Include="..\Axit.Core\Axit.Core.csproj" />
+  </ItemGroup>
+
+</Project>

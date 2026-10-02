@@ -45,12 +45,12 @@ public class PrivacyTests
     private static string RepositoryRoot()
     {
         var dir = new DirectoryInfo(AppContext.BaseDirectory);
-        while (dir is not null && !File.Exists(Path.Combine(dir.FullName, "AxClaude.sln")))
+        while (dir is not null && !File.Exists(Path.Combine(dir.FullName, "Axit.sln")))
         {
             dir = dir.Parent;
         }
 
-        return dir?.FullName ?? throw new InvalidOperationException("AxClaude.sln not found above the test directory.");
+        return dir?.FullName ?? throw new InvalidOperationException("Axit.sln not found above the test directory.");
     }
 
     // Text files outside build output and git's own folder, which is what a commit can carry.

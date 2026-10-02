@@ -1,6 +1,6 @@
 <#
 .SYNOPSIS
-  Generates src\AxClaude\AxClaude.ico: a rounded dark-blue square with the letters Ax, at the usual Windows sizes.
+  Generates src\Axit\AxClaude.ico: a rounded dark-blue square with the letters Ax, at the usual Windows sizes.
 
 .DESCRIPTION
   Uses System.Drawing only, so it runs on any Windows machine. The 256 pixel image is stored PNG-compressed, the
@@ -15,7 +15,7 @@ param(
 $ErrorActionPreference = 'Stop'
 if (-not $Out) {
     # $PSScriptRoot is not set while parameter defaults are evaluated in Windows PowerShell 5.1.
-    $Out = Join-Path (Split-Path -Parent $MyInvocation.MyCommand.Path) '..\src\AxClaude\AxClaude.ico'
+    $Out = Join-Path (Split-Path -Parent $MyInvocation.MyCommand.Path) '..\src\Axit\AxClaude.ico'
 }
 Add-Type -AssemblyName System.Drawing
 

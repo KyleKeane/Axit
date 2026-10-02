@@ -2,6 +2,7 @@ using System.Diagnostics;
 using System.IO.Compression;
 using System.Net.Http.Headers;
 using AxClaude.Core.Updates;
+using Axit.Core;
 
 namespace AxClaude;
 
@@ -128,7 +129,7 @@ internal static class Updater
     private static HttpClient CreateClient()
     {
         var client = new HttpClient { Timeout = TimeSpan.FromMinutes(10) };
-        client.DefaultRequestHeaders.UserAgent.Add(new ProductInfoHeaderValue("AxClaude", Program.Version));
+        client.DefaultRequestHeaders.UserAgent.Add(new ProductInfoHeaderValue("AxClaude", BundleInfo.Version));
         return client;
     }
 }

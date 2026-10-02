@@ -1,26 +1,16 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
+  <!-- AxClaude's window, as a class library inside Axit.exe (docs/axit/SPEC.md AX-1.7, B-2); src/Axit is the executable. -->
   <PropertyGroup>
-    <OutputType>WinExe</OutputType>
     <TargetFramework>net10.0-windows</TargetFramework>
     <UseWindowsForms>true</UseWindowsForms>
     <RootNamespace>AxClaude</RootNamespace>
     <AssemblyName>AxClaude</AssemblyName>
-    <ApplicationHighDpiMode>PerMonitorV2</ApplicationHighDpiMode>
-    <ApplicationUseCompatibleTextRendering>false</ApplicationUseCompatibleTextRendering>
-    <ApplicationVisualStyles>true</ApplicationVisualStyles>
-    <InvariantGlobalization>true</InvariantGlobalization>
-    <ApplicationIcon>AxClaude.ico</ApplicationIcon>
-    <Version>1.7.0</Version>
-    <Product>AxClaude</Product>
-    <Description>Accessible front end for the Claude Code CLI in screen reader mode</Description>
-    <Authors>Dr. Kyle Keane</Authors>
-    <Company>Dr. Kyle Keane, www.kylekeane.com</Company>
-    <Copyright>Copyright (c) 2026 Dr. Kyle Keane (www.kylekeane.com). MIT License.</Copyright>
   </PropertyGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\AxClaude.Core\AxClaude.Core.csproj" />
+    <ProjectReference Include="..\Axit.Core\Axit.Core.csproj" />
   </ItemGroup>
 
   <ItemGroup>

@@ -39,7 +39,7 @@ allow it, see B-9).
 
 ## 4. Functional requirements
 
-### AX-1 Launch and dispatch (planned, step 3)
+### AX-1 Launch and dispatch (built, step 3; the `down` verb answers "not in this build yet" until step 8)
 
 - AX-1.1 The first argument may be a verb naming an app: `claude`, `down`. The rest of the arguments go to that app
   unchanged, so `Axit.exe claude C:\src --record x.vt` is what `AxClaude.exe C:\src --record x.vt` was.
@@ -256,4 +256,8 @@ docs/axdown/            SPEC.md, user-guide.md (embedded by src/AxDown), nvda-te
 ## 7. Status
 
 - 2026-10-02: plan written (`docs/axit/plan.md`); AxClaude's documents moved to `docs/axclaude/`; the notes split per
-  project; this specification written. 1.7.0 (the bridge, B-6) committed on `main`, release pending.
+  project; this specification written. 1.7.0 (the bridge, B-6) released from `main`.
+- 2026-10-02, step 3: `Axit.exe` exists (`src/Axit`), `src/AxClaude` is a class library with `AxClaudeApp.Run`,
+  `Axit.Core/Dispatch` decides the app and is tested in `tests/Axit.Tests`; `Axit.sln`, `run.ps1` and `build.yml`
+  follow. `publish.ps1`, `install.ps1` and the release pipeline still carry AxClaude's names and are not usable on
+  the branch until step 5.

@@ -1,9 +1,11 @@
 namespace AxClaude;
 
 /// <summary>
-/// Command line: <c>AxClaude [&lt;folder&gt;] [--project &lt;folder&gt;] [--claude &lt;path&gt;] [--cols N] [--rows N] [--no-ax]
-/// [--record &lt;file.vt&gt;] [-- claude arguments]</c>. Values not given fall back to the settings file. <see cref="ClaudeArgs"/>
-/// is null when no <c>--</c> was given (the window then uses <c>--continue</c>, FR-9.1) and empty after a bare <c>--</c>.
+/// Command line: <c>Axit claude [&lt;folder&gt;] [--project &lt;folder&gt;] [--claude &lt;path&gt;] [--cols N] [--rows N] [--no-ax]
+/// [--record &lt;file.vt&gt;] [-- claude arguments]</c> (the console command <c>axclaude</c> stands for <c>Axit claude</c>;
+/// a folder alone also reaches here, docs/axit/SPEC.md AX-1). Values not given fall back to the settings file.
+/// <see cref="ClaudeArgs"/> is null when no <c>--</c> was given (the window then uses <c>--continue</c>, FR-9.1) and
+/// empty after a bare <c>--</c>.
 /// </summary>
 internal sealed record StartupOptions(
     string? Folder,
@@ -15,7 +17,8 @@ internal sealed record StartupOptions(
     IReadOnlyList<string>? ClaudeArgs)
 {
     public const string Usage = """
-        Usage: AxClaude [<folder>] [--project <folder>] [--claude <path>] [--cols N] [--rows N] [--no-ax] [--record <file.vt>] [-- claude arguments]
+        Usage: Axit claude [<folder>] [--project <folder>] [--claude <path>] [--cols N] [--rows N] [--no-ax] [--record <file.vt>] [-- claude arguments]
+               axclaude ...  the same, as the installed console command
 
           <folder>            the project folder (default: the current folder, or the last one used)
           --claude <path>     claude.exe or claude.cmd to run (default: found on PATH or in the usual install folders)

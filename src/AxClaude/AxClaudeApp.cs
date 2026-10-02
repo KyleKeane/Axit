@@ -1,17 +1,17 @@
 using AxClaude.Core;
+using Axit.Core;
 
 namespace AxClaude;
 
-internal static class Program
+/// <summary>
+/// AxClaude's entry point inside Axit (docs/axit/SPEC.md AX-1.7): <c>Axit.exe claude [arguments]</c> calls
+/// <see cref="Run"/>. The app owns its crash handling, its command line, its settings and its window; the
+/// executable's Program owns only the dispatch.
+/// </summary>
+public static class AxClaudeApp
 {
-    public static string Version { get; } =
-        typeof(Program).Assembly.GetName().Version is { } v ? $"{v.Major}.{v.Minor}.{v.Build}" : "0.0.0";
-
-    [STAThread]
-    private static void Main(string[] args)
+    public static void Run(string[] args)
     {
-        ApplicationConfiguration.Initialize();
-
         // FR-13.1: an exception in a UI handler is logged and reported instead of silently ending the process.
         Application.SetUnhandledExceptionMode(UnhandledExceptionMode.CatchException);
         Application.ThreadException += (_, e) => ReportCrash(e.Exception);
@@ -19,7 +19,7 @@ internal static class Program
             Log.Error("Unhandled exception on a background thread", e.ExceptionObject as Exception);
 
         // The program path tells a development build from the installed one when both write to the same log.
-        Log.Info($"AxClaude {Version} starting on .NET {Environment.Version} from {Environment.ProcessPath ?? "(unknown)"} as process {Environment.ProcessId}, arguments: {string.Join(" ", args)}");
+        Log.Info($"AxClaude {BundleInfo.Version} starting on .NET {Environment.Version} from {Environment.ProcessPath ?? "(unknown)"} as process {Environment.ProcessId}, arguments: {string.Join(" ", args)}");
 
         if (args.Length == 1 && args[0] is "--help" or "-h" or "-?" or "/?")
         {
@@ -29,7 +29,7 @@ internal static class Program
 
         if (args.Length == 1 && args[0] == "--version")
         {
-            MessageBox.Show($"AxClaude {Version}", "AxClaude", MessageBoxButtons.OK, MessageBoxIcon.Information);
+            MessageBox.Show($"AxClaude {BundleInfo.Version}", "AxClaude", MessageBoxButtons.OK, MessageBoxIcon.Information);
             return;
         }
 

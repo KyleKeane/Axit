@@ -34,16 +34,16 @@ jobs:
           $tag = '${{ github.event.inputs.tag }}'
           if (-not $tag) { $tag = $env:GITHUB_REF_NAME }
           $version = $tag -replace '^v', ''
-          $projectVersion = (Select-Xml -Path src/AxClaude/AxClaude.csproj -XPath '/Project/PropertyGroup/Version').Node.InnerText
+          $projectVersion = (Select-Xml -Path src/Axit/Axit.csproj -XPath '/Project/PropertyGroup/Version').Node.InnerText
           if ($projectVersion -ne $version) {
-            Write-Host "Tag $tag does not match <Version>$projectVersion</Version> in AxClaude.csproj. Release with release.ps1, which sets both."
+            Write-Host "Tag $tag does not match <Version>$projectVersion</Version> in Axit.csproj. Release with release.ps1, which sets both."
             exit 1
           }
           "TAG=$tag" >> $env:GITHUB_ENV
           "VERSION=$version" >> $env:GITHUB_ENV
 
       - name: Test
-        run: dotnet test AxClaude.sln --configuration Release --nologo
+        run: dotnet test Axit.sln --configuration Release --nologo
 
       - name: Publish
         shell: pwsh

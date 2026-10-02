@@ -6,6 +6,7 @@ using AxClaude.Core.Privacy;
 using AxClaude.Core.Pty;
 using AxClaude.Core.Transcript;
 using AxClaude.Core.Updates;
+using Axit.Core;
 
 namespace AxClaude;
 
@@ -31,7 +32,7 @@ internal sealed class MainForm : Form
     private readonly ToolStripMenuItem _currentFolderItem = new() { ShortcutKeys = Keys.Control | Keys.W };
     private readonly ToolStripMenuItem _recentFoldersItem = new("&Recent folders");
     private readonly ToolStripMenuItem _recordItem = new(RecordItemText);
-    private readonly ToolStripMenuItem _installedItem = new($"&Installed: AxClaude {Program.Version}");
+    private readonly ToolStripMenuItem _installedItem = new($"&Installed: AxClaude {BundleInfo.Version}");
     private readonly ToolStripMenuItem _latestItem = new();
     private readonly ToolStripMenuItem _updateItem = new("Check for &updates...");
     private readonly System.Windows.Forms.Timer _quiet = new() { Interval = 100 };
@@ -1387,7 +1388,7 @@ internal sealed class MainForm : Form
         var claude = ClaudeLauncher.Find(_options.ClaudePath ?? _settings.ClaudePath);
         var text = string.Join("\r\n",
         [
-            $"AxClaude {Program.Version} on .NET {Environment.Version}, {Environment.OSVersion}",
+            $"AxClaude {BundleInfo.Version} on .NET {Environment.Version}, {Environment.OSVersion}",
             $"Program: {Environment.ProcessPath ?? "(unknown)"} (process {Environment.ProcessId})",
             $"Claude: {claude ?? "(not found)"}",
             $"Project folder: {_folder ?? "(none)"}",
@@ -2329,7 +2330,7 @@ internal sealed class MainForm : Form
             {
                 SetLatest("none published yet");
             }
-            else if (UpdateCheck.IsNewer(release, Program.Version))
+            else if (UpdateCheck.IsNewer(release, BundleInfo.Version))
             {
                 var version = release.Version.ToString(3);
                 _update = release;
@@ -2355,14 +2356,14 @@ internal sealed class MainForm : Form
             }
             else
             {
-                var same = release.Version == UpdateCheck.ParseVersion(Program.Version);
+                var same = release.Version == UpdateCheck.ParseVersion(BundleInfo.Version);
                 SetLatest($"AxClaude {release.Version.ToString(3)} ({(same ? "this version" : "older than this build")})");
             }
 
             if (manual)
             {
                 ShowNotice(Notice.Plain("Check for updates",
-                    $"You have the newest version, AxClaude {Program.Version}.\n" +
+                    $"You have the newest version, AxClaude {BundleInfo.Version}.\n" +
                     (release is null ? "No release is published yet.\n" : string.Empty) +
                     $"Releases: {UpdateCheck.ReleasesPage}"));
             }
@@ -2413,7 +2414,7 @@ internal sealed class MainForm : Form
 
     private void ShowAbout() =>
         ShowNotice(Notice.Plain("About AxClaude",
-            $"AxClaude {Program.Version}\nA screen reader friendly window for Claude Code.\nMade by Dr. Kyle Keane, www.kylekeane.com. Free under the MIT licence.\n\n" +
+            $"AxClaude {BundleInfo.Version}\nA screen reader friendly window for Claude Code.\nMade by Dr. Kyle Keane, www.kylekeane.com. Free under the MIT licence.\n\n" +
             $"Latest release on GitHub: {_latestState}\nClaude Code documentation: https://code.claude.com/docs\nSettings: {AppSettings.DefaultPath}\nLog: {Log.FilePath}\n\n" +
             HelpText.Disclaimer));
 
@@ -2423,7 +2424,7 @@ internal sealed class MainForm : Form
         var version = release.Version.ToString(3);
         var size = release.ZipSize > 0 ? $" The download is {release.ZipSize / (1024.0 * 1024.0):0} MB." : string.Empty;
         var text =
-            $"You have AxClaude {Program.Version}. AxClaude {version} is available.\n\n" +
+            $"You have AxClaude {BundleInfo.Version}. AxClaude {version} is available.\n\n" +
             (release.Notes.Length > 0 ? release.Notes + "\n\n" : string.Empty) +
             "Update now downloads the new version, closes AxClaude, installs it and starts it again on the same folder. " +
             $"The conversation is picked up again if one is open.{size}\n" +

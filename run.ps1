@@ -29,32 +29,33 @@ $ErrorActionPreference = 'Stop'
 $root = $PSScriptRoot
 
 if ($Test) {
-    dotnet test "$root\AxClaude.sln" -nologo
+    dotnet test "$root\Axit.sln" -nologo
     exit $LASTEXITCODE
 }
 
 if (-not $NoBuild) {
-    Write-Host "Building AxClaude..."
-    dotnet build "$root\src\AxClaude\AxClaude.csproj" -c Debug -nologo -v q
+    Write-Host "Building Axit..."
+    dotnet build "$root\src\Axit\Axit.csproj" -c Debug -nologo -v q
     if ($LASTEXITCODE -ne 0) {
         Write-Host "Build failed."
         exit $LASTEXITCODE
     }
 }
 
-$exe = Join-Path $root 'src\AxClaude\bin\Debug\net10.0-windows\AxClaude.exe'
+$exe = Join-Path $root 'src\Axit\bin\Debug\net10.0-windows\Axit.exe'
 if (-not (Test-Path $exe)) {
-    Write-Host "AxClaude.exe was not found at $exe. Run without -NoBuild first."
+    Write-Host "Axit.exe was not found at $exe. Run without -NoBuild first."
     exit 1
 }
 
+# Axit.exe holds every app of the bundle; the verb picks AxClaude (docs/axit/SPEC.md AX-1).
 $Project = (Resolve-Path $Project).Path
 Write-Host "Starting AxClaude on $Project"
 if ($New) {
     # A bare -- never reaches the app: PowerShell takes it as the end of the script's own parameters.
-    & $exe $Project '--'
+    & $exe claude $Project '--'
 } elseif ($ClaudeArgs -and $ClaudeArgs.Count -gt 0) {
-    & $exe $Project '--' @ClaudeArgs
+    & $exe claude $Project '--' @ClaudeArgs
 } else {
-    & $exe $Project
+    & $exe claude $Project
 }

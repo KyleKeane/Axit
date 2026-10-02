@@ -284,8 +284,8 @@ Added the same day at Kyle's request: rules 9 and 10 of section 5 (key tables in
 question area shared), step 11, and the key work in steps 8 and 12.
 
 - [x] Step 1 bundle spec and document split (2026-10-02)
-- [x] Step 2 bridge 1.7.0 committed on `main` (2026-10-02); the release itself is Kyle's `.\release.ps1 1.7.0`
-- [ ] Step 3 Axit.exe with AxClaude inside
+- [x] Step 2 bridge 1.7.0 released from `main` (2026-10-02)
+- [x] Step 3 Axit.exe with AxClaude inside (2026-10-02; `publish.ps1`, `install.ps1` and the release pipeline wait for step 5)
 - [ ] Step 4 shared projects
 - [ ] Step 5 installer, publish and release
 - [ ] Step 6 AxDown spec
