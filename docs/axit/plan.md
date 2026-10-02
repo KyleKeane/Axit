@@ -263,8 +263,8 @@ today; AxDown starts at step 6.
    fails with "the zip does not contain AxClaude.exe".
 4. **File types for AxDown's Open with.** Recommended: `.md`, `.markdown`, `.txt`; `Open in AxDown` on every file.
    Windows does not let an installer set the default program silently; the guide explains Settings, Default apps.
-5. **AxDown's navigation keys** (step 11). To settle with the AxDown spec. Ctrl+H is replace and Ctrl+L is often
-   go-to-line in other editors, so the letters need choosing with care.
+5. **AxDown's navigation keys** (step 12). Settled 2026-10-02: NVDA's browse-mode letters with Ctrl (next) and
+   Ctrl+Shift (previous): H, 1 to 6, K, L, I, Q, T; built headings first (AxDown SPEC AD-D7).
 6. **Program file name.** `Axit.exe`, process `Axit`. Confirm.
 
 ## 8. Risks
@@ -291,6 +291,9 @@ question area shared), step 11, and the key work in steps 8 and 12.
 - [x] Step 4 shared code in `Axit.Core` (2026-10-02; `Axit.Forms` comes with AxDown at step 8)
 - [x] Step 5 installer, publish and release (2026-10-02, code and zip; Kyle's checks of Start search, folder menu and commands pending)
 - [x] Step 6 AxDown spec, guide and test plan written (2026-10-02); Kyle to read them and settle AD-D7, the navigation letters
+- Queued after step 10 (Kyle, 2026-10-02): two AxClaude bugs seen in the question interface during this work, recorded
+  in `docs/axclaude/SPEC.md` §12 To do: a two-question AskUserQuestion that kept refiring in the control area, and
+  an own-words (Other) answer that reached Claude with most characters dropped. Both need a raw recording first.
 - [ ] Step 7 AxDown.Core
 - [ ] Step 8 AxDown window
 - [ ] Step 9 AxDown installed

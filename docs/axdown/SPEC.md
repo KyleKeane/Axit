@@ -126,8 +126,8 @@ Everything else in the editor is the control's own: arrows, Home, End, Ctrl+Home
 Ctrl+Right by word, Shift with any of them to select, Ctrl+A, Ctrl+C, Ctrl+X, Ctrl+V, Ctrl+Z, Delete, Backspace,
 Ctrl+Backspace, Tab (types a tab), Enter (a new line).
 
-Reserved for section 9 (navigation; decision AD-D7 settles the letters): Ctrl+letter next item of a kind,
-Ctrl+Shift+letter the previous.
+Reserved for section 9 (navigation, AD-D7): Ctrl+letter the next item of a kind, Ctrl+Shift+letter the previous,
+with NVDA's browse-mode letters: H, 1 to 6, K, L, I, Q, T.
 
 - AD-5.1 In an EDIT control Ctrl+H, Ctrl+I, Ctrl+J and Ctrl+M arrive as the characters Backspace, Tab, line feed
   and Enter. A handled key sets `SuppressKeyPress`; a key in that group that AxDown does not handle is swallowed
@@ -227,11 +227,13 @@ are read and written on the UI thread (a 32 MB file is the ceiling, AD-3.7).
 - **AD-D5 The Notepad title convention**, `*name - AxDown`: short, known, read by NVDA as "star name".
 - **AD-D6 Go to line carries the position.** One key, Ctrl+G, both tells the line and column (in the field's name)
   and moves; a separate "where am I" key would be one more key to learn, and the status bar is there for NVDA+End.
-- **AD-D7 Navigation letters (to settle with Kyle, decision 5 of the plan).** Proposal: Ctrl+H next heading,
-  Ctrl+L next list item, Ctrl+K next link, Ctrl+B next fenced code block, each with Shift for the previous; `h` is
-  what AxClaude's conversation uses for headings, so the letter is already known. No per-level keys (Ctrl+1 to
-  Ctrl+6 mean the controls in AxClaude, and the collision test would list them). Ctrl+H is otherwise Replace in
-  some editors, which AxDown does not have.
+- **AD-D7 Navigation letters are NVDA's browse-mode letters (Kyle, 2026-10-02).** The defaults are the keys NVDA
+  users already know from web pages, with Ctrl for the next item and Ctrl+Shift for the previous: H heading, 1 to 6
+  a heading of that level, K link, L list, I list item, Q block quote, T table. They are built in that order,
+  headings first (Ctrl+H, Ctrl+Shift+H, then the levels), the others as the outline learns them. Known difference:
+  Ctrl+1 and Ctrl+2 move the focus in AxClaude's window; the collision test lists it, and step 11 (AxClaude's key
+  table) is where to decide whether AxClaude's focus keys move. Ctrl+H is otherwise Replace in some editors, which
+  AxDown does not have.
 - **AD-D8 No file watching.** The changed-on-disk check at save time catches the case that loses work; a watcher
   would speak at the wrong moments and add a thread.
 - **AD-D9 Open with, not the default.** AxDown registers for `.md`, `.markdown` and `.txt` and appears in the
@@ -247,11 +249,12 @@ the off-screen probe approach of AxClaude checks layout and keys without disturb
 ## 9. Next version: Markdown navigation (plan step 12)
 
 - `AxDown.Core/MarkdownOutline`: from the text and a caret position, the next and previous heading (`#` lines, with
-  the level), list item (`-`, `*`, `+`, `1.` after optional spaces), link (`[text](url)` and bare `https://`), and
-  fenced code block (` ``` ` or `~~~` openings), ignoring headings and items inside code blocks. Pure, tested.
-- Keys per AD-D7. The jump moves the caret to the start of the line and speaks the line through one notification;
-  "No next heading" and the like when there is none; nothing on a plain arrow key.
+  the level), ignoring heading-looking lines inside fenced code blocks (` ``` ` or `~~~`). Pure, tested. Lists,
+  list items, links, block quotes and tables follow, each with NVDA's letter (AD-D7).
+- Keys per AD-D7: Ctrl+H and Ctrl+Shift+H first, then Ctrl+1 to Ctrl+6 for the levels, then K, L, I, Q, T. The
+  jump moves the caret to the start of the line and speaks the line through one notification; "No next heading" /
+  "No previous heading" and the like when there is none; nothing on a plain arrow key.
 
 ## 10. Status
 
-- 2026-10-02: specification written (plan step 6); nothing built. Open: AD-D7 (the navigation letters), with Kyle.
+- 2026-10-02: specification written (plan step 6); AD-D7 settled the same day (headings first). Nothing built yet.

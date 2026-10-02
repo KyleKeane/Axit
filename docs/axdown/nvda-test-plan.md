@@ -69,6 +69,6 @@ letter), and a `long.md` with headings and lines longer than the window.
 ## 8. Navigation (from the version with section 9 of the spec)
 
 1. In `long.md`, Ctrl+H: the caret moves to the next heading and its line is spoken; Ctrl+Shift+H back; at the last
-   heading: "No next heading". The same for list items, links and code blocks with their letters.
+   heading: "No next heading", at the first: "No previous heading".
 2. A heading-looking line inside a fenced code block is skipped.
 3. Plain arrow keys still speak nothing of AxDown's own.
