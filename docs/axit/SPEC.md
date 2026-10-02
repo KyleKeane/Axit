@@ -34,8 +34,9 @@ allow it, see B-9).
 
 - **AxClaude** (built): `Axit.exe claude [<folder>] [options]`, Start entry `Axit AxClaude`, `Open in AxClaude` on
   folders, command `axclaude`. Specification `docs/axclaude/SPEC.md`.
-- **AxDown** (planned, steps 6 to 11): `Axit.exe down [<file>]`, Start entry `Axit AxDown`, `Open in AxDown` on
-  files and Open with for `.md`, `.markdown`, `.txt`, command `axdown`. Specification `docs/axdown/SPEC.md`.
+- **AxDown** (specified at step 6, built at steps 7 to 9): `Axit.exe down [<file>]`, Start entry `Axit AxDown`,
+  `Open in AxDown` on files and Open with for `.md`, `.markdown`, `.txt`, command `axdown`. Specification
+  `docs/axdown/SPEC.md`, guide `docs/axdown/user-guide.md`, test plan `docs/axdown/nvda-test-plan.md`.
 
 ## 4. Functional requirements
 
@@ -140,10 +141,11 @@ allow it, see B-9).
   **window-specific**, meaning something in one window only. Each app's keyboard table in its spec marks every key
   with its kind.
 - AX-8.2 Bundle-wide keys are defined once, in `Axit.Forms/BundleKeys`, a plain static class of constants, and every
-  window uses those constants. The first bundle-wide keys are the ones AxClaude has today that are not about Claude:
-  F1 for the shortcuts, Ctrl+Tab, Ctrl+Shift+Tab and F6 to move between the window's controls, Alt and F10 for the
-  menu, Ctrl+Plus and Ctrl+Minus for the text size, Enter and Escape on a notice. The list is settled with the AxDown
-  spec (step 6).
+  window uses those constants. The list, settled with the AxDown spec (step 6): F1 the keyboard shortcuts; Tab,
+  Shift+Tab, Ctrl+Tab, Ctrl+Shift+Tab and F6 move between the window's controls (and between a notice's text, field
+  and buttons); Ctrl+F find, F3 and Shift+F3 next and previous; Ctrl+S save (what the window holds: a conversation,
+  a file); Ctrl+Plus and Ctrl+Minus text size; Enter and Escape on a notice; Page Up and Page Down one screen in an
+  edit control; Alt+F4 exit; Alt and F10 the menu. Everything else is window-specific.
 - AX-8.3 Window-specific keys are defined once per window, in one table (`AxClaudeKeys`, `AxDownKeys`), as constants
   with names that say what the key does. Changing a key is a change to that one line; the menu item, the key handler
   and the F1 text read the table. Single-letter quick keys (AxClaude's `h`, `i`, `o`) are in the table too.
