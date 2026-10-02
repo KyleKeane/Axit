@@ -4,6 +4,7 @@
 
 - Axit: AxClaude is now one app of Axit, one program file that will also hold AxDown, a plain editor for Markdown and text files. `Axit.exe claude <folder>`, or a folder alone, starts AxClaude exactly as before; the console command `axclaude` stays.
 - Axit: settings and logs moved to the bundle's folders, `%APPDATA%\Axit\axclaude.json` and `%LOCALAPPDATA%\Axit\logs\axclaude.log`. The first start copies the settings of AxClaude 1.x; the old file is left where it was.
+- Axit: one installation for every app, in `%LOCALAPPDATA%\Programs\Axit`, listed in Settings, Apps as Axit. The Start menu entry is "Axit AxClaude" (press the Windows key and type `axc`); the console commands are `axclaude` and `axit`, which opens the app that fits the path it is given; the right-click entry on folders stays "Open in AxClaude". Installing removes an AxClaude 1.x installation first. The zip is `Axit-<version>-win-x64.zip`, with the bundle's README inside; each app's guide is under its Help menu.
 
 ## 1.7.0 - 2026-10-02
 

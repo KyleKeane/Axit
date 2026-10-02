@@ -11,20 +11,20 @@ You are talking to the real Claude Code. Slash commands, questions, permission p
 
 ## Install AxClaude
 
-Download `install.cmd` from the latest release on the releases page (https://github.com/KyleKeane/AxClaude/releases) and double-click it. It fetches the latest AxClaude and installs it; press a key when it is done. If you have the zip instead, extract it and double-click the `install.cmd` inside. If Windows SmartScreen warns about an unknown publisher, choose More info, then Run anyway.
+AxClaude is one app of **Axit**, one program that holds several apps for screen reader users. Download `install.cmd` from the latest release on the releases page (https://github.com/KyleKeane/AxClaude/releases) and double-click it. It fetches the latest Axit and installs it; press a key when it is done. If you have the zip instead, extract it and double-click the `install.cmd` inside. If Windows SmartScreen warns about an unknown publisher, choose More info, then Run anyway.
 
-This puts AxClaude in your Programs folder and adds a Start menu entry, an "Open in AxClaude" entry in the right-click menu of folders, the `axclaude` command for consoles, and an entry in Settings, Apps. No administrator rights are needed, and no PowerShell setting has to change.
+This puts Axit in your Programs folder and adds a Start menu entry, "Axit AxClaude" (press the Windows key and type `axc`), an "Open in AxClaude" entry in the right-click menu of folders, the `axclaude` command for consoles, and an entry in Settings, Apps named Axit. No administrator rights are needed, and no PowerShell setting has to change. If you had AxClaude installed before Axit existed, the installer removes it first, and AxClaude takes over your settings the first time it starts.
 
-To update: AxClaude offers new versions itself (Help menu). You can also run `install.cmd` again. Either way the old version is removed completely first, also one installed with the earlier `install.ps1`, and the new one is installed fresh. Your settings stay.
+To update: AxClaude offers new versions itself (Help menu). You can also run `install.cmd` again. Either way the old version is removed completely first and the new one is installed fresh. Your settings stay.
 
-To remove: Settings, Apps, Installed apps, AxClaude, Uninstall (or Add or remove programs in the Control Panel). Close AxClaude first: while it runs, nothing is removed and the window says so. A console window says what was removed; press a key to close it. Your settings stay. From a console, `"%LOCALAPPDATA%\Programs\AxClaude\install.cmd" -Uninstall` does the same.
+To remove: Settings, Apps, Installed apps, Axit, Uninstall (or Add or remove programs in the Control Panel). Close AxClaude first: while it runs, nothing is removed and the window says so. A console window says what was removed; press a key to close it. Your settings stay. From a console, `"%LOCALAPPDATA%\Programs\Axit\install.cmd" -Uninstall` does the same.
 
 ## Start
 
 Claude works in one project folder at a time. Pick how you start:
 
-- Start menu: AxClaude opens the folder you used last time. The first time, it asks you to choose a folder.
-- Console: `axclaude` uses the current folder. `axclaude C:\my\project` uses that folder. AxClaude continues your last conversation in the folder, or starts a new one when there is none; `axclaude --` alone always starts a new one, and anything else after `--` goes to Claude Code, for example `axclaude -- --resume`.
+- Start menu: Axit AxClaude opens the folder you used last time. The first time, it asks you to choose a folder.
+- Console: `axclaude` uses the current folder. `axclaude C:\my\project` uses that folder, and so does `axit C:\my\project`, since a folder means AxClaude. AxClaude continues your last conversation in the folder, or starts a new one when there is none; `axclaude --` alone always starts a new one, and anything else after `--` goes to Claude Code, for example `axclaude -- --resume`.
 - File Explorer: right-click a folder and choose "Open in AxClaude".
 
 Ctrl+N starts a new session from inside AxClaude. The notice shows the folder, with a Choose folder button under it, then a list of ways to start Claude: a new conversation, continue the last conversation, choose a conversation to resume, plan mode, edits accepted without asking, and Custom, where you type Claude Code's own command line options, one or more on each line. Enter stops the current session, clears the conversation and starts the new one in the empty window; with "Continue the last conversation" the earlier exchanges come back under their "from previous session" headings, and messages count from 1 again. Escape keeps the current session. Restart Claude (Ctrl+Shift+R) keeps the options you chose and the conversation.

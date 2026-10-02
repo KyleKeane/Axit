@@ -16,7 +16,7 @@ public static class UpdateCheck
 {
     public const string Repository = "KyleKeane/AxClaude";
 
-    /// <summary>The end of the zip's file name, as publish.ps1 names it: <c>AxClaude-1.0.1-win-x64.zip</c>.</summary>
+    /// <summary>The end of the zip's file name, as publish.ps1 names it: <c>Axit-2.0.0-win-x64.zip</c> (<c>AxClaude-1.7.0-win-x64.zip</c> before the bundle).</summary>
     public const string ZipSuffix = "-win-x64.zip";
 
     public static string ReleasesPage => $"https://github.com/{Repository}/releases";

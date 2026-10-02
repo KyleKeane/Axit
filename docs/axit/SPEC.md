@@ -58,7 +58,7 @@ allow it, see B-9).
   `<App>App`, plus a `Usage` text. `Axit`'s `Program` owns the crash handling, the version and the log start, and calls
   that entry point; the app owns everything after.
 
-### AX-2 Installation (planned, step 5 for AxClaude, step 9 for AxDown)
+### AX-2 Installation (built for AxClaude at step 5; AxDown's entries come at step 9)
 
 - AX-2.1 `install.ps1` installs for the current user into `%LOCALAPPDATA%\Programs\Axit` with no administrator
   rights, from the extracted zip or from `publish\win-x64`; `install.cmd` runs it with the execution policy bypassed
@@ -82,7 +82,7 @@ allow it, see B-9).
   -LogFile <file>` installs after that process ends and starts AxClaude on the folder, as the 1.7.0 updater expects.
   A later version may add a parameter to start AxDown on a file; nothing is renamed.
 
-### AX-3 Updates (built in AxClaude; the paths change at step 4)
+### AX-3 Updates (built)
 
 - AX-3.1 One version for the bundle, `<Version>` in `src/Axit/Axit.csproj`. A newer GitHub release is offered as
   AxClaude does today (`docs/axclaude/SPEC.md` FR-1.10, D25): asked once at startup when the setting is on, a notice
@@ -94,7 +94,7 @@ allow it, see B-9).
 - AX-3.4 The update check and the version comparison are pure code in `Axit.Core/Updates/UpdateCheck`, unit tested;
   the download and the hand-over are `Axit.Core/Updates/Updater`.
 
-### AX-4 Releases (built; the names change at step 5)
+### AX-4 Releases (built, step 5)
 
 - AX-4.1 `release.ps1 <version>` checks that `CHANGELOG.md` has a `## <version>` section, runs the tests, sets
   `<Version>`, commits `Release <version>`, tags `v<version>` and pushes. `.github/workflows/release.yml` checks the
@@ -266,3 +266,7 @@ docs/axdown/            SPEC.md, user-guide.md (embedded by src/AxDown), nvda-te
 - 2026-10-02, step 4: `Axit.Core` holds `AppPaths`, `SettingsFile`, `Log`, `Updates/` and `Audio/WaveTone`;
   AxClaude's settings file is `%APPDATA%\Axit\axclaude.json` (the 1.x file copied on the first start) and its log
   `%LOCALAPPDATA%\Axit\logs\axclaude.log`; `tests/Axit.Tests` has `SettingsFileTests` and `LayoutTests`.
+- 2026-10-02, step 5: `install.ps1`, `install.cmd`, `publish.ps1`, `release.ps1` and `release.yml` are the bundle's
+  (`Programs\Axit`, `Axit AxClaude`, `axit` and `axclaude`, the Apps entry `Axit`, `Axit-<version>-win-x64.zip`,
+  `docs/axit/README.md` in the zip); a 1.x installation is removed first. Kyle's checks of the Start menu search,
+  the folder menu and the console commands are pending (AX-2.2).

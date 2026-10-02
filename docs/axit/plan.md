@@ -289,7 +289,7 @@ question area shared), step 11, and the key work in steps 8 and 12.
 - [x] Step 2 bridge 1.7.0 released from `main` (2026-10-02)
 - [x] Step 3 Axit.exe with AxClaude inside (2026-10-02; `publish.ps1`, `install.ps1` and the release pipeline wait for step 5)
 - [x] Step 4 shared code in `Axit.Core` (2026-10-02; `Axit.Forms` comes with AxDown at step 8)
-- [ ] Step 5 installer, publish and release
+- [x] Step 5 installer, publish and release (2026-10-02, code and zip; Kyle's checks of Start search, folder menu and commands pending)
 - [ ] Step 6 AxDown spec
 - [ ] Step 7 AxDown.Core
 - [ ] Step 8 AxDown window

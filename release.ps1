@@ -1,7 +1,7 @@
 <#
 .SYNOPSIS
-  Releases a new version of AxClaude: sets the version, commits, tags and pushes. GitHub Actions then builds, tests,
-  publishes the zip and creates the GitHub release that installed copies of AxClaude update themselves from.
+  Releases a new version of Axit, the bundle AxClaude is one app of: sets the version, commits, tags and pushes. GitHub Actions then builds, tests,
+  publishes the zip and creates the GitHub release that installed copies update themselves from.
 
 .DESCRIPTION
   Before running it, add a "## <version> - <date>" section to CHANGELOG.md: its text becomes the release notes and
@@ -11,7 +11,7 @@
     3. commits CHANGELOG.md and the project file as "Release <version>",
     4. tags v<version> and pushes main and the tag.
   The push starts .github/workflows/release.yml. Follow it with `gh run watch`, or on the Actions page. When it is
-  done, the release is at https://github.com/KyleKeane/AxClaude/releases and the app offers it as an update.
+  done, the release is at https://github.com/KyleKeane/AxClaude/releases and the apps offer it as an update.
 
 .EXAMPLE
   .\release.ps1 1.0.1
@@ -59,13 +59,15 @@ if (-not (Select-String -Path $changelog -Pattern ('^## ' + [regex]::Escape($Ver
     exit 1
 }
 
-# The test project alone: it needs only AxClaude.Core, so it builds while the app itself is running from bin\Debug.
+# The test projects alone: they need no window project, so they build while the app itself is running from bin\Debug.
 # GitHub Actions builds and tests the whole solution before it publishes.
 Write-Host "Running the tests..."
-dotnet test (Join-Path $root 'tests\AxClaude.Tests\AxClaude.Tests.csproj') --nologo -v q
-if ($LASTEXITCODE -ne 0) {
-    Write-Host "The tests failed. Nothing was changed."
-    exit $LASTEXITCODE
+foreach ($tests in 'tests\Axit.Tests\Axit.Tests.csproj', 'tests\AxClaude.Tests\AxClaude.Tests.csproj') {
+    dotnet test (Join-Path $root $tests) --nologo -v q
+    if ($LASTEXITCODE -ne 0) {
+        Write-Host "The tests failed. Nothing was changed."
+        exit $LASTEXITCODE
+    }
 }
 
 $xml = Get-Content $project -Raw
