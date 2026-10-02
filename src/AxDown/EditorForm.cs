@@ -141,7 +141,7 @@ internal sealed class EditorForm : Form
 
         ApplyTextFont();
         RestoreWindow();
-        Load(path);
+        LoadDocument(path);
 
         if (settingsError is not null)
         {
@@ -152,7 +152,7 @@ internal sealed class EditorForm : Form
     /// <summary>The crash handler's report (AD-11), shown inside the window like every other notice.</summary>
     public void ShowError(string title, string message) => ShowNotice(Notice.Plain(title, message) with { Unprompted = true });
 
-    private string Name => _path is null ? Untitled : Path.GetFileName(_path);
+    private string DocumentName => _path is null ? Untitled : Path.GetFileName(_path);
 
     protected override void OnShown(EventArgs e)
     {
@@ -187,8 +187,9 @@ internal sealed class EditorForm : Form
         SaveSettings();
         if (_updateFolder is { } update)
         {
-            // AX-3.2: the downloaded version's installer waits for this process to end and installs.
-            Updater.LaunchInstaller(update, projectFolder: null, continueConversation: false);
+            // AX-3.2: the downloaded version's installer waits for this process to end, installs and starts AxDown
+            // again on the file (none for an unnamed document).
+            Updater.LaunchInstaller(update, projectFolder: null, continueConversation: false, file: _path);
         }
 
         base.OnFormClosing(e);
@@ -304,7 +305,7 @@ internal sealed class EditorForm : Form
 
     // ---- the document (AD-3) ----
 
-    private void Load(string? path)
+    private void LoadDocument(string? path)
     {
         _path = path;
         _document = TextDocument.Empty();
@@ -344,7 +345,7 @@ internal sealed class EditorForm : Form
         ScheduleStatus();
     }
 
-    private void NewDocument() => AskToSave(() => Load(null));
+    private void NewDocument() => AskToSave(() => LoadDocument(null));
 
     private void OpenFile() => AskToSave(() =>
     {
@@ -356,7 +357,7 @@ internal sealed class EditorForm : Form
 
         if (dialog.ShowDialog(this) == DialogResult.OK)
         {
-            Load(dialog.FileName);
+            LoadDocument(dialog.FileName);
             _editor.Select();
         }
     });
@@ -373,7 +374,7 @@ internal sealed class EditorForm : Form
         if (ChangedOnDisk())
         {
             ShowNotice(new Notice("The file changed on disk",
-                $"{Name} was changed by another program since you opened it. Write over it?",
+                $"{DocumentName} was changed by another program since you opened it. Write over it?",
                 [
                     new OverlayChoice("&Write over", () => WriteFile(_path, then), IsDefault: true),
                     new OverlayChoice("&Cancel", IsCancel: true),
@@ -389,7 +390,7 @@ internal sealed class EditorForm : Form
         using var dialog = new SaveFileDialog
         {
             Filter = FileFilter,
-            FileName = Name,
+            FileName = DocumentName,
             DefaultExt = _path is null ? "md" : Path.GetExtension(_path).TrimStart('.'),
             AddExtension = _path is null,
             OverwritePrompt = true,
@@ -440,7 +441,7 @@ internal sealed class EditorForm : Form
             return;
         }
 
-        ShowNotice(new Notice($"Save changes to {Name}?", string.Empty,
+        ShowNotice(new Notice($"Save changes to {DocumentName}?", string.Empty,
         [
             new OverlayChoice("&Save", () => Save(then), IsDefault: true),
             new OverlayChoice("&Don't save", then),
@@ -576,8 +577,8 @@ internal sealed class EditorForm : Form
 
     private void UpdateTitle()
     {
-        Text = (_changed ? "*" : string.Empty) + Name + " - " + AppName;
-        _editor.AccessibleName = Name;
+        Text = (_changed ? "*" : string.Empty) + DocumentName + " - " + AppName;
+        _editor.AccessibleName = DocumentName;
     }
 
     private void ScheduleStatus()
@@ -589,7 +590,7 @@ internal sealed class EditorForm : Form
     private void UpdateStatus()
     {
         var (line, column, _) = Position();
-        _fileLabel.Text = Name + (_changed ? ", unsaved changes" : string.Empty);
+        _fileLabel.Text = DocumentName + (_changed ? ", unsaved changes" : string.Empty);
         _positionLabel.Text = $"Line {line}, Column {column} · {_document.EncodingName} · {_document.LineEndingName}";
         StatusLayout.Fit(_status, _fileLabel, _positionLabel);
     }
@@ -966,8 +967,8 @@ internal sealed class EditorForm : Form
         var text =
             $"You have Axit {BundleInfo.Version}. Axit {version} is available.\n\n" +
             (release.Notes.Length > 0 ? release.Notes + "\n\n" : string.Empty) +
-            $"Update now downloads the new version, closes {AppName} (asking first when there are unsaved changes) and installs it; " +
-            $"start it again from the Start menu.{size}\n" +
+            $"Update now downloads the new version, closes {AppName} (asking first when there are unsaved changes), installs it " +
+            $"and starts it again on the same file.{size}\n" +
             "Later keeps this version; the Help menu offers the update again.";
         ShowNotice(new Notice($"Update to Axit {version}", text,
         [

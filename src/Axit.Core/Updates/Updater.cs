@@ -82,10 +82,11 @@ public static class Updater
 
     /// <summary>
     /// Starts the downloaded version's install.ps1 without a window. It waits for this process to end, installs, and
-    /// starts AxClaude on <paramref name="projectFolder"/> when one is given, with <c>-- --continue</c> when asked, so
-    /// that the conversation is picked up again (AX-2.7 keeps these parameters). Its output goes to <see cref="LogPath"/>.
+    /// starts the app again: AxClaude on <paramref name="projectFolder"/> when one is given, with <c>-- --continue</c>
+    /// when asked, so that the conversation is picked up again, or AxDown on <paramref name="file"/> (AX-2.7 keeps
+    /// these parameters). Its output goes to <see cref="LogPath"/>.
     /// </summary>
-    public static void LaunchInstaller(string folder, string? projectFolder, bool continueConversation)
+    public static void LaunchInstaller(string folder, string? projectFolder, bool continueConversation, string? file = null)
     {
         var start = new ProcessStartInfo("powershell.exe")
         {
@@ -110,6 +111,12 @@ public static class Updater
             {
                 start.ArgumentList.Add("-ContinueConversation");
             }
+        }
+
+        if (file is not null)
+        {
+            start.ArgumentList.Add("-StartFile");
+            start.ArgumentList.Add(file);
         }
 
         Process.Start(start)?.Dispose();

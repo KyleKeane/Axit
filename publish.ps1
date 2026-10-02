@@ -4,7 +4,7 @@
   the bundle's README, zipped for sending, and installs it for the current user unless -NoInstall is given.
 
 .DESCRIPTION
-  Output: publish\win-x64\ (Axit.exe, install.cmd, install.ps1, README.md, LICENSE) and publish\Axit-<version>-win-x64.zip.
+  Output: publish\win-x64\ (Axit.exe, AxDown.ico, install.cmd, install.ps1, README.md, LICENSE) and publish\Axit-<version>-win-x64.zip.
   Send the zip to someone: they extract it and double-click install.cmd (see README.md inside). Without -NoInstall the
   script then runs install.ps1 from publish\win-x64 on this machine (Start menu entries, File Explorer entries and
   the console commands; see install.ps1 -? for details and -Uninstall).
@@ -38,6 +38,9 @@ if ($LASTEXITCODE -ne 0) {
 }
 
 $exe = Join-Path $out 'Axit.exe'
+# AxDown's icon for its Start menu and File Explorer entries, next to the executable (a project item would be
+# bundled into the single file).
+Copy-Item (Join-Path $root 'src\Axit\AxDown.ico') $out -Force
 Copy-Item (Join-Path $root 'install.ps1') $out -Force
 Copy-Item (Join-Path $root 'install.cmd') $out -Force
 Copy-Item (Join-Path $root 'LICENSE') $out -Force

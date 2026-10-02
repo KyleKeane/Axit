@@ -19,6 +19,10 @@
     <Copyright>Copyright (c) 2026 Dr. Kyle Keane (www.kylekeane.com). MIT License.</Copyright>
   </PropertyGroup>
 
+  <!-- AxDown.ico, next to this file, is AxDown's icon for its Start menu and File Explorer entries (the executable's
+       own icon is AxClaude's). publish.ps1 copies it next to the executable, since a single-file publish would bundle
+       a project item into the executable, and install.ps1 copies it on. -->
+
   <ItemGroup>
     <ProjectReference Include="..\AxClaude\AxClaude.csproj" />
     <ProjectReference Include="..\AxDown\AxDown.csproj" />

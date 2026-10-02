@@ -1,25 +1,30 @@
 <#
 .SYNOPSIS
-  Generates src\Axit\AxClaude.ico: a rounded dark-blue square with the letters Ax, at the usual Windows sizes.
+  Generates the icons in src\Axit: AxClaude.ico (the letters Ax on dark blue, also the icon of Axit.exe) and
+  AxDown.ico (the letters Ad on dark green), rounded squares at the usual Windows sizes.
 
 .DESCRIPTION
   Uses System.Drawing only, so it runs on any Windows machine. The 256 pixel image is stored PNG-compressed, the
   smaller ones as 32-bit bitmaps, which is what Windows expects in an icon file. Re-run after changing the design;
-  the result is committed.
+  the result is committed. A new app of the bundle adds a line at the end with its letters and colour.
+
+.EXAMPLE
+  .\tools\make-icon.ps1                                   # both icons
+  .\tools\make-icon.ps1 -Out x.ico -Text Ab -Rgb 90,40,120  # one icon of your own
 #>
 [CmdletBinding()]
 param(
-    [string]$Out
+    [string]$Out,
+    [string]$Text = 'Ax',
+    [int[]]$Rgb = @(31, 78, 121)
 )
 
 $ErrorActionPreference = 'Stop'
-if (-not $Out) {
-    # $PSScriptRoot is not set while parameter defaults are evaluated in Windows PowerShell 5.1.
-    $Out = Join-Path (Split-Path -Parent $MyInvocation.MyCommand.Path) '..\src\Axit\AxClaude.ico'
-}
 Add-Type -AssemblyName System.Drawing
+# $PSScriptRoot is not set while parameter defaults are evaluated in Windows PowerShell 5.1.
+$iconFolder = Join-Path (Split-Path -Parent $MyInvocation.MyCommand.Path) '..\src\Axit'
 
-function New-IconBitmap([int]$size) {
+function New-IconBitmap([int]$size, [string]$text, [System.Drawing.Color]$color) {
     $bmp = New-Object System.Drawing.Bitmap $size, $size, ([System.Drawing.Imaging.PixelFormat]::Format32bppArgb)
     $g = [System.Drawing.Graphics]::FromImage($bmp)
     $g.SmoothingMode = [System.Drawing.Drawing2D.SmoothingMode]::AntiAlias
@@ -35,7 +40,7 @@ function New-IconBitmap([int]$size) {
     $path.AddArc($rect.Right - $d, $rect.Bottom - $d, $d, $d, 0, 90)
     $path.AddArc($rect.X, $rect.Bottom - $d, $d, $d, 90, 90)
     $path.CloseFigure()
-    $fill = New-Object System.Drawing.SolidBrush ([System.Drawing.Color]::FromArgb(255, 31, 78, 121))
+    $fill = New-Object System.Drawing.SolidBrush $color
     $g.FillPath($fill, $path)
 
     $fontSize = [Math]::Max(5, $size * 0.5)
@@ -44,7 +49,7 @@ function New-IconBitmap([int]$size) {
     $format.Alignment = [System.Drawing.StringAlignment]::Center
     $format.LineAlignment = [System.Drawing.StringAlignment]::Center
     $box = New-Object System.Drawing.RectangleF 0, ($size * 0.02), $size, $size
-    $g.DrawString('Ax', $font, [System.Drawing.Brushes]::White, $box, $format)
+    $g.DrawString($text, $font, [System.Drawing.Brushes]::White, $box, $format)
 
     $g.Dispose()
     return $bmp
@@ -81,36 +86,47 @@ function Get-DibBytes([System.Drawing.Bitmap]$bmp) {
     return , $ms.ToArray()
 }
 
-$sizes = 16, 24, 32, 48, 64, 256
-$images = @()
-foreach ($size in $sizes) {
-    $bmp = New-IconBitmap $size
-    if ($size -ge 256) { [byte[]]$bytes = Get-PngBytes $bmp } else { [byte[]]$bytes = Get-DibBytes $bmp }
-    $images += [pscustomobject]@{ Size = $size; Bytes = $bytes }
-    $bmp.Dispose()
+function Write-Icon([string]$out, [string]$text, [int[]]$rgb) {
+    $color = [System.Drawing.Color]::FromArgb(255, $rgb[0], $rgb[1], $rgb[2])
+    $sizes = 16, 24, 32, 48, 64, 256
+    $images = @()
+    foreach ($size in $sizes) {
+        $bmp = New-IconBitmap $size $text $color
+        if ($size -ge 256) { [byte[]]$bytes = Get-PngBytes $bmp } else { [byte[]]$bytes = Get-DibBytes $bmp }
+        $images += [pscustomobject]@{ Size = $size; Bytes = $bytes }
+        $bmp.Dispose()
+    }
+
+    $stream = [System.IO.File]::Create($out)
+    $writer = New-Object System.IO.BinaryWriter $stream
+    $writer.Write([int16]0)                 # reserved
+    $writer.Write([int16]1)                 # type: icon
+    $writer.Write([int16]$images.Count)
+    $offset = 6 + 16 * $images.Count
+    foreach ($image in $images) {
+        $dim = if ($image.Size -ge 256) { 0 } else { $image.Size }
+        $writer.Write([byte]$dim)           # width
+        $writer.Write([byte]$dim)           # height
+        $writer.Write([byte]0)              # colours in palette
+        $writer.Write([byte]0)              # reserved
+        $writer.Write([int16]1)             # planes
+        $writer.Write([int16]32)            # bits per pixel
+        $writer.Write([int32]$image.Bytes.Length)
+        $writer.Write([int32]$offset)
+        $offset += $image.Bytes.Length
+    }
+    foreach ($image in $images) {
+        $writer.Write([byte[]]$image.Bytes, 0, $image.Bytes.Length)
+    }
+    $writer.Flush()
+    $stream.Close()
+    Write-Host ("Wrote {0} ({1:N0} bytes, sizes {2})" -f $out, (Get-Item $out).Length, ($sizes -join ', '))
 }
 
-$stream = [System.IO.File]::Create((Join-Path (Split-Path -Parent $Out) (Split-Path -Leaf $Out)))
-$writer = New-Object System.IO.BinaryWriter $stream
-$writer.Write([int16]0)                 # reserved
-$writer.Write([int16]1)                 # type: icon
-$writer.Write([int16]$images.Count)
-$offset = 6 + 16 * $images.Count
-foreach ($image in $images) {
-    $dim = if ($image.Size -ge 256) { 0 } else { $image.Size }
-    $writer.Write([byte]$dim)           # width
-    $writer.Write([byte]$dim)           # height
-    $writer.Write([byte]0)              # colours in palette
-    $writer.Write([byte]0)              # reserved
-    $writer.Write([int16]1)             # planes
-    $writer.Write([int16]32)            # bits per pixel
-    $writer.Write([int32]$image.Bytes.Length)
-    $writer.Write([int32]$offset)
-    $offset += $image.Bytes.Length
+if ($Out) {
+    Write-Icon ([System.IO.Path]::GetFullPath($Out)) $Text $Rgb
+} else {
+    # One line per app: the letters and the colour.
+    Write-Icon (Join-Path $iconFolder 'AxClaude.ico') 'Ax' @(31, 78, 121)
+    Write-Icon (Join-Path $iconFolder 'AxDown.ico') 'Ad' @(31, 110, 70)
 }
-foreach ($image in $images) {
-    $writer.Write([byte[]]$image.Bytes, 0, $image.Bytes.Length)
-}
-$writer.Flush()
-$stream.Close()
-Write-Host ("Wrote {0} ({1:N0} bytes, sizes {2})" -f (Resolve-Path $Out), (Get-Item $Out).Length, ($sizes -join ', '))

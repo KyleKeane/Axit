@@ -4,22 +4,24 @@ Axit is one Windows program that holds several apps for people who use a screen 
 
 The apps:
 
-- **AxClaude** runs the Claude Code CLI for you and shows everything Claude says in a plain text window, one line at a time, with a few keys to move around and spoken notices when Claude needs you. Open its guide inside the app: Help, User guide.
-- **AxDown**, a plain editor for Markdown and text files, is coming in a later version.
+- **AxClaude** runs the Claude Code CLI for you and shows everything Claude says in a plain text window, one line at a time, with a few keys to move around and spoken notices when Claude needs you.
+- **AxDown** is a plain editor for Markdown and text files: one file in one window, written back exactly as it was found, with find, go to line, and questions asked inside the window.
+
+Each app's guide is inside it: Help, User guide.
 
 ## Install
 
 Download `install.cmd` from the latest release on the releases page (https://github.com/KyleKeane/AxClaude/releases) and double-click it. It fetches the latest Axit and installs it; press a key when it is done. If you have the zip instead, extract it and double-click the `install.cmd` inside. If Windows SmartScreen warns about an unknown publisher, choose More info, then Run anyway.
 
-This puts Axit in your Programs folder (`%LOCALAPPDATA%\Programs\Axit`) and adds, for each app, a Start menu entry (`Axit AxClaude`: press the Windows key and type `axc`), an entry in the right-click menu of File Explorer (`Open in AxClaude` on folders) and a console command (`axclaude`; `axit` alone opens the app that fits the path you give it). Settings, Apps lists Axit with an Uninstall. No administrator rights are needed, and no PowerShell setting has to change.
+This puts Axit in your Programs folder (`%LOCALAPPDATA%\Programs\Axit`) and adds, for each app, a Start menu entry (`Axit AxClaude` and `Axit AxDown`: press the Windows key and type `axc` or `axd`), an entry in the right-click menu of File Explorer (`Open in AxClaude` on folders, `Open in AxDown` on files, and AxDown under `Open with` for `.md`, `.markdown` and `.txt` files) and a console command (`axclaude`, `axdown`; `axit` alone opens the app that fits the path you give it). Settings, Apps lists Axit with an Uninstall. No administrator rights are needed, and no PowerShell setting has to change. To make AxDown the program that opens `.md` files when you press Enter on one, use Settings, Apps, Default apps; Windows does not let a program set that for itself.
 
 If you had AxClaude installed before Axit existed, the installer removes it first and AxClaude takes over your settings the first time it starts.
 
 ## Start
 
-- Start menu: `Axit AxClaude`.
-- Console: `axclaude`, or `axclaude C:\my\project`. `axit C:\my\project` does the same, since a folder means AxClaude.
-- File Explorer: right-click a folder and choose `Open in AxClaude`.
+- Start menu: `Axit AxClaude`, `Axit AxDown`.
+- Console: `axclaude`, or `axclaude C:\my\project`; `axdown notes.md`. `axit C:\my\project` and `axit notes.md` do the same, since a folder means AxClaude and a file AxDown.
+- File Explorer: right-click a folder and choose `Open in AxClaude`; right-click a file and choose `Open in AxDown`.
 
 ## Update
 

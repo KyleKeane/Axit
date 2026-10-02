@@ -59,7 +59,7 @@ allow it, see B-9).
   `<App>App`, plus a `Usage` text. `Axit`'s `Program` owns the crash handling, the version and the log start, and calls
   that entry point; the app owns everything after.
 
-### AX-2 Installation (built for AxClaude at step 5; AxDown's entries come at step 9)
+### AX-2 Installation (built, steps 5 and 9)
 
 - AX-2.1 `install.ps1` installs for the current user into `%LOCALAPPDATA%\Programs\Axit` with no administrator
   rights, from the extracted zip or from `publish\win-x64`; `install.cmd` runs it with the execution policy bypassed
@@ -81,7 +81,7 @@ allow it, see B-9).
   file is left where it is; the app copies it on its first start (AX-5.2).
 - AX-2.7 The hand-over parameters stay: `install.ps1 -WaitForProcess <pid> -Start <folder> [-ContinueConversation]
   -LogFile <file>` installs after that process ends and starts AxClaude on the folder, as the 1.7.0 updater expects.
-  A later version may add a parameter to start AxDown on a file; nothing is renamed.
+  `-StartFile <file>` (step 9) starts AxDown on the file the same way; nothing is renamed.
 
 ### AX-3 Updates (built)
 
@@ -275,4 +275,7 @@ docs/axdown/            SPEC.md, user-guide.md (embedded by src/AxDown), nvda-te
 - 2026-10-02, steps 6 to 8: AxDown specified (`docs/axdown/`), its pure code and window built; `Axit.Forms` holds
   the shared window pieces, moved from AxClaude unchanged (AX-6.2), plus `BundleKeys` and `WindowAccessibleObject`;
   `tests/Axit.Tests/KeyTests` is the collision test (AX-8.4), with AxDown's table in it and AxClaude's to come at
-  step 11. `Axit.exe down <file>` works; the installer's entries for AxDown are step 9.
+  step 11. `Axit.exe down <file>` works.
+- 2026-10-02, step 9: the installer adds AxDown's Start entry, "Open in AxDown" on files, the `Axit.AxDown` ProgID
+  under Open with for `.md`, `.markdown` and `.txt`, `axdown.cmd`, and `-StartFile` for the updater; `AxDown.ico` is
+  drawn by `tools/make-icon.ps1` and shipped next to the executable. Kyle's checks (AX-2.2) pending for both apps.
