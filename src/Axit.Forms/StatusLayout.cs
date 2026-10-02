@@ -1,4 +1,4 @@
-namespace AxClaude;
+namespace Axit.Forms;
 
 /// <summary>
 /// Keeps both status bar labels inside the strip. A ToolStrip item that does not fit is neither drawn nor exposed to
@@ -6,7 +6,7 @@ namespace AxClaude;
 /// both fit at their natural width, the folder path is clipped first (it is also in the title bar and the Project
 /// menu), down to a quarter of the strip, then the state. NVDA reads the full text of a clipped label.
 /// </summary>
-internal static class StatusLayout
+public static class StatusLayout
 {
     /// <summary>Pixels kept free: the strip lays items out from x = 1, and an item that ends past the edge overflows.</summary>
     private const int Slack = 8;

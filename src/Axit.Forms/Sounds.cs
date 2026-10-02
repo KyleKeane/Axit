@@ -2,7 +2,7 @@ using System.Runtime.InteropServices;
 using Axit.Core;
 using Axit.Core.Audio;
 
-namespace AxClaude;
+namespace Axit.Forms;
 
 /// <summary>
 /// The app's sounds (FR-7.3, FR-7.8), played through one winmm wave-out device that is opened at the first sound
@@ -13,7 +13,7 @@ namespace AxClaude;
 /// 1.2.1 the sounds went through <c>PlaySound</c>, which opens and closes the device for every call: ticks in quick
 /// succession stuttered and backed up. UI thread only.
 /// </summary>
-internal static class Sounds
+public static class Sounds
 {
     private const uint WAVE_MAPPER = 0xFFFFFFFF;
     private const uint WHDR_INQUEUE = 0x0010;

@@ -1,6 +1,6 @@
 using System.Runtime.InteropServices;
 
-namespace AxClaude;
+namespace Axit.Forms;
 
 /// <summary>
 /// Page Up and Page Down for the conversation and the message field (FR-2.1, FR-5). The caret moves by one
@@ -11,7 +11,7 @@ namespace AxClaude;
 /// or last row, and does nothing at all while the text fits the control. The screen reader reads the new row itself;
 /// nothing is announced here.
 /// </summary>
-internal static class EditPaging
+public static class EditPaging
 {
     private const int EM_LINESCROLL = 0x00B6;
     private const int EM_SCROLLCARET = 0x00B7;

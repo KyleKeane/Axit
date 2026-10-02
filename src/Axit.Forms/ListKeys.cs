@@ -1,4 +1,4 @@
-namespace AxClaude;
+namespace Axit.Forms;
 
 /// <summary>
 /// The keys every list of the control area adds to a list box's own (D33). A number jumps forward through the items
@@ -6,7 +6,7 @@ namespace AxClaude;
 /// through the single-digit answers (1 to 9), Shift+0 back. Page Up and Page Down move ten items. Home and End are the
 /// list box's own: the first and the last item; Ctrl+Home and Ctrl+End do the same.
 /// </summary>
-internal static class ListKeys
+public static class ListKeys
 {
     private const int PageItems = 10;
 

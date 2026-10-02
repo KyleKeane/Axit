@@ -377,11 +377,12 @@ src/AxClaude.Core/        class library (net10.0), no WinForms
   Updates/    UpdateCheck (the latest GitHub release: parsing, version comparison), ReleaseInfo
   AppSettings.cs
 src/AxClaude/             class library (net10.0-windows), AxClaude's window inside Axit.exe: AxClaudeApp (the entry point
-                          Run, crash handler, --help, --version), MainForm, TranscriptView, EditPaging, OverlayPanel,
-                          ControlArea, ListKeys, HelpText, StatusLayout, StartupOptions, Sounds (the wave-out device),
-                          Updater (download, hand-over to install.ps1), Log
+                          Run, crash handler, --help, --version), MainForm, TranscriptView, HelpText, StartupOptions
 src/Axit/                 the executable of the bundle (docs/axit/SPEC.md): Program (dispatch), AxClaude.ico (tools/make-icon.ps1)
-src/Axit.Core/            shared pure code: Dispatch (which app a command line starts), BundleInfo (the version)
+src/Axit.Core/            shared pure code: Dispatch, BundleInfo, AppPaths, SettingsFile, WindowPlacement, Log,
+                          Updates/ (UpdateCheck, Updater), Audio/WaveTone
+src/Axit.Forms/           shared window pieces, moved from here unchanged (bundle AX-6.2): OverlayPanel and Notice (D23),
+                          ControlArea and ListKeys (D33), Sounds (the wave-out device), EditPaging, StatusLayout, BundleKeys
 tests/AxClaude.Tests/     xunit: FixtureTests, ReplayTests, SessionModelTests, ArrivalsTests, TranscriptMirrorTests,
                           ReadingBreakTests, SettingsTests, UpdateCheckTests, WaveToneTests, ClaudeLauncherTests; TestHelpers
 tests/Axit.Tests/         the bundle's tests: DispatchTests

@@ -1,6 +1,7 @@
 using System.Runtime.InteropServices;
 using System.Windows.Forms.Automation;
 using AxClaude.Core.Transcript;
+using Axit.Forms;
 
 namespace AxClaude;
 

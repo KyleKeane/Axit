@@ -122,7 +122,7 @@ allow it, see B-9).
 - AX-6.1 `Axit.Core` (pure, unit tested; built at step 4): `Dispatch`, `BundleInfo`, `AppPaths`, `SettingsFile`,
   `Log` (per-app file name), `Updates/` (`UpdateCheck`, the release check, and `Updater`, the download and the
   hand-over to `install.ps1`; neither needs a window), `Audio/WaveTone` (the sounds as WAV bytes).
-- AX-6.2 `Axit.Forms` (WinForms, no tests, checked with NVDA; planned, step 8): `OverlayPanel` (the notices in the
+- AX-6.2 `Axit.Forms` (WinForms, no tests, checked with NVDA; built at step 8): `OverlayPanel` (the notices in the
   window, with the `Notice` record callers pass), `ControlArea` and `ListKeys` (a question's answers as a list or a
   field in the input field's place, with the number and page keys of every such list), `Sounds` (one wave-out device
   for the life of the process), `EditPaging` (Page Up and Page Down in an edit control), `StatusLayout`, the font

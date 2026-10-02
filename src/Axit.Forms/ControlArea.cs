@@ -1,4 +1,4 @@
-namespace AxClaude;
+namespace Axit.Forms;
 
 /// <summary>
 /// The control area (D33): the message field's place at the bottom of the window, which holds one control in the
@@ -10,7 +10,7 @@ namespace AxClaude;
 /// For a moment after a control appears, and after an answer goes, Enter, Space, Escape and typed keys do nothing:
 /// they were meant for the message field, or the answer is on its way.
 /// </summary>
-internal sealed class ControlArea : Panel
+public sealed class ControlArea : Panel
 {
     private const int HoldMs = 1000;
 

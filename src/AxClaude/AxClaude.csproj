@@ -11,6 +11,7 @@
   <ItemGroup>
     <ProjectReference Include="..\AxClaude.Core\AxClaude.Core.csproj" />
     <ProjectReference Include="..\Axit.Core\Axit.Core.csproj" />
+    <ProjectReference Include="..\Axit.Forms\Axit.Forms.csproj" />
   </ItemGroup>
 
   <ItemGroup>

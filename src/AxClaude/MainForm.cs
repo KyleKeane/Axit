@@ -7,6 +7,7 @@ using AxClaude.Core.Pty;
 using AxClaude.Core.Transcript;
 using Axit.Core.Updates;
 using Axit.Core;
+using Axit.Forms;
 
 namespace AxClaude;
 

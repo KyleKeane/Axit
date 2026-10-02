@@ -1,9 +1,9 @@
 using System.Windows.Forms.Automation;
 
-namespace AxClaude;
+namespace Axit.Forms;
 
 /// <summary>A button on a notice. Unless <see cref="StaysOpen"/> is set, the notice closes before the action runs.</summary>
-internal sealed record OverlayChoice(string Text, Action? Action = null, bool IsDefault = false, bool IsCancel = false, bool StaysOpen = false)
+public sealed record OverlayChoice(string Text, Action? Action = null, bool IsDefault = false, bool IsCancel = false, bool StaysOpen = false)
 {
     /// <summary>The single button of a plain notice: Enter and Escape both close it.</summary>
     public static readonly OverlayChoice Close = new("&Close", IsDefault: true, IsCancel: true);
@@ -14,17 +14,17 @@ internal sealed record OverlayChoice(string Text, Action? Action = null, bool Is
 /// text, and, when <paramref name="Required"/>, what to say when the default button is pressed while the field is
 /// empty (the notice then stays open).
 /// </summary>
-internal sealed record OverlayInput(string Label, string AccessibleName, string Initial, string EmptyMessage, bool Required = true);
+public sealed record OverlayInput(string Label, string AccessibleName, string Initial, string EmptyMessage, bool Required = true);
 
 /// <summary>A recommended way to start Claude in the New session notice (FR-8.6): the radio button's text and the arguments it stands for.</summary>
-internal sealed record OverlayPreset(string Text, IReadOnlyList<string> Arguments);
+public sealed record OverlayPreset(string Text, IReadOnlyList<string> Arguments);
 
 /// <summary>
 /// The New session part of a notice (FR-8.6): the folder (null when none is chosen yet) with a Choose folder button
 /// under it, the presets as radio buttons with Custom last (<paramref name="Selected"/> equal to the number of
 /// presets selects Custom), and the argument field that shows while Custom is selected.
 /// </summary>
-internal sealed record OverlaySession(string? Folder, Action ChooseFolder, IReadOnlyList<OverlayPreset> Presets, int Selected, string CustomArguments);
+public sealed record OverlaySession(string? Folder, Action ChooseFolder, IReadOnlyList<OverlayPreset> Presets, int Selected, string CustomArguments);
 
 /// <summary>
 /// What a notice says and offers, and nothing about how it is shown (D23): the title, the text, the buttons, at most
@@ -32,7 +32,7 @@ internal sealed record OverlaySession(string? Folder, Action ChooseFolder, IRead
 /// <c>MainForm.ShowNotice</c>, which adds what all notices share: the key line made from the buttons, the chime and
 /// the hold of a notice the user did not open, the focus, and the blocked window.
 /// </summary>
-internal sealed record Notice(string Title, string Text, IReadOnlyList<OverlayChoice> Choices)
+public sealed record Notice(string Title, string Text, IReadOnlyList<OverlayChoice> Choices)
 {
     public OverlayInput? Input { get; init; }
 
@@ -57,7 +57,7 @@ internal sealed record Notice(string Title, string Text, IReadOnlyList<OverlayCh
 /// menu, and routes Enter and Escape to the default and cancel buttons through its AcceptButton and CancelButton; Tab
 /// moves between the text, the field or the session controls, and the buttons.
 /// </summary>
-internal sealed class OverlayPanel : Panel
+public sealed class OverlayPanel : Panel
 {
     private const string NoFolder = "(none chosen yet)";
     private const string ChooseFolderFirst = "Choose a folder first";
