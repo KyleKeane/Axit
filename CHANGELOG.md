@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased
+## 2.2.0 - 2026-10-02
 
 - Axit: the update notice offers "Update and restart" (Enter), which installs and starts the app again where it was, and "Update and close", which only installs; "Open release page" and "Later" stay. While the download runs, a notice shows a progress bar, which NVDA reports the way it reports any progress bar, and Escape cancels the download and keeps the version you have.
 - For developers: `run-axclaude.ps1` and `run-axdown.ps1` build Axit and start one app; both call `run.ps1 -App claude|down`, which on its own starts AxClaude.
