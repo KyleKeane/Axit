@@ -299,3 +299,7 @@ docs/axdown/            SPEC.md, user-guide.md (embedded by src/AxDown), nvda-te
   (B-7); Axit 2.0.0 released from `main`.
 - 2026-10-02, step 11: `AxClaudeKeys` holds AxClaude's keys; the window, the menus and the conversation view read
   it; the collision test covers both windows (AX-8.4). No key changed.
+- 2026-10-02, 2.1.1 to 2.3.0: AxDown's window role (2.1.1); the update notice with Update and restart, Update and
+  close and a progress bar (2.2.0); the in-place install with one bar for download and install and the restart by
+  the app itself (AX-2.8, AX-3.2; 2.3.0). Kyle ran the full path from an older build to 2.3.0 with NVDA: the bar,
+  "Downloaded. Installing", "Installed. Restarting", AxDown back as it was.

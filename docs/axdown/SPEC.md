@@ -282,3 +282,6 @@ the off-screen probe approach of AxClaude checks layout and keys without disturb
   sets `AccessibleRole.Window`, which is why NVDA speaks "axclaude - AxClaude window" there (the folder is called
   axclaude; the name is not repeated). AxDown sets the same role now and NVDA says "README.md - AxDown window" first
   (AD-7). Every window of the bundle sets it (`docs/axit/adding-an-app.md`).
+- 2026-10-02, 2.3.0: the in-place update (bundle AX-2.8, AX-3.2) run by Kyle with NVDA from an older build, with no
+  file open: one progress bar through download and install, "Installed. Restarting", AxDown back empty as it was,
+  About naming 2.3.0. Test plan section 7.2 passed.
