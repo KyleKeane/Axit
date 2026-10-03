@@ -11,7 +11,7 @@
     <ApplicationVisualStyles>true</ApplicationVisualStyles>
     <InvariantGlobalization>true</InvariantGlobalization>
     <ApplicationIcon>AxClaude.ico</ApplicationIcon>
-    <Version>2.1.1</Version>
+    <Version>2.2.0</Version>
     <Product>Axit</Product>
     <Description>Accessible Windows apps for screen reader users: AxClaude, a front end for the Claude Code CLI, and AxDown, a text editor</Description>
     <Authors>Dr. Kyle Keane</Authors>
