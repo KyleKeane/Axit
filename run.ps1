@@ -1,28 +1,35 @@
 <#
 .SYNOPSIS
-  Builds AxClaude and starts it on a project folder.
+  Builds Axit and starts one of its apps: AxClaude on a project folder (the default), or AxDown on a file.
 
 .EXAMPLE
-  .\run.ps1                       # current folder is the project
-  .\run.ps1 C:\src\myproject      # that folder is the project
+  .\run.ps1                                  # AxClaude on the current folder
+  .\run.ps1 C:\src\myproject                 # AxClaude on that folder
   .\run.ps1 C:\src\myproject -- --resume     # extra arguments go to claude (default: --continue)
   .\run.ps1 C:\src\myproject -New            # a new conversation (PowerShell swallows a bare --)
-  .\run.ps1 -NoBuild              # skip the build, just start
-  .\run.ps1 -Test                 # run the unit tests instead
+  .\run.ps1 -App down C:\notes\todo.md       # AxDown on that file (run-axdown.ps1 says the same)
+  .\run.ps1 -App down                        # AxDown with an empty document
+  .\run.ps1 -NoBuild                         # skip the build, just start
+  .\run.ps1 -Test                            # run the unit tests instead
 
+  run-axclaude.ps1 and run-axdown.ps1 next to this script pass -App for you and take the same other arguments.
   If PowerShell refuses to run scripts: powershell -ExecutionPolicy Bypass -File .\run.ps1
+  Close a running Axit first: the build writes into the folder it holds open.
 #>
 [CmdletBinding()]
 param(
+    # The app to start: the verb Axit.exe takes (docs/axit/SPEC.md AX-1). AxClaude unless said otherwise.
+    [ValidateSet('claude', 'down')]
+    [string]$App = 'claude',
+
+    # AxClaude's project folder (default: the current folder), or AxDown's file (default: an empty document).
     [Parameter(Position = 0)]
-    [string]$Project = (Get-Location).Path,
+    [Alias('Project')]
+    [string]$Path,
 
     [switch]$NoBuild,
     [switch]$Test,
     [switch]$New,
-
-    # Start AxDown on this file instead of AxClaude on the project folder.
-    [string]$Down,
 
     [Parameter(ValueFromRemainingArguments = $true)]
     [string[]]$ClaudeArgs
@@ -51,20 +58,25 @@ if (-not (Test-Path $exe)) {
     exit 1
 }
 
-# Axit.exe holds every app of the bundle; the verb picks the app (docs/axit/SPEC.md AX-1).
-if ($Down) {
-    Write-Host "Starting AxDown on $Down"
-    & $exe down $Down
+if ($App -eq 'down') {
+    if ($Path) {
+        Write-Host "Starting AxDown on $Path"
+        & $exe down $Path
+    } else {
+        Write-Host "Starting AxDown"
+        & $exe down
+    }
     exit $LASTEXITCODE
 }
 
-$Project = (Resolve-Path $Project).Path
-Write-Host "Starting AxClaude on $Project"
+if (-not $Path) { $Path = (Get-Location).Path }
+$Path = (Resolve-Path $Path).Path
+Write-Host "Starting AxClaude on $Path"
 if ($New) {
     # A bare -- never reaches the app: PowerShell takes it as the end of the script's own parameters.
-    & $exe claude $Project '--'
+    & $exe claude $Path '--'
 } elseif ($ClaudeArgs -and $ClaudeArgs.Count -gt 0) {
-    & $exe claude $Project '--' @ClaudeArgs
+    & $exe claude $Path '--' @ClaudeArgs
 } else {
-    & $exe claude $Project
+    & $exe claude $Path
 }

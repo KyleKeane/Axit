@@ -1,5 +1,9 @@
 # Changelog
 
+## Unreleased
+
+- For developers: `run-axclaude.ps1` and `run-axdown.ps1` build Axit and start one app; both call `run.ps1 -App claude|down`, which on its own starts AxClaude.
+
 ## 2.1.1 - 2026-10-02
 
 - AxDown: NVDA now speaks the window when it opens ("README.md - AxDown window") before the text field, as it does for AxClaude. The window had no accessible role, so NVDA passed over it.

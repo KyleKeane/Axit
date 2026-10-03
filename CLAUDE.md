@@ -13,7 +13,7 @@ Specifications are the source of truth: `docs/axit/SPEC.md` for the bundle (laun
 
 ## Commands
 
-`dotnet build Axit.sln`, `dotnet test Axit.sln`; `run.ps1 <folder>` builds `src/Axit` and starts AxClaude there (`-New`, `-NoBuild`, `-Test`), `run.ps1 -Down <file>` starts AxDown; `Axit.exe claude|down …`, or a folder or file alone, picks the app. Each app's own commands are in its `CLAUDE.md`. Bundle-level scripts: `publish.ps1` (self-contained exe + installer + guide into `publish\`, zip, install for this user; `-NoInstall`), `install.ps1` and `install.cmd` (per-user install, `-Uninstall`), `release.ps1 <version>` (after a `## <version>` section in `CHANGELOG.md`: tests, version, commit, tag, push; GitHub Actions publishes the release the apps update from), `gh run watch`, `tools/make-icon.ps1`.
+`dotnet build Axit.sln`, `dotnet test Axit.sln`; `run.ps1 [-App claude|down] [<path>]` builds `src/Axit` and starts one app (AxClaude on a folder by default; `-New`, `-NoBuild`, `-Test`), and `run-axclaude.ps1` and `run-axdown.ps1` are the same with `-App` filled in; `Axit.exe claude|down …`, or a folder or file alone, picks the app. Each app's own commands are in its `CLAUDE.md`. Bundle-level scripts: `publish.ps1` (self-contained exe + installer + guide into `publish\`, zip, install for this user; `-NoInstall`), `install.ps1` and `install.cmd` (per-user install, `-Uninstall`), `release.ps1 <version>` (after a `## <version>` section in `CHANGELOG.md`: tests, version, commit, tag, push; GitHub Actions publishes the release the apps update from), `gh run watch`, `tools/make-icon.ps1`.
 
 ## The apps and where their notes are
 

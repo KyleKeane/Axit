@@ -5,7 +5,8 @@ The WinForms side of AxDown: one plain edit control named after the file, a menu
 ## Commands
 
 ```
-.\run.ps1 -Down C:\path\to\notes.md      # build Axit and start AxDown on the file (close a running Axit first)
+.\run-axdown.ps1 C:\path\to\notes.md     # build Axit and start AxDown on the file (run.ps1 -App down; close a running Axit first)
+.\run-axdown.ps1                         # an empty document
 dotnet build Axit.sln
 dotnet test tests/AxDown.Tests/AxDown.Tests.csproj
 ```

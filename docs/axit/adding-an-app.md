@@ -57,7 +57,8 @@ its tests, then the window, then the installer.
 - `src/Axit/Program.cs`: `case Dispatch.AxThing: SetAppId("Axit.AxThing"); AxThingApp.Run(launch.Arguments);`.
 - `src/Axit/Axit.csproj`: the project reference. `Axit.sln`: the two projects (`dotnet sln add`).
 - `tests/Axit.Tests`: the project reference and the window's table in `KeyTests.Windows`.
-- `run.ps1`: a way to start the app in development, if a file or folder argument does not already reach it.
+- `run.ps1`: the verb in `-App`'s `ValidateSet` and a branch that starts it; a `run-axthing.ps1` next to the
+  others that calls `run.ps1 -App thing @args`.
 
 ## 6. Installer and release
 

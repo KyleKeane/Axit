@@ -5,8 +5,8 @@ The WinForms side of AxClaude: the window that hosts Claude Code's screen reader
 ## Commands
 
 ```
-.\run.ps1 "C:\path\to\project"          # build and start the app (run.ps1 for -NoBuild, -Test, -- claude args)
-.\run.ps1 "C:\path" -New                # a new conversation instead of the default --continue (PowerShell swallows a bare --)
+.\run-axclaude.ps1 "C:\path\to\project"  # build Axit and start AxClaude there (run.ps1 -App claude, the default; -NoBuild, -Test, -- claude args)
+.\run-axclaude.ps1 "C:\path" -New        # a new conversation instead of the default --continue (PowerShell swallows a bare --)
 dotnet build Axit.sln
 dotnet test Axit.sln
 AXCLAUDE_UPDATE_EXPECTED=1 dotnet test   # regenerate tests/fixtures/*.expected.txt after a deliberate parser change; review the diff
