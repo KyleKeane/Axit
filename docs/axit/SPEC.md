@@ -87,10 +87,14 @@ allow it, see B-9).
 ### AX-3 Updates
 
 - AX-3.1 One version for the bundle, `<Version>` in `src/Axit/Axit.csproj`. A newer GitHub release is offered as
-  AxClaude does today (`docs/axclaude/SPEC.md` FR-1.10, D25): asked once at startup when the setting is on, a notice
-  with the release notes, Update now, Open release page, Later. Each app's Help menu has the same items.
-- AX-3.2 Update now downloads the zip into `%LOCALAPPDATA%\Axit\updates\<version>` and hands over to the downloaded
-  version's `install.ps1` (AX-2.7). A download counts as complete when it holds `install.ps1` and a program file.
+  AxClaude does (`docs/axclaude/SPEC.md` FR-1.10, D25): asked once at startup when the setting is on, a notice with
+  the release notes and four buttons: Update and restart (Enter), Update and close, Open release page, Later
+  (Escape). Each app's Help menu has the same items.
+- AX-3.2 Either update downloads the zip into `%LOCALAPPDATA%\Axit\updates\<version>` behind a notice with a
+  progress bar (`Notice.Progress`; NVDA reports a progress bar by its own settings, so nothing is spoken about the
+  progress) and a Cancel button that keeps the installed version, then closes the window and hands over to the
+  downloaded version's `install.ps1` (AX-2.7), which starts the app again after Update and restart and not after
+  Update and close. A download counts as complete when it holds `install.ps1` and a program file.
 - AX-3.3 The 1.7.0 bridge (B-6): AxClaude 1.7.0 accepts a download whose program file is not `AxClaude.exe`, so an
   installed AxClaude updates into Axit through Help, Update now. The first Axit release is 2.0.0.
 - AX-3.4 The update check and the version comparison are pure code in `Axit.Core/Updates/UpdateCheck`, unit tested;

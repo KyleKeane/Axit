@@ -44,6 +44,13 @@ public sealed record Notice(string Title, string Text, IReadOnlyList<OverlayChoi
     /// </summary>
     public bool Unprompted { get; init; }
 
+    /// <summary>
+    /// A progress bar under the text, for a download (bundle AX-3.2). The window moves it with
+    /// <see cref="OverlayPanel.SetProgress"/>; NVDA reports a progress bar the way it reports every other one, by its
+    /// own settings (beeps or percentages), so the notice says nothing of its own about the progress.
+    /// </summary>
+    public bool Progress { get; init; }
+
     /// <summary>A read-only text with a Close button: help texts, About and errors.</summary>
     public static Notice Plain(string title, string text) => new(title, text, [OverlayChoice.Close]);
 }
@@ -82,6 +89,7 @@ public sealed class OverlayPanel : Panel
     private readonly TextBox _custom = new();
     private readonly List<RadioButton> _presets = [];
     private readonly FlowLayoutPanel _buttons = new();
+    private readonly ProgressBar _progress = new();
     private OverlayInput? _inputSpec;
     private OverlaySession? _sessionSpec;
     private long _holdUntil;
@@ -183,10 +191,19 @@ public sealed class OverlayPanel : Panel
         _buttons.Padding = new Padding(0, 6, 0, 0);
         _buttons.TabIndex = 5;
 
+        // A download's progress bar (Notice.Progress), above the buttons; hidden otherwise.
+        _progress.Dock = DockStyle.Bottom;
+        _progress.Height = 22;
+        _progress.Minimum = 0;
+        _progress.Maximum = 100;
+        _progress.AccessibleName = "Progress";
+        _progress.Visible = false;
+
         // Docked controls are laid out from the last in the collection to the first: the buttons take the bottom,
-        // the title the top, the field the strip under the title, then the text takes what is left, or, in a New
-        // session notice, a strip of a few lines with the session controls filling the rest under it.
-        Controls.AddRange([_session, _text, _inputRow, _title, _buttons]);
+        // the progress bar the strip above them, the title the top, the field the strip under the title, then the
+        // text takes what is left, or, in a New session notice, a strip of a few lines with the session controls
+        // filling the rest under it.
+        Controls.AddRange([_session, _text, _inputRow, _title, _progress, _buttons]);
     }
 
     /// <summary>A button was pressed. The window closes the notice (unless the choice stays open) and runs its action.</summary>
@@ -255,6 +272,12 @@ public sealed class OverlayPanel : Panel
         }
 
         SetText();
+        _progress.Visible = notice.Progress;
+        if (notice.Progress)
+        {
+            _progress.Style = ProgressBarStyle.Marquee;
+        }
+
         _inputRow.Visible = input is not null;
         if (input is not null)
         {
@@ -301,6 +324,19 @@ public sealed class OverlayPanel : Panel
                 CancelButton = button;
             }
         }
+    }
+
+    /// <summary>The progress bar of a <see cref="Notice.Progress"/> notice: 0 to 100, or a marquee while the total is unknown (below 0).</summary>
+    public void SetProgress(int percent)
+    {
+        if (percent < 0)
+        {
+            _progress.Style = ProgressBarStyle.Marquee;
+            return;
+        }
+
+        _progress.Style = ProgressBarStyle.Blocks;
+        _progress.Value = Math.Clamp(percent, 0, 100);
     }
 
     /// <summary>The folder chosen through the Choose folder button: the first line of the text changes and is spoken.</summary>

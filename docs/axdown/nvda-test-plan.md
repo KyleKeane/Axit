@@ -63,7 +63,13 @@ letter), and a `long.md` with headings and lines longer than the window.
 ## 7. Updates and uninstall
 
 1. Help, Check for updates reports in a notice either way.
-2. Settings, Apps, Axit, Uninstall removes AxDown's Start entry, its file menu entries, Open with, and `axdown.cmd`
+2. With an older build installed (set `<Version>` in `src/Axit/Axit.csproj` below the latest release, `.\publish.ps1`,
+   set it back), open a file: the notice "Update to Axit <newest>" opens by itself with four buttons. Enter (Update
+   and restart): the notice "Downloading Axit <newest>" with a progress bar that NVDA reports by its progress bar
+   settings; "Downloaded. Restarting to update"; AxDown closes and comes back on the same file, Help, About naming
+   the newest version. Again with the older build: Escape during the download says "Update cancelled" and keeps the
+   version; Update and close installs without AxDown coming back.
+3. Settings, Apps, Axit, Uninstall removes AxDown's Start entry, its file menu entries, Open with, and `axdown.cmd`
    together with everything else of Axit; `%APPDATA%\Axit\axdown.json` stays.
 
 ## 8. Navigation (from the version with section 9 of the spec)

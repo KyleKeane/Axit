@@ -46,6 +46,7 @@ internal sealed class EditorForm : Form
     private ReleaseInfo? _update;
     private bool _updateBusy;
     private string? _updateFolder;
+    private bool _restartAfterUpdate = true;
 
     public EditorForm(string? path, EditorSettings settings, string? settingsError)
     {
@@ -194,9 +195,9 @@ internal sealed class EditorForm : Form
         SaveSettings();
         if (_updateFolder is { } update)
         {
-            // AX-3.2: the downloaded version's installer waits for this process to end, installs and starts AxDown
-            // again on the file (none for an unnamed document).
-            Updater.LaunchInstaller(update, projectFolder: null, continueConversation: false, file: _path);
+            // AX-3.2: the downloaded version's installer waits for this process to end, installs and, after Update
+            // and restart, starts AxDown again on the file (none for an unnamed document).
+            Updater.LaunchInstaller(update, projectFolder: null, continueConversation: false, file: _restartAfterUpdate ? _path : null);
         }
 
         base.OnFormClosing(e);
@@ -1003,12 +1004,13 @@ internal sealed class EditorForm : Form
         var text =
             $"You have Axit {BundleInfo.Version}. Axit {version} is available.\n\n" +
             (release.Notes.Length > 0 ? release.Notes + "\n\n" : string.Empty) +
-            $"Update now downloads the new version, closes {AppName} (asking first when there are unsaved changes), installs it " +
-            $"and starts it again on the same file.{size}\n" +
+            $"Update and restart downloads the new version, closes {AppName} (asking first when there are unsaved changes), installs it " +
+            $"and starts it again on the same file. Update and close installs without starting it again. A progress bar shows the download.{size}\n" +
             "Later keeps this version; the Help menu offers the update again.";
         ShowNotice(new Notice($"Update to Axit {version}", text,
         [
-            new OverlayChoice("&Update now", () => InstallUpdate(release), IsDefault: true),
+            new OverlayChoice("Update and &restart", () => InstallUpdate(release, restart: true), IsDefault: true),
+            new OverlayChoice("Update and &close", () => InstallUpdate(release, restart: false)),
             new OverlayChoice("&Open release page", () => OpenUrl(release.PageUrl), StaysOpen: true),
             new OverlayChoice("&Later", IsCancel: true),
         ])
@@ -1017,7 +1019,8 @@ internal sealed class EditorForm : Form
         });
     }
 
-    private async void InstallUpdate(ReleaseInfo release)
+    /// <summary>Downloads the release behind a notice with a progress bar (Cancel stops it), then closes; OnFormClosing hands over to the installer.</summary>
+    private async void InstallUpdate(ReleaseInfo release, bool restart)
     {
         if (_updateBusy)
         {
@@ -1027,20 +1030,38 @@ internal sealed class EditorForm : Form
         _updateBusy = true;
         _updateItem.Enabled = false;
         var version = release.Version.ToString(3);
-        Announce($"Downloading Axit {version}", true);
+        var size = release.ZipSize > 0 ? $" ({release.ZipSize / (1024.0 * 1024.0):0} MB)" : string.Empty;
+        using var cancellation = new CancellationTokenSource(TimeSpan.FromMinutes(10));
+        var cancelled = false;
+        ShowNotice(new Notice($"Downloading Axit {version}",
+            $"The download{size} is under way; the progress bar shows how far it is. Cancel keeps this version.",
+        [
+            new OverlayChoice("&Cancel", () =>
+            {
+                cancelled = true;
+                cancellation.Cancel();
+            }, IsDefault: true, IsCancel: true),
+        ])
+        {
+            Progress = true,
+        });
         try
         {
-            using var cancellation = new CancellationTokenSource(TimeSpan.FromMinutes(10));
-            var folder = await Updater.DownloadAsync(release, cancellation.Token);
+            var folder = await Updater.DownloadAsync(release, cancellation.Token, new Progress<int>(_overlay.SetProgress));
             if (IsDisposed)
             {
                 return;
             }
 
             _updateFolder = folder;
-            Log.Info($"Update {release.Tag} downloaded to {folder}");
-            Announce("Downloaded. Closing to update", true);
+            _restartAfterUpdate = restart;
+            Log.Info($"Update {release.Tag} downloaded to {folder}; restart: {restart}");
+            Announce(restart ? "Downloaded. Restarting to update" : "Downloaded. Closing to update", true);
             Close();
+        }
+        catch (OperationCanceledException) when (cancelled && !IsDisposed)
+        {
+            Announce("Update cancelled", true);
         }
         catch (Exception ex) when (ex is HttpRequestException or TaskCanceledException or IOException or InvalidOperationException or UnauthorizedAccessException)
         {

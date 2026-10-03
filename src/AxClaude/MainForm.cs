@@ -104,6 +104,7 @@ internal sealed class MainForm : Form
     private ReleaseInfo? _latest;
     private string _latestState = "not checked yet";
     private string? _updateFolder;
+    private bool _restartAfterUpdate = true;
     private bool _updateBusy;
 
     public MainForm(StartupOptions options, AppSettings settings, string? settingsError)
@@ -221,8 +222,9 @@ internal sealed class MainForm : Form
         SaveSettings();
         if (_updateFolder is { } update)
         {
-            // FR-1.10: the downloaded version's installer waits for this process to end, installs and starts AxClaude again.
-            Updater.LaunchInstaller(update, _folder, continueConversation: _messageSent);
+            // FR-1.10: the downloaded version's installer waits for this process to end, installs and, after Update
+            // and restart, starts AxClaude again on the folder.
+            Updater.LaunchInstaller(update, _restartAfterUpdate ? _folder : null, continueConversation: _restartAfterUpdate && _messageSent);
         }
 
         base.OnFormClosing(e);
@@ -2260,7 +2262,9 @@ internal sealed class MainForm : Form
         var stops = ClaudeBusy ? "Claude stops in the middle of its work" : "the background work stops";
         var consequence = _updateFolder is null
             ? $"If you close now, {stops}."
-            : $"If you close now, {stops} and the update is installed.";
+            : _restartAfterUpdate
+                ? $"If you close now, {stops}, the update is installed and AxClaude starts again."
+                : $"If you close now, {stops} and the update is installed.";
         ShowNotice(new Notice("Close AxClaude?",
             $"{state}. {consequence}\n" +
             "What is done so far is saved. Start AxClaude again to carry on.",
@@ -2404,12 +2408,14 @@ internal sealed class MainForm : Form
         var text =
             $"You have AxClaude {BundleInfo.Version}. AxClaude {version} is available.\n\n" +
             (release.Notes.Length > 0 ? release.Notes + "\n\n" : string.Empty) +
-            "Update now downloads the new version, closes AxClaude, installs it and starts it again on the same folder. " +
-            $"The conversation is picked up again if one is open.{size}\n" +
+            "Update and restart downloads the new version, closes AxClaude, installs it and starts it again on the same folder; " +
+            "the conversation is picked up again if one is open. Update and close installs without starting it again. " +
+            $"A progress bar shows the download.{size}\n" +
             "Later keeps this version; the Help menu offers the update again.";
         ShowNotice(new Notice($"Update to AxClaude {version}", text,
         [
-            new OverlayChoice("&Update now", () => InstallUpdate(release), IsDefault: true),
+            new OverlayChoice("Update and &restart", () => InstallUpdate(release, restart: true), IsDefault: true),
+            new OverlayChoice("Update and &close", () => InstallUpdate(release, restart: false)),
             new OverlayChoice("&Open release page", () => OpenUrl(release.PageUrl), StaysOpen: true),
             new OverlayChoice("&Later", IsCancel: true),
         ])
@@ -2419,10 +2425,12 @@ internal sealed class MainForm : Form
     }
 
     /// <summary>
-    /// Update now: downloads and extracts the release, then closes the window. The close question of FR-1.7 still
-    /// applies while Claude works; on the way out, OnFormClosing starts the new version's installer.
+    /// Update and restart, or Update and close: downloads and extracts the release behind a notice with a progress
+    /// bar (Cancel stops the download), then closes the window. The close question of FR-1.7 still applies while
+    /// Claude works; on the way out, OnFormClosing starts the new version's installer, which starts AxClaude again
+    /// when <paramref name="restart"/> was chosen.
     /// </summary>
-    private async void InstallUpdate(ReleaseInfo release)
+    private async void InstallUpdate(ReleaseInfo release, bool restart)
     {
         if (_updateBusy)
         {
@@ -2432,22 +2440,43 @@ internal sealed class MainForm : Form
         _updateBusy = true;
         _updateItem.Enabled = false;
         var version = release.Version.ToString(3);
-        Announce($"Downloading AxClaude {version}", true);
+        var size = release.ZipSize > 0 ? $" ({release.ZipSize / (1024.0 * 1024.0):0} MB)" : string.Empty;
         _model.AddSystemLine($"Downloading AxClaude {version}...");
+        using var cancellation = new CancellationTokenSource(TimeSpan.FromMinutes(10));
+        var cancelled = false;
+        ShowNotice(new Notice($"Downloading AxClaude {version}",
+            $"The download{size} is under way; the progress bar shows how far it is. Cancel keeps this version.",
+        [
+            new OverlayChoice("&Cancel", () =>
+            {
+                cancelled = true;
+                cancellation.Cancel();
+            }, IsDefault: true, IsCancel: true),
+        ])
+        {
+            Progress = true,
+        });
         try
         {
-            using var cancellation = new CancellationTokenSource(TimeSpan.FromMinutes(10));
-            var folder = await Updater.DownloadAsync(release, cancellation.Token);
+            var folder = await Updater.DownloadAsync(release, cancellation.Token, new Progress<int>(_overlay.SetProgress));
             if (IsDisposed)
             {
                 return;
             }
 
             _updateFolder = folder;
-            Log.Info($"Update {release.Tag} downloaded to {folder}");
-            _model.AddSystemLine($"AxClaude {version} downloaded. AxClaude closes now, installs it and starts again.");
-            Announce("Downloaded. Restarting to update", true);
+            _restartAfterUpdate = restart;
+            Log.Info($"Update {release.Tag} downloaded to {folder}; restart: {restart}");
+            _model.AddSystemLine(restart
+                ? $"AxClaude {version} downloaded. AxClaude closes now, installs it and starts again."
+                : $"AxClaude {version} downloaded. AxClaude closes now and installs it.");
+            Announce(restart ? "Downloaded. Restarting to update" : "Downloaded. Closing to update", true);
             Close();
+        }
+        catch (OperationCanceledException) when (cancelled && !IsDisposed)
+        {
+            _model.AddSystemLine($"The download of AxClaude {version} was cancelled.");
+            Announce("Update cancelled", true);
         }
         catch (Exception ex) when (ex is HttpRequestException or TaskCanceledException or IOException or InvalidOperationException or UnauthorizedAccessException)
         {

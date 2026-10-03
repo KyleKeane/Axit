@@ -24,9 +24,10 @@ public static class Updater
 
     /// <summary>
     /// Downloads and extracts the release's zip and returns the folder that holds the new program file and install.ps1.
-    /// A complete earlier download of the same version is reused.
+    /// A complete earlier download of the same version is reused. <paramref name="progress"/>, when given, hears the
+    /// percentage downloaded each time it changes (the window shows it on a progress bar, AX-3.2).
     /// </summary>
-    public static async Task<string> DownloadAsync(ReleaseInfo release, CancellationToken cancellation)
+    public static async Task<string> DownloadAsync(ReleaseInfo release, CancellationToken cancellation, IProgress<int>? progress = null)
     {
         if (release.ZipUrl is null)
         {
@@ -61,8 +62,43 @@ public static class Updater
         using (var response = await Http.GetAsync(release.ZipUrl, HttpCompletionOption.ResponseHeadersRead, cancellation).ConfigureAwait(false))
         {
             response.EnsureSuccessStatusCode();
-            await using var file = File.Create(zip);
-            await response.Content.CopyToAsync(file, cancellation).ConfigureAwait(false);
+            var total = response.Content.Headers.ContentLength ?? release.ZipSize;
+            try
+            {
+                await using var file = File.Create(zip);
+                await using var stream = await response.Content.ReadAsStreamAsync(cancellation).ConfigureAwait(false);
+                var buffer = new byte[64 * 1024];
+                long done = 0;
+                var lastPercent = -1;
+                int read;
+                while ((read = await stream.ReadAsync(buffer, cancellation).ConfigureAwait(false)) > 0)
+                {
+                    await file.WriteAsync(buffer.AsMemory(0, read), cancellation).ConfigureAwait(false);
+                    done += read;
+                    if (progress is not null && total > 0)
+                    {
+                        var percent = (int)Math.Min(100, done * 100 / total);
+                        if (percent != lastPercent)
+                        {
+                            lastPercent = percent;
+                            progress.Report(percent);
+                        }
+                    }
+                }
+            }
+            catch
+            {
+                // A partial zip must not be taken for a download next time (the file is closed by now).
+                try
+                {
+                    File.Delete(zip);
+                }
+                catch (IOException)
+                {
+                }
+
+                throw;
+            }
         }
 
         if (Directory.Exists(folder))

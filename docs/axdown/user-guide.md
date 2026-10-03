@@ -56,7 +56,7 @@ Everything you change is saved in `%APPDATA%\Axit\axdown.json`: the font, the te
 
 ## Updates
 
-New versions of Axit are published on GitHub, and every app of Axit updates together. When AxDown starts, it asks GitHub once whether there is a newer one; if there is, a notice opens: Enter updates, Escape keeps the version you have. Update now downloads the new version, closes AxDown, installs it and starts it again on the same file. Help, "Check for updates" asks at any time.
+New versions of Axit are published on GitHub, and every app of Axit updates together. When AxDown starts, it asks GitHub once whether there is a newer one; if there is, a notice opens with four buttons. Update and restart (Enter) downloads the new version, closes AxDown (asking first about unsaved changes), installs it and starts it again on the same file; Update and close installs it without starting it again. While the download runs, a notice shows a progress bar, which NVDA reports the way it reports any progress bar (beeps or percentages, by your NVDA settings); Escape cancels the download and keeps the version you have. Open release page opens it in the browser; Later keeps the version you have. Help, "Check for updates" asks at any time.
 
 ## If something goes wrong
 
