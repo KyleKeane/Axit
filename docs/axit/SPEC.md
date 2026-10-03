@@ -25,7 +25,7 @@ editor, an AI-assisted editor) and follow the same pattern without changes to th
   This is what makes the repository workable for smaller AI models and cheap to extend.
 - **G4 Plain code.** Zero third-party runtime dependencies, as AxClaude always had, and no coding paradigm that a
   smaller model would struggle to edit: plain classes, static methods, one obvious way to do each thing.
-- **G5 Nothing breaks on the way.** AxClaude works as released; the transition keeps it working at every commit.
+- **G5 Nothing breaks.** AxClaude behaves as released; every commit builds and passes the tests, and a change to a window is checked with NVDA before it is released.
 
 Non-goals: a plugin system or loading apps from separate files (apps are compiled in); more than one window per
 process; an installer that needs administrator rights; setting Windows default programs silently (Windows does not
@@ -35,7 +35,7 @@ allow it, see B-9).
 
 - **AxClaude** (built): `Axit.exe claude [<folder>] [options]`, Start entry `Axit AxClaude`, `Open in AxClaude` on
   folders, command `axclaude`. Specification `docs/axclaude/SPEC.md`.
-- **AxDown** (specified at step 6, built at steps 7 to 9): `Axit.exe down [<file>]`, Start entry `Axit AxDown`,
+- **AxDown**: `Axit.exe down [<file>]`, Start entry `Axit AxDown`,
   `Open in AxDown` on files and Open with for `.md`, `.markdown`, `.txt`, command `axdown`. Specification
   `docs/axdown/SPEC.md`, guide `docs/axdown/user-guide.md`, test plan `docs/axdown/nvda-test-plan.md`.
 
@@ -68,7 +68,7 @@ allow it, see B-9).
   settings and the logs. This is AxClaude's installer today (`docs/axclaude/SPEC.md` FR-8.7, D18) with the names changed.
 - AX-2.2 Start menu: one shortcut per app, named `Axit <App>` (`Axit AxClaude`, `Axit AxDown`), each starting
   `Axit.exe <verb>` with the app's icon. Windows search matches the start of each word, so `axc` and `axd` find them
-  and `axit` lists them; this is checked by hand at step 5 and the names change to `<App> (Axit)` if it does not hold.
+  and `axit` lists them (checked).
 - AX-2.3 File Explorer: `Open in AxClaude` on folders and on a folder's background (`Axit.exe claude "%1"`, `%V` for
   the background); `Open in AxDown` on every file (`Axit.exe down "%1"`); AxDown registered as a program for `.md`,
   `.markdown` and `.txt`, so it appears under Open with and can be chosen as the default in Settings, Default apps
@@ -82,7 +82,7 @@ allow it, see B-9).
   file is left where it is; the app copies it on its first start (AX-5.2).
 - AX-2.7 The hand-over parameters stay: `install.ps1 -WaitForProcess <pid> -Start <folder> [-ContinueConversation]
   -LogFile <file>` installs after that process ends and starts AxClaude on the folder, as the 1.7.0 updater expects.
-  `-StartFile <file>` (step 9) starts AxDown on the file the same way; nothing is renamed. Copies up to 2.2.0 update
+  `-StartFile <file>` starts AxDown on the file the same way; nothing is renamed. Copies up to 2.2.0 update
   this way; from 2.3.0 the apps use AX-2.8.
 - AX-2.8 In place: `install.ps1 -InPlace -LogFile <file>` installs while the app keeps running. Nothing is removed;
   the new files are written over the old ones; the running `Axit.exe` is first renamed `Axit.old.exe` (a running
@@ -134,10 +134,10 @@ allow it, see B-9).
 
 ### AX-6 Shared pieces
 
-- AX-6.1 `Axit.Core` (pure, unit tested; built at step 4): `Dispatch`, `BundleInfo`, `AppPaths`, `SettingsFile`,
+- AX-6.1 `Axit.Core` (pure, unit tested): `Dispatch`, `BundleInfo`, `AppPaths`, `SettingsFile`,
   `Log` (per-app file name), `Updates/` (`UpdateCheck`, the release check, and `Updater`, the download and the
   hand-over to `install.ps1`; neither needs a window), `Audio/WaveTone` (the sounds as WAV bytes).
-- AX-6.2 `Axit.Forms` (WinForms, no tests, checked with NVDA; built at step 8): `OverlayPanel` (the notices in the
+- AX-6.2 `Axit.Forms` (WinForms, no tests, checked with NVDA): `OverlayPanel` (the notices in the
   window, with the `Notice` record callers pass), `ControlArea` and `ListKeys` (a question's answers as a list or a
   field in the input field's place, with the number and page keys of every such list), `Sounds` (one wave-out device
   for the life of the process), `EditPaging` (Page Up and Page Down in an edit control), `StatusLayout`, the font
@@ -156,7 +156,7 @@ allow it, see B-9).
   **window-specific**, meaning something in one window only. Each app's keyboard table in its spec marks every key
   with its kind.
 - AX-8.2 Bundle-wide keys are defined once, in `Axit.Forms/BundleKeys`, a plain static class of constants, and every
-  window uses those constants. The list, settled with the AxDown spec (step 6): F1 the keyboard shortcuts; Tab,
+  window uses those constants. The list: F1 the keyboard shortcuts; Tab,
   Shift+Tab, Ctrl+Tab, Ctrl+Shift+Tab and F6 move between the window's controls (and between a notice's text, field
   and buttons); Ctrl+F find, F3 and Shift+F3 next and previous; Ctrl+S save (what the window holds: a conversation,
   a file); Ctrl+Plus and Ctrl+Minus text size; Enter and Escape on a notice; Page Up and Page Down one screen in an
@@ -244,7 +244,7 @@ docs/axdown/            SPEC.md, user-guide.md (embedded by src/AxDown), nvda-te
 - **B-2 Apps are class libraries with one entry point.** `Axit`'s `Program` stays the only `Main`; each app is
   `<App>App.Run(args)`. One process shows one window; that keeps the apps apart for the taskbar, Alt+Tab and NVDA.
 - **B-3 Shared code moves on the second use, unchanged.** Nothing is generalised on a guess, and moving code as it is
-  keeps AxClaude's behaviour identical through the transition (G5).
+  kept AxClaude's behaviour identical when it became one app of the bundle (G5).
 - **B-4 Names.** The bundle is Axit; the apps keep their names; Start entries are `Axit <App>` so that the bundle
   name groups them and the app name is still a word that search matches.
 - **B-5 Settings and logs per app, under `Axit`.** One folder for the bundle, one file per app, so an app's settings
@@ -264,42 +264,22 @@ docs/axdown/            SPEC.md, user-guide.md (embedded by src/AxDown), nvda-te
 - **B-10 Plain code only.** Plain classes, static methods, records for data, one way to do each thing. No dependency
   injection, no interfaces with one implementation, no reflection beyond the two reads WinForms needs, no source
   generators, no NuGet packages. This is what lets a smaller model make a change without reading the whole code.
-- **B-11 The transition runs on the branch `axit`.** `main` stays AxClaude 1.7.0 and releasable until 2.0.0 is
-  checked with NVDA; every commit on the branch builds and passes the tests.
+- **B-11 Releases go from `main`; larger work runs on a branch.** `main` is always releasable; a branch merges when
+  its NVDA checks have passed. The transition to the bundle ran this way on the branch `axit`.
 - **B-12 Keys are tables, in two kinds.** Several windows will want the same letters, and a key that means one thing
   in one window and another in the next is what a screen reader user feels first. Every key is either bundle-wide or
   window-specific (AX-8); the tables make a collision visible in a test and a change a one-line edit, which is what a
   smaller model needs when the keys have to move.
 - **B-13 The notices and the question area are shared, not copied.** They work and they are what the user knows;
-  every window asks the same way (AX-6.4). They move to `Axit.Forms` unchanged when AxDown needs them (step 8).
+  every window asks the same way (AX-6.4). They moved to `Axit.Forms` unchanged when AxDown needed them (2.0.0).
 
 ## 7. Status
 
-- 2026-10-02: plan written (`docs/axit/plan.md`); AxClaude's documents moved to `docs/axclaude/`; the notes split per
-  project; this specification written. 1.7.0 (the bridge, B-6) released from `main`.
-- 2026-10-02, step 3: `Axit.exe` exists (`src/Axit`), `src/AxClaude` is a class library with `AxClaudeApp.Run`,
-  `Axit.Core/Dispatch` decides the app and is tested in `tests/Axit.Tests`; `Axit.sln`, `run.ps1` and `build.yml`
-  follow. `publish.ps1`, `install.ps1` and the release pipeline still carry AxClaude's names and are not usable on
-  the branch until step 5.
-- 2026-10-02, step 4: `Axit.Core` holds `AppPaths`, `SettingsFile`, `Log`, `Updates/` and `Audio/WaveTone`;
-  AxClaude's settings file is `%APPDATA%\Axit\axclaude.json` (the 1.x file copied on the first start) and its log
-  `%LOCALAPPDATA%\Axit\logs\axclaude.log`; `tests/Axit.Tests` has `SettingsFileTests` and `LayoutTests`.
-- 2026-10-02, step 5: `install.ps1`, `install.cmd`, `publish.ps1`, `release.ps1` and `release.yml` are the bundle's
-  (`Programs\Axit`, `Axit AxClaude`, `axit` and `axclaude`, the Apps entry `Axit`, `Axit-<version>-win-x64.zip`,
-  `docs/axit/README.md` in the zip); a 1.x installation is removed first. Kyle's checks of the Start menu search,
-  the folder menu and the console commands are pending (AX-2.2).
-- 2026-10-02, steps 6 to 8: AxDown specified (`docs/axdown/`), its pure code and window built; `Axit.Forms` holds
-  the shared window pieces, moved from AxClaude unchanged (AX-6.2), plus `BundleKeys` and `WindowAccessibleObject`;
-  `tests/Axit.Tests/KeyTests` is the collision test (AX-8.4), with AxDown's table in it and AxClaude's to come at
-  step 11. `Axit.exe down <file>` works.
-- 2026-10-02, step 9: the installer adds AxDown's Start entry, "Open in AxDown" on files, the `Axit.AxDown` ProgID
-  under Open with for `.md`, `.markdown` and `.txt`, `axdown.cmd`, and `-StartFile` for the updater; `AxDown.ico` is
-  drawn by `tools/make-icon.ps1` and shipped next to the executable. Kyle's checks (AX-2.2) pending for both apps.
-- 2026-10-02, step 10: Kyle's NVDA checks passed for both apps; the repository was renamed to `KyleKeane/Axit`
-  (B-7); Axit 2.0.0 released from `main`.
-- 2026-10-02, step 11: `AxClaudeKeys` holds AxClaude's keys; the window, the menus and the conversation view read
-  it; the collision test covers both windows (AX-8.4). No key changed.
-- 2026-10-02, 2.1.1 to 2.3.0: AxDown's window role (2.1.1); the update notice with Update and restart, Update and
-  close and a progress bar (2.2.0); the in-place install with one bar for download and install and the restart by
-  the app itself (AX-2.8, AX-3.2; 2.3.0). Kyle ran the full path from an older build to 2.3.0 with NVDA: the bar,
-  "Downloaded. Installing", "Installed. Restarting", AxDown back as it was.
+- 2.0.0 (2026-10-02): the bundle. `Axit.exe` with AxClaude unchanged inside it and AxDown new; `Axit.Core` and
+  `Axit.Forms`; the installer, publish and release scripts for the bundle; the repository renamed `KyleKeane/Axit`.
+  Preceded by AxClaude 1.7.0, the bridge (B-6). Both apps checked with NVDA by Kyle before the release.
+- 2.1.0: the key tables (`AxClaudeKeys`, `AxDownKeys`, `BundleKeys`) with the collision test (AX-8); heading
+  navigation in AxDown. 2.1.1: AxDown's window spoken on opening (`AccessibleRole.Window`).
+- 2.2.0: the update notice with Update and restart, Update and close, and a progress bar for the download.
+- 2.3.0: the in-place install with one bar for download and install and the restart by the app itself (AX-2.8,
+  AX-3.2); Kyle ran the full path from an older build with NVDA. 2.3.1: the documents pruned after the transition.

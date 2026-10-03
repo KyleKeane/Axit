@@ -18,7 +18,7 @@ Where things are:
 .\run-axclaude.ps1 C:\path\to\project      # start on that folder
 .\run-axclaude.ps1 C:\path\to\project -- --resume   # arguments after -- go to claude (default: --continue)
 .\run-axclaude.ps1 C:\path\to\project -New # a new conversation (PowerShell swallows a bare --)
-.\run-axdown.ps1 C:\notes\todo.md          # build, then start AxDown on that file (or no file: an empty document)
+.\run-axdown.ps1 C:\notes\todo.md          # build, then start AxDown on that file (no file: docs\axdown\tutorial.md, the guided tour)
 .\run.ps1 [-App claude|down] [<path>]      # what both scripts call; AxClaude is the default
 .\run.ps1 -NoBuild                         # start without building
 .\run.ps1 -Test                            # run the unit tests

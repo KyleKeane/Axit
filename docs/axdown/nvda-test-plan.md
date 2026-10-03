@@ -1,7 +1,7 @@
 # AxDown NVDA test plan
 
 Manual checks with NVDA running, against `docs/axdown/SPEC.md`. Run the sections a change touches before a release;
-run all of them before the first release of AxDown (plan step 10). Prepare a folder with `plain.txt` (UTF-8, no
+run all of them before a release that changes the window. Prepare a folder with `plain.txt` (UTF-8, no
 mark, CRLF), `bom.md` (UTF-8 with a mark, LF), `wide.txt` (UTF-16 LE), `ansi.txt` (Windows-1252 with an accented
 letter), and a `long.md` with headings and lines longer than the window.
 

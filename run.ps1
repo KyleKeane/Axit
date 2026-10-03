@@ -8,7 +8,7 @@
   .\run.ps1 C:\src\myproject -- --resume     # extra arguments go to claude (default: --continue)
   .\run.ps1 C:\src\myproject -New            # a new conversation (PowerShell swallows a bare --)
   .\run.ps1 -App down C:\notes\todo.md       # AxDown on that file (run-axdown.ps1 says the same)
-  .\run.ps1 -App down                        # AxDown with an empty document
+  .\run.ps1 -App down                        # AxDown with an empty document (run-axdown.ps1 opens the tutorial file instead)
   .\run.ps1 -NoBuild                         # skip the build, just start
   .\run.ps1 -Test                            # run the unit tests instead
 

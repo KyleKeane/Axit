@@ -1,6 +1,6 @@
 # Adding an app to Axit
 
-The checklist for a new app of the bundle, written against what AxDown took (plan steps 6 to 9, 2026-10-02). An app
+The checklist for a new app of the bundle, written against what AxDown took (2026-10-02). An app
 is a window with a verb; everything else below exists so that the app can be built, changed and released without the
 rest of the bundle in context (`docs/axit/SPEC.md` 5.3). Work in this order: the spec first, then the pure code with
 its tests, then the window, then the installer.
@@ -41,7 +41,7 @@ its tests, then the window, then the installer.
   control's page keys, `StatusLayout` for two status labels, `Sounds.Notice` for an unprompted notice,
   `WindowAccessibleObject` from `CreateAccessibilityInstance`. Copy the notice flow (`ShowNotice`, `CloseNotice`,
   `WithKeyLine`, the swallowed shortcuts and Alt/F10 while a notice shows), `Announce`, the font handling, the window
-  placement and the update flow from `EditorForm` until plan step 11 shares them.
+  placement and the update flow from `EditorForm` until a shared window base exists.
 - `AxThingKeys`: the window's keys as constants with an `All` list; handle every key in `ProcessCmdKey` from
   `BundleKeys` and `AxThingKeys` and nowhere else; menu items show the key with `ShortcutKeyDisplayString`.
 - `HelpText`: the F1 text (bundle-wide keys first, then the app's), the embedded guide, the disclaimer.

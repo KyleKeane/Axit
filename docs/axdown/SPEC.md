@@ -213,7 +213,7 @@ tests/AxDown.Tests/ TextDocumentTests (every encoding and line ending case, a ne
 docs/axdown/       this spec, user-guide.md (embedded, Help, User guide), nvda-test-plan.md
 ```
 
-Shared pieces AxDown uses (AX-6, moved to `Axit.Forms` at step 8 one by one): `OverlayPanel` and `Notice`,
+Shared pieces AxDown uses (AX-6): `OverlayPanel` and `Notice`,
 `ControlArea` (the Go to line field), `EditPaging`, `StatusLayout`, the font handling, `Sounds` (the notice chime),
 `BundleKeys`; from `Axit.Core`: `SettingsFile`, `AppPaths`, `Log`, `Updater`, `BundleInfo`.
 
@@ -240,8 +240,8 @@ are read and written on the UI thread (a 32 MB file is the ceiling, AD-3.7).
   users already know from web pages, with Ctrl for the next item and Ctrl+Shift for the previous: H heading, 1 to 6
   a heading of that level, K link, L list, I list item, Q block quote, T table. They are built in that order,
   headings first (Ctrl+H, Ctrl+Shift+H, then the levels), the others as the outline learns them. Known difference:
-  Ctrl+1 and Ctrl+2 move the focus in AxClaude's window; the collision test lists it, and step 11 (AxClaude's key
-  table) is where to decide whether AxClaude's focus keys move. Ctrl+H is otherwise Replace in some editors, which
+  Ctrl+1 and Ctrl+2 move the focus in AxClaude's window; the collision test lists it, and `AxClaudeKeys` is where to
+  decide whether AxClaude's focus keys move. Ctrl+H is otherwise Replace in some editors, which
   AxDown does not have.
 - **AD-D8 No file watching.** The changed-on-disk check at save time catches the case that loses work; a watcher
   would speak at the wrong moments and add a thread.
@@ -255,7 +255,7 @@ UTF-16 LE and BE with marks, Windows-1252, `\r\n`, `\n`, `\r` and no line ending
 bytes, a new document's defaults. The window has no automated tests; `docs/axdown/nvda-test-plan.md` covers it, and
 the off-screen probe approach of AxClaude checks layout and keys without disturbing the user.
 
-## 9. Markdown navigation (headings built in 2.1.0; the rest to come)
+## 9. Markdown navigation (headings since 2.1.0; the other letters follow)
 
 - `AxDown.Core/MarkdownOutline`: from the text and a caret position, the next and previous heading: a line of one to
   six `#` followed by a space (or hashes alone), after at most three spaces, outside fenced code blocks (` ``` ` or
@@ -269,19 +269,10 @@ the off-screen probe approach of AxClaude checks layout and keys without disturb
 
 ## 10. Status
 
-- 2026-10-02: specification written (plan step 6); AD-D7 settled the same day. Step 7 built: `AxDown.Core` with
-  `TextDocument` (AD-3.1 to AD-3.4, AD-3.7, AD-3.9) and `EditorSettings` (AD-8), 14 tests. Step 8 built: the window
-  (`EditorForm`, AD-1 to AD-11 as specified), `AxDownKeys` and `BundleKeys` with the collision test; checked off
-  screen with a probe, not yet with NVDA (step 10). Step 9 built: the installer's entries (AD-D9), `AxDown.ico`,
-  and the updater restarting AxDown on its file (`-StartFile`).
-- 2026-10-02: Kyle's NVDA pass of sections 1 to 7 of the test plan clear; released in Axit 2.0.0. Step 12 built and
-  checked (test plan section 8); released in Axit 2.1.0.
-
-- 2026-10-02, 2.1.1: the window opened silently, NVDA speaking only "README.md edit multi line" (NVDA's log showed no
-  window at all). Cause: the window had no accessible role, so NVDA took it for a nameless pane; AxClaude's window
-  sets `AccessibleRole.Window`, which is why NVDA speaks "axclaude - AxClaude window" there (the folder is called
-  axclaude; the name is not repeated). AxDown sets the same role now and NVDA says "README.md - AxDown window" first
-  (AD-7). Every window of the bundle sets it (`docs/axit/adding-an-app.md`).
-- 2026-10-02, 2.3.0: the in-place update (bundle AX-2.8, AX-3.2) run by Kyle with NVDA from an older build, with no
-  file open: one progress bar through download and install, "Installed. Restarting", AxDown back empty as it was,
-  About naming 2.3.0. Test plan section 7.2 passed.
+- 2.0.0 (2026-10-02): everything in section 4 built (`TextDocument`, `EditorSettings`, `EditorForm`, `AxDownKeys`,
+  the installer's entries, `AxDown.ico`), checked off screen with a probe and by Kyle with NVDA (test plan sections 1
+  to 7). 2.1.0: heading navigation (section 9), checked (section 8). 2.1.1: the window spoken on opening; it had no
+  accessible role, so NVDA took it for a nameless pane and spoke only the field, while AxClaude's window, with
+  `AccessibleRole.Window`, is spoken as "axclaude - AxClaude window" (the folder's name, then the app's). 2.3.0: the
+  in-place update (bundle AX-2.8, AX-3.2) run by Kyle with NVDA from an older build and no file open: one progress
+  bar through download and install, "Installed. Restarting", AxDown back empty as it was (test plan 7.2).

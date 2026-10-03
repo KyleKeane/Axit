@@ -1,6 +1,6 @@
 # Axit
 
-Axit is a bundle of accessible Windows apps for a blind developer who uses the NVDA screen reader, shipped as one self-contained executable. Its apps are **AxClaude**, a front end for the Claude Code CLI (`claude --ax-screen-reader` in a ConPTY pseudo console, shown as a line-by-line transcript), and **AxDown**, a barebones editor for Markdown and text files. The repository was AxClaude's until 2.0.0 (2026-10-02); `docs/axit/plan.md` records the transition and what is still to come. Releases go from `main`; larger work runs on a branch and merges when it has passed its NVDA checks.
+Axit is a bundle of accessible Windows apps for a blind developer who uses the NVDA screen reader, shipped as one self-contained executable. Its apps are **AxClaude**, a front end for the Claude Code CLI (`claude --ax-screen-reader` in a ConPTY pseudo console, shown as a line-by-line transcript), and **AxDown**, a barebones editor for Markdown and text files. `docs/axit/plan.md` records how the repository became the bundle (2026-10-02) and what is still to come. Releases go from `main`; larger work runs on a branch and merges when it has passed its NVDA checks.
 
 Specifications are the source of truth: `docs/axit/SPEC.md` for the bundle (launch, install, update, release, shared pieces, the accessibility rules, the modularity rules), `docs/axclaude/SPEC.md` for AxClaude, `docs/axdown/SPEC.md` for AxDown. A behaviour change updates the spec in the same commit.
 
@@ -30,7 +30,7 @@ Specifications are the source of truth: `docs/axit/SPEC.md` for the bundle (laun
 4. Modularity (SPEC 5.3): one app, one set of folders; references point one way (an app never references another app; shared projects never reference an app; `LayoutTests` enforces it); shared code moves on the second use, unchanged, one piece per commit; notes next to the code; one version, one changelog with app prefixes (`AxClaude:`, `AxDown:`, `Axit:`). A new app follows `docs/axit/adding-an-app.md`.
 5. Keys (SPEC AX-8): every key is either bundle-wide (`Axit.Forms/BundleKeys`, the same in every window) or window-specific (one table per window); a key is changed in its table and nowhere else; a test fails on a collision.
 6. Personal data never enters the repository or a session's output: only the licence identity (Dr. Kyle Keane, www.kylekeane.com) appears; `PrivacyTests` fails on an e-mail address or an account path; recordings are read through PtyCapture's redacting `--dump`, never `--raw`, `cat` or `type`.
-7. Git hygiene: small commits with imperative subject lines; never commit `bin/`, `obj/`, ad-hoc captures or `.claude/settings.local.json`. During the transition every commit on `axit` builds and passes the tests, and AxClaude keeps behaving as released.
+7. Git hygiene: small commits with imperative subject lines; never commit `bin/`, `obj/`, ad-hoc captures or `.claude/settings.local.json`. Every commit builds and passes the tests; `main` is always releasable.
 
 ## Environment gotchas (bundle-wide)
 

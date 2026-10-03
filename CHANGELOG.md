@@ -1,5 +1,9 @@
 # Changelog
 
+## 2.3.1 - 2026-10-02
+
+- For developers: the documents and notes are pruned of the transition's scaffolding (the plan is now a short record), the accessibility review covers both windows, and the specifications describe the released state only. `docs/axdown/tutorial.md` is a guided tour of AxDown with every Markdown structure to practise the keys on; `run-axdown.ps1` opens it when given no file. No change in behaviour.
+
 ## 2.3.0 - 2026-10-02
 
 - Axit: an update now installs while the app is still open, so one progress bar covers the download and the installation, and the app starts the new version itself afterwards: "Update and restart" brings AxClaude back on its folder and AxDown on its file, or empty if it had no file (the restart used to depend on a file being open). "Update and close" installs and closes. The installer puts the running program file aside as `Axit.old.exe`, which the next start removes.
