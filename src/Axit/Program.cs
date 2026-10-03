@@ -16,6 +16,7 @@ internal static class Program
     private static void Main(string[] args)
     {
         ApplicationConfiguration.Initialize();
+        DeleteOldProgramFiles();
 
         var launch = Dispatch.Decide(args);
         if (launch.Error is not null)
@@ -39,6 +40,30 @@ internal static class Program
                 var text = launch.Arguments[0] == "--version" ? $"Axit {BundleInfo.Version}" : $"Axit {BundleInfo.Version}\n\n{Dispatch.Usage}";
                 MessageBox.Show(text, "Axit", MessageBoxButtons.OK, MessageBoxIcon.Information);
                 break;
+        }
+    }
+
+    /// <summary>
+    /// AX-2.8: an update installed in place renames the program file that was running to Axit.old.exe, since a
+    /// running file cannot be overwritten or deleted. The next start removes it; one still running waits for the next.
+    /// </summary>
+    private static void DeleteOldProgramFiles()
+    {
+        try
+        {
+            foreach (var old in Directory.GetFiles(AppContext.BaseDirectory, "Axit.old*.exe"))
+            {
+                try
+                {
+                    File.Delete(old);
+                }
+                catch (Exception ex) when (ex is IOException or UnauthorizedAccessException)
+                {
+                }
+            }
+        }
+        catch (Exception ex) when (ex is IOException or UnauthorizedAccessException)
+        {
         }
     }
 

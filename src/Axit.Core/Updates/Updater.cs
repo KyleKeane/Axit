@@ -1,14 +1,15 @@
 using System.Diagnostics;
 using System.IO.Compression;
 using System.Net.Http.Headers;
+using System.Text;
 
 namespace Axit.Core.Updates;
 
 /// <summary>
 /// The bundle's side of updating (docs/axit/SPEC.md AX-3; AxClaude's FR-1.10): asks GitHub for the latest release,
-/// downloads its zip into <c>%LOCALAPPDATA%\Axit\updates\&lt;version&gt;</c>, and hands over to that version's own
-/// install.ps1, which waits for this process to end, installs over the current installation and starts the app
-/// again. The running executable is never overwritten while it runs (AxClaude's D25).
+/// downloads its zip into <c>%LOCALAPPDATA%\Axit\updates\&lt;version&gt;</c>, runs that version's own install.ps1 in
+/// place while the app keeps running (the running program file is renamed, never overwritten, AxClaude's D25), and
+/// starts the installed program file again when the app closes after Update and restart.
 /// </summary>
 public static class Updater
 {
@@ -117,17 +118,20 @@ public static class Updater
     }
 
     /// <summary>
-    /// Starts the downloaded version's install.ps1 without a window. It waits for this process to end, installs, and
-    /// starts the app again: AxClaude on <paramref name="projectFolder"/> when one is given, with <c>-- --continue</c>
-    /// when asked, so that the conversation is picked up again, or AxDown on <paramref name="file"/> (AX-2.7 keeps
-    /// these parameters). Its output goes to <see cref="LogPath"/>.
+    /// Runs the downloaded version's install.ps1 in place, while this app keeps running (AX-2.8): the installer
+    /// renames the running program file and copies the new one over it, and writes the shortcuts, menus and the
+    /// Apps entry again. Every line the installer prints goes to <paramref name="lines"/> as it comes, for the
+    /// progress bar; the result is the installer's exit code (0 when it succeeded) and everything it printed, for the
+    /// log and the error notice. Its output also goes to <see cref="LogPath"/>.
     /// </summary>
-    public static void LaunchInstaller(string folder, string? projectFolder, bool continueConversation, string? file = null)
+    public static async Task<(int ExitCode, string Output)> InstallInPlaceAsync(string folder, IProgress<string>? lines)
     {
         var start = new ProcessStartInfo("powershell.exe")
         {
             UseShellExecute = false,
             CreateNoWindow = true,
+            RedirectStandardOutput = true,
+            RedirectStandardError = true,
             WorkingDirectory = folder,
         };
         start.ArgumentList.Add("-NoProfile");
@@ -135,28 +139,62 @@ public static class Updater
         start.ArgumentList.Add("Bypass");
         start.ArgumentList.Add("-File");
         start.ArgumentList.Add(Path.Combine(folder, "install.ps1"));
-        start.ArgumentList.Add("-WaitForProcess");
-        start.ArgumentList.Add(Environment.ProcessId.ToString());
+        start.ArgumentList.Add("-InPlace");
         start.ArgumentList.Add("-LogFile");
         start.ArgumentList.Add(LogPath);
-        if (projectFolder is not null)
-        {
-            start.ArgumentList.Add("-Start");
-            start.ArgumentList.Add(projectFolder);
-            if (continueConversation)
-            {
-                start.ArgumentList.Add("-ContinueConversation");
-            }
-        }
 
-        if (file is not null)
+        var output = new StringBuilder();
+        using var process = Process.Start(start) ?? throw new InvalidOperationException("PowerShell could not be started.");
+        process.OutputDataReceived += (_, e) =>
         {
-            start.ArgumentList.Add("-StartFile");
-            start.ArgumentList.Add(file);
+            if (e.Data is null)
+            {
+                return;
+            }
+
+            lock (output)
+            {
+                output.AppendLine(e.Data);
+            }
+
+            lines?.Report(e.Data);
+        };
+        process.ErrorDataReceived += (_, e) =>
+        {
+            if (e.Data is not null)
+            {
+                lock (output)
+                {
+                    output.AppendLine(e.Data);
+                }
+            }
+        };
+        process.BeginOutputReadLine();
+        process.BeginErrorReadLine();
+        await process.WaitForExitAsync().ConfigureAwait(false);
+        // The synchronous wait flushes the last lines of the redirected output.
+        process.WaitForExit();
+        lock (output)
+        {
+            return (process.ExitCode, output.ToString().Trim());
+        }
+    }
+
+    /// <summary>Starts the installed program file (the new version, after an update) with <paramref name="arguments"/>, from its own folder.</summary>
+    public static void StartInstalled(IReadOnlyList<string> arguments)
+    {
+        var start = new ProcessStartInfo(AppPaths.InstalledExe)
+        {
+            UseShellExecute = false,
+            WorkingDirectory = AppPaths.InstallFolder,
+        };
+        foreach (var argument in arguments)
+        {
+            start.ArgumentList.Add(argument);
         }
 
         Process.Start(start)?.Dispose();
-        Log.Info($"Update installer started from {folder}; it installs when this process ends and logs to {LogPath}");
+        Log.Info($"Started the installed {AppPaths.InstalledExe} with: {string.Join(" ", arguments)}");
     }
 
     /// <summary>

@@ -15,4 +15,10 @@ public static class AppPaths
 
     public static string UpdatesFolder { get; } =
         Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "Axit", "updates");
+
+    /// <summary>Where install.ps1 puts the bundle (AX-2.1), and the program file there, which an update starts again.</summary>
+    public static string InstallFolder { get; } =
+        Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "Programs", "Axit");
+
+    public static string InstalledExe => Path.Combine(InstallFolder, "Axit.exe");
 }

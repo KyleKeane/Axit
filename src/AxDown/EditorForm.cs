@@ -45,8 +45,9 @@ internal sealed class EditorForm : Form
     private string _latestState = "not checked yet";
     private ReleaseInfo? _update;
     private bool _updateBusy;
-    private string? _updateFolder;
-    private bool _restartAfterUpdate = true;
+
+    /// <summary>After Update and restart: how the installed new version is started when this window closes; null when nothing is to start.</summary>
+    private string[]? _restartArguments;
 
     public EditorForm(string? path, EditorSettings settings, string? settingsError)
     {
@@ -193,11 +194,10 @@ internal sealed class EditorForm : Form
 
         SaveWindow();
         SaveSettings();
-        if (_updateFolder is { } update)
+        if (_restartArguments is { } restart)
         {
-            // AX-3.2: the downloaded version's installer waits for this process to end, installs and, after Update
-            // and restart, starts AxDown again on the file (none for an unnamed document).
-            Updater.LaunchInstaller(update, projectFolder: null, continueConversation: false, file: _restartAfterUpdate ? _path : null);
+            // AX-3.2: the update is installed; the new version starts on this file (or empty) as this process ends.
+            Updater.StartInstalled(restart);
         }
 
         base.OnFormClosing(e);
@@ -1019,7 +1019,11 @@ internal sealed class EditorForm : Form
         });
     }
 
-    /// <summary>Downloads the release behind a notice with a progress bar (Cancel stops it), then closes; OnFormClosing hands over to the installer.</summary>
+    /// <summary>
+    /// Downloads the release and installs it in place behind one notice with one progress bar (the download up to
+    /// 80 percent, the installer's steps to 100; Cancel stops the download, not the install), then closes;
+    /// OnFormClosing starts the installed new version when <paramref name="restart"/> was chosen (AX-3.2).
+    /// </summary>
     private async void InstallUpdate(ReleaseInfo release, bool restart)
     {
         if (_updateBusy)
@@ -1033,30 +1037,60 @@ internal sealed class EditorForm : Form
         var size = release.ZipSize > 0 ? $" ({release.ZipSize / (1024.0 * 1024.0):0} MB)" : string.Empty;
         using var cancellation = new CancellationTokenSource(TimeSpan.FromMinutes(10));
         var cancelled = false;
-        ShowNotice(new Notice($"Downloading Axit {version}",
-            $"The download{size} is under way; the progress bar shows how far it is. Cancel keeps this version.",
+        var installing = false;
+        ShowNotice(new Notice($"Updating to Axit {version}",
+            $"The new version is downloaded{size} and installed; the progress bar shows how far it is. Cancel during the download keeps this version.",
         [
             new OverlayChoice("&Cancel", () =>
             {
+                if (installing)
+                {
+                    Announce("Installing, this cannot be cancelled now", true);
+                    return;
+                }
+
                 cancelled = true;
                 cancellation.Cancel();
-            }, IsDefault: true, IsCancel: true),
+                CloseNotice(null);
+            }, IsDefault: true, IsCancel: true, StaysOpen: true),
         ])
         {
             Progress = true,
         });
         try
         {
-            var folder = await Updater.DownloadAsync(release, cancellation.Token, new Progress<int>(_overlay.SetProgress));
+            var folder = await Updater.DownloadAsync(release, cancellation.Token, new Progress<int>(percent => _overlay.SetProgress(percent * 80 / 100)));
             if (IsDisposed)
             {
                 return;
             }
 
-            _updateFolder = folder;
-            _restartAfterUpdate = restart;
-            Log.Info($"Update {release.Tag} downloaded to {folder}; restart: {restart}");
-            Announce(restart ? "Downloaded. Restarting to update" : "Downloaded. Closing to update", true);
+            installing = true;
+            _overlay.SetProgress(80);
+            Announce("Downloaded. Installing", true);
+            var step = 80;
+            var result = await Updater.InstallInPlaceAsync(folder, new Progress<string>(_ => _overlay.SetProgress(step = Math.Min(99, step + 3))));
+            if (IsDisposed)
+            {
+                return;
+            }
+
+            if (result.ExitCode != 0)
+            {
+                Log.Error($"The installer failed with code {result.ExitCode}:\r\n{result.Output}");
+                ShowNotice(new Notice($"Update to Axit {version}",
+                    $"The installer failed; this version keeps running.\n\n{result.Output}\n\nYou can download the zip from the release page and run install.cmd yourself.",
+                [
+                    new OverlayChoice("&Open release page", () => OpenUrl(release.PageUrl), StaysOpen: true),
+                    OverlayChoice.Close,
+                ]));
+                return;
+            }
+
+            _overlay.SetProgress(100);
+            _restartArguments = restart ? (_path is null ? ["down"] : ["down", _path]) : null;
+            Log.Info($"Update {release.Tag} installed in place; restart: {restart}");
+            Announce(restart ? "Installed. Restarting" : "Installed. Closing", true);
             Close();
         }
         catch (OperationCanceledException) when (cancelled && !IsDisposed)
@@ -1065,8 +1099,8 @@ internal sealed class EditorForm : Form
         }
         catch (Exception ex) when (ex is HttpRequestException or TaskCanceledException or IOException or InvalidOperationException or UnauthorizedAccessException)
         {
-            Log.Error("Update download failed", ex);
-            Fail("The update could not be downloaded: " + ex.Message);
+            Log.Error("The update failed", ex);
+            Fail("The update failed, and this version keeps running: " + ex.Message);
         }
         finally
         {

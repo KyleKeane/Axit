@@ -82,7 +82,13 @@ allow it, see B-9).
   file is left where it is; the app copies it on its first start (AX-5.2).
 - AX-2.7 The hand-over parameters stay: `install.ps1 -WaitForProcess <pid> -Start <folder> [-ContinueConversation]
   -LogFile <file>` installs after that process ends and starts AxClaude on the folder, as the 1.7.0 updater expects.
-  `-StartFile <file>` (step 9) starts AxDown on the file the same way; nothing is renamed.
+  `-StartFile <file>` (step 9) starts AxDown on the file the same way; nothing is renamed. Copies up to 2.2.0 update
+  this way; from 2.3.0 the apps use AX-2.8.
+- AX-2.8 In place: `install.ps1 -InPlace -LogFile <file>` installs while the app keeps running. Nothing is removed;
+  the new files are written over the old ones; the running `Axit.exe` is first renamed `Axit.old.exe` (a running
+  program file can be renamed but not overwritten or deleted), and `Axit.exe` deletes any `Axit.old*.exe` next to it
+  when it starts. The shortcuts, menus, shims and the Apps entry are written again, so the version shown in Settings,
+  Apps is the new one. The app, not the installer, starts the new version afterwards (AX-3.2).
 
 ### AX-3 Updates
 
@@ -90,11 +96,15 @@ allow it, see B-9).
   AxClaude does (`docs/axclaude/SPEC.md` FR-1.10, D25): asked once at startup when the setting is on, a notice with
   the release notes and four buttons: Update and restart (Enter), Update and close, Open release page, Later
   (Escape). Each app's Help menu has the same items.
-- AX-3.2 Either update downloads the zip into `%LOCALAPPDATA%\Axit\updates\<version>` behind a notice with a
-  progress bar (`Notice.Progress`; NVDA reports a progress bar by its own settings, so nothing is spoken about the
-  progress) and a Cancel button that keeps the installed version, then closes the window and hands over to the
-  downloaded version's `install.ps1` (AX-2.7), which starts the app again after Update and restart and not after
-  Update and close. A download counts as complete when it holds `install.ps1` and a program file.
+- AX-3.2 Either update runs behind one notice with one progress bar (`Notice.Progress`; NVDA reports a progress bar
+  by its own settings, so nothing is spoken about the progress itself): the zip is downloaded into
+  `%LOCALAPPDATA%\Axit\updates\<version>` (the bar to 80 percent; Cancel keeps the installed version), then the
+  downloaded version's `install.ps1 -InPlace` runs while the app keeps running (AX-2.8; "Downloaded. Installing";
+  the installer's lines move the bar to 100; Cancel no longer applies and says so), then the window closes
+  ("Installed. Restarting" or "Installed. Closing") and, after Update and restart, starts the installed program file
+  itself with what it had open (AxClaude: the folder, and `-- --continue` when a message was sent; AxDown: the file,
+  or nothing). A failed installer leaves the running version in place and shows its output in a notice. A download
+  counts as complete when it holds `install.ps1` and a program file.
 - AX-3.3 The 1.7.0 bridge (B-6): AxClaude 1.7.0 accepts a download whose program file is not `AxClaude.exe`, so an
   installed AxClaude updates into Axit through Help, Update now. The first Axit release is 2.0.0.
 - AX-3.4 The update check and the version comparison are pure code in `Axit.Core/Updates/UpdateCheck`, unit tested;

@@ -25,16 +25,20 @@
   install.cmd, next to this script, runs it with the execution policy bypassed: double-click it, or install.cmd -Uninstall.
   Downloaded on its own from the releases page, install.cmd fetches the latest release and runs this script from it.
 
-  The apps' own Update now (Help menu) runs the downloaded version's copy of this script as
+  The apps' own Update (Help menu) runs the downloaded version's copy of this script as
+    install.ps1 -InPlace -LogFile <file>
+  while the app keeps running (AX-2.8): nothing is removed, the new files are written over the old ones, and the
+  running Axit.exe is renamed Axit.old.exe first, since a running program file can be renamed but not overwritten;
+  the app then starts the new version itself, and the next start removes the old file. Copies before 2.3.0 call
     install.ps1 -WaitForProcess <pid> [-Start <folder> [-ContinueConversation]] [-StartFile <file>] -LogFile <file>
-  which waits for the running app to end, installs, and starts AxClaude on the folder or AxDown on the file.
-  AxClaude 1.7.0 calls it with -Start (AX-2.7), which is how an installed AxClaude becomes Axit.
+  after they have closed; those parameters stay (AX-2.7), which is also how AxClaude 1.7.0 becomes Axit.
 #>
 [CmdletBinding()]
 param(
     [switch]$Uninstall,
     [switch]$NoContextMenu,
     [switch]$NoStartMenu,
+    [switch]$InPlace,
     [int]$WaitForProcess,
     [string]$Start,
     [switch]$ContinueConversation,
@@ -154,9 +158,11 @@ if (-not (Test-Path -LiteralPath $sourceExe)) {
 $sameFolder = [string]::Equals((Resolve-Path $source).Path.TrimEnd('\'), $target.TrimEnd('\'), [StringComparison]::OrdinalIgnoreCase)
 if (-not $sameFolder) {
     # A previous installation, of Axit or of AxClaude 1.x, is removed completely first, so nothing of it stays
-    # behind; then this one is installed fresh. The updater comes here too, after the running app has closed.
+    # behind; then this one is installed fresh. The older updaters come here too, after the running app has closed.
+    # In place (-InPlace, the apps' own update) the app keeps running: nothing is removed, the files are written over
+    # the old ones, and the running program file is renamed, since it can be renamed but not overwritten or deleted.
     $found = @($places | Where-Object { Test-Path -LiteralPath $_ })
-    if ($found) {
+    if ($found -and -not $InPlace) {
         if (Test-Running) {
             Say "Axit is still running, so nothing was changed. Close it and run this again."
             exit 1
@@ -172,7 +178,16 @@ if (-not $sameFolder) {
     New-Item -ItemType Directory -Force $target | Out-Null
     foreach ($name in 'Axit.exe', 'AxDown.ico', 'README.md', 'LICENSE', 'install.ps1', 'install.cmd') {
         $file = Join-Path $source $name
-        if (Test-Path -LiteralPath $file) { Copy-Item -LiteralPath $file $target -Force }
+        if (-not (Test-Path -LiteralPath $file)) { continue }
+        $destination = Join-Path $target $name
+        if ($InPlace -and $name -eq 'Axit.exe' -and (Test-Path -LiteralPath $destination)) {
+            $old = Join-Path $target 'Axit.old.exe'
+            if (Test-Path -LiteralPath $old) { try { Remove-Item -LiteralPath $old -Force } catch { } }
+            if (Test-Path -LiteralPath $old) { $old = Join-Path $target ('Axit.old.' + (Get-Date -Format 'HHmmss') + '.exe') }
+            Move-Item -LiteralPath $destination -Destination $old -Force
+            Say "Moved the running program file aside as $(Split-Path -Leaf $old); the next start removes it."
+        }
+        Copy-Item -LiteralPath $file -Destination $target -Force
     }
 }
 

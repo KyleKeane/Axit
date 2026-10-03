@@ -1,5 +1,9 @@
 # Changelog
 
+## 2.3.0 - 2026-10-02
+
+- Axit: an update now installs while the app is still open, so one progress bar covers the download and the installation, and the app starts the new version itself afterwards: "Update and restart" brings AxClaude back on its folder and AxDown on its file, or empty if it had no file (the restart used to depend on a file being open). "Update and close" installs and closes. The installer puts the running program file aside as `Axit.old.exe`, which the next start removes.
+
 ## 2.2.0 - 2026-10-02
 
 - Axit: the update notice offers "Update and restart" (Enter), which installs and starts the app again where it was, and "Update and close", which only installs; "Open release page" and "Later" stay. While the download runs, a notice shows a progress bar, which NVDA reports the way it reports any progress bar, and Escape cancels the download and keeps the version you have.

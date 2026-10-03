@@ -112,8 +112,8 @@ UTF-8, UTF-16 and the system code page; files that are not text; files over 32 M
   size, Font…
 - AD-4.4 Help: Keyboard shortcuts (F1), User guide, Installed: Axit n (About), Latest release and the update items as
   AxClaude has them (FR-1.10 there, the bundle's `Updater`, AX-3: Update and restart, Update and close, Open release
-  page, Later; the download behind a progress bar with Cancel; after Update and restart the installer starts AxDown
-  again on the file), Copy diagnostics, About AxDown.
+  page, Later; one progress bar for the download and the in-place install, Cancel during the download; after Update
+  and restart AxDown starts the new version itself, on the file or empty), Copy diagnostics, About AxDown.
 - AD-4.5 Every menu item has a mnemonic and a shortcut or a shortcut text (AX-7.1).
 
 ### AD-5 Keys
