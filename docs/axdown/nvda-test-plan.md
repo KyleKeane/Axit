@@ -48,8 +48,8 @@ letter), and a `long.md` with headings and lines longer than the window.
 1. Ctrl+F: the notice with "Text to find"; type a word, Enter: the caret lands on the match, NVDA reads the line
    with the selection; F3 the next; Shift+F3 back; a word that is not there: "Not found".
 2. Ctrl+G: the field "Go to line (now line n, column m)" is read with the correct numbers; type a number, Enter:
-   "Line n of m" and the caret is at the start of that line; a number past the end lands on the last line; Escape
-   returns to the editor where it was.
+   "Line n of m" and the caret is at the start of that line; a number past the end lands on the last line; a word
+   instead of a number: "Not a line number" and the caret has not moved; Escape returns to the editor where it was.
 3. NVDA+End reads the status bar: the name, "Line n, Column m", the encoding and the line ending.
 
 ## 5. Text size and font

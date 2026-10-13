@@ -556,6 +556,10 @@ internal sealed class EditorForm : Form
                 {
                     GoToLine(Math.Clamp(wanted, 1, lines), lines);
                 }
+                else
+                {
+                    Announce("Not a line number", true);
+                }
             },
             escape: () =>
             {

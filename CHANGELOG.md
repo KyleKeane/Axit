@@ -15,6 +15,7 @@
 - AxClaude: a question that Claude redraws while it is already shown at the bottom of the window is no longer shown again, with its chime and announcement, when a redraw leaves Claude's cursor off the prompt row for a frame. This is the likely cause of the question that "kept refiring" on 2026-10-02.
 - AxClaude: a message sent while Claude works on a step longer than 30 minutes (a long subagent, a slow build) is no longer forgotten before Claude takes it up; its Input and Output lines and the "Responding" announcement were missing for such a message. A message whose Input and Output lines were trimmed from a very long conversation is no longer printed again at the bottom. Force Claude to restart now prints the Input and Output lines of a message Claude had not taken up yet, at the end of the old run, instead of holding it for an echo that never comes.
 - AxClaude: an argument for Claude Code that ends in a backslash and needs quotes, such as `--add-dir "C:\Dir With Space\"` with the backslash tab completion adds, is now passed on correctly. Windows read the backslash and the closing quote as a quote character, so the folder came out wrong and every argument after it was swallowed. The Custom arguments field splits by the same Windows rules.
+- AxDown: Go to line says "Not a line number" when the text typed is not a number, where it silently did nothing.
 
 ## 2.4.0 - 2026-10-13
 

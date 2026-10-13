@@ -167,15 +167,16 @@ never a separate window.
   wrapping once at the end, selects it and returns the focus to the editor, where NVDA reads the selection's line.
   "Not found" is spoken when there is none. F3 and Shift+F3 repeat without the notice.
 - AD-6.4 Go to line: a field in the question area under the editor, named "Go to line (now line 12, column 4)";
-  Enter moves the caret to the start of that line (clamped to the last), Escape cancels; the name is how the position
-  is read on demand (G4), and the status bar carries it too (AD-9).
+  Enter moves the caret to the start of that line (clamped to the last) and says "Line n of m", or "Not a line
+  number" when the text is not a number, the caret staying; Escape cancels; the name is how the position is read on
+  demand (G4), and the status bar carries it too (AD-9).
 
 ### AD-7 Announcements
 
 On opening, NVDA speaks the window ("README.md - AxDown window"), then the field ("README.md edit multi line"): the
 window has the accessible role Window, as AxClaude's has, so that NVDA names it; nothing of AxDown's own is spoken
 then. Afterwards, spoken through one UI Automation notification on the editor (AX-7.3), and only these: "Saved" (after a save and
-after Save as); "Not found" (find); "Line n of m" after Go to line; "Word wrap on" / "Word wrap off"; "Text size n";
+after Save as); "Not found" (find); "Line n of m" after Go to line, or "Not a line number"; "Word wrap on" / "Word wrap off"; "Text size n";
 "Install, heading level 2" after a heading jump, "No next heading" / "No previous heading" when there is none;
 "Copied" is NVDA's own. Opening a file speaks nothing of its own: the focus arrives in the editor and NVDA reads
 its name (the file's) and the first line.
