@@ -156,4 +156,27 @@ public sealed class TextDocumentTests
             Directory.Delete(folder, true);
         }
     }
+
+    [Fact]
+    public void A_file_with_a_nul_character_is_not_text_and_is_refused()
+    {
+        var folder = Path.Combine(Path.GetTempPath(), "axdown-tests", Guid.NewGuid().ToString("N"));
+        Directory.CreateDirectory(folder);
+        var path = Path.Combine(folder, "out.txt");
+        try
+        {
+            // UTF-16 without a mark (cmd /u), a PNG, a text file with one stray NUL: the edit control would keep only the text before it.
+            File.WriteAllBytes(path, Encoding.Unicode.GetBytes("dir\r\n"));
+            var error = Assert.Throws<InvalidOperationException>(() => TextDocument.Read(path));
+            Assert.Contains("out.txt", error.Message);
+            Assert.Contains("not a text file", error.Message);
+
+            File.WriteAllBytes(path, Encoding.UTF8.GetBytes("plain text\r\n"));
+            Assert.Equal("plain text\r\n", TextDocument.Read(path).Text);
+        }
+        finally
+        {
+            Directory.Delete(folder, true);
+        }
+    }
 }

@@ -60,7 +60,7 @@ New versions of Axit are published on GitHub, and every app of Axit updates toge
 
 ## If something goes wrong
 
-- A file that cannot be opened, or is larger than 32 MB, is reported in a notice; the window stays open and empty.
+- A file that cannot be opened, is not text, or is larger than 32 MB, is reported in a notice; the window stays open, empty and untitled, so that saving cannot write over the file.
 - An error from AxDown is a notice inside the window. Escape closes it. Help, Copy diagnostics puts the version, the paths and the last log lines on the clipboard for a bug report; the log is in `%LOCALAPPDATA%\Axit\logs\axdown.log`.
 
 ## About AxDown

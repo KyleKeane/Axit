@@ -39,7 +39,9 @@ letter), and a `long.md` with headings and lines longer than the window.
 7. Change the file in another editor while AxDown has it open, then Ctrl+S in AxDown: the notice "The file changed
    on disk since you opened it. Write over it?"; Cancel keeps both; Write over writes.
 8. Close with Alt+F4 with unsaved changes: the notice; Don't save closes; Cancel stays.
-9. Open a locked or missing file: a notice names the problem; Escape closes it; the window stays open.
+9. Open a locked file, or one that is not text (a `.png`): a notice names the problem; Escape closes it; the window
+   stays open on an empty "Untitled" document, and Ctrl+S opens the Save dialog instead of writing over the file. A
+   missing file opens as an empty document of that name, which Ctrl+S creates.
 
 ## 4. Find and go to line
 

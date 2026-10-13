@@ -342,6 +342,8 @@ internal sealed class EditorForm : Form
             }
             catch (Exception ex) when (ex is InvalidOperationException or IOException or UnauthorizedAccessException)
             {
+                // Untitled, so that Save cannot write the empty editor over the file (AD-3.7).
+                _path = null;
                 Fail($"{path} could not be opened: {ex.Message}");
             }
         }

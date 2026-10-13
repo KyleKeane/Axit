@@ -101,9 +101,12 @@ UTF-8, UTF-16 and the system code page; files that are not text; files over 32 M
 - AD-3.6 Changed on disk: when the file's last write time is not the one remembered, Save first asks through a
   notice ("The file changed on disk since you opened it. Write over it?" with Write over and Cancel). Nothing is
   watched or polled; the check happens at the moment of saving.
-- AD-3.7 A file over 32 MB is refused with a notice, since the EDIT control stops being usable long before that. A
-  file that cannot be read (missing, locked, not text, no permission) is reported in a notice and the window stays
-  open with an empty document of that name.
+- AD-3.7 A file over 32 MB is refused with a notice, since the EDIT control stops being usable long before that, and
+  so is a file that is not text: one whose decoded text holds a NUL character (a PNG, UTF-16 without a mark), since
+  the EDIT control keeps only the text before the first NUL and a save would write that truncation back. A file that
+  cannot be opened (over the limit, not text, locked, no permission) is reported in a notice and the window stays
+  open with an empty, untitled document, so that Save cannot write the empty editor over the file (Save as names a
+  new one). A missing file opens as an empty document of that name, created by the first save.
 - AD-3.8 Open, New and Exit check for unsaved changes first (AD-6.1).
 - AD-3.9 All of this is pure code in `AxDown.Core/TextDocument` (bytes in, text plus encoding plus line ending out,
   and back), unit tested for every encoding and line ending case, with the window only calling it.

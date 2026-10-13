@@ -29,7 +29,10 @@ public sealed record TextDocument(string Text, Encoding Encoding, bool ByteOrder
     /// <summary>A new document: UTF-8 without a mark, Windows line endings (AD-3.3, AD-3.4).</summary>
     public static TextDocument Empty() => new(string.Empty, Utf8, ByteOrderMark: false, "\r\n");
 
-    /// <summary>Reads the file. Throws <see cref="InvalidOperationException"/> for a file over <see cref="MaxBytes"/>, and the usual I/O exceptions.</summary>
+    /// <summary>
+    /// Reads the file. Throws <see cref="InvalidOperationException"/> for a file over <see cref="MaxBytes"/> or one that is
+    /// not text (AD-3.7), and the usual I/O exceptions.
+    /// </summary>
     public static TextDocument Read(string path)
     {
         var length = new FileInfo(path).Length;
@@ -38,7 +41,14 @@ public sealed record TextDocument(string Text, Encoding Encoding, bool ByteOrder
             throw new InvalidOperationException($"{Path.GetFileName(path)} is {length / (1024 * 1024)} MB. AxDown opens files up to {MaxBytes / (1024 * 1024)} MB.");
         }
 
-        return FromBytes(File.ReadAllBytes(path));
+        var document = FromBytes(File.ReadAllBytes(path));
+        if (document.Text.Contains('\0'))
+        {
+            // The edit control holds text up to the first NUL character: the rest would be lost on the next save.
+            throw new InvalidOperationException($"{Path.GetFileName(path)} is not a text file (it holds a NUL character).");
+        }
+
+        return document;
     }
 
     /// <summary>Writes <paramref name="text"/> (with <c>\r\n</c> line endings, as the edit control gives it) back in this document's encoding and line ending.</summary>
