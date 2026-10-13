@@ -22,6 +22,15 @@ public class PrivacyTests
         Assert.Equal("C:\\Users\\<user>\\x, an Al fact", Redaction.Redact("C:\\Users\\<user>\\x, an Al fact", ["Al"]));
     }
 
+    [Fact]
+    public void Redact_covers_the_unix_spellings_of_a_drive()
+    {
+        // Git Bash and WSL paths, as a tool result or a Bash command in the conversation prints them; built from parts for the scan below.
+        Assert.Equal("cd /c/Users/<user>/x", Redaction.Redact("cd /c/" + "Users/Someone/x", []));
+        Assert.Equal("ls /mnt/c/Users/<user>", Redaction.Redact("ls /mnt/c/" + "Users/Someone", []));
+        Assert.Equal(["/mnt/c/" + "Users/Someone"], Redaction.Find("see /mnt/c/" + "Users/Someone and /home/someone"));
+    }
+
     /// <summary>
     /// No file in the repository holds an e-mail address or a path into a Windows account: recordings of /status carry
     /// the account's address, and paths name the account. The licence line names the author and is the one exception.

@@ -10,6 +10,7 @@
 - AxClaude: the message field no longer cuts a long paste at 32 767 characters. The edit control's default limit dropped the rest of a pasted log without a word, and the shortened message went to Claude as "Sent".
 - AxClaude: Enter on a conversation line while one of Claude's questions occupies the bottom of the window now says "Answer Claude first; the message field is hidden while it asks" and copies nothing. It used to copy the line into the hidden field and put the focus in the answer list, where the comment typed next picked an answer and Enter sent it.
 - AxClaude: in a git worktree (`git worktree add`, or Claude Code's worktree isolation) the patterns that keep AxClaude's recordings and saved conversations out of git now go into the repository's own exclude file. They were written into the worktree's private folder under `.git/worktrees`, which git never reads, while the log reported success.
+- For developers: the privacy check and the recording dump now also catch an account path spelt the Git Bash or WSL way (`/c/Users/<name>`, `/mnt/c/Users/<name>`), which a Bash command in a conversation prints.
 
 ## 2.4.0 - 2026-10-13
 

@@ -13,8 +13,9 @@ public static partial class Redaction
     [GeneratedRegex(@"[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}")]
     private static partial Regex EmailRegex();
 
-    // The account folder under a drive's Users folder, also with doubled or forward slashes; the placeholder names below are left alone.
-    [GeneratedRegex(@"(?i)([A-Z]:(?:\\{1,2}|/)Users(?:\\{1,2}|/))(?!<user>|Public\b|Default\b|runneradmin\b)[^\\/\s""'<>|:*?]+")]
+    // The account folder under a drive's Users folder, also with doubled or forward slashes and as Git Bash (/c/Users)
+    // or WSL (/mnt/c/Users) spell the drive; the placeholder names below are left alone.
+    [GeneratedRegex(@"(?i)((?:[A-Z]:|/mnt/[A-Z]|/[A-Z])(?:\\{1,2}|/)Users(?:\\{1,2}|/))(?!<user>|Public\b|Default\b|runneradmin\b)[^\\/\s""'<>|:*?]+")]
     private static partial Regex UserPathRegex();
 
     [GeneratedRegex(@"\\\\\.\\pipe\\[^\s""'<>|]+")]
