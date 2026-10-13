@@ -133,6 +133,28 @@ public class SessionModelTests
     }
 
     [Fact]
+    public void A_reply_row_shaped_like_a_completion_entry_stays_visible()
+    {
+        // An aligned listing in a reply matches the completion-list pattern; only the list above a draft row, or under the cursor, is the list.
+        var model = new SessionModel(80, 8);
+        var routes = new[] { "claude: The routes:", "/api/users      GET  lists users", "/api/users/:id  GET  one user", "That is all." };
+        Feed(model, $"{Esc}[?25lclaude: The routes:\r\n/api/users      GET  lists users\r\n/api/users/:id  GET  one user\r\nThat is all.\r\n\r\nauto mode on (shift+tab to cycle)\r\n${Esc}[?25h");
+        Assert.Equal(routes, Visible(model));
+
+        // Typing a slash command: Claude prints the list, then the draft row (a dollar sign and a no-break space) under it.
+        Feed(model, $"{Esc}[?25l{Esc}[7;1H/model          Set the AI model{Esc}[K\r\n/mcp            Manage MCP servers{Esc}[K\r\n$ /m{Esc}[K{Esc}[?25h");
+        Assert.Equal(routes, Visible(model));
+
+        // The cursor parked inside the list before the draft row is printed.
+        Feed(model, $"{Esc}[?25l{Esc}[6;1H/model          Set the AI model{Esc}[K\r\n/mcp            Manage MCP servers{Esc}[K\r\n/memory         Edit CLAUDE.md files{Esc}[K{Esc}[?25h");
+        Assert.Equal(routes, Visible(model));
+
+        // After /exit, Claude's last lines go under the list and the draft, which stay hidden.
+        Feed(model, $"{Esc}[?25l\r\n$ /exit{Esc}[K\r\nResume this session with:{Esc}[K\r\nclaude --resume <id>{Esc}[K{Esc}[?25h");
+        Assert.Equal([.. routes, "Resume this session with:", "claude --resume <id>"], Visible(model));
+    }
+
+    [Fact]
     public void Rows_written_over_the_chrome_and_scrolled_away_inside_a_frame_are_content()
     {
         var model = new SessionModel(80, 6);

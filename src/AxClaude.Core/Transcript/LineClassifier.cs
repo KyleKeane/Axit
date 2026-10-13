@@ -59,8 +59,7 @@ public static partial class LineClassifier
     public static bool IsChrome(string text) =>
         ModeLineRegex().IsMatch(text) || SpinnerRegex().IsMatch(text) || TipRegex().IsMatch(text)
         || NotepadHintRegex().IsMatch(text) || EffortHintRegex().IsMatch(text) || BackgroundHintRegex().IsMatch(text)
-        || QueuedHintRegex().IsMatch(text) || AnnouncementRowRegex().IsMatch(text)
-        || CompletionRowRegex().IsMatch(text) || CompletionContinuationRegex().IsMatch(text);
+        || QueuedHintRegex().IsMatch(text) || AnnouncementRowRegex().IsMatch(text);
 
     /// <summary>A bracketed announcement row; the text inside the brackets is what Claude wants spoken.</summary>
     public static string? AnnouncementText(string text) =>

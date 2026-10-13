@@ -734,27 +734,40 @@ public sealed partial class SessionModel : ILineStore
 
         TranscriptViewOpen = transcriptView;
 
-        // The slash-command completion list and the echoed draft can end a frame with the cursor inside them,
-        // so they are hidden wherever they sit above the cursor. Continuation rows only count directly under a list row.
-        var inList = false;
+        // The slash-command completion list sits directly above the echoed draft row (`$ /ex`), and both can be left
+        // above the cursor: a frame can end with the cursor inside the list before the draft row is printed, and after
+        // /exit Claude prints its last lines under them. The draft row is hidden wherever it is, and list rows only as
+        // the run directly above a draft row or ending at the cursor row: an aligned listing in a reply looks like a
+        // list too (FR-3.5). Continuation rows only count directly under a list row; the Notepad hint goes wherever it is.
+        var runStart = -1;
         for (var r = 0; r <= cy; r++)
         {
             var line = _screen.LineAt(r);
-            if (line is null)
+            if (line is not null && (LineClassifier.IsCompletionRow(line.Text) || (runStart >= 0 && LineClassifier.IsCompletionContinuation(line.Text))))
             {
-                inList = false;
+                if (runStart < 0)
+                {
+                    runStart = r;
+                }
+
                 continue;
             }
 
-            var completion = LineClassifier.IsCompletionRow(line.Text);
-            var continuation = inList && LineClassifier.IsCompletionContinuation(line.Text);
-            if (completion || continuation || LineClassifier.IsDraftRow(line.Text) || LineClassifier.IsNotepadHint(line.Text))
+            if (line is not null && LineClassifier.IsDraftRow(line.Text))
             {
-                line.ChromeHidden = true;
-                line.StickyChromeText = line.Text;
+                HideRows(runStart < 0 ? r : runStart, r);
+            }
+            else if (line is not null && LineClassifier.IsNotepadHint(line.Text))
+            {
+                HideRows(r, r);
             }
 
-            inList = completion || continuation;
+            runStart = -1;
+        }
+
+        if (runStart >= 0)
+        {
+            HideRows(runStart, cy);
         }
 
         if (announcements is not null)
@@ -766,6 +779,18 @@ public sealed partial class SessionModel : ILineStore
         }
 
         return anchor;
+
+        void HideRows(int from, int to)
+        {
+            for (var r = from; r <= to; r++)
+            {
+                if (_screen.LineAt(r) is { } line)
+                {
+                    line.ChromeHidden = true;
+                    line.StickyChromeText = line.Text;
+                }
+            }
+        }
     }
 
     /// <summary>
