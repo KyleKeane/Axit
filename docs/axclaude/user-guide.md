@@ -83,7 +83,7 @@ In the conversation, these keys move to a line and speak it. Add Shift to go bac
 
 - `i`: the next `# Input` line (a message you sent). `o` or `r`: the next `# Output` line (a reply from Claude). Ctrl+Shift+O from anywhere goes to the newest reply.
 - `h`: the next heading. `1` to `6`: the next heading of that level. Input and Output lines are level 1; headings inside Claude's replies are level 2 and deeper.
-- `c`: the next line that starts a Claude reply. `t`: the next tool line (a file Claude edited or a command it ran). `p`: the next paragraph, the first line after a blank line. `e`: the next error or warning. `d`: the next "done" line at the end of a reply. `s`: the next system line from AxClaude. `q`: the next question Claude asked: AxClaude writes a line `Question: …` in front of each one, which stays when Claude replaces the question with your answer.
+- `c`: the next line that starts a Claude reply. `t`: the next tool line (a file Claude edited or a command it ran). `p`: the next paragraph, the first line after a blank line or the first line of a message from Claude, so it also finds the short messages Claude prints between its tool calls. `e`: the next error or warning. `d`: the next "done" line at the end of a reply. `s`: the next system line from AxClaude. `q`: the next question Claude asked: AxClaude writes a line `Question: …` in front of each one, which stays when Claude replaces the question with your answer.
 - `l`: says where you are, like "Line 12 of 340". Nothing else ever speaks line numbers.
 - Page Up and Page Down move one screen at a time, and reach the first and last line.
 - Ctrl+F opens Find. Type the text and press Enter; F3 and Shift+F3 find the next and previous match. "Not found" means there is none.

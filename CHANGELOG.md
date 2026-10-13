@@ -4,6 +4,7 @@
 
 - AxClaude: Options, "Soft background music while Claude works" (off until you turn it on) plays a quiet music-box loop from the moment Claude starts working until it is done or asks, so you hear that Claude is still at work without reading along. It stops at once when you turn it off, and the chimes and ticks sound over it as before.
 - AxClaude: Options, "Louder alert when Claude is done and the window is in the background" (off until you turn it on) plays a longer, louder call in place of the done or question chime when Claude finishes or asks while you are in another window, where the chime was easy to miss and NVDA does not say "Done".
+- AxClaude: `p` and Shift+P now stop at each "claude:" line as well as at the paragraphs after a blank line. Claude prints its short messages between tool calls with no blank line in front of them, so the paragraph key passed over them and found only the paragraphs of the final reply.
 
 ## 2.3.1 - 2026-10-02
 

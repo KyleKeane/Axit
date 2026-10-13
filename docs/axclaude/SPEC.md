@@ -187,7 +187,7 @@ Single keys act only when the view has focus and no modifier other than Shift is
 | `c` / Shift+C | `claude:` reply line |
 | `t` / Shift+T | tool line: `tool:`, `tool error:` or a summary ending in `(ctrl+o to expand)` |
 | `d` / Shift+D | turn summary (`… for 5s · done 2:48 PM`), d for done |
-| `p` / Shift+P | paragraph: the first line, or a line with text directly after a blank line |
+| `p` / Shift+P | paragraph: the first line, a line with text directly after a blank line, or a `claude:` line. Claude prints the short messages between its tool calls with no blank line in front of them (`Read 1 file (ctrl+o to expand)` is followed at once by the next `claude:` row), so the blank-line rule alone passed over them and found only the paragraphs of the final reply |
 | `e` / Shift+E | `error:`, `warning:` or `tool error:` |
 | `s` / Shift+S | system line |
 | `q` / Shift+Q | the record of a question Claude asked, `Question: <title>` (D33) |

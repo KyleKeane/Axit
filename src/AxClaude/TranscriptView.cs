@@ -22,8 +22,8 @@ internal sealed class TranscriptView : TextBox
     /// </summary>
     private const int NavigationHoldMs = 250;
 
-    /// <summary>A single-key jump target; <paramref name="Previous"/>, when given, must also hold for the line before it (the first line always qualifies).</summary>
-    private sealed record QuickKey(Keys Key, string Name, Func<Line, bool> Matches, Func<Line, bool>? Previous = null);
+    /// <summary>A single-key jump target; <paramref name="Previous"/>, when given, must also hold for the line and the one before it (the first line always qualifies).</summary>
+    private sealed record QuickKey(Keys Key, string Name, Func<Line, bool> Matches, Func<Line, Line, bool>? Previous = null);
 
     /// <summary>k and Shift+K: the bookmarks dropped with m (FR-3.9); the Navigate menu reaches them too.</summary>
     private static readonly QuickKey BookmarkKey = new(AxClaudeKeys.Bookmark, "bookmark", l => l.Kind == LineKind.Bookmark);
@@ -32,12 +32,13 @@ internal sealed class TranscriptView : TextBox
     [
         new(AxClaudeKeys.Heading, "heading", l => l.HeadingLevel > 0),
         // A replayed you: row has its own marker in front of it (FR-4.8); it is not a second stop.
-        new(AxClaudeKeys.Input, "input", l => l.Kind is LineKind.InputMarker or LineKind.UserEcho, Previous: p => p.Kind != LineKind.InputMarker),
+        new(AxClaudeKeys.Input, "input", l => l.Kind is LineKind.InputMarker or LineKind.UserEcho, Previous: (_, p) => p.Kind != LineKind.InputMarker),
         new(AxClaudeKeys.Response, "response", l => l.Kind == LineKind.OutputMarker),
         new(AxClaudeKeys.ResponseAlso, "response", l => l.Kind == LineKind.OutputMarker),
         new(AxClaudeKeys.ClaudeReply, "Claude reply", l => l.Kind == LineKind.ClaudeReply),
         new(AxClaudeKeys.ToolLine, "tool line", l => l.Kind is LineKind.Tool or LineKind.ToolError),
-        new(AxClaudeKeys.Paragraph, "paragraph", l => l.Text.Length > 0, Previous: p => p.Text.Length == 0),
+        // Claude prints the short messages between its tool calls with no blank line in front of them, so every claude: line is a paragraph too.
+        new(AxClaudeKeys.Paragraph, "paragraph", l => l.Text.Length > 0, Previous: (l, p) => p.Text.Length == 0 || l.Kind == LineKind.ClaudeReply),
         new(AxClaudeKeys.Error, "error", l => l.Kind is LineKind.Error or LineKind.Warning or LineKind.ToolError),
         new(AxClaudeKeys.TurnSummary, "turn summary", l => l.Kind == LineKind.TurnSummary),
         new(AxClaudeKeys.SystemLine, "system line", l => l.Kind == LineKind.System),
@@ -402,7 +403,7 @@ internal sealed class TranscriptView : TextBox
             var current = _mirror.LineIndexAt(SelectionStart);
             for (var i = current + step; i >= 0 && i < _mirror.LineCount; i += step)
             {
-                if (key.Matches(_mirror.LineAt(i)) && (key.Previous is null || i == 0 || key.Previous(_mirror.LineAt(i - 1))))
+                if (key.Matches(_mirror.LineAt(i)) && (key.Previous is null || i == 0 || key.Previous(_mirror.LineAt(i), _mirror.LineAt(i - 1))))
                 {
                     MoveTo(i);
                     return;
