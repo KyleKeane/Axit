@@ -843,8 +843,10 @@ internal sealed class EditorForm : Form
         CancelButton = null;
         PerformLayout();
         then?.Invoke();
-        if (IsDisposed)
+        if (IsDisposed || _noticeOpen)
         {
+            // The window closed, or the action opened a notice of its own (the update's progress, the changed-on-disk
+            // question after Save), which is showing now.
             return;
         }
 

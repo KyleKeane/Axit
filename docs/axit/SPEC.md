@@ -184,8 +184,9 @@ These are the rules of `docs/axclaude/SPEC.md` that are not about Claude; app sp
   shortcuts. Native Win32 controls (EDIT, menus, status bar, `ListBox`) are used because NVDA reads them reliably;
   no WPF, no web view, no owner-drawn controls.
 - AX-7.2 No second window of the app's own: questions, errors and help texts are notices drawn inside the window
-  (`OverlayPanel`), never a `Form` or a `MessageBox` once a window exists. The Windows folder, file and font pickers
-  are the only separate windows.
+  (`OverlayPanel`), never a `Form` or a `MessageBox` once a window exists. A notice's button may open the next notice
+  (the update's progress, an error, AxDown's changed-on-disk question after Save), which then stays in view. The
+  Windows folder, file and font pickers are the only separate windows.
 - AX-7.3 The caret never moves except as the direct result of the user's own command. The result of a navigation
   command is announced through a UI Automation notification, joined into one notification when several things arrive
   at once. Nothing speaks on a plain arrow key; information is given on demand.

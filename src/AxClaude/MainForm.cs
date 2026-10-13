@@ -2264,8 +2264,8 @@ internal sealed class MainForm : Form
             return;
         }
 
+        var focusBefore = _focusBeforeNotice;
         _noticeOpen = false;
-        _transcript.KeepCaret = false;
         _transcript.Visible = true;
         // The message field, or the control area when Claude asked something while the notice showed.
         _input.Visible = _area.Current is null;
@@ -2281,9 +2281,20 @@ internal sealed class MainForm : Form
             return;
         }
 
+        if (_noticeOpen)
+        {
+            // The action opened a notice of its own (the update's progress, an error): that one is showing now, and
+            // the reader's place from before the first notice carries over to it.
+            _focusBeforeNotice = focusBefore;
+            _transcript.KeepCaret = focusBefore is not null;
+            return;
+        }
+
+        // Cleared after the action, so that a system line the action adds does not move a reader's caret.
+        _transcript.KeepCaret = false;
         if (ActiveControl is null || _overlay.Contains(ActiveControl))
         {
-            (_focusBeforeNotice ?? BottomControl).Select();
+            (focusBefore ?? BottomControl).Select();
         }
 
         _overlay.Visible = false;

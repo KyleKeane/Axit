@@ -1,5 +1,9 @@
 # Changelog
 
+## 2.4.1 - 2026-10-13
+
+- Axit: a notice opened by another notice's button now stays in view. "Update and restart" hid its own progress notice, so the download and installation ran behind a blank window with no Cancel to reach; an error after "Restart now", and AxDown's "The file changed on disk" question after Save in the "Save changes?" notice, were hidden the same way and left the window without a working key.
+
 ## 2.4.0 - 2026-10-13
 
 - AxClaude: Options, "Soft background music while Claude works" (off until you turn it on) plays a quiet, slow loop of soft plucked notes from the moment Claude starts working until it is done or asks, so you hear that Claude is still at work without reading along. It stops at once when you turn it off, and the chimes and ticks sound over it as before. Ctrl+Space turns it on or off from anywhere in the window and says so, adding "nothing is running" when Claude is idle.
