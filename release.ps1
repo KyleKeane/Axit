@@ -6,7 +6,7 @@
 .DESCRIPTION
   Before running it, add a "## <version> - <date>" section to CHANGELOG.md: its text becomes the release notes and
   is what the update notice in the app shows. Everything else must be committed. The script then
-    1. fetches origin and stops if origin/main has commits that main here does not,
+    1. fetches origin and stops if origin/main has commits that main here does not (skipped with -NoPush),
     2. runs the unit tests,
     3. sets <Version> in src/Axit/Axit.csproj,
     4. commits CHANGELOG.md and the project file as "Release <version>",
@@ -43,17 +43,20 @@ if ($branch -ne 'main') {
     exit 1
 }
 
-# Nothing is released over work someone else has pushed: main here must contain everything origin/main has.
-git -C $root fetch -q origin
-if ($LASTEXITCODE -ne 0) {
-    Write-Host "Could not fetch origin. Nothing was changed."
-    exit $LASTEXITCODE
-}
+# Nothing is released over work someone else has pushed: main here must contain everything origin/main has. The
+# check belongs to the push, so -NoPush (commit and tag offline, push later) does not need origin to be reachable.
+if (-not $NoPush) {
+    git -C $root fetch -q origin
+    if ($LASTEXITCODE -ne 0) {
+        Write-Host "Could not fetch origin. Nothing was changed."
+        exit $LASTEXITCODE
+    }
 
-git -C $root merge-base --is-ancestor origin/main main
-if ($LASTEXITCODE -ne 0) {
-    Write-Host "origin/main has commits that main here does not. Bring them in first (git pull --ff-only, or a merge), then run this again."
-    exit 1
+    git -C $root merge-base --is-ancestor origin/main main
+    if ($LASTEXITCODE -ne 0) {
+        Write-Host "origin/main has commits that main here does not. Bring them in first (git pull --ff-only, or a merge), then run this again."
+        exit 1
+    }
 }
 
 $dirty = @(git -C $root status --porcelain) | Where-Object { $_ -and ($_.Substring(3) -ne 'CHANGELOG.md') }
