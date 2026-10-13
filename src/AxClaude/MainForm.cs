@@ -375,8 +375,9 @@ internal sealed class MainForm : Form
         session.DropDownItems.Add(new ToolStripMenuItem("Send Ctrl+&D", null, (_, _) => Write("\x04")));
         session.DropDownItems.Add(new ToolStripMenuItem("Send &Tab", null, (_, _) => Write("\t")));
         session.DropDownItems.Add(new ToolStripMenuItem("Send Shift+Tab (next permission &mode)", null, (_, _) => Write("\x1b[Z")) { ShortcutKeys = AxClaudeKeys.NextPermissionMode });
-        session.DropDownItems.Add(new ToolStripMenuItem("Send &Up", null, (_, _) => Write("\x1b[A")) { ShortcutKeyDisplayString = "Ctrl+Up in the message field" });
-        session.DropDownItems.Add(new ToolStripMenuItem("Send Do&wn", null, (_, _) => Write("\x1b[B")) { ShortcutKeyDisplayString = "Ctrl+Down in the message field" });
+        // FR-2.4: menu items only; Ctrl+Up and Ctrl+Down move by paragraph in every edit control of the bundle.
+        session.DropDownItems.Add(new ToolStripMenuItem("Send &Up", null, (_, _) => Write("\x1b[A")));
+        session.DropDownItems.Add(new ToolStripMenuItem("Send Do&wn", null, (_, _) => Write("\x1b[B")));
 
         var navigate = new ToolStripMenuItem("&Navigate");
         navigate.DropDownItems.Add(new ToolStripMenuItem("Go to &message field", null, (_, _) => GoTo(BottomControl)) { ShortcutKeyDisplayString = "Ctrl+1" });
@@ -579,13 +580,13 @@ internal sealed class MainForm : Form
                 e.SuppressKeyPress = true;
                 Announce("Shift+Escape interrupts", true);
                 break;
-            case AxClaudeKeys.SendUp:
-                e.SuppressKeyPress = true;
-                Write("\x1b[A");
-                break;
-            case AxClaudeKeys.SendDown:
-                e.SuppressKeyPress = true;
-                Write("\x1b[B");
+            case BundleKeys.ParagraphUp:
+            case BundleKeys.ParagraphDown:
+            case BundleKeys.SelectParagraphUp:
+            case BundleKeys.SelectParagraphDown:
+                // The start of the previous or next line of the message, with Shift selecting to there (FR-2.1): the control's own keys scroll a row and leave the caret.
+                e.Handled = e.SuppressKeyPress = true;
+                EditParagraphs.Move(_input, e.KeyCode == Keys.Down ? 1 : -1, e.Shift);
                 break;
             case BundleKeys.PageUp:
             case BundleKeys.PageDown:
