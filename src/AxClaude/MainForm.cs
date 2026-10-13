@@ -1198,7 +1198,8 @@ internal sealed class MainForm : Form
 
         try
         {
-            File.WriteAllText(dialog.FileName, _transcript.Text, new UTF8Encoding(false));
+            // The lines as the view shows them, without the reading break the view adds while a reply streams (FR-3.10).
+            File.WriteAllText(dialog.FileName, TranscriptMirror.Render(_model.Lines), new UTF8Encoding(false));
         }
         catch (Exception ex) when (ex is IOException or UnauthorizedAccessException)
         {
