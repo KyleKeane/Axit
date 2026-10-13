@@ -1952,7 +1952,7 @@ internal sealed class MainForm : Form
         if (interrupt)
         {
             // After NVDA has taken the focus change, so that the question comes last: raised at once, it was cut off.
-            var question = (_area.CurrentItem.Length == 0 ? name : name + Stop(name[^1]) + _area.CurrentItem).TrimEnd(' ', '.');
+            var question = (_area.CurrentItem.Length == 0 ? name : name + Stop(name) + _area.CurrentItem).TrimEnd(' ', '.');
             Later(300, () =>
             {
                 if (_shownWait == signature)
@@ -2026,14 +2026,14 @@ internal sealed class MainForm : Form
                 break;
             }
 
-            name.Append(Stop(name[^1])).Append(line);
+            name.Append(Stop(name.ToString())).Append(line);
         }
 
         return name.ToString();
     }
 
-    /// <summary>What goes between two sentences: a space after a line that ends in its own punctuation, else a full stop and a space.</summary>
-    private static string Stop(char last) => last is '.' or '?' or '!' or ':' ? " " : ". ";
+    /// <summary>What goes between two sentences: a space after a text that ends in its own punctuation, else a full stop and a space; nothing after an empty text.</summary>
+    private static string Stop(string before) => before.Length == 0 ? string.Empty : before[^1] is '.' or '?' or '!' or ':' ? " " : ". ";
 
     /// <summary>
     /// One of Claude's questions (D33): the answers as a list in the control area. Enter answers, Escape cancels the
@@ -2150,7 +2150,7 @@ internal sealed class MainForm : Form
     {
         var chosen = LineClassifier.TextPromptAnswer(prompt) ?? "an answer that asks for your own words";
         var asked = _askedQuestion is { } question ? QuestionName(question) : null;
-        var name = (asked is null ? string.Empty : asked + Stop(asked[^1])) + $"You chose {chosen}. Your answer";
+        var name = (asked is null ? string.Empty : asked + Stop(asked)) + $"You chose {chosen}. Your answer";
         ShowInArea(prompt, name, Environment.TickCount64 - _answerAt > 3000, (focus, hold) => _area.ShowField(name, focus, hold, typed =>
         {
             var words = typed.Trim();
