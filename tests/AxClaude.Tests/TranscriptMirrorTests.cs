@@ -30,6 +30,29 @@ public class TranscriptMirrorTests
     }
 
     [Fact]
+    public void A_frame_that_changes_nothing_allocates_nothing_and_keeps_every_caret_position()
+    {
+        var mirror = new TranscriptMirror();
+        List<Line> lines = [L("first"), L("second line"), Joined("wrapped"), L("")];
+        mirror.Update(lines);
+        // Warmed up: the first unchanged frame makes the one update object the rest share.
+        mirror.Update(lines);
+
+        var before = GC.GetAllocatedBytesForCurrentThread();
+        var update = mirror.Update(lines);
+        Assert.Equal(0, GC.GetAllocatedBytesForCurrentThread() - before);
+
+        Assert.False(update.Changed);
+        for (var i = 0; i < mirror.LineCount; i++)
+        {
+            var start = mirror.StartAt(i);
+            var end = start + mirror.TextAt(i).Length;
+            Assert.Equal(start, update.MapPosition(start));
+            Assert.Equal(end, update.MapPosition(end));
+        }
+    }
+
+    [Fact]
     public void A_rewritten_line_keeps_the_caret_at_its_column()
     {
         var mirror = new TranscriptMirror();

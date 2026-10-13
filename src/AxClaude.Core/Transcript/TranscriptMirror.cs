@@ -31,6 +31,9 @@ public sealed class TranscriptMirror
     private readonly List<int> _extra = [];
     private readonly List<ReadingBreak> _breaks = [];
     private int _breakStart = int.MaxValue;
+    // Reused between frames, like the line lists: a frame that changes nothing visible allocates nothing (D24).
+    private readonly List<MirrorEdit> _edits = [];
+    private MirrorUpdate? _unchanged;
 
     /// <summary>
     /// A reading break: the reader has heard <see cref="Row"/> up to <see cref="Mark"/>. When the row grows past the
@@ -257,11 +260,12 @@ public sealed class TranscriptMirror
         // large object heap on every frame, most of which change nothing visible.
         var next = _scratch;
         next.Clear();
-        foreach (var line in lines)
+        // By index: foreach over the interface boxes the list's enumerator, 40 bytes a frame.
+        for (var i = 0; i < lines.Count; i++)
         {
-            if (!line.Hidden)
+            if (!lines[i].Hidden)
             {
-                next.Add(line);
+                next.Add(lines[i]);
             }
         }
 
@@ -295,7 +299,8 @@ public sealed class TranscriptMirror
             suffix++;
         }
 
-        var edits = new List<MirrorEdit>();
+        var edits = _edits;
+        edits.Clear();
         for (var i = 0; i < prefix; i++)
         {
             if (_text[i] != next[i].Text || _extra[i] != ExtraOf(i, next[i]))
@@ -351,8 +356,9 @@ public sealed class TranscriptMirror
 
         if (edits.Count == 0)
         {
-            // The same lines with the same texts and separators: nothing to recompute.
-            return new MirrorUpdate(edits, _shown, _starts, _shown, _text, _extra, _starts, prefix, suffix);
+            // The same lines with the same texts and separators: nothing to recompute, and the same update as last
+            // time, which maps every caret position to itself (every line is in the prefix).
+            return _unchanged ??= new MirrorUpdate(edits, _shown, _starts, _shown, _text, _extra, _starts, _shown.Count, 0);
         }
 
         edits.Sort((a, b) => b.Start.CompareTo(a.Start));
@@ -400,6 +406,7 @@ public sealed class TranscriptMirror
         _scratch = _shown;
         _shown = next;
         _starts = starts;
+        _unchanged = null;
         DisplayLineCount = displayLine + 1;
         return update;
     }
