@@ -77,4 +77,39 @@ public class WaveToneTests
         var second = Math.Abs((int)BitConverter.ToInt16(wav, WaveTone.HeaderLength + 2));
         Assert.True(second < Peak(0, each / 4) / 4, $"{second} should be well below the peak");
     }
+
+    [Fact]
+    public void Plucks_ring_into_the_next_note_and_loop_without_a_seam()
+    {
+        var wav = WaveTone.Plucks(0.2, 20, 440, 330, 220);
+        var samples = (wav.Length - WaveTone.HeaderLength) / 2;
+        var each = 20 * WaveTone.SampleRate / 1000;
+        Assert.Equal(3 * each, samples);
+
+        int At(int i) => BitConverter.ToInt16(wav, WaveTone.HeaderLength + i * 2);
+
+        int Peak(int from, int to)
+        {
+            var peak = 0;
+            for (var i = from; i < to; i++)
+            {
+                peak = Math.Max(peak, Math.Abs(At(i)));
+            }
+
+            return peak;
+        }
+
+        // The loop is scaled as a whole: its loudest sample is the amplitude.
+        var peak = Peak(0, samples);
+        Assert.InRange(peak, 0.2 * short.MaxValue - 2, 0.2 * short.MaxValue + 1);
+
+        // Each note starts well over the tail of the one before, which has died away under it.
+        for (var n = 1; n < 3; n++)
+        {
+            Assert.True(Peak(n * each, n * each + each / 4) > 2 * Peak(n * each - each / 4, n * each), $"note {n} should start over the last one's tail");
+        }
+
+        // The last note's tail wraps round to the start, so the first sample follows on from the last: no seam when it loops.
+        Assert.True(Math.Abs(At(0) - At(samples - 1)) < peak / 10, "the loop should join up");
+    }
 }

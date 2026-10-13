@@ -32,6 +32,9 @@ public sealed class AppSettings
     /// <summary>The chimes when a message is sent and when Claude replies, finishes and asks (FR-7.3). The key keeps its 1.0 name.</summary>
     public bool SoundOnBell { get; set; } = true;
 
+    /// <summary>A soft music loop from the moment Claude starts working until it is done or asks (FR-7.9).</summary>
+    public bool WorkingMusic { get; set; }
+
     public bool FlashTaskbar { get; set; } = true;
 
     /// <summary>How much of a reply is spoken as it arrives (FR-7.4): none, the first line of each message, or all.</summary>

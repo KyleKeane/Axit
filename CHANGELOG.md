@@ -1,5 +1,9 @@
 # Changelog
 
+## 2.4.0 - 2026-10-13
+
+- AxClaude: Options, "Soft background music while Claude works" (off until you turn it on) plays a quiet music-box loop from the moment Claude starts working until it is done or asks, so you hear that Claude is still at work without reading along. It stops at once when you turn it off, and the chimes and ticks sound over it as before.
+
 ## 2.3.1 - 2026-10-02
 
 - For developers: the documents and notes are pruned of the transition's scaffolding (the plan is now a short record), the accessibility review covers both windows, and the specifications describe the released state only. `docs/axdown/tutorial.md` is a guided tour of AxDown with every Markdown structure to practise the keys on; `run-axdown.ps1` opens it when given no file. No change in behaviour.

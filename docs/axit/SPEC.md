@@ -139,8 +139,8 @@ allow it, see B-9).
   hand-over to `install.ps1`; neither needs a window), `Audio/WaveTone` (the sounds as WAV bytes).
 - AX-6.2 `Axit.Forms` (WinForms, no tests, checked with NVDA): `OverlayPanel` (the notices in the
   window, with the `Notice` record callers pass), `ControlArea` and `ListKeys` (a question's answers as a list or a
-  field in the input field's place, with the number and page keys of every such list), `Sounds` (one wave-out device
-  for the life of the process), `EditPaging` (Page Up and Page Down in an edit control), `StatusLayout`, the font
+  field in the input field's place, with the number and page keys of every such list), `Sounds` (wave-out devices kept
+  open for the life of the process), `EditPaging` (Page Up and Page Down in an edit control), `StatusLayout`, the font
   handling (text size and the font picker), `BundleKeys` (AX-8). The crash report (twenty lines in each app's
   `Run`) stays per app until a second copy shows what is common.
 - AX-6.3 A piece moves into a shared project only when a second app needs it, in a commit of its own, with the

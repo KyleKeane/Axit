@@ -39,6 +39,8 @@ internal sealed class MainForm : Form
     private readonly System.Windows.Forms.Timer _quiet = new() { Interval = 100 };
     private readonly System.Windows.Forms.Timer _attention = new() { Interval = 400 };
     private readonly System.Windows.Forms.Timer _exitSettle = new() { Interval = 300 };
+    /// <summary>The working music is playing (FR-7.9).</summary>
+    private bool _musicOn;
 
     /// <summary>How long reply speech waits for Claude's prompt row, which comes after a question's rows (D33).</summary>
     private readonly System.Windows.Forms.Timer _speechHold = new() { Interval = 250 };
@@ -393,6 +395,12 @@ internal sealed class MainForm : Form
         options.DropDownItems.Add(Toggle("&Announce when Claude is done", _settings.AnnounceBell, v => _settings.AnnounceBell = v));
         options.DropDownItems.Add(Toggle("Play &sounds: ready, sent, replying, done, question", _settings.SoundOnBell, v => _settings.SoundOnBell = v));
         options.DropDownItems.Add(Toggle("Tick for each &new line and tool call from Claude", _settings.ClickOnNewLine, v => _settings.ClickOnNewLine = v));
+        // FR-7.9: starts or stops at once when toggled during a turn.
+        options.DropDownItems.Add(Toggle("Soft &background music while Claude works", _settings.WorkingMusic, v =>
+        {
+            _settings.WorkingMusic = v;
+            UpdateMusic();
+        }));
         options.DropDownItems.Add(Toggle("&Flash the taskbar button when Claude is done", _settings.FlashTaskbar, v => _settings.FlashTaskbar = v));
         // FR-7.4: one of three, shown checked like a radio group; the choice is announced, since the menu closes on it.
         var speech = new ToolStripMenuItem("Speak &replies as they arrive");
@@ -770,6 +778,7 @@ internal sealed class MainForm : Form
     {
         _transcript.Sync(_model.Lines);
         UpdateStatus();
+        UpdateMusic();
 
         // One pass over the transcript for the tick (FR-7.8) and the spoken reply and tool calls (FR-7.4). Nothing is
         // spoken before Claude is ready in this run: what it prints until then is the replayed conversation, there for
@@ -977,6 +986,30 @@ internal sealed class MainForm : Form
                 dwTimeout = 0,
             };
             FlashWindowEx(ref info);
+        }
+    }
+
+    /// <summary>
+    /// The working music (FR-7.9) plays exactly while the status says working: it starts with the first working
+    /// frame and stops with the frame in which Claude is done, asks, or was stopped, and at once when the option is
+    /// turned off.
+    /// </summary>
+    private void UpdateMusic()
+    {
+        var play = _settings.WorkingMusic && _host is not null && _model.Working && !_model.PromptPending;
+        if (play == _musicOn)
+        {
+            return;
+        }
+
+        _musicOn = play;
+        if (play)
+        {
+            Sounds.StartMusic();
+        }
+        else
+        {
+            Sounds.StopMusic();
         }
     }
 
@@ -1748,6 +1781,7 @@ internal sealed class MainForm : Form
         // Nothing waits on an answer any more: the message field comes back.
         CloseArea();
         UpdateStatus();
+        UpdateMusic();
     }
 
     /// <summary>
