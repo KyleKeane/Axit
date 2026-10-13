@@ -162,14 +162,16 @@ public sealed record TextDocument(string Text, Encoding Encoding, bool ByteOrder
         return text.Replace("\r\n", "\n").Replace('\r', '\n').Replace("\n", "\r\n");
     }
 
-    /// <summary>The ANSI code page of this Windows; 1252 when it cannot be asked (another OS, an unknown page).</summary>
+    /// <summary>The ANSI code page of this Windows; 1252 when it cannot be asked (another OS, an unknown page) or is UTF-8 itself.</summary>
     private static Encoding SystemCodePage()
     {
         try
         {
-            if (OperatingSystem.IsWindows())
+            // 65001 when Windows runs with "Use Unicode UTF-8 for worldwide language support". The bytes were just found
+            // not to be UTF-8: decoding them as UTF-8 would replace every non-ASCII byte, and a save would write that back.
+            if (OperatingSystem.IsWindows() && GetACP() is var page && page != 65001)
             {
-                return Encoding.GetEncoding((int)GetACP());
+                return Encoding.GetEncoding((int)page);
             }
         }
         catch (Exception ex) when (ex is ArgumentException or NotSupportedException)

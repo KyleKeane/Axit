@@ -4,6 +4,7 @@
 
 - Axit: a notice opened by another notice's button now stays in view. "Update and restart" hid its own progress notice, so the download and installation ran behind a blank window with no Cancel to reach; an error after "Restart now", and AxDown's "The file changed on disk" question after Save in the "Save changes?" notice, were hidden the same way and left the window without a working key.
 - AxDown: a file that could not be opened (locked, too large, not text) now leaves the window on an empty, untitled document, so Ctrl+S asks for a name instead of writing the empty editor over the file. A file that is not text, such as a picture or UTF-16 text without its mark, is refused as well: the edit control kept only the text before the first NUL character and would have saved that truncation back.
+- AxDown: on a Windows set to "Use Unicode UTF-8 for worldwide language support", a file that is not UTF-8 is now read as Windows-1252 rather than as UTF-8 with replacement characters, which a save would have written back over every accented letter.
 
 ## 2.4.0 - 2026-10-13
 

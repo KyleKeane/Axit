@@ -88,7 +88,9 @@ UTF-8, UTF-16 and the system code page; files that are not text; files over 32 M
 
 - AD-3.1 Reading: the bytes are decoded as UTF-8 with a byte order mark, UTF-16 little or big endian with a mark,
   otherwise UTF-8 when the bytes are valid UTF-8, otherwise the system code page (`Encoding.Default` is UTF-8 in
-  .NET; the ANSI page comes from `CodePagesEncodingProvider`, built into .NET, no package).
+  .NET; the ANSI page comes from `CodePagesEncodingProvider`, built into .NET, no package). When the system page is
+  UTF-8 itself (Windows' "Use Unicode UTF-8 for worldwide language support" option), Windows-1252 is used instead:
+  the bytes were just found not to be UTF-8, and decoding them as UTF-8 would replace every non-ASCII byte.
 - AD-3.2 The encoding and whether there was a mark are remembered with the document and shown in the status bar
   ("UTF-8", "UTF-8 with BOM", "UTF-16 LE", "Windows-1252").
 - AD-3.3 Writing: the text goes back in the remembered encoding, with the mark when there was one. A new document is
