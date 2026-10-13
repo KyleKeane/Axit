@@ -502,6 +502,8 @@ internal sealed class MainForm : Form
         _input.AcceptsTab = false;
         _input.WordWrap = true;
         _input.ScrollBars = ScrollBars.Vertical;
+        // The control's default of 32 767 characters cut a long paste short without a word (FR-2.1).
+        _input.MaxLength = 0;
         _input.Dock = DockStyle.Bottom;
         _input.TabIndex = 0;
         _input.KeyDown += OnInputKeyDown;

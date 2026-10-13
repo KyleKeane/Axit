@@ -7,6 +7,7 @@
 - AxDown: on a Windows set to "Use Unicode UTF-8 for worldwide language support", a file that is not UTF-8 is now read as Windows-1252 rather than as UTF-8 with replacement characters, which a save would have written back over every accented letter.
 - Axit: a settings file with a typo in it (after Options, Open settings file) is now copied to `axclaude.json.bad` or `axdown.json.bad` before the defaults take over, and the message in the window names the copy. The app saves its settings soon after it starts, which wrote the defaults over every other setting in the file; the copy keeps them for mending.
 - AxClaude: Shift+Escape now interrupts Claude from its question list and answer field too. The list and the field kept every Escape, with or without Shift, for themselves, so right after an answer nothing on the keyboard could interrupt.
+- AxClaude: the message field no longer cuts a long paste at 32 767 characters. The edit control's default limit dropped the rest of a pasted log without a word, and the shortened message went to Claude as "Sent".
 
 ## 2.4.0 - 2026-10-13
 
