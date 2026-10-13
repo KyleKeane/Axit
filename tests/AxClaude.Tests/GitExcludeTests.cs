@@ -48,6 +48,31 @@ public class GitExcludeTests
     }
 
     [Fact]
+    public void A_linked_worktree_writes_into_the_common_directory()
+    {
+        var root = Directory.CreateTempSubdirectory("axclaude-exclude-").FullName;
+        try
+        {
+            // What git worktree add leaves behind: a .git file in the worktree, and a commondir file in its gitdir.
+            var repoGit = Path.Combine(root, "repo", ".git");
+            var worktreeGit = Path.Combine(repoGit, "worktrees", "feature");
+            var worktree = Path.Combine(root, "feature");
+            Directory.CreateDirectory(worktreeGit);
+            Directory.CreateDirectory(worktree);
+            File.WriteAllText(Path.Combine(worktree, ".git"), $"gitdir: {worktreeGit}\n");
+            File.WriteAllText(Path.Combine(worktreeGit, "commondir"), "../..\n");
+
+            var path = GitExclude.Update(worktree, on: true);
+            Assert.Equal(Path.Combine(repoGit, "info", "exclude"), path);
+            Assert.Contains("axclaude-*.txt", File.ReadAllText(path!));
+        }
+        finally
+        {
+            Directory.Delete(root, recursive: true);
+        }
+    }
+
+    [Fact]
     public void A_file_the_app_offers_to_save_matches_a_pattern()
     {
         // The default names of Save conversation and Record raw stream (MainForm).

@@ -90,11 +90,24 @@ public static class GitExclude
 
         if (File.Exists(dotGit) && File.ReadAllText(dotGit).Trim() is var text && text.StartsWith("gitdir:", StringComparison.Ordinal))
         {
-            var target = text["gitdir:".Length..].Trim();
-            var full = Path.GetFullPath(Path.IsPathRooted(target) ? target : Path.Combine(folder, target));
-            return Directory.Exists(full) ? full : null;
+            var full = Resolve(folder, text["gitdir:".Length..]);
+            if (!Directory.Exists(full))
+            {
+                return null;
+            }
+
+            // A linked worktree's gitdir is <repo>/.git/worktrees/<name>, whose info/exclude git never reads: the
+            // exclude file belongs to the common directory, which the commondir file there names.
+            var commonDir = Path.Combine(full, "commondir");
+            return File.Exists(commonDir) ? Resolve(full, File.ReadAllText(commonDir)) : full;
         }
 
         return null;
+    }
+
+    private static string Resolve(string from, string target)
+    {
+        target = target.Trim();
+        return Path.GetFullPath(Path.IsPathRooted(target) ? target : Path.Combine(from, target));
     }
 }
