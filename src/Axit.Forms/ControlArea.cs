@@ -153,8 +153,10 @@ public sealed class ControlArea : Panel
     /// <summary>Puts the new control over the old one; returns the old one.</summary>
     private Control? Place(Control control, string name)
     {
-        // Enter and Escape reach the control's KeyDown rather than the window's default and cancel buttons.
-        control.PreviewKeyDown += (_, e) => e.IsInputKey |= e.KeyCode is Keys.Enter or Keys.Escape;
+        // Enter and Escape reach the control's KeyDown rather than the window's default and cancel buttons. Only the
+        // plain keys (KeyData, not KeyCode): with a modifier they belong to the window, which skips ProcessCmdKey for
+        // an input key (Shift+Escape is AxClaude's interrupt from anywhere).
+        control.PreviewKeyDown += (_, e) => e.IsInputKey |= e.KeyData is Keys.Enter or Keys.Escape;
         var old = Current;
         _name.Text = name;
         Visible = true;
