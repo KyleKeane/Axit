@@ -7,6 +7,7 @@
 - AxClaude: `p` and Shift+P now stop at each "claude:" line as well as at the paragraphs after a blank line. Claude prints its short messages between tool calls with no blank line in front of them, so the paragraph key passed over them and found only the paragraphs of the final reply.
 - Axit: Ctrl+Up and Ctrl+Down now move to the start of the previous and next paragraph in every text field of the bundle (AxClaude's conversation and message field, AxDown's editor), a paragraph being the first line after a blank line, and Ctrl+Shift+Up and Ctrl+Shift+Down select to there, as in Word. The Windows edit control scrolled the view instead and left the caret where it was, so a screen reader read the same text again.
 - AxClaude: Send Up and Send Down to Claude are menu items only now (Session menu), since Ctrl+Up and Ctrl+Down in the message field move by paragraph like everywhere else.
+- AxClaude: the ticks are gentler and slower. A soft tap replaces the typewriter strike for each new line and two soft low taps replace the knocks for each tool, at about half the volume, and ticks come at most about eleven a second, so a burst of lines is an even patter rather than a rattle over NVDA's speech.
 
 ## 2.3.1 - 2026-10-02
 

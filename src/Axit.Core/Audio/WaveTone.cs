@@ -52,22 +52,27 @@ public static class WaveTone
     }
 
     /// <summary>
-    /// Strikes, like a typewriter key or a tiny hammer: each is a burst of noise over a short tone that dies away at
-    /// once, the noise gone within a couple of milliseconds and the tone within <paramref name="millisecondsEach"/>,
-    /// the next strike following as soon as the last has faded. One strike is heard as a single tick; two or three in
-    /// a row, a few milliseconds apart, as one ratchety tick. The tone rises over its first 0.6 ms and the noise over
-    /// four samples: a sound that starts at full volume is heard as a click followed by a separate falling note. The
-    /// noise is the same every time.
+    /// Strikes, like a soft tap on wood: each is a tone that dies away within <paramref name="millisecondsEach"/>,
+    /// rising over an eighth of that time so that it is heard as one tap and not a click, the next strike following
+    /// as soon as the last has faded. With <paramref name="noise"/> above zero a burst of noise, the same every time
+    /// and gone within a couple of milliseconds, sits over the start, like a typewriter key. A frequency of 0 is a
+    /// rest of that length: at the end of a tick it spaces the ticks out, since a tick is dropped while its buffer is
+    /// still queued (AxClaude FR-7.8).
     /// </summary>
     public static byte[] Strikes(double amplitude, int millisecondsEach, double noise, params double[] hertz)
     {
         var each = Samples(millisecondsEach);
-        var attack = Math.Min(each / 4, SampleRate / 1500);
+        var attack = Math.Max(1, each / 8);
         var chiff = Math.Max(1, Samples(1));
         var random = new Random(7);
         var samples = new short[each * hertz.Length];
         for (var n = 0; n < hertz.Length; n++)
         {
+            if (hertz[n] == 0)
+            {
+                continue;
+            }
+
             for (var i = 0; i < each; i++)
             {
                 // Down to about a quarter of a percent at the end, so the cut-off is not heard.

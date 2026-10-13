@@ -170,10 +170,12 @@ public static class Sounds
         }
     }
 
-    // A typewriter-like strike, a burst of noise over a 1.5 kHz tone that dies away within 10 ms: a line from Claude
-    // arrived. Two lower knocks in a row, 12 ms each and rising: a tool call arrived.
-    private static readonly Sound LineTick = new(WaveTone.Strikes(0.4, 10, 0.5, 1500));
-    private static readonly Sound ToolTick = new(WaveTone.Strikes(0.5, 12, 0.5, 650, 850));
+    // A soft tap, a 30 ms A5 tone that dies away, then 60 ms of silence in the same buffer so that ticks come at most
+    // about eleven a second: a line from Claude arrived. Two soft low taps, E4 then A4, 40 ms each: a tool call
+    // arrived. Until 2.4.0 these were a burst of noise over a tone and two knocks, at up to a hundred a second: sharp
+    // enough to jitter over NVDA's speech and seem to pull its volume about.
+    private static readonly Sound LineTick = new(WaveTone.Strikes(0.2, 30, 0, 880, 0, 0));
+    private static readonly Sound ToolTick = new(WaveTone.Strikes(0.25, 40, 0, 329.63, 440));
 
     // C6 alone, a high ping: Claude is ready. A4 alone, low: the message went out. C5, E5, G5 up to a long note:
     // Claude starts replying. The same notes down, G5, E5, C5: the turn is done. Two E5s: Claude needs an answer.
@@ -200,10 +202,10 @@ public static class Sounds
     private static readonly Device Chimes = new("sounds", LineTick, ToolTick, ReadyChime, SentChime, RespondingChime, DoneChime, QuestionChime, NoticeChime, AlertChime);
     private static readonly Device Music = new("working music", WorkingMusic);
 
-    /// <summary>A tiny typewriter-like tick: a line from Claude arrived.</summary>
+    /// <summary>A soft tap: a line from Claude arrived.</summary>
     public static void Click() => Chimes.Play(LineTick, replace: false);
 
-    /// <summary>Two lower knocks: a tool call arrived.</summary>
+    /// <summary>Two soft low taps: a tool call arrived.</summary>
     public static void Tool() => Chimes.Play(ToolTick, replace: false);
 
     /// <summary>A single high ping: Claude is ready.</summary>
