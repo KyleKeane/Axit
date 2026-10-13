@@ -12,6 +12,7 @@
 - AxClaude: in a git worktree (`git worktree add`, or Claude Code's worktree isolation) the patterns that keep AxClaude's recordings and saved conversations out of git now go into the repository's own exclude file. They were written into the worktree's private folder under `.git/worktrees`, which git never reads, while the log reported success.
 - For developers: the privacy check and the recording dump now also catch an account path spelt the Git Bash or WSL way (`/c/Users/<name>`, `/mnt/c/Users/<name>`), which a Bash command in a conversation prints.
 - Axit: three loose ends of the update: Cancel pressed while the downloaded zip is being unpacked now cancels (it was ignored and the update installed anyway); a download that is not a zip is reported as a failed update instead of a crash notice; and when the installed program cannot be started as the window closes, the failure goes to the log and the window still closes, where it used to stay open and throw again on every close. AxDown: Cancel in the "Save changes?" question after "Update and restart" now says "Update installed. It starts with the next AxDown" and forgets the restart, as AxClaude's Keep working does; a later Exit started the new version unasked.
+- AxClaude: a question that Claude redraws while it is already shown at the bottom of the window is no longer shown again, with its chime and announcement, when a redraw leaves Claude's cursor off the prompt row for a frame. This is the likely cause of the question that "kept refiring" on 2026-10-02.
 
 ## 2.4.0 - 2026-10-13
 

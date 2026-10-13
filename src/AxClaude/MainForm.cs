@@ -855,8 +855,12 @@ internal sealed class MainForm : Form
                 _attention.Start();
             }
         }
-        else
+        else if (_shownWait is null)
         {
+            // Claude redraws a question in passing, and a frame can end with the cursor off the prompt row (a repaint
+            // from the top, the quiet timer cutting a redraw). While the control area shows the question it stays
+            // handled; AnnounceAttention forgets it when nothing waits any more. Forgetting it here made the next frame
+            // rebuild the list, replay the chime and announce the same question again (the refiring of 2026-10-02).
             _promptAnnounced = false;
             _handledWait = null;
         }
@@ -909,6 +913,9 @@ internal sealed class MainForm : Form
             {
                 var byUser = Environment.TickCount64 - Math.Max(_answerAt, _screenKeyAt) < 3000;
                 CloseArea();
+                // The question is over: the same one asked again later is new.
+                _promptAnnounced = false;
+                _handledWait = null;
                 if (!byUser)
                 {
                     Announce("Question closed", false);
