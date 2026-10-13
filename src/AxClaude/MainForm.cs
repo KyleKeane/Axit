@@ -619,6 +619,13 @@ internal sealed class MainForm : Form
     /// </summary>
     private void QuoteLineInMessage(int number, int count, string text)
     {
+        if (_area.Current is not null)
+        {
+            // The field is hidden behind Claude's question: the quote would land unseen and the comment in the list.
+            Announce("Answer Claude first; the message field is hidden while it asks", true);
+            return;
+        }
+
         var existing = _input.Text.TrimEnd('\r', '\n');
         var quote = $"{QuoteMarker}\r\nLine {number} of {count}:\r\n{text}\r\n{CommentMarker}\r\n";
         _input.Text = existing.Length == 0 ? quote : existing + "\r\n\r\n" + quote;
