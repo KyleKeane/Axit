@@ -24,6 +24,7 @@
 - AxClaude: Save conversation as (Ctrl+S) no longer writes the extra line break the conversation shows while a reply streams past the line you are reading; the file holds the lines as they are.
 - AxClaude: what the window remembers about spoken reply lines and seen tool calls is dropped with the lines when a long conversation is trimmed, instead of growing for as long as the window is open.
 - Axit: Page Up and Page Down keep moving a whole screen in a text with more than 65 536 rows (a very large file in AxDown, a long conversation with wrapped lines); the edit control reports the bottom row in 16 bits, and past that count the keys moved one row.
+- AxClaude: the handlers for Claude's output and exit are now given to the pseudo console before its reader thread starts, so a chunk printed in the first moments can no longer be missed.
 
 ## 2.4.0 - 2026-10-13
 

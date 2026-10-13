@@ -414,7 +414,7 @@ Input field / menus ──> MainForm write queue (paced writes) ──> ConPTY i
 
 ### 7.4 PtyHost
 
-The one ConPTY implementation: five kernel32 calls, the std-handle guard (FR-1.4), the graceful stop (FR-1.7), a reader thread and an `Exited` event from a wait thread; `ClaudeLauncher` builds the command line and the environment (FR-1.2, FR-1.3). `tools/PtyCapture` records through both, so a fixture shows what the app sees. The console size is fixed (D9).
+The one ConPTY implementation: five kernel32 calls, the std-handle guard (FR-1.4), the graceful stop (FR-1.7), a reader thread that hands every chunk to the callback given to `Start` and a wait thread that reports the exit code the same way (both callbacks are in place before the threads start, so nothing the child prints first is missed); `ClaudeLauncher` builds the command line and the environment (FR-1.2, FR-1.3). `tools/PtyCapture` records through both, so a fixture shows what the app sees. The console size is fixed (D9).
 
 ### 7.5 VT parsing and the screen model
 

@@ -80,17 +80,17 @@ internal static class Program
         var output = new Output();
         var clock = Stopwatch.StartNew();
         var exited = new ManualResetEventSlim();
-        using var host = PtyHost.Start(new PtyOptions(commandLine, cwd, cols, rows, ClaudeLauncher.BuildEnvironment()));
-        host.DataReceived += data =>
-        {
-            recorder.Write(data);
-            output.Append(data, clock.ElapsedMilliseconds);
-        };
-        host.Exited += code =>
-        {
-            Console.Error.WriteLine($"[capture] process exited with code {code} at {clock.ElapsedMilliseconds} ms");
-            exited.Set();
-        };
+        using var host = PtyHost.Start(new PtyOptions(commandLine, cwd, cols, rows, ClaudeLauncher.BuildEnvironment()),
+            data =>
+            {
+                recorder.Write(data);
+                output.Append(data, clock.ElapsedMilliseconds);
+            },
+            code =>
+            {
+                Console.Error.WriteLine($"[capture] process exited with code {code} at {clock.ElapsedMilliseconds} ms");
+                exited.Set();
+            });
         Console.Error.WriteLine($"[capture] started pid {host.ProcessId}");
 
         var runner = new ScriptRunner(host, output, exited, clock);

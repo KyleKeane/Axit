@@ -12,8 +12,8 @@ public sealed record PtyOptions(
     IReadOnlyDictionary<string, string> Environment);
 
 /// <summary>
-/// Runs a command inside a Windows pseudo console. Output arrives on a background thread through
-/// <see cref="DataReceived"/>; <see cref="Exited"/> fires once, from another background thread.
+/// Runs a command inside a Windows pseudo console. Output arrives on a background thread through the data callback
+/// given to <see cref="Start"/>; the exit callback fires once, from another background thread.
 /// </summary>
 public sealed class PtyHost : IDisposable
 {
@@ -26,20 +26,26 @@ public sealed class PtyHost : IDisposable
     private Thread _waiter = null!;
     private int _exited;
     private bool _disposed;
+    private readonly Action<byte[]> _dataReceived;
+    private readonly Action<int> _exitedHandler;
 
-    private PtyHost()
+    private PtyHost(Action<byte[]> dataReceived, Action<int> exited)
     {
+        _dataReceived = dataReceived;
+        _exitedHandler = exited;
     }
-
-    public event Action<byte[]>? DataReceived;
-    public event Action<int>? Exited;
 
     public int ProcessId => _process.dwProcessId;
     public bool HasExited => Volatile.Read(ref _exited) == 1;
 
-    public static PtyHost Start(PtyOptions options)
+    /// <summary>
+    /// Starts the child in a new pseudo console. <paramref name="dataReceived"/> gets every chunk the child prints,
+    /// from a reader thread; <paramref name="exited"/> gets the exit code once, from another background thread. Both
+    /// are in place before the threads start, so that nothing the child prints first is missed.
+    /// </summary>
+    public static PtyHost Start(PtyOptions options, Action<byte[]> dataReceived, Action<int> exited)
     {
-        var host = new PtyHost();
+        var host = new PtyHost(dataReceived, exited);
         SafeFileHandle? inputRead = null, inputWrite = null, outputRead = null, outputWrite = null;
         var attributeList = IntPtr.Zero;
         try
@@ -187,7 +193,7 @@ public sealed class PtyHost : IDisposable
                     break;
                 }
 
-                DataReceived?.Invoke(buffer.AsSpan(0, count).ToArray());
+                _dataReceived(buffer.AsSpan(0, count).ToArray());
             }
         }
         catch (Exception ex) when (ex is IOException or ObjectDisposedException)
@@ -201,7 +207,7 @@ public sealed class PtyHost : IDisposable
         Native.WaitForSingleObject(_process.hProcess, Native.INFINITE);
         Native.GetExitCodeProcess(_process.hProcess, out var code);
         Volatile.Write(ref _exited, 1);
-        Exited?.Invoke((int)code);
+        _exitedHandler((int)code);
     }
 
     private static string BuildEnvironmentBlock(IReadOnlyDictionary<string, string> environment)

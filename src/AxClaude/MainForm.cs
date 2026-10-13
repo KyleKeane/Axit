@@ -1686,7 +1686,13 @@ internal sealed class MainForm : Form
         _launchedFolder = _folder;
         KeepFilesOutOfGit();
 
-        PtyHost host;
+        // Chunks that arrive while the UI thread is busy are handed over together: one post per burst, not one per
+        // chunk, so a large tool output does not queue up hundreds of window messages ahead of the user's keys. The
+        // handlers go in with Start, so that nothing Claude prints first is missed; they run on background threads
+        // and only post to this one, which gets to the posted work after host is assigned below.
+        var inbox = new List<byte[]>();
+        var posted = false;
+        PtyHost? host = null;
         try
         {
             host = PtyHost.Start(new PtyOptions(
@@ -1694,7 +1700,7 @@ internal sealed class MainForm : Form
                 _folder!,
                 _model.Columns,
                 _model.Rows,
-                ClaudeLauncher.BuildEnvironment()));
+                ClaudeLauncher.BuildEnvironment()), OnData, OnExited);
         }
         catch (Exception ex)
         {
@@ -1714,11 +1720,9 @@ internal sealed class MainForm : Form
         _lastCommand = null;
         _settings.RememberFolder(_folder!);
         SaveSettings();
-        // Chunks that arrive while the UI thread is busy are handed over together: one post per burst, not one per
-        // chunk, so a large tool output does not queue up hundreds of window messages ahead of the user's keys.
-        var inbox = new List<byte[]>();
-        var posted = false;
-        host.DataReceived += data =>
+        UpdateStatus();
+
+        void OnData(byte[] data)
         {
             try
             {
@@ -1748,7 +1752,7 @@ internal sealed class MainForm : Form
                     posted = false;
                 }
             }
-        };
+        }
 
         void FeedInbox()
         {
@@ -1774,7 +1778,7 @@ internal sealed class MainForm : Form
             _quiet.Start();
         }
 
-        host.Exited += code => Post(() =>
+        void OnExited(int code) => Post(() =>
         {
             if (ReferenceEquals(host, _host))
             {
@@ -1784,7 +1788,6 @@ internal sealed class MainForm : Form
                 _exitSettle.Start();
             }
         });
-        UpdateStatus();
     }
 
     private void FinishExit()
