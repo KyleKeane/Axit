@@ -2,12 +2,12 @@
 
 ## 2.4.0 - 2026-10-13
 
-- AxClaude: Options, "Soft background music while Claude works" (off until you turn it on) plays a quiet music-box loop from the moment Claude starts working until it is done or asks, so you hear that Claude is still at work without reading along. It stops at once when you turn it off, and the chimes and ticks sound over it as before. Ctrl+Space turns it on or off from anywhere in the window and says so, adding "nothing is running" when Claude is idle.
+- AxClaude: Options, "Soft background music while Claude works" (off until you turn it on) plays a quiet, slow loop of soft plucked notes from the moment Claude starts working until it is done or asks, so you hear that Claude is still at work without reading along. It stops at once when you turn it off, and the chimes and ticks sound over it as before. Ctrl+Space turns it on or off from anywhere in the window and says so, adding "nothing is running" when Claude is idle.
 - AxClaude: Options, "Louder alert when Claude is done and the window is in the background" (off until you turn it on) plays a longer, louder call in place of the done or question chime when Claude finishes or asks while you are in another window, where the chime was easy to miss and NVDA does not say "Done".
 - AxClaude: `p` and Shift+P now stop at each "claude:" line as well as at the paragraphs after a blank line. Claude prints its short messages between tool calls with no blank line in front of them, so the paragraph key passed over them and found only the paragraphs of the final reply.
 - Axit: Ctrl+Up and Ctrl+Down now move to the start of the previous and next paragraph in every text field of the bundle (AxClaude's conversation and message field, AxDown's editor), a paragraph being the first line after a blank line, and Ctrl+Shift+Up and Ctrl+Shift+Down select to there, as in Word. The Windows edit control scrolled the view instead and left the caret where it was, so a screen reader read the same text again.
 - AxClaude: Send Up and Send Down to Claude are menu items only now (Session menu), since Ctrl+Up and Ctrl+Down in the message field move by paragraph like everywhere else.
-- AxClaude: the ticks are gentler and slower. A soft tap replaces the typewriter strike for each new line and two soft low taps replace the knocks for each tool, at about half the volume, and ticks come at most about eleven a second, so a burst of lines is an even patter rather than a rattle over NVDA's speech.
+- AxClaude: the tick for each new line and the two knocks for each tool are a touch softer, with their character kept.
 
 ## 2.3.1 - 2026-10-02
 

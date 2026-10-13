@@ -52,12 +52,12 @@ public static class WaveTone
     }
 
     /// <summary>
-    /// Strikes, like a soft tap on wood: each is a tone that dies away within <paramref name="millisecondsEach"/>,
-    /// rising over an eighth of that time so that it is heard as one tap and not a click, the next strike following
-    /// as soon as the last has faded. With <paramref name="noise"/> above zero a burst of noise, the same every time
-    /// and gone within a couple of milliseconds, sits over the start, like a typewriter key. A frequency of 0 is a
-    /// rest of that length: at the end of a tick it spaces the ticks out, since a tick is dropped while its buffer is
-    /// still queued (AxClaude FR-7.8).
+    /// Strikes, like a typewriter key or a tiny hammer: each is a burst of noise over a short tone that dies away at
+    /// once, the noise gone within a couple of milliseconds and the tone within <paramref name="millisecondsEach"/>,
+    /// the next strike following as soon as the last has faded. One strike is heard as a single tick; two or three in
+    /// a row, a few milliseconds apart, as one ratchety tick. The tone rises over an eighth of the strike and the
+    /// noise over four samples: a sound that starts at full volume is heard as a click followed by a separate falling
+    /// note. The noise is the same every time.
     /// </summary>
     public static byte[] Strikes(double amplitude, int millisecondsEach, double noise, params double[] hertz)
     {
@@ -68,11 +68,6 @@ public static class WaveTone
         var samples = new short[each * hertz.Length];
         for (var n = 0; n < hertz.Length; n++)
         {
-            if (hertz[n] == 0)
-            {
-                continue;
-            }
-
             for (var i = 0; i < each; i++)
             {
                 // Down to about a quarter of a percent at the end, so the cut-off is not heard.
@@ -92,8 +87,8 @@ public static class WaveTone
     }
 
     /// <summary>
-    /// Plucked notes, like a music box, one every <paramref name="millisecondsEach"/>: each is a tone with its first
-    /// two overtones, which die faster than the fundamental as a struck string's do, rising over 3 ms and ringing
+    /// Soft plucked notes, one every <paramref name="millisecondsEach"/>: each is a tone with a little of its first
+    /// two overtones, which die faster than the fundamental as a struck string's do, swelling over 20 ms and ringing
     /// into the next note's time, down to about two percent where the one after that starts. The tail of the last
     /// note wraps round to the start, so the sequence is exactly periodic and loops without a seam, which is what a
     /// sound that plays for as long as Claude works needs (AxClaude FR-7.9). The whole is scaled so that its loudest
@@ -103,7 +98,7 @@ public static class WaveTone
     {
         var each = Samples(millisecondsEach);
         var ring = 2 * each;
-        var attack = Math.Max(1, Samples(3));
+        var attack = Math.Max(1, Samples(20));
         var total = each * hertz.Length;
         var mix = new double[total];
         for (var n = 0; n < hertz.Length; n++)
@@ -113,7 +108,7 @@ public static class WaveTone
                 var decay = Math.Exp(-4.0 * i / ring);
                 var envelope = i < attack ? decay * i / attack : decay;
                 var phase = 2 * Math.PI * hertz[n] * i / SampleRate;
-                var tone = Math.Sin(phase) + 0.5 * Math.Sin(2 * phase) * decay + 0.25 * Math.Sin(3 * phase) * decay * decay;
+                var tone = Math.Sin(phase) + 0.3 * Math.Sin(2 * phase) * decay + 0.1 * Math.Sin(3 * phase) * decay * decay;
                 mix[(n * each + i) % total] += tone * envelope;
             }
         }

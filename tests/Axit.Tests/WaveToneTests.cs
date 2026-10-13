@@ -79,30 +79,11 @@ public class WaveToneTests
     }
 
     [Fact]
-    public void Strikes_leave_a_rest_silent()
-    {
-        var wav = WaveTone.Strikes(0.3, 6, 0, 3000, 0);
-        var each = 6 * WaveTone.SampleRate / 1000;
-        Assert.Equal(WaveTone.HeaderLength + 2 * each * 2, wav.Length);
-        var loudest = 0;
-        for (var i = 0; i < each; i++)
-        {
-            loudest = Math.Max(loudest, Math.Abs((int)BitConverter.ToInt16(wav, WaveTone.HeaderLength + i * 2)));
-        }
-
-        Assert.True(loudest > 0.1 * short.MaxValue, "the strike should sound");
-        for (var i = each; i < 2 * each; i++)
-        {
-            Assert.Equal(0, BitConverter.ToInt16(wav, WaveTone.HeaderLength + i * 2));
-        }
-    }
-
-    [Fact]
     public void Plucks_ring_into_the_next_note_and_loop_without_a_seam()
     {
-        var wav = WaveTone.Plucks(0.2, 20, 440, 330, 220);
+        var wav = WaveTone.Plucks(0.2, 100, 440, 330, 220);
         var samples = (wav.Length - WaveTone.HeaderLength) / 2;
-        var each = 20 * WaveTone.SampleRate / 1000;
+        var each = 100 * WaveTone.SampleRate / 1000;
         Assert.Equal(3 * each, samples);
 
         int At(int i) => BitConverter.ToInt16(wav, WaveTone.HeaderLength + i * 2);

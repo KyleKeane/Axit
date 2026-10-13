@@ -170,12 +170,10 @@ public static class Sounds
         }
     }
 
-    // A soft tap, a 30 ms A5 tone that dies away, then 60 ms of silence in the same buffer so that ticks come at most
-    // about eleven a second: a line from Claude arrived. Two soft low taps, E4 then A4, 40 ms each: a tool call
-    // arrived. Until 2.4.0 these were a burst of noise over a tone and two knocks, at up to a hundred a second: sharp
-    // enough to jitter over NVDA's speech and seem to pull its volume about.
-    private static readonly Sound LineTick = new(WaveTone.Strikes(0.2, 30, 0, 880, 0, 0));
-    private static readonly Sound ToolTick = new(WaveTone.Strikes(0.25, 40, 0, 329.63, 440));
+    // A typewriter-like strike, a burst of noise over a 1.5 kHz tone that dies away within 10 ms: a line from Claude
+    // arrived. Two lower knocks in a row, 12 ms each and rising: a tool call arrived. A touch softer since 2.4.0.
+    private static readonly Sound LineTick = new(WaveTone.Strikes(0.3, 10, 0.4, 1500));
+    private static readonly Sound ToolTick = new(WaveTone.Strikes(0.4, 12, 0.4, 650, 850));
 
     // C6 alone, a high ping: Claude is ready. A4 alone, low: the message went out. C5, E5, G5 up to a long note:
     // Claude starts replying. The same notes down, G5, E5, C5: the turn is done. Two E5s: Claude needs an answer.
@@ -191,9 +189,10 @@ public static class Sounds
     // heard from another window, where the done chime was missed (AxClaude FR-7.3).
     private static readonly Sound AlertChime = new(WaveTone.Notes(0.6, (783.99, 100), (1046.5, 100), (1318.5, 300), (0, 200), (783.99, 100), (1046.5, 100), (1318.5, 500)));
 
-    // Sixteen soft plucked notes, like a music box, an arpeggio up C, A minor, F and G at 300 ms a note: 4.8 s that
-    // loop without a seam while Claude works (AxClaude FR-7.9). Quieter than the chimes, on a device of its own.
-    private static readonly Sound WorkingMusic = new(WaveTone.Plucks(0.18, 300,
+    // Sixteen soft plucked notes, an arpeggio up C, A minor, F and G at 500 ms a note: 8 s that loop without a seam
+    // while Claude works (AxClaude FR-7.9). Quiet, slow and dull next to the chimes, on a device of its own; the first
+    // version, at half the chimes' peak and 300 ms a note with a music-box ring, was too much over NVDA's speech.
+    private static readonly Sound WorkingMusic = new(WaveTone.Plucks(0.08, 500,
         261.63, 329.63, 392.00, 523.25,
         220.00, 261.63, 329.63, 440.00,
         174.61, 220.00, 261.63, 349.23,
@@ -202,10 +201,10 @@ public static class Sounds
     private static readonly Device Chimes = new("sounds", LineTick, ToolTick, ReadyChime, SentChime, RespondingChime, DoneChime, QuestionChime, NoticeChime, AlertChime);
     private static readonly Device Music = new("working music", WorkingMusic);
 
-    /// <summary>A soft tap: a line from Claude arrived.</summary>
+    /// <summary>A tiny typewriter-like tick: a line from Claude arrived.</summary>
     public static void Click() => Chimes.Play(LineTick, replace: false);
 
-    /// <summary>Two soft low taps: a tool call arrived.</summary>
+    /// <summary>Two lower knocks: a tool call arrived.</summary>
     public static void Tool() => Chimes.Play(ToolTick, replace: false);
 
     /// <summary>A single high ping: Claude is ready.</summary>
