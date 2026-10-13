@@ -89,9 +89,6 @@ internal sealed class TranscriptView : TextBox
     /// <summary>Escape was pressed: the window moves focus to the message field.</summary>
     public event Action? EscapePressed;
 
-    /// <summary>Space was pressed: the window turns the background music on or off and says so (FR-7.9).</summary>
-    public event Action? SpacePressed;
-
     /// <summary>Enter was pressed on a line: its display number (from 1), the display line count and its full text (FR-2.9).</summary>
     public event Action<int, int, string>? LineChosen;
 
@@ -345,13 +342,6 @@ internal sealed class TranscriptView : TextBox
             {
                 e.Handled = e.SuppressKeyPress = true;
                 ChooseLine();
-                return;
-            }
-
-            if (e.KeyCode == AxClaudeKeys.ToggleMusic && !e.Shift)
-            {
-                e.Handled = e.SuppressKeyPress = true;
-                SpacePressed?.Invoke();
                 return;
             }
 

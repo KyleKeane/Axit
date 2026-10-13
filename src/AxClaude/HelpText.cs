@@ -29,6 +29,7 @@ internal static class HelpText
           Ctrl+Shift+M: next permission mode
           Ctrl+Shift+O: go to the latest reply
           Ctrl+Shift+K: bookmark the conversation line the caret is on, or take the bookmark away
+          Ctrl+Space: background music on or off, and says which
           Ctrl+Plus, Ctrl+Minus: bigger or smaller text
           F1: this list
           Alt+F4: close AxClaude (asks first while Claude is working)
@@ -45,7 +46,6 @@ internal static class HelpText
           Page Up, Page Down: one screen up or down
           Ctrl+Up, Ctrl+Down: the previous or next paragraph (the first line after a blank line); with Shift, select to there
           l: say the line number, like "Line 12 of 340"
-          Space: background music on or off, and says which
           i and Shift+I: next and previous "# Input" line (a message you sent)
           o and Shift+O, or r and Shift+R: next and previous "# Output" line (a reply from Claude)
           h and Shift+H: next and previous heading. 1 to 6: heading of that level

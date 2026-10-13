@@ -21,6 +21,8 @@ public static class AxClaudeKeys
     public const Keys OpenFolder = Keys.Control | Keys.W;
     public const Keys NewSession = Keys.Control | Keys.N;
     public const Keys RestartClaude = Keys.Control | Keys.Shift | Keys.R;
+    /// <summary>Background music on or off, said each time (FR-7.9).</summary>
+    public const Keys ToggleMusic = Keys.Control | Keys.Space;
 
     /// <summary>D14: never sent to Claude; the key only says why.</summary>
     public const Keys CtrlOGuard = Keys.Control | Keys.O;
@@ -47,8 +49,6 @@ public static class AxClaudeKeys
     public const Keys Bookmark = Keys.K;
     public const Keys BookmarkToggle = Keys.M;
     public const Keys LineNumber = Keys.L;
-    /// <summary>Background music on or off, said each time (FR-7.9); the read-only conversation has no use for the key itself.</summary>
-    public const Keys ToggleMusic = Keys.Space;
     public const Keys JumpBack = Keys.Back;
     public const Keys HeadingLevel1 = Keys.D1;
     public const Keys HeadingLevel2 = Keys.D2;
