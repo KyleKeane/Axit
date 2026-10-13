@@ -68,6 +68,10 @@ public sealed class SettingsFileTests
             Assert.NotNull(error);
             Assert.Contains(path, error);
             Assert.Equal(3, loaded.Size);
+
+            // The app saves soon after loading: the broken file is kept for mending, and the error says where.
+            Assert.Equal("{ not json", File.ReadAllText(path + ".bad"));
+            Assert.Contains(path + ".bad", error);
         }
         finally
         {

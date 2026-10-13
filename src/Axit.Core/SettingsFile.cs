@@ -35,7 +35,23 @@ public static class SettingsFile
         {
             return JsonSerializer.Deserialize<T>(File.ReadAllText(path), JsonOptions) ?? new T();
         }
-        catch (Exception ex) when (ex is JsonException or IOException or UnauthorizedAccessException)
+        catch (JsonException ex)
+        {
+            error = $"{path}: {ex.Message}";
+            try
+            {
+                // The app saves its settings soon after loading, which would write the defaults over the one typo: the
+                // file is kept next to itself for mending.
+                File.Copy(path, path + ".bad", overwrite: true);
+                error += $" A copy is kept as {path}.bad.";
+            }
+            catch (Exception copyError) when (copyError is IOException or UnauthorizedAccessException)
+            {
+            }
+
+            return new T();
+        }
+        catch (Exception ex) when (ex is IOException or UnauthorizedAccessException)
         {
             error = $"{path}: {ex.Message}";
             return new T();
