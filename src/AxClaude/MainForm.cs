@@ -1900,7 +1900,7 @@ internal sealed class MainForm : Form
         }
 
         _noticeOpen = true;
-        _overlay.Populate(notice with { Text = WithKeyLine(notice.Text, notice.Choices) });
+        _overlay.Populate(notice);
         _overlay.Visible = true;
         _overlay.BringToFront();
         AcceptButton = _overlay.DefaultButton;
@@ -1911,21 +1911,6 @@ internal sealed class MainForm : Form
         _area.Visible = false;
         _menu.Enabled = false;
         PerformLayout();
-    }
-
-    /// <summary>
-    /// The last line of every notice with text, made from its buttons so that no notice words it differently:
-    /// "Enter: Close anyway. Escape: Keep working." or "Enter or Escape: Close." for a single button.
-    /// </summary>
-    private static string WithKeyLine(string text, IReadOnlyList<OverlayChoice> choices)
-    {
-        var enter = choices.FirstOrDefault(choice => choice.IsDefault);
-        var escape = choices.FirstOrDefault(choice => choice.IsCancel);
-        // The button's text without its mnemonic marker or a trailing ellipsis.
-        static string Label(OverlayChoice choice) => choice.Text.Replace("&", string.Empty).TrimEnd('.');
-        var keys = enter is not null && ReferenceEquals(enter, escape) ? $"Enter or Escape: {Label(enter)}."
-            : string.Join(" ", new[] { enter is null ? null : $"Enter: {Label(enter)}.", escape is null ? null : $"Escape: {Label(escape)}." }.OfType<string>());
-        return text.Length == 0 || keys.Length == 0 ? text : text.TrimEnd('\n') + "\n" + keys;
     }
 
     // ---- the control area: what Claude waits on, in the message field's place (D33) ----

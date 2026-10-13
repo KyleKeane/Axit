@@ -812,7 +812,7 @@ internal sealed class EditorForm : Form
         }
 
         _noticeOpen = true;
-        _overlay.Populate(notice with { Text = WithKeyLine(notice.Text, notice.Choices) });
+        _overlay.Populate(notice);
         _overlay.Visible = true;
         _overlay.BringToFront();
         AcceptButton = _overlay.DefaultButton;
@@ -825,16 +825,6 @@ internal sealed class EditorForm : Form
     }
 
     /// <summary>"Enter: Save. Escape: Cancel." or "Enter or Escape: Close." as the last line of every notice with text.</summary>
-    private static string WithKeyLine(string text, IReadOnlyList<OverlayChoice> choices)
-    {
-        var enter = choices.FirstOrDefault(choice => choice.IsDefault);
-        var escape = choices.FirstOrDefault(choice => choice.IsCancel);
-        static string Label(OverlayChoice choice) => choice.Text.Replace("&", string.Empty).TrimEnd('.');
-        var keys = enter is not null && ReferenceEquals(enter, escape) ? $"Enter or Escape: {Label(enter)}."
-            : string.Join(" ", new[] { enter is null ? null : $"Enter: {Label(enter)}.", escape is null ? null : $"Escape: {Label(escape)}." }.OfType<string>());
-        return keys.Length == 0 ? text : (text.Length == 0 ? keys : text.TrimEnd('\n') + "\n" + keys);
-    }
-
     private void OnNoticeChoice(OverlayChoice choice)
     {
         if (choice.StaysOpen)

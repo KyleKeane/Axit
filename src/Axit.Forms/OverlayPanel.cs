@@ -120,6 +120,7 @@ public sealed class OverlayPanel : Panel
         _text.ForeColor = SystemColors.WindowText;
         _text.Dock = DockStyle.Fill;
         _text.TabIndex = 2;
+        _text.KeyDown += OnEditKeyDown;
 
         _inputLabel.AutoSize = true;
         _inputLabel.Location = new Point(0, 6);
@@ -179,6 +180,7 @@ public sealed class OverlayPanel : Panel
         _custom.AccessibleName = "Custom arguments";
         _custom.Margin = new Padding(0);
         _custom.KeyDown += OnCustomKeyDown;
+        _custom.KeyDown += OnEditKeyDown;
         _customRow.Controls.Add(_customLabel);
         _customRow.Controls.Add(_custom);
         _session.Controls.AddRange([_chooseFolder, _presetGroup, _customRow]);
@@ -256,7 +258,7 @@ public sealed class OverlayPanel : Panel
         _holdUntil = notice.Unprompted ? Environment.TickCount64 + HoldMs : 0;
         _title.Text = title;
         _text.AccessibleName = title;
-        _body = text;
+        _body = WithKeyLine(text, choices);
         _inputSpec = input;
         _sessionSpec = session;
         _session.Visible = session is not null;
@@ -402,6 +404,46 @@ public sealed class OverlayPanel : Panel
         }
 
         Chosen?.Invoke(choice);
+    }
+
+    /// <summary>
+    /// The last line of every notice, made from its buttons so that no notice words its keys itself: "Enter: Close
+    /// anyway. Escape: Keep working.", or "Enter or Escape: Close." for a single button; the whole text of a notice
+    /// with no words of its own (AxDown's save question), so that there is always text to land on.
+    /// </summary>
+    private static string WithKeyLine(string text, IReadOnlyList<OverlayChoice> choices)
+    {
+        var enter = choices.FirstOrDefault(choice => choice.IsDefault);
+        var escape = choices.FirstOrDefault(choice => choice.IsCancel);
+        // The button's text without its mnemonic marker or a trailing ellipsis.
+        static string Label(OverlayChoice choice) => choice.Text.Replace("&", string.Empty).TrimEnd('.');
+        var keys = enter is not null && ReferenceEquals(enter, escape) ? $"Enter or Escape: {Label(enter)}."
+            : string.Join(" ", new[] { enter is null ? null : $"Enter: {Label(enter)}.", escape is null ? null : $"Escape: {Label(escape)}." }.OfType<string>());
+        return keys.Length == 0 ? text : text.Length == 0 ? keys : text.TrimEnd('\n') + "\n" + keys;
+    }
+
+    /// <summary>The bundle's page and paragraph keys (AX-8.2) in the notice's text and in the Custom arguments field.</summary>
+    private static void OnEditKeyDown(object? sender, KeyEventArgs e)
+    {
+        if (sender is not TextBoxBase box)
+        {
+            return;
+        }
+
+        if (e.KeyData is BundleKeys.PageUp or BundleKeys.PageDown)
+        {
+            EditPaging.Page(box, e.KeyCode == Keys.PageDown ? 1 : -1);
+        }
+        else if (e.KeyData is BundleKeys.ParagraphUp or BundleKeys.ParagraphDown or BundleKeys.SelectParagraphUp or BundleKeys.SelectParagraphDown)
+        {
+            EditParagraphs.Move(box, e.KeyCode == Keys.Down ? 1 : -1, e.Shift);
+        }
+        else
+        {
+            return;
+        }
+
+        e.Handled = e.SuppressKeyPress = true;
     }
 
     private void SetText()

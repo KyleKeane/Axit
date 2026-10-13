@@ -33,4 +33,4 @@ dotnet test tests/AxDown.Tests/AxDown.Tests.csproj
 - `_editor.Text` copies the whole text on every read; it is read on command and by the status timer, never per keystroke.
 - The form's `AccessibleRole` is `Window`: NVDA speaks a window with that role when it opens ("README.md - AxDown window"); without it the window is a nameless pane and only the field is heard (2.1.1).
 - The notice state is the flag `_noticeOpen`, not the panel's `Visible` (false for every child while the form is not shown); the same flag keeps the window's shortcuts and Alt/F10 off while a notice shows (see `src/AxClaude/CLAUDE.md` for the full story of these behaviours, which AxDown shares).
-- The notice flow (`ShowNotice`, `CloseNotice`, `WithKeyLine`, `Announce`) and the update flow are copies of AxClaude's; a shared window base in `Axit.Forms` is the way to unify them when a third window arrives.
+- The notice flow (`ShowNotice`, `CloseNotice`, `Announce`) and the update flow are copies of AxClaude's; a shared window base in `Axit.Forms` is the way to unify them when a third window arrives.
