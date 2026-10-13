@@ -151,7 +151,7 @@ public class QuestionTests
         Assert.Equal("Do you want to create permission-test.txt?", question.Text[^1]);
         Assert.Equal(["1", "2", "3"], question.Options.Select(o => o.Key));
         Assert.Equal("No", question.Options[2].Text);
-        Assert.Equal(QuestionDialog.AnswerNotice, QuestionRouter.Route(question, null).Dialog);
+        Assert.Equal(QuestionDialog.AnswerNotice, QuestionRouter.DialogFor(null));
 
         // Escape declined; the question is gone.
         Assert.False(model.PromptPending);
@@ -168,13 +168,12 @@ public class QuestionTests
         var colour = seen[0];
         Assert.False(colour.AllowsSeveral);
         Assert.Equal(5, colour.Options.Count);
-        Assert.Equal(QuestionDialog.AnswerNotice, QuestionRouter.Route(colour, null).Dialog);
+        Assert.Equal(QuestionDialog.AnswerNotice, QuestionRouter.DialogFor(null));
 
         // Several answers: the answer notice with check boxes, which sends "1,3" (the recording typed 1, comma, 3 as
         // three keystrokes and the review shows "→ Apple, Cherry"); typed in the message field, "1,3" answers too.
         var fruit = seen[1];
         Assert.True(fruit.AllowsSeveral);
-        Assert.Equal(QuestionDialog.AnswerNotice, QuestionRouter.Route(fruit, null).Dialog);
         Assert.True(fruit.Accepts("1,3"));
         Assert.True(fruit.Accepts("1, 3"));
         Assert.False(fruit.Accepts("1,9"));
@@ -359,7 +358,7 @@ public class QuestionTests
         Assert.Equal("Select model", question.Title);
         Assert.Equal(["1", "2", "3", "4", "5"], question.Options.Select(o => o.Key));
         Assert.True(question.Options[0].Current);
-        Assert.Equal(QuestionDialog.AnswerNotice, QuestionRouter.Route(question, SlashCommands.Find("/model")).Dialog);
+        Assert.Equal(QuestionDialog.AnswerNotice, QuestionRouter.DialogFor(SlashCommands.Find("/model")));
 
         // The recording's Escape went out a millisecond before Ctrl+C and was not taken as a key of its own: the
         // picker was still open when the recorder stopped Claude.
@@ -396,19 +395,15 @@ public class QuestionTests
     [Fact]
     public void A_list_of_answers_goes_to_the_answer_notice()
     {
-        var question = QuestionReader.Read(ModelRows, 9)!;
-        Assert.Equal(QuestionDialog.AnswerNotice, QuestionRouter.Route(question, SlashCommands.Find("/model")).Dialog);
-        Assert.Equal(QuestionDialog.AnswerNotice, QuestionRouter.Route(question, SlashCommands.Find("/config")).Dialog);
-        Assert.Equal(QuestionDialog.AnswerNotice, QuestionRouter.Route(QuestionReader.Read(TrustRows, 8)!, null).Dialog);
+        Assert.Equal(QuestionDialog.AnswerNotice, QuestionRouter.DialogFor(SlashCommands.Find("/model")));
+        Assert.Equal(QuestionDialog.AnswerNotice, QuestionRouter.DialogFor(SlashCommands.Find("/config")));
+        Assert.Equal(QuestionDialog.AnswerNotice, QuestionRouter.DialogFor(null));
     }
 
     [Fact]
     public void A_panel_command_leaves_its_lists_to_the_message_field()
     {
-        var question = QuestionReader.Read(ModelRows, 9)!;
-        var panel = SlashCommands.Find("/permissions");
-        Assert.Equal(QuestionDialog.MessageField, QuestionRouter.Route(question, panel).Dialog);
-        Assert.Equal(QuestionDialog.AnswerNotice, QuestionRouter.Route(question with { AllowsSeveral = true }, null).Dialog);
+        Assert.Equal(QuestionDialog.MessageField, QuestionRouter.DialogFor(SlashCommands.Find("/permissions")));
     }
 
     [Fact]

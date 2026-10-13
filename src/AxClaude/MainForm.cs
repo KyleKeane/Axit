@@ -951,7 +951,7 @@ internal sealed class MainForm : Form
     {
         if (_model.PendingQuestion is { } question)
         {
-            if (QuestionRouter.Route(question, _lastCommand).Dialog != QuestionDialog.AnswerNotice)
+            if (QuestionRouter.DialogFor(_lastCommand) != QuestionDialog.AnswerNotice)
             {
                 return false;
             }
