@@ -26,11 +26,14 @@ public static class EditPaging
         var lineCount = (int)SendMessage(handle, EM_GETLINECOUNT, IntPtr.Zero, IntPtr.Zero);
         var first = (int)SendMessage(handle, EM_GETFIRSTVISIBLELINE, IntPtr.Zero, IntPtr.Zero);
         // The row at the bottom edge of the control, or the last row of the text when that ends higher up. The row
-        // is the high word of the reply; the low word's character index is only good below 64K characters.
+        // is the high word of the reply, 16 bits, so it is the row modulo 65 536: its distance from the first visible
+        // row is right as long as a screen is shorter than that, where the row itself is wrong past 65 536 rows. The
+        // low word's character index is only good below 64K characters.
         var bottomPoint = (IntPtr)((Math.Max(0, box.ClientSize.Height - 1) << 16) | 1);
         var atBottom = (int)SendMessage(handle, EM_CHARFROMPOS, IntPtr.Zero, bottomPoint);
-        var last = atBottom == -1 ? first : (atBottom >> 16) & 0xFFFF;
-        var page = Math.Max(1, last - first);
+        var rows = atBottom == -1 ? 0 : (((atBottom >> 16) & 0xFFFF) - (first & 0xFFFF)) & 0xFFFF;
+        var last = first + rows;
+        var page = Math.Max(1, rows);
         var caretRow = box.GetLineFromCharIndex(box.SelectionStart);
         var target = Math.Clamp(caretRow + direction * page, 0, Math.Max(0, lineCount - 1));
         if (target == caretRow)
