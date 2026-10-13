@@ -301,19 +301,10 @@ internal sealed class EditorForm : Form
 
     private void OnEditorKeyDown(object? sender, KeyEventArgs e)
     {
-        if (e.KeyCode is BundleKeys.PageUp or BundleKeys.PageDown && e.Modifiers == Keys.None)
+        if (e.KeyCode is Keys.PageUp or Keys.PageDown && e.Modifiers == Keys.None)
         {
             // AD-2.3: the control's own page keys do nothing while the text fits.
             EditPaging.Page(_editor, e.KeyCode == Keys.PageDown ? 1 : -1);
-            e.Handled = e.SuppressKeyPress = true;
-            ScheduleStatus();
-            return;
-        }
-
-        if (e.KeyData is BundleKeys.LineUp or BundleKeys.LineDown or BundleKeys.SelectLineUp or BundleKeys.SelectLineDown)
-        {
-            // AD-2.3: the control's own Ctrl+Up and Ctrl+Down scroll a row and leave the caret where it is.
-            EditLines.Move(_editor, e.KeyCode == Keys.Down ? 1 : -1, e.Shift);
             e.Handled = e.SuppressKeyPress = true;
             ScheduleStatus();
             return;

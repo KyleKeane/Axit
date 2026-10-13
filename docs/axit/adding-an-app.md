@@ -37,8 +37,8 @@ its tests, then the window, then the installer.
 - `AxThingApp.Run(string[] args)` and `Usage`: `Log.UseApp("axthing")` first, the crash handling as `AxDownApp` has
   it, `--help` and `--version`, the settings, `Application.Run(new ThingForm(...))`.
 - `ThingForm`: the window. Use the shared pieces, never a copy: `OverlayPanel` and `Notice` for every question and
-  text of the window's own, `ControlArea` for a field or a list in the input's place, `EditPaging` and
-  `EditLines` for an edit control's page and line keys, `StatusLayout` for two status labels, `Sounds.Notice` for an unprompted notice,
+  text of the window's own, `ControlArea` for a field or a list in the input's place, `EditPaging` for an edit
+  control's page keys, `StatusLayout` for two status labels, `Sounds.Notice` for an unprompted notice,
   `WindowAccessibleObject` from `CreateAccessibilityInstance`. Copy the notice flow (`ShowNotice`, `CloseNotice`,
   `WithKeyLine`, the swallowed shortcuts and Alt/F10 while a notice shows), `Announce`, the font handling, the window
   placement and the update flow from `EditorForm` until a shared window base exists.

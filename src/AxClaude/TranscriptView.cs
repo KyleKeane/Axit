@@ -327,15 +327,6 @@ internal sealed class TranscriptView : TextBox
             return;
         }
 
-        if (e.KeyData is BundleKeys.LineUp or BundleKeys.LineDown or BundleKeys.SelectLineUp or BundleKeys.SelectLineDown)
-        {
-            // One transcript line up or down at the same column, with Shift selecting to there (FR-5): the control's
-            // own keys scroll a row and leave the caret. A caret move like the arrows', not a jump for Backspace.
-            e.Handled = e.SuppressKeyPress = true;
-            EditLines.Move(this, e.KeyCode == Keys.Down ? 1 : -1, e.Shift);
-            return;
-        }
-
         if (!e.Control && !e.Alt)
         {
             if (e.KeyCode == AxClaudeKeys.Enter && !e.Shift)

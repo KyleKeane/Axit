@@ -16,7 +16,7 @@ Each file opens in its own window; Alt+Tab moves between them.
 
 ## Write and read
 
-The text is an ordinary Windows edit field, so NVDA's own keys read it: arrows for characters and lines, Ctrl+Left and Ctrl+Right for words, NVDA's say-all to read on from the caret, and so on. Type to write; Enter starts a new line; Tab types a tab. Ctrl+Z undoes the last change, once. Page Up and Page Down move a screen at a time and reach the first and last line. Ctrl+Up and Ctrl+Down move one line of the file up or down, however long the line, keeping your place in it, and with Shift they select to there.
+The text is an ordinary Windows edit field, so NVDA's own keys read it: arrows for characters and lines, Ctrl+Left and Ctrl+Right for words, NVDA's say-all to read on from the caret, and so on. Type to write; Enter starts a new line; Tab types a tab. Ctrl+Z undoes the last change, once. Page Up and Page Down move a screen at a time and reach the first and last line.
 
 Long lines wrap at the window's edge, so Down Arrow reads one screen line at a time. View, Word wrap (Ctrl+Shift+W) turns that off: each line of the file is then one line in the window, however long, and AxDown says "Word wrap off". Your place in the text is kept either way.
 
