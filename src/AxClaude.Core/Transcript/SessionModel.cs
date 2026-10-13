@@ -11,10 +11,14 @@ namespace AxClaude.Core.Transcript;
 /// </summary>
 public sealed partial class SessionModel : ILineStore
 {
-    /// <summary>A sent message and the block the app prints for it (FR-4.1); <c>Block[0]</c> is in the transcript once the block is placed.</summary>
-    private sealed record PendingSend(string Text, IReadOnlyList<Line> Block, DateTime Created);
+    /// <summary>A sent message and the block the app prints for it (FR-4.1); <see cref="Placed"/> once the block is in the transcript, which happens once.</summary>
+    private sealed record PendingSend(string Text, IReadOnlyList<Line> Block, DateTime Created)
+    {
+        public bool Placed { get; set; }
+    }
 
-    // A message sent while Claude is busy is echoed only when Claude gets to it, which can take minutes.
+    // A send whose echo never came is forgotten after this, counted only while Claude is idle: a message queued behind
+    // a long step (a subagent, a slow build) is echoed when Claude gets to it, however long that takes.
     private static readonly TimeSpan PendingLifetime = TimeSpan.FromMinutes(30);
 
     /// <summary>Spoken when Ctrl+O replaces the prompt with Claude's detailed view, and when the prompt is back.</summary>
@@ -151,7 +155,12 @@ public sealed partial class SessionModel : ILineStore
     /// <summary>Recomputes chrome, classification, echo handling and status from the current screen.</summary>
     private void CompleteFrame()
     {
-        _pending.RemoveAll(p => DateTime.UtcNow - p.Created > PendingLifetime);
+        if (!Working && QueuedMessages == 0)
+        {
+            var now = Clock();
+            _pending.RemoveAll(p => now - p.Created > PendingLifetime);
+        }
+
         PullRowText();
         _anchor = ApplyChrome(out var spinner, out var mode, out var background, out var working);
         Spinner = spinner;
@@ -208,7 +217,7 @@ public sealed partial class SessionModel : ILineStore
         block.Add(new Line(_nextId++, LineKind.UserMessage, string.Empty));
         block.Add(new Line(_nextId++, LineKind.OutputMarker, $"# Output {ExchangeCount} Reply from Claude{stamp}") { HeadingLevel = 1 });
         block.Add(new Line(_nextId++, LineKind.UserMessage, string.Empty));
-        var send = new PendingSend(trimmed, block, DateTime.UtcNow);
+        var send = new PendingSend(trimmed, block, Clock());
         _pending.Add(send);
         if (!Working)
         {
@@ -440,6 +449,19 @@ public sealed partial class SessionModel : ILineStore
     public void ResetScreen()
     {
         PullRowText();
+        // A message queued for the Claude that is being stopped never reaches it: its block goes in here, at the end
+        // of the old run, so that what was sent is on record with no reply after it, and nothing waits for an echo
+        // from the next run (FR-4.7).
+        foreach (var send in _pending)
+        {
+            if (!send.Placed)
+            {
+                InsertBlock(send, AnchorIndex());
+            }
+        }
+
+        _pending.Clear();
+        QueuedMessages = 0;
         for (var r = 0; r < Rows; r++)
         {
             var row = _screen.RowAt(r);
@@ -860,7 +882,12 @@ public sealed partial class SessionModel : ILineStore
         }
     }
 
-    private void InsertBlock(PendingSend send, int at) => _lines.InsertRange(at, send.Block);
+    /// <summary>Puts the block into the transcript, once: a block the trim has dropped is not printed again.</summary>
+    private void InsertBlock(PendingSend send, int at)
+    {
+        _lines.InsertRange(at, send.Block);
+        send.Placed = true;
+    }
 
     /// <summary>
     /// A send whose block is still held back (sent while Claude worked) but whose echo never came: once Claude is
@@ -875,7 +902,7 @@ public sealed partial class SessionModel : ILineStore
 
         foreach (var send in _pending)
         {
-            if (_lines.LastIndexOf(send.Block[0]) < 0)
+            if (!send.Placed)
             {
                 InsertBlock(send, AnchorIndex());
             }
@@ -922,7 +949,7 @@ public sealed partial class SessionModel : ILineStore
             }
 
             _pending.RemoveAt(i);
-            if (_lines.LastIndexOf(send.Block[0]) < 0)
+            if (!send.Placed)
             {
                 InsertBlock(send, _lines.LastIndexOf(line));
             }

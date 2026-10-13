@@ -581,6 +581,69 @@ public class SessionModelTests
     }
 
     [Fact]
+    public void A_message_queued_behind_a_long_step_is_not_forgotten()
+    {
+        var model = new SessionModel(80, 12);
+        var now = new DateTime(2026, 10, 13, 9, 0, 0);
+        model.Clock = () => now;
+        Feed(model, $"{Esc}[?25lclaude: Working on it.\r\nRunning…\r\nauto mode on (shift+tab to cycle)  ·  esc to interrupt\r\n${Esc}[?25h");
+        Assert.True(model.Working);
+        Assert.True(model.Send("queued"));
+        var queuedFrame = $"{Esc}[?25l{Esc}[2;1Hyou: queued{Esc}[K\r\nctrl+x ctrl+s to send now{Esc}[K\r\nRunning…{Esc}[K\r\nauto mode on (shift+tab to cycle)  ·  esc to interrupt{Esc}[K\r\n${Esc}[K{Esc}[?25h";
+        Feed(model, queuedFrame);
+        Assert.Equal(1, model.QueuedMessages);
+
+        // The step runs for an hour, Claude redrawing its working block meanwhile: the message waits as long as the step.
+        now = now.AddHours(1);
+        Feed(model, queuedFrame);
+        Assert.Equal(["claude: Working on it."], Visible(model));
+
+        // Claude takes the message up: its block goes in front of the echo, with its markers.
+        Feed(model, $"{Esc}[?25l{Esc}[2;1HDone.{Esc}[K\r\nyou: queued{Esc}[K\r\nclaude: Answer.{Esc}[K\r\nauto mode on (shift+tab to cycle){Esc}[K\r\n${Esc}[K{Esc}[?25h");
+        Assert.Equal(["claude: Working on it.", "Done.", "# Input 1", "queued", "", "# Output 1 Reply from Claude", "", "claude: Answer."], Visible(model));
+    }
+
+    [Fact]
+    public void A_block_the_trim_dropped_is_not_printed_again()
+    {
+        var model = new SessionModel(80, 12) { MaxLines = 100 };
+        Feed(model, $"{Esc}[?25lauto mode on (shift+tab to cycle)\r\n${Esc}[?25h");
+        Assert.True(model.Send("first"));
+        Assert.Equal("# Input 1", Visible(model)[0]);
+
+        // Claude prints on without ever echoing the message (a pasted-text placeholder, say) until the oldest tenth,
+        // the block among it, is trimmed. An idle frame used to print the block again at the bottom.
+        for (var n = 0; n < 30; n++)
+        {
+            var rows = string.Concat(Enumerable.Range(n * 15, 15).Select(i => $"row {i}\r\n"));
+            Feed(model, $"{Esc}[?25l{rows}auto mode on (shift+tab to cycle)\r\n${Esc}[?25h");
+        }
+
+        Assert.False(model.Working);
+        Assert.DoesNotContain(model.Lines, l => l.Text == "row 0");
+        Assert.DoesNotContain(model.Lines, l => l.Kind == LineKind.InputMarker);
+    }
+
+    [Fact]
+    public void Reset_screen_prints_a_message_whose_echo_can_no_longer_come()
+    {
+        var model = new SessionModel(80, 10);
+        Feed(model, $"{Esc}[?25lclaude: Working on it.\r\nRunning…\r\nauto mode on (shift+tab to cycle)  ·  esc to interrupt\r\n${Esc}[?25h");
+        Assert.True(model.Send("held"));
+        Assert.Equal(["claude: Working on it."], Visible(model));
+
+        // Force Claude to restart: the Claude that would have echoed the message is gone, so its block goes in at the end of the old run.
+        model.ResetScreen();
+        model.AddSystemLine("Restarting Claude");
+        Assert.Equal(["claude: Working on it.", "# Input 1", "held", "", "# Output 1 Reply from Claude", "", "System: Restarting Claude"], Visible(model));
+        Assert.Equal(0, model.QueuedMessages);
+
+        // The next run's idle prompt places nothing more.
+        Feed(model, $"{Esc}[?25lauto mode on (shift+tab to cycle)\r\n${Esc}[?25h");
+        Assert.Single(model.Lines, l => l.Kind == LineKind.InputMarker);
+    }
+
+    [Fact]
     public void Clear_drops_a_message_held_for_its_echo()
     {
         var model = new SessionModel(80, 10);
