@@ -34,6 +34,9 @@ public static class AxClaudeKeys
     public const Keys Enter = Keys.Return;
     public const Keys Escape = Keys.Escape;
 
+    /// <summary>In the conversation with a selection: copies it and says so (FR-3.11); the control's own copy otherwise.</summary>
+    public const Keys CopySelection = Keys.Control | Keys.C;
+
     // The conversation's quick keys (FR-5): a letter alone, Shift with it for the previous one.
     public const Keys Heading = Keys.H;
     public const Keys Input = Keys.I;
@@ -74,6 +77,7 @@ public static class AxClaudeKeys
         ("Ctrl+O guard", CtrlOGuard),
         ("Enter: send, or quote the line", Enter),
         ("Escape: the guard, clear the selection or go to the field", Escape),
+        ("Copy the selection", CopySelection),
         ("Heading", Heading),
         ("Input", Input),
         ("Response", Response),

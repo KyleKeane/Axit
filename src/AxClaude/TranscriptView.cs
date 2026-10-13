@@ -320,7 +320,7 @@ internal sealed class TranscriptView : TextBox
             return;
         }
 
-        if (e.KeyData == (Keys.Control | Keys.C) && SelectionLength > 0)
+        if (e.KeyData == AxClaudeKeys.CopySelection && SelectionLength > 0)
         {
             e.Handled = e.SuppressKeyPress = true;
             CopySelection();
