@@ -6,10 +6,11 @@
 .DESCRIPTION
   Before running it, add a "## <version> - <date>" section to CHANGELOG.md: its text becomes the release notes and
   is what the update notice in the app shows. Everything else must be committed. The script then
-    1. runs the unit tests,
-    2. sets <Version> in src/Axit/Axit.csproj,
-    3. commits CHANGELOG.md and the project file as "Release <version>",
-    4. tags v<version> and pushes main and the tag.
+    1. fetches origin and stops if origin/main has commits that main here does not,
+    2. runs the unit tests,
+    3. sets <Version> in src/Axit/Axit.csproj,
+    4. commits CHANGELOG.md and the project file as "Release <version>",
+    5. tags v<version> and pushes main and the tag.
   The push starts .github/workflows/release.yml. Follow it with `gh run watch`, or on the Actions page. When it is
   done, the release is at https://github.com/KyleKeane/Axit/releases and the apps offer it as an update.
 
@@ -39,6 +40,19 @@ if ($Version -notmatch '^\d+\.\d+\.\d+$') {
 $branch = (git -C $root rev-parse --abbrev-ref HEAD).Trim()
 if ($branch -ne 'main') {
     Write-Host "Release from main (you are on '$branch')."
+    exit 1
+}
+
+# Nothing is released over work someone else has pushed: main here must contain everything origin/main has.
+git -C $root fetch -q origin
+if ($LASTEXITCODE -ne 0) {
+    Write-Host "Could not fetch origin. Nothing was changed."
+    exit $LASTEXITCODE
+}
+
+git -C $root merge-base --is-ancestor origin/main main
+if ($LASTEXITCODE -ne 0) {
+    Write-Host "origin/main has commits that main here does not. Bring them in first (git pull --ff-only, or a merge), then run this again."
     exit 1
 }
 

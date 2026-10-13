@@ -112,8 +112,9 @@ allow it, see B-9).
 
 ### AX-4 Releases
 
-- AX-4.1 `release.ps1 <version>` checks that `CHANGELOG.md` has a `## <version>` section, runs the tests, sets
-  `<Version>`, commits `Release <version>`, tags `v<version>` and pushes. `.github/workflows/release.yml` checks the
+- AX-4.1 `release.ps1 <version>` checks that `CHANGELOG.md` has a `## <version>` section, fetches origin and stops
+  when `origin/main` has commits that `main` does not (nothing is released over work pushed from elsewhere), runs
+  the tests, sets `<Version>`, commits `Release <version>`, tags `v<version>` and pushes. `.github/workflows/release.yml` checks the
   tag against the version, tests, runs `publish.ps1 -NoInstall` and creates the GitHub release `Axit <version>` with
   `Axit-<version>-win-x64.zip` and `install.cmd` attached and the CHANGELOG section as notes.
 - AX-4.2 `publish.ps1` publishes `src/Axit` self-contained, single file, into `publish\win-x64` with `install.cmd`,
