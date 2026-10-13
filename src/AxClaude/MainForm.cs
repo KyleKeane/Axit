@@ -81,6 +81,12 @@ internal sealed class MainForm : Form
     /// <summary>When an answer was last sent: the question that follows is the user's doing and opens without the chime.</summary>
     private long _answerAt;
 
+    /// <summary>
+    /// How long after the user's answer or key what Claude shows next counts as the user's doing: no chime, no
+    /// "Question closed", and the control area holds its keys that long so that a second Escape does not reach Claude.
+    /// </summary>
+    private const int UserActionMs = 3000;
+
     /// <summary>The /config setting last chosen, where the list of settings starts when Claude's list comes back.</summary>
     private string? _settingKey;
 
@@ -911,7 +917,7 @@ internal sealed class MainForm : Form
             // right after the user's answer or key.
             if (_area.Current is not null)
             {
-                var byUser = Environment.TickCount64 - Math.Max(_answerAt, _screenKeyAt) < 3000;
+                var byUser = Environment.TickCount64 - Math.Max(_answerAt, _screenKeyAt) < UserActionMs;
                 CloseArea();
                 // The question is over: the same one asked again later is new.
                 _promptAnnounced = false;
@@ -2060,7 +2066,7 @@ internal sealed class MainForm : Form
         }
 
         _askedQuestion = question;
-        ShowQuestionList(question.Signature, QuestionName(question), question, null, Environment.TickCount64 - _answerAt > 3000, AnswerQuestion, () =>
+        ShowQuestionList(question.Signature, QuestionName(question), question, null, Environment.TickCount64 - _answerAt > UserActionMs, AnswerQuestion, () =>
         {
             SendEscape();
             Announce("Cancelled", false);
@@ -2074,7 +2080,7 @@ internal sealed class MainForm : Form
     /// back on the setting just chosen. Escape saves and closes.
     /// </summary>
     private void ShowSettings(Question settings, bool back = false) =>
-        ShowQuestionList(settings.Signature, "Claude's settings", settings, _settingKey, !back && Environment.TickCount64 - _answerAt > 3000, chosen =>
+        ShowQuestionList(settings.Signature, "Claude's settings", settings, _settingKey, !back && Environment.TickCount64 - _answerAt > UserActionMs, chosen =>
         {
             var setting = chosen[0];
             _settingKey = setting.Key;
@@ -2143,7 +2149,7 @@ internal sealed class MainForm : Form
         && question.OptionFor("y") is not null
         && !question.Text.Any(line => line.StartsWith("warning:", StringComparison.Ordinal))
         && _askedQuestion?.Step is (int number, int count) && number == count
-        && Environment.TickCount64 - _answerAt < 3000;
+        && Environment.TickCount64 - _answerAt < UserActionMs;
 
     /// <summary>
     /// The follow-up of a question when Claude asks for the user's own words ("Enter text for option 4 (Other), or
@@ -2155,7 +2161,7 @@ internal sealed class MainForm : Form
         var chosen = LineClassifier.TextPromptAnswer(prompt) ?? "an answer that asks for your own words";
         var asked = _askedQuestion is { } question ? QuestionName(question) : null;
         var name = (asked is null ? string.Empty : asked + Stop(asked)) + $"You chose {chosen}. Your answer";
-        ShowInArea(prompt, name, Environment.TickCount64 - _answerAt > 3000, (focus, hold) => _area.ShowField(name, focus, hold, typed =>
+        ShowInArea(prompt, name, Environment.TickCount64 - _answerAt > UserActionMs, (focus, hold) => _area.ShowField(name, focus, hold, typed =>
         {
             var words = typed.Trim();
             if (words.Length == 0)
@@ -2194,7 +2200,7 @@ internal sealed class MainForm : Form
             }
         }
 
-        ShowInArea(screen.Signature, screen.Title, Environment.TickCount64 - _screenKeyAt > 3000, (focus, hold) =>
+        ShowInArea(screen.Signature, screen.Title, Environment.TickCount64 - _screenKeyAt > UserActionMs, (focus, hold) =>
             _area.ShowList(screen.Title, items, 0, null, focus, hold, (index, _) =>
             {
                 if (index < first)
@@ -2214,7 +2220,7 @@ internal sealed class MainForm : Form
     private void SendEscape()
     {
         _answerAt = Environment.TickCount64;
-        _area.Hold(3000);
+        _area.Hold(UserActionMs);
         Write("\x1b");
     }
 
@@ -2223,7 +2229,7 @@ internal sealed class MainForm : Form
     {
         _screenKeyAt = Environment.TickCount64;
         _handledWait = null;
-        _area.Hold(3000);
+        _area.Hold(UserActionMs);
         Write(key);
         // A key that changes nothing draws no frame: the timer brings the screen back all the same.
         _attention.Stop();
@@ -2252,7 +2258,7 @@ internal sealed class MainForm : Form
 
         _writes.Enqueue(("\r", 50));
         _answerAt = Environment.TickCount64;
-        _area.Hold(3000);
+        _area.Hold(UserActionMs);
         if (!_writing)
         {
             PumpWrites();
