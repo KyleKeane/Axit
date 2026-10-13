@@ -39,6 +39,20 @@ public class ArrivalsTests
     }
 
     [Fact]
+    public void What_was_remembered_about_trimmed_lines_is_forgotten()
+    {
+        var arrivals = new Arrivals();
+        var lines = Enumerable.Range(1, 50).Select(i => new Line(i, i == 1 ? LineKind.OutputMarker : LineKind.ClaudeReply, $"claude: line {i}")).ToList();
+        arrivals.Update(lines, working: false, ReplySpeechMode.All, toolCalls: false);
+        var remembered = arrivals.Remembered;
+        Assert.True(remembered >= 49);
+
+        // The oldest tenth trimmed from the front (FR-3.6): the entries for those lines go, and the rest stay.
+        arrivals.Update(lines.Skip(5).ToList(), working: false, ReplySpeechMode.All, toolCalls: false);
+        Assert.Equal(remembered - 4, arrivals.Remembered);
+    }
+
+    [Fact]
     public void A_reply_claude_prints_again_later_in_the_same_turn_is_not_spoken_again()
     {
         var model = new SessionModel(80, 20);

@@ -22,6 +22,7 @@
 - AxClaude: a reply row shaped like an entry of the slash-command completion list, such as an aligned listing of routes or paths (`/api/users      GET  lists users`), is no longer hidden. Only the rows directly above the typed command, or under Claude's cursor while it prints the list, are the list.
 - For developers: a frame that changes nothing in the conversation (a spinner tick) allocates nothing again in the view's mirror, as the notes on the per-frame path promise; the edit list and the no-change result were allocated on every frame.
 - AxClaude: Save conversation as (Ctrl+S) no longer writes the extra line break the conversation shows while a reply streams past the line you are reading; the file holds the lines as they are.
+- AxClaude: what the window remembers about spoken reply lines and seen tool calls is dropped with the lines when a long conversation is trimmed, instead of growing for as long as the window is open.
 
 ## 2.4.0 - 2026-10-13
 

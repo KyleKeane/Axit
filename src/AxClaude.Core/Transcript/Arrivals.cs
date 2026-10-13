@@ -38,6 +38,8 @@ public sealed class Arrivals
 
     private readonly Dictionary<int, string> _spoken = [];
     private readonly Dictionary<int, string> _toolRows = [];
+    private readonly HashSet<int> _present = [];
+    private Line? _first;
     private readonly List<Line> _candidates = [];
     private readonly StringBuilder _text = new();
     private int _contentLines;
@@ -123,9 +125,35 @@ public sealed class Arrivals
             _spokenInExchange.Clear();
         }
 
+        if (lines.Count > 0 && !ReferenceEquals(lines[0], _first))
+        {
+            // The transcript was trimmed from the front (FR-3.6) or cleared: what was remembered about lines that are
+            // gone goes too. By membership, since the ids are not in list order (a marker inserted later is newer).
+            _first = lines[0];
+            _present.Clear();
+            for (var i = 0; i < lines.Count; i++)
+            {
+                _present.Add(lines[i].Id);
+            }
+
+            Forget(_spoken, _present);
+            Forget(_toolRows, _present);
+        }
+
         var newLine = content > _contentLines;
         _contentLines = content;
         return new Arrival(newLine, toolCall, Speech(lines, lastVisible, working));
+    }
+
+    /// <summary>The lines remembered as spoken or seen; for the test that keeps the memory bounded.</summary>
+    public int Remembered => _spoken.Count + _toolRows.Count;
+
+    private static void Forget(Dictionary<int, string> known, HashSet<int> present)
+    {
+        foreach (var id in known.Keys.Where(id => !present.Contains(id)).ToList())
+        {
+            known.Remove(id);
+        }
     }
 
     /// <summary>
