@@ -31,7 +31,7 @@ internal static class HelpText
         The text
           Arrow keys, Home, End, Ctrl+Home, Ctrl+End, Ctrl+Left, Ctrl+Right: move as in any text
           Page Up, Page Down: one screen up or down, or the first or last line
-          Ctrl+Up, Ctrl+Down: the previous or next paragraph (a line of the file, however long)
+          Ctrl+Up, Ctrl+Down: one line of the file up or down, however long the line, keeping your place in it
           Shift with any of them, or Ctrl+A: select. Ctrl+C, Ctrl+X, Ctrl+V: copy, cut, paste. Ctrl+Z: undo
           Enter: a new line. Tab: a tab character
 

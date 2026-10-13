@@ -327,12 +327,12 @@ internal sealed class TranscriptView : TextBox
             return;
         }
 
-        if (e.KeyData is BundleKeys.ParagraphUp or BundleKeys.ParagraphDown or BundleKeys.SelectParagraphUp or BundleKeys.SelectParagraphDown)
+        if (e.KeyData is BundleKeys.LineUp or BundleKeys.LineDown or BundleKeys.SelectLineUp or BundleKeys.SelectLineDown)
         {
-            // The start of the previous or next transcript line, with Shift selecting to there (FR-5): the control's
+            // One transcript line up or down at the same column, with Shift selecting to there (FR-5): the control's
             // own keys scroll a row and leave the caret. A caret move like the arrows', not a jump for Backspace.
             e.Handled = e.SuppressKeyPress = true;
-            EditParagraphs.Move(this, e.KeyCode == Keys.Down ? 1 : -1, e.Shift);
+            EditLines.Move(this, e.KeyCode == Keys.Down ? 1 : -1, e.Shift);
             return;
         }
 

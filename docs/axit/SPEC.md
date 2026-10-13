@@ -140,8 +140,8 @@ allow it, see B-9).
 - AX-6.2 `Axit.Forms` (WinForms, no tests, checked with NVDA): `OverlayPanel` (the notices in the
   window, with the `Notice` record callers pass), `ControlArea` and `ListKeys` (a question's answers as a list or a
   field in the input field's place, with the number and page keys of every such list), `Sounds` (wave-out devices kept
-  open for the life of the process), `EditPaging` (Page Up and Page Down in an edit control), `EditParagraphs`
-  (Ctrl+Up and Ctrl+Down by paragraph, with Shift selecting), `StatusLayout`, the font
+  open for the life of the process), `EditPaging` (Page Up and Page Down in an edit control), `EditLines`
+  (Ctrl+Up and Ctrl+Down one whole line up or down at the same column, with Shift selecting), `StatusLayout`, the font
   handling (text size and the font picker), `BundleKeys` (AX-8). The crash report (twenty lines in each app's
   `Run`) stays per app until a second copy shows what is common.
 - AX-6.3 A piece moves into a shared project only when a second app needs it, in a commit of its own, with the
@@ -161,10 +161,12 @@ allow it, see B-9).
   Shift+Tab, Ctrl+Tab, Ctrl+Shift+Tab and F6 move between the window's controls (and between a notice's text, field
   and buttons); Ctrl+F find, F3 and Shift+F3 next and previous; Ctrl+S save (what the window holds: a conversation,
   a file); Ctrl+Plus and Ctrl+Minus text size; Enter and Escape on a notice; Page Up and Page Down one screen in an
-  edit control; Ctrl+Up and Ctrl+Down the start of the previous and next paragraph in an edit control (a logical
-  line, however many rows it wraps to), and Ctrl+Shift+Up and Ctrl+Shift+Down the selection grown to there, as in
-  Word (`EditParagraphs`; the EDIT control's own keys scroll a row and leave the caret where it is, and a screen
-  reader, which passes these keys through and then reads the paragraph at the caret, read the same one again);
+  edit control; Ctrl+Up and Ctrl+Down one line up and down in an edit control, a whole line however many rows it
+  wraps to (Up and Down move by row), at the same column or at the end of a shorter line, the column kept across a
+  run of presses, and Ctrl+Shift+Up and Ctrl+Shift+Down the selection grown to there (`EditLines`; the EDIT
+  control's own keys scroll a row and leave the caret where it is, and a screen reader, which passes these keys
+  through and then reads at the caret, read the same text again; Word's Ctrl+Down goes to the start of the next
+  paragraph instead, but a line step that keeps the column is what the arrow keys do and what was asked for);
   Alt+F4 exit; Alt and F10 the menu. Everything else is window-specific.
 - AX-8.3 Window-specific keys are defined once per window, in one table (`AxClaudeKeys`, `AxDownKeys`), as constants
   with names that say what the key does. Changing a key is a change to that one line: the menu item and the key

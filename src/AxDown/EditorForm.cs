@@ -310,10 +310,10 @@ internal sealed class EditorForm : Form
             return;
         }
 
-        if (e.KeyData is BundleKeys.ParagraphUp or BundleKeys.ParagraphDown or BundleKeys.SelectParagraphUp or BundleKeys.SelectParagraphDown)
+        if (e.KeyData is BundleKeys.LineUp or BundleKeys.LineDown or BundleKeys.SelectLineUp or BundleKeys.SelectLineDown)
         {
             // AD-2.3: the control's own Ctrl+Up and Ctrl+Down scroll a row and leave the caret where it is.
-            EditParagraphs.Move(_editor, e.KeyCode == Keys.Down ? 1 : -1, e.Shift);
+            EditLines.Move(_editor, e.KeyCode == Keys.Down ? 1 : -1, e.Shift);
             e.Handled = e.SuppressKeyPress = true;
             ScheduleStatus();
             return;

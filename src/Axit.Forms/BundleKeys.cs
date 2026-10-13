@@ -30,21 +30,21 @@ public static class BundleKeys
     public const Keys PageUp = Keys.PageUp;
     public const Keys PageDown = Keys.PageDown;
 
-    /// <summary>The start of the previous or next paragraph in an edit control, and with Shift the selection grown to there, through <see cref="EditParagraphs"/>.</summary>
-    public const Keys ParagraphUp = Keys.Control | Keys.Up;
-    public const Keys ParagraphDown = Keys.Control | Keys.Down;
-    public const Keys SelectParagraphUp = Keys.Control | Keys.Shift | Keys.Up;
-    public const Keys SelectParagraphDown = Keys.Control | Keys.Shift | Keys.Down;
+    /// <summary>One line up or down in an edit control, a whole line at the same column, and with Shift the selection grown to there, through <see cref="EditLines"/>.</summary>
+    public const Keys LineUp = Keys.Control | Keys.Up;
+    public const Keys LineDown = Keys.Control | Keys.Down;
+    public const Keys SelectLineUp = Keys.Control | Keys.Shift | Keys.Up;
+    public const Keys SelectLineDown = Keys.Control | Keys.Shift | Keys.Down;
 
     /// <summary>Every key above with its name, for the collision test and the F1 texts.</summary>
     public static readonly IReadOnlyList<(string Name, Keys Key)> All =
     [
         ("Page up", PageUp),
         ("Page down", PageDown),
-        ("Paragraph up", ParagraphUp),
-        ("Paragraph down", ParagraphDown),
-        ("Select to the paragraph above", SelectParagraphUp),
-        ("Select to the paragraph below", SelectParagraphDown),
+        ("Line up", LineUp),
+        ("Line down", LineDown),
+        ("Select to the line above", SelectLineUp),
+        ("Select to the line below", SelectLineDown),
         ("Keyboard shortcuts", Shortcuts),
         ("Next control", NextControl),
         ("Previous control", PreviousControl),

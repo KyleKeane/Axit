@@ -22,7 +22,7 @@ letter), and a `long.md` with headings and lines longer than the window.
 2. Type a sentence; Backspace and Delete behave as in Notepad; Enter makes a line; Tab types a tab (the focus does
    not leave the editor). Ctrl+Z undoes the last change.
 3. Page Down moves a screen and reaches the last line; Page Up the first. In a short file both do something.
-3a. Ctrl+Down reads the next line of the file, one per press, a long wrapped line in one go; Ctrl+Up from inside a line reads its start, then the line before. Ctrl+Shift+Down: NVDA says the line selected; Ctrl+Shift+Up: unselected. The status bar's line number follows.
+3a. Ctrl+Down moves one line of the file down per press, a long wrapped line in one go, and keeps the column (Left Arrow afterwards reads the character before the same column); Ctrl+Up one line up; on the first and last line nothing moves and NVDA reads the same row. Ctrl+Shift+Down: NVDA says the text selected; Ctrl+Shift+Up: unselected. The status bar's line number follows.
 4. Ctrl+Shift+W: "Word wrap off"; a long line is now one line; the caret stays on the same character. Again:
    "Word wrap on"; the caret stays.
 5. Ctrl+M, Ctrl+H, Ctrl+I, Ctrl+J insert nothing.

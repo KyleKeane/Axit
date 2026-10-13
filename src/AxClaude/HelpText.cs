@@ -38,12 +38,12 @@ internal static class HelpText
           Shift+Enter: new line
           Page Up, Page Down: one screen of the field up or down, or the first or last line of the message
           Escape: does nothing; a reminder says that Shift+Escape interrupts Claude
-          Ctrl+Up, Ctrl+Down: the previous or next line of the message; with Shift, select to there
+          Ctrl+Up, Ctrl+Down: one line of the message up or down, keeping your place in the line; with Shift, select to there
 
         Conversation
           Arrow keys, Home, End, Ctrl+Home, Ctrl+End: move as in any text
           Page Up, Page Down: one screen up or down
-          Ctrl+Up, Ctrl+Down: the previous or next paragraph (a line Claude printed, however long); with Shift, select to there
+          Ctrl+Up, Ctrl+Down: one line up or down (a whole line Claude printed, however many rows it wraps to), keeping your place in the line; with Shift, select to there
           l: say the line number, like "Line 12 of 340"
           i and Shift+I: next and previous "# Input" line (a message you sent)
           o and Shift+O, or r and Shift+R: next and previous "# Output" line (a reply from Claude)
