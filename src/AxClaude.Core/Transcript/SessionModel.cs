@@ -537,6 +537,13 @@ public sealed partial class SessionModel : ILineStore
             line.Kind = LineClassifier.Classify(line.Text, false);
         }
 
+        if (line.ChromeHidden && line.StickyChromeText != line.Text)
+        {
+            // Chrome at the last frame end, written over since (the first rows of a long reply land where the spinner
+            // and the mode line stood) and scrolled away before this frame end: content, which no later pass revisits.
+            line.ChromeHidden = false;
+        }
+
         line.Committed = true;
         line.Row = null;
     }
@@ -704,6 +711,11 @@ public sealed partial class SessionModel : ILineStore
                 {
                     blockOpen = false;
                 }
+            }
+            else
+            {
+                // Remembered for Commit: the row counts as content once something else is written on it.
+                line.StickyChromeText = line.Text;
             }
 
             line.ChromeHidden = chrome;

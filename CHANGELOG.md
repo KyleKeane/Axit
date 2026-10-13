@@ -18,6 +18,7 @@
 - AxDown: Go to line says "Not a line number" when the text typed is not a number, where it silently did nothing.
 - AxClaude: after Force Claude to restart or a new session, a question the new Claude asks at startup (workspace trust) goes to the answer list again. It was routed as if it belonged to the slash command sent last in the old session, so after `/status` or `/config` it was left to the message field.
 - AxClaude: a question of Claude's with an empty title no longer crashes the window when its name is built.
+- AxClaude: the first lines of a reply longer than the screen are no longer lost. Claude prints a long reply in one go where its spinner and mode line stood, and the lines written over those rows scrolled off the hidden screen before the end of the frame, so they kept the rows' "interface" marking and were never shown, spoken or saved.
 
 ## 2.4.0 - 2026-10-13
 

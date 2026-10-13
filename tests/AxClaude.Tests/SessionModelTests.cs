@@ -133,6 +133,20 @@ public class SessionModelTests
     }
 
     [Fact]
+    public void Rows_written_over_the_chrome_and_scrolled_away_inside_a_frame_are_content()
+    {
+        var model = new SessionModel(80, 6);
+        Feed(model, $"{Esc}[?25lclaude: Short.\r\nRunning…\r\nauto mode on (shift+tab to cycle)  ·  esc to interrupt\r\n${Esc}[?25h");
+        Assert.Equal(["claude: Short."], Visible(model));
+
+        // A reply longer than the screen, printed in one frame from the spinner's row: its first lines land on the old
+        // chrome rows and scroll off before the frame ends, so only Commit sees them.
+        var rows = string.Concat(Enumerable.Range(1, 10).Select(i => $"line {i}{Esc}[K\r\n"));
+        Feed(model, $"{Esc}[?25l{Esc}[2;1H{rows}Worked for 3s · done{Esc}[K\r\nauto mode on (shift+tab to cycle){Esc}[K\r\n${Esc}[K{Esc}[?25h");
+        Assert.Equal(["claude: Short.", .. Enumerable.Range(1, 10).Select(i => $"line {i}"), "Worked for 3s · done"], Visible(model));
+    }
+
+    [Fact]
     public void Rows_that_scroll_away_inside_a_frame_are_still_classified()
     {
         var model = new SessionModel(80, 6);
