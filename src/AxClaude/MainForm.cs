@@ -2543,6 +2543,8 @@ internal sealed class MainForm : Form
         try
         {
             var folder = await Updater.DownloadAsync(release, cancellation.Token, new Progress<int>(percent => _overlay.SetProgress(percent * 80 / 100)));
+            // Cancel pressed while the zip was being unpacked, which the download does not watch the token for.
+            cancellation.Token.ThrowIfCancellationRequested();
             if (IsDisposed)
             {
                 return;
@@ -2585,8 +2587,9 @@ internal sealed class MainForm : Form
             _model.AddSystemLine($"The download of AxClaude {version} was cancelled.");
             Announce("Update cancelled", true);
         }
-        catch (Exception ex) when (ex is HttpRequestException or TaskCanceledException or IOException or InvalidOperationException or UnauthorizedAccessException)
+        catch (Exception ex) when (ex is HttpRequestException or TaskCanceledException or IOException or InvalidDataException or InvalidOperationException or UnauthorizedAccessException)
         {
+            // InvalidDataException: a download that is not a zip.
             Log.Error("The update failed", ex);
             if (!IsDisposed)
             {

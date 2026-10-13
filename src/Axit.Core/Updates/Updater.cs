@@ -1,3 +1,4 @@
+using System.ComponentModel;
 using System.Diagnostics;
 using System.IO.Compression;
 using System.Net.Http.Headers;
@@ -193,8 +194,16 @@ public static class Updater
             start.ArgumentList.Add(argument);
         }
 
-        Process.Start(start)?.Dispose();
-        Log.Info($"Started the installed {AppPaths.InstalledExe} with: {string.Join(" ", arguments)}");
+        try
+        {
+            Process.Start(start)?.Dispose();
+            Log.Info($"Started the installed {AppPaths.InstalledExe} with: {string.Join(" ", arguments)}");
+        }
+        catch (Exception ex) when (ex is Win32Exception or InvalidOperationException)
+        {
+            // The program file is missing or blocked (quarantined, a policy): the window is closing and only the log can say.
+            Log.Error($"The installed {AppPaths.InstalledExe} could not be started", ex);
+        }
     }
 
     /// <summary>

@@ -104,7 +104,11 @@ allow it, see B-9).
   ("Installed. Restarting" or "Installed. Closing") and, after Update and restart, starts the installed program file
   itself with what it had open (AxClaude: the folder, and `-- --continue` when a message was sent; AxDown: the file,
   or nothing). A failed installer leaves the running version in place and shows its output in a notice. A download
-  counts as complete when it holds `install.ps1` and a program file.
+  counts as complete when it holds `install.ps1` and a program file. Cancel counts until the download is unpacked, a
+  download that is not a zip is a failed update like any other, and an installed program file that cannot be
+  started as the window closes is logged (`StartInstalled`), the window closing all the same. Each app's close
+  question after Update and restart (AxClaude's Keep working, AxDown's Cancel in the save question) keeps the window
+  on the old program file and says "Update installed. It starts with the next AxClaude" (or AxDown).
 - AX-3.3 The 1.7.0 bridge (B-6): AxClaude 1.7.0 accepts a download whose program file is not `AxClaude.exe`, so an
   installed AxClaude updates into Axit through Help, Update now. The first Axit release is 2.0.0.
 - AX-3.4 The update check and the version comparison are pure code in `Axit.Core/Updates/UpdateCheck`, unit tested;

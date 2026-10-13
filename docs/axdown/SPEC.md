@@ -158,7 +158,9 @@ All through the bundle's `OverlayPanel` and `ControlArea` (AX-6.4, AX-7.2): draw
 never a separate window.
 
 - AD-6.1 Unsaved changes: "Save changes to notes.md?" with Save (default), Don't save and Cancel; before New, Open and
-  Exit, and when Windows closes the window. Save with no name yet opens the file picker first.
+  Exit, and when Windows closes the window. Save with no name yet opens the file picker first. Cancel on the way out
+  after Update and restart keeps this window on the old program file and says "Update installed. It starts with the
+  next AxDown" (AX-3.2); until then a later Exit started the new version as if the restart had just been chosen.
 - AD-6.2 Changed on disk (AD-3.6); file errors (AD-3.7); the update notice (AX-3); Keyboard shortcuts; User guide;
   About.
 - AD-6.3 Find: the notice with the field "Text to find" (as AxClaude's); Enter finds the next match from the caret,

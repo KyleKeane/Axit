@@ -187,7 +187,7 @@ internal sealed class EditorForm : Form
             {
                 _closeConfirmed = true;
                 Close();
-            });
+            }, KeepWorkingAfterUpdate);
             base.OnFormClosing(e);
             return;
         }
@@ -457,8 +457,8 @@ internal sealed class EditorForm : Form
     private bool ChangedOnDisk() =>
         _path is not null && _lastWriteTime is { } opened && File.Exists(_path) && File.GetLastWriteTimeUtc(_path) != opened;
 
-    /// <summary>AD-6.1: runs <paramref name="then"/> at once without changes, otherwise after Save or Don't save; Cancel does nothing.</summary>
-    private void AskToSave(Action then)
+    /// <summary>AD-6.1: runs <paramref name="then"/> at once without changes, otherwise after Save or Don't save; Cancel runs <paramref name="cancelled"/>.</summary>
+    private void AskToSave(Action then, Action? cancelled = null)
     {
         if (!_changed)
         {
@@ -470,8 +470,20 @@ internal sealed class EditorForm : Form
         [
             new OverlayChoice("&Save", () => Save(then), IsDefault: true),
             new OverlayChoice("&Don't save", then),
-            new OverlayChoice("&Cancel", IsCancel: true),
+            new OverlayChoice("&Cancel", cancelled, IsCancel: true),
         ]));
+    }
+
+    /// <summary>Cancel in the save question after Update and restart: the update is installed already; this window stays, and the new version comes with the next start.</summary>
+    private void KeepWorkingAfterUpdate()
+    {
+        if (_restartArguments is null)
+        {
+            return;
+        }
+
+        _restartArguments = null;
+        Announce("Update installed. It starts with the next AxDown", true);
     }
 
     // ---- find and go to line (AD-6.3, AD-6.4) ----
@@ -1073,6 +1085,8 @@ internal sealed class EditorForm : Form
         try
         {
             var folder = await Updater.DownloadAsync(release, cancellation.Token, new Progress<int>(percent => _overlay.SetProgress(percent * 80 / 100)));
+            // Cancel pressed while the zip was being unpacked, which the download does not watch the token for.
+            cancellation.Token.ThrowIfCancellationRequested();
             if (IsDisposed)
             {
                 return;
@@ -1110,8 +1124,9 @@ internal sealed class EditorForm : Form
         {
             Announce("Update cancelled", true);
         }
-        catch (Exception ex) when (ex is HttpRequestException or TaskCanceledException or IOException or InvalidOperationException or UnauthorizedAccessException)
+        catch (Exception ex) when (ex is HttpRequestException or TaskCanceledException or IOException or InvalidDataException or InvalidOperationException or UnauthorizedAccessException)
         {
+            // InvalidDataException: a download that is not a zip.
             Log.Error("The update failed", ex);
             Fail("The update failed, and this version keeps running: " + ex.Message);
         }

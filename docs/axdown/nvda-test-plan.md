@@ -72,7 +72,9 @@ letter), and a `long.md` with headings and lines longer than the window.
    settings; "Downloaded. Installing" at about 80 percent, then "Installed. Restarting"; AxDown closes and comes back
    on the same file (or empty, as it was), Help, About naming the newest version. Again with the older build: Escape
    during the download says "Update cancelled" and keeps the version; Update and close says "Installed. Closing" and
-   AxDown does not come back; the Start menu entry is the newest version.
+   AxDown does not come back; the Start menu entry is the newest version. With unsaved changes, Update and restart:
+   the "Save changes?" question; Escape (Cancel): "Update installed. It starts with the next AxDown", the window
+   stays; a later Exit with Don't save closes without starting AxDown again.
 3. Settings, Apps, Axit, Uninstall removes AxDown's Start entry, its file menu entries, Open with, and `axdown.cmd`
    together with everything else of Axit; `%APPDATA%\Axit\axdown.json` stays.
 
