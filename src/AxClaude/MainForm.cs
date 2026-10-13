@@ -402,6 +402,7 @@ internal sealed class MainForm : Form
             UpdateMusic();
         }));
         options.DropDownItems.Add(Toggle("&Flash the taskbar button when Claude is done", _settings.FlashTaskbar, v => _settings.FlashTaskbar = v));
+        options.DropDownItems.Add(Toggle("Louder alert when Claude is &done and the window is in the background", _settings.BackgroundAlert, v => _settings.BackgroundAlert = v));
         // FR-7.4: one of three, shown checked like a radio group; the choice is announced, since the menu closes on it.
         var speech = new ToolStripMenuItem("Speak &replies as they arrive");
         foreach (var (mode, text) in ReplySpeechChoices)
@@ -959,11 +960,17 @@ internal sealed class MainForm : Form
     /// <summary>
     /// The chime (two equal notes for a question, three falling notes when Claude is done, FR-7.3) and the taskbar
     /// flash that go with an attention announcement; without <paramref name="chime"/> only the flash (the answer
-    /// control area plays its own chime).
+    /// control area plays its own chime). While the window is in the background the alert, when it is on, plays in
+    /// place of any chime, the area's included: it is the one sound meant to carry into another window.
     /// </summary>
     private void Signal(bool question, bool chime = true)
     {
-        if (_settings.SoundOnBell && chime)
+        var away = !ContainsFocus;
+        if (_settings.BackgroundAlert && away)
+        {
+            Sounds.Alert();
+        }
+        else if (_settings.SoundOnBell && chime)
         {
             if (question)
             {
@@ -975,7 +982,7 @@ internal sealed class MainForm : Form
             }
         }
 
-        if (_settings.FlashTaskbar && !ContainsFocus && IsHandleCreated)
+        if (_settings.FlashTaskbar && away && IsHandleCreated)
         {
             var info = new FLASHWINFO
             {

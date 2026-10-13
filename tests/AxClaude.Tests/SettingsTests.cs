@@ -12,7 +12,7 @@ public class SettingsTests
         var path = Path.Combine(Path.GetTempPath(), "axclaude-tests", Guid.NewGuid().ToString("N"), "settings.json");
         try
         {
-            var settings = new AppSettings { FontFamily = "Consolas", FontSize = 14, ReplySpeech = ReplySpeechMode.FirstLines, SpeakToolCalls = true, PtyColumns = 200, MarkerTimeStamps = true, JoinWrappedLines = false, WorkingMusic = true };
+            var settings = new AppSettings { FontFamily = "Consolas", FontSize = 14, ReplySpeech = ReplySpeechMode.FirstLines, SpeakToolCalls = true, PtyColumns = 200, MarkerTimeStamps = true, JoinWrappedLines = false, WorkingMusic = true, BackgroundAlert = true };
             settings.RememberFolder(@"C:\one");
             settings.RememberFolder(@"C:\two");
             settings.RememberFolder(@"c:\ONE");
@@ -31,6 +31,7 @@ public class SettingsTests
             Assert.True(loaded.MarkerTimeStamps);
             Assert.False(loaded.JoinWrappedLines);
             Assert.True(loaded.WorkingMusic);
+            Assert.True(loaded.BackgroundAlert);
             Assert.Equal(@"c:\ONE", loaded.LastProjectFolder);
             Assert.Equal([@"c:\ONE", @"C:\two"], loaded.RecentFolders);
             Assert.True(loaded.Window!.Maximized);
@@ -54,6 +55,7 @@ public class SettingsTests
         Assert.True(missing.JoinWrappedLines);
         Assert.False(missing.MarkerTimeStamps);
         Assert.False(missing.WorkingMusic);
+        Assert.False(missing.BackgroundAlert);
 
         Directory.CreateDirectory(Path.GetDirectoryName(path)!);
         try

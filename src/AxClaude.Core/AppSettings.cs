@@ -37,6 +37,9 @@ public sealed class AppSettings
 
     public bool FlashTaskbar { get; set; } = true;
 
+    /// <summary>A longer, louder call in place of the done or question chime while the window is in the background (FR-7.3).</summary>
+    public bool BackgroundAlert { get; set; }
+
     /// <summary>How much of a reply is spoken as it arrives (FR-7.4): none, the first line of each message, or all.</summary>
     public ReplySpeechMode ReplySpeech { get; set; }
 

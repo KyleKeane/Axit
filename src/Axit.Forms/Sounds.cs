@@ -66,7 +66,11 @@ public static class Sounds
     private static readonly Sound DoneChime = new(WaveTone.Notes(0.35, (783.99, 90), (659.25, 90), (523.25, 220)));
     private static readonly Sound QuestionChime = new(WaveTone.Notes(0.35, (659.25, 70), (0, 40), (659.25, 110)));
     private static readonly Sound NoticeChime = new(WaveTone.Notes(0.35, (1046.5, 45), (1318.5, 45), (1046.5, 45), (1318.5, 110)));
-    private static readonly Sound[] All = [LineTick, ToolTick, ReadyChime, SentChime, RespondingChime, DoneChime, QuestionChime, NoticeChime];
+
+    // G5, C6 up to a held E6, and once more: longer and louder than the chimes, so that Claude finishing or asking is
+    // heard from another window, where the done chime was missed (AxClaude FR-7.3).
+    private static readonly Sound AlertChime = new(WaveTone.Notes(0.6, (783.99, 100), (1046.5, 100), (1318.5, 300), (0, 200), (783.99, 100), (1046.5, 100), (1318.5, 500)));
+    private static readonly Sound[] All = [LineTick, ToolTick, ReadyChime, SentChime, RespondingChime, DoneChime, QuestionChime, NoticeChime, AlertChime];
 
     // Sixteen soft plucked notes, like a music box, an arpeggio up C, A minor, F and G at 300 ms a note: 4.8 s that
     // loop without a seam while Claude works (AxClaude FR-7.9). Quieter than the chimes, on a device of its own.
@@ -104,6 +108,9 @@ public static class Sounds
 
     /// <summary>A quick high trill: the answer notice opened and waits for an answer.</summary>
     public static void Notice() => Play(NoticeChime, replace: true);
+
+    /// <summary>A longer, louder call, three rising notes to a held one and again: Claude is done or asks while the window is in the background.</summary>
+    public static void Alert() => Play(AlertChime, replace: true);
 
     /// <summary>Starts the soft music loop that plays while Claude works (AxClaude FR-7.9); nothing while it plays already.</summary>
     public static void StartMusic()
