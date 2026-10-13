@@ -374,14 +374,14 @@ internal sealed class MainForm : Form
         project.DropDownItems.Add(_recentFoldersItem);
         project.DropDownItems.Add(new ToolStripMenuItem("&Force Claude to restart", null, (_, _) => RestartClaude()) { ShortcutKeys = AxClaudeKeys.RestartClaude });
         project.DropDownItems.Add(new ToolStripSeparator());
-        project.DropDownItems.Add(new ToolStripMenuItem("&Save conversation as...", null, (_, _) => SaveConversation()) { ShortcutKeyDisplayString = "Ctrl+S" });
+        project.DropDownItems.Add(new ToolStripMenuItem("&Save conversation as...", null, (_, _) => SaveConversation()) { ShortcutKeyDisplayString = BundleKeys.Text(BundleKeys.Save) });
         project.DropDownItems.Add(new ToolStripSeparator());
         project.DropDownItems.Add(new ToolStripMenuItem("E&xit", null, (_, _) => Close()) { ShortcutKeyDisplayString = "Alt+F4" });
 
         var session = new ToolStripMenuItem("&Session");
         session.DropDownItems.Add(new ToolStripMenuItem("Send &message", null, (_, _) => SendInput()) { ShortcutKeyDisplayString = "Enter in the message field" });
         session.DropDownItems.Add(new ToolStripMenuItem("Send the waiting message &now", null, (_, _) => SendNow()) { ShortcutKeys = AxClaudeKeys.SendNow });
-        session.DropDownItems.Add(new ToolStripMenuItem("&Interrupt Claude (send Escape)", null, (_, _) => Interrupt()) { ShortcutKeyDisplayString = "Shift+Esc" });
+        session.DropDownItems.Add(new ToolStripMenuItem("&Interrupt Claude (send Escape)", null, (_, _) => Interrupt()) { ShortcutKeyDisplayString = BundleKeys.Text(AxClaudeKeys.Interrupt) });
         session.DropDownItems.Add(new ToolStripMenuItem("Send Ctrl+&C", null, (_, _) => Write("\x03")) { ShortcutKeys = AxClaudeKeys.SendCtrlC });
         session.DropDownItems.Add(new ToolStripMenuItem("Send Ctrl+&D", null, (_, _) => Write("\x04")));
         session.DropDownItems.Add(new ToolStripMenuItem("Send &Tab", null, (_, _) => Write("\t")));
@@ -391,17 +391,17 @@ internal sealed class MainForm : Form
         session.DropDownItems.Add(new ToolStripMenuItem("Send Do&wn", null, (_, _) => Write("\x1b[B")));
 
         var navigate = new ToolStripMenuItem("&Navigate");
-        navigate.DropDownItems.Add(new ToolStripMenuItem("Go to &message field", null, (_, _) => GoTo(BottomControl)) { ShortcutKeyDisplayString = "Ctrl+1" });
-        navigate.DropDownItems.Add(new ToolStripMenuItem("Go to &conversation", null, (_, _) => GoTo(_transcript)) { ShortcutKeyDisplayString = "Ctrl+2" });
+        navigate.DropDownItems.Add(new ToolStripMenuItem("Go to &message field", null, (_, _) => GoTo(BottomControl)) { ShortcutKeyDisplayString = BundleKeys.Text(AxClaudeKeys.GoToField) });
+        navigate.DropDownItems.Add(new ToolStripMenuItem("Go to &conversation", null, (_, _) => GoTo(_transcript)) { ShortcutKeyDisplayString = BundleKeys.Text(AxClaudeKeys.GoToConversation) });
         navigate.DropDownItems.Add(new ToolStripMenuItem("&Latest response", null, (_, _) => _transcript.JumpToLatestResponse()) { ShortcutKeys = AxClaudeKeys.LatestResponse });
         navigate.DropDownItems.Add(new ToolStripSeparator());
-        navigate.DropDownItems.Add(new ToolStripMenuItem("&Find...", null, (_, _) => FindDialog()) { ShortcutKeyDisplayString = "Ctrl+F" });
-        navigate.DropDownItems.Add(new ToolStripMenuItem("Find &next", null, (_, _) => FindNext(backward: false)) { ShortcutKeyDisplayString = "F3" });
-        navigate.DropDownItems.Add(new ToolStripMenuItem("Find &previous", null, (_, _) => FindNext(backward: true)) { ShortcutKeyDisplayString = "Shift+F3" });
+        navigate.DropDownItems.Add(new ToolStripMenuItem("&Find...", null, (_, _) => FindDialog()) { ShortcutKeyDisplayString = BundleKeys.Text(BundleKeys.Find) });
+        navigate.DropDownItems.Add(new ToolStripMenuItem("Find &next", null, (_, _) => FindNext(backward: false)) { ShortcutKeyDisplayString = BundleKeys.Text(BundleKeys.FindNext) });
+        navigate.DropDownItems.Add(new ToolStripMenuItem("Find &previous", null, (_, _) => FindNext(backward: true)) { ShortcutKeyDisplayString = BundleKeys.Text(BundleKeys.FindPrevious) });
         navigate.DropDownItems.Add(new ToolStripSeparator());
-        navigate.DropDownItems.Add(new ToolStripMenuItem("&Bookmark this line", null, (_, _) => _transcript.ToggleBookmark()) { ShortcutKeys = AxClaudeKeys.BookmarkLine, ShortcutKeyDisplayString = "Ctrl+Shift+K, or M in the conversation" });
-        navigate.DropDownItems.Add(new ToolStripMenuItem("Next bookmar&k", null, (_, _) => _transcript.JumpToBookmark(backward: false)) { ShortcutKeyDisplayString = "K in the conversation" });
-        navigate.DropDownItems.Add(new ToolStripMenuItem("Pre&vious bookmark", null, (_, _) => _transcript.JumpToBookmark(backward: true)) { ShortcutKeyDisplayString = "Shift+K in the conversation" });
+        navigate.DropDownItems.Add(new ToolStripMenuItem("&Bookmark this line", null, (_, _) => _transcript.ToggleBookmark()) { ShortcutKeys = AxClaudeKeys.BookmarkLine, ShortcutKeyDisplayString = $"{BundleKeys.Text(AxClaudeKeys.BookmarkLine)}, or {BundleKeys.Text(AxClaudeKeys.BookmarkToggle)} in the conversation" });
+        navigate.DropDownItems.Add(new ToolStripMenuItem("Next bookmar&k", null, (_, _) => _transcript.JumpToBookmark(backward: false)) { ShortcutKeyDisplayString = $"{BundleKeys.Text(AxClaudeKeys.Bookmark)} in the conversation" });
+        navigate.DropDownItems.Add(new ToolStripMenuItem("Pre&vious bookmark", null, (_, _) => _transcript.JumpToBookmark(backward: true)) { ShortcutKeyDisplayString = $"Shift+{BundleKeys.Text(AxClaudeKeys.Bookmark)} in the conversation" });
 
         var options = new ToolStripMenuItem("&Options");
         options.DropDownItems.Add(Toggle("&Announce when Claude is done", _settings.AnnounceBell, v => _settings.AnnounceBell = v));
@@ -413,7 +413,7 @@ internal sealed class MainForm : Form
             _settings.WorkingMusic = v;
             UpdateMusic();
         });
-        _musicItem.ShortcutKeyDisplayString = "Ctrl+Space";
+        _musicItem.ShortcutKeyDisplayString = BundleKeys.Text(AxClaudeKeys.ToggleMusic);
         options.DropDownItems.Add(_musicItem);
         options.DropDownItems.Add(Toggle("&Flash the taskbar button when Claude is done", _settings.FlashTaskbar, v => _settings.FlashTaskbar = v));
         options.DropDownItems.Add(Toggle("Louder alert when Claude is &done and the window is in the background", _settings.BackgroundAlert, v => _settings.BackgroundAlert = v));
@@ -459,8 +459,8 @@ internal sealed class MainForm : Form
         }));
         options.DropDownItems.Add(new ToolStripSeparator());
         options.DropDownItems.Add(new ToolStripMenuItem("&Font...", null, (_, _) => ChooseFont()));
-        options.DropDownItems.Add(new ToolStripMenuItem("&Larger text", null, (_, _) => ChangeTextSize(1)) { ShortcutKeyDisplayString = "Ctrl+Plus" });
-        options.DropDownItems.Add(new ToolStripMenuItem("S&maller text", null, (_, _) => ChangeTextSize(-1)) { ShortcutKeyDisplayString = "Ctrl+Minus" });
+        options.DropDownItems.Add(new ToolStripMenuItem("&Larger text", null, (_, _) => ChangeTextSize(1)) { ShortcutKeyDisplayString = BundleKeys.Text(BundleKeys.LargerText) });
+        options.DropDownItems.Add(new ToolStripMenuItem("S&maller text", null, (_, _) => ChangeTextSize(-1)) { ShortcutKeyDisplayString = BundleKeys.Text(BundleKeys.SmallerText) });
         options.DropDownItems.Add(new ToolStripMenuItem("&Use the Windows text size", null, (_, _) => UseSystemFont()));
         options.DropDownItems.Add(new ToolStripSeparator());
         _recordItem.Click += (_, _) => ToggleRecording();

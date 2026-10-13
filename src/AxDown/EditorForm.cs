@@ -1138,27 +1138,9 @@ internal sealed class EditorForm : Form
         var item = new ToolStripMenuItem(text, null, (_, _) => action());
         if (key != Keys.None)
         {
-            item.ShortcutKeyDisplayString = KeyText(key);
+            item.ShortcutKeyDisplayString = BundleKeys.Text(key);
         }
 
         return item;
-    }
-
-    /// <summary>"Ctrl+Shift+S", "F3", "Ctrl+Plus": the key as the menu shows it.</summary>
-    private static string KeyText(Keys key)
-    {
-        var parts = new List<string>();
-        if (key.HasFlag(Keys.Control)) parts.Add("Ctrl");
-        if (key.HasFlag(Keys.Shift)) parts.Add("Shift");
-        if (key.HasFlag(Keys.Alt)) parts.Add("Alt");
-        var code = key & Keys.KeyCode;
-        parts.Add(code switch
-        {
-            Keys.Oemplus or Keys.Add => "Plus",
-            Keys.OemMinus or Keys.Subtract => "Minus",
-            >= Keys.D0 and <= Keys.D9 => ((char)('0' + (code - Keys.D0))).ToString(),
-            _ => code.ToString(),
-        });
-        return string.Join("+", parts);
     }
 }

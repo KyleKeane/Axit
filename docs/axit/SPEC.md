@@ -181,6 +181,9 @@ allow it, see B-9).
 - AX-8.4 A unit test in `tests/Axit.Tests` fails when a window-specific key equals a bundle-wide key, and lists the
   keys that two windows use for different actions, so that a collision between apps is seen before it is felt.
 - AX-8.5 A key is never handled anywhere but through its table, and no key is intercepted that NVDA uses (AX-7.4).
+  The text a menu item shows for its key comes from the tables too (`BundleKeys.Text`: "Ctrl+Shift+S", "Shift+Escape"),
+  so that a key changed in its table changes in the menus by itself; only Windows' own keys (Alt+F4, the edit
+  control's Ctrl+Z, Ctrl+X, Ctrl+C, Ctrl+V, Ctrl+A) and descriptions ("Enter in the message field") are written out.
 
 ### AX-7 Accessibility rules every app follows
 

@@ -58,4 +58,34 @@ public static class BundleKeys
         ("Smaller text", SmallerText),
         ("Smaller text (numpad)", SmallerTextNumpad),
     ];
+
+    /// <summary>"Ctrl+Shift+S", "F3", "Ctrl+Plus", "Shift+Escape": a key as a menu shows it next to its item, from the tables.</summary>
+    public static string Text(Keys key)
+    {
+        var parts = new List<string>();
+        if (key.HasFlag(Keys.Control))
+        {
+            parts.Add("Ctrl");
+        }
+
+        if (key.HasFlag(Keys.Shift))
+        {
+            parts.Add("Shift");
+        }
+
+        if (key.HasFlag(Keys.Alt))
+        {
+            parts.Add("Alt");
+        }
+
+        var code = key & Keys.KeyCode;
+        parts.Add(code switch
+        {
+            Keys.Oemplus or Keys.Add => "Plus",
+            Keys.OemMinus or Keys.Subtract => "Minus",
+            >= Keys.D0 and <= Keys.D9 => ((char)('0' + (code - Keys.D0))).ToString(),
+            _ => code.ToString(),
+        });
+        return string.Join("+", parts);
+    }
 }
