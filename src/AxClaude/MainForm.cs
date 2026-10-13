@@ -1709,6 +1709,8 @@ internal sealed class MainForm : Form
         _host = host;
         _readyAnnounced = false;
         _promptAnnounced = false;
+        // A question of the new Claude belongs to no slash command of the old one (QuestionRouter).
+        _lastCommand = null;
         _settings.RememberFolder(_folder!);
         SaveSettings();
         // Chunks that arrive while the UI thread is busy are handed over together: one post per burst, not one per

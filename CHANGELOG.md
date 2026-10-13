@@ -16,6 +16,7 @@
 - AxClaude: a message sent while Claude works on a step longer than 30 minutes (a long subagent, a slow build) is no longer forgotten before Claude takes it up; its Input and Output lines and the "Responding" announcement were missing for such a message. A message whose Input and Output lines were trimmed from a very long conversation is no longer printed again at the bottom. Force Claude to restart now prints the Input and Output lines of a message Claude had not taken up yet, at the end of the old run, instead of holding it for an echo that never comes.
 - AxClaude: an argument for Claude Code that ends in a backslash and needs quotes, such as `--add-dir "C:\Dir With Space\"` with the backslash tab completion adds, is now passed on correctly. Windows read the backslash and the closing quote as a quote character, so the folder came out wrong and every argument after it was swallowed. The Custom arguments field splits by the same Windows rules.
 - AxDown: Go to line says "Not a line number" when the text typed is not a number, where it silently did nothing.
+- AxClaude: after Force Claude to restart or a new session, a question the new Claude asks at startup (workspace trust) goes to the answer list again. It was routed as if it belonged to the slash command sent last in the old session, so after `/status` or `/config` it was left to the message field.
 
 ## 2.4.0 - 2026-10-13
 
