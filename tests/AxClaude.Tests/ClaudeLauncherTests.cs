@@ -35,4 +35,15 @@ public class ClaudeLauncherTests
         Assert.Equal("--continue --name \"my feature\" \"say \\\"hi\\\"\" \"\"", line);
         Assert.Equal(arguments, ClaudeLauncher.SplitArguments(line));
     }
+
+    [Fact]
+    public void Backslashes_follow_the_windows_rules()
+    {
+        // Literal everywhere but in front of a quote: a quoted folder with its trailing backslash keeps the arguments after it.
+        string[] arguments = ["--add-dir", @"C:\Dir With Space\", @"C:\plain\", @"back\\slash", "odd\\\"quote"];
+        var line = ClaudeLauncher.JoinArguments(arguments);
+        Assert.Equal(@"--add-dir ""C:\Dir With Space\\"" C:\plain\ back\\slash ""odd\\\""quote""", line);
+        Assert.Equal(arguments, ClaudeLauncher.SplitArguments(line));
+        Assert.Equal([@"C:\Dir With Space\", "--verbose"], ClaudeLauncher.SplitArguments(@"""C:\Dir With Space\\"" --verbose"));
+    }
 }

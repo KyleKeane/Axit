@@ -93,8 +93,10 @@ public static class ClaudeLauncher
     }
 
     /// <summary>
-    /// The arguments in a line the user typed (the New session notice, FR-8.6): split at whitespace; a double-quoted
-    /// part keeps its spaces and a backslash before a quote gives a literal quote. The inverse of <see cref="JoinArguments"/>.
+    /// The arguments in a line the user typed (the New session notice, FR-8.6), split the way Windows splits a command
+    /// line (CommandLineToArgvW): at whitespace; a double-quoted part keeps its spaces; a backslash is literal except in
+    /// front of a quote, where each pair is one backslash and an odd one left over makes the quote literal. So
+    /// <c>"C:\Dir With Space\\"</c> is that folder with its trailing backslash. The inverse of <see cref="JoinArguments"/>.
     /// </summary>
     public static IReadOnlyList<string> SplitArguments(string text)
     {
@@ -105,10 +107,34 @@ public static class ClaudeLauncher
         for (var i = 0; i < text.Length; i++)
         {
             var c = text[i];
-            if (c == '\\' && i + 1 < text.Length && text[i + 1] == '"')
+            if (c == '\\')
             {
-                current.Append('"');
-                i++;
+                var run = 1;
+                while (i + run < text.Length && text[i + run] == '\\')
+                {
+                    run++;
+                }
+
+                if (i + run < text.Length && text[i + run] == '"')
+                {
+                    current.Append('\\', run / 2);
+                    if (run % 2 == 1)
+                    {
+                        current.Append('"');
+                    }
+                    else
+                    {
+                        inQuotes = !inQuotes;
+                    }
+
+                    i += run;
+                }
+                else
+                {
+                    current.Append('\\', run);
+                    i += run - 1;
+                }
+
                 hasToken = true;
             }
             else if (c == '"')
@@ -141,11 +167,36 @@ public static class ClaudeLauncher
         return result;
     }
 
-    /// <summary>The arguments as one line, quoted where needed, so that <see cref="SplitArguments"/> gives them back.</summary>
+    /// <summary>The arguments as one line, quoted where needed, so that <see cref="SplitArguments"/> and Windows give them back.</summary>
     public static string JoinArguments(IEnumerable<string> arguments) => string.Join(' ', arguments.Select(Quote));
 
-    private static string Quote(string argument) =>
-        argument.Length > 0 && argument.IndexOfAny([' ', '\t', '"']) < 0
-            ? argument
-            : "\"" + argument.Replace("\"", "\\\"") + "\"";
+    /// <summary>
+    /// The argument as the child's CommandLineToArgvW reads it back: quoted when it has a space, a tab or a quote;
+    /// inside, backslashes are literal except in front of a quote, the closing one included, where the run is
+    /// doubled, and a quote gets one more backslash. An argument ending in a backslash used to swallow the closing
+    /// quote and every argument after it.
+    /// </summary>
+    private static string Quote(string argument)
+    {
+        if (argument.Length > 0 && argument.IndexOfAny([' ', '\t', '"']) < 0)
+        {
+            return argument;
+        }
+
+        var quoted = new StringBuilder("\"");
+        var backslashes = 0;
+        foreach (var c in argument)
+        {
+            if (c == '\\')
+            {
+                backslashes++;
+                continue;
+            }
+
+            quoted.Append('\\', c == '"' ? backslashes * 2 + 1 : backslashes).Append(c);
+            backslashes = 0;
+        }
+
+        return quoted.Append('\\', backslashes * 2).Append('"').ToString();
+    }
 }
