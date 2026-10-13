@@ -47,6 +47,8 @@ public static class AxClaudeKeys
     public const Keys Bookmark = Keys.K;
     public const Keys BookmarkToggle = Keys.M;
     public const Keys LineNumber = Keys.L;
+    /// <summary>Background music on or off, said each time (FR-7.9); the read-only conversation has no use for the key itself.</summary>
+    public const Keys ToggleMusic = Keys.Space;
     public const Keys JumpBack = Keys.Back;
     public const Keys HeadingLevel1 = Keys.D1;
     public const Keys HeadingLevel2 = Keys.D2;
@@ -86,6 +88,7 @@ public static class AxClaudeKeys
         ("Bookmark", Bookmark),
         ("Bookmark this line (m)", BookmarkToggle),
         ("Line number", LineNumber),
+        ("Background music on or off", ToggleMusic),
         ("Back to the line before the jump", JumpBack),
         ("Heading level 1", HeadingLevel1),
         ("Heading level 2", HeadingLevel2),

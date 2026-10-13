@@ -36,6 +36,8 @@ internal sealed class MainForm : Form
     private readonly ToolStripMenuItem _installedItem = new($"&Installed: AxClaude {BundleInfo.Version}");
     private readonly ToolStripMenuItem _latestItem = new();
     private readonly ToolStripMenuItem _updateItem = new("Check for &updates...");
+    /// <summary>Options → Soft background music while Claude works, made with the menu; Space in the conversation flips it (FR-7.9).</summary>
+    private ToolStripMenuItem _musicItem = null!;
     private readonly System.Windows.Forms.Timer _quiet = new() { Interval = 100 };
     private readonly System.Windows.Forms.Timer _attention = new() { Interval = 400 };
     private readonly System.Windows.Forms.Timer _exitSettle = new() { Interval = 300 };
@@ -396,12 +398,13 @@ internal sealed class MainForm : Form
         options.DropDownItems.Add(Toggle("&Announce when Claude is done", _settings.AnnounceBell, v => _settings.AnnounceBell = v));
         options.DropDownItems.Add(Toggle("Play &sounds: ready, sent, replying, done, question", _settings.SoundOnBell, v => _settings.SoundOnBell = v));
         options.DropDownItems.Add(Toggle("Tick for each &new line and tool call from Claude", _settings.ClickOnNewLine, v => _settings.ClickOnNewLine = v));
-        // FR-7.9: starts or stops at once when toggled during a turn.
-        options.DropDownItems.Add(Toggle("Soft &background music while Claude works", _settings.WorkingMusic, v =>
+        // FR-7.9: starts or stops at once when toggled during a turn; Space in the conversation flips the same item.
+        _musicItem = Toggle("Soft &background music while Claude works", _settings.WorkingMusic, v =>
         {
             _settings.WorkingMusic = v;
             UpdateMusic();
-        }));
+        });
+        options.DropDownItems.Add(_musicItem);
         options.DropDownItems.Add(Toggle("&Flash the taskbar button when Claude is done", _settings.FlashTaskbar, v => _settings.FlashTaskbar = v));
         options.DropDownItems.Add(Toggle("Louder alert when Claude is &done and the window is in the background", _settings.BackgroundAlert, v => _settings.BackgroundAlert = v));
         // FR-7.4: one of three, shown checked like a radio group; the choice is announced, since the menu closes on it.
@@ -502,6 +505,7 @@ internal sealed class MainForm : Form
         _transcript.Dock = DockStyle.Fill;
         _transcript.TabIndex = 1;
         _transcript.EscapePressed += () => BottomControl.Focus();
+        _transcript.SpacePressed += ToggleMusic;
         _transcript.LineChosen += QuoteLineInMessage;
         _transcript.BookmarkToggled += ToggleBookmark;
         _overlay.Chosen += OnNoticeChoice;
@@ -1019,6 +1023,16 @@ internal sealed class MainForm : Form
         {
             Sounds.StopMusic();
         }
+    }
+
+    /// <summary>
+    /// Space in the conversation (FR-7.9): the music option flips through its menu item, which applies and saves it,
+    /// and the result is said; when Claude is not working at that moment nothing is heard yet, which is said too.
+    /// </summary>
+    private void ToggleMusic()
+    {
+        _musicItem.Checked = !_musicItem.Checked;
+        Announce(!_settings.WorkingMusic ? "Background music off" : _musicOn ? "Background music on" : "Background music on, nothing is running", true);
     }
 
     private void UpdateStatus()
