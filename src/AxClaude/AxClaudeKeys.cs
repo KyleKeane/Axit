@@ -3,7 +3,7 @@ namespace AxClaude;
 /// <summary>
 /// AxClaude's window-specific keys (SPEC.md §6.3; bundle AX-8). A key is changed here and nowhere else: the window's
 /// key switch, the menu items and the conversation's quick keys read this table, and the F1 text in <c>HelpText</c>
-/// names the same keys. The bundle-wide keys (F1, the controls, find, save, text size, the page keys) are
+/// names the same keys. The bundle-wide keys (F1, the controls, find, save, text size, the page and paragraph keys) are
 /// <c>Axit.Forms.BundleKeys</c>; the collision test in <c>tests/Axit.Tests</c> fails when a key here equals one of those
 /// or when a key appears twice.
 /// </summary>
@@ -27,8 +27,8 @@ public static class AxClaudeKeys
 
     // The message field, and the conversation: Enter sends a message in the field and quotes the line in the
     // conversation; Escape is the guard in the field (D20) and clears the selection or returns to the field in the
-    // conversation. Ctrl+Up and Ctrl+Down are the edit control's own in both (they scroll, FR-2.4); Send Up and
-    // Send Down to Claude are menu items without a key since 2.4.0.
+    // conversation. Ctrl+Up and Ctrl+Down are the bundle's paragraph keys in both (FR-2.1); Send Up and Send Down
+    // to Claude are menu items without a key since 2.4.0.
     public const Keys Enter = Keys.Return;
     public const Keys Escape = Keys.Escape;
 

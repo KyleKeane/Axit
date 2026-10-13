@@ -68,9 +68,13 @@ UTF-8, UTF-16 and the system code page; files that are not text; files over 32 M
 - AD-2.2 The text is the file's, with line endings normalised to `\r\n` for the control; the original line ending
   is remembered and written back (AD-3.4).
 - AD-2.3 Page Up and Page Down move one screen and reach the ends through the bundle's `EditPaging` (as AxClaude's
-  FR-2.1): the control's own keys do nothing while the text fits. Ctrl+Up and Ctrl+Down are the control's own and
-  stay so: as in Notepad and VS Code they scroll a row and leave the caret where it is, which a screen reader does
-  not hear (AxClaude FR-2.4).
+  FR-2.1): the control's own keys do nothing while the text fits. Ctrl+Up and Ctrl+Down move to the start of the
+  previous and next paragraph, a paragraph starting at the first line or at a line with text directly after a blank
+  line (Ctrl+Up from inside one goes to its start first, Ctrl+Down from the last to the end of the file), and
+  Ctrl+Shift+Up and Ctrl+Shift+Down select to there from the selection's anchor, as in Word, through the bundle's
+  `EditParagraphs` (AX-8.2): the control's own keys scroll a row and leave the caret where it is, as Notepad's do,
+  which NVDA, reading at the caret after the key, reported as the same text again. NVDA reads the row the caret
+  lands on or the selection change; the app says nothing.
 - AD-2.4 Turning word wrap off and on keeps the caret where it was. (WinForms recreates the control's handle on that
   change and loses the position; the form saves `SelectionStart` and restores it, then scrolls to the caret.)
 - AD-2.5 Undo is the control's own (Ctrl+Z, one level, as in Notepad before Windows 11). Nothing more in version one.
@@ -126,7 +130,8 @@ Every key is bundle-wide (the same in every window of Axit, `Axit.Forms/BundleKe
 Bundle-wide (AX-8.2): F1 shortcuts; Tab, Shift+Tab, Ctrl+Tab, Ctrl+Shift+Tab and F6 move between the window's
 controls (in AxDown there is one, so they stay in the editor; in a notice they move between its text, field and
 buttons); Ctrl+F find, F3 and Shift+F3 next and previous; Ctrl+S save; Ctrl+Plus and Ctrl+Minus text size; Enter
-and Escape on a notice; Page Up and Page Down one screen in an edit control; Alt+F4 exit; Alt and F10 the menu.
+and Escape on a notice; Page Up and Page Down one screen in an edit control; Ctrl+Up and Ctrl+Down the previous and
+next paragraph, with Shift selecting to there (AD-2.3); Alt+F4 exit; Alt and F10 the menu.
 
 Window-specific: Ctrl+N new document; Ctrl+O open; Ctrl+Shift+S save as; Ctrl+G go to line; Ctrl+Shift+W word wrap;
 Ctrl+H next heading and Ctrl+Shift+H previous heading (section 9).
@@ -216,7 +221,7 @@ docs/axdown/       this spec, user-guide.md (embedded, Help, User guide), nvda-t
 ```
 
 Shared pieces AxDown uses (AX-6): `OverlayPanel` and `Notice`,
-`ControlArea` (the Go to line field), `EditPaging`, `StatusLayout`, the font handling, `Sounds` (the notice chime),
+`ControlArea` (the Go to line field), `EditPaging`, `EditParagraphs`, `StatusLayout`, the font handling, `Sounds` (the notice chime),
 `BundleKeys`; from `Axit.Core`: `SettingsFile`, `AppPaths`, `Log`, `Updater`, `BundleInfo`.
 
 Data flow: `TextDocument.Read(path)` gives text, encoding, mark and line ending; the form puts the text in the

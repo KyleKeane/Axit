@@ -5,7 +5,8 @@
 - AxClaude: Options, "Soft background music while Claude works" (off until you turn it on) plays a quiet music-box loop from the moment Claude starts working until it is done or asks, so you hear that Claude is still at work without reading along. It stops at once when you turn it off, and the chimes and ticks sound over it as before.
 - AxClaude: Options, "Louder alert when Claude is done and the window is in the background" (off until you turn it on) plays a longer, louder call in place of the done or question chime when Claude finishes or asks while you are in another window, where the chime was easy to miss and NVDA does not say "Done".
 - AxClaude: `p` and Shift+P now stop at each "claude:" line as well as at the paragraphs after a blank line. Claude prints its short messages between tool calls with no blank line in front of them, so the paragraph key passed over them and found only the paragraphs of the final reply.
-- AxClaude: Ctrl+Up and Ctrl+Down in the message field are the text field's own keys now, as in the conversation and in any editor: they scroll without moving the caret, as Notepad and VS Code do. Send Up and Send Down to Claude stay in the Session menu, without a key.
+- Axit: Ctrl+Up and Ctrl+Down now move to the start of the previous and next paragraph in every text field of the bundle (AxClaude's conversation and message field, AxDown's editor), a paragraph being the first line after a blank line, and Ctrl+Shift+Up and Ctrl+Shift+Down select to there, as in Word. The Windows edit control scrolled the view instead and left the caret where it was, so a screen reader read the same text again.
+- AxClaude: Send Up and Send Down to Claude are menu items only now (Session menu), since Ctrl+Up and Ctrl+Down in the message field move by paragraph like everywhere else.
 
 ## 2.3.1 - 2026-10-02
 

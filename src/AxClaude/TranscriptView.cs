@@ -327,6 +327,15 @@ internal sealed class TranscriptView : TextBox
             return;
         }
 
+        if (e.KeyData is BundleKeys.ParagraphUp or BundleKeys.ParagraphDown or BundleKeys.SelectParagraphUp or BundleKeys.SelectParagraphDown)
+        {
+            // The start of the previous or next paragraph, with Shift selecting to there (FR-5): the control's own
+            // keys scroll a row and leave the caret. A caret move like the arrows', not a jump for Backspace.
+            e.Handled = e.SuppressKeyPress = true;
+            EditParagraphs.Move(this, e.KeyCode == Keys.Down ? 1 : -1, e.Shift);
+            return;
+        }
+
         if (!e.Control && !e.Alt)
         {
             if (e.KeyCode == AxClaudeKeys.Enter && !e.Shift)
