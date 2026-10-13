@@ -171,9 +171,10 @@ public static class Sounds
     }
 
     // A typewriter-like strike, a burst of noise over a 1.5 kHz tone that dies away within 10 ms: a line from Claude
-    // arrived. Two lower knocks in a row, 12 ms each and rising: a tool call arrived. A touch softer since 2.4.0.
-    private static readonly Sound LineTick = new(WaveTone.Strikes(0.3, 10, 0.4, 1500));
-    private static readonly Sound ToolTick = new(WaveTone.Strikes(0.4, 12, 0.4, 650, 850));
+    // arrived. Two lower knocks in a row, 12 ms each and rising: a tool call arrived. Softer versions were tried in
+    // 2.4.0 and went unheard under speech; these are the 1.3.0 sounds, which the user likes.
+    private static readonly Sound LineTick = new(WaveTone.Strikes(0.4, 10, 0.5, 1500));
+    private static readonly Sound ToolTick = new(WaveTone.Strikes(0.5, 12, 0.5, 650, 850));
 
     // C6 alone, a high ping: Claude is ready. A4 alone, low: the message went out. C5, E5, G5 up to a long note:
     // Claude starts replying. The same notes down, G5, E5, C5: the turn is done. Two E5s: Claude needs an answer.

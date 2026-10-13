@@ -55,14 +55,14 @@ public static class WaveTone
     /// Strikes, like a typewriter key or a tiny hammer: each is a burst of noise over a short tone that dies away at
     /// once, the noise gone within a couple of milliseconds and the tone within <paramref name="millisecondsEach"/>,
     /// the next strike following as soon as the last has faded. One strike is heard as a single tick; two or three in
-    /// a row, a few milliseconds apart, as one ratchety tick. The tone rises over an eighth of the strike and the
-    /// noise over four samples: a sound that starts at full volume is heard as a click followed by a separate falling
-    /// note. The noise is the same every time.
+    /// a row, a few milliseconds apart, as one ratchety tick. The tone rises over its first 0.6 ms and the noise over
+    /// four samples: a sound that starts at full volume is heard as a click followed by a separate falling note. The
+    /// noise is the same every time.
     /// </summary>
     public static byte[] Strikes(double amplitude, int millisecondsEach, double noise, params double[] hertz)
     {
         var each = Samples(millisecondsEach);
-        var attack = Math.Max(1, each / 8);
+        var attack = Math.Min(each / 4, SampleRate / 1500);
         var chiff = Math.Max(1, Samples(1));
         var random = new Random(7);
         var samples = new short[each * hertz.Length];
