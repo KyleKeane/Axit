@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased
+## 2.6.0 - 2026-10-14
 
 - Axit: Help, "Check for updates" stays in the menu and asks GitHub again every time, so a user who chose Later on one version can look again; "Update to AxClaude n" (Axit n in AxDown) is a second item below it while a newer release is known. Before, the check item itself turned into the update item. The items "Installed: n" and "Latest release: n" are gone from Help: the version in use is on the Check for updates item ("Check for updates (AxClaude 2.6.0)..."), and About names it with the latest release and the releases page.
 - AxClaude: every Options item is in a submenu now. Text takes "Time stamps on Input and Output lines", and a new General submenu holds "Check for updates at start", "Keep recordings and saved conversations out of git" and "Open settings file".
