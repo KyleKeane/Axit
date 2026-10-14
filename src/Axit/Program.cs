@@ -16,6 +16,8 @@ internal static class Program
     private static void Main(string[] args)
     {
         ApplicationConfiguration.Initialize();
+        // AX-7.7: the windows are light or dark as Windows is; a high contrast theme takes over as it always has.
+        Application.SetColorMode(SystemColorMode.System);
         DeleteOldProgramFiles();
 
         var launch = Dispatch.Decide(args);

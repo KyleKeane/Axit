@@ -1,5 +1,9 @@
 # Changelog
 
+## 2.5.0 - 2026-10-13
+
+- Axit: both windows are now light or dark as Windows is (Settings, Personalisation, Colours, "Choose your mode"), picked up when the app starts. They were always light. High contrast themes apply as before.
+
 ## 2.4.1 - 2026-10-13
 
 - Axit: a notice opened by another notice's button now stays in view. "Update and restart" hid its own progress notice, so the download and installation ran behind a blank window with no Cancel to reach; an error after "Restart now", and AxDown's "The file changed on disk" question after Save in the "Save changes?" notice, were hidden the same way and left the window without a working key.

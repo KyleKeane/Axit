@@ -103,6 +103,7 @@ Each step says what to do and what NVDA must say or do. A step fails if NVDA say
 7. Help, "Claude Code slash commands (web)": the browser opens the commands page at code.claude.com. The other web items open their pages too.
 8. Ctrl+S: the Save dialog with a name like `<folder>-20260919-1405.txt`; save it: "Saved". The file holds the conversation as shown, with the "# Input" and "# Output" lines and your messages between them, and no "you:" echo or chrome rows.
 9. Options, "Show the time in the Input and Output lines", then send a message: the markers read "# Input 4 (14:05)" and "# Output 4 Reply from Claude (14:05)" (the current time). Earlier markers are unchanged. Turn it off again.
+10. Windows set to dark mode (Settings, Personalisation, Colours, "Choose your mode": Dark) and the app started again: a sighted check shows the window, the menus, the notices and the question list dark; NVDA reads every control, the menus and the notices exactly as in the sections above. Back to Light: the next start is light again. A contrast theme (Settings, Accessibility, Contrast themes) overrides both.
 
 ## 10. Claude Code missing, and the installer
 

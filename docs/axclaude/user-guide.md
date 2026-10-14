@@ -104,7 +104,7 @@ Ctrl+S saves the conversation as a text file. Ctrl+A and Ctrl+C in the conversat
 
 ## Text size and fonts
 
-Ctrl+Plus and Ctrl+Minus make the text bigger or smaller and say the new size. Options, Font opens the Windows font dialog. Options, "Use the Windows text size" goes back to the Windows setting (Settings, Accessibility, Text size). Colours follow Windows, so high contrast themes work.
+Ctrl+Plus and Ctrl+Minus make the text bigger or smaller and say the new size. Options, Font opens the Windows font dialog. Options, "Use the Windows text size" goes back to the Windows setting (Settings, Accessibility, Text size). Colours follow Windows, light or dark, and high contrast themes work.
 
 ## Settings
 

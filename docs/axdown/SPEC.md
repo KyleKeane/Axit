@@ -214,7 +214,7 @@ notice; Help, Copy diagnostics puts the version, the paths and the log's tail on
 
 Controls and accessible names: the editor `TextBox` named after the file; the `MenuStrip`; the `StatusStrip` with
 two labels and no names (NVDA+End reads the text); notices and the question area as the bundle's (AX-6.4). Minimum
-size 500×300; the system font and colours.
+size 500×300; the system font and colours, light or dark as Windows is (AX-7.7).
 
 ## 6. Architecture
 
