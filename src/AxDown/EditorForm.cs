@@ -97,7 +97,7 @@ internal sealed class EditorForm : Form
 
         var help = new ToolStripMenuItem("&Help");
         help.DropDownItems.Add(Item("&Keyboard shortcuts", () => ShowNotice(Notice.Plain("Keyboard shortcuts", HelpText.Shortcuts)), BundleKeys.Shortcuts));
-        help.DropDownItems.Add(new ToolStripMenuItem("&User guide", null, (_, _) => ShowNotice(Notice.Plain("User guide", HelpText.UserGuide()))));
+        help.DropDownItems.Add(new ToolStripMenuItem("User &guide", null, (_, _) => ShowNotice(Notice.Plain("User guide", HelpText.UserGuide()))));
         help.DropDownItems.Add(new ToolStripSeparator());
         // AX-3: the version in use, the latest release GitHub named, and the way to update, always in the menu.
         _installedItem.Click += (_, _) => ShowAbout();
