@@ -95,8 +95,9 @@ allow it, see B-9).
 - AX-3.1 One version for the bundle, `<Version>` in `src/Axit/Axit.csproj`. A newer GitHub release is offered as
   AxClaude does (`docs/axclaude/SPEC.md` FR-1.10, D25): asked once at startup when the setting is on, a notice with
   the release notes and four buttons: Update and restart (Enter), Update and close, Open release page, Later
-  (Escape). Each app's Help menu has Check for updates, always, which asks GitHub again every time, and Update to
-  <version> below it while a newer release is known; About names the version in use and the latest release named.
+  (Escape). Each app's Help menu has Check for updates (<app> <version>), always, naming the version in use and asking
+  GitHub again every time, and Update to <version> below it while a newer release is known; About names the version
+  in use and the latest release named.
 - AX-3.2 Either update runs behind one notice with one progress bar (`Notice.Progress`; NVDA reports a progress bar
   by its own settings, so nothing is spoken about the progress itself): the zip is downloaded into
   `%LOCALAPPDATA%\Axit\updates\<version>` (the bar to 80 percent; Cancel keeps the installed version), then the

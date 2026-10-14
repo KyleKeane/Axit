@@ -66,7 +66,7 @@ letter), and a `long.md` with headings and lines longer than the window.
 
 ## 7. Updates and uninstall
 
-1. Help, Check for updates reports in a notice either way and stays in the menu; Help, About names the version in use
+1. Help, "Check for updates (Axit <version>)..." names the version you have and reports in a notice either way; About names it too
    and "Latest release on GitHub: Axit <version>" with the releases page.
 2. With an older build installed (set `<Version>` in `src/Axit/Axit.csproj` below the latest release, `.\publish.ps1`,
    set it back), open a file: the notice "Update to Axit <newest>" opens by itself with four buttons. Escape (Later):

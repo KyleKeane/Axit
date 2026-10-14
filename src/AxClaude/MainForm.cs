@@ -33,7 +33,7 @@ internal sealed class MainForm : Form
     private readonly ToolStripMenuItem _currentFolderItem = new() { ShortcutKeys = AxClaudeKeys.OpenFolder };
     private readonly ToolStripMenuItem _recentFoldersItem = new("&Recent folders");
     private readonly ToolStripMenuItem _recordItem = new(RecordItemText);
-    private readonly ToolStripMenuItem _checkItem = new("Check for &updates...");
+    private readonly ToolStripMenuItem _checkItem = new($"Check for &updates (AxClaude {BundleInfo.Version})...");
     private readonly ToolStripMenuItem _updateItem = new() { Visible = false };
     /// <summary>Options → Sounds → Background music while Claude works, made with the menu; Ctrl+Space flips it from anywhere (FR-7.9).</summary>
     private ToolStripMenuItem _musicItem = null!;
@@ -495,8 +495,8 @@ internal sealed class MainForm : Form
         web.DropDownItems.Add(new ToolStripMenuItem("&Install or update Claude Code", null, (_, _) => OpenUrl(ClaudeLauncher.InstallUrl)));
         help.DropDownItems.Add(web);
         help.DropDownItems.Add(new ToolStripSeparator());
-        // FR-1.10: Check for updates asks GitHub every time; Update to AxClaude n stands below it while a newer release
-        // is known. The version in use and the latest release named are in About.
+        // FR-1.10: Check for updates names the version in use and asks GitHub every time; Update to AxClaude n stands
+        // below it while a newer release is known. About names the version too, with the latest release named.
         _checkItem.Click += (_, _) => CheckForUpdates(manual: true);
         help.DropDownItems.Add(_checkItem);
         _updateItem.Click += (_, _) =>

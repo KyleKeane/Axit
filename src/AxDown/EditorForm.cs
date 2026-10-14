@@ -29,7 +29,7 @@ internal sealed class EditorForm : Form
     private readonly OverlayPanel _overlay = new();
     private readonly ControlArea _area = new();
     private readonly ToolStripMenuItem _wordWrapItem;
-    private readonly ToolStripMenuItem _checkItem = new("Check for &updates...");
+    private readonly ToolStripMenuItem _checkItem = new($"Check for &updates (Axit {BundleInfo.Version})...");
     private readonly ToolStripMenuItem _updateItem = new() { Visible = false };
     private readonly System.Windows.Forms.Timer _statusTimer = new() { Interval = 300 };
 
@@ -98,8 +98,8 @@ internal sealed class EditorForm : Form
         help.DropDownItems.Add(Item("&Keyboard shortcuts", () => ShowNotice(Notice.Plain("Keyboard shortcuts", HelpText.Shortcuts)), BundleKeys.Shortcuts));
         help.DropDownItems.Add(new ToolStripMenuItem("User &guide", null, (_, _) => ShowNotice(Notice.Plain("User guide", HelpText.UserGuide()))));
         help.DropDownItems.Add(new ToolStripSeparator());
-        // AX-3: Check for updates asks GitHub every time; Update to Axit n stands below it while a newer release is
-        // known. The version in use and the latest release named are in About.
+        // AX-3: Check for updates names the version in use and asks GitHub every time; Update to Axit n stands below
+        // it while a newer release is known. About names the version too, with the latest release named.
         _checkItem.Click += (_, _) => CheckForUpdates(manual: true);
         help.DropDownItems.Add(_checkItem);
         _updateItem.Click += (_, _) =>
