@@ -1,6 +1,6 @@
 # Changelog
 
-## 2.5.0 - 2026-10-13
+## 2.5.0 - 2026-10-14
 
 - Axit: both windows are now light or dark as Windows is (Settings, Personalisation, Colours, "Choose your mode"), picked up when the app starts. They were always light. High contrast themes apply as before.
 - AxClaude: the menus are regrouped and shortened. Session is now Claude: Send message, Send now, Interrupt, Next permission mode, and a Send key submenu for Ctrl+C, Ctrl+D, Tab, Up and Down. Navigate says Message field and Conversation. Options holds five submenus, Sounds, Speech, When Claude is done, Questions and Text, with the four settings that fit no group after them; the Speak replies choices are the Speech items "Speak replies: none", "first lines" and "all lines". Help gathers the Claude Code pages under "Claude Code on the web" and takes Record raw stream from Options. Every mnemonic is now unique within its menu: User guide and Check for updates shared the letter U, and Open current folder and Force Claude to restart shared F, so Alt and the letter cycled instead of acting.
