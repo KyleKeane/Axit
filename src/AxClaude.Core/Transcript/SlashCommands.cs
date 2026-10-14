@@ -39,7 +39,8 @@ public enum CommandInteraction
 
 /// <summary>
 /// A built-in slash command: its name without the slash, its aliases, what it asks of the user, and how the entry is
-/// known: <c>docs</c> (from the documentation only) or the Claude Code version it was recorded with.
+/// known (<c>docs</c>, <c>mentioned</c>, or the Claude Code version it was recorded with): provenance for whoever
+/// changes the table, read by no code.
 /// </summary>
 public sealed record SlashCommand(string Name, CommandInteraction Interaction, string Source, IReadOnlyList<string>? Aliases = null)
 {
