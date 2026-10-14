@@ -407,7 +407,7 @@ internal sealed class MainForm : Form
         navigate.DropDownItems.Add(new ToolStripMenuItem("Next bookmar&k", null, (_, _) => _transcript.JumpToBookmark(backward: false)) { ShortcutKeyDisplayString = $"{BundleKeys.Text(AxClaudeKeys.Bookmark)} in the conversation" });
         navigate.DropDownItems.Add(new ToolStripMenuItem("Pre&vious bookmark", null, (_, _) => _transcript.JumpToBookmark(backward: true)) { ShortcutKeyDisplayString = $"Shift+{BundleKeys.Text(AxClaudeKeys.Bookmark)} in the conversation" });
 
-        // The settings: a submenu for each kind, then the few that fit no group. Each check item is saved as it is toggled.
+        // The settings: a submenu for each kind, nothing outside one. Each check item is saved as it is toggled.
         var options = new ToolStripMenuItem("&Options");
         var sounds = new ToolStripMenuItem("&Sounds");
         sounds.DropDownItems.Add(Toggle("&Chimes: ready, sent, replying, done, question", _settings.SoundOnBell, v => _settings.SoundOnBell = v));
@@ -466,21 +466,22 @@ internal sealed class MainForm : Form
         textMenu.DropDownItems.Add(new ToolStripMenuItem("&Larger text", null, (_, _) => ChangeTextSize(1)) { ShortcutKeyDisplayString = BundleKeys.Text(BundleKeys.LargerText) });
         textMenu.DropDownItems.Add(new ToolStripMenuItem("S&maller text", null, (_, _) => ChangeTextSize(-1)) { ShortcutKeyDisplayString = BundleKeys.Text(BundleKeys.SmallerText) });
         textMenu.DropDownItems.Add(new ToolStripMenuItem("&Windows text size", null, (_, _) => UseSystemFont()));
-        options.DropDownItems.Add(textMenu);
-
-        options.DropDownItems.Add(new ToolStripSeparator());
-        options.DropDownItems.Add(Toggle("T&ime stamps on Input and Output lines", _settings.MarkerTimeStamps, v =>
+        textMenu.DropDownItems.Add(Toggle("&Time stamps on Input and Output lines", _settings.MarkerTimeStamps, v =>
         {
             _settings.MarkerTimeStamps = v;
             _model.TimeStamps = v;
         }));
-        options.DropDownItems.Add(Toggle("Check for &updates at start", _settings.CheckForUpdates, v => _settings.CheckForUpdates = v));
-        options.DropDownItems.Add(Toggle("&Keep recordings and saved conversations out of git", _settings.KeepFilesOutOfGit, v =>
+        options.DropDownItems.Add(textMenu);
+
+        var general = new ToolStripMenuItem("&General");
+        general.DropDownItems.Add(Toggle("Check for &updates at start", _settings.CheckForUpdates, v => _settings.CheckForUpdates = v));
+        general.DropDownItems.Add(Toggle("&Keep recordings and saved conversations out of git", _settings.KeepFilesOutOfGit, v =>
         {
             _settings.KeepFilesOutOfGit = v;
             KeepFilesOutOfGit();
         }));
-        options.DropDownItems.Add(new ToolStripMenuItem("Open settings &file", null, (_, _) => OpenSettingsFile()));
+        general.DropDownItems.Add(new ToolStripMenuItem("Open settings &file", null, (_, _) => OpenSettingsFile()));
+        options.DropDownItems.Add(general);
 
         var help = new ToolStripMenuItem("&Help");
         help.DropDownItems.Add(new ToolStripMenuItem("&Keyboard shortcuts", null, (_, _) => ShowNotice(Notice.Plain("Keyboard shortcuts", HelpText.Shortcuts))) { ShortcutKeys = BundleKeys.Shortcuts });
