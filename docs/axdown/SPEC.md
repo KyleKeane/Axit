@@ -121,10 +121,11 @@ UTF-8, UTF-16 and the system code page; files that are not text; files over 32 M
   heading (Ctrl+H), Previous heading (Ctrl+Shift+H).
 - AD-4.3 View: Word wrap (checked; Ctrl+Shift+W), Larger text (Ctrl+Plus), Smaller text (Ctrl+Minus), Windows text
   size, Font…
-- AD-4.4 Help: Keyboard shortcuts (F1), User guide, Installed: Axit n (About), Latest release and the update items as
-  AxClaude has them (FR-1.10 there, the bundle's `Updater`, AX-3: Update and restart, Update and close, Open release
-  page, Later; one progress bar for the download and the in-place install, Cancel during the download; after Update
-  and restart AxDown starts the new version itself, on the file or empty), Copy diagnostics, About AxDown.
+- AD-4.4 Help: Keyboard shortcuts (F1), User guide, Check for updates and, while a newer release is known, Update to
+  Axit n, as AxClaude has them (FR-1.10 there, the bundle's `Updater`, AX-3: Update and restart, Update and close,
+  Open release page, Later; one progress bar for the download and the in-place install, Cancel during the download;
+  after Update and restart AxDown starts the new version itself, on the file or empty), Copy diagnostics, About
+  AxDown, which names the version in use and the latest release GitHub named.
 - AD-4.5 Every menu item has a mnemonic and a shortcut or a shortcut text (AX-7.1).
 
 ### AD-5 Keys

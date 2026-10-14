@@ -66,16 +66,19 @@ letter), and a `long.md` with headings and lines longer than the window.
 
 ## 7. Updates and uninstall
 
-1. Help, Check for updates reports in a notice either way.
+1. Help, Check for updates reports in a notice either way and stays in the menu; Help, About names the version in use
+   and "Latest release on GitHub: Axit <version>" with the releases page.
 2. With an older build installed (set `<Version>` in `src/Axit/Axit.csproj` below the latest release, `.\publish.ps1`,
-   set it back), open a file: the notice "Update to Axit <newest>" opens by itself with four buttons. Enter (Update
-   and restart): the notice "Updating to Axit <newest>" with a progress bar that NVDA reports by its progress bar
-   settings; "Downloaded. Installing" at about 80 percent, then "Installed. Restarting"; AxDown closes and comes back
-   on the same file (or empty, as it was), Help, About naming the newest version. Again with the older build: Escape
-   during the download says "Update cancelled" and keeps the version; Update and close says "Installed. Closing" and
-   AxDown does not come back; the Start menu entry is the newest version. With unsaved changes, Update and restart:
-   the "Save changes?" question; Escape (Cancel): "Update installed. It starts with the next AxDown", the window
-   stays; a later Exit with Don't save closes without starting AxDown again.
+   set it back), open a file: the notice "Update to Axit <newest>" opens by itself with four buttons. Escape (Later):
+   Help has "Update to Axit <newest>..." below Check for updates, and Check for updates asks GitHub again and opens
+   the notice once more. Enter (Update and restart): the notice "Updating to Axit <newest>" with a progress bar that
+   NVDA reports by its progress bar settings; "Downloaded. Installing" at about 80 percent, then "Installed.
+   Restarting"; AxDown closes and comes back on the same file (or empty, as it was), Help, About naming the newest
+   version. Again with the older build: Escape during the download says "Update cancelled" and keeps the version;
+   Update and close says "Installed. Closing" and AxDown does not come back; the Start menu entry is the newest
+   version. With unsaved changes, Update and restart: the "Save changes?" question; Escape (Cancel): "Update
+   installed. It starts with the next AxDown", the window stays; a later Exit with Don't save closes without
+   starting AxDown again.
 3. Settings, Apps, Axit, Uninstall removes AxDown's Start entry, its file menu entries, Open with, and `axdown.cmd`
    together with everything else of Axit; `%APPDATA%\Axit\axdown.json` stays.
 

@@ -33,9 +33,8 @@ internal sealed class MainForm : Form
     private readonly ToolStripMenuItem _currentFolderItem = new() { ShortcutKeys = AxClaudeKeys.OpenFolder };
     private readonly ToolStripMenuItem _recentFoldersItem = new("&Recent folders");
     private readonly ToolStripMenuItem _recordItem = new(RecordItemText);
-    private readonly ToolStripMenuItem _installedItem = new($"&Installed: AxClaude {BundleInfo.Version}");
-    private readonly ToolStripMenuItem _latestItem = new();
-    private readonly ToolStripMenuItem _updateItem = new("Check for &updates...");
+    private readonly ToolStripMenuItem _checkItem = new("Check for &updates...");
+    private readonly ToolStripMenuItem _updateItem = new() { Visible = false };
     /// <summary>Options → Sounds → Background music while Claude works, made with the menu; Ctrl+Space flips it from anywhere (FR-7.9).</summary>
     private ToolStripMenuItem _musicItem = null!;
     private readonly System.Windows.Forms.Timer _quiet = new() { Interval = 100 };
@@ -111,7 +110,6 @@ internal sealed class MainForm : Form
     private bool _noticeOpen;
     private bool _closeConfirmed;
     private ReleaseInfo? _update;
-    private ReleaseInfo? _latest;
     private string _latestState = "not checked yet";
     /// <summary>After Update and restart: how the installed new version is started when this window closes (FR-1.10); null when nothing is to start.</summary>
     private string[]? _restartArguments;
@@ -496,13 +494,17 @@ internal sealed class MainForm : Form
         web.DropDownItems.Add(new ToolStripMenuItem("&Install or update Claude Code", null, (_, _) => OpenUrl(ClaudeLauncher.InstallUrl)));
         help.DropDownItems.Add(web);
         help.DropDownItems.Add(new ToolStripSeparator());
-        // FR-1.10: the version in use, the latest release GitHub named, and the way to update, always in the menu.
-        _installedItem.Click += (_, _) => ShowAbout();
-        help.DropDownItems.Add(_installedItem);
-        SetLatest(_latestState);
-        _latestItem.Click += (_, _) => OpenLatestRelease();
-        help.DropDownItems.Add(_latestItem);
-        _updateItem.Click += (_, _) => CheckForUpdates(manual: true);
+        // FR-1.10: Check for updates asks GitHub every time; Update to AxClaude n stands below it while a newer release
+        // is known. The version in use and the latest release named are in About.
+        _checkItem.Click += (_, _) => CheckForUpdates(manual: true);
+        help.DropDownItems.Add(_checkItem);
+        _updateItem.Click += (_, _) =>
+        {
+            if (_update is { } known)
+            {
+                ShowUpdateNotice(known);
+            }
+        };
         help.DropDownItems.Add(_updateItem);
         help.DropDownItems.Add(new ToolStripSeparator());
         _recordItem.Click += (_, _) => ToggleRecording();
@@ -2380,25 +2382,20 @@ internal sealed class MainForm : Form
     }
 
     /// <summary>
-    /// FR-1.10: asks GitHub for the latest release. A newer one is announced, noted in a system line and offered under
-    /// Help; a manual check (Help → Check for updates) reports the result either way, including a failure.
+    /// FR-1.10: asks GitHub for the latest release, every time. A newer one is announced, noted in a system line and
+    /// offered under Help; a manual check (Help → Check for updates) reports the result either way, including a failure.
     /// </summary>
     private async void CheckForUpdates(bool manual)
     {
-        if (manual && _update is { } known)
-        {
-            ShowUpdateNotice(known);
-            return;
-        }
-
         if (_updateBusy)
         {
             return;
         }
 
         _updateBusy = true;
+        _checkItem.Enabled = false;
         _updateItem.Enabled = false;
-        SetLatest("checking...");
+        _latestState = "checking...";
         try
         {
             using var cancellation = new CancellationTokenSource(TimeSpan.FromSeconds(30));
@@ -2408,17 +2405,20 @@ internal sealed class MainForm : Form
                 return;
             }
 
-            _latest = release;
+            // A check answers for itself: an update known from an earlier one is replaced, or gone.
+            _update = null;
+            _updateItem.Visible = false;
             if (release is null)
             {
-                SetLatest("none published yet");
+                _latestState = "none published yet";
             }
             else if (UpdateCheck.IsNewer(release, BundleInfo.Version))
             {
                 var version = release.Version.ToString(3);
                 _update = release;
-                SetLatest($"AxClaude {version} (newer than this one)");
-                _updateItem.Text = $"&Update to AxClaude {version}...";
+                _latestState = $"AxClaude {version} (newer than this one)";
+                _updateItem.Text = $"Update &to AxClaude {version}...";
+                _updateItem.Visible = true;
                 Log.Info($"Update available: {release.Tag}, zip {release.ZipUrl ?? "missing"}");
                 if (!manual)
                 {
@@ -2440,7 +2440,7 @@ internal sealed class MainForm : Form
             else
             {
                 var same = release.Version == UpdateCheck.ParseVersion(BundleInfo.Version);
-                SetLatest($"AxClaude {release.Version.ToString(3)} ({(same ? "this version" : "older than this build")})");
+                _latestState = $"AxClaude {release.Version.ToString(3)} ({(same ? "this version" : "older than this build")})";
             }
 
             if (manual)
@@ -2454,7 +2454,7 @@ internal sealed class MainForm : Form
         catch (Exception ex) when (ex is HttpRequestException or TaskCanceledException or IOException or InvalidOperationException)
         {
             Log.Error("The update check failed", ex);
-            SetLatest("unknown, GitHub could not be reached");
+            _latestState = "unknown, GitHub could not be reached";
             if (manual && !IsDisposed)
             {
                 ShowNotice(new Notice("Check for updates",
@@ -2470,35 +2470,16 @@ internal sealed class MainForm : Form
             _updateBusy = false;
             if (!IsDisposed)
             {
+                _checkItem.Enabled = true;
                 _updateItem.Enabled = true;
             }
-        }
-    }
-
-    /// <summary>Help → Latest release: what GitHub named, or why nothing is known yet.</summary>
-    private void SetLatest(string state)
-    {
-        _latestState = state;
-        _latestItem.Text = "&Latest release: " + state;
-    }
-
-    /// <summary>Help → Latest release: opens the release page when one is known, otherwise checks.</summary>
-    private void OpenLatestRelease()
-    {
-        if (_latest is { } latest)
-        {
-            OpenUrl(latest.PageUrl);
-        }
-        else
-        {
-            CheckForUpdates(manual: true);
         }
     }
 
     private void ShowAbout() =>
         ShowNotice(Notice.Plain("About AxClaude",
             $"AxClaude {BundleInfo.Version}\nA screen reader friendly window for Claude Code.\nMade by Dr. Kyle Keane, www.kylekeane.com. Free under the MIT licence.\n\n" +
-            $"Latest release on GitHub: {_latestState}\nClaude Code documentation: https://code.claude.com/docs\nSettings: {AppSettings.DefaultPath}\nLog: {Log.FilePath}\n\n" +
+            $"Latest release on GitHub: {_latestState}\nReleases: {UpdateCheck.ReleasesPage}\nClaude Code documentation: https://code.claude.com/docs\nSettings: {AppSettings.DefaultPath}\nLog: {Log.FilePath}\n\n" +
             HelpText.Disclaimer));
 
     /// <summary>The release notes with Update now, Open release page and Later (FR-1.10); <paramref name="unprompted"/> when the check at startup found it.</summary>
@@ -2539,6 +2520,7 @@ internal sealed class MainForm : Form
         }
 
         _updateBusy = true;
+        _checkItem.Enabled = false;
         _updateItem.Enabled = false;
         var version = release.Version.ToString(3);
         var size = release.ZipSize > 0 ? $" ({release.ZipSize / (1024.0 * 1024.0):0} MB)" : string.Empty;
@@ -2632,6 +2614,7 @@ internal sealed class MainForm : Form
             _updateBusy = false;
             if (!IsDisposed)
             {
+                _checkItem.Enabled = true;
                 _updateItem.Enabled = true;
             }
         }

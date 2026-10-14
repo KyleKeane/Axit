@@ -1,5 +1,9 @@
 # Changelog
 
+## Unreleased
+
+- Axit: Help, "Check for updates" stays in the menu and asks GitHub again every time, so a user who chose Later on one version can look again; "Update to AxClaude n" (Axit n in AxDown) is a second item below it while a newer release is known. Before, the check item itself turned into the update item. The items "Installed: n" and "Latest release: n" are gone from Help; About names the version in use, the latest release and the releases page.
+
 ## 2.5.0 - 2026-10-14
 
 - Axit: both windows are now light or dark as Windows is (Settings, Personalisation, Colours, "Choose your mode"), picked up when the app starts. They were always light. High contrast themes apply as before.

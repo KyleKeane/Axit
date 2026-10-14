@@ -29,9 +29,8 @@ internal sealed class EditorForm : Form
     private readonly OverlayPanel _overlay = new();
     private readonly ControlArea _area = new();
     private readonly ToolStripMenuItem _wordWrapItem;
-    private readonly ToolStripMenuItem _installedItem = new($"&Installed: Axit {BundleInfo.Version}");
-    private readonly ToolStripMenuItem _latestItem = new();
-    private readonly ToolStripMenuItem _updateItem = new("Check for &updates...");
+    private readonly ToolStripMenuItem _checkItem = new("Check for &updates...");
+    private readonly ToolStripMenuItem _updateItem = new() { Visible = false };
     private readonly System.Windows.Forms.Timer _statusTimer = new() { Interval = 300 };
 
     private TextDocument _document = TextDocument.Empty();
@@ -99,13 +98,17 @@ internal sealed class EditorForm : Form
         help.DropDownItems.Add(Item("&Keyboard shortcuts", () => ShowNotice(Notice.Plain("Keyboard shortcuts", HelpText.Shortcuts)), BundleKeys.Shortcuts));
         help.DropDownItems.Add(new ToolStripMenuItem("User &guide", null, (_, _) => ShowNotice(Notice.Plain("User guide", HelpText.UserGuide()))));
         help.DropDownItems.Add(new ToolStripSeparator());
-        // AX-3: the version in use, the latest release GitHub named, and the way to update, always in the menu.
-        _installedItem.Click += (_, _) => ShowAbout();
-        help.DropDownItems.Add(_installedItem);
-        SetLatest(_latestState);
-        _latestItem.Click += (_, _) => OpenUrl(UpdateCheck.ReleasesPage);
-        help.DropDownItems.Add(_latestItem);
-        _updateItem.Click += (_, _) => CheckForUpdates(manual: true);
+        // AX-3: Check for updates asks GitHub every time; Update to Axit n stands below it while a newer release is
+        // known. The version in use and the latest release named are in About.
+        _checkItem.Click += (_, _) => CheckForUpdates(manual: true);
+        help.DropDownItems.Add(_checkItem);
+        _updateItem.Click += (_, _) =>
+        {
+            if (_update is { } known)
+            {
+                ShowUpdateNotice(known);
+            }
+        };
         help.DropDownItems.Add(_updateItem);
         help.DropDownItems.Add(new ToolStripSeparator());
         help.DropDownItems.Add(new ToolStripMenuItem("Copy diag&nostics", null, (_, _) => CopyDiagnostics()));
@@ -894,7 +897,7 @@ internal sealed class EditorForm : Form
     private void ShowAbout() =>
         ShowNotice(Notice.Plain($"About {AppName}",
             $"{AppName}, part of Axit {BundleInfo.Version}\nA plain editor for Markdown and text files.\nMade by Dr. Kyle Keane, www.kylekeane.com. Free under the MIT licence.\n\n" +
-            $"Latest release on GitHub: {_latestState}\nSettings: {EditorSettings.DefaultPath}\nLog: {Log.FilePath}\n\n" +
+            $"Latest release on GitHub: {_latestState}\nReleases: {UpdateCheck.ReleasesPage}\nSettings: {EditorSettings.DefaultPath}\nLog: {Log.FilePath}\n\n" +
             HelpText.Disclaimer));
 
     private void CopyDiagnostics()
@@ -931,29 +934,18 @@ internal sealed class EditorForm : Form
         }
     }
 
-    private void SetLatest(string state)
-    {
-        _latestState = state;
-        _latestItem.Text = "&Latest release: " + state;
-    }
-
-    /// <summary>AX-3: asks GitHub for the latest release; a newer one is offered in a notice, a manual check reports either way.</summary>
+    /// <summary>AX-3: asks GitHub for the latest release, every time; a newer one is offered in a notice, a manual check reports either way.</summary>
     private async void CheckForUpdates(bool manual)
     {
-        if (manual && _update is { } known)
-        {
-            ShowUpdateNotice(known);
-            return;
-        }
-
         if (_updateBusy)
         {
             return;
         }
 
         _updateBusy = true;
+        _checkItem.Enabled = false;
         _updateItem.Enabled = false;
-        SetLatest("checking...");
+        _latestState = "checking...";
         try
         {
             using var cancellation = new CancellationTokenSource(TimeSpan.FromSeconds(30));
@@ -963,9 +955,12 @@ internal sealed class EditorForm : Form
                 return;
             }
 
+            // A check answers for itself: an update known from an earlier one is replaced, or gone.
+            _update = null;
+            _updateItem.Visible = false;
             if (release is null)
             {
-                SetLatest("none published yet");
+                _latestState = "none published yet";
                 if (manual)
                 {
                     ShowNotice(Notice.Plain("Check for updates", "No release is published yet."));
@@ -975,8 +970,9 @@ internal sealed class EditorForm : Form
             {
                 var version = release.Version.ToString(3);
                 _update = release;
-                SetLatest($"Axit {version} (newer than this one)");
-                _updateItem.Text = $"&Update to Axit {version}...";
+                _latestState = $"Axit {version} (newer than this one)";
+                _updateItem.Text = $"Update &to Axit {version}...";
+                _updateItem.Visible = true;
                 Log.Info($"Update available: {release.Tag}, zip {release.ZipUrl ?? "missing"}");
                 if (manual || !_noticeOpen)
                 {
@@ -989,7 +985,7 @@ internal sealed class EditorForm : Form
             }
             else
             {
-                SetLatest($"Axit {release.Version.ToString(3)}");
+                _latestState = $"Axit {release.Version.ToString(3)}";
                 if (manual)
                 {
                     ShowNotice(Notice.Plain("Check for updates", $"You have the newest version, Axit {BundleInfo.Version}."));
@@ -999,7 +995,7 @@ internal sealed class EditorForm : Form
         catch (Exception ex) when (ex is HttpRequestException or TaskCanceledException or IOException or InvalidOperationException)
         {
             Log.Error("Update check failed", ex);
-            SetLatest("unknown, GitHub could not be reached");
+            _latestState = "unknown, GitHub could not be reached";
             if (manual)
             {
                 ShowNotice(new Notice("Check for updates", "GitHub could not be reached: " + ex.Message,
@@ -1012,6 +1008,7 @@ internal sealed class EditorForm : Form
         finally
         {
             _updateBusy = false;
+            _checkItem.Enabled = true;
             _updateItem.Enabled = true;
         }
     }
@@ -1051,6 +1048,7 @@ internal sealed class EditorForm : Form
         }
 
         _updateBusy = true;
+        _checkItem.Enabled = false;
         _updateItem.Enabled = false;
         var version = release.Version.ToString(3);
         var size = release.ZipSize > 0 ? $" ({release.ZipSize / (1024.0 * 1024.0):0} MB)" : string.Empty;
@@ -1127,6 +1125,7 @@ internal sealed class EditorForm : Form
         finally
         {
             _updateBusy = false;
+            _checkItem.Enabled = true;
             _updateItem.Enabled = true;
         }
     }
