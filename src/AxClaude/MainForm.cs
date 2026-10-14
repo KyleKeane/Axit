@@ -36,7 +36,7 @@ internal sealed class MainForm : Form
     private readonly ToolStripMenuItem _installedItem = new($"&Installed: AxClaude {BundleInfo.Version}");
     private readonly ToolStripMenuItem _latestItem = new();
     private readonly ToolStripMenuItem _updateItem = new("Check for &updates...");
-    /// <summary>Options → Soft background music while Claude works, made with the menu; Ctrl+Space flips it from anywhere (FR-7.9).</summary>
+    /// <summary>Options → Sounds → Background music while Claude works, made with the menu; Ctrl+Space flips it from anywhere (FR-7.9).</summary>
     private ToolStripMenuItem _musicItem = null!;
     private readonly System.Windows.Forms.Timer _quiet = new() { Interval = 100 };
     private readonly System.Windows.Forms.Timer _attention = new() { Interval = 400 };
@@ -54,12 +54,12 @@ internal sealed class MainForm : Form
     private readonly Arrivals _arrivals = new();
     private readonly List<(ReplySpeechMode Mode, ToolStripMenuItem Item)> _replySpeechItems = [];
 
-    /// <summary>The Speak replies choices in menu order (FR-7.4); the text without its mnemonic is what the choice announces.</summary>
+    /// <summary>The Speak replies choices of Options → Speech in menu order (FR-7.4); the text without its mnemonic is what the choice announces.</summary>
     private static readonly (ReplySpeechMode Mode, string Text)[] ReplySpeechChoices =
     [
-        (ReplySpeechMode.None, "&None"),
-        (ReplySpeechMode.FirstLines, "&First lines only"),
-        (ReplySpeechMode.All, "&All lines"),
+        (ReplySpeechMode.None, "Speak replies: &none"),
+        (ReplySpeechMode.FirstLines, "Speak replies: &first lines"),
+        (ReplySpeechMode.All, "Speak replies: &all lines"),
     ];
     private PtyHost? _host;
     private StreamRecorder? _recorder;
@@ -364,35 +364,41 @@ internal sealed class MainForm : Form
         Size = new Size(1000, 700);
         MinimumSize = new Size(600, 400);
 
+        // The menus (FR-10): short, grouped by what the items are about, every mnemonic unique within its menu.
         var project = new ToolStripMenuItem("&Project");
         _currentFolderItem.Click += (_, _) => OpenFolder();
         project.DropDownItems.Add(_currentFolderItem);
         project.DropDownItems.Add(new ToolStripMenuItem("&Change folder...", null, (_, _) => ChangeFolder()));
-        project.DropDownItems.Add(new ToolStripMenuItem("&New session...", null, (_, _) => NewSession()) { ShortcutKeys = AxClaudeKeys.NewSession });
         _recentFoldersItem.DropDownOpening += (_, _) => FillRecentFolders();
         _recentFoldersItem.DropDownItems.Add(new ToolStripMenuItem("(none)") { Enabled = false });
         project.DropDownItems.Add(_recentFoldersItem);
-        project.DropDownItems.Add(new ToolStripMenuItem("&Force Claude to restart", null, (_, _) => RestartClaude()) { ShortcutKeys = AxClaudeKeys.RestartClaude });
+        project.DropDownItems.Add(new ToolStripMenuItem("&New session...", null, (_, _) => NewSession()) { ShortcutKeys = AxClaudeKeys.NewSession });
+        project.DropDownItems.Add(new ToolStripMenuItem("Force Claude to res&tart", null, (_, _) => RestartClaude()) { ShortcutKeys = AxClaudeKeys.RestartClaude });
         project.DropDownItems.Add(new ToolStripSeparator());
         project.DropDownItems.Add(new ToolStripMenuItem("&Save conversation as...", null, (_, _) => SaveConversation()) { ShortcutKeyDisplayString = BundleKeys.Text(BundleKeys.Save) });
         project.DropDownItems.Add(new ToolStripSeparator());
         project.DropDownItems.Add(new ToolStripMenuItem("E&xit", null, (_, _) => Close()) { ShortcutKeyDisplayString = "Alt+F4" });
 
-        var session = new ToolStripMenuItem("&Session");
-        session.DropDownItems.Add(new ToolStripMenuItem("Send &message", null, (_, _) => SendInput()) { ShortcutKeyDisplayString = "Enter in the message field" });
-        session.DropDownItems.Add(new ToolStripMenuItem("Send the waiting message &now", null, (_, _) => SendNow()) { ShortcutKeys = AxClaudeKeys.SendNow });
-        session.DropDownItems.Add(new ToolStripMenuItem("&Interrupt Claude (send Escape)", null, (_, _) => Interrupt()) { ShortcutKeyDisplayString = BundleKeys.Text(AxClaudeKeys.Interrupt) });
-        session.DropDownItems.Add(new ToolStripMenuItem("Send Ctrl+&C", null, (_, _) => Write("\x03")) { ShortcutKeys = AxClaudeKeys.SendCtrlC });
-        session.DropDownItems.Add(new ToolStripMenuItem("Send Ctrl+&D", null, (_, _) => Write("\x04")));
-        session.DropDownItems.Add(new ToolStripMenuItem("Send &Tab", null, (_, _) => Write("\t")));
-        session.DropDownItems.Add(new ToolStripMenuItem("Send Shift+Tab (next permission &mode)", null, (_, _) => Write("\x1b[Z")) { ShortcutKeys = AxClaudeKeys.NextPermissionMode });
-        // FR-2.4: menu items only; Ctrl+Up and Ctrl+Down move by paragraph in every edit control of the bundle.
-        session.DropDownItems.Add(new ToolStripMenuItem("Send &Up", null, (_, _) => Write("\x1b[A")));
-        session.DropDownItems.Add(new ToolStripMenuItem("Send Do&wn", null, (_, _) => Write("\x1b[B")));
+        // What goes to Claude itself (FR-11); the raw sequences are fixed here and listed in Appendix B.
+        var claude = new ToolStripMenuItem("&Claude");
+        claude.DropDownItems.Add(new ToolStripMenuItem("Send &message", null, (_, _) => SendInput()) { ShortcutKeyDisplayString = "Enter in the message field" });
+        claude.DropDownItems.Add(new ToolStripMenuItem("Send &now", null, (_, _) => SendNow()) { ShortcutKeys = AxClaudeKeys.SendNow });
+        claude.DropDownItems.Add(new ToolStripMenuItem("&Interrupt", null, (_, _) => Interrupt()) { ShortcutKeyDisplayString = BundleKeys.Text(AxClaudeKeys.Interrupt) });
+        claude.DropDownItems.Add(new ToolStripMenuItem("Next &permission mode", null, (_, _) => Write("\x1b[Z")) { ShortcutKeys = AxClaudeKeys.NextPermissionMode });
+        claude.DropDownItems.Add(new ToolStripSeparator());
+        // The keys Claude's own menus take. Up and Down are menu items only (FR-2.4): Ctrl+Up and Ctrl+Down move by
+        // paragraph in every edit control of the bundle.
+        var sendKey = new ToolStripMenuItem("Send &key");
+        sendKey.DropDownItems.Add(new ToolStripMenuItem("Ctrl+&C", null, (_, _) => Write("\x03")) { ShortcutKeys = AxClaudeKeys.SendCtrlC });
+        sendKey.DropDownItems.Add(new ToolStripMenuItem("Ctrl+&D", null, (_, _) => Write("\x04")));
+        sendKey.DropDownItems.Add(new ToolStripMenuItem("&Tab", null, (_, _) => Write("\t")));
+        sendKey.DropDownItems.Add(new ToolStripMenuItem("&Up", null, (_, _) => Write("\x1b[A")));
+        sendKey.DropDownItems.Add(new ToolStripMenuItem("Do&wn", null, (_, _) => Write("\x1b[B")));
+        claude.DropDownItems.Add(sendKey);
 
         var navigate = new ToolStripMenuItem("&Navigate");
-        navigate.DropDownItems.Add(new ToolStripMenuItem("Go to &message field", null, (_, _) => GoTo(BottomControl)) { ShortcutKeyDisplayString = BundleKeys.Text(AxClaudeKeys.GoToField) });
-        navigate.DropDownItems.Add(new ToolStripMenuItem("Go to &conversation", null, (_, _) => GoTo(_transcript)) { ShortcutKeyDisplayString = BundleKeys.Text(AxClaudeKeys.GoToConversation) });
+        navigate.DropDownItems.Add(new ToolStripMenuItem("&Message field", null, (_, _) => GoTo(BottomControl)) { ShortcutKeyDisplayString = BundleKeys.Text(AxClaudeKeys.GoToField) });
+        navigate.DropDownItems.Add(new ToolStripMenuItem("&Conversation", null, (_, _) => GoTo(_transcript)) { ShortcutKeyDisplayString = BundleKeys.Text(AxClaudeKeys.GoToConversation) });
         navigate.DropDownItems.Add(new ToolStripMenuItem("&Latest response", null, (_, _) => _transcript.JumpToLatestResponse()) { ShortcutKeys = AxClaudeKeys.LatestResponse });
         navigate.DropDownItems.Add(new ToolStripSeparator());
         navigate.DropDownItems.Add(new ToolStripMenuItem("&Find...", null, (_, _) => FindDialog()) { ShortcutKeyDisplayString = BundleKeys.Text(BundleKeys.Find) });
@@ -403,22 +409,24 @@ internal sealed class MainForm : Form
         navigate.DropDownItems.Add(new ToolStripMenuItem("Next bookmar&k", null, (_, _) => _transcript.JumpToBookmark(backward: false)) { ShortcutKeyDisplayString = $"{BundleKeys.Text(AxClaudeKeys.Bookmark)} in the conversation" });
         navigate.DropDownItems.Add(new ToolStripMenuItem("Pre&vious bookmark", null, (_, _) => _transcript.JumpToBookmark(backward: true)) { ShortcutKeyDisplayString = $"Shift+{BundleKeys.Text(AxClaudeKeys.Bookmark)} in the conversation" });
 
+        // The settings: a submenu for each kind, then the few that fit no group. Each check item is saved as it is toggled.
         var options = new ToolStripMenuItem("&Options");
-        options.DropDownItems.Add(Toggle("&Announce when Claude is done", _settings.AnnounceBell, v => _settings.AnnounceBell = v));
-        options.DropDownItems.Add(Toggle("Play &sounds: ready, sent, replying, done, question", _settings.SoundOnBell, v => _settings.SoundOnBell = v));
-        options.DropDownItems.Add(Toggle("Tick for each &new line and tool call from Claude", _settings.ClickOnNewLine, v => _settings.ClickOnNewLine = v));
+        var sounds = new ToolStripMenuItem("&Sounds");
+        sounds.DropDownItems.Add(Toggle("&Chimes: ready, sent, replying, done, question", _settings.SoundOnBell, v => _settings.SoundOnBell = v));
+        sounds.DropDownItems.Add(Toggle("&Ticks for new lines and tool calls", _settings.ClickOnNewLine, v => _settings.ClickOnNewLine = v));
         // FR-7.9: starts or stops at once when toggled during a turn; Ctrl+Space anywhere flips the same item.
-        _musicItem = Toggle("Soft &background music while Claude works", _settings.WorkingMusic, v =>
+        _musicItem = Toggle("&Background music while Claude works", _settings.WorkingMusic, v =>
         {
             _settings.WorkingMusic = v;
             UpdateMusic();
         });
         _musicItem.ShortcutKeyDisplayString = BundleKeys.Text(AxClaudeKeys.ToggleMusic);
-        options.DropDownItems.Add(_musicItem);
-        options.DropDownItems.Add(Toggle("&Flash the taskbar button when Claude is done", _settings.FlashTaskbar, v => _settings.FlashTaskbar = v));
-        options.DropDownItems.Add(Toggle("Louder alert when Claude is &done and the window is in the background", _settings.BackgroundAlert, v => _settings.BackgroundAlert = v));
-        // FR-7.4: one of three, shown checked like a radio group; the choice is announced, since the menu closes on it.
-        var speech = new ToolStripMenuItem("Speak &replies as they arrive");
+        sounds.DropDownItems.Add(_musicItem);
+        options.DropDownItems.Add(sounds);
+
+        // FR-7.4: the reply choices are one of three, shown checked like a radio group; the choice is announced, since
+        // the menu closes on it. The tool: row of each call is spoken whatever the reply mode; it starts with what arrives next.
+        var speech = new ToolStripMenuItem("S&peech");
         foreach (var (mode, text) in ReplySpeechChoices)
         {
             var item = new ToolStripMenuItem(text) { Checked = _settings.ReplySpeech == mode };
@@ -427,21 +435,22 @@ internal sealed class MainForm : Form
             _replySpeechItems.Add((mode, item));
         }
 
-        options.DropDownItems.Add(speech);
-        // FR-7.4: the tool: row of each call, spoken as it arrives, whatever the reply mode; starts with what arrives next.
-        options.DropDownItems.Add(Toggle("Speak each tool &call", _settings.SpeakToolCalls, v =>
+        speech.DropDownItems.Add(Toggle("Speak each &tool call", _settings.SpeakToolCalls, v =>
         {
             _settings.SpeakToolCalls = v;
             _arrivals.Skip(_model.Lines);
         }));
-        options.DropDownItems.Add(Toggle("Show the &time in the Input and Output lines", _settings.MarkerTimeStamps, v =>
-        {
-            _settings.MarkerTimeStamps = v;
-            _model.TimeStamps = v;
-        }));
-        options.DropDownItems.Add(Toggle("Check for &updates when AxClaude starts", _settings.CheckForUpdates, v => _settings.CheckForUpdates = v));
-        // D33: off, what Claude waits on is only announced, as before 1.4.0: no control area, no guard, no waiting screens.
-        options.DropDownItems.Add(Toggle("Answer Claude's &questions from a list", _settings.QuestionNotices, v =>
+        options.DropDownItems.Add(speech);
+
+        var done = new ToolStripMenuItem("When Claude is &done");
+        done.DropDownItems.Add(Toggle("&Announce \"Done\"", _settings.AnnounceBell, v => _settings.AnnounceBell = v));
+        done.DropDownItems.Add(Toggle("&Flash the taskbar button", _settings.FlashTaskbar, v => _settings.FlashTaskbar = v));
+        done.DropDownItems.Add(Toggle("&Louder alert when the window is in the background", _settings.BackgroundAlert, v => _settings.BackgroundAlert = v));
+        options.DropDownItems.Add(done);
+
+        // D33: with the list off, what Claude waits on is only announced, as before 1.4.0: no control area, no guard, no waiting screens.
+        var questions = new ToolStripMenuItem("&Questions");
+        questions.DropDownItems.Add(Toggle("&Answer from a list", _settings.QuestionNotices, v =>
         {
             _settings.QuestionNotices = v;
             _model.DetectScreens = v;
@@ -450,32 +459,42 @@ internal sealed class MainForm : Form
                 CloseArea();
             }
         }));
-        options.DropDownItems.Add(Toggle("&Go to Claude's questions at once, interrupting speech", _settings.InterruptForQuestions, v => _settings.InterruptForQuestions = v));
-        options.DropDownItems.Add(Toggle("Re&view answers before they go to Claude", _settings.ReviewAnswers, v => _settings.ReviewAnswers = v));
-        options.DropDownItems.Add(Toggle("&Keep AxClaude's recordings and saved conversations out of git", _settings.KeepFilesOutOfGit, v =>
+        questions.DropDownItems.Add(Toggle("&Go to them at once, interrupting speech", _settings.InterruptForQuestions, v => _settings.InterruptForQuestions = v));
+        questions.DropDownItems.Add(Toggle("&Review answers before they go to Claude", _settings.ReviewAnswers, v => _settings.ReviewAnswers = v));
+        options.DropDownItems.Add(questions);
+
+        var textMenu = new ToolStripMenuItem("&Text");
+        textMenu.DropDownItems.Add(new ToolStripMenuItem("&Font...", null, (_, _) => ChooseFont()));
+        textMenu.DropDownItems.Add(new ToolStripMenuItem("&Larger text", null, (_, _) => ChangeTextSize(1)) { ShortcutKeyDisplayString = BundleKeys.Text(BundleKeys.LargerText) });
+        textMenu.DropDownItems.Add(new ToolStripMenuItem("S&maller text", null, (_, _) => ChangeTextSize(-1)) { ShortcutKeyDisplayString = BundleKeys.Text(BundleKeys.SmallerText) });
+        textMenu.DropDownItems.Add(new ToolStripMenuItem("&Windows text size", null, (_, _) => UseSystemFont()));
+        options.DropDownItems.Add(textMenu);
+
+        options.DropDownItems.Add(new ToolStripSeparator());
+        options.DropDownItems.Add(Toggle("T&ime stamps on Input and Output lines", _settings.MarkerTimeStamps, v =>
+        {
+            _settings.MarkerTimeStamps = v;
+            _model.TimeStamps = v;
+        }));
+        options.DropDownItems.Add(Toggle("Check for &updates at start", _settings.CheckForUpdates, v => _settings.CheckForUpdates = v));
+        options.DropDownItems.Add(Toggle("&Keep recordings and saved conversations out of git", _settings.KeepFilesOutOfGit, v =>
         {
             _settings.KeepFilesOutOfGit = v;
             KeepFilesOutOfGit();
         }));
-        options.DropDownItems.Add(new ToolStripSeparator());
-        options.DropDownItems.Add(new ToolStripMenuItem("&Font...", null, (_, _) => ChooseFont()));
-        options.DropDownItems.Add(new ToolStripMenuItem("&Larger text", null, (_, _) => ChangeTextSize(1)) { ShortcutKeyDisplayString = BundleKeys.Text(BundleKeys.LargerText) });
-        options.DropDownItems.Add(new ToolStripMenuItem("S&maller text", null, (_, _) => ChangeTextSize(-1)) { ShortcutKeyDisplayString = BundleKeys.Text(BundleKeys.SmallerText) });
-        options.DropDownItems.Add(new ToolStripMenuItem("&Use the Windows text size", null, (_, _) => UseSystemFont()));
-        options.DropDownItems.Add(new ToolStripSeparator());
-        _recordItem.Click += (_, _) => ToggleRecording();
-        options.DropDownItems.Add(_recordItem);
-        options.DropDownItems.Add(new ToolStripMenuItem("&Open settings file", null, (_, _) => OpenSettingsFile()));
+        options.DropDownItems.Add(new ToolStripMenuItem("Open settings &file", null, (_, _) => OpenSettingsFile()));
 
         var help = new ToolStripMenuItem("&Help");
         help.DropDownItems.Add(new ToolStripMenuItem("&Keyboard shortcuts", null, (_, _) => ShowNotice(Notice.Plain("Keyboard shortcuts", HelpText.Shortcuts))) { ShortcutKeys = BundleKeys.Shortcuts });
-        help.DropDownItems.Add(new ToolStripMenuItem("&User guide", null, (_, _) => ShowNotice(Notice.Plain("User guide", HelpText.UserGuide()))));
+        help.DropDownItems.Add(new ToolStripMenuItem("User &guide", null, (_, _) => ShowNotice(Notice.Plain("User guide", HelpText.UserGuide()))));
         help.DropDownItems.Add(new ToolStripSeparator());
-        help.DropDownItems.Add(new ToolStripMenuItem("Claude Code &documentation (web)", null, (_, _) => OpenUrl("https://code.claude.com/docs/en/overview")));
-        help.DropDownItems.Add(new ToolStripMenuItem("Claude Code slash &commands (web)", null, (_, _) => OpenUrl("https://code.claude.com/docs/en/commands")));
-        help.DropDownItems.Add(new ToolStripMenuItem("Claude Code &keys (web)", null, (_, _) => OpenUrl("https://code.claude.com/docs/en/interactive-mode")));
-        help.DropDownItems.Add(new ToolStripMenuItem("Claude Code command &line (web)", null, (_, _) => OpenUrl("https://code.claude.com/docs/en/cli-reference")));
-        help.DropDownItems.Add(new ToolStripMenuItem("Install or update Claude Code (&web)", null, (_, _) => OpenUrl(ClaudeLauncher.InstallUrl)));
+        var web = new ToolStripMenuItem("Claude Code on the &web");
+        web.DropDownItems.Add(new ToolStripMenuItem("&Documentation", null, (_, _) => OpenUrl("https://code.claude.com/docs/en/overview")));
+        web.DropDownItems.Add(new ToolStripMenuItem("Slash &commands", null, (_, _) => OpenUrl("https://code.claude.com/docs/en/commands")));
+        web.DropDownItems.Add(new ToolStripMenuItem("&Keys", null, (_, _) => OpenUrl("https://code.claude.com/docs/en/interactive-mode")));
+        web.DropDownItems.Add(new ToolStripMenuItem("Command &line", null, (_, _) => OpenUrl("https://code.claude.com/docs/en/cli-reference")));
+        web.DropDownItems.Add(new ToolStripMenuItem("&Install or update Claude Code", null, (_, _) => OpenUrl(ClaudeLauncher.InstallUrl)));
+        help.DropDownItems.Add(web);
         help.DropDownItems.Add(new ToolStripSeparator());
         // FR-1.10: the version in use, the latest release GitHub named, and the way to update, always in the menu.
         _installedItem.Click += (_, _) => ShowAbout();
@@ -486,10 +505,12 @@ internal sealed class MainForm : Form
         _updateItem.Click += (_, _) => CheckForUpdates(manual: true);
         help.DropDownItems.Add(_updateItem);
         help.DropDownItems.Add(new ToolStripSeparator());
+        _recordItem.Click += (_, _) => ToggleRecording();
+        help.DropDownItems.Add(_recordItem);
         help.DropDownItems.Add(new ToolStripMenuItem("Copy diag&nostics", null, (_, _) => CopyDiagnostics()));
         help.DropDownItems.Add(new ToolStripMenuItem("&About", null, (_, _) => ShowAbout()));
 
-        _menu.Items.AddRange([project, session, navigate, options, help]);
+        _menu.Items.AddRange([project, claude, navigate, options, help]);
         MainMenuStrip = _menu;
 
         // No AccessibleName on status labels: it would replace the text that NVDA reads with NVDA+End.
@@ -536,7 +557,7 @@ internal sealed class MainForm : Form
         UpdateFolderUi();
     }
 
-    /// <summary>Options → Speak replies as they arrive → a mode (FR-7.4): speech starts with what arrives next.</summary>
+    /// <summary>Options → Speech → Speak replies: a mode (FR-7.4): speech starts with what arrives next.</summary>
     private void SetReplySpeech(ReplySpeechMode mode)
     {
         _settings.ReplySpeech = mode;
@@ -547,7 +568,7 @@ internal sealed class MainForm : Form
 
         _arrivals.Skip(_model.Lines);
         SaveSettings();
-        Announce("Speak replies: " + ReplySpeechChoices.First(c => c.Mode == mode).Text.Replace("&", string.Empty), true);
+        Announce(ReplySpeechChoices.First(c => c.Mode == mode).Text.Replace("&", string.Empty), true);
     }
 
     private ToolStripMenuItem Toggle(string text, bool initial, Action<bool> apply)
@@ -754,7 +775,7 @@ internal sealed class MainForm : Form
     }
 
     /// <summary>
-    /// Session → Send the waiting message now (Ctrl+Shift+S): Claude's Ctrl+X Ctrl+S, which makes it take up a
+    /// Claude → Send now (Ctrl+Shift+S): Claude's Ctrl+X Ctrl+S, which makes it take up a
     /// message it holds without finishing the current step first (FR-2.8). The chord goes as two writes.
     /// </summary>
     private void SendNow()
