@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased
+## 2.6.1 - 2026-10-16
 
 - AxClaude: an "error:" row from Claude, such as "error: API Error: 401 Invalid API key · Please run /login" when the login has lapsed, is now spoken with Speak replies: first lines or all lines, like a "claude:" row. Such a turn announced "Sent", "Responding" and "Done" and never said why; only the e key found the row.
 
