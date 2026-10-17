@@ -59,7 +59,6 @@ public class QuestionTests
         Assert.Equal([@"C:\Temp\example", "Quick safety check: Is this a project you created or one you trust?", "Claude Code'll be able to read, edit, and execute files here.", "Security guide"], question.Text);
         Assert.Equal(["y", "n"], question.Options.Select(o => o.Key));
         Assert.Equal("No, exit", question.Options[1].Text);
-        Assert.Equal(["Enter to confirm · Esc to cancel"], question.Hints);
     }
 
     [Fact]
@@ -72,7 +71,6 @@ public class QuestionTests
         Assert.True(question.Options[0].Current);
         Assert.Equal("Default (recommended) — Opus 5.5 with 1M context · Best for everyday, complex tasks", question.Options[0].Text);
         Assert.False(question.Options[1].Current);
-        Assert.Equal(3, question.Hints.Count);
     }
 
     [Fact]
@@ -82,7 +80,6 @@ public class QuestionTests
         Assert.Equal("Colour", question.Title);
         Assert.Equal(["Which colour do you prefer?"], question.Text);
         Assert.Equal(5, question.Options.Count);
-        Assert.Empty(question.Hints);
     }
 
     [Fact]

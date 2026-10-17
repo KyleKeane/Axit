@@ -2118,7 +2118,7 @@ internal sealed class MainForm : Form
     private void ShowSwitch(Question settings, QuestionOption setting, bool on)
     {
         var name = setting.Setting?.Name ?? setting.Text;
-        var values = new Question(name, [], [new QuestionOption("1", "True", on), new QuestionOption("2", "False", !on)], []);
+        var values = new Question(name, [], [new QuestionOption("1", "True", on), new QuestionOption("2", "False", !on)]);
         ShowQuestionList(settings.Signature, name, values, null, false, chosen =>
         {
             if (chosen[0].Current)

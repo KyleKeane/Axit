@@ -57,7 +57,11 @@ public sealed class Line
 
     public bool Committed { get; internal set; }
     public bool Hidden => ChromeHidden || EchoHidden || ReplayHidden || RepaintHidden;
-    /// <summary>A line the app inserted (a marker, a printed message line or blank line, a system line, a bookmark): never classified by text, never hidden.</summary>
+    /// <summary>
+    /// A line of the app's own (a marker, a printed message line or blank line, a system line, a bookmark, the record
+    /// of a question), plus Claude's one <c>[Screen Reader Mode: …]</c> row, which is classified System as well: not
+    /// classified again by text, no stop for the tick, no row to join.
+    /// </summary>
     public bool IsMarker => Kind is LineKind.InputMarker or LineKind.OutputMarker or LineKind.System or LineKind.UserMessage or LineKind.Bookmark or LineKind.Question;
 
     internal bool ChromeHidden { get; set; }

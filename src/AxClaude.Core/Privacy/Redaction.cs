@@ -3,7 +3,7 @@ using System.Text.RegularExpressions;
 namespace AxClaude.Core.Privacy;
 
 /// <summary>
-/// Personal data in text read off Claude's screen: `/status` prints the account's e-mail address, organisation, session
+/// Personal data in text read off Claude's screen: `/status` prints the account's e-mail address, session
 /// id and a pipe name, and paths name the Windows account. <see cref="Redact"/> replaces each with a placeholder, so
 /// that what a tool prints about a recording can be shown and shared (PtyCapture --dump); <see cref="Find"/> lists them,
 /// for the test that keeps them out of the repository.

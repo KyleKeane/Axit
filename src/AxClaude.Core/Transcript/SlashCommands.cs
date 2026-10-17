@@ -9,9 +9,6 @@ public enum CommandInteraction
     /// <summary>A list of answers, one to choose (<c>/model</c>).</summary>
     Picker,
 
-    /// <summary>A list with several answers to tick, or with toggles.</summary>
-    Multi,
-
     /// <summary>
     /// A screen to read that waits for keys named on its hint row, often with tabs (<c>/status</c>, <c>/help</c>,
     /// <c>/tasks</c>): the cursor sits on the hint row or the tab row, not on a prompt row.
@@ -20,9 +17,6 @@ public enum CommandInteraction
 
     /// <summary>A settings or management screen with tabs, a search field or nested lists (<c>/permissions</c>).</summary>
     Panel,
-
-    /// <summary>A yes-or-no confirmation.</summary>
-    Confirm,
 
     /// <summary>Asks for typed text.</summary>
     Input,

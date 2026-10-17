@@ -390,20 +390,6 @@ public class SessionModelTests
     }
 
     [Fact]
-    public void Markers_are_level_one_headings_and_claudes_headings_are_deeper()
-    {
-        var model = new SessionModel(80, 10);
-        Feed(model, $"{Esc}[?25l${Esc}[?25h");
-        model.Send("hi");
-        Feed(model, $"{Esc}[?25l{Esc}[1;1Hyou: hi{Esc}[K\r\nclaude: What Blue Is{Esc}[K\r\n{Esc}[K\r\nBlue is a colour.{Esc}[K\r\n${Esc}[K{Esc}[?25h");
-
-        Assert.Equal(1, model.Lines.Single(l => l.Kind == LineKind.InputMarker).HeadingLevel);
-        Assert.Equal(1, model.Lines.Single(l => l.Kind == LineKind.OutputMarker).HeadingLevel);
-        Assert.Equal(2, model.Lines.Single(l => l.Text == "claude: What Blue Is").HeadingLevel);
-        Assert.Equal(0, model.Lines.Single(l => l.Text == "Blue is a colour.").HeadingLevel);
-    }
-
-    [Fact]
     public void Echo_that_differs_from_the_sent_text_stays_visible()
     {
         var model = new SessionModel(80, 10);

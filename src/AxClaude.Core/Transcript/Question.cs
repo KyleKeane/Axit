@@ -32,7 +32,7 @@ public sealed record QuestionOption(string Key, string Text, bool Current = fals
 /// <c>/model</c>, a question of Claude's own): its title, the lines between the title and the answers, the answers,
 /// and the key hints Claude prints under the question (<c>s to use this session only</c>).
 /// </summary>
-public sealed record Question(string Title, IReadOnlyList<string> Text, IReadOnlyList<QuestionOption> Options, IReadOnlyList<string> Hints)
+public sealed record Question(string Title, IReadOnlyList<string> Text, IReadOnlyList<QuestionOption> Options)
 {
     /// <summary>
     /// Several answers may be given at once, their numbers separated by commas ("1,3", typed one keystroke each; the

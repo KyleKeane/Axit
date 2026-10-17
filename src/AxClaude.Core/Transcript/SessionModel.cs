@@ -9,7 +9,7 @@ namespace AxClaude.Core.Transcript;
 /// inserts. Feed it the raw console bytes; it raises <see cref="Changed"/> at the end of every frame.
 /// Single threaded: call everything from one thread.
 /// </summary>
-public sealed partial class SessionModel : ILineStore
+public sealed partial class SessionModel
 {
     /// <summary>A sent message and the block the app prints for it (FR-4.1); <see cref="Placed"/> once the block is in the transcript, which happens once.</summary>
     private sealed record PendingSend(string Text, IReadOnlyList<Line> Block, DateTime Created)
@@ -157,8 +157,15 @@ public sealed partial class SessionModel : ILineStore
     {
         if (!Working && QueuedMessages == 0)
         {
+            // A loop, not RemoveAll with a lambda: that captured the clock and allocated on every idle frame (D24).
             var now = Clock();
-            _pending.RemoveAll(p => now - p.Created > PendingLifetime);
+            for (var i = _pending.Count - 1; i >= 0; i--)
+            {
+                if (now - _pending[i].Created > PendingLifetime)
+                {
+                    _pending.RemoveAt(i);
+                }
+            }
         }
 
         PullRowText();
@@ -509,11 +516,11 @@ public sealed partial class SessionModel : ILineStore
         Changed?.Invoke();
     }
 
-    // ---- ILineStore ----
+    // ---- The screen's line store: where it puts the lines it creates, commits (scrolled off the top) or discards ----
 
     // Screen lines sit at the end of the list, so they are searched from the end.
 
-    public Line CreateLine(Line? before)
+    internal Line CreateLine(Line? before)
     {
         var line = new Line(_nextId++, LineKind.Plain, string.Empty) { ReplayHidden = HideReplay, RepaintHidden = _repainting };
         var index = before is null ? -1 : _lines.LastIndexOf(before);
@@ -529,7 +536,7 @@ public sealed partial class SessionModel : ILineStore
         return line;
     }
 
-    public void Commit(Line line)
+    internal void Commit(Line line)
     {
         if (!line.IsMarker && line.Kind == LineKind.Plain)
         {
@@ -548,7 +555,7 @@ public sealed partial class SessionModel : ILineStore
         line.Row = null;
     }
 
-    public void Remove(Line line)
+    internal void Remove(Line line)
     {
         var index = _lines.LastIndexOf(line);
         if (index >= 0)

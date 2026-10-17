@@ -3,14 +3,6 @@ using AxClaude.Core.Transcript;
 
 namespace AxClaude.Core.Vt;
 
-/// <summary>Where the screen puts the lines it creates, commits (scrolled off the top) or discards.</summary>
-public interface ILineStore
-{
-    Line CreateLine(Line? before);
-    void Commit(Line line);
-    void Remove(Line line);
-}
-
 internal sealed class Row(int columns)
 {
     /// <summary>Marks the second cell of a two-cell wide character.</summary>
@@ -53,12 +45,12 @@ internal sealed class Row(int columns)
 /// A headless terminal screen: a grid of cells, a cursor and a scroll region, driven by <see cref="VtParser"/>.
 /// Rows carry a stable line identity so that in-place rewrites update existing transcript lines.
 /// </summary>
-public sealed class Screen : IVtSink
+public sealed class Screen
 {
     // One shared string per printable ASCII character: a repaint prints thousands of cells per frame.
     private static readonly string[] Ascii = Enumerable.Range(0, 128).Select(c => ((char)c).ToString()).ToArray();
 
-    private readonly ILineStore _store;
+    private readonly SessionModel _store;
     private readonly Row[] _rows;
     private int _cx;
     private int _cy;
@@ -68,7 +60,7 @@ public sealed class Screen : IVtSink
     private int _bottom;
     private bool _pendingWrap;
 
-    public Screen(int columns, int rows, ILineStore store)
+    public Screen(int columns, int rows, SessionModel store)
     {
         if (columns < 2 || rows < 2)
         {
@@ -111,7 +103,7 @@ public sealed class Screen : IVtSink
 
     // ---- IVtSink ----
 
-    public void Print(string text)
+    internal void Print(string text)
     {
         foreach (var rune in text.EnumerateRunes())
         {
@@ -158,7 +150,7 @@ public sealed class Screen : IVtSink
         }
     }
 
-    public void Control(char c)
+    internal void Control(char c)
     {
         switch (c)
         {
@@ -189,7 +181,7 @@ public sealed class Screen : IVtSink
         }
     }
 
-    public void Escape(char final, string intermediates)
+    internal void Escape(char final, string intermediates)
     {
         if (intermediates.Length > 0)
         {
@@ -220,7 +212,7 @@ public sealed class Screen : IVtSink
         }
     }
 
-    public void Csi(string parameters, string intermediates, char final)
+    internal void Csi(string parameters, string intermediates, char final)
     {
         if (intermediates.Length > 0)
         {
@@ -324,7 +316,7 @@ public sealed class Screen : IVtSink
         }
     }
 
-    public void Osc(string content)
+    internal void Osc(string content)
     {
         var separator = content.IndexOf(';');
         var code = separator < 0 ? content : content[..separator];
@@ -475,7 +467,6 @@ public sealed class Screen : IVtSink
 
             row.Dirty = false;
             _store.Commit(line);
-            line.Row = null;
             row.Line = null;
         }
     }
@@ -623,7 +614,6 @@ public sealed class Screen : IVtSink
         if (row.Line is { } line)
         {
             _store.Remove(line);
-            line.Row = null;
             row.Line = null;
         }
     }

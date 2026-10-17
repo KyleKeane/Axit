@@ -39,16 +39,6 @@ public static partial class QuestionReader
             return null;
         }
 
-        var hints = new List<string>();
-        for (var i = promptRow + 1; i < rows.Count && hints.Count < MaxRows; i++)
-        {
-            var hint = rows[i].Trim();
-            if (hint.Length > 0)
-            {
-                hints.Add(hint);
-            }
-        }
-
         // An answer longer than the console is wrapped onto the rows under it ("1. Claude's screens — Put the lines …"
         // over "theme in /theme …"). Rows that are not answers are held, and joined to the answer found above them when
         // the numbers show they belong to it; otherwise the answers end at the lowest answer row.
@@ -148,7 +138,7 @@ public static partial class QuestionReader
         title = CheckBoxRegex().Replace(title, string.Empty).TrimEnd(':', ' ');
         // "Select with numbers [1-4] (comma- or space-separated for several)": more than one answer may be given.
         var several = rows[promptRow].Contains("for several", StringComparison.Ordinal);
-        return new Question(title, text, options, hints) { AllowsSeveral = several, FirstRow = first, Step = step };
+        return new Question(title, text, options) { AllowsSeveral = several, FirstRow = first, Step = step };
     }
 
     /// <summary>The highest answer a prompt row names ("5" in "Select with numbers [1-5]", "n" in "Enter y/n:"), or null.</summary>

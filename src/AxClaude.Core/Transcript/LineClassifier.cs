@@ -73,7 +73,7 @@ public static partial class LineClassifier
     /// <summary>The status row of Claude's detailed transcript view, which takes the place of the prompt.</summary>
     public static bool IsTranscriptViewRow(string text) => TranscriptViewRowRegex().IsMatch(text);
 
-    /// <summary>The prompt row with nothing typed: <c>$</c> alone. Only trusted directly under the cursor row.</summary>
+    /// <summary>A prompt row with nothing typed: <c>$</c>, <c>&gt;</c> or <c>!</c> alone.</summary>
     public static bool IsBarePrompt(string text) => text.Trim() is "$" or ">" or "!";
 
     /// <summary>The hint under a queued message; the rows above it up to the <c>you:</c> row are the queued message.</summary>

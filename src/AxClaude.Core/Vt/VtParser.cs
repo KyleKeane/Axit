@@ -2,21 +2,11 @@ using System.Text;
 
 namespace AxClaude.Core.Vt;
 
-/// <summary>Receives the decoded pieces of a VT byte stream.</summary>
-public interface IVtSink
-{
-    void Print(string text);
-    void Control(char c);
-    void Escape(char final, string intermediates);
-    void Csi(string parameters, string intermediates, char final);
-    void Osc(string content);
-}
-
 /// <summary>
 /// Splits a stream of characters into printable runs, C0 controls, ESC sequences, CSI sequences and OSC strings.
 /// The parser keeps its state between calls, so a sequence may be split across chunks.
 /// </summary>
-public sealed class VtParser(IVtSink sink)
+public sealed class VtParser(Screen screen)
 {
     private enum State { Ground, Escape, Csi, Osc, OscEscape, String, StringEscape }
 
@@ -50,7 +40,7 @@ public sealed class VtParser(IVtSink sink)
                 else if (c < ' ')
                 {
                     FlushPrint();
-                    sink.Control(c);
+                    screen.Control(c);
                 }
                 else if (c != '\x7f')
                 {
@@ -84,7 +74,7 @@ public sealed class VtParser(IVtSink sink)
                     var intermediates = _intermediates.ToString();
                     _intermediates.Clear();
                     _state = State.Ground;
-                    sink.Escape(c, intermediates);
+                    screen.Escape(c, intermediates);
                 }
                 else if (c == '\x1b')
                 {
@@ -92,7 +82,7 @@ public sealed class VtParser(IVtSink sink)
                 }
                 else if (c < ' ')
                 {
-                    sink.Control(c);
+                    screen.Control(c);
                 }
                 else
                 {
@@ -113,7 +103,7 @@ public sealed class VtParser(IVtSink sink)
                 else if (c >= '@' && c <= '~')
                 {
                     _state = State.Ground;
-                    sink.Csi(_parameters.ToString(), _intermediates.ToString(), c);
+                    screen.Csi(_parameters.ToString(), _intermediates.ToString(), c);
                 }
                 else if (c == '\x1b')
                 {
@@ -126,7 +116,7 @@ public sealed class VtParser(IVtSink sink)
                 }
                 else if (c < ' ')
                 {
-                    sink.Control(c);
+                    screen.Control(c);
                 }
                 else if (c != '\x7f')
                 {
@@ -139,7 +129,7 @@ public sealed class VtParser(IVtSink sink)
                 if (c == '\a')
                 {
                     _state = State.Ground;
-                    sink.Osc(_osc.ToString());
+                    screen.Osc(_osc.ToString());
                 }
                 else if (c == '\x1b')
                 {
@@ -156,7 +146,7 @@ public sealed class VtParser(IVtSink sink)
                 if (c == '\\')
                 {
                     _state = State.Ground;
-                    sink.Osc(_osc.ToString());
+                    screen.Osc(_osc.ToString());
                 }
                 else
                 {
@@ -203,6 +193,6 @@ public sealed class VtParser(IVtSink sink)
 
         var text = _print.ToString();
         _print.Clear();
-        sink.Print(text);
+        screen.Print(text);
     }
 }
