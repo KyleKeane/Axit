@@ -116,20 +116,31 @@ internal sealed class TranscriptView : TextBox
         return AccessibilityObject.RaiseAutomationNotification(AutomationNotificationKind.ActionCompleted, processing, text);
     }
 
-    /// <summary>Focuses the view and puts the caret on the newest response marker.</summary>
-    public void JumpToLatestResponse()
+    /// <summary>
+    /// Ctrl+Shift with a quick key letter, or Navigate → Latest response (FR-5, D36): focuses the view and puts the
+    /// caret on the last line that key would stop at; `No response yet` and so on when there is none. False for a
+    /// letter that is no quick key.
+    /// </summary>
+    public bool JumpToLast(Keys letter)
     {
+        var key = Array.Find(QuickKeys, k => k.Key == letter);
+        if (key is null)
+        {
+            return false;
+        }
+
         Focus();
         for (var i = _mirror.LineCount - 1; i >= 0; i--)
         {
-            if (_mirror.LineAt(i).Kind == LineKind.OutputMarker)
+            if (Stops(key, i))
             {
                 MoveTo(i);
-                return;
+                return true;
             }
         }
 
-        Announce("No response yet", true);
+        Announce($"No {key.Name} yet", true);
+        return true;
     }
 
     /// <summary>m, or Navigate → Bookmark this line: focuses the view and bookmarks the caret's line, or takes its bookmark away (FR-3.9).</summary>
@@ -413,7 +424,7 @@ internal sealed class TranscriptView : TextBox
             var current = _mirror.LineIndexAt(SelectionStart);
             for (var i = current + step; i >= 0 && i < _mirror.LineCount; i += step)
             {
-                if (key.Matches(_mirror.LineAt(i)) && (key.Previous is null || i == 0 || key.Previous(_mirror.LineAt(i), _mirror.LineAt(i - 1))))
+                if (Stops(key, i))
                 {
                     MoveTo(i);
                     return;
@@ -424,16 +435,19 @@ internal sealed class TranscriptView : TextBox
         Announce($"No {(backward ? "previous" : "next")} {key.Name}", true);
     }
 
+    /// <summary>Whether a quick key stops at a line: the line matches, and the rule about the line before it holds.</summary>
+    private bool Stops(QuickKey key, int index) =>
+        key.Matches(_mirror.LineAt(index)) && (key.Previous is null || index == 0 || key.Previous(_mirror.LineAt(index), _mirror.LineAt(index - 1)));
+
     /// <summary>
     /// Ctrl+Alt with a quick key letter (FR-5, D36): every line that key would stop at, from the caret's line to the
     /// end of the conversation, spoken as one notification with the text each jump would say, wrapped rows joined;
-    /// the caret stays. False for a letter that is no quick key, and for o and r: a list of output markers says
-    /// nothing worth hearing, and Ctrl+Alt+O goes to the latest one instead.
+    /// the caret stays. False for a letter that is no quick key.
     /// </summary>
     public bool ReadToEnd(Keys letter)
     {
         var key = Array.Find(QuickKeys, k => k.Key == letter);
-        if (key is null || letter is AxClaudeKeys.Response or AxClaudeKeys.ResponseAlso)
+        if (key is null)
         {
             return false;
         }
@@ -443,7 +457,7 @@ internal sealed class TranscriptView : TextBox
         {
             for (var i = _mirror.LineIndexAt(SelectionStart); i < _mirror.LineCount; i++)
             {
-                if (key.Matches(_mirror.LineAt(i)) && (key.Previous is null || i == 0 || key.Previous(_mirror.LineAt(i), _mirror.LineAt(i - 1))))
+                if (Stops(key, i))
                 {
                     Utterance.Append(text, SpokenText(i, whole: true), joinedToPrevious: false);
                 }
