@@ -149,16 +149,17 @@ allow it, see B-9).
   hand-over to `install.ps1`; neither needs a window), `Audio/WaveTone` (the sounds as WAV bytes).
 - AX-6.2 `Axit.Forms` (WinForms, no tests, checked with NVDA): `OverlayPanel` (the notices in the
   window, with the `Notice` record callers pass), `ControlArea` and `ListKeys` (a question's answers as a list or a
-  field in the input field's place, with the number and page keys of every such list), `Sounds` (wave-out devices kept
+  field in the message field's place, with the number and page keys of every such list), `Sounds` (wave-out devices kept
   open for the life of the process), `EditPaging` (Page Up and Page Down in an edit control), `EditParagraphs`
-  (Ctrl+Up and Ctrl+Down by paragraph, with Shift selecting), `StatusLayout`, the font
+  (Ctrl+Up and Ctrl+Down by paragraph, with Shift selecting), `EditKeys` (the KeyDown handler that gives an edit
+  control both), `Announcer` (the UI Automation notification, AX-7.1), `StatusLayout`, the font
   handling (text size and the font picker), `BundleKeys` (AX-8). The crash report (twenty lines in each app's
   `Run`) stays per app until a second copy shows what is common.
 - AX-6.3 A piece moves into a shared project only when a second app needs it, in a commit of its own, with the
   accessibility review; it moves unchanged where possible (B-3).
 - AX-6.4 The notices and the question area are the bundle's one way of asking the user something, so that every
   window asks the same way: a notice has a title, a text, named buttons that Enter and Escape reach, the key line and
-  the chime; a question in the input field's place is a list or a field named with the question, Enter answers,
+  the chime; a question in the message field's place is a list or a field named with the question, Enter answers,
   Escape cancels. An app that needs to ask uses these and does not draw its own dialog.
 
 ### AX-8 Keys
@@ -299,7 +300,7 @@ docs/axdown/            SPEC.md, user-guide.md (embedded by src/AxDown), nvda-te
 
 - 2.0.0 (2026-10-02): the bundle. `Axit.exe` with AxClaude unchanged inside it and AxDown new; `Axit.Core` and
   `Axit.Forms`; the installer, publish and release scripts for the bundle; the repository renamed `KyleKeane/Axit`.
-  Preceded by AxClaude 1.7.0, the bridge (B-6). Both apps checked with NVDA by Kyle before the release.
+  Preceded by AxClaude 1.7.0, the bridge (B-6). Both apps checked with NVDA by the user before the release.
 - 2.1.0: the key tables (`AxClaudeKeys`, `AxDownKeys`, `BundleKeys`) with the collision test (AX-8); heading
   navigation in AxDown. 2.1.1: AxDown's window spoken on opening (`AccessibleRole.Window`).
 - 2.2.0: the update notice with Update and restart, Update and close, and a progress bar for the download.

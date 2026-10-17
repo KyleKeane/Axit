@@ -1,6 +1,5 @@
 using System.Runtime.InteropServices;
 using System.Text;
-using System.Windows.Forms.Automation;
 using AxClaude.Core.Transcript;
 using Axit.Forms;
 
@@ -108,17 +107,8 @@ internal sealed class TranscriptView : TextBox
     [System.ComponentModel.DefaultValue(false)]
     public bool KeepCaret { get; set; }
 
-    /// <summary>Speaks text through a UI Automation notification without moving focus. Returns false when unsupported.</summary>
-    public bool Announce(string text, bool interrupt)
-    {
-        if (!IsHandleCreated)
-        {
-            return false;
-        }
-
-        var processing = interrupt ? AutomationNotificationProcessing.MostRecent : AutomationNotificationProcessing.All;
-        return AccessibilityObject.RaiseAutomationNotification(AutomationNotificationKind.ActionCompleted, processing, text);
-    }
+    /// <summary>Speaks text through a UI Automation notification without moving focus (FR-7.1). Returns false when unsupported.</summary>
+    public bool Announce(string text, bool interrupt) => Announcer.Raise(this, text, interrupt);
 
     /// <summary>Ctrl+3, or Navigate → Latest response (FR-5): focuses the view and puts the caret on the newest output marker; `No response yet` when there is none.</summary>
     public void JumpToLatestResponse()

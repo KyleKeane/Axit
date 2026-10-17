@@ -545,6 +545,8 @@ internal sealed class MainForm : Form
         _input.Dock = DockStyle.Bottom;
         _input.TabIndex = 0;
         _input.KeyDown += OnInputKeyDown;
+        // The bundle's page and paragraph keys (FR-2.1): the control's own keys do nothing while the message fits, or scroll a row and leave the caret.
+        _input.KeyDown += EditKeys.Handle;
 
         _transcript.Dock = DockStyle.Fill;
         _transcript.TabIndex = 1;
@@ -626,20 +628,6 @@ internal sealed class MainForm : Form
                 // A guard (FR-2.3, D20): Escape is a reflex key for screen reader users, and Claude takes it as an interrupt.
                 e.SuppressKeyPress = true;
                 Announce("Shift+Escape interrupts", true);
-                break;
-            case BundleKeys.ParagraphUp:
-            case BundleKeys.ParagraphDown:
-            case BundleKeys.SelectParagraphUp:
-            case BundleKeys.SelectParagraphDown:
-                // The start of the previous or next paragraph of the message, with Shift selecting to there (FR-2.1): the control's own keys scroll a row and leave the caret.
-                e.Handled = e.SuppressKeyPress = true;
-                EditParagraphs.Move(_input, e.KeyCode == Keys.Down ? 1 : -1, e.Shift);
-                break;
-            case BundleKeys.PageUp:
-            case BundleKeys.PageDown:
-                // One screen of the field's rows, or its first / last row (FR-2.1): the control's own keys do nothing while the message fits.
-                e.Handled = e.SuppressKeyPress = true;
-                EditPaging.Page(_input, e.KeyCode == Keys.PageDown ? 1 : -1);
                 break;
                 // Plain Up and Down only move the caret (D13): text appearing in the field on an arrow key confused the reading.
         }

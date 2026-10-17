@@ -230,7 +230,7 @@ docs/axdown/       this spec, user-guide.md (embedded, Help, User guide), nvda-t
 ```
 
 Shared pieces AxDown uses (AX-6): `OverlayPanel` and `Notice`,
-`ControlArea` (the Go to line field), `EditPaging`, `EditParagraphs`, `StatusLayout`, the font handling, `Sounds` (the notice chime),
+`ControlArea` (the Go to line field), `EditKeys` (the page and paragraph keys), `Announcer`, `StatusLayout`, the font handling, `Sounds` (the notice chime),
 `BundleKeys`; from `Axit.Core`: `SettingsFile`, `AppPaths`, `Log`, `Updater`, `BundleInfo`.
 
 Data flow: `TextDocument.Read(path)` gives text, encoding, mark and line ending; the form puts the text in the

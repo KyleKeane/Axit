@@ -1,4 +1,3 @@
-using System.Windows.Forms.Automation;
 
 namespace Axit.Forms;
 
@@ -120,7 +119,7 @@ public sealed class OverlayPanel : Panel
         _text.ForeColor = SystemColors.WindowText;
         _text.Dock = DockStyle.Fill;
         _text.TabIndex = 2;
-        _text.KeyDown += OnEditKeyDown;
+        _text.KeyDown += EditKeys.Handle;
 
         _inputLabel.AutoSize = true;
         _inputLabel.Location = new Point(0, 6);
@@ -180,7 +179,7 @@ public sealed class OverlayPanel : Panel
         _custom.AccessibleName = "Custom arguments";
         _custom.Margin = new Padding(0);
         _custom.KeyDown += OnCustomKeyDown;
-        _custom.KeyDown += OnEditKeyDown;
+        _custom.KeyDown += EditKeys.Handle;
         _customRow.Controls.Add(_customLabel);
         _customRow.Controls.Add(_custom);
         _session.Controls.AddRange([_chooseFolder, _presetGroup, _customRow]);
@@ -366,13 +365,7 @@ public sealed class OverlayPanel : Panel
     public bool Announce(string text, bool interrupt)
     {
         Control source = _inputSpec is not null ? _input : _text;
-        if (!source.IsHandleCreated)
-        {
-            return false;
-        }
-
-        var processing = interrupt ? AutomationNotificationProcessing.MostRecent : AutomationNotificationProcessing.All;
-        return source.AccessibilityObject.RaiseAutomationNotification(AutomationNotificationKind.ActionCompleted, processing, text);
+        return Announcer.Raise(source, text, interrupt);
     }
 
     protected override bool ProcessCmdKey(ref Message msg, Keys keyData)
@@ -420,30 +413,6 @@ public sealed class OverlayPanel : Panel
         var keys = enter is not null && ReferenceEquals(enter, escape) ? $"Enter or Escape: {Label(enter)}."
             : string.Join(" ", new[] { enter is null ? null : $"Enter: {Label(enter)}.", escape is null ? null : $"Escape: {Label(escape)}." }.OfType<string>());
         return keys.Length == 0 ? text : text.Length == 0 ? keys : text.TrimEnd('\n') + "\n" + keys;
-    }
-
-    /// <summary>The bundle's page and paragraph keys (AX-8.2) in the notice's text and in the Custom arguments field.</summary>
-    private static void OnEditKeyDown(object? sender, KeyEventArgs e)
-    {
-        if (sender is not TextBoxBase box)
-        {
-            return;
-        }
-
-        if (e.KeyData is BundleKeys.PageUp or BundleKeys.PageDown)
-        {
-            EditPaging.Page(box, e.KeyCode == Keys.PageDown ? 1 : -1);
-        }
-        else if (e.KeyData is BundleKeys.ParagraphUp or BundleKeys.ParagraphDown or BundleKeys.SelectParagraphUp or BundleKeys.SelectParagraphDown)
-        {
-            EditParagraphs.Move(box, e.KeyCode == Keys.Down ? 1 : -1, e.Shift);
-        }
-        else
-        {
-            return;
-        }
-
-        e.Handled = e.SuppressKeyPress = true;
     }
 
     private void SetText()

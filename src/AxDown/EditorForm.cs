@@ -1,6 +1,5 @@
 using System.Diagnostics;
 using System.Net.Http;
-using System.Windows.Forms.Automation;
 using AxDown.Core;
 using Axit.Core;
 using Axit.Core.Updates;
@@ -304,20 +303,10 @@ internal sealed class EditorForm : Form
 
     private void OnEditorKeyDown(object? sender, KeyEventArgs e)
     {
-        if (e.KeyCode is BundleKeys.PageUp or BundleKeys.PageDown && e.Modifiers == Keys.None)
+        // AD-2.3: the bundle's page and paragraph keys; the control's own do nothing while the text fits, or scroll a row and leave the caret.
+        EditKeys.Handle(sender, e);
+        if (e.Handled)
         {
-            // AD-2.3: the control's own page keys do nothing while the text fits.
-            EditPaging.Page(_editor, e.KeyCode == Keys.PageDown ? 1 : -1);
-            e.Handled = e.SuppressKeyPress = true;
-            ScheduleStatus();
-            return;
-        }
-
-        if (e.KeyData is BundleKeys.ParagraphUp or BundleKeys.ParagraphDown or BundleKeys.SelectParagraphUp or BundleKeys.SelectParagraphDown)
-        {
-            // AD-2.3: the control's own Ctrl+Up and Ctrl+Down scroll a row and leave the caret where it is.
-            EditParagraphs.Move(_editor, e.KeyCode == Keys.Down ? 1 : -1, e.Shift);
-            e.Handled = e.SuppressKeyPress = true;
             ScheduleStatus();
             return;
         }
@@ -883,13 +872,7 @@ internal sealed class EditorForm : Form
             return _overlay.Announce(text, interrupt);
         }
 
-        if (!_editor.IsHandleCreated)
-        {
-            return false;
-        }
-
-        var processing = interrupt ? AutomationNotificationProcessing.MostRecent : AutomationNotificationProcessing.All;
-        return _editor.AccessibilityObject.RaiseAutomationNotification(AutomationNotificationKind.ActionCompleted, processing, text);
+        return Announcer.Raise(_editor, text, interrupt);
     }
 
     // ---- help, about, diagnostics, updates (AD-4.4, AX-3) ----
