@@ -38,7 +38,7 @@ internal sealed class TranscriptView : TextBox
         // A replayed you: row has its own marker in front of it (FR-4.8); it is not a second stop.
         new(AxClaudeKeys.Input, "input", l => l.Kind is LineKind.InputMarker or LineKind.UserEcho, Previous: (_, p) => p.Kind != LineKind.InputMarker),
         ResponseKey,
-        new(AxClaudeKeys.ResponseAlso, "response", l => l.Kind == LineKind.OutputMarker),
+        ResponseKey with { Key = AxClaudeKeys.ResponseAlso },
         new(AxClaudeKeys.ClaudeReply, "Claude reply", l => l.Kind == LineKind.ClaudeReply),
         new(AxClaudeKeys.ToolLine, "tool line", l => l.Kind is LineKind.Tool or LineKind.ToolError),
         // Claude prints the short messages between its tool calls with no blank line in front of them, so every claude: line is a paragraph too.

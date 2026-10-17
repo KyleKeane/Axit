@@ -16,7 +16,7 @@ internal sealed class MainForm : Form
     private const string RecordItemText = "&Record raw stream for a bug report...";
 
     /// <summary>Spoken for Ctrl+O, which the app does not pass on (D14).</summary>
-    private const string CtrlOGuard = "Ctrl+O is off. For tool output, start with --verbose";
+    private const string CtrlOGuardText = "Ctrl+O is off. For tool output, start with --verbose";
 
     private readonly StartupOptions _options;
     private readonly AppSettings _settings;
@@ -85,6 +85,12 @@ internal sealed class MainForm : Form
     /// "Question closed", and the control area holds its keys that long so that a second Escape does not reach Claude.
     /// </summary>
     private const int UserActionMs = 3000;
+
+    /// <summary>D33: the interrupting speech of a question waits this long after the focus moved, so that NVDA's reading of the new control does not cut it off.</summary>
+    private const int FocusSettleMs = 300;
+
+    /// <summary>Whether the user's answer or key at <paramref name="at"/> came less than <see cref="UserActionMs"/> ago: what follows it is prompted, not a surprise.</summary>
+    private static bool UserActed(long at) => Environment.TickCount64 - at < UserActionMs;
 
     /// <summary>The /config setting last chosen, where the list of settings starts when Claude's list comes back.</summary>
     private string? _settingKey;
@@ -263,26 +269,30 @@ internal sealed class MainForm : Form
 
     protected override bool ProcessCmdKey(ref Message msg, Keys keyData)
     {
+        // The text size keys work everywhere, a notice included.
+        switch (keyData)
+        {
+            case BundleKeys.LargerText:
+            case BundleKeys.LargerTextNumpad:
+                ChangeTextSize(1);
+                return true;
+            case BundleKeys.SmallerText:
+            case BundleKeys.SmallerTextNumpad:
+                ChangeTextSize(-1);
+                return true;
+        }
+
         if (_noticeOpen)
         {
             // A notice holds the keyboard: the window's shortcuts and the menu's wait until it is closed. Not calling
             // the base skips the menu shortcuts; Enter and Escape reach the notice's buttons through AcceptButton and
-            // CancelButton, Tab and the editing keys work as usual. Only the text size keys stay live.
-            switch (keyData)
-            {
-                case BundleKeys.LargerText:
-                case BundleKeys.LargerTextNumpad:
-                    ChangeTextSize(1);
-                    return true;
-                case BundleKeys.SmallerText:
-                case BundleKeys.SmallerTextNumpad:
-                    ChangeTextSize(-1);
-                    return true;
-            }
-
+            // CancelButton, Tab and the editing keys work as usual.
             return false;
         }
 
+        // Most keys with a menu item of their own are that item's ShortcutKeys and reach the menu through the base
+        // call. This switch holds the rest: the focus keys, the Ctrl+O guard, the interrupt (WinForms takes no
+        // Shift-only shortcut), and the bundle and go-to keys, whose menu items only show the key.
         switch (keyData)
         {
             case Keys.Tab:
@@ -321,7 +331,7 @@ internal sealed class MainForm : Form
                 }
                 else
                 {
-                    Announce(CtrlOGuard, true);
+                    Announce(CtrlOGuardText, true);
                 }
 
                 return true;
@@ -340,14 +350,6 @@ internal sealed class MainForm : Form
             case AxClaudeKeys.Interrupt:
                 // The interrupt key (FR-2.3). Ctrl+Escape opens the Start menu and never reaches the app.
                 Interrupt();
-                return true;
-            case BundleKeys.LargerText:
-            case BundleKeys.LargerTextNumpad:
-                ChangeTextSize(1);
-                return true;
-            case BundleKeys.SmallerText:
-            case BundleKeys.SmallerTextNumpad:
-                ChangeTextSize(-1);
                 return true;
         }
 
@@ -374,7 +376,7 @@ internal sealed class MainForm : Form
         project.DropDownItems.Add(_currentFolderItem);
         project.DropDownItems.Add(new ToolStripMenuItem("&Change folder...", null, (_, _) => ChangeFolder()));
         _recentFoldersItem.DropDownOpening += (_, _) => FillRecentFolders();
-        _recentFoldersItem.DropDownItems.Add(new ToolStripMenuItem("(none)") { Enabled = false });
+        FillRecentFolders();
         project.DropDownItems.Add(_recentFoldersItem);
         project.DropDownItems.Add(new ToolStripMenuItem("&New session...", null, (_, _) => NewSession()) { ShortcutKeys = AxClaudeKeys.NewSession });
         project.DropDownItems.Add(new ToolStripMenuItem("Force Claude to res&tart", null, (_, _) => RestartClaude()) { ShortcutKeys = AxClaudeKeys.RestartClaude });
@@ -757,15 +759,21 @@ internal sealed class MainForm : Form
         }
 
         _writes.Enqueue(("\r", 50));
-        if (!_writing)
-        {
-            PumpWrites();
-        }
+        StartWrites();
 
         Announce(queued && !answer ? "Queued" : "Sent", false);
         if (_settings.SoundOnBell)
         {
             Sounds.Sent();
+        }
+    }
+
+    /// <summary>Starts the write pump when it is idle; a pump already running takes what was queued after it.</summary>
+    private void StartWrites()
+    {
+        if (!_writing)
+        {
+            PumpWrites();
         }
     }
 
@@ -797,10 +805,7 @@ internal sealed class MainForm : Form
 
         _writes.Enqueue(("\x18", 30));
         _writes.Enqueue(("\x13", 30));
-        if (!_writing)
-        {
-            PumpWrites();
-        }
+        StartWrites();
 
         Announce("Sending now", false);
     }
@@ -933,10 +938,7 @@ internal sealed class MainForm : Form
 
             if (!_promptAnnounced || waiting != _handledWait)
             {
-                _promptAnnounced = true;
-                _handledWait = waiting;
-                // Recorded for q.
-                _model.MarkQuestion();
+                MarkHandled(waiting);
                 Announce("Claude asks", false);
                 Signal(question: true);
             }
@@ -947,7 +949,7 @@ internal sealed class MainForm : Form
             // right after the user's answer or key.
             if (_area.Current is not null)
             {
-                var byUser = Environment.TickCount64 - Math.Max(_answerAt, _screenKeyAt) < UserActionMs;
+                var byUser = UserActed(Math.Max(_answerAt, _screenKeyAt));
                 CloseArea();
                 // The question is over: the same one asked again later is new.
                 _promptAnnounced = false;
@@ -986,17 +988,17 @@ internal sealed class MainForm : Form
                 return false;
             }
 
-            Mark(question.Signature);
+            MarkHandled(question.Signature);
             ShowClaudeQuestion(question);
         }
         else if (_model.PendingScreen is { } screen)
         {
-            Mark(screen.Signature);
+            MarkHandled(screen.Signature);
             ShowClaudeScreen(screen);
         }
         else if (_model.TextPrompt is { } prompt)
         {
-            Mark(prompt);
+            MarkHandled(prompt);
             ShowOwnAnswer(prompt);
         }
         else
@@ -1004,23 +1006,23 @@ internal sealed class MainForm : Form
             return false;
         }
 
-        // The taskbar flash; the area plays its own chime.
+        // The taskbar flash; ShowInArea plays the chime for what the area shows.
         Signal(question: true, chime: false);
         return true;
+    }
 
-        void Mark(string signature)
-        {
-            _promptAnnounced = true;
-            _handledWait = signature;
-            // Recorded for q (nothing for the text row after Other, which belongs to the question before).
-            _model.MarkQuestion();
-        }
+    /// <summary>What Claude waits on is handled, announced or shown once, and recorded for q (nothing for the text row after Other, which belongs to the question before).</summary>
+    private void MarkHandled(string? signature)
+    {
+        _promptAnnounced = true;
+        _handledWait = signature;
+        _model.MarkQuestion();
     }
 
     /// <summary>
     /// The chime (two equal notes for a question, three falling notes when Claude is done, FR-7.3) and the taskbar
-    /// flash that go with an attention announcement; without <paramref name="chime"/> only the flash (the answer
-    /// control area plays its own chime). While the window is in the background the alert, when it is on, plays in
+    /// flash that go with an attention announcement; without <paramref name="chime"/> only the flash (ShowInArea
+    /// plays the chime for what the control area shows). While the window is in the background the alert, when it is on, plays in
     /// place of any chime, the area's included: it is the one sound meant to carry into another window.
     /// </summary>
     private void Signal(bool question, bool chime = true)
@@ -1247,15 +1249,18 @@ internal sealed class MainForm : Form
         Announce("Saved", true);
     }
 
-    private void OpenUrl(string url)
+    private void OpenUrl(string url) => OpenWithShell(url, "page");
+
+    /// <summary>Opens a page, a file or a folder with whatever Windows has for it; a failure is a notice, not a crash.</summary>
+    private void OpenWithShell(string target, string what)
     {
         try
         {
-            Process.Start(new ProcessStartInfo(url) { UseShellExecute = true });
+            Process.Start(new ProcessStartInfo(target) { UseShellExecute = true });
         }
         catch (Exception ex) when (ex is System.ComponentModel.Win32Exception or IOException)
         {
-            Fail("The page could not be opened: " + ex.Message);
+            Fail($"The {what} could not be opened: {ex.Message}");
         }
     }
 
@@ -1386,14 +1391,7 @@ internal sealed class MainForm : Form
     private void OpenSettingsFile()
     {
         SaveSettings();
-        try
-        {
-            Process.Start(new ProcessStartInfo(AppSettings.DefaultPath) { UseShellExecute = true });
-        }
-        catch (Exception ex) when (ex is System.ComponentModel.Win32Exception or IOException)
-        {
-            Fail("The settings file could not be opened: " + ex.Message);
-        }
+        OpenWithShell(AppSettings.DefaultPath, "settings file");
     }
 
     // ---- diagnostics ----
@@ -1528,14 +1526,7 @@ internal sealed class MainForm : Form
             return;
         }
 
-        try
-        {
-            Process.Start(new ProcessStartInfo(_folder) { UseShellExecute = true });
-        }
-        catch (Exception ex) when (ex is System.ComponentModel.Win32Exception or IOException)
-        {
-            Fail("The folder could not be opened: " + ex.Message);
-        }
+        OpenWithShell(_folder, "folder");
     }
 
     /// <summary>The standard folder picker (one of the few separate windows, D23); null when it was cancelled.</summary>
@@ -1899,7 +1890,7 @@ internal sealed class MainForm : Form
         Log.Error(message);
         _model.AddSystemLine(message);
         UpdateStatus();
-        ShowNotice(Notice.Plain("Error", message) with { Unprompted = true });
+        ShowError("Error", message);
     }
 
     /// <summary>The crash handler's report (FR-13.4), shown inside the window like every other notice.</summary>
@@ -1908,11 +1899,11 @@ internal sealed class MainForm : Form
     // ---- notices: the app's own dialogs, drawn inside the window (D23) ----
 
     /// <summary>
-    /// The one place a notice is shown (D23); callers pass only its content. It adds what every notice shares: the key
-    /// line made from the buttons at the end of the text, the notice chime and the hold of a notice the user did not
-    /// open, the focus in the notice (the field, the chosen answer, or the top of the text), the blocked menu and
-    /// window shortcuts, and Enter and Escape on the default and cancel buttons. A notice shown while another is
-    /// open replaces it.
+    /// The one place a notice is shown (D23); callers pass only its content. It adds what every notice shares here:
+    /// the notice chime of a notice the user did not open, the focus in the notice (the field, the chosen answer, or
+    /// the top of the text), the blocked menu and window shortcuts, and Enter and Escape on the default and cancel
+    /// buttons; the panel's Populate adds the key line made from the buttons and the hold of an unprompted notice. A
+    /// notice shown while another is open replaces it.
     /// </summary>
     private void ShowNotice(Notice notice)
     {
@@ -1978,7 +1969,7 @@ internal sealed class MainForm : Form
         {
             // After NVDA has taken the focus change, so that the question comes last: raised at once, it was cut off.
             var question = (_area.CurrentItem.Length == 0 ? name : name + Stop(name) + _area.CurrentItem).TrimEnd(' ', '.');
-            Later(300, () =>
+            Later(FocusSettleMs, () =>
             {
                 if (_shownWait == signature)
                 {
@@ -2081,7 +2072,7 @@ internal sealed class MainForm : Form
         }
 
         _askedQuestion = question;
-        ShowQuestionList(question.Signature, QuestionName(question), question, null, Environment.TickCount64 - _answerAt > UserActionMs, AnswerQuestion, () =>
+        ShowQuestionList(question.Signature, QuestionName(question), question, null, !UserActed(_answerAt), AnswerQuestion, () =>
         {
             SendEscape();
             Announce("Cancelled", false);
@@ -2095,7 +2086,7 @@ internal sealed class MainForm : Form
     /// back on the setting just chosen. Escape saves and closes.
     /// </summary>
     private void ShowSettings(Question settings, bool back = false) =>
-        ShowQuestionList(settings.Signature, "Claude's settings", settings, _settingKey, !back && Environment.TickCount64 - _answerAt > UserActionMs, chosen =>
+        ShowQuestionList(settings.Signature, "Claude's settings", settings, _settingKey, !back && !UserActed(_answerAt), chosen =>
         {
             var setting = chosen[0];
             _settingKey = setting.Key;
@@ -2164,7 +2155,7 @@ internal sealed class MainForm : Form
         && question.OptionFor("y") is not null
         && !question.Text.Any(line => line.StartsWith("warning:", StringComparison.Ordinal))
         && _askedQuestion?.Step is (int number, int count) && number == count
-        && Environment.TickCount64 - _answerAt < UserActionMs;
+        && UserActed(_answerAt);
 
     /// <summary>
     /// The follow-up of a question when Claude asks for the user's own words ("Enter text for option 4 (Other), or
@@ -2176,7 +2167,7 @@ internal sealed class MainForm : Form
         var chosen = LineClassifier.TextPromptAnswer(prompt) ?? "an answer that asks for your own words";
         var asked = _askedQuestion is { } question ? QuestionName(question) : null;
         var name = (asked is null ? string.Empty : asked + Stop(asked)) + $"You chose {chosen}. Your answer";
-        ShowInArea(prompt, name, Environment.TickCount64 - _answerAt > UserActionMs, (focus, hold) => _area.ShowField(name, focus, hold, typed =>
+        ShowInArea(prompt, name, !UserActed(_answerAt), (focus, hold) => _area.ShowField(name, focus, hold, typed =>
         {
             var words = typed.Trim();
             if (words.Length == 0)
@@ -2215,7 +2206,7 @@ internal sealed class MainForm : Form
             }
         }
 
-        ShowInArea(screen.Signature, screen.Title, Environment.TickCount64 - _screenKeyAt > UserActionMs, (focus, hold) =>
+        ShowInArea(screen.Signature, screen.Title, !UserActed(_screenKeyAt), (focus, hold) =>
             _area.ShowList(screen.Title, items, 0, null, focus, hold, (index, _) =>
             {
                 if (index < first)
@@ -2274,10 +2265,7 @@ internal sealed class MainForm : Form
         _writes.Enqueue(("\r", 50));
         _answerAt = Environment.TickCount64;
         _area.Hold(UserActionMs);
-        if (!_writing)
-        {
-            PumpWrites();
-        }
+        StartWrites();
 
         if (_settings.SoundOnBell)
         {
@@ -2399,9 +2387,7 @@ internal sealed class MainForm : Form
             return;
         }
 
-        _updateBusy = true;
-        _checkItem.Enabled = false;
-        _updateItem.Enabled = false;
+        SetUpdateBusy(true);
         _latestState = "checking...";
         try
         {
@@ -2474,12 +2460,7 @@ internal sealed class MainForm : Form
         }
         finally
         {
-            _updateBusy = false;
-            if (!IsDisposed)
-            {
-                _checkItem.Enabled = true;
-                _updateItem.Enabled = true;
-            }
+            SetUpdateBusy(false);
         }
     }
 
@@ -2489,7 +2470,21 @@ internal sealed class MainForm : Form
             $"Latest release on GitHub: {_latestState}\nReleases: {UpdateCheck.ReleasesPage}\nClaude Code documentation: https://code.claude.com/docs\nSettings: {AppSettings.DefaultPath}\nLog: {Log.FilePath}\n\n" +
             HelpText.Disclaimer));
 
-    /// <summary>The release notes with Update now, Open release page and Later (FR-1.10); <paramref name="unprompted"/> when the check at startup found it.</summary>
+    /// <summary>While a check or an install runs, the two Help items are disabled, so that neither starts twice.</summary>
+    private void SetUpdateBusy(bool busy)
+    {
+        _updateBusy = busy;
+        if (!IsDisposed)
+        {
+            _checkItem.Enabled = !busy;
+            _updateItem.Enabled = !busy;
+        }
+    }
+
+    /// <summary>The button that opens a release on GitHub and leaves the notice open.</summary>
+    private OverlayChoice ReleasePageChoice(ReleaseInfo release) => new("&Open release page", () => OpenUrl(release.PageUrl), StaysOpen: true);
+
+    /// <summary>The release notes with Update and restart, Update and close, Open release page and Later (FR-1.10); <paramref name="unprompted"/> when the check at startup found it.</summary>
     private void ShowUpdateNotice(ReleaseInfo release, bool unprompted = false)
     {
         var version = release.Version.ToString(3);
@@ -2505,7 +2500,7 @@ internal sealed class MainForm : Form
         [
             new OverlayChoice("Update and &restart", () => InstallUpdate(release, restart: true), IsDefault: true),
             new OverlayChoice("Update and &close", () => InstallUpdate(release, restart: false)),
-            new OverlayChoice("&Open release page", () => OpenUrl(release.PageUrl), StaysOpen: true),
+            ReleasePageChoice(release),
             new OverlayChoice("&Later", IsCancel: true),
         ])
         {
@@ -2526,9 +2521,7 @@ internal sealed class MainForm : Form
             return;
         }
 
-        _updateBusy = true;
-        _checkItem.Enabled = false;
-        _updateItem.Enabled = false;
+        SetUpdateBusy(true);
         var version = release.Version.ToString(3);
         var size = release.ZipSize > 0 ? $" ({release.ZipSize / (1024.0 * 1024.0):0} MB)" : string.Empty;
         _model.AddSystemLine($"Updating to AxClaude {version}...");
@@ -2581,7 +2574,7 @@ internal sealed class MainForm : Form
                 ShowNotice(new Notice($"Update to AxClaude {version}",
                     $"The installer failed; this version keeps running.\n\n{result.Output}\n\nYou can download the zip from the release page and run install.cmd yourself.",
                 [
-                    new OverlayChoice("&Open release page", () => OpenUrl(release.PageUrl), StaysOpen: true),
+                    ReleasePageChoice(release),
                     OverlayChoice.Close,
                 ]));
                 return;
@@ -2611,23 +2604,17 @@ internal sealed class MainForm : Form
                 ShowNotice(new Notice($"Update to AxClaude {version}",
                     $"The update failed: {ex.Message}\nThis version keeps running. You can download the zip from the release page and run install.cmd yourself.",
                 [
-                    new OverlayChoice("&Open release page", () => OpenUrl(release.PageUrl), StaysOpen: true),
+                    ReleasePageChoice(release),
                     OverlayChoice.Close,
                 ]));
             }
         }
         finally
         {
-            _updateBusy = false;
-            if (!IsDisposed)
-            {
-                _checkItem.Enabled = true;
-                _updateItem.Enabled = true;
-            }
+            SetUpdateBusy(false);
         }
     }
 
-    /// <summary>Keep working after Update now: the downloaded update is not installed now; the Help menu offers it again and the download is kept.</summary>
     /// <summary>How the new version starts after Update and restart: on this folder, and on the conversation when a message was sent (FR-9.1).</summary>
     private string[] RestartArguments()
     {
