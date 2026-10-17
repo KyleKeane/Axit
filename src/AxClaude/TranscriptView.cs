@@ -39,7 +39,8 @@ internal sealed class TranscriptView : TextBox
         new(AxClaudeKeys.ClaudeReply, "Claude reply", l => l.Kind == LineKind.ClaudeReply),
         new(AxClaudeKeys.ToolLine, "tool line", l => l.Kind is LineKind.Tool or LineKind.ToolError),
         // Claude prints the short messages between its tool calls with no blank line in front of them, so every claude: line is a paragraph too.
-        new(AxClaudeKeys.Paragraph, "paragraph", l => l.Text.Length > 0, Previous: (l, p) => p.Text.Length == 0 || l.Kind == LineKind.ClaudeReply),
+        // Tool, tool output and thinking rows are never paragraphs, blank line in front or not: p is for the prose, t finds the tools.
+        new(AxClaudeKeys.Paragraph, "paragraph", l => l.Text.Length > 0 && l.Kind is not (LineKind.Tool or LineKind.ToolError or LineKind.Thinking), Previous: (l, p) => p.Text.Length == 0 || l.Kind == LineKind.ClaudeReply),
         new(AxClaudeKeys.Error, "error", l => l.Kind is LineKind.Error or LineKind.Warning or LineKind.ToolError),
         new(AxClaudeKeys.TurnSummary, "turn summary", l => l.Kind == LineKind.TurnSummary),
         new(AxClaudeKeys.SystemLine, "system line", l => l.Kind == LineKind.System),

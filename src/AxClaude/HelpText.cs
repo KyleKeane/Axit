@@ -55,7 +55,7 @@ internal static class HelpText
             (Input and Output lines are level 1, Claude's headings level 2 and deeper)
           c and Shift+C: next and previous "claude:" line
           t and Shift+T: next and previous tool line
-          p and Shift+P: next and previous paragraph (the first line after a blank line, or a "claude:" line)
+          p and Shift+P: next and previous paragraph (the first line after a blank line, or a "claude:" line; never a tool or thinking line)
           e and Shift+E: next and previous error or warning
           d and Shift+D: next and previous "done" line at the end of a reply
           s and Shift+S: next and previous system line
