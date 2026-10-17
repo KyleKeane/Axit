@@ -575,23 +575,38 @@ public sealed partial class SessionModel : ILineStore
     }
 
     /// <summary>
-    /// The cursor went to the top left corner with the screen not cleared since the last frame and a visible line on
-    /// the top row. Frames start at the first row of Claude's live block, below the conversation on screen, and
+    /// The cursor went to the top left corner with the screen not cleared since the last frame and text showing
+    /// somewhere on it. Frames start at the first row of Claude's live block, below the conversation on screen, and
     /// Claude clears the screen before it starts afresh; so this is Claude repainting everything from the top. In a
     /// long session it printed the whole conversation again that way, as a burst of frames, reworded in places, and
     /// it was read out a second time. The lines on screen are let go with the text they had at the last frame end,
     /// and what the repaint prints gets lines of its own, hidden as copies until a later frame writes something else
-    /// on their rows.
+    /// on their rows. Until 2.7.1 the test was a visible line on the top row alone, and a repaint that found a blank
+    /// line there went through as new lines (a raw recording of 2026-10-17); the first draw of a session, the case
+    /// the test is for, lands on a screen with no text at all.
     /// </summary>
     private void OnHomed()
     {
-        if (_repainting || _screen.ClearedSinceFrameEnd || _screen.LineAt(0) is not { Hidden: false, Text.Length: > 0 })
+        if (_repainting || _screen.ClearedSinceFrameEnd || !ScreenShowsText())
         {
             return;
         }
 
         _screen.DetachRows();
         _repainting = true;
+    }
+
+    private bool ScreenShowsText()
+    {
+        for (var r = 0; r < Rows; r++)
+        {
+            if (_screen.LineAt(r) is { Hidden: false, Text.Length: > 0 })
+            {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     private void PullRowText()

@@ -542,6 +542,28 @@ public class SessionModelTests
     }
 
     [Fact]
+    public void A_repaint_that_finds_a_blank_top_row_is_hidden_too()
+    {
+        // A raw recording of 2026-10-17: of three repaints in one session, the one whose top row happened to be a
+        // blank line went through as 1,763 new lines and old turns were read out again; the other two were hidden.
+        var model = new SessionModel(80, 6);
+        Feed(model, $"{Esc}[?25l{Esc}[K\r\nclaude: first answer{Esc}[K\r\nclaude: second answer{Esc}[K\r\nauto mode on (shift+tab to cycle){Esc}[K\r\n${Esc}[K{Esc}[?25h");
+        model.EndFrame();
+        Assert.Equal(["claude: first answer", "claude: second answer"], Visible(model).Where(t => t.Length > 0));
+
+        Feed(model, $"{Esc}[?25l{Esc}[?25l{Esc}[Hclaude: an old answer, reworded{Esc}[K\r\ntool: Update (a.cs){Esc}[K\r\nclaude: first answer, reworded{Esc}[K\r\nclaude: second answer, reworded{Esc}[K\r\nRead 1 file{Esc}[K\r\nclaude: more old text{Esc}[K{Esc}[?25h");
+        Feed(model, $"{Esc}[?25l\r\nclaude: still more old text{Esc}[K\r\nauto mode on (shift+tab to cycle){Esc}[K\r\n${Esc}[K{Esc}[?25h");
+        model.EndFrame();
+        Assert.Equal(["claude: first answer", "claude: second answer"], Visible(model).Where(t => t.Length > 0));
+
+        // The first draw of a session lands on a screen with no text at all: that is not a repaint.
+        var fresh = new SessionModel(80, 6);
+        Feed(fresh, $"{Esc}[?25l{Esc}[Hclaude: hello{Esc}[K\r\nauto mode on (shift+tab to cycle){Esc}[K\r\n${Esc}[K{Esc}[?25h");
+        fresh.EndFrame();
+        Assert.Equal(["claude: hello"], Visible(fresh));
+    }
+
+    [Fact]
     public void Rewriting_a_row_updates_the_same_line()
     {
         // On the second row: Claude's frames never rewrite the top row over conversation (that is a repaint).

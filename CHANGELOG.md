@@ -2,6 +2,7 @@
 
 ## Unreleased
 
+- AxClaude: old turns read out again at the end of a long reply, the "déjà vu" of long sessions since September, is fixed. Claude Code sometimes repaints the whole conversation from the top of the screen; the app hides that burst, but only when the top row of the screen held text, and a repaint that found a blank line there went through as new lines, which Speak replies read. Found in a raw recording of 2026-10-17 with three repaints, one of them leaking. The app now takes any cursor-home without an erase onto a screen that shows text as a repaint.
 - AxClaude: the status row of a running subagent ("◯ general-purpose Checking callers 2m 15s · ↓ 1.2k tokens", one per agent while Claude Code's Agent tool runs) is screen decoration now, like the spinner. It was taken for reply text and, redrawn every second, was spoken again and again by Speak replies for as long as the agent ran.
 
 ## 2.7.0 - 2026-10-17
