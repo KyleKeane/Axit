@@ -1,10 +1,10 @@
 # Changelog
 
-## Unreleased
+## 2.7.0 - 2026-10-17
 
-- AxClaude: a tool line, a tool's output or a thinking line is never a paragraph for p, Shift+P and Ctrl+Alt+P, blank line in front or not; t finds the tool lines. Reading every paragraph of a turn heard its tool calls among them.
 - AxClaude: Ctrl+3 goes to the newest reply from anywhere, next to Ctrl+1 for the message field and Ctrl+2 for the conversation. It is the key of Navigate, Latest response, which was Ctrl+Shift+O. For the last line of any other kind: Ctrl+End, then Shift with its letter.
 - AxClaude: Ctrl+Alt with a quick key letter, from anywhere, reads every line of that kind from the caret's line to the end of the conversation in one go, without moving the caret: Ctrl+3 to the newest reply, then Ctrl+Alt+P for its prose, each paragraph whole, Ctrl+Alt+H for its headings, Ctrl+Alt+C for Claude's lines, and so on for every quick key letter. Control stops NVDA; "No next paragraph" when there is nothing of the kind below.
+- AxClaude: a tool line, a tool's output or a thinking line is never a paragraph for p and Shift+P, blank line in front or not; t finds the tool lines.
 
 ## 2.6.1 - 2026-10-16
 
