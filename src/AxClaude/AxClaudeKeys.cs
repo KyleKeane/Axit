@@ -16,14 +16,14 @@ public static class AxClaudeKeys
     public const Keys SendNow = Keys.Control | Keys.Shift | Keys.S;
     public const Keys SendCtrlC = Keys.Control | Keys.Shift | Keys.C;
     public const Keys NextPermissionMode = Keys.Control | Keys.Shift | Keys.M;
-    /// <summary>Ctrl+Shift with a quick key letter, from anywhere: the conversation takes the focus and the caret goes to the last line of that kind (FR-5, D36). A key of this table with the same letters wins: Ctrl+Shift+S stays Send now.</summary>
-    public const Keys JumpToLast = Keys.Control | Keys.Shift;
+    /// <summary>Ctrl+Alt with a quick key letter, from anywhere: the conversation takes the focus and the caret goes to the last line of that kind (FR-5, D36).</summary>
+    public const Keys JumpToLast = Keys.Control | Keys.Alt;
 
-    /// <summary>The Navigate menu's name for Ctrl+Shift+O, the last output marker.</summary>
+    /// <summary>The Navigate menu's name for Ctrl+Alt+O, the last output marker.</summary>
     public const Keys LatestResponse = JumpToLast | Keys.O;
 
-    /// <summary>Ctrl+Alt with a quick key letter, from anywhere: every line of that kind from the caret's line to the end, spoken once (FR-5, D36).</summary>
-    public const Keys ReadToEnd = Keys.Control | Keys.Alt;
+    /// <summary>Ctrl+Shift with a quick key letter, from anywhere: every line of that kind from the caret's line to the end, spoken once (FR-5, D36). A key of this table with the same letters wins: Ctrl+Shift+S stays Send now.</summary>
+    public const Keys ReadToEnd = Keys.Control | Keys.Shift;
     public const Keys BookmarkLine = Keys.Control | Keys.Shift | Keys.K;
     public const Keys OpenFolder = Keys.Control | Keys.W;
     public const Keys NewSession = Keys.Control | Keys.N;
@@ -77,8 +77,8 @@ public static class AxClaudeKeys
         ("Send Ctrl+C", SendCtrlC),
         ("Next permission mode", NextPermissionMode),
         ("Latest response", LatestResponse),
-        ("Go to the last: Ctrl+Shift with a quick key letter", JumpToLast),
-        ("Read to the end: Ctrl+Alt with a quick key letter", ReadToEnd),
+        ("Go to the last: Ctrl+Alt with a quick key letter", JumpToLast),
+        ("Read to the end: Ctrl+Shift with a quick key letter", ReadToEnd),
         ("Bookmark this line", BookmarkLine),
         ("Open the current folder", OpenFolder),
         ("New session", NewSession),

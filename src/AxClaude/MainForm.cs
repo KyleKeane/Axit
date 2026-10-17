@@ -351,7 +351,7 @@ internal sealed class MainForm : Form
                 return true;
         }
 
-        // Ctrl+Shift with a quick key letter goes to the last line of that kind, and Ctrl+Alt with one reads that
+        // Ctrl+Alt with a quick key letter goes to the last line of that kind, and Ctrl+Shift with one reads that
         // kind to the end, from anywhere (FR-5, D36). A key of the table's own, Send now on Ctrl+Shift+S, wins: the
         // menus take it below.
         var modifiers = keyData & Keys.Modifiers;

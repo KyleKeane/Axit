@@ -117,7 +117,7 @@ internal sealed class TranscriptView : TextBox
     }
 
     /// <summary>
-    /// Ctrl+Shift with a quick key letter, or Navigate → Latest response (FR-5, D36): focuses the view and puts the
+    /// Ctrl+Alt with a quick key letter, or Navigate → Latest response (FR-5, D36): focuses the view and puts the
     /// caret on the last line that key would stop at; `No response yet` and so on when there is none. False for a
     /// letter that is no quick key.
     /// </summary>
@@ -440,7 +440,7 @@ internal sealed class TranscriptView : TextBox
         key.Matches(_mirror.LineAt(index)) && (key.Previous is null || index == 0 || key.Previous(_mirror.LineAt(index), _mirror.LineAt(index - 1)));
 
     /// <summary>
-    /// Ctrl+Alt with a quick key letter (FR-5, D36): every line that key would stop at, from the caret's line to the
+    /// Ctrl+Shift with a quick key letter (FR-5, D36): every line that key would stop at, from the caret's line to the
     /// end of the conversation, spoken as one notification with the text each jump would say, wrapped rows joined;
     /// the caret stays. False for a letter that is no quick key.
     /// </summary>
