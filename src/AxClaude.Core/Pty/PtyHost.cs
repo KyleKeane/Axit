@@ -151,10 +151,9 @@ public sealed class PtyHost : IDisposable
         return host;
     }
 
-    public void Write(string text) => Write(Encoding.UTF8.GetBytes(text));
-
-    public void Write(byte[] bytes)
+    public void Write(string text)
     {
+        var bytes = Encoding.UTF8.GetBytes(text);
         lock (_writeLock)
         {
             if (_disposed || HasExited)

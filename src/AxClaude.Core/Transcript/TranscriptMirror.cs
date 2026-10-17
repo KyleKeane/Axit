@@ -432,7 +432,7 @@ public sealed class TranscriptMirror
             return "\r\n";
         }
 
-        return line.Text.StartsWith(' ') ? string.Empty : " ";
+        return SeparatorBefore(line);
     }
 
     private bool EndsWithBreak(Line row)

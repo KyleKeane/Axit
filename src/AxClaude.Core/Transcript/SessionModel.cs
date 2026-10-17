@@ -182,9 +182,10 @@ public sealed partial class SessionModel
         JoinWrappedRows();
         HandleEchoes();
         PlaceBlocksWithoutEcho();
-        PromptPending = CursorWaitsForAnswer();
-        PendingQuestion = PromptPending ? ReadPendingQuestion() : null;
-        TextPrompt = PromptPending ? CursorTextPrompt() : null;
+        var promptRow = PromptRowAtCursor();
+        PromptPending = promptRow >= 0;
+        PendingQuestion = PromptPending ? QuestionReader.Read(ScreenRows(), promptRow) : null;
+        TextPrompt = PromptPending && _screen.LineAt(promptRow) is { } prompt && LineClassifier.IsTextPrompt(prompt.Text) ? prompt.Text : null;
         // A screen of Claude's that waits on its hint row waits for the user just as a question does (D33).
         PendingScreen = PromptPending || !DetectScreens ? null : ReadPendingScreen();
         PromptPending |= PendingScreen is not null;
@@ -346,7 +347,7 @@ public sealed partial class SessionModel
         for (var i = start; i < end; i++)
         {
             var line = _lines[i];
-            if (line.Hidden || line.IsMarker || !IsPastMessage(line.Text))
+            if (line.Hidden || line.IsMarker || !IsPastMessage(line))
             {
                 continue;
             }
@@ -379,15 +380,15 @@ public sealed partial class SessionModel
         }
     }
 
-    /// <summary>A replayed message row: <c>you:</c> followed by something other than a slash command.</summary>
-    private static bool IsPastMessage(string text)
+    /// <summary>A replayed message row: a <c>you:</c> row followed by something other than a slash command.</summary>
+    private static bool IsPastMessage(Line line)
     {
-        if (!text.StartsWith("you:", StringComparison.Ordinal))
+        if (line.Kind != LineKind.UserEcho)
         {
             return false;
         }
 
-        var rest = text.AsSpan("you:".Length).TrimStart();
+        var rest = line.Text.AsSpan("you:".Length).TrimStart();
         return rest.Length > 0 && rest[0] != '/';
     }
 
@@ -402,12 +403,12 @@ public sealed partial class SessionModel
                 continue;
             }
 
-            if (line.Text.StartsWith("you:", StringComparison.Ordinal))
+            if (line.Kind == LineKind.UserEcho)
             {
                 return -1;
             }
 
-            if (line.Text.StartsWith("claude:", StringComparison.Ordinal) || line.Text.StartsWith("thinking:", StringComparison.Ordinal) || line.Text.StartsWith("tool", StringComparison.Ordinal))
+            if (line.Kind is LineKind.ClaudeReply or LineKind.Thinking or LineKind.Tool or LineKind.ToolError)
             {
                 return j;
             }
@@ -459,13 +460,7 @@ public sealed partial class SessionModel
         // A message queued for the Claude that is being stopped never reaches it: its block goes in here, at the end
         // of the old run, so that what was sent is on record with no reply after it, and nothing waits for an echo
         // from the next run (FR-4.7).
-        foreach (var send in _pending)
-        {
-            if (!send.Placed)
-            {
-                InsertBlock(send, AnchorIndex());
-            }
-        }
+        PlaceHeldBlocks();
 
         _pending.Clear();
         QueuedMessages = 0;
@@ -641,8 +636,10 @@ public sealed partial class SessionModel
 
     /// <summary>
     /// Hides interface rows: everything below the cursor row, the prompt row itself, and the contiguous block of
-    /// mode, spinner and tip rows directly above it. Returns the topmost line of that block, which is where the
-    /// next marker is inserted.
+    /// mode, spinner and tip rows directly above it; then the slash-command completion list and the draft row
+    /// (<see cref="HideCompletionRows"/>). On the way it reads the spinner, the mode line, the background count and
+    /// whether Claude works, counts the queued messages, follows Claude's detailed view and raises Claude's own
+    /// announcements. Returns the topmost line of the chrome block, which is where the next marker is inserted.
     /// </summary>
     private Line? ApplyChrome(out string? spinner, out string? mode, out string? background, out bool working)
     {
@@ -755,7 +752,22 @@ public sealed partial class SessionModel
         }
 
         TranscriptViewOpen = transcriptView;
+        HideCompletionRows(cy);
 
+        if (announcements is not null)
+        {
+            foreach (var announcement in announcements)
+            {
+                Announcement?.Invoke(announcement);
+            }
+        }
+
+        return anchor;
+    }
+
+    /// <summary>The slash-command completion list and the draft row, hidden wherever they stand above the cursor row (FR-3.5 d).</summary>
+    private void HideCompletionRows(int cy)
+    {
         // The slash-command completion list sits directly above the echoed draft row (`$ /ex`), and both can be left
         // above the cursor: a frame can end with the cursor inside the list before the draft row is printed, and after
         // /exit Claude prints its last lines under them. The draft row is hidden wherever it is, and list rows only as
@@ -791,16 +803,6 @@ public sealed partial class SessionModel
         {
             HideRows(runStart, cy);
         }
-
-        if (announcements is not null)
-        {
-            foreach (var announcement in announcements)
-            {
-                Announcement?.Invoke(announcement);
-            }
-        }
-
-        return anchor;
 
         void HideRows(int from, int to)
         {
@@ -959,6 +961,12 @@ public sealed partial class SessionModel
             return;
         }
 
+        PlaceHeldBlocks();
+    }
+
+    /// <summary>Inserts the exchange block of every held message that has none yet, at the anchor (FR-4.7).</summary>
+    private void PlaceHeldBlocks()
+    {
         foreach (var send in _pending)
         {
             if (!send.Placed)
@@ -1117,42 +1125,21 @@ public sealed partial class SessionModel
     }
 
     /// <summary>
-    /// Claude waits for an answer when the cursor sits on a prompt row (<c>Enter selection</c>, <c>Enter y/n</c>,
-    /// <c>Select with numbers</c>) or on the blank row under one. Only the cursor row counts: a tool result or a
-    /// replay can quote such text anywhere else (§4.4).
+    /// The row of the prompt Claude waits on: the cursor row when it holds prompt text (<c>Enter selection</c>,
+    /// <c>Enter y/n</c>, <c>Select with numbers</c>, <c>Enter text for</c>), else the row above a blank cursor row
+    /// when that one does; -1 when Claude waits on nothing. Only the cursor row counts: a tool result or a replay can
+    /// quote such text anywhere else (§4.4).
     /// </summary>
-    private bool CursorWaitsForAnswer()
+    private int PromptRowAtCursor()
     {
         var cy = _screen.CursorRow;
         var line = _screen.LineAt(cy);
         if (line is not null && LineClassifier.IsPromptText(line.Text))
         {
-            return true;
+            return cy;
         }
 
-        return (line is null || line.Text.Length == 0) && cy > 0 && _screen.LineAt(cy - 1) is { } above && LineClassifier.IsPromptText(above.Text);
-    }
-
-    /// <summary>The "Enter text for …" row when it is the cursor row or the row above a blank cursor row, else null.</summary>
-    private string? CursorTextPrompt()
-    {
-        var cy = _screen.CursorRow;
-        var row = (_screen.LineAt(cy)?.Text ?? string.Empty).Trim();
-        if (row.Length == 0 && cy > 0)
-        {
-            row = (_screen.LineAt(cy - 1)?.Text ?? string.Empty).Trim();
-        }
-
-        return LineClassifier.IsTextPrompt(row) ? row : null;
-    }
-
-    /// <summary>The question on the rows around the cursor: its prompt row is the cursor row or the row above a blank cursor row.</summary>
-    private Question? ReadPendingQuestion()
-    {
-        var rows = ScreenRows();
-        var cy = _screen.CursorRow;
-        var promptRow = LineClassifier.IsPromptText(rows[cy].Trim()) ? cy : cy - 1;
-        return QuestionReader.Read(rows, promptRow);
+        return (line is null || line.Text.Length == 0) && cy > 0 && _screen.LineAt(cy - 1) is { } above && LineClassifier.IsPromptText(above.Text) ? cy - 1 : -1;
     }
 
     /// <summary>
