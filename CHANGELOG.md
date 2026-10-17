@@ -3,9 +3,9 @@
 ## Unreleased
 
 - AxClaude: a tool line, a tool's output or a thinking line is never a paragraph for p, Shift+P, Ctrl+Alt+P and Ctrl+Shift+P, blank line in front or not; t finds the tool lines. Reading every paragraph of a turn heard its tool calls among them.
-- AxClaude: Ctrl+3 goes to the newest reply from anywhere, next to Ctrl+1 for the message field and Ctrl+2 for the conversation. It is the key of Navigate, Latest response, which was Ctrl+Shift+O.
-- AxClaude: Ctrl+Alt with a quick key letter, from anywhere, goes to the last line of that kind in the conversation: Ctrl+Alt+O the newest reply (the same as Ctrl+3), Ctrl+Alt+I your newest message, Ctrl+Alt+H the last heading, Ctrl+Alt+C the last "claude:" line, and so on for every quick key letter; "No input yet" and the like when there is none.
-- AxClaude: Ctrl+Shift with a quick key letter, from anywhere, reads every line of that kind from the caret's line to the end of the conversation in one go, without moving the caret: Ctrl+Alt+O to the newest reply, then Ctrl+Shift+P for its paragraphs, Ctrl+Shift+H for its headings, and so on for o, i, t, e, d, q and 1 to 6. Control stops NVDA; "No next paragraph" when there is nothing of the kind below. Ctrl+Shift+C, S, K and R keep their jobs (Send Ctrl+C, Send now, Bookmark this line, Force Claude to restart).
+- AxClaude: Ctrl+3 goes to the newest reply from anywhere, next to Ctrl+1 for the message field and Ctrl+2 for the conversation. It is the key shown on Navigate, Latest response; Ctrl+Shift+O still goes there too.
+- AxClaude: Ctrl+Shift with a quick key letter, from anywhere, goes to the last line of that kind in the conversation: Ctrl+Shift+O the newest reply (as before, and the same as Ctrl+3), Ctrl+Shift+I your newest message, Ctrl+Shift+H the last heading, and so on for p, t, e, d, q and 1 to 6; "No input yet" and the like when there is none. Ctrl+Shift+C, S, K and R keep their jobs (Send Ctrl+C, Send now, Bookmark this line, Force Claude to restart).
+- AxClaude: Ctrl+Alt with a quick key letter, from anywhere, reads every line of that kind from the caret's line to the end of the conversation in one go, without moving the caret: Ctrl+3 to the newest reply, then Ctrl+Alt+P for its paragraphs, Ctrl+Alt+H for its headings, Ctrl+Alt+C for Claude's lines, and so on for every quick key letter. Control stops NVDA; "No next paragraph" when there is nothing of the kind below.
 
 ## 2.6.1 - 2026-10-16
 
