@@ -8,10 +8,7 @@ public class ScreenTests
     [Fact]
     public void The_tasks_recording_waits_on_its_hint_row()
     {
-        const string name = "tasks-screen-claude2.1.281-240x50.vt";
-        var model = new SessionModel(240, 50);
-        model.Feed(TestHelpers.Fixture(name));
-        model.EndFrame();
+        var model = TestHelpers.ParseFixture("tasks-screen-claude2.1.281-240x50.vt");
 
         var screen = Assert.IsType<ClaudeScreen>(model.PendingScreen);
         Assert.True(model.PromptPending);

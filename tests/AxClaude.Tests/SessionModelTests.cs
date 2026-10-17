@@ -6,8 +6,6 @@ namespace AxClaude.Tests;
 
 public class SessionModelTests
 {
-    private const string Esc = "\x1b";
-
     [Fact]
     public void Send_prints_the_exchange_block_and_hides_the_echo()
     {
@@ -242,6 +240,21 @@ public class SessionModelTests
         Feed(model, $"{Esc}[?25lclaude: First part\r\n\r\nA paragraph.\r\n\r\nDetails\r\n\r\n- item\r\n\r\nls -la\r\ngit init\r\n\r\nThe end.\r\ntool: Bash (dotnet test)\r\n=== tests ===\r\n\r\nPassed\r\nBaked for 1s · done 2:47 PM\r\nauto mode on (shift+tab to cycle)\r\n${Esc}[?25h");
         var headings = model.Lines.Where(l => l.HeadingLevel > 0).Select(l => $"{l.HeadingLevel}:{l.Text}").ToList();
         Assert.Equal(["2:claude: First part", "2:Details"], headings);
+    }
+
+    [Theory]
+    [InlineData("# Title", 1)]
+    [InlineData("## Title", 2)]
+    [InlineData("###### Title", 6)]
+    [InlineData("####### Title", 0)]
+    [InlineData("#Title", 0)]
+    [InlineData("## ", 0)]
+    public void Raw_markdown_hashes_are_the_heading_level_wherever_the_row_is(string text, int level)
+    {
+        // Between two code lines inside a reply and in tool output outside one, where no structural heading can be (SPEC.md 7.6).
+        Assert.Equal(level, LineClassifier.HeadingLevel(text, LineKind.Plain, "```markdown", "```", inReply: true));
+        Assert.Equal(level, LineClassifier.HeadingLevel(text, LineKind.Plain, "", "", inReply: false));
+        Assert.Equal(level, LineClassifier.HeadingLevel("claude: " + text, LineKind.ClaudeReply, null, "more text", inReply: true));
     }
 
     [Fact]

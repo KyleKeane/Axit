@@ -253,7 +253,6 @@ public class TranscriptMirrorTests
     [MemberData(nameof(FixtureTests.Fixtures), MemberType = typeof(FixtureTests))]
     public void Edits_reproduce_the_visible_text_and_keep_the_caret_on_its_line_for_every_frame(string name)
     {
-        var bytes = Fixture(name);
         var (columns, rows) = FixtureSize(name);
         var model = new SessionModel(columns, rows);
         var mirror = new TranscriptMirror();
@@ -295,15 +294,7 @@ public class TranscriptMirrorTests
             }
         };
 
-        var random = new Random(name.Length);
-        var offset = 0;
-        while (offset < bytes.Length)
-        {
-            var length = Math.Min(random.Next(1, 300), bytes.Length - offset);
-            model.Feed(bytes.AsSpan(offset, length));
-            offset += length;
-        }
-
+        FeedInRandomChunks(model, Fixture(name), name.Length);
         model.EndFrame();
         Assert.True(frames > 1, $"Only {frames} frames");
     }

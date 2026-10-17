@@ -12,8 +12,6 @@ namespace AxClaude.Tests;
 /// </summary>
 public class ArrivalsTests
 {
-    private const string Esc = "\x1b";
-
     [Fact]
     public void A_block_printed_in_one_frame_is_one_utterance_and_important_takes_its_first_line()
     {
@@ -206,7 +204,7 @@ public class ArrivalsTests
         var heard = Listen(model, ReplySpeechMode.All);
         var headlines = Listen(model, ReplySpeechMode.FirstLines);
         var calls = Listen(model, ReplySpeechMode.None, toolCalls: true);
-        Replay(model, fixture, sent);
+        ReplayInFixedChunks(model, fixture, sent);
 
         // Every reply line after a live marker was heard, in one piece per frame, and nothing else was.
         var replyLines = new List<string>();
@@ -254,12 +252,7 @@ public class ArrivalsTests
         var model = new SessionModel(240, 50);
         var heard = Listen(model, ReplySpeechMode.FirstLines, toolCalls: true);
         var calls = Listen(model, ReplySpeechMode.None, toolCalls: true);
-        Replay(model, "steering-claude2.1.278-240x50.vt",
-        [
-            "Use the Bash tool to run the command: sleep 20. After it finishes reply with exactly OK DONE.",
-            "Second message sent while you were busy: after OK DONE also write the word HELLO on its own line.",
-            "Reply with the number of lines in this message and the text of its last line.\nThis is the second line.",
-        ]);
+        Replay(model, Steering, SteeringMessages);
 
         // The tool row arrives in the frame after the opening line, which it makes final: one utterance for both.
         Assert.Equal(["tool: Bash (sleep 20)"], calls.Speech);
@@ -292,8 +285,11 @@ public class ArrivalsTests
         return heard;
     }
 
-    /// <summary>Feeds the recording in small chunks; each message is sent, as the app does, before its draft appears in the stream.</summary>
-    private static void Replay(SessionModel model, string fixture, string[] sent)
+    /// <summary>
+    /// Feeds a recording without a chunk index (the conversation fixtures) in 64-byte chunks; each message is sent, as
+    /// the app does, before its draft appears in the stream.
+    /// </summary>
+    private static void ReplayInFixedChunks(SessionModel model, string fixture, string[] sent)
     {
         var bytes = Fixture(fixture);
         var sendAt = new List<int>();

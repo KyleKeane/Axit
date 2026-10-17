@@ -35,23 +35,13 @@ public class FixtureTests
     [MemberData(nameof(Fixtures))]
     public void Fixture_parses_the_same_regardless_of_chunking(string name)
     {
-        var bytes = Fixture(name);
-        var whole = Visible(ParseFixture(name));
-
-        var random = new Random(name.Length);
+        var whole = ParseFixture(name);
         var (columns, rows) = FixtureSize(name);
         var chunked = new SessionModel(columns, rows);
-        var offset = 0;
-        while (offset < bytes.Length)
-        {
-            var length = Math.Min(random.Next(1, 300), bytes.Length - offset);
-            chunked.Feed(bytes.AsSpan(offset, length));
-            offset += length;
-        }
-
+        FeedInRandomChunks(chunked, Fixture(name), name.Length);
         chunked.EndFrame();
-        Assert.Equal(whole, Visible(chunked));
-        Assert.Equal(TranscriptMirror.Render(ParseFixture(name).Lines), TranscriptMirror.Render(chunked.Lines));
+        Assert.Equal(Visible(whole), Visible(chunked));
+        Assert.Equal(TranscriptMirror.Render(whole.Lines), TranscriptMirror.Render(chunked.Lines));
     }
 
     [Fact]

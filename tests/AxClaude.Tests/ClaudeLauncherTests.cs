@@ -46,4 +46,22 @@ public class ClaudeLauncherTests
         Assert.Equal(arguments, ClaudeLauncher.SplitArguments(line));
         Assert.Equal([@"C:\Dir With Space\", "--verbose"], ClaudeLauncher.SplitArguments(@"""C:\Dir With Space\\"" --verbose"));
     }
+
+    [Fact]
+    public void The_command_line_quotes_the_executable_and_the_arguments_that_need_it()
+    {
+        Assert.Equal(
+            @"""C:\Tools\claude.exe"" --ax-screen-reader --name ""my feature""",
+            ClaudeLauncher.BuildCommandLine(@"C:\Tools\claude.exe", ["--ax-screen-reader", "--name", "my feature"]));
+    }
+
+    [Fact]
+    public void A_cmd_wrapper_runs_through_cmd_exe_with_the_whole_line_quoted_once_more()
+    {
+        // cmd /s strips the outer quotes, leaving the quoted path and the arguments as they are; the extension's case does not matter.
+        Assert.Equal(
+            @"cmd.exe /d /s /c """"C:\npm\claude.cmd"" --name ""my feature""""",
+            ClaudeLauncher.BuildCommandLine(@"C:\npm\claude.cmd", ["--name", "my feature"]));
+        Assert.StartsWith("cmd.exe /d /s /c ", ClaudeLauncher.BuildCommandLine(@"C:\npm\CLAUDE.CMD", ["--continue"]));
+    }
 }

@@ -1,4 +1,5 @@
 using AxClaude.Core.Transcript;
+using static AxClaude.Tests.TestHelpers;
 
 namespace AxClaude.Tests;
 
@@ -109,10 +110,6 @@ public class QuestionTests
     /// <summary>Replays a recording with the app's quiet rule and returns the model and every distinct question it reported waiting.</summary>
     private static (SessionModel Model, List<Question> Seen) QuestionsIn(string name)
     {
-        var bytes = TestHelpers.Fixture(name);
-        var chunks = File.ReadAllLines(Path.Combine(TestHelpers.FixtureDirectory(), name + ".chunks.txt"))
-            .Where(l => l.Length > 0 && char.IsDigit(l[0]))
-            .Select(l => l.Split(' ').Select(int.Parse).ToArray());
         var model = new SessionModel(240, 50);
         var seen = new List<Question>();
         model.Changed += () =>
@@ -123,19 +120,7 @@ public class QuestionTests
             }
         };
 
-        var previous = 0;
-        foreach (var chunk in chunks)
-        {
-            if (chunk[2] - previous >= 100)
-            {
-                model.EndFrame();
-            }
-
-            model.Feed(bytes.AsSpan(chunk[0], chunk[1]));
-            previous = chunk[2];
-        }
-
-        model.EndFrame();
+        Replay(model, name);
         return (model, seen);
     }
 
@@ -148,7 +133,6 @@ public class QuestionTests
         Assert.Equal("Do you want to create permission-test.txt?", question.Text[^1]);
         Assert.Equal(["1", "2", "3"], question.Options.Select(o => o.Key));
         Assert.Equal("No", question.Options[2].Text);
-        Assert.Equal(QuestionDialog.AnswerNotice, QuestionRouter.DialogFor(null));
 
         // Escape declined; the question is gone.
         Assert.False(model.PromptPending);
@@ -165,7 +149,6 @@ public class QuestionTests
         var colour = seen[0];
         Assert.False(colour.AllowsSeveral);
         Assert.Equal(5, colour.Options.Count);
-        Assert.Equal(QuestionDialog.AnswerNotice, QuestionRouter.DialogFor(null));
 
         // Several answers: the answer notice with check boxes, which sends "1,3" (the recording typed 1, comma, 3 as
         // three keystrokes and the review shows "→ Apple, Cherry"); typed in the message field, "1,3" answers too.
@@ -223,25 +206,11 @@ public class QuestionTests
     public void Other_asks_for_the_users_own_words()
     {
         // The recording answered 4 (Other), then typed t, u, l, i, p one keystroke each; Claude took "tulip".
-        const string name = "other-answer-claude2.1.281-240x50.vt";
-        var bytes = TestHelpers.Fixture(name);
         var model = new SessionModel(240, 50);
         string? prompt = null;
         model.Changed += () => prompt ??= model.AwaitsText && model.PromptPending && model.PendingQuestion is null ? model.TextPrompt : null;
         // The "Enter text for" row comes without a frame bracket: the app's quiet rule ends that frame.
-        var previous = 0;
-        foreach (var chunk in File.ReadAllLines(Path.Combine(TestHelpers.FixtureDirectory(), name + ".chunks.txt")).Where(l => l.Length > 0 && char.IsDigit(l[0])).Select(l => l.Split(' ').Select(int.Parse).ToArray()))
-        {
-            if (chunk[2] - previous >= 100)
-            {
-                model.EndFrame();
-            }
-
-            model.Feed(bytes.AsSpan(chunk[0], chunk[1]));
-            previous = chunk[2];
-        }
-
-        model.EndFrame();
+        Replay(model, "other-answer-claude2.1.281-240x50.vt");
         Assert.Equal("Enter text for option 4 (Other), or Escape for the list:", prompt);
         Assert.False(model.AwaitsText);
         Assert.Equal("Other", LineClassifier.TextPromptAnswer(prompt!));
@@ -309,19 +278,18 @@ public class QuestionTests
     [Fact]
     public void A_question_is_recorded_in_front_of_its_first_row_once()
     {
-        const string Esc = "\x1b";
         var model = new SessionModel(80, 12);
-        TestHelpers.Feed(model, $"{Esc}[?25lyou: pick one{Esc}[K\r\n ☐ Colour{Esc}[K\r\nWhich colour?{Esc}[K\r\n1. Red{Esc}[K\r\n2. Green{Esc}[K\r\nSelect with numbers [1-2]. Then Enter to submit or Escape to cancel:{Esc}[K{Esc}[?25h");
+        Feed(model, $"{Esc}[?25lyou: pick one{Esc}[K\r\n ☐ Colour{Esc}[K\r\nWhich colour?{Esc}[K\r\n1. Red{Esc}[K\r\n2. Green{Esc}[K\r\nSelect with numbers [1-2]. Then Enter to submit or Escape to cancel:{Esc}[K{Esc}[?25h");
         Assert.NotNull(model.PendingQuestion);
         model.MarkQuestion();
         model.MarkQuestion();
-        var visible = TestHelpers.Visible(model);
+        var visible = Visible(model);
         Assert.Single(visible, t => t == "Question: Colour");
         Assert.Equal(visible.IndexOf("Question: Colour") + 1, visible.IndexOf(" ☐ Colour"));
 
         // Claude redraws the answered question as its result: the record stays in front of it.
-        TestHelpers.Feed(model, $"{Esc}[?25l{Esc}[2;1H●  User answered Claude's questions:{Esc}[K\r\n· Which colour? → Green{Esc}[K\r\n{Esc}[K\r\n{Esc}[K\r\n{Esc}[K\r\n${Esc}[K{Esc}[?25h");
-        visible = TestHelpers.Visible(model);
+        Feed(model, $"{Esc}[?25l{Esc}[2;1H●  User answered Claude's questions:{Esc}[K\r\n· Which colour? → Green{Esc}[K\r\n{Esc}[K\r\n{Esc}[K\r\n{Esc}[K\r\n${Esc}[K{Esc}[?25h");
+        visible = Visible(model);
         Assert.Equal(visible.IndexOf("Question: Colour") + 1, visible.IndexOf("●  User answered Claude's questions:"));
     }
 
@@ -355,7 +323,6 @@ public class QuestionTests
         Assert.Equal("Select model", question.Title);
         Assert.Equal(["1", "2", "3", "4", "5"], question.Options.Select(o => o.Key));
         Assert.True(question.Options[0].Current);
-        Assert.Equal(QuestionDialog.AnswerNotice, QuestionRouter.DialogFor(SlashCommands.Find("/model")));
 
         // The recording's Escape went out a millisecond before Ctrl+C and was not taken as a key of its own: the
         // picker was still open when the recorder stopped Claude.

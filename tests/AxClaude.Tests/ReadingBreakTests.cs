@@ -140,7 +140,6 @@ public class ReadingBreakTests
     [MemberData(nameof(FixtureTests.Fixtures), MemberType = typeof(FixtureTests))]
     public void Marking_every_frame_keeps_the_rendering_consistent_and_clearing_restores_the_plain_text(string name)
     {
-        var bytes = Fixture(name);
         var (columns, rows) = FixtureSize(name);
         var model = new SessionModel(columns, rows);
         var mirror = new TranscriptMirror();
@@ -159,15 +158,7 @@ public class ReadingBreakTests
             }
         };
 
-        var random = new Random(name.Length);
-        var offset = 0;
-        while (offset < bytes.Length)
-        {
-            var count = Math.Min(bytes.Length - offset, random.Next(1, 300));
-            model.Feed(bytes.AsSpan(offset, count));
-            offset += count;
-        }
-
+        FeedInRandomChunks(model, Fixture(name), name.Length);
         model.EndFrame();
         mirror.ClearBreaks();
         Apply(text, mirror.Update(model.Lines));
