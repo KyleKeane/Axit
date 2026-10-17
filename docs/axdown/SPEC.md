@@ -252,7 +252,7 @@ are read and written on the UI thread (a 32 MB file is the ceiling, AD-3.7).
 - **AD-D5 The Notepad title convention**, `*name - AxDown`: short, known, read by NVDA as "star name".
 - **AD-D6 Go to line carries the position.** One key, Ctrl+G, both tells the line and column (in the field's name)
   and moves; a separate "where am I" key would be one more key to learn, and the status bar is there for NVDA+End.
-- **AD-D7 Navigation letters are NVDA's browse-mode letters (Kyle, 2026-10-02).** The defaults are the keys NVDA
+- **AD-D7 Navigation letters are NVDA's browse-mode letters (2026-10-02).** The defaults are the keys NVDA
   users already know from web pages, with Ctrl for the next item and Ctrl+Shift for the previous: H heading, 1 to 6
   a heading of that level, K link, L list, I list item, Q block quote, T table. They are built in that order,
   headings first (Ctrl+H, Ctrl+Shift+H, then the levels), the others as the outline learns them. Known difference:
@@ -286,9 +286,9 @@ the off-screen probe approach of AxClaude checks layout and keys without disturb
 ## 10. Status
 
 - 2.0.0 (2026-10-02): everything in section 4 built (`TextDocument`, `EditorSettings`, `EditorForm`, `AxDownKeys`,
-  the installer's entries, `AxDown.ico`), checked off screen with a probe and by Kyle with NVDA (test plan sections 1
+  the installer's entries, `AxDown.ico`), checked off screen with a probe and by the user with NVDA (test plan sections 1
   to 7). 2.1.0: heading navigation (section 9), checked (section 8). 2.1.1: the window spoken on opening; it had no
   accessible role, so NVDA took it for a nameless pane and spoke only the field, while AxClaude's window, with
   `AccessibleRole.Window`, is spoken as "axclaude - AxClaude window" (the folder's name, then the app's). 2.3.0: the
-  in-place update (bundle AX-2.8, AX-3.2) run by Kyle with NVDA from an older build and no file open: one progress
+  in-place update (bundle AX-2.8, AX-3.2) run by the user with NVDA from an older build and no file open: one progress
   bar through download and install, "Installed. Restarting", AxDown back empty as it was (test plan 7.2).

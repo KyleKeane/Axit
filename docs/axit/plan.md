@@ -33,7 +33,7 @@ use, unchanged. One installer, one updater, one version, one changelog, one rele
 The bundle spec and the document split; the 1.7.0 bridge; `Axit.exe` with AxClaude inside and the tested dispatcher;
 the shared pure code in `Axit.Core`; the installer, publish and release scripts for the bundle; the AxDown
 specification; `AxDown.Core`; the AxDown window and the shared window pieces in `Axit.Forms`; AxDown's installer
-entries and icon; Kyle's NVDA checks and the 2.0.0 release; AxClaude's key table (2.1.0); heading navigation in
+entries and icon; the user's NVDA checks and the 2.0.0 release; AxClaude's key table (2.1.0); heading navigation in
 AxDown (2.1.0); the adding-an-app checklist. After 2.1.0: AxDown's window spoken on opening (2.1.1), the update notice
 with its four buttons and the progress bar (2.2.0), the in-place install with one bar for download and install and
 the restart by the app itself (2.3.0).
@@ -42,10 +42,6 @@ the restart by the app itself (2.3.0).
 
 - The rest of NVDA's letters in AxDown: 1 to 6 for heading levels, K links, L lists, I list items, Q block quotes,
   T tables (AxDown SPEC §9, AD-D7).
-- Two AxClaude bugs seen in the question interface, in `docs/axclaude/SPEC.md` §12 To do: a two-question
-  AskUserQuestion that kept refiring in the control area, and an own-words (Other) answer that reached Claude with
-  most characters dropped. Both need a raw recording first.
-- The NVDA episode of silent notifications, also in §12 To do: to catch with NVDA's log at Input/output level if it
-  returns.
+- AxClaude's open items are in `docs/axclaude/SPEC.md` §12 To do, the one list for them.
 - A shared window base in `Axit.Forms` for the notice and update flows, which exist twice (`MainForm`,
   `EditorForm`), when a third window arrives.

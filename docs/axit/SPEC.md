@@ -305,4 +305,4 @@ docs/axdown/            SPEC.md, user-guide.md (embedded by src/AxDown), nvda-te
   navigation in AxDown. 2.1.1: AxDown's window spoken on opening (`AccessibleRole.Window`).
 - 2.2.0: the update notice with Update and restart, Update and close, and a progress bar for the download.
 - 2.3.0: the in-place install with one bar for download and install and the restart by the app itself (AX-2.8,
-  AX-3.2); Kyle ran the full path from an older build with NVDA. 2.3.1: the documents pruned after the transition.
+  AX-3.2); the user ran the full path from an older build with NVDA. 2.3.1: the documents pruned after the transition.

@@ -3,6 +3,7 @@
 ## Unreleased
 
 - AxClaude: old turns read out again at the end of a long reply, the "déjà vu" of long sessions since September, is fixed. Claude Code sometimes repaints the whole conversation from the top of the screen; the app hides that burst, but only when the top row of the screen held text, and a repaint that found a blank line there went through as new lines, which Speak replies read. Found in a raw recording of 2026-10-17 with three repaints, one of them leaking. The app now takes any cursor-home without an erase onto a screen that shows text as a repaint.
+- For developers: a consistency audit of AxClaude. The repository's brace rule is enforced by every build; dead code is gone (an unused question field, two unreachable command kinds, two single-implementation interfaces); each copied idiom in the window and the Core has one name; the page and paragraph keys and the UI Automation notification are shared pieces of Axit.Forms; the command-line parser lives in AxClaude.Core with tests; the specification, the guide, the test plan and the notes were brought back in line with the code and shortened (history out of the rules, one name per thing, the long decisions split).
 - AxClaude: the status row of a running subagent ("◯ general-purpose Checking callers 2m 15s · ↓ 1.2k tokens", one per agent while Claude Code's Agent tool runs) is screen decoration now, like the spinner. It was taken for reply text and, redrawn every second, was spoken again and again by Speak replies for as long as the agent ran.
 
 ## 2.7.0 - 2026-10-17

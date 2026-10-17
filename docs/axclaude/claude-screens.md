@@ -13,9 +13,8 @@ The app does not need to know the command: the shape of Claude's screen decides.
 3. **A screen's lines and keys.** The cursor sits on a key-hint row (`↑/↓ to select · Enter to view · Esc to close`) or on a tab row (`Settings  Status   Config   Usage   Stats`). The control area lists the screen's lines, then one item per key the hint row names.
 4. **Typed input.** A command that wants text after it goes in the message field, guarded so that a message is not sent into a question by mistake (SPEC.md FR-2.10). An `Enter text for` row (after "Other") gets a field in the control area; the message field also sends your words there without the guard, one keystroke at a time.
 
-## Two gaps in the app today
+## One gap in the app today
 
-- **Screens that wait on a hint row were not noticed** (fixed: they show in the control area and count as waiting). Only the rows `Enter y/n`, `Enter selection`, `Select with numbers` and `Permission Required:` count as a question, so `/status`, `/tasks`, `/ide`, `/rewind`, `/autocompact` and the others below give no "Claude asks", and a message typed then goes into the screen.
 - **Tab screens are hidden from the conversation** (still so; the control area lists their lines). `/status`, `/usage`, `/cost`, `/help` and `/permissions` put the cursor on the tab row at the top, and every row below the cursor is treated as chrome (FR-3.5), so their content never reaches the conversation.
 
 ## Lists of answers
@@ -40,7 +39,7 @@ Recorded with Claude Code 2.1.281 (2026-09-24); every answer is typed one keystr
 
 - Workspace trust at startup: "Permission Required: Accessing workspace", y or n.
 - A tool's permission question (`--permission-mode default`): "Permission Required: Create file" or "Bash command", the command or file and a preview, "Do you want to proceed?", then Yes, Yes and always allow / switch mode, and No as the last answer. A `Tip:` row inside it is skipped. "Tab to amend" draws nothing in screen reader mode and is not offered. No returns to the prompt with "What should Claude do instead?".
-- Plan approval (`--permission-mode plan`): "Permission Required: Ready to code?", Claude's plan as text, then Yes with auto mode, Yes with manual approval, and "No, keep planning", which asks for feedback on an "Enter text for option 3" row: the message field, announced.
+- Plan approval (`--permission-mode plan`): "Permission Required: Ready to code?", Claude's plan as text, then Yes with auto mode, Yes with manual approval, and "No, keep planning", which asks for feedback on an "Enter text for option 3" row: a field in the control area, as after Other.
 - Claude's own question (AskUserQuestion): a header row (" ☐ Colour"), the question, the answers, then Other and "Chat about this". Other asks for your words on an "Enter text for option 4 (Other)" row: the control area holds a field named with the question (Enter sends, Escape goes back to the list). "Chat about this" ends the question like Escape.
 - Several questions in one call: a tab row ("←   ☐ Colour   ☐ Fruit   ✔ Submit   →") above each, one list per question ("Question 1 of 2"), then "Review your answers" with y or n.
 - Several answers allowed ("comma- or space-separated for several"): the list has check boxes; the ticked keys go joined with commas.
