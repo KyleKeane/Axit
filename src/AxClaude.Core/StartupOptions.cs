@@ -1,4 +1,4 @@
-namespace AxClaude;
+namespace AxClaude.Core;
 
 /// <summary>
 /// Command line: <c>Axit claude [&lt;folder&gt;] [--project &lt;folder&gt;] [--claude &lt;path&gt;] [--cols N] [--rows N] [--no-ax]
@@ -7,7 +7,7 @@ namespace AxClaude;
 /// <see cref="ClaudeArgs"/> is null when no <c>--</c> was given (the window then uses <c>--continue</c>, FR-9.1) and
 /// empty after a bare <c>--</c>.
 /// </summary>
-internal sealed record StartupOptions(
+public sealed record StartupOptions(
     string? Folder,
     string? ClaudePath,
     bool NoAx,
