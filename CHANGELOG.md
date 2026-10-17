@@ -1,5 +1,9 @@
 # Changelog
 
+## Unreleased
+
+- AxClaude: an "error:" row from Claude, such as "error: API Error: 401 Invalid API key · Please run /login" when the login has lapsed, is now spoken with Speak replies: first lines or all lines, like a "claude:" row. Such a turn announced "Sent", "Responding" and "Done" and never said why; only the e key found the row.
+
 ## 2.6.0 - 2026-10-14
 
 - Axit: Help, "Check for updates" stays in the menu and asks GitHub again every time, so a user who chose Later on one version can look again; "Update to AxClaude n" (Axit n in AxDown) is a second item below it while a newer release is known. Before, the check item itself turned into the update item. The items "Installed: n" and "Latest release: n" are gone from Help: the version in use is on the Check for updates item ("Check for updates (AxClaude 2.6.0)..."), and About names it with the latest release and the releases page.

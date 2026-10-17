@@ -7,10 +7,10 @@ public enum ReplySpeechMode
 {
     None,
 
-    /// <summary>The <c>claude:</c> row of each message: where Claude says what it is doing or what it found.</summary>
+    /// <summary>The <c>claude:</c> row of each message, where Claude says what it is doing or what it found, and an <c>error:</c> row.</summary>
     FirstLines,
 
-    /// <summary>The <c>claude:</c> row and its unlabelled continuation rows; tool output and thinking never.</summary>
+    /// <summary>The <c>claude:</c> or <c>error:</c> row and its unlabelled continuation rows; tool output and thinking never.</summary>
     All,
 }
 
@@ -21,8 +21,10 @@ public readonly record struct Arrival(bool NewLine, bool ToolCall, string? Speec
 /// One pass over the transcript at the end of every frame, shared by the tick and by speaking replies. The tick
 /// wants to know whether a visible line from Claude arrived: any line that is not one of the app's own. Speech
 /// wants the reply lines after the newest output marker that became final in this frame, as one utterance: a line
-/// is final when it is committed, followed by another visible line, or Claude is idle. Claude prints a whole
-/// message at once in screen reader mode, so a frame often finishes many lines; one notification per line was a
+/// is final when it is committed, followed by another visible line, or Claude is idle. An <c>error:</c> row is a
+/// reply line too: when the login has lapsed it is Claude's whole answer, and a turn that said only Sent,
+/// Responding and Done left the user without a word of why. Claude prints a whole message at once in screen
+/// reader mode, so a frame often finishes many lines; one notification per line was a
 /// burst that NVDA cut short after the first few, and one utterance per frame also reads as prose (D32). A line
 /// counts as spoken by identity and text, because Claude redraws rows in place: the row that held the prompt a
 /// moment ago holds the first reply line next. The <c>tool:</c> row of each tool call joins the utterance when
@@ -101,7 +103,8 @@ public sealed class Arrivals
                 continue;
             }
 
-            if (line.Kind == LineKind.ClaudeReply)
+            // An error: row opens a reply like a claude: row: it is Claude's whole answer when the login has lapsed.
+            if (line.Kind is LineKind.ClaudeReply or LineKind.Error)
             {
                 inReply = true;
             }
@@ -111,7 +114,7 @@ public sealed class Arrivals
             }
 
             var wanted = inReply
-                ? mode == ReplySpeechMode.All || (mode == ReplySpeechMode.FirstLines && line.Kind == LineKind.ClaudeReply)
+                ? mode == ReplySpeechMode.All || (mode == ReplySpeechMode.FirstLines && line.Kind is (LineKind.ClaudeReply or LineKind.Error))
                 : toolCalls && IsToolCall(line);
             if (wanted && line.Text.Length > 0)
             {

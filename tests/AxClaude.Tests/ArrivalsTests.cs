@@ -39,6 +39,32 @@ public class ArrivalsTests
     }
 
     [Fact]
+    public void An_error_row_is_spoken_like_a_reply_in_both_modes_and_never_with_none()
+    {
+        // The login lapsed: Claude's whole answer is one error: row, and the turn said Sent, Responding and Done
+        // without a word of it (2026-10-16).
+        var all = new SessionModel(80, 14);
+        var important = new SessionModel(80, 14);
+        var silent = new SessionModel(80, 14);
+        var heard = Listen(all, ReplySpeechMode.All);
+        var headlines = Listen(important, ReplySpeechMode.FirstLines);
+        var nothing = Listen(silent, ReplySpeechMode.None);
+        const string error = "error: API Error: 401 Invalid API key · Please run /login";
+
+        foreach (var model in new[] { all, important, silent })
+        {
+            Feed(model, $"{Esc}[?25lauto mode on (shift+tab to cycle)\r\n${Esc}[?25h");
+            model.Send("hello");
+            Feed(model, $"{Esc}[?25l{Esc}[1;1Hyou: hello{Esc}[K\r\nThinking…{Esc}[K\r\nauto mode on (shift+tab to cycle)  ·  esc to interrupt{Esc}[K\r\n${Esc}[K{Esc}[?25h");
+            Feed(model, $"{Esc}[?25l{Esc}[2;1H{error}{Esc}[K\r\nauto mode on (shift+tab to cycle){Esc}[K\r\n${Esc}[K{Esc}[?25h");
+        }
+
+        Assert.Equal([error], heard.Speech);
+        Assert.Equal([error], headlines.Speech);
+        Assert.Empty(nothing.Speech);
+    }
+
+    [Fact]
     public void What_was_remembered_about_trimmed_lines_is_forgotten()
     {
         var arrivals = new Arrivals();
