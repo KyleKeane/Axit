@@ -1,4 +1,5 @@
 using System.Runtime.InteropServices;
+using System.Text;
 using System.Windows.Forms.Automation;
 using AxClaude.Core.Transcript;
 using Axit.Forms;
@@ -424,6 +425,36 @@ internal sealed class TranscriptView : TextBox
     }
 
     /// <summary>
+    /// Ctrl+Alt with a quick key letter (FR-5, D36): every line that key would stop at, from the caret's line to the
+    /// end of the conversation, spoken as one notification with the text each jump would say, wrapped rows joined;
+    /// the caret stays. False for a letter that is no quick key, and for o and r: a list of output markers says
+    /// nothing worth hearing, and Ctrl+Alt+O goes to the latest one instead.
+    /// </summary>
+    public bool ReadToEnd(Keys letter)
+    {
+        var key = Array.Find(QuickKeys, k => k.Key == letter);
+        if (key is null || letter is AxClaudeKeys.Response or AxClaudeKeys.ResponseAlso)
+        {
+            return false;
+        }
+
+        var text = new StringBuilder();
+        if (_mirror.LineCount > 0)
+        {
+            for (var i = _mirror.LineIndexAt(SelectionStart); i < _mirror.LineCount; i++)
+            {
+                if (key.Matches(_mirror.LineAt(i)) && (key.Previous is null || i == 0 || key.Previous(_mirror.LineAt(i), _mirror.LineAt(i - 1))))
+                {
+                    Utterance.Append(text, SpokenText(i, whole: true), joinedToPrevious: false);
+                }
+            }
+        }
+
+        Announce(text.Length == 0 ? $"No next {key.Name}" : text.ToString(), true);
+        return true;
+    }
+
+    /// <summary>
     /// Page Up and Page Down move the caret by one screen of wrapped rows and reach the first and last row
     /// (<see cref="EditPaging"/>, shared with the message field). The line left is remembered for Backspace (FR-3.12)
     /// when the caret moved. The screen reader reads the new row itself, so nothing is announced here.
@@ -516,10 +547,28 @@ internal sealed class TranscriptView : TextBox
             RememberJump();
         }
 
-        var line = _mirror.LineAt(index);
         Select(_mirror.StartAt(index) + _mirror.RenderedColumn(index, column), 0);
         ScrollCaretIntoView();
-        var text = line.Text.Length == 0 ? "blank" : line.Text;
+        if (!Announce(prefix + SpokenText(index, whole: false), true))
+        {
+            // No UI Automation notifications: select the line so the screen reader reports the selection.
+            Select(_mirror.StartAt(index), _mirror.RenderedColumn(index, _mirror.TextAt(index).Length));
+        }
+    }
+
+    /// <summary>
+    /// What a jump to a line says: its text (`blank` when empty), a heading with its level, a bookmark with the line
+    /// it marks. <paramref name="whole"/> takes the rows wrapped under the line as well, as the reader sees them.
+    /// </summary>
+    private string SpokenText(int index, bool whole)
+    {
+        var line = _mirror.LineAt(index);
+        var text = whole ? _mirror.DisplayTextAt(index) : line.Text;
+        if (text.Length == 0)
+        {
+            text = "blank";
+        }
+
         if (line.HeadingLevel > 0)
         {
             text += $" heading level {line.HeadingLevel}";
@@ -532,11 +581,7 @@ internal sealed class TranscriptView : TextBox
             text += ", " + (marked.Length == 0 ? "blank" : marked);
         }
 
-        if (!Announce(prefix + text, true))
-        {
-            // No UI Automation notifications: select the line so the screen reader reports the selection.
-            Select(_mirror.StartAt(index), _mirror.RenderedColumn(index, _mirror.TextAt(index).Length));
-        }
+        return text;
     }
 
     [DllImport("user32.dll")]

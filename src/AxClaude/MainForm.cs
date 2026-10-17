@@ -351,6 +351,12 @@ internal sealed class MainForm : Form
                 return true;
         }
 
+        // Ctrl+Alt with a quick key letter reads that kind of line to the end, from anywhere (FR-5, D36).
+        if ((keyData & Keys.Modifiers) == AxClaudeKeys.ReadToEnd && _transcript.ReadToEnd(keyData & Keys.KeyCode))
+        {
+            return true;
+        }
+
         return base.ProcessCmdKey(ref msg, keyData);
     }
 

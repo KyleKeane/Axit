@@ -3,6 +3,7 @@
 ## Unreleased
 
 - AxClaude: Latest response, the jump to the newest reply from anywhere, is Ctrl+Alt+O; it was Ctrl+Shift+O.
+- AxClaude: Ctrl+Alt with a quick key letter, from anywhere, reads every line of that kind from the caret's line to the end of the conversation in one go, without moving the caret: Ctrl+Alt+O to the newest reply, then Ctrl+Alt+P for its paragraphs, Ctrl+Alt+H for its headings, Ctrl+Alt+C for Claude's lines, and so on for t, e, d, s, q, k, i and 1 to 6. Control stops NVDA; "No next paragraph" when there is nothing of the kind below.
 
 ## 2.6.1 - 2026-10-16
 

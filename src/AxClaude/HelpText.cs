@@ -28,6 +28,7 @@ internal static class HelpText
           Ctrl+Shift+C: send Ctrl+C to Claude
           Ctrl+Shift+M: next permission mode
           Ctrl+Alt+O: go to the latest reply
+          Ctrl+Alt and a letter from the Conversation list below (p, h, c, t, e, d, s, q, k, i, 1 to 6): read every line of that kind from the caret to the end of the conversation in one go, without moving. Control stops NVDA
           Ctrl+Shift+K: bookmark the conversation line the caret is on, or take the bookmark away
           Ctrl+Space: background music on or off, and says which
           Ctrl+Plus, Ctrl+Minus: bigger or smaller text

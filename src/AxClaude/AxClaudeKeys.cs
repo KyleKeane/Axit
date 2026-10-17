@@ -18,6 +18,9 @@ public static class AxClaudeKeys
     public const Keys NextPermissionMode = Keys.Control | Keys.Shift | Keys.M;
     /// <summary>The latest output marker, from anywhere (FR-5); Ctrl+Shift+O until 2.6.1.</summary>
     public const Keys LatestResponse = Keys.Control | Keys.Alt | Keys.O;
+
+    /// <summary>Ctrl+Alt with a quick key letter, from anywhere: every line of that kind from the caret's line to the end, spoken once (FR-5, D36).</summary>
+    public const Keys ReadToEnd = Keys.Control | Keys.Alt;
     public const Keys BookmarkLine = Keys.Control | Keys.Shift | Keys.K;
     public const Keys OpenFolder = Keys.Control | Keys.W;
     public const Keys NewSession = Keys.Control | Keys.N;
@@ -71,6 +74,7 @@ public static class AxClaudeKeys
         ("Send Ctrl+C", SendCtrlC),
         ("Next permission mode", NextPermissionMode),
         ("Latest response", LatestResponse),
+        ("Read to the end: Ctrl+Alt with a quick key letter", ReadToEnd),
         ("Bookmark this line", BookmarkLine),
         ("Open the current folder", OpenFolder),
         ("New session", NewSession),
