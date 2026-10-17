@@ -16,6 +16,7 @@ internal static class HelpText
     public const string Shortcuts = """
         Anywhere
           Ctrl+1: go to the message field. Ctrl+2: go to the conversation. Both say where you are, also when you are there already
+          Ctrl+3: go to the latest reply, in the conversation
           Tab, Shift+Tab, Ctrl+Tab or F6: switch between the message field (or Claude's question in its place) and the conversation
           Shift+Escape: interrupt Claude, or close one of Claude's dialogs
           Ctrl+Shift+S: make Claude take up the waiting message now instead of after its current step
@@ -27,7 +28,7 @@ internal static class HelpText
           Ctrl+O: switched off, a reminder says why (Claude's detailed view redraws the conversation in screen reader mode)
           Ctrl+Shift+C: send Ctrl+C to Claude
           Ctrl+Shift+M: next permission mode
-          Ctrl+Alt+O: go to the latest reply. Ctrl+Alt+I: go to your latest message
+          Ctrl+Alt+I: go to your latest message. Ctrl+Alt+O: the latest reply, the same as Ctrl+3
           Ctrl+Alt and a letter from the Conversation list below (h, c, p, t, e, d, s, q, k, 1 to 6, besides i and o): go to the last line of that kind
           Ctrl+Shift and a letter from the Conversation list below (o, i, h, p, t, e, d, q, 1 to 6): read every line of that kind from the caret to the end of the conversation in one go, without moving. Control stops NVDA
           Ctrl+Shift+K: bookmark the conversation line the caret is on, or take the bookmark away

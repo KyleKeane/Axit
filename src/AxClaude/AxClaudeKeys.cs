@@ -12,15 +12,14 @@ public static class AxClaudeKeys
     // Anywhere in the window.
     public const Keys GoToField = Keys.Control | Keys.D1;
     public const Keys GoToConversation = Keys.Control | Keys.D2;
+    /// <summary>Navigate → Latest response: the last output marker, from anywhere, the third place after the field and the conversation (FR-5, FR-6.5). Ctrl+Alt+O, the layer's key for o, does the same.</summary>
+    public const Keys LatestResponse = Keys.Control | Keys.D3;
     public const Keys Interrupt = Keys.Shift | Keys.Escape;
     public const Keys SendNow = Keys.Control | Keys.Shift | Keys.S;
     public const Keys SendCtrlC = Keys.Control | Keys.Shift | Keys.C;
     public const Keys NextPermissionMode = Keys.Control | Keys.Shift | Keys.M;
     /// <summary>Ctrl+Alt with a quick key letter, from anywhere: the conversation takes the focus and the caret goes to the last line of that kind (FR-5, D36).</summary>
     public const Keys JumpToLast = Keys.Control | Keys.Alt;
-
-    /// <summary>The Navigate menu's name for Ctrl+Alt+O, the last output marker.</summary>
-    public const Keys LatestResponse = JumpToLast | Keys.O;
 
     /// <summary>Ctrl+Shift with a quick key letter, from anywhere: every line of that kind from the caret's line to the end, spoken once (FR-5, D36). A key of this table with the same letters wins: Ctrl+Shift+S stays Send now.</summary>
     public const Keys ReadToEnd = Keys.Control | Keys.Shift;
