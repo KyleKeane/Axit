@@ -497,6 +497,22 @@ public class SessionModelTests
     }
 
     [Fact]
+    public void A_running_agents_status_row_is_chrome()
+    {
+        // From a recording of 2.1.300 (§4.4 item 21): the Agent tool draws a row per running subagent above the
+        // spinner and redraws it every second; shown as a reply line, every redraw was spoken again (FR-3.5).
+        var model = new SessionModel(120, 20);
+        Feed(model, $"{Esc}[?25lC:\\Temp\\project\r\nauto mode on (shift+tab to cycle)\r\n${Esc}[?25h");
+        Feed(model, $"{Esc}[?25l{Esc}[2;1H◯  general-purpose Checking callers 2m 15s · ↓ 1.2k tokens{Esc}[K\r\n◯  Explore Reading the spec 3s{Esc}[K\r\nCerebrating…{Esc}[K\r\nauto mode on (shift+tab to cycle)  ·  esc to interrupt{Esc}[K\r\n${Esc}[K{Esc}[?25h");
+        Assert.True(model.Working);
+        Assert.Equal(["C:\\Temp\\project"], Visible(model));
+
+        // The agent's result row that replaces it is content, as any tool summary is.
+        Feed(model, $"{Esc}[?25l{Esc}[2;1HMessage from @general-purpose (ctrl+o to expand){Esc}[K\r\n{Esc}[K\r\nauto mode on (shift+tab to cycle){Esc}[K\r\n${Esc}[K{Esc}[?25h");
+        Assert.Equal(["C:\\Temp\\project", "Message from @general-purpose (ctrl+o to expand)"], Visible(model));
+    }
+
+    [Fact]
     public void Rows_below_the_cursor_are_hidden()
     {
         var model = new SessionModel(80, 10);

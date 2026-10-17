@@ -9,6 +9,11 @@ public static partial class LineClassifier
     [GeneratedRegex(@"^(\S+)…(\s+\(.*\))?$")]
     private static partial Regex SpinnerRegex();
 
+    // A running subagent, one row each above the spinner, redrawn every second with its time and token count
+    // (§4.4 item 21): "◯  general-purpose Checking callers 2m 15s · ↓ 1.2k tokens".
+    [GeneratedRegex(@"^◯\s+.*\d+[hms](?: \d+[ms])?(?: · [↓↑] [\d.]+[kM]? tokens)?$")]
+    private static partial Regex AgentRowRegex();
+
     // Shown under a message that was sent while Claude was busy; the message itself is drawn just above it.
     [GeneratedRegex(@"^ctrl\+x ctrl\+s to send now$")]
     private static partial Regex QueuedHintRegex();
@@ -59,7 +64,7 @@ public static partial class LineClassifier
     public static bool IsChrome(string text) =>
         ModeLineRegex().IsMatch(text) || SpinnerRegex().IsMatch(text) || TipRegex().IsMatch(text)
         || NotepadHintRegex().IsMatch(text) || EffortHintRegex().IsMatch(text) || BackgroundHintRegex().IsMatch(text)
-        || QueuedHintRegex().IsMatch(text) || AnnouncementRowRegex().IsMatch(text);
+        || QueuedHintRegex().IsMatch(text) || AnnouncementRowRegex().IsMatch(text) || AgentRowRegex().IsMatch(text);
 
     /// <summary>A bracketed announcement row; the text inside the brackets is what Claude wants spoken.</summary>
     public static string? AnnouncementText(string text) =>

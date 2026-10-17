@@ -1,5 +1,9 @@
 # Changelog
 
+## Unreleased
+
+- AxClaude: the status row of a running subagent ("◯ general-purpose Checking callers 2m 15s · ↓ 1.2k tokens", one per agent while Claude Code's Agent tool runs) is screen decoration now, like the spinner. It was taken for reply text and, redrawn every second, was spoken again and again by Speak replies for as long as the agent ran.
+
 ## 2.7.0 - 2026-10-17
 
 - AxClaude: Ctrl+3 goes to the newest reply from anywhere, next to Ctrl+1 for the message field and Ctrl+2 for the conversation. It is the key of Navigate, Latest response, which was Ctrl+Shift+O. For the last line of any other kind: Ctrl+End, then Shift with its letter.
