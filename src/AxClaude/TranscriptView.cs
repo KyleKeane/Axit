@@ -29,12 +29,15 @@ internal sealed class TranscriptView : TextBox
     /// <summary>k and Shift+K: the bookmarks dropped with m (FR-3.9); the Navigate menu reaches them too.</summary>
     private static readonly QuickKey BookmarkKey = new(AxClaudeKeys.Bookmark, "bookmark", l => l.Kind == LineKind.Bookmark);
 
+    /// <summary>o and Shift+O: the output markers; Ctrl+3 goes to the newest one (FR-5).</summary>
+    private static readonly QuickKey ResponseKey = new(AxClaudeKeys.Response, "response", l => l.Kind == LineKind.OutputMarker);
+
     private static readonly QuickKey[] QuickKeys =
     [
         new(AxClaudeKeys.Heading, "heading", l => l.HeadingLevel > 0),
         // A replayed you: row has its own marker in front of it (FR-4.8); it is not a second stop.
         new(AxClaudeKeys.Input, "input", l => l.Kind is LineKind.InputMarker or LineKind.UserEcho, Previous: (_, p) => p.Kind != LineKind.InputMarker),
-        new(AxClaudeKeys.Response, "response", l => l.Kind == LineKind.OutputMarker),
+        ResponseKey,
         new(AxClaudeKeys.ResponseAlso, "response", l => l.Kind == LineKind.OutputMarker),
         new(AxClaudeKeys.ClaudeReply, "Claude reply", l => l.Kind == LineKind.ClaudeReply),
         new(AxClaudeKeys.ToolLine, "tool line", l => l.Kind is LineKind.Tool or LineKind.ToolError),
@@ -117,31 +120,20 @@ internal sealed class TranscriptView : TextBox
         return AccessibilityObject.RaiseAutomationNotification(AutomationNotificationKind.ActionCompleted, processing, text);
     }
 
-    /// <summary>
-    /// Ctrl+Shift with a quick key letter, or Navigate → Latest response (FR-5, D36): focuses the view and puts the
-    /// caret on the last line that key would stop at; `No response yet` and so on when there is none. False for a
-    /// letter that is no quick key.
-    /// </summary>
-    public bool JumpToLast(Keys letter)
+    /// <summary>Ctrl+3, or Navigate → Latest response (FR-5): focuses the view and puts the caret on the newest output marker; `No response yet` when there is none.</summary>
+    public void JumpToLatestResponse()
     {
-        var key = Array.Find(QuickKeys, k => k.Key == letter);
-        if (key is null)
-        {
-            return false;
-        }
-
         Focus();
         for (var i = _mirror.LineCount - 1; i >= 0; i--)
         {
-            if (Stops(key, i))
+            if (Stops(ResponseKey, i))
             {
                 MoveTo(i);
-                return true;
+                return;
             }
         }
 
-        Announce($"No {key.Name} yet", true);
-        return true;
+        Announce("No response yet", true);
     }
 
     /// <summary>m, or Navigate → Bookmark this line: focuses the view and bookmarks the caret's line, or takes its bookmark away (FR-3.9).</summary>
@@ -443,7 +435,8 @@ internal sealed class TranscriptView : TextBox
     /// <summary>
     /// Ctrl+Alt with a quick key letter (FR-5, D36): every line that key would stop at, from the caret's line to the
     /// end of the conversation, spoken as one notification with the text each jump would say, wrapped rows joined;
-    /// the caret stays. False for a letter that is no quick key.
+    /// a paragraph is read whole, its lines down to the next blank line, so that a list is heard entire. The caret
+    /// stays. False for a letter that is no quick key.
     /// </summary>
     public bool ReadToEnd(Keys letter)
     {
@@ -458,9 +451,19 @@ internal sealed class TranscriptView : TextBox
         {
             for (var i = _mirror.LineIndexAt(SelectionStart); i < _mirror.LineCount; i++)
             {
-                if (Stops(key, i))
+                if (!Stops(key, i))
                 {
-                    Utterance.Append(text, SpokenText(i, whole: true), joinedToPrevious: false);
+                    continue;
+                }
+
+                Utterance.Append(text, SpokenText(i, whole: true), joinedToPrevious: false);
+                for (var j = i + 1; key.Key == AxClaudeKeys.Paragraph && j < _mirror.LineCount && key.Matches(_mirror.LineAt(j)) && !Stops(key, j); j++)
+                {
+                    // The rest of the paragraph. A row wrapped under the one before is in that one's display text already.
+                    if (!_mirror.LineAt(j).JoinedToPrevious)
+                    {
+                        Utterance.Append(text, _mirror.DisplayTextAt(j), joinedToPrevious: false);
+                    }
                 }
             }
         }

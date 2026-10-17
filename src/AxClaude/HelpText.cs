@@ -28,9 +28,7 @@ internal static class HelpText
           Ctrl+O: switched off, a reminder says why (Claude's detailed view redraws the conversation in screen reader mode)
           Ctrl+Shift+C: send Ctrl+C to Claude
           Ctrl+Shift+M: next permission mode
-          Ctrl+Shift+I: go to your latest message. Ctrl+Shift+O: the latest reply, the same as Ctrl+3
-          Ctrl+Shift and a letter from the Conversation list below (h, p, t, e, d, q, 1 to 6, besides i and o): go to the last line of that kind
-          Ctrl+Alt and a letter from the Conversation list below (o, i, h, c, p, t, e, d, s, q, k, 1 to 6): read every line of that kind from the caret to the end of the conversation in one go, without moving. Control stops NVDA
+          Ctrl+Alt and a letter from the Conversation list below: read every line of that kind from the caret to the end of the conversation in one go, without moving; Ctrl+Alt+P reads the paragraphs whole. Control stops NVDA
           Ctrl+Shift+K: bookmark the conversation line the caret is on, or take the bookmark away
           Ctrl+Space: background music on or off, and says which
           Ctrl+Plus, Ctrl+Minus: bigger or smaller text
@@ -64,6 +62,7 @@ internal static class HelpText
           k and Shift+K: next and previous bookmark, read together with the line it marks
           Enter: copy the line into the message field under a marker line and go there, to comment on it
           Backspace: back to the line you were on before the last jump; again for the jump before that
+          Ctrl+End, then Shift and a letter: the last line of that kind
           Shift with the arrow keys, or Ctrl+A: select text. Ctrl+C: copy the selection. New output waits while text is selected
           Escape: clear the selection, or go to the message field
 

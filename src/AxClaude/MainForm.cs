@@ -351,17 +351,10 @@ internal sealed class MainForm : Form
                 return true;
         }
 
-        // Ctrl+Shift with a quick key letter goes to the last line of that kind, and Ctrl+Alt with one reads that
-        // kind to the end, from anywhere (FR-5, D36). A key of the table's own, Send now on Ctrl+Shift+S, wins: the
-        // menus take it below.
-        var modifiers = keyData & Keys.Modifiers;
-        if ((modifiers is AxClaudeKeys.JumpToLast or AxClaudeKeys.ReadToEnd) && !AxClaudeKeys.All.Any(k => k.Key == keyData))
+        // Ctrl+Alt with a quick key letter reads that kind of line to the end, from anywhere (FR-5, D36).
+        if ((keyData & Keys.Modifiers) == AxClaudeKeys.ReadToEnd && _transcript.ReadToEnd(keyData & Keys.KeyCode))
         {
-            var letter = keyData & Keys.KeyCode;
-            if (modifiers == AxClaudeKeys.JumpToLast ? _transcript.JumpToLast(letter) : _transcript.ReadToEnd(letter))
-            {
-                return true;
-            }
+            return true;
         }
 
         return base.ProcessCmdKey(ref msg, keyData);
@@ -410,7 +403,7 @@ internal sealed class MainForm : Form
         var navigate = new ToolStripMenuItem("&Navigate");
         navigate.DropDownItems.Add(new ToolStripMenuItem("&Message field", null, (_, _) => GoTo(BottomControl)) { ShortcutKeyDisplayString = BundleKeys.Text(AxClaudeKeys.GoToField) });
         navigate.DropDownItems.Add(new ToolStripMenuItem("&Conversation", null, (_, _) => GoTo(_transcript)) { ShortcutKeyDisplayString = BundleKeys.Text(AxClaudeKeys.GoToConversation) });
-        navigate.DropDownItems.Add(new ToolStripMenuItem("&Latest response", null, (_, _) => _transcript.JumpToLast(AxClaudeKeys.Response)) { ShortcutKeys = AxClaudeKeys.LatestResponse });
+        navigate.DropDownItems.Add(new ToolStripMenuItem("&Latest response", null, (_, _) => _transcript.JumpToLatestResponse()) { ShortcutKeys = AxClaudeKeys.LatestResponse });
         navigate.DropDownItems.Add(new ToolStripSeparator());
         navigate.DropDownItems.Add(new ToolStripMenuItem("&Find...", null, (_, _) => FindDialog()) { ShortcutKeyDisplayString = BundleKeys.Text(BundleKeys.Find) });
         navigate.DropDownItems.Add(new ToolStripMenuItem("Find &next", null, (_, _) => FindNext(backward: false)) { ShortcutKeyDisplayString = BundleKeys.Text(BundleKeys.FindNext) });
