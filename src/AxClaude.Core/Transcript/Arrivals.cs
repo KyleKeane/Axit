@@ -33,8 +33,6 @@ public readonly record struct Arrival(bool NewLine, bool ToolCall, string? Speec
 /// </summary>
 public sealed class Arrivals
 {
-    private static readonly char[] PauseEndings = ['.', ',', ';', ':', '!', '?', '…'];
-
     /// <summary>The hint Claude appends to a collapsed tool row (<c>tool: Reading 1 file… (ctrl+o to expand)</c>); shown, not spoken.</summary>
     private const string ExpandHint = "(ctrl+o to expand)";
 
@@ -202,7 +200,7 @@ public sealed class Arrivals
         return _text.Length == 0 ? null : _text.ToString();
     }
 
-    /// <summary>A wrapped continuation joins with a space; other lines with a full stop unless they end with a pause of their own, so a heading or a list item is heard as one. A tool row loses its expand hint.</summary>
+    /// <summary>A tool row loses its expand hint; the lines join as one utterance (<see cref="Utterance"/>).</summary>
     private void Append(Line line)
     {
         var text = line.Text;
@@ -211,21 +209,6 @@ public sealed class Arrivals
             text = text[..^ExpandHint.Length].TrimEnd();
         }
 
-        if (_text.Length > 0)
-        {
-            if (line.JoinedToPrevious)
-            {
-                if (!text.StartsWith(' '))
-                {
-                    _text.Append(' ');
-                }
-            }
-            else
-            {
-                _text.Append(Array.IndexOf(PauseEndings, _text[^1]) >= 0 ? " " : ". ");
-            }
-        }
-
-        _text.Append(text);
+        Utterance.Append(_text, text, line.JoinedToPrevious);
     }
 }
