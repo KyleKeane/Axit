@@ -16,7 +16,8 @@ public static class AxClaudeKeys
     public const Keys SendNow = Keys.Control | Keys.Shift | Keys.S;
     public const Keys SendCtrlC = Keys.Control | Keys.Shift | Keys.C;
     public const Keys NextPermissionMode = Keys.Control | Keys.Shift | Keys.M;
-    public const Keys LatestResponse = Keys.Control | Keys.Shift | Keys.O;
+    /// <summary>The latest output marker, from anywhere (FR-5); Ctrl+Shift+O until 2.6.1.</summary>
+    public const Keys LatestResponse = Keys.Control | Keys.Alt | Keys.O;
     public const Keys BookmarkLine = Keys.Control | Keys.Shift | Keys.K;
     public const Keys OpenFolder = Keys.Control | Keys.W;
     public const Keys NewSession = Keys.Control | Keys.N;

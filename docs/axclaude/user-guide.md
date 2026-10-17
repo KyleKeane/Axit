@@ -81,7 +81,7 @@ Every message you send is printed like this: the line `# Input 1`, your message,
 
 In the conversation, these keys move to a line and speak it. Add Shift to go backwards.
 
-- `i`: the next `# Input` line (a message you sent). `o` or `r`: the next `# Output` line (a reply from Claude). Ctrl+Shift+O from anywhere goes to the newest reply.
+- `i`: the next `# Input` line (a message you sent). `o` or `r`: the next `# Output` line (a reply from Claude). Ctrl+Alt+O from anywhere goes to the newest reply.
 - `h`: the next heading. `1` to `6`: the next heading of that level. Input and Output lines are level 1; headings inside Claude's replies are level 2 and deeper.
 - `c`: the next line that starts a Claude reply. `t`: the next tool line (a file Claude edited or a command it ran). `p`: the next paragraph, the first line after a blank line or the first line of a message from Claude, so it also finds the short messages Claude prints between its tool calls. `e`: the next error or warning. `d`: the next "done" line at the end of a reply. `s`: the next system line from AxClaude. `q`: the next question Claude asked: AxClaude writes a line `Question: …` in front of each one, which stays when Claude replaces the question with your answer.
 - `l`: says where you are, like "Line 12 of 340". Nothing else ever speaks line numbers.- Page Up and Page Down move one screen at a time, and reach the first and last line. Ctrl+Up and Ctrl+Down move to the previous and next paragraph, the first line after a blank line; with Shift they select to there.
@@ -98,7 +98,7 @@ Ctrl+S saves the conversation as a text file. Ctrl+A and Ctrl+C in the conversat
 
 - **Project**: Open current folder (Ctrl+W), which names the folder and opens it in File Explorer, Change folder, Recent folders, New session (Ctrl+N), Force Claude to restart (Ctrl+Shift+R), Save conversation as (Ctrl+S), Exit.
 - **Claude**: Send message (Enter), Send now (Ctrl+Shift+S) for a message that waits while Claude works, Interrupt (Shift+Escape), Next permission mode (Ctrl+Shift+M), and Send key, a submenu with the keys Claude's own menus take: Ctrl+C (Ctrl+Shift+C), Ctrl+D, Tab, Up, Down.
-- **Navigate**: Message field (Ctrl+1), Conversation (Ctrl+2), Latest response (Ctrl+Shift+O), Find, Find next, Find previous, Bookmark this line, Next bookmark, Previous bookmark.
+- **Navigate**: Message field (Ctrl+1), Conversation (Ctrl+2), Latest response (Ctrl+Alt+O), Find, Find next, Find previous, Bookmark this line, Next bookmark, Previous bookmark.
 - **Options**: a submenu for each kind of setting. Sounds: the chimes, the ticks, the background music. Speech: what is spoken of replies as they arrive (none, first lines, all lines) and whether each tool call is. When Claude is done: the "Done" announcement, the taskbar flash, the louder alert for a background window. Questions: answering from a list, going to a question at once, reviewing answers first. Text: the font, larger and smaller text, the Windows text size, time stamps on the Input and Output lines. General: checking for updates at start, keeping AxClaude's files out of git, the settings file. Every item is saved as you change it.
 - **Help**: Keyboard shortcuts (F1), this guide, Claude Code on the web (the documentation, slash commands, keys, command line, install or update), Check for updates (which names the version you have), Update to the newest version while one is known, recording for a bug report, Copy diagnostics, About, which names the version you have and the latest release.
 

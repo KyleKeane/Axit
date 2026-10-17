@@ -27,7 +27,7 @@ internal static class HelpText
           Ctrl+O: switched off, a reminder says why (Claude's detailed view redraws the conversation in screen reader mode)
           Ctrl+Shift+C: send Ctrl+C to Claude
           Ctrl+Shift+M: next permission mode
-          Ctrl+Shift+O: go to the latest reply
+          Ctrl+Alt+O: go to the latest reply
           Ctrl+Shift+K: bookmark the conversation line the caret is on, or take the bookmark away
           Ctrl+Space: background music on or off, and says which
           Ctrl+Plus, Ctrl+Minus: bigger or smaller text
