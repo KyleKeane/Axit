@@ -156,7 +156,11 @@ internal sealed class ScriptRunner(PtyHost host, Output output, ManualResetEvent
     public void Execute(string rawLine)
     {
         var line = rawLine.Trim();
-        if (line.Length == 0 || line.StartsWith('#')) return;
+        if (line.Length == 0 || line.StartsWith('#'))
+        {
+            return;
+        }
+
         var space = line.IndexOf(' ');
         var verb = space < 0 ? line : line[..space];
         var rest = space < 0 ? string.Empty : line[(space + 1)..];
@@ -171,7 +175,11 @@ internal sealed class ScriptRunner(PtyHost host, Output output, ManualResetEvent
                 _mark = output.Length;
                 break;
             case "iffound":
-                if (_lastFound) Execute(rest);
+                if (_lastFound)
+                {
+                    Execute(rest);
+                }
+
                 break;
             case "wait":
                 {
@@ -202,8 +210,16 @@ internal sealed class ScriptRunner(PtyHost host, Output output, ManualResetEvent
                     var deadline = clock.ElapsedMilliseconds + max;
                     while (clock.ElapsedMilliseconds < deadline)
                     {
-                        if (clock.ElapsedMilliseconds - output.LastAt >= quietFor) return;
-                        if (host.HasExited) return;
+                        if (clock.ElapsedMilliseconds - output.LastAt >= quietFor)
+                        {
+                            return;
+                        }
+
+                        if (host.HasExited)
+                        {
+                            return;
+                        }
+
                         Thread.Sleep(50);
                     }
                     Console.Error.WriteLine($"[script t={clock.ElapsedMilliseconds}]   never went quiet");
@@ -284,19 +300,35 @@ internal static class Dump
     private static int EscapeEnd(string text, int start)
     {
         var i = start + 1;
-        if (i >= text.Length) return i;
+        if (i >= text.Length)
+        {
+            return i;
+        }
+
         switch (text[i])
         {
             case '[': // CSI: parameters and intermediates, then a final byte 0x40-0x7E
                 i++;
-                while (i < text.Length && text[i] < '\x40') i++;
+                while (i < text.Length && text[i] < '\x40')
+                {
+                    i++;
+                }
+
                 return Math.Min(i + 1, text.Length);
             case ']': // OSC: terminated by BEL or ESC \
                 i++;
                 while (i < text.Length)
                 {
-                    if (text[i] == '\a') return i + 1;
-                    if (text[i] == '\x1b' && i + 1 < text.Length && text[i + 1] == '\\') return i + 2;
+                    if (text[i] == '\a')
+                    {
+                        return i + 1;
+                    }
+
+                    if (text[i] == '\x1b' && i + 1 < text.Length && text[i + 1] == '\\')
+                    {
+                        return i + 2;
+                    }
+
                     i++;
                 }
                 return i;
@@ -305,7 +337,11 @@ internal static class Dump
             case '^':
             case '_':
                 i++;
-                while (i + 1 < text.Length && !(text[i] == '\x1b' && text[i + 1] == '\\')) i++;
+                while (i + 1 < text.Length && !(text[i] == '\x1b' && text[i + 1] == '\\'))
+                {
+                    i++;
+                }
+
                 return Math.Min(i + 2, text.Length);
             default: // two-byte escape such as ESC 7, ESC 8, ESC =, ESC >
                 return i + 1;

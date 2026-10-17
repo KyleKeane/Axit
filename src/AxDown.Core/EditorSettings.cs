@@ -36,8 +36,19 @@ public sealed class EditorSettings
 
     private void Sanitize()
     {
-        if (FontSize is < 0 or > 96) FontSize = 0;
-        if (string.IsNullOrWhiteSpace(FontFamily)) FontFamily = null;
-        if (Window is { } w && (w.Width < 200 || w.Height < 150)) Window = null;
+        if (FontSize is < 0 or > 96)
+        {
+            FontSize = 0;
+        }
+
+        if (string.IsNullOrWhiteSpace(FontFamily))
+        {
+            FontFamily = null;
+        }
+
+        if (Window is { } w && (w.Width < 200 || w.Height < 150))
+        {
+            Window = null;
+        }
     }
 }

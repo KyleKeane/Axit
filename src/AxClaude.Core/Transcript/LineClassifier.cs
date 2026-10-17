@@ -148,21 +148,61 @@ public static partial class LineClassifier
 
     public static LineKind Classify(string text, bool inPromptBlock)
     {
-        if (text.StartsWith("you:", StringComparison.Ordinal)) return LineKind.UserEcho;
-        if (text.StartsWith("claude:", StringComparison.Ordinal)) return LineKind.ClaudeReply;
-        if (text.StartsWith("thinking:", StringComparison.Ordinal)) return LineKind.Thinking;
-        if (text.StartsWith("tool error:", StringComparison.Ordinal)) return LineKind.ToolError;
-        if (text.StartsWith("tool:", StringComparison.Ordinal) || text.EndsWith("(ctrl+o to expand)", StringComparison.Ordinal)) return LineKind.Tool;
-        if (text.StartsWith("error:", StringComparison.Ordinal)) return LineKind.Error;
-        if (text.StartsWith("warning:", StringComparison.Ordinal)) return LineKind.Warning;
+        if (text.StartsWith("you:", StringComparison.Ordinal))
+        {
+            return LineKind.UserEcho;
+        }
+
+        if (text.StartsWith("claude:", StringComparison.Ordinal))
+        {
+            return LineKind.ClaudeReply;
+        }
+
+        if (text.StartsWith("thinking:", StringComparison.Ordinal))
+        {
+            return LineKind.Thinking;
+        }
+
+        if (text.StartsWith("tool error:", StringComparison.Ordinal))
+        {
+            return LineKind.ToolError;
+        }
+
+        if (text.StartsWith("tool:", StringComparison.Ordinal) || text.EndsWith("(ctrl+o to expand)", StringComparison.Ordinal))
+        {
+            return LineKind.Tool;
+        }
+
+        if (text.StartsWith("error:", StringComparison.Ordinal))
+        {
+            return LineKind.Error;
+        }
+
+        if (text.StartsWith("warning:", StringComparison.Ordinal))
+        {
+            return LineKind.Warning;
+        }
+
         if (IsPromptText(text))
         {
             return LineKind.Prompt;
         }
 
-        if (inPromptBlock && PromptOptionRegex().IsMatch(text)) return LineKind.PromptOption;
-        if (TurnSummaryRegex().IsMatch(text)) return LineKind.TurnSummary;
-        if (text.StartsWith("[Screen Reader Mode:", StringComparison.Ordinal)) return LineKind.System;
+        if (inPromptBlock && PromptOptionRegex().IsMatch(text))
+        {
+            return LineKind.PromptOption;
+        }
+
+        if (TurnSummaryRegex().IsMatch(text))
+        {
+            return LineKind.TurnSummary;
+        }
+
+        if (text.StartsWith("[Screen Reader Mode:", StringComparison.Ordinal))
+        {
+            return LineKind.System;
+        }
+
         return LineKind.Plain;
     }
 

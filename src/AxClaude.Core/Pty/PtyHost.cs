@@ -50,12 +50,22 @@ public sealed class PtyHost : IDisposable
         var attributeList = IntPtr.Zero;
         try
         {
-            if (!Native.CreatePipe(out inputRead, out inputWrite, IntPtr.Zero, 0)) throw Native.Error("CreatePipe");
-            if (!Native.CreatePipe(out outputRead, out outputWrite, IntPtr.Zero, 0)) throw Native.Error("CreatePipe");
+            if (!Native.CreatePipe(out inputRead, out inputWrite, IntPtr.Zero, 0))
+            {
+                throw Native.Error("CreatePipe");
+            }
+
+            if (!Native.CreatePipe(out outputRead, out outputWrite, IntPtr.Zero, 0))
+            {
+                throw Native.Error("CreatePipe");
+            }
 
             var size = new Native.COORD { X = (short)options.Columns, Y = (short)options.Rows };
             var hr = Native.CreatePseudoConsole(size, inputRead, outputWrite, 0, out host._console);
-            if (hr != 0) throw new InvalidOperationException($"CreatePseudoConsole failed with 0x{hr:X8}.");
+            if (hr != 0)
+            {
+                throw new InvalidOperationException($"CreatePseudoConsole failed with 0x{hr:X8}.");
+            }
 
             // The pseudo console holds its own copies of these ends.
             inputRead.Dispose();
@@ -65,7 +75,11 @@ public sealed class PtyHost : IDisposable
             var listSize = IntPtr.Zero;
             Native.InitializeProcThreadAttributeList(IntPtr.Zero, 1, 0, ref listSize);
             attributeList = Marshal.AllocHGlobal(listSize);
-            if (!Native.InitializeProcThreadAttributeList(attributeList, 1, 0, ref listSize)) throw Native.Error("InitializeProcThreadAttributeList");
+            if (!Native.InitializeProcThreadAttributeList(attributeList, 1, 0, ref listSize))
+            {
+                throw Native.Error("InitializeProcThreadAttributeList");
+            }
+
             if (!Native.UpdateProcThreadAttribute(attributeList, 0, (IntPtr)Native.PROC_THREAD_ATTRIBUTE_PSEUDOCONSOLE,
                     host._console, (IntPtr)IntPtr.Size, IntPtr.Zero, IntPtr.Zero))
             {
@@ -99,7 +113,10 @@ public sealed class PtyHost : IDisposable
                 Marshal.FreeHGlobal(environmentBlock);
             }
 
-            if (!created) throw Native.Error("CreateProcess");
+            if (!created)
+            {
+                throw Native.Error("CreateProcess");
+            }
 
             host._input = new FileStream(inputWrite, FileAccess.Write, 1, false);
             host._output = new FileStream(outputRead, FileAccess.Read, 65536, false);
@@ -107,7 +124,11 @@ public sealed class PtyHost : IDisposable
         }
         catch
         {
-            if (host._console != IntPtr.Zero) Native.ClosePseudoConsole(host._console);
+            if (host._console != IntPtr.Zero)
+            {
+                Native.ClosePseudoConsole(host._console);
+            }
+
             inputRead?.Dispose();
             inputWrite?.Dispose();
             outputRead?.Dispose();

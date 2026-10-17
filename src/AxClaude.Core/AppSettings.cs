@@ -124,13 +124,41 @@ public sealed class AppSettings
     {
         RecentFolders ??= [];
         RecentFolders.RemoveAll(string.IsNullOrWhiteSpace);
-        if (PtyColumns is < 20 or > 1000) PtyColumns = 240;
-        if (PtyRows is < 5 or > 500) PtyRows = 50;
-        if (FontSize is < 0 or > 96) FontSize = 0;
-        if (MaxTranscriptLines < 1000) MaxTranscriptLines = 1000;
-        if (string.IsNullOrWhiteSpace(FontFamily)) FontFamily = null;
-        if (Window is { } w && (w.Width < 200 || w.Height < 150)) Window = null;
-        if (SpeakReplies && ReplySpeech == ReplySpeechMode.None) ReplySpeech = ReplySpeechMode.All;
+        if (PtyColumns is < 20 or > 1000)
+        {
+            PtyColumns = 240;
+        }
+
+        if (PtyRows is < 5 or > 500)
+        {
+            PtyRows = 50;
+        }
+
+        if (FontSize is < 0 or > 96)
+        {
+            FontSize = 0;
+        }
+
+        if (MaxTranscriptLines < 1000)
+        {
+            MaxTranscriptLines = 1000;
+        }
+
+        if (string.IsNullOrWhiteSpace(FontFamily))
+        {
+            FontFamily = null;
+        }
+
+        if (Window is { } w && (w.Width < 200 || w.Height < 150))
+        {
+            Window = null;
+        }
+
+        if (SpeakReplies && ReplySpeech == ReplySpeechMode.None)
+        {
+            ReplySpeech = ReplySpeechMode.All;
+        }
+
         SpeakReplies = false;
     }
 }
