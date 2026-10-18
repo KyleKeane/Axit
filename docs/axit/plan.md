@@ -45,4 +45,6 @@ the restart by the app itself (2.3.0).
   `EditorForm`), when a third window arrives.
 - AxJSON, an editor for JSON files: `docs/axjson/SPEC.md` is a placeholder spec (2026-10-17), raw mode as AxDown plus
   structure keys and a formatter, structured mode as a form of real input fields from templates. It starts after
-  AxDown's letters, spec first, by `adding-an-app.md`.
+  AxDown's letters, spec first, by `adding-an-app.md`. Decided 2026-10-18 (AJ-D4, B-14): AxDown's editor shell moves
+  to the shared projects on that second use and each file type is one app over it; one file per window, no tabs; the
+  Axit menu (AX-9) lists the open windows by recency and by app.

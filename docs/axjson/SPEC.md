@@ -1,8 +1,8 @@
 # AxJSON — Specification (placeholder)
 
 AxJSON would be the third app of the Axit bundle (`docs/axit/SPEC.md`): an editor for JSON files for a blind developer
-who uses the NVDA screen reader. **Status on 2026-10-17: a placeholder.** No code exists, nothing below is built, and
-AxDown's Markdown navigation (`docs/axdown/SPEC.md` §9) comes first. The document records the shape that was agreed
+who uses the NVDA screen reader. **Status on 2026-10-18: a placeholder.** No code exists and nothing below is built;
+AxDown's Markdown navigation (`docs/axdown/SPEC.md` §9) is built, awaiting NVDA. The document records the shape that was agreed
 so that the work can start from it, following `docs/axit/adding-an-app.md`. Requirements are numbered `AJ-n.m` and
 decisions `AJ-Dn`; the bundle's rules, AX-7 (accessibility) and AX-8 (keys), are cited by number and not repeated.
 In AxJSON's code and documents, "SPEC.md" means this file.
@@ -102,12 +102,23 @@ caret cannot leave a value: Backspace held down empties the field and nothing el
 - **AJ-D2 Structured mode is a form of real fields, from templates.** Real controls give field-bounded editing for
   free (the caret cannot leave a value), NVDA reads them natively, and a template is a record, not a schema engine.
   A tree or grid of the app's own was considered and dropped: it would be custom accessibility work for a worse result.
-- **AJ-D3 A placeholder until AxDown is done.** The next work is AxDown's remaining Markdown letters; AxJSON starts
-  after them, spec first, following `docs/axit/adding-an-app.md`.
+- **AJ-D3 A placeholder until AxDown is done.** AxDown's remaining Markdown letters came first (2026-10-17); AxJSON
+  starts next, spec first, following `docs/axit/adding-an-app.md`.
+- **AJ-D4 One editor shell, one app per file type, one file per window (2026-10-18).** From the outside the bundle is
+  already one editor for every file type: one program file, one installer, one update, and a path alone picks the
+  app by its extension (AX-1.2). Inside, AxDown's editor shell (open, save, find, go to line, status bar, notices,
+  settings) moves to the shared projects on this second use (G5, AX-6.3), and each file type is one app over it:
+  AxDown is the shell plus Markdown, AxJSON the shell plus JSON plus its form, so that one app's folders hold
+  everything about its file type. What differs per type is small and is the seam that exists already: the outline
+  that finds the elements, the key pairs (`TextJump`), the Navigate menu made from them, and the type's own commands
+  (Format). Tabs for several files in one window were considered and dropped (B-14): one file per window, and the
+  Axit menu (AX-9) lists the open windows. Structured mode stays JSON's alone (AJ-D2); Markdown's text is its structure.
 
 ## 7. Open questions
 
-- The exact letters of AJ-2.2 against AxDown's and NVDA's, checked by the collision test (AX-8.4).
+- The exact letters of AJ-2.2 against AxDown's and NVDA's, checked by the collision test (AX-8.4). The rule: a letter
+  keeps its meaning where the concept exists in both types (L list and array, I item in both); a letter with no
+  counterpart is the type's own; K, NVDA's link in AxDown, is the one to decide (AJ-D4).
 - Whether structured mode is in version one or follows raw mode as a second version (AxDown's pattern).
 - How a list of objects (an array of MCP servers) is edited in the form: a list box with Edit opening the object's
   group, or one group per item.
