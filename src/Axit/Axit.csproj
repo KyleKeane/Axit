@@ -13,7 +13,7 @@
     <ApplicationIcon>AxClaude.ico</ApplicationIcon>
     <Version>2.12.0</Version>
     <Product>Axit</Product>
-    <Description>Accessible Windows apps for screen reader users: AxClaude, a front end for the Claude Code CLI, AxDown, a text editor, and AxJSON, a JSON editor</Description>
+    <Description>Accessible Windows apps for screen reader users: AxClaude, a front end for the Claude Code CLI, AxDown, a text editor, AxJSON, a JSON editor, and AxGit, a git manager</Description>
     <Authors>Dr. Kyle Keane</Authors>
     <Company>Dr. Kyle Keane, www.kylekeane.com</Company>
     <Copyright>Copyright (c) 2026 Dr. Kyle Keane (www.kylekeane.com). MIT License.</Copyright>
