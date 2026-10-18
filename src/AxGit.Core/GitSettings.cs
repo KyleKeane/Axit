@@ -4,27 +4,15 @@ namespace AxGit.Core;
 
 /// <summary>
 /// Everything AxGit remembers between runs (SPEC.md AG-8.1), in <c>%APPDATA%\Axit\axgit.json</c> through the bundle's
-/// <see cref="SettingsFile"/>. A missing or unreadable file falls back to the defaults.
+/// <see cref="SettingsFile"/>: the font, the update check and the window's place from <see cref="WindowSettings"/>,
+/// plus the recent repositories. A missing or unreadable file falls back to the defaults.
 /// </summary>
-public sealed class GitSettings : IWindowSettings
+public sealed class GitSettings : WindowSettings
 {
     public const int MaxRecentRepositories = 10;
 
-    /// <summary>Null means the Windows system font.</summary>
-    public string? FontFamily { get; set; }
-
-    /// <summary>Point size; 0 means the system font size.</summary>
-    public float FontSize { get; set; }
-
-    public bool FontBold { get; set; }
-
-    /// <summary>Ask GitHub once at startup whether a newer release exists (docs/axit/SPEC.md AX-3).</summary>
-    public bool CheckForUpdates { get; set; } = true;
-
     /// <summary>The repositories opened, newest first, for Repository → Open recent repository and the start without a path.</summary>
     public List<string> RecentRepositories { get; set; } = [];
-
-    public WindowPlacement? Window { get; set; }
 
     public static string DefaultPath => AppPaths.SettingsFile("axgit");
 
@@ -35,7 +23,7 @@ public sealed class GitSettings : IWindowSettings
         return settings;
     }
 
-    public void Save(string path) => SettingsFile.Save(path, this);
+    public override void Save(string path) => SettingsFile.Save(path, this);
 
     /// <summary>Puts the repository at the front of <see cref="RecentRepositories"/>, once, and keeps the list to <see cref="MaxRecentRepositories"/>.</summary>
     public void RememberRepository(string root)
@@ -55,23 +43,9 @@ public sealed class GitSettings : IWindowSettings
 
     private void Sanitize()
     {
+        SanitizeWindow();
         RecentRepositories ??= [];
         RecentRepositories.RemoveAll(string.IsNullOrWhiteSpace);
         Trim();
-
-        if (FontSize is < 0 or > 96)
-        {
-            FontSize = 0;
-        }
-
-        if (string.IsNullOrWhiteSpace(FontFamily))
-        {
-            FontFamily = null;
-        }
-
-        if (Window is { } w && (w.Width < 200 || w.Height < 150))
-        {
-            Window = null;
-        }
     }
 }

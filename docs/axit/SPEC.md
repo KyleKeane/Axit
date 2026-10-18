@@ -154,7 +154,7 @@ allow it, see B-9).
 
 ### AX-6 Shared pieces
 
-- AX-6.1 `Axit.Core` (pure, unit tested): `Dispatch` (with `Apps`, the name and verb of each app), `BundleInfo`, `AppPaths`, `SettingsFile`, `IWindowSettings` (what every window's settings hold, AX-6.5),
+- AX-6.1 `Axit.Core` (pure, unit tested): `Dispatch` (with `Apps`, the name and verb of each app), `BundleInfo`, `AppPaths`, `SettingsFile`, `WindowSettings` (what every window's settings hold, AX-6.5),
   `Log` (per-app file name), `Updates/` (`UpdateCheck`, the release check, and `Updater`, the download and the
   hand-over to `install.ps1`; neither needs a window), `Audio/WaveTone` (the sounds as WAV bytes), `MarkdownOutline` (the headings, links, lists, block quotes and tables of a Markdown text, with next and previous from a caret position; AxDown SPEC §9, shared since its second use), `AxitWindows` (the window lists of the Axit menu from the windows the system names, AX-9), `RecentlyClosed` (the bundle's list of closed files and folders, AX-9.4), `BundleAbout` (the About sections and the embedded Axit guide, AX-9.9).
 - AX-6.2 `Axit.Forms` (WinForms, no tests, checked with NVDA): `OverlayPanel` (the notices in the
@@ -186,7 +186,7 @@ allow it, see B-9).
   what to show after, where the focus goes after one (`FocusTarget`, `FocusToKeep`), whether the chime follows a
   setting, what gets the font, how the new version starts it again (`RestartArguments`, `UpdateRestartText`), what
   to note of an update (`UpdateNoted`), its diagnostics lines, and its own keys (`ProcessWindowKey`). The settings
-  each window needs are an interface in `Axit.Core`, `IWindowSettings` (font, update check, place; `Save`), which
+  each window needs are an interface in `Axit.Core`, `WindowSettings` (font, update check, place; `Save`), which
   every app's settings class implements while its file keeps its own shape. The base grew out of the editor shell on
   the third copy, AxGit (2026-10-18); AxClaude's `MainForm` moved onto it the same day, its own extras (the sound
   setting for the chime, the reader's kept caret, system lines for the update's steps) as hooks.

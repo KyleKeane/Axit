@@ -10,7 +10,7 @@ namespace AxClaude.Core;
 /// <c>%APPDATA%\AxClaude\settings.json</c> there (<see cref="TakeOverOldFile"/>). A missing or unreadable file falls
 /// back to the defaults.
 /// </summary>
-public sealed class AppSettings : IWindowSettings
+public sealed class AppSettings : WindowSettings
 {
     public const int MaxRecentFolders = 10;
 
@@ -20,13 +20,7 @@ public sealed class AppSettings : IWindowSettings
     public int PtyColumns { get; set; } = 240;
     public int PtyRows { get; set; } = 50;
 
-    /// <summary>Null means the Windows system font (which follows the text size setting under Accessibility).</summary>
-    public string? FontFamily { get; set; }
-
-    /// <summary>Point size; 0 means the system font size.</summary>
-    public float FontSize { get; set; }
-
-    public bool FontBold { get; set; }
+    // The font, the update check and the window's place are WindowSettings' (bundle AX-6.5).
     public bool AnnounceBell { get; set; } = true;
 
     /// <summary>The chimes when a message is sent and when Claude replies, finishes and asks (FR-7.3). The key keeps its 1.0 name.</summary>
@@ -59,9 +53,6 @@ public sealed class AppSettings : IWindowSettings
     /// <summary>Show reply rows that Claude wrapped at the console width as one line (FR-3.2a). File only, no menu item.</summary>
     public bool JoinWrappedLines { get; set; } = true;
 
-    /// <summary>Ask GitHub once at startup whether a newer release exists (FR-1.10).</summary>
-    public bool CheckForUpdates { get; set; } = true;
-
     /// <summary>
     /// Recognise what Claude waits on and show it in the control area in the message field's place, and keep
     /// messages out of a waiting question (D33, FR-2.10). Off: questions are only announced, as before 1.4.0.
@@ -87,7 +78,6 @@ public sealed class AppSettings : IWindowSettings
     public bool KeepFilesOutOfGit { get; set; } = true;
 
     public int MaxTranscriptLines { get; set; } = 20000;
-    public WindowPlacement? Window { get; set; }
 
     public static string DefaultPath => AppPaths.SettingsFile("axclaude");
 
@@ -107,7 +97,7 @@ public sealed class AppSettings : IWindowSettings
     }
 
     /// <summary>Writes the file atomically: a temporary file next to it is moved into place.</summary>
-    public void Save(string path) => SettingsFile.Save(path, this);
+    public override void Save(string path) => SettingsFile.Save(path, this);
 
     public void RememberFolder(string folder)
     {
@@ -122,6 +112,7 @@ public sealed class AppSettings : IWindowSettings
 
     private void Sanitize()
     {
+        SanitizeWindow();
         RecentFolders ??= [];
         RecentFolders.RemoveAll(string.IsNullOrWhiteSpace);
         if (PtyColumns is < 20 or > 1000)
@@ -134,24 +125,9 @@ public sealed class AppSettings : IWindowSettings
             PtyRows = 50;
         }
 
-        if (FontSize is < 0 or > 96)
-        {
-            FontSize = 0;
-        }
-
         if (MaxTranscriptLines < 1000)
         {
             MaxTranscriptLines = 1000;
-        }
-
-        if (string.IsNullOrWhiteSpace(FontFamily))
-        {
-            FontFamily = null;
-        }
-
-        if (Window is { } w && (w.Width < 200 || w.Height < 150))
-        {
-            Window = null;
         }
 
         if (SpeakReplies && ReplySpeech == ReplySpeechMode.None)

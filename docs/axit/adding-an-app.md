@@ -46,7 +46,7 @@ Its own code is the outline and the commands (pure, in its Core, tested), its ke
 - `ThingForm`: the window, derived from `Axit.Forms/AxitForm` (AX-6.5), which already holds the notice flow,
   `Announce`, the fonts, the window's place, the settings saving, the Axit menu with the update flow, find in a text
   box, the diagnostics and the common keys. Pass the app's name, its settings (a class that implements
-  `Axit.Core/IWindowSettings`) and the settings path to the base; add `Overlay` to the controls first; fill in the
+  `Axit.Core/WindowSettings`) and the settings path to the base; add `Overlay` to the controls first; fill in the
   hooks (`Shortcuts`, `HideForNotice`, `ShowAfterNotice`, `FocusTarget`, `ApplyFont`, `RestartArguments`,
   `UpdateRestartText`, `ProcessWindowKey`, and the optional ones `FocusToKeep`, `NoticeChime`, `OnNoticeOpened`,
   `OnNoticeClosed`, `UpdateNoted`, `DiagnosticsLines`). Use the other shared pieces, never a copy: `ControlArea` for

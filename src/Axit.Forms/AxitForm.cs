@@ -29,7 +29,7 @@ public abstract class AxitForm : Form
     /// <summary>After Update and restart: how the installed new version is started when this window closes; null when nothing is to start.</summary>
     private string[]? _restartArguments;
 
-    protected AxitForm(string appName, IWindowSettings settings, string settingsPath)
+    protected AxitForm(string appName, WindowSettings settings, string settingsPath)
     {
         AppName = appName;
         Settings = settings;
@@ -55,7 +55,7 @@ public abstract class AxitForm : Form
     protected string AppName { get; }
 
     /// <summary>The app's settings as the base needs them: the font, the update check and the window's place.</summary>
-    protected IWindowSettings Settings { get; }
+    protected WindowSettings Settings { get; }
 
     protected string SettingsPath { get; }
 
