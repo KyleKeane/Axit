@@ -385,7 +385,7 @@ public sealed partial class GitForm : AxitForm
         _branches = [];
         _logLoaded = false;
         _branchesLoaded = false;
-        Text = $"{Path.GetFileName(Path.TrimEndingDirectorySeparator(root))} - {AxGitApp.Name}";
+        Text = $"{RecentMenu.FolderName(root)} - {AxGitApp.Name}";
         _settings.RememberRepository(root);
         SaveSettings();
         Log.Info($"Opened {root}");
@@ -422,24 +422,8 @@ public sealed partial class GitForm : AxitForm
     }
 
     /// <summary>Repository → Open recent repository (AG-6.1): the last ten, those that still exist, "1. name (path)" (AX-9.5).</summary>
-    private void FillRecent()
-    {
-        _recentItem.DropDownItems.Clear();
-        var repositories = _settings.RecentRepositories.Where(Directory.Exists).ToList();
-        if (repositories.Count == 0)
-        {
-            // Enabled and doing nothing (bundle AX-9.5): a disabled item is skipped, and NVDA would have nothing to read.
-            _recentItem.DropDownItems.Add(new ToolStripMenuItem("&No recent repositories"));
-            return;
-        }
-
-        for (var i = 0; i < repositories.Count; i++)
-        {
-            var target = repositories[i];
-            var name = Path.GetFileName(Path.TrimEndingDirectorySeparator(target));
-            _recentItem.DropDownItems.Add(new ToolStripMenuItem(AxitWindows.Label(i, $"{name} ({target})"), null, (_, _) => Do(() => StartAsync(target))));
-        }
-    }
+    private void FillRecent() =>
+        RecentMenu.Fill(_recentItem, _settings.RecentRepositories, Directory.Exists, RecentMenu.FolderName, "&No recent repositories", target => Do(() => StartAsync(target)));
 
     /// <summary>Repository → Show current repository in → File Explorer (Ctrl+W): the folder opened in File Explorer, one of the system's own windows.</summary>
     private void ShowInExplorer()

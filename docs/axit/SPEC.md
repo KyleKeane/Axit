@@ -166,7 +166,7 @@ allow it, see B-9).
   open for the life of the process), `EditPaging` (Page Up and Page Down in an edit control), `EditParagraphs`
   (Ctrl+Up and Ctrl+Down by paragraph, with Shift selecting), `EditKeys` (the KeyDown handler that gives an edit
   control both), `Announcer` (the UI Automation notification, AX-7.1), `TextJump` and `TextJumps` (a window's key pairs for the kinds of element in a text and the jump itself on an edit control, used by every notice text and by AxDown's editor, AX-7.2), `StatusLayout`, the font
-  handling (text size and the font picker), `BundleKeys` (AX-8), `AxitMenu` (the Axit menu every window has, AX-9),
+  handling (text size and the font picker), `BundleKeys` (AX-8), `AxitMenu` (the Axit menu every window has, AX-9), `RecentMenu` (the "Open recent …" submenus, AX-9.5),
   and the text editor shell: `TextEditorForm` (the window every text editor app is: the file, the menus, find, go to
   line, the status bar, the notices, the fonts, the update flow; AxDown's `EditorForm` until AxJSON, the second
   editor), `EditorApp` (what differs between the editor apps, as data: name, verb, settings file, file types, F1 text,

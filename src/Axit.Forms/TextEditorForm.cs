@@ -386,24 +386,8 @@ public sealed class TextEditorForm : AxitForm
     private void NewDocument() => AskToSave(() => LoadDocument(null));
 
     /// <summary>File → Open recent file (AD-4.1): the last ten files opened or saved under a name, from the settings; one that no longer exists is left out.</summary>
-    private void FillRecentFiles()
-    {
-        _recentFilesItem.DropDownItems.Clear();
-        var files = _settings.RecentFiles.Where(File.Exists).ToList();
-        if (files.Count == 0)
-        {
-            // Enabled and doing nothing (bundle AX-9.5): a disabled item is skipped, and NVDA would have nothing to read.
-            _recentFilesItem.DropDownItems.Add(new ToolStripMenuItem("&No recent files"));
-            return;
-        }
-
-        for (var i = 0; i < files.Count; i++)
-        {
-            // "1. notes.md (C:\notes\notes.md)", the shape of the Axit menu's items (bundle AX-9.5).
-            var target = files[i];
-            _recentFilesItem.DropDownItems.Add(new ToolStripMenuItem(AxitWindows.Label(i, $"{Path.GetFileName(target)} ({target})"), null, (_, _) => AskToSave(() => LoadDocument(target))));
-        }
-    }
+    private void FillRecentFiles() =>
+        RecentMenu.Fill(_recentFilesItem, _settings.RecentFiles, File.Exists, Path.GetFileName, "&No recent files", target => AskToSave(() => LoadDocument(target)));
 
     /// <summary>File → Show current file in → File Explorer, Ctrl+W (AD-4.1): the file selected in File Explorer, one of the system's own windows (AX-7.2).</summary>
     private void ShowInExplorer()

@@ -569,24 +569,8 @@ internal sealed class MainForm : AxitForm
         return item;
     }
 
-    private void FillRecentFolders()
-    {
-        _recentFoldersItem.DropDownItems.Clear();
-        var folders = _settings.RecentFolders.Where(Directory.Exists).ToList();
-        if (folders.Count == 0)
-        {
-            // Enabled and doing nothing (bundle AX-9.5): a disabled item is skipped, and NVDA would have nothing to read.
-            _recentFoldersItem.DropDownItems.Add(new ToolStripMenuItem("&No recent folders"));
-            return;
-        }
-
-        for (var i = 0; i < folders.Count; i++)
-        {
-            // "1. myproject (C:\src\myproject)", the shape of the Axit menu's items (bundle AX-9.5).
-            var target = folders[i];
-            _recentFoldersItem.DropDownItems.Add(new ToolStripMenuItem(AxitWindows.Label(i, $"{FolderName(target)} ({target})"), null, (_, _) => SwitchFolder(target)));
-        }
-    }
+    private void FillRecentFolders() =>
+        RecentMenu.Fill(_recentFoldersItem, _settings.RecentFolders, Directory.Exists, RecentMenu.FolderName, "&No recent folders", SwitchFolder);
 
     // ---- input ----
 
@@ -1117,15 +1101,9 @@ internal sealed class MainForm : AxitForm
     {
         // FR-8.4: the folder's name, then its full path in parentheses, so that the name comes first in speech and
         // two folders of one name are still told apart in Alt+Tab and in the Axit menu; announcements use the name.
-        Text = _folder is null ? "AxClaude" : $"{FolderName(_folder)} ({_folder}) - AxClaude";
+        Text = _folder is null ? "AxClaude" : $"{RecentMenu.FolderName(_folder)} ({_folder}) - AxClaude";
         _folderLabel.Text = _folder ?? "No project folder";
         StatusLayout.Fit(_status, _state, _folderLabel);
-    }
-
-    private static string FolderName(string folder)
-    {
-        var name = Path.GetFileName(folder.TrimEnd(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar));
-        return name.Length > 0 ? name : folder;
     }
 
     /// <summary>
@@ -1276,7 +1254,7 @@ internal sealed class MainForm : AxitForm
             Title = "Export the conversation as text",
             Filter = "Text files (*.txt)|*.txt|All files (*.*)|*.*",
             // Outside the project, and named axclaude-… so the exclude patterns catch it wherever it goes (D34).
-            FileName = $"axclaude-{(_folder is null ? "conversation" : FolderName(_folder))}-{DateTime.Now:yyyyMMdd-HHmm}.txt",
+            FileName = $"axclaude-{(_folder is null ? "conversation" : RecentMenu.FolderName(_folder))}-{DateTime.Now:yyyyMMdd-HHmm}.txt",
             AddExtension = true,
             DefaultExt = "txt",
             InitialDirectory = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments),
@@ -1514,7 +1492,7 @@ internal sealed class MainForm : AxitForm
         }
 
         SetFolder(folder);
-        Announce($"Folder {FolderName(folder)}", false);
+        Announce($"Folder {RecentMenu.FolderName(folder)}", false);
         // Another folder is another conversation (FR-8.3): the window is cleared, and what Claude prints there, a
         // replay with its blocks when the folder has one, arrives as at the first start of the app.
         Relaunch($"Project folder changed to {folder}", clearConversation: true);
@@ -1583,7 +1561,7 @@ internal sealed class MainForm : AxitForm
         SetFolder(folder);
         _claudeArgs = [.. arguments];
         var with = arguments.Count > 0 ? " with " + ClaudeLauncher.JoinArguments(arguments) : " with no extra arguments";
-        Announce($"New session in {FolderName(folder)}", false);
+        Announce($"New session in {RecentMenu.FolderName(folder)}", false);
         // A new session is a new conversation (or a resumed one): the window is cleared first, and what Claude prints
         // then, a replay with its blocks included, arrives as at the first start of the app.
         Relaunch($"New session in {folder}{with}", clearConversation: true);
