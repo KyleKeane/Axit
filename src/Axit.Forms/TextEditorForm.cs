@@ -1,4 +1,3 @@
-using System.Diagnostics;
 using Axit.Core;
 
 namespace Axit.Forms;
@@ -386,14 +385,7 @@ public sealed class TextEditorForm : AxitForm
             return;
         }
 
-        try
-        {
-            Process.Start(new ProcessStartInfo("explorer.exe", $"/select,\"{_path}\"") { UseShellExecute = false });
-        }
-        catch (Exception ex) when (ex is System.ComponentModel.Win32Exception or InvalidOperationException)
-        {
-            Fail($"File Explorer could not be started: {ex.Message}");
-        }
+        OpenInExplorer(_path);
     }
 
     /// <summary>File → Show current file in → AxGit (AD-4.1): a new AxGit window on the repository that holds the file.</summary>

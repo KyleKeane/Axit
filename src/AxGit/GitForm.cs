@@ -408,14 +408,7 @@ public sealed partial class GitForm : AxitForm
             return;
         }
 
-        try
-        {
-            Process.Start(new ProcessStartInfo("explorer.exe", $"\"{_root}\"") { UseShellExecute = false });
-        }
-        catch (Exception ex) when (ex is System.ComponentModel.Win32Exception or InvalidOperationException)
-        {
-            Fail($"File Explorer could not be started: {ex.Message}");
-        }
+        OpenInExplorer(_root);
     }
 
     /// <summary>Repository → Show current repository in → AxClaude: a new AxClaude on the repository's folder (AG-1.4).</summary>

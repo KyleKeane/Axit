@@ -183,7 +183,7 @@ allow it, see B-9).
   windows share and no app copies: the notice flow (`ShowNotice`, `CloseNotice`, `Fail`, `ShowError`; Alt, F10 and
   the window's shortcuts swallowed while a notice shows), `Announce`, the text font with its size keys and the
   Windows font picker (the choice said), the window's place and size, the settings saving, the Axit menu with the
-  update check, the update notice and the install in place (AX-3), find in a text box, Copy diagnostics, `OpenUrl`,
+  update check, the update notice and the install in place (AX-3), find in a text box, Copy diagnostics, `OpenUrl`, `OpenInExplorer`,
   the submenus and the menu every window has (Options → Text, General and Developer; Help: `CreateTextMenu`,
   `CreateGeneralMenu`, `CreateDeveloperMenu`, `CreateHelpMenu`, each with the window's own items in their place;
   `Toggle` for a checked setting), the window role for NVDA (AX-7.1) and the common part of the key switch (the

@@ -1,4 +1,3 @@
-using System.Diagnostics;
 using System.Text;
 using AxClaude.Core.Privacy;
 using AxClaude.Core.Transcript;
@@ -94,18 +93,5 @@ internal sealed partial class MainForm
 
         Log.Info("Conversation exported to " + dialog.FileName);
         Announce("Exported", true);
-    }
-
-    /// <summary>Opens a page, a file or a folder with whatever Windows has for it; a failure is a notice, not a crash.</summary>
-    private void OpenWithShell(string target, string what)
-    {
-        try
-        {
-            Process.Start(new ProcessStartInfo(target) { UseShellExecute = true });
-        }
-        catch (Exception ex) when (ex is System.ComponentModel.Win32Exception or IOException)
-        {
-            Fail($"The {what} could not be opened: {ex.Message}");
-        }
     }
 }

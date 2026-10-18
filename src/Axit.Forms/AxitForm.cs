@@ -624,6 +624,20 @@ public abstract class AxitForm : Form
         }
     }
 
+    /// <summary>The path in File Explorer, one of the system's own windows (AX-7.2): a folder opened, a file selected in its folder.</summary>
+    protected void OpenInExplorer(string path)
+    {
+        var arguments = Directory.Exists(path) ? $"\"{path}\"" : $"/select,\"{path}\"";
+        try
+        {
+            Process.Start(new ProcessStartInfo("explorer.exe", arguments) { UseShellExecute = false });
+        }
+        catch (Exception ex) when (ex is System.ComponentModel.Win32Exception or InvalidOperationException)
+        {
+            Fail("File Explorer could not be started: " + ex.Message);
+        }
+    }
+
     /// <summary>
     /// AX-3: asks GitHub for the latest release, every time. A newer one is offered in a notice (unprompted at
     /// startup) and noted in the Axit menu; a manual check (Axit → Check for updates) reports the result either

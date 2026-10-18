@@ -7,7 +7,6 @@ internal sealed partial class MainForm
 {
     // ---- project folder ----
 
-    /// <summary>Session → Show current folder in → File Explorer, Ctrl+W (FR-8.2): the folder in File Explorer, one of the system's own windows (D23).</summary>
     /// <summary>Session → Show current folder in → AxGit (FR-8.2): a new AxGit window on the repository that holds the project folder.</summary>
     private void OpenInAxGit()
     {
@@ -20,6 +19,7 @@ internal sealed partial class MainForm
         AxitMenu.Start(Dispatch.AxGit, _folder);
     }
 
+    /// <summary>Session → Show current folder in → File Explorer, Ctrl+W (FR-8.2): the folder in File Explorer, one of the system's own windows (D23).</summary>
     private void ShowInExplorer()
     {
         if (_folder is null)
@@ -34,7 +34,7 @@ internal sealed partial class MainForm
             return;
         }
 
-        OpenWithShell(_folder, "folder");
+        OpenInExplorer(_folder);
     }
 
     /// <summary>The standard folder picker (one of the few separate windows, D23); null when it was cancelled.</summary>
