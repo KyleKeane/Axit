@@ -22,6 +22,8 @@ Long lines wrap at the window's edge, so Down Arrow reads one screen line at a t
 
 Ctrl+S saves and AxJSON says "Saved". A new document asks for a name first, with the Windows file dialog; Ctrl+Shift+S, Save as, asks every time. Ctrl+O opens another file in this window and Ctrl+N starts an empty one; both ask first if you have unsaved changes, as does closing the window: a notice says "Save changes to settings.json?" with Save, Don't save and Cancel; Enter saves, Escape cancels. File, Open recent file lists the last ten files you opened or saved; File, Show current file in, File Explorer (Ctrl+W) opens File Explorer with the file selected.
 
+When another program changes the file while it is open here, for example Claude editing it while you are in AxClaude, AxJSON notices when you come back to its window: with nothing unsaved it reloads the file, keeps your line, and says "Reloaded, settings.json changed on disk"; with unsaved changes it says "settings.json changed on disk; Save will ask", and Ctrl+S then offers Write over, Reload and lose mine, or Cancel.
+
 AxJSON writes a file back the way it found it: the same encoding, with or without a byte order mark, and the same kind of line ending. The status bar shows what it found, for example "UTF-8 · CRLF". If the file changed on disk while you had it open, saving asks before writing over it.
 
 The title is the file's name, with a star in front while there are unsaved changes: "*settings.json - AxJSON".

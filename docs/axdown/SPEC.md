@@ -103,9 +103,16 @@ UTF-8, UTF-16 and the system code page; files that are not text; files over 32 M
 - AD-3.5 Save writes the file in place (as Notepad does) and then reads its last write time, which Ctrl+S and the
   close check compare against (AD-3.6). Save as asks for a path with the Windows file picker, then saves and renames
   the document (title, editor name, status bar).
-- AD-3.6 Changed on disk: when the file's last write time is not the one remembered, Save first asks through a
-  notice ("The file changed on disk since you opened it. Write over it?" with Write over and Cancel). Nothing is
-  watched or polled; the check happens at the moment of saving.
+- AD-3.6 Changed on disk: the file's last write time is compared with the one remembered when the window becomes
+  active again (`OnActivated`; nothing is watched or polled while it stays active, since the user leaves it to let
+  another program, Claude, work and comes back) and at the moment of saving. Back in the window with no unsaved
+  changes and a changed file, the editor reloads it, keeps the caret on its line and column, and says "Reloaded,
+  <name> changed on disk"; with unsaved changes it says once, until the file changes again, "<name> changed on disk;
+  Save will ask". Save with a changed file asks through a notice ("<name> was changed by another program since you
+  opened it. Write over it, or reload it and lose your changes?") with Write over (Enter), Reload and lose mine, and
+  Cancel (Escape); Reload drops the unsaved text and reloads with the caret kept, saying "Reloaded". No merging,
+  which is git's work, and no deleted-file case (a file that is gone is simply not compared). Asked for on
+  2026-10-18 with AxClaude editing files open in AxDown; the same in AxJSON, the same shell.
 - AD-3.7 A file over 32 MB is refused with a notice, since the EDIT control stops being usable long before that, and
   so is a file that is not text: one whose decoded text holds a NUL character (a PNG, UTF-16 without a mark), since
   the EDIT control keeps only the text before the first NUL and a save would write that truncation back. A file that
@@ -199,7 +206,7 @@ never a separate window.
 On opening, NVDA speaks the window ("README.md - AxDown window"), then the field ("README.md edit multi line"): the
 window has the accessible role Window, as AxClaude's has, so that NVDA names it; nothing of AxDown's own is spoken
 then. Afterwards, spoken through one UI Automation notification on the editor (AX-7.3), and only these: "Saved" (after a save and
-after Save as); "Not found" (find); "Line n of m" after Go to line, or "Not a line number"; "Word wrap on" / "Word wrap off"; "Text size n"; "No file yet" (Show current file in on Untitled);
+after Save as); "Reloaded, <name> changed on disk" and "<name> changed on disk; Save will ask" on coming back to the window, "Reloaded" after Reload and lose mine (AD-3.6); "Not found" (find); "Line n of m" after Go to line, or "Not a line number"; "Word wrap on" / "Word wrap off"; "Text size n"; "No file yet" (Show current file in on Untitled);
 "Install, heading level 2" after a heading jump, "No next heading" / "No previous heading" when there is none;
 "Copied" is NVDA's own. Opening a file speaks nothing of its own: the focus arrives in the editor and NVDA reads
 its name (the file's) and the first line.

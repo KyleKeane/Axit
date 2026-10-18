@@ -36,8 +36,13 @@ letter), and a `long.md` with headings and lines longer than the window.
    cancels and the text is still there; Enter saves and the document is empty, "Untitled".
 5. Ctrl+S on Untitled opens the Windows Save dialog; cancelling returns to the editor with the focus where it was.
 6. Ctrl+Shift+S saves under a new name; the title, the editor's name and the status bar show the new name.
-7. Change the file in another editor while AxDown has it open, then Ctrl+S in AxDown: the notice "The file changed
-   on disk since you opened it. Write over it?"; Cancel keeps both; Write over writes.
+7. With `plain.txt` open and unchanged, go to another window and append a line to the file there (in AxClaude: "add
+   a line to plain.txt"; or in a console: `echo more>> plain.txt`), then Alt+Tab back: "Reloaded, plain.txt changed
+   on disk", the caret on the line it was on, and Ctrl+End reads the new line. Now type a character, go away, change
+   the file again, come back: "plain.txt changed on disk; Save will ask", your character still there; Alt+Tab away
+   and back again: nothing is said twice. Ctrl+S: the notice "The file changed on disk" with Write over, Reload and
+   lose mine, Cancel; Escape keeps both; Ctrl+S, Down to "Reload and lose mine", Enter: "Reloaded", your character
+   gone and the file's new line there; make a change, Ctrl+S, Enter on Write over: "Saved".
 8. Close with Alt+F4 with unsaved changes: the notice; Don't save closes; Cancel stays.
 9. Open a locked file, or one that is not text (a `.png`): a notice names the problem; Escape closes it; the window
    stays open on an empty "Untitled" document, and Ctrl+S opens the Save dialog instead of writing over the file. A

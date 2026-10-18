@@ -31,6 +31,9 @@ public sealed class TextEditorForm : AxitForm
     private TextDocument _document = TextDocument.Empty();
     private string? _path;
     private DateTime? _lastWriteTime;
+
+    /// <summary>The write time already said as "changed on disk" while there were unsaved changes, so that it is said once (AD-3.6).</summary>
+    private DateTime? _changeNoticed;
     private bool _changed;
     private bool _loading;
     private bool _closeConfirmed;
@@ -223,6 +226,13 @@ public sealed class TextEditorForm : AxitForm
         base.OnShown(e);
     }
 
+    /// <summary>Back in this window: a file another program changed meanwhile is reloaded, or noted (AD-3.6).</summary>
+    protected override void OnActivated(EventArgs e)
+    {
+        base.OnActivated(e);
+        CheckDisk();
+    }
+
     protected override void OnFormClosing(FormClosingEventArgs e)
     {
         if (_changed && !_closeConfirmed)
@@ -340,6 +350,7 @@ public sealed class TextEditorForm : AxitForm
         _path = path;
         _document = TextDocument.Empty();
         _lastWriteTime = null;
+        _changeNoticed = null;
         if (path is not null && File.Exists(path))
         {
             try
@@ -444,15 +455,57 @@ public sealed class TextEditorForm : AxitForm
         if (ChangedOnDisk())
         {
             ShowNotice(new Notice("The file changed on disk",
-                $"{DocumentName} was changed by another program since you opened it. Write over it?",
+                $"{DocumentName} was changed by another program since you opened it. Write over it, or reload it and lose your changes?",
                 [
                     new OverlayChoice("&Write over", () => WriteFile(_path, then), IsDefault: true),
+                    new OverlayChoice("&Reload and lose mine", () => Reload("Reloaded")),
                     new OverlayChoice("&Cancel", IsCancel: true),
                 ]));
             return;
         }
 
         WriteFile(_path, then);
+    }
+
+    /// <summary>
+    /// AD-3.6, on activation: a file changed on disk is reloaded with the caret kept on its line and column when
+    /// nothing is unsaved here, and said once otherwise, since Save will ask. Nothing is watched while the window
+    /// stays active; the user leaves it to let another program (Claude) work and comes back.
+    /// </summary>
+    private void CheckDisk()
+    {
+        if (_path is null || _lastWriteTime is not { } opened || !File.Exists(_path))
+        {
+            return;
+        }
+
+        var now = File.GetLastWriteTimeUtc(_path);
+        if (now == opened)
+        {
+            return;
+        }
+
+        if (_changed)
+        {
+            if (_changeNoticed != now)
+            {
+                _changeNoticed = now;
+                Announce($"{DocumentName} changed on disk; Save will ask", false);
+            }
+
+            return;
+        }
+
+        Reload($"Reloaded, {DocumentName} changed on disk");
+    }
+
+    /// <summary>The file read again, the caret back on its line and column, <paramref name="announcement"/> said.</summary>
+    private void Reload(string announcement)
+    {
+        var (line, column, _) = Position();
+        LoadDocument(_path);
+        MoveTo(line, column);
+        Announce(announcement, false);
     }
 
     private void SaveAs(Action? then = null)
@@ -488,6 +541,7 @@ public sealed class TextEditorForm : AxitForm
         {
             _document.Write(path, _editor.Text);
             _lastWriteTime = File.GetLastWriteTimeUtc(path);
+            _changeNoticed = null;
             _changed = false;
             UpdateTitle();
             UpdateStatus();
@@ -575,6 +629,13 @@ public sealed class TextEditorForm : AxitForm
 
     private void GoToLine(int line, int lines)
     {
+        MoveTo(line, 1);
+        Announce($"Line {line} of {lines}", true);
+    }
+
+    /// <summary>The caret to a line and column of the text (1-based), clamped to what is there; the status bar follows.</summary>
+    private void MoveTo(int line, int column)
+    {
         var text = _editor.Text;
         var index = 0;
         for (var current = 1; current < line && index < text.Length; index++)
@@ -585,10 +646,11 @@ public sealed class TextEditorForm : AxitForm
             }
         }
 
-        _editor.Select(index, 0);
+        var end = text.IndexOf('\n', index);
+        var length = (end < 0 ? text.Length : end) - index;
+        _editor.Select(index + Math.Clamp(column - 1, 0, Math.Max(0, length)), 0);
         _editor.ScrollToCaret();
         UpdateStatus();
-        Announce($"Line {line} of {lines}", true);
     }
 
     /// <summary>A Navigate menu item: the shared jump on the editor (AD-D7), then the status bar.</summary>

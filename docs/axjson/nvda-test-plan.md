@@ -21,6 +21,8 @@ and `broken.json`, the same with the comma after `"opus"` removed and a comma ad
 1. Start AxJSON from the Start menu: NVDA reads "Untitled - AxJSON window", then "Untitled edit multi line".
 2. `axjson settings.json` in a console, and `axit settings.json`: both open AxJSON on the file, "settings.json - AxJSON window".
 3. In File Explorer, right-click `settings.json`, Open with: AxJSON is listed; it opens the file.
+4. The file flows are the shell's: run AxDown's section 3, step 7 (a file changed by another program) on a `.json`
+   file once; the announcements name the file.
 
 ## 2. Navigation (AJ-2.2)
 

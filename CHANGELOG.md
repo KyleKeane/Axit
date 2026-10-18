@@ -4,6 +4,7 @@
 
 - Axit: the pieces every window had its own copy of are shared now: the entry point with the log and the crash handling (`AppHost`), the settings' font, update-check and window fields (`WindowSettings`), the embedded guides' reader, the "Open recent" submenus (`RecentMenu`), the status bar's two labels (`StatusLayout.Pair`) and Options → Developer → Open settings file, which opens the file in AxJSON in every window (AxDown opened its own settings in AxDown; AxClaude used the default editor). `--version` says "AxClaude, Axit n" like the other apps.
 - Axit: the shipped README names all four apps' Start menu entries and commands.
+- AxDown, AxJSON: a file changed by another program while it is open, which only Save used to notice. Coming back to the window with nothing unsaved reloads the file with the caret kept on its line, "Reloaded, notes.md changed on disk"; with unsaved changes the editor says so once and Save offers Write over, Reload and lose mine, or Cancel.
 
 ## 2.12.0 - 2026-10-18
 
