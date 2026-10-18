@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased
+## 2.12.0 - 2026-10-18
 
 - AxGit: a new app of the bundle, a git manager for one repository, as a first draft (`docs/axgit/SPEC.md`). `Axit.exe git <folder or file>`, `axgit`, Start menu entry "Axit AxGit". One list with three views, Changes (Ctrl+1), Log (Ctrl+2) and Branches (Ctrl+3), a details text for a diff or a commit, and the branch in the status bar. Space stages or unstages, Enter shows the diff or the commit or switches the branch, Delete discards after a question, Ctrl+Enter commits with a message asked in a notice, Ctrl+N makes a branch, Ctrl+Shift+F, L and P fetch, pull and push, F5 refreshes, Ctrl+E opens the file in its editor. Every action is one git command on a background task and one announcement; git's whole answer comes as a notice when it fails. Not yet checked with NVDA.
 - Axit: a shared window base, `AxitForm`, holds what every window had its own copy of: the notices, the announcements, the fonts, the window's place, the settings saving, the Axit menu with the update check and the update itself, find, the diagnostics. AxClaude, AxDown, AxJSON and AxGit all run on it. Visible from the outside: the font picker now says the chosen font in every window, the manual update check names the releases page in every window, and a failed update is a notice with the release page in every window, as they were in AxClaude.

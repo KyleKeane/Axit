@@ -1,8 +1,9 @@
 # AxGit — Specification
 
 AxGit is the fourth app of the Axit bundle (`docs/axit/SPEC.md`): a git manager for one repository, for a blind
-developer who uses the NVDA screen reader. Describes AxGit as of its first draft (2026-10-18), unreleased and awaiting
-its NVDA pass. The document is kept in step with the code (a behaviour change updates it in the same commit).
+developer who uses the NVDA screen reader. Describes AxGit as of its first draft, released in Axit 2.12.0 (2026-10-18) after an
+NVDA pass of its start, views, diff, staging, notices and the way to and from the other windows; the commit, discard,
+switch and remote commands await theirs. The document is kept in step with the code (a behaviour change updates it in the same commit).
 Requirements are numbered `AG-n.m` and decisions `AG-Dn`; the bundle's rules, AX-7 (accessibility), AX-8 (keys) and
 AX-9 (the Axit menu), are cited by number and not repeated. In AxGit's code and documents, "SPEC.md" means this file.
 
@@ -229,6 +230,8 @@ have been the third copy of them.
 
 ## 8. Status
 
-- First draft on 2026-10-18 (unreleased): AG-1 to AG-8 built; `docs/axgit/nvda-test-plan.md` is the pass to run
-  before a release; the installer entries (Start menu, console command, folder context menu) are written and not yet
-  installed.
+- First draft on 2026-10-18, released in 2.12.0 the same day: AG-1 to AG-8 built; heard under NVDA by the user:
+  the start from AxClaude and AxDown, the three views, a diff, staging and unstaging, the notices, Ctrl+E into
+  AxDown, and the way back through the Axit menu; `docs/axgit/nvda-test-plan.md` sections 3.5 to 4.5 (commit,
+  discard, branches, fetch, pull, push) are still to run. The window moved onto the bundle's window base the same
+  day (AX-6.5).

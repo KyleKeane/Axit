@@ -421,3 +421,8 @@ docs/axdown/            SPEC.md, user-guide.md (embedded by src/AxDown), nvda-te
   edit field, Ctrl+Q to read a question or screen again; AxClaude D33), the first menu of every window in the standard
   order of a File menu with AxClaude's Save conversation as renamed Export conversation (AX-8.2, AD-4.1); the draft
   flow and Ctrl+Q heard under NVDA by the user, the rest covered by recordings and tests.
+- 2.12.0 (2026-10-18), developed on `axit`: AxGit, the fourth app, as a first draft (`docs/axgit/SPEC.md`; section
+  3), reached from the other windows' "Show current … in ▸" submenus; the window base `AxitForm` (AX-6.5) with the
+  editor shell, AxGit and AxClaude's `MainForm` on it. Heard under NVDA by the user: the notices in AxClaude and
+  AxDown on the base, AxGit's start, views, diff, staging and notices, and the way to and from it; AxGit's commit,
+  discard, switch and remote commands await their pass.
