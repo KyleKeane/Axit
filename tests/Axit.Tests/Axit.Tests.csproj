@@ -5,15 +5,7 @@
   <PropertyGroup>
     <TargetFramework>net10.0-windows</TargetFramework>
     <UseWindowsForms>true</UseWindowsForms>
-    <IsPackable>false</IsPackable>
-    <IsTestProject>true</IsTestProject>
   </PropertyGroup>
-
-  <ItemGroup>
-    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.14.1" />
-    <PackageReference Include="xunit" Version="2.9.3" />
-    <PackageReference Include="xunit.runner.visualstudio" Version="3.1.4" />
-  </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\..\src\Axit.Core\Axit.Core.csproj" />
@@ -22,10 +14,6 @@
     <ProjectReference Include="..\..\src\AxJSON\AxJSON.csproj" />
     <ProjectReference Include="..\..\src\AxGit\AxGit.csproj" />
     <ProjectReference Include="..\..\src\AxClaude\AxClaude.csproj" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <Using Include="Xunit" />
   </ItemGroup>
 
 </Project>

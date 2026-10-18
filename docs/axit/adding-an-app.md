@@ -28,7 +28,7 @@ its tests, then the window, then the installer.
 - `AxThing.Core.csproj` (net10.0), referencing `Axit.Core` only. Everything that needs no window goes here.
 - `ThingSettings`: a plain class of properties with defaults, `DefaultPath => AppPaths.SettingsFile("axthing")`,
   `Load` through `SettingsFile.Load` plus a `Sanitize`, `Save` through `SettingsFile.Save`.
-- Tests for every rule in the spec that the pure code carries; the test project references only `AxThing.Core`.
+- Tests for every rule in the spec that the pure code carries; the test project references only `AxThing.Core`; its file holds that one reference, since `tests/Directory.Build.props` makes every test project xunit on .NET 10.
 - `CLAUDE.md`: what is here, the commands, the gotchas.
 
 ## 4. The window (`src/AxThing/`)
