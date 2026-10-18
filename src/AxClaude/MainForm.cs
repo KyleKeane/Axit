@@ -2292,7 +2292,7 @@ internal sealed class MainForm : Form
         // The screen's keys work from anywhere in the list, as in Claude, where only its highlight counts (D33). Enter
         // on one of the screen's lines does what the hint row says Enter does (send on the review of a draft, next on
         // one of its switches, view in /tasks); a screen whose hint names no Enter is left when Escape closes it, and
-        // otherwise the actions are named, since Escape would put the screen off. Until 2.10.1 Enter on a line meant
+        // otherwise the actions are named, since Escape would put the screen off. Until 2.11.0 Enter on a line meant
         // Escape, here Later, so Enter on the line "❯  Send feedback", taken for the button, put the draft off.
         var enter = screen.Keys.FirstOrDefault(key => key.Send == "\r");
         void EnterOnLine()

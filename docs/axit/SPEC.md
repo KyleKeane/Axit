@@ -397,3 +397,8 @@ docs/axdown/            SPEC.md, user-guide.md (embedded by src/AxDown), nvda-te
   ask before its NVDA pass.
 - 2.10.0 (2026-10-18): every numbered list item reads "N. name (path)" (AX-9.5, FR-8.5, AD-4.1); AxJSON marked beta
   until its NVDA pass.
+- 2.11.0 (2026-10-18), developed on `axit`: AxClaude's handling of the feedback drafts Claude Code queues by itself
+  (the review comes up like a question, `/feedback` lists the drafts, a screen's keys from anywhere in its list, the
+  edit field, Ctrl+Q to read a question or screen again; AxClaude D33), the first menu of every window in the standard
+  order of a File menu with AxClaude's Save conversation as renamed Export conversation (AX-8.2, AD-4.1); the draft
+  flow and Ctrl+Q heard under NVDA by the user, the rest covered by recordings and tests.

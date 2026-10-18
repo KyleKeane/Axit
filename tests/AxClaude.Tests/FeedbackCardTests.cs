@@ -89,7 +89,7 @@ public class FeedbackCardTests
     public void Only_a_draft_of_the_turn_that_ended_opens()
     {
         // Drafts counted when Claude is ready (five queued by other sessions, or left over) do not open /feedback:
-        // they opened it on every start before 2.10.1.
+        // they opened it on every start before 2.11.0.
         var watch = new FeedbackDraftWatch();
         Assert.False(watch.Drafted(working: false, idle: true, drafts: 5));
         Assert.False(watch.Drafted(working: false, idle: true, drafts: 5));

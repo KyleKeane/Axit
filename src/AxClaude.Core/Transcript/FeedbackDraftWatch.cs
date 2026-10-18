@@ -4,7 +4,7 @@ namespace AxClaude.Core.Transcript;
 /// When a feedback draft Claude Code queued by itself opens /feedback (SPEC.md D33). Claude counts its drafts on the
 /// mode line ("1 feedback draft", <see cref="SessionModel.FeedbackDrafts"/>); the count is compared with the one before
 /// the turn that ran last, so that a draft made in this session's turn opens, while drafts counted at startup or left
-/// by other sessions wait for /feedback by hand (they opened the list on every start before 2.10.1).
+/// by other sessions wait for /feedback by hand (they opened the list on every start before 2.11.0).
 /// </summary>
 public sealed class FeedbackDraftWatch
 {
