@@ -95,6 +95,13 @@ public sealed class Screen
     public event Action? Homed;
 
     /// <summary>
+    /// The whole screen is about to be erased (<c>ESC[2J</c>, <c>ESC[3J</c>), raised before the rows lose their
+    /// text: a model that keeps what was on screen (AxTerminal, where cls starts the screen afresh) lets the rows go
+    /// here (<see cref="DetachRows"/>).
+    /// </summary>
+    public event Action? Cleared;
+
+    /// <summary>
     /// A shell integration mark, OSC 133 (docs/axterminal/SPEC.md AT-1.3): the letter (A the prompt starts, B the
     /// command starts, C the output starts, D the command finished) and what follows the letter's semicolon (a D's
     /// exit code), or null. Claude Code emits C and D marks too; AxClaude does not listen.
@@ -479,6 +486,7 @@ public sealed class Screen
                 _rows[_cy].Clear(0, _cx + 1);
                 break;
             default:
+                Cleared?.Invoke();
                 foreach (var row in _rows)
                 {
                     row.Clear(0, Columns);

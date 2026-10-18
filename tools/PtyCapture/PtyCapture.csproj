@@ -8,7 +8,10 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <!-- ClaudeLauncher and Redaction; the host itself is Axit.Core's. -->
     <ProjectReference Include="..\..\src\AxClaude.Core\AxClaude.Core.csproj" />
+    <!-- ShellLauncher, for recording a shell the way AxTerminal starts it (the shell option). -->
+    <ProjectReference Include="..\..\src\AxTerminal.Core\AxTerminal.Core.csproj" />
   </ItemGroup>
 
 </Project>

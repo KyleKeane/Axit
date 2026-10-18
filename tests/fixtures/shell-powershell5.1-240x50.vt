@@ -1,0 +1,119 @@
+[?9001h[?1004h[?25l[2J[m[HWarning: PowerShell detected that you might be using a screen reader and has disabled PSReadLine for compatibility purposes. If you want to re-enable it, run 'Import-Module PSReadLine'.]0;C:\WINDOWS\System32\WindowsPowerShell\v1.0\powershell.exe[?25h[?25l[3;1H[?25h]133;A]9;9;"C:\axit-fixture"PS C:\axit-fixture> ]133;BWrite-Output hello
+hello
+]133;D;0]133;A]9;9;"C:\axit-fixture"PS C:\axit-fixture> ]133;Bcmd /c exit 3
+]133;D;3]133;A]9;9;"C:\axit-fixture"PS C:\axit-fixture> ]133;BGet-ChildItem -Name
+sub
+a.txt
+b.md
+]133;D;0]133;A]9;9;"C:\axit-fixture"PS C:\axit-fixture> ]133;BRead-Host "Continue? (y/n)"
+Continue? (y/n): y
+y
+]133;D;0]133;A]9;9;"C:\axit-fixture"PS C:\axit-fixture> ]133;Bif ($true) {
+>> "yes"
+>> }
+>> 
+yes
+]133;D;0]133;A]9;9;"C:\axit-fixture"PS C:\axit-fixture> ]133;Bcls
+[?25l[H[?25h[?25l[K
+[K
+[K
+[K
+[K
+[K
+[K
+[K
+[K
+[K
+[K
+[K
+[K
+[K
+[K
+[K
+[K
+[K
+[K
+[K
+[K
+[K
+[K
+[K
+[K
+[K
+[K
+[K
+[K
+[K
+[K
+[K
+[K
+[K
+[K
+[K
+[K
+[K
+[K
+[K
+[K
+[K
+[K
+[K
+[K
+[K
+[K
+[K
+[K
+[K[H[?25h[?25l[3J[K
+[K
+[K
+[K
+[K
+[K
+[K
+[K
+[K
+[K
+[K
+[K
+[K
+[K
+[K
+[K
+[K
+[K
+[K
+[K
+[K
+[K
+[K
+[K
+[K
+[K
+[K
+[K
+[K
+[K
+[K
+[K
+[K
+[K
+[K
+[K
+[K
+[K
+[K
+[K
+[K
+[K
+[K
+[K
+[K
+[K
+[K
+[K
+[K
+[K[H[?25h]133;D;0]133;A]9;9;"C:\axit-fixture"PS C:\axit-fixture> ]133;BWrite-Output after-cls
+after-cls
+]133;D;0]133;A]9;9;"C:\axit-fixture"PS C:\axit-fixture> ]133;B
+]133;D]133;A]9;9;"C:\axit-fixture"PS C:\axit-fixture> ]133;Bexit
+[?9001l[?1004l

@@ -10,7 +10,7 @@ namespace AxClaude.Tests;
 public class FixtureTests
 {
     public static IEnumerable<object[]> Fixtures() =>
-        Directory.GetFiles(FixtureDirectory(), "*.vt").OrderBy(f => f).Select(f => new object[] { Path.GetFileName(f) });
+        Directory.GetFiles(FixtureDirectory(), "*-claude*.vt").OrderBy(f => f).Select(f => new object[] { Path.GetFileName(f) });
 
     [Theory]
     [MemberData(nameof(Fixtures))]

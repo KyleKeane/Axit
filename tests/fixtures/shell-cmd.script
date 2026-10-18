@@ -1,0 +1,55 @@
+# Command Prompt under AxTerminal's launcher (PtyCapture --shell cmd): a command, a failing command, a listing, a
+# question answered, cls, a bare Enter, exit. Recorded in C:\axit-fixture.
+mark
+wait 20000 \e]133;B
+sleep 500
+send echo hello
+sleep 200
+send \r
+mark
+wait 10000 \e]133;B
+sleep 500
+send cmd /c exit 3
+sleep 200
+send \r
+mark
+wait 10000 \e]133;B
+sleep 500
+send dir /b
+sleep 200
+send \r
+mark
+wait 10000 \e]133;B
+sleep 500
+send set /p answer=Continue? (y/n):
+sleep 200
+send \r
+mark
+wait 10000 (y/n)
+sleep 2500
+send y
+sleep 200
+send \r
+mark
+wait 10000 \e]133;B
+sleep 500
+send cls
+sleep 200
+send \r
+mark
+wait 10000 \e]133;B
+sleep 500
+send echo after-cls
+sleep 200
+send \r
+mark
+wait 10000 \e]133;B
+sleep 500
+send \r
+mark
+wait 10000 \e]133;B
+sleep 500
+send exit
+sleep 200
+send \r
+exit 10000

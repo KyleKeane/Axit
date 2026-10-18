@@ -1,0 +1,17 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <RootNamespace>AxTerminal.Core</RootNamespace>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <InternalsVisibleTo Include="AxTerminal.Tests" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <!-- The bundle's shared pure code: the ConPTY host, the parser, the screen, the line store, the mirror, the settings file (docs/axit/SPEC.md AX-6.1). -->
+    <ProjectReference Include="..\Axit.Core\Axit.Core.csproj" />
+  </ItemGroup>
+
+</Project>

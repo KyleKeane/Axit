@@ -1,0 +1,72 @@
+# Windows PowerShell under AxTerminal's launcher (PtyCapture --shell powershell): a command, a failing command, a
+# listing, a question answered, a multi-line command, cls, a bare Enter, exit. Recorded in C:\axit-fixture.
+mark
+wait 20000 \e]133;B
+sleep 500
+send Write-Output hello
+sleep 200
+send \r
+mark
+wait 10000 \e]133;B
+sleep 500
+send cmd /c exit 3
+sleep 200
+send \r
+mark
+wait 10000 \e]133;B
+sleep 500
+send Get-ChildItem -Name
+sleep 200
+send \r
+mark
+wait 10000 \e]133;B
+sleep 500
+send Read-Host "Continue? (y/n)"
+sleep 200
+send \r
+mark
+wait 10000 (y/n)
+sleep 2500
+send y
+sleep 200
+send \r
+mark
+wait 10000 \e]133;B
+sleep 500
+send if ($true) {
+sleep 200
+send \r
+sleep 400
+send "yes"
+sleep 200
+send \r
+sleep 400
+send }
+sleep 200
+send \r
+sleep 400
+# With a screen reader running PowerShell turns PSReadLine off, and the console host then ends a block on an empty line.
+send \r
+mark
+wait 10000 \e]133;B
+sleep 500
+send cls
+sleep 200
+send \r
+mark
+wait 10000 \e]133;B
+sleep 500
+send Write-Output after-cls
+sleep 200
+send \r
+mark
+wait 10000 \e]133;B
+sleep 500
+send \r
+mark
+wait 10000 \e]133;B
+sleep 500
+send exit
+sleep 200
+send \r
+exit 10000

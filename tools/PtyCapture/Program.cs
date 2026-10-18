@@ -5,6 +5,9 @@
 //
 // Usage:
 //   PtyCapture --out <file.vt> [--cwd <dir>] [--cols N] [--rows N] [--script <file>] -- <command line>
+//   PtyCapture --out <file.vt> --shell pwsh|powershell|cmd [--cwd <dir>] [--cols N] [--rows N] [--script <file>]
+//                                          (the shell as AxTerminal starts it: its command line with the prompt
+//                                          snippet and its environment, ShellLauncher in AxTerminal.Core)
 //   PtyCapture --dump <file.vt> [--raw]    (print a human readable rendering of a recording; e-mail addresses,
 //                                          the account in paths, pipe names and session ids are replaced unless --raw)
 //
@@ -21,6 +24,7 @@ using System.Diagnostics;
 using System.Text;
 using AxClaude.Core.Privacy;
 using AxClaude.Core.Pty;
+using AxTerminal.Core;
 using Axit.Core.Pty;
 
 namespace PtyCapture;
@@ -29,7 +33,7 @@ internal static class Program
 {
     private static int Main(string[] args)
     {
-        string? cwd = null, outPath = null, scriptPath = null, dumpPath = null;
+        string? cwd = null, outPath = null, scriptPath = null, dumpPath = null, shell = null;
         int cols = 120, rows = 40;
         var raw = false;
         var command = new List<string>();
@@ -41,6 +45,7 @@ internal static class Program
                 case "--cwd": cwd = args[++i]; break;
                 case "--out": outPath = args[++i]; break;
                 case "--script": scriptPath = args[++i]; break;
+                case "--shell": shell = args[++i]; break;
                 case "--dump": dumpPath = args[++i]; break;
                 case "--raw": raw = true; break;
                 case "--cols": cols = int.Parse(args[++i]); break;
@@ -64,15 +69,36 @@ internal static class Program
             return 0;
         }
 
-        if (outPath is null || command.Count == 0)
+        if (outPath is null || (command.Count == 0 && shell is null))
         {
             Console.Error.WriteLine("Usage: PtyCapture --out <file.vt> [--cwd <dir>] [--cols N] [--rows N] [--script <file>] -- <command line>");
+            Console.Error.WriteLine("       PtyCapture --out <file.vt> --shell pwsh|powershell|cmd [--cwd <dir>] [--cols N] [--rows N] [--script <file>]");
             Console.Error.WriteLine("       PtyCapture --dump <file.vt> [--raw]");
             return 2;
         }
 
         cwd ??= Environment.CurrentDirectory;
-        var commandLine = ClaudeLauncher.BuildCommandLine(command[0], command.Skip(1));
+        string commandLine;
+        Dictionary<string, string> environment;
+        if (shell is not null)
+        {
+            // A shell as AxTerminal starts it (docs/axterminal/SPEC.md AT-1.2, AT-1.3).
+            var kind = ShellLauncher.Parse(shell);
+            if (ShellLauncher.BuildCommandLine(kind) is not { } shellLine)
+            {
+                Console.Error.WriteLine($"{ShellLauncher.Describe(kind)} was not found on this machine.");
+                return 2;
+            }
+
+            commandLine = shellLine;
+            environment = ShellLauncher.BuildEnvironment(kind);
+        }
+        else
+        {
+            commandLine = ClaudeLauncher.BuildCommandLine(command[0], command.Skip(1));
+            environment = ClaudeLauncher.BuildEnvironment();
+        }
+
         string[] script = scriptPath is null ? [] : File.ReadAllLines(scriptPath);
         Console.Error.WriteLine($"[capture] cwd={cwd} size={cols}x{rows}");
         Console.Error.WriteLine($"[capture] command: {commandLine}");
@@ -81,7 +107,7 @@ internal static class Program
         var output = new Output();
         var clock = Stopwatch.StartNew();
         var exited = new ManualResetEventSlim();
-        using var host = PtyHost.Start(new PtyOptions(commandLine, cwd, cols, rows, ClaudeLauncher.BuildEnvironment()),
+        using var host = PtyHost.Start(new PtyOptions(commandLine, cwd, cols, rows, environment),
             data =>
             {
                 recorder.Write(data);

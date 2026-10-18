@@ -1,0 +1,64 @@
+[?9001h[?1004h[?25l[2J[m[HMicrosoft Windows [Version 10.0.26200.9711]]0;C:\WINDOWS\system32\cmd.exe[?25h[?25l
+(c) Microsoft Corporation. All rights reserved.[4;1H[?25h]133;D\]133;A\]9;9;C:\axit-fixture\C:\axit-fixture>]133;B\echo hello
+[?25lhello[7;1H[?25h]133;D\]133;A\]9;9;C:\axit-fixture\C:\axit-fixture>]133;B\cmd /c exit 3
+]0;C:\WINDOWS\system32\cmd.exe - cmd  /c exit 3
+]0;C:\WINDOWS\system32\cmd.exe]133;D\]133;A\]9;9;C:\axit-fixture\C:\axit-fixture>]133;B\dir /b
+[?25la.txt
+b.md
+sub[14;1H[?25h]133;D\]133;A\]9;9;C:\axit-fixture\C:\axit-fixture>]133;B\set /p answer=Continue? (y/n):
+Continue? (y/n):]0;C:\WINDOWS\system32\cmd.exe - set  /p answer=Continue? (y/n):y
+
+]0;C:\WINDOWS\system32\cmd.exe]133;D\]133;A\]9;9;C:\axit-fixture\C:\axit-fixture>]133;B\cls
+[?25l[H[K
+[K
+[K
+[K
+[K
+[K
+[K
+[K
+[K
+[K
+[K
+[K
+[K
+[K
+[K
+[K
+[K
+[K
+[K
+[K
+[K
+[K
+[K
+[K
+[K
+[K
+[K
+[K
+[K
+[K
+[K
+[K
+[K
+[K
+[K
+[K
+[K
+[K
+[K
+[K
+[K
+[K
+[K
+[K
+[K
+[K
+[K
+[K
+[K
+[K[18;1H]0;C:\WINDOWS\system32\cmd.exe - cls[?25h[3J[?25l[2;1H]0;C:\WINDOWS\system32\cmd.exe[?25h]133;D\]133;A\]9;9;C:\axit-fixture\C:\axit-fixture>]133;B\echo after-cls
+[?25lafter-cls[5;1H[?25h]133;D\]133;A\]9;9;C:\axit-fixture\C:\axit-fixture>]133;B\
+]133;D\]133;A\]9;9;C:\axit-fixture\C:\axit-fixture>]133;B\exit
+[?9001l[?1004l

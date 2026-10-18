@@ -1,0 +1,54 @@
+Microsoft Windows [Version 10.0.26200.9711]
+(c) Microsoft Corporation. All rights reserved.
+
+# Input 1
+echo hello
+
+# Output 1
+
+hello
+
+# Input 2
+cmd /c exit 3
+
+# Output 2
+
+
+# Input 3
+dir /b
+
+# Output 3
+
+a.txt
+b.md
+sub
+
+# Input 4
+set /p answer=Continue? (y/n):
+
+# Output 4
+
+Continue? (y/n):y
+# Input 5
+y
+
+# Output 5
+
+
+# Input 6
+cls
+
+# Output 6
+
+
+# Input 7
+echo after-cls
+
+# Output 7
+
+after-cls
+
+# Input 8
+exit
+
+# Output 8
