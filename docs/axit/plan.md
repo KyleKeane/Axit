@@ -45,3 +45,6 @@ the restart by the app itself (2.3.0).
 - AxClaude's open items are in `docs/axclaude/SPEC.md` §12 To do, the one list for them.
 - A shared window base in `Axit.Forms` for the notice and update flows, which exist twice (`MainForm`,
   `EditorForm`), when a third window arrives.
+- AxJSON, an editor for JSON files: `docs/axjson/SPEC.md` is a placeholder spec (2026-10-17), raw mode as AxDown plus
+  structure keys and a formatter, structured mode as a form of real input fields from templates. It starts after
+  AxDown's letters, spec first, by `adding-an-app.md`.
