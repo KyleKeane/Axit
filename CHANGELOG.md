@@ -1,5 +1,11 @@
 # Changelog
 
+## 2.8.0 - 2026-10-17
+
+- AxClaude: the Claude menu item for Ctrl+X Ctrl+S is "Send queued messages now", the name Claude Code's own shortcut table gives it. It was Send now; the key, Ctrl+Shift+S, is unchanged.
+- AxClaude: the Navigate items Message field, Conversation and Latest response read their shortcut and their position as two things again. NVDA speaks a menu item's shortcut directly before its position in the menu, and the synthesizer ran "Ctrl+1" and "1 of 9" together into "Ctrl+11 of 9"; the three shortcuts now end in a full stop, which the synthesizer takes as a pause and NVDA does not speak.
+- AxClaude: Options has a Developer submenu with Open settings file (from General), Record raw stream for a bug report and Copy diagnostics (both from Help), so that Help holds the texts, the updates and About.
+
 ## 2.7.1 - 2026-10-17
 
 - AxClaude: old turns read out again at the end of a long reply, the "déjà vu" of long sessions since September, is fixed. Claude Code sometimes repaints the whole conversation from the top of the screen; the app hides that burst, but only when the top row of the screen held text, and a repaint that found a blank line there went through as new lines, which Speak replies read. Found in a raw recording of 2026-10-17 with three repaints, one of them leaking. The app now takes any cursor-home without an erase onto a screen that shows text as a repaint.
