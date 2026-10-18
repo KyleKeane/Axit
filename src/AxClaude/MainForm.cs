@@ -2285,15 +2285,17 @@ internal sealed class MainForm : Form
             }
         }
 
-        // Enter on one of the screen's lines: on the line Claude highlights (❯) it acts on that line, as Enter does in
-        // Claude; on another line it leaves a screen that Escape closes, and otherwise names the actions, since
-        // Escape would put the screen off (the review of a feedback draft: Later) and "❯  Send feedback" was taken
-        // for the button (D33).
-        void EnterOnLine(int index)
+        // The screen's keys work from anywhere in the list, as in Claude, where only its highlight counts (D33). Enter
+        // on one of the screen's lines does what the hint row says Enter does (send on the review of a draft, next on
+        // one of its switches, view in /tasks); a screen whose hint names no Enter is left when Escape closes it, and
+        // otherwise the actions are named, since Escape would put the screen off. Until 2.10.1 Enter on a line meant
+        // Escape, here Later, so Enter on the line "❯  Send feedback", taken for the button, put the draft off.
+        var enter = screen.Keys.FirstOrDefault(key => key.Send == "\r");
+        void EnterOnLine()
         {
-            if (screen.Lines[index].StartsWith('❯'))
+            if (enter is not null)
             {
-                SendScreenKey("\r");
+                SendScreenKey(enter.Send);
             }
             else if (leaves)
             {
@@ -2303,6 +2305,19 @@ internal sealed class MainForm : Form
             {
                 Announce("Actions at the end of the list: " + string.Join(", ", items.Skip(first)), true);
             }
+        }
+
+        // A letter the hint row names (d to discard, x to stop) goes to Claude from anywhere in the list; any other
+        // letter is the list's own jump to the item that starts with it.
+        bool Letter(char letter)
+        {
+            if (screen.Keys.FirstOrDefault(key => key.Send.Length == 1 && key.Send[0] == letter) is not { } key)
+            {
+                return false;
+            }
+
+            SendScreenKey(key.Send);
+            return true;
         }
 
         var text = new StringBuilder(screen.Title);
@@ -2316,12 +2331,12 @@ internal sealed class MainForm : Form
             {
                 if (index < first)
                 {
-                    EnterOnLine(index);
+                    EnterOnLine();
                     return;
                 }
 
                 SendScreenKey(screen.Keys[index - first].Send);
-            }, Leave));
+            }, Leave, Letter));
     }
 
     /// <summary>

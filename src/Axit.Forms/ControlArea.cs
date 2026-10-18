@@ -42,10 +42,12 @@ public sealed class ControlArea : Panel
     /// A list named <paramref name="name"/>, starting on item <paramref name="start"/>. With <paramref name="ticked"/>
     /// it has check boxes, those items ticked. Enter calls <paramref name="choose"/> with the focused item and the
     /// ticked ones, Escape calls <paramref name="escape"/>. The list takes the focus when <paramref name="focus"/>;
-    /// <paramref name="hold"/> makes it ignore the answering keys for a moment.
+    /// <paramref name="hold"/> makes it ignore the answering keys for a moment. A plain letter goes to
+    /// <paramref name="letter"/> first, when given: true takes the key (a screen's own key such as d to discard, from
+    /// anywhere in the list), false leaves it to the list's jump to the item that starts with it.
     /// </summary>
     public void ShowList(string name, IReadOnlyList<string> items, int start, IReadOnlyList<int>? ticked, bool focus, bool hold,
-        Action<int, IReadOnlyList<int>> choose, Action escape)
+        Action<int, IReadOnlyList<int>> choose, Action escape, Func<char, bool>? letter = null)
     {
         // A plain list box, a checked one for several answers: NVDA reads either as a list, the answer and its place.
         var list = ticked is null ? new ListBox() : new CheckedListBox();
@@ -75,6 +77,11 @@ public sealed class ControlArea : Panel
             else if (Answering(e) && e.KeyCode == Keys.Escape)
             {
                 escape();
+            }
+            else if (!e.Handled && letter is not null && e.Modifiers == Keys.None && e.KeyCode is >= Keys.A and <= Keys.Z
+                && letter((char)('a' + (e.KeyCode - Keys.A))))
+            {
+                e.Handled = e.SuppressKeyPress = true;
             }
             else if (!e.Handled)
             {
