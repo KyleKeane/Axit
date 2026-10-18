@@ -420,7 +420,8 @@ internal sealed class EditorForm : Form
         var files = _settings.RecentFiles.Where(File.Exists).ToList();
         if (files.Count == 0)
         {
-            _recentFilesItem.DropDownItems.Add(new ToolStripMenuItem("(none)") { Enabled = false });
+            // Enabled and doing nothing (bundle AX-9.5): a disabled item is skipped, and NVDA would have nothing to read.
+            _recentFilesItem.DropDownItems.Add(new ToolStripMenuItem("&No recent files"));
             return;
         }
 

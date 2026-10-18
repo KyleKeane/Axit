@@ -76,22 +76,22 @@ public sealed class AxitMenu : ToolStripMenuItem
             }
         }
 
-        NoneWhenEmpty(_recentlyClosed);
+        NoneWhenEmpty(_recentlyClosed, "&Nothing recently closed");
 
         var windows = OpenWindows();
         var current = Current();
-        FillWindows(_openWindows, AxitWindows.Others(windows, current), current);
+        FillWindows(_openWindows, AxitWindows.Others(windows, current), current, "&No other open windows");
         foreach (var (app, item) in _perApp)
         {
             var of = AxitWindows.Of(windows, app);
             item.Text = $"{AxitWindows.AppLabel(app)} ({of.Count})";
-            FillWindows(item, of, current);
+            FillWindows(item, of, current, $"&No open {app.Name} windows");
         }
     }
 
     private nint Current() => _owner.IsHandleCreated ? _owner.Handle : 0;
 
-    private static void FillWindows(ToolStripMenuItem list, IReadOnlyList<AxitWindow> windows, nint current)
+    private static void FillWindows(ToolStripMenuItem list, IReadOnlyList<AxitWindow> windows, nint current, string none)
     {
         list.DropDownItems.Clear();
         for (var i = 0; i < windows.Count; i++)
@@ -103,14 +103,19 @@ public sealed class AxitMenu : ToolStripMenuItem
             });
         }
 
-        NoneWhenEmpty(list);
+        NoneWhenEmpty(list, none);
     }
 
-    private static void NoneWhenEmpty(ToolStripMenuItem list)
+    /// <summary>
+    /// An empty list gets one item that says so and does nothing, enabled (AX-9.5): WinForms skips disabled items when
+    /// the keyboard moves through a menu, so a submenu of only a disabled "(none)" opened with nothing selected and
+    /// left the screen reader with nothing to read.
+    /// </summary>
+    private static void NoneWhenEmpty(ToolStripMenuItem list, string text)
     {
         if (list.DropDownItems.Count == 0)
         {
-            list.DropDownItems.Add(new ToolStripMenuItem("(none)") { Enabled = false });
+            list.DropDownItems.Add(new ToolStripMenuItem(text));
         }
     }
 

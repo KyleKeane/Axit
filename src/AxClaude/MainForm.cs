@@ -614,7 +614,8 @@ internal sealed class MainForm : Form
         var folders = _settings.RecentFolders.Where(Directory.Exists).ToList();
         if (folders.Count == 0)
         {
-            _recentFoldersItem.DropDownItems.Add(new ToolStripMenuItem("(none)") { Enabled = false });
+            // Enabled and doing nothing (bundle AX-9.5): a disabled item is skipped, and NVDA would have nothing to read.
+            _recentFoldersItem.DropDownItems.Add(new ToolStripMenuItem("&No recent folders"));
             return;
         }
 

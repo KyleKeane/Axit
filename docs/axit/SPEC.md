@@ -215,7 +215,10 @@ allow it, see B-9).
   windows closing in the same instant leave the last writer's list). Nothing else about windows is stored.
 - AX-9.5 A window's or a file's item is its number and a title, "1 notes.md - AxDown", the number as the mnemonic (1
   to 9, then a to z), so that Alt+A, O, 1 or Alt+A, R, 1 acts without an arrow key. Enter brings a window to the
-  front, restored when it was minimized. A list with nothing in it holds one disabled item, "(none)".
+  front, restored when it was minimized. A list with nothing in it holds one item that says so and does nothing, enabled
+  ("No other open windows", "No open AxDown windows", "Nothing recently closed"; the apps' own lists likewise, "No
+  recent folders", "No recent files"): WinForms skips disabled items when the keyboard moves through a menu, so a
+  submenu of only a disabled item opens with nothing selected and leaves the screen reader with nothing to read.
 - AX-9.6 The windows are the visible, unowned, titled top-level windows of every process named as this one, told
   apart by the end of their title (" - AxClaude", " - AxDown"; AD-10, AxClaude's `<folder> (<path>) - AxClaude`); a window of
   none of the apps (the bundle's own message box, AX-1.4) is listed nowhere. The lists are pure code in

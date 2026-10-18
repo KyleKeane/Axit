@@ -43,8 +43,8 @@ letter), and a `long.md` with headings and lines longer than the window.
    stays open on an empty "Untitled" document, and Ctrl+S opens the Save dialog instead of writing over the file. A
    missing file opens as an empty document of that name, which Ctrl+S creates.
 10. File, Open recent file lists `plain.txt` and the other files opened or saved in this window, newest first;
-    choosing one opens it, after the unsaved-changes question when there are changes; before any file, "(none)",
-    unavailable.
+    choosing one opens it, after the unsaved-changes question when there are changes; before any file, "No recent files",
+    which NVDA reads and which does nothing on Enter.
 11. File, Show current file in, File Explorer (Ctrl+W): a File Explorer window opens with the file selected and NVDA
     reads its title; Alt+F4 closes it and the focus is back in AxDown. On Untitled: "No file yet".
 
@@ -74,7 +74,7 @@ letter), and a `long.md` with headings and lines longer than the window.
    for updates and About (bundle AX-9); About, Axit on GitHub: the browser opens the repository page. With a second
    AxDown open, Open windows reads "1 <name> - AxDown, 1 of 1" and Enter brings that window to the front; Alt+A, B, D there
    lists both windows, the current one checked; Alt+A, N, D starts a new Untitled window. Alone, Open windows holds
-   "(none)", unavailable. Close a window that has `plain.txt` open: in another window Alt+A, R reads "1 plain.txt -
+   "No other open windows", which NVDA reads and which does nothing. Close a window that has `plain.txt` open: in another window Alt+A, R reads "1 plain.txt -
    AxDown" and Enter opens it in a new window; File, Open on another file puts the one you left there too. Alt+A, C
    (Close all windows) with unsaved changes in one window: that window asks "Save changes?" and the others close.
 5. Options, Developer, Copy diagnostics: "Copied diagnostics"; Options, Developer, Open settings file: a new AxDown
