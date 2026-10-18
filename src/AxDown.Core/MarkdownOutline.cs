@@ -45,13 +45,13 @@ public static class MarkdownOutline
         return headings;
     }
 
-    /// <summary>The first heading on a line after the caret's line; null when there is none.</summary>
-    public static Heading? NextHeading(string text, int caret)
+    /// <summary>The first heading on a line after the caret's line, of the level given (1 to 6) or of any level for 0; null when there is none.</summary>
+    public static Heading? NextHeading(string text, int caret, int level = 0)
     {
         var lineStart = LineStart(text, caret);
         foreach (var heading in Headings(text))
         {
-            if (heading.Start > lineStart)
+            if (heading.Start > lineStart && (level == 0 || heading.Level == level))
             {
                 return heading;
             }
@@ -60,14 +60,14 @@ public static class MarkdownOutline
         return null;
     }
 
-    /// <summary>The last heading on a line before the caret's line; null when there is none.</summary>
-    public static Heading? PreviousHeading(string text, int caret)
+    /// <summary>The last heading on a line before the caret's line, of the level given (1 to 6) or of any level for 0; null when there is none.</summary>
+    public static Heading? PreviousHeading(string text, int caret, int level = 0)
     {
         var lineStart = LineStart(text, caret);
         Heading? found = null;
         foreach (var heading in Headings(text))
         {
-            if (heading.Start < lineStart)
+            if (heading.Start < lineStart && (level == 0 || heading.Level == level))
             {
                 found = heading;
             }

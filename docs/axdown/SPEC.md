@@ -117,8 +117,9 @@ UTF-8, UTF-16 and the system code page; files that are not text; files over 32 M
 
 - AD-4.1 File: New (Ctrl+N), Open… (Ctrl+O), Save (Ctrl+S), Save as… (Ctrl+Shift+S), Exit (Alt+F4).
 - AD-4.2 Edit: Undo (Ctrl+Z), Cut, Copy, Paste, Select all (the control's own, listed for discoverability).
-  Navigate (as AxClaude's): Find… (Ctrl+F), Find next (F3), Find previous (Shift+F3), Go to line… (Ctrl+G), Next
-  heading (Ctrl+H), Previous heading (Ctrl+Shift+H).
+  Navigate (as AxClaude's): Find… (Ctrl+F), Find next (F3), Find previous (Shift+F3), Go to line… (Ctrl+G), then the
+  submenus Next and Previous with one item per kind of section 9: Heading (Ctrl+H, Ctrl+Shift+H), Heading level 1 to
+  6 (Ctrl+1 to Ctrl+6, Ctrl+Shift+1 to Ctrl+Shift+6).
 - AD-4.3 View: Word wrap (checked; Ctrl+Shift+W), Larger text (Ctrl+Plus), Smaller text (Ctrl+Minus), Windows text
   size, Font…
 - AD-4.4 Help: Keyboard shortcuts (F1), User guide, Check for updates (Axit n) and, while a newer release is known,
@@ -140,13 +141,13 @@ and Escape on a notice; Page Up and Page Down one screen in an edit control; Ctr
 next paragraph, with Shift selecting to there (AD-2.3); Alt+F4 exit; Alt and F10 the menu.
 
 Window-specific: Ctrl+N new document; Ctrl+O open; Ctrl+Shift+S save as; Ctrl+G go to line; Ctrl+Shift+W word wrap;
-Ctrl+H next heading and Ctrl+Shift+H previous heading (section 9).
+Ctrl+H next heading and Ctrl+Shift+H previous heading; Ctrl+1 to Ctrl+6 and Ctrl+Shift+1 to Ctrl+Shift+6 the next and previous heading of that level (section 9).
 Everything else in the editor is the control's own: arrows, Home, End, Ctrl+Home, Ctrl+End, Ctrl+Left and
 Ctrl+Right by word, Shift with any of them to select, Ctrl+A, Ctrl+C, Ctrl+X, Ctrl+V, Ctrl+Z, Delete, Backspace,
 Ctrl+Backspace, Tab (types a tab), Enter (a new line).
 
 Reserved for the rest of section 9 (AD-D7): Ctrl+letter the next item of a kind, Ctrl+Shift+letter the previous,
-with NVDA's browse-mode letters still to come: 1 to 6, K, L, I, Q, T.
+with NVDA's browse-mode letters still to come: K, L, I, Q, T.
 
 - AD-5.1 In an EDIT control Ctrl+H, Ctrl+I, Ctrl+J and Ctrl+M arrive as the characters Backspace, Tab, line feed
   and Enter. A handled key sets `SuppressKeyPress`; a key in that group that AxDown does not handle is swallowed
@@ -271,17 +272,18 @@ UTF-16 LE and BE with marks, Windows-1252, `\r\n`, `\n`, `\r` and no line ending
 bytes, a new document's defaults. The window has no automated tests; `docs/axdown/nvda-test-plan.md` covers it, and
 the off-screen probe approach of AxClaude checks layout and keys without disturbing the user.
 
-## 9. Markdown navigation (headings since 2.1.0; the other letters follow)
+## 9. Markdown navigation (headings since 2.1.0, heading levels next; the other letters follow)
 
 - `AxDown.Core/MarkdownOutline`: from the text and a caret position, the next and previous heading: a line of one to
   six `#` followed by a space (or hashes alone), after at most three spaces, outside fenced code blocks (` ``` ` or
   `~~~`); the text without the marks and closing hashes, and the level. Next means after the caret's line, previous
-  before it, so a jump from inside a heading never lands on itself. Pure, tested. Lists, list items, links, block
-  quotes and tables follow, each with NVDA's letter (AD-D7).
-- Keys per AD-D7: Ctrl+H and Ctrl+Shift+H (built); then Ctrl+1 to Ctrl+6 for the levels, then K, L, I, Q, T. The
-  jump moves the caret to the start of the heading line and speaks it as NVDA's browse mode would, "Install,
-  heading level 2", through one notification; "No next heading" / "No previous heading" when there is none, and the
-  caret stays; nothing on a plain arrow key. The Navigate menu lists the keys.
+  before it, so a jump from inside a heading never lands on itself; a level narrows both to headings of that level.
+  Pure, tested. Lists, list items, links, block quotes and tables follow, each with NVDA's letter (AD-D7).
+- Keys per AD-D7: Ctrl+H and Ctrl+Shift+H for any heading, Ctrl+1 to Ctrl+6 and Ctrl+Shift+1 to Ctrl+Shift+6 for a
+  heading of that level (built); then K, L, I, Q, T. The jump moves the caret to the start of the heading line and
+  speaks it as NVDA's browse mode would, "Install, heading level 2", through one notification; "No next heading" /
+  "No previous heading" when there is none ("No next heading level 2" for a level), and the caret stays; nothing on a
+  plain arrow key. The Navigate menu lists the keys under Next and Previous, one item per kind.
 
 ## 10. Status
 

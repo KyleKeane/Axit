@@ -88,3 +88,6 @@ letter), and a `long.md` with headings and lines longer than the window.
    heading: "No next heading", at the first: "No previous heading".
 2. A heading-looking line inside a fenced code block is skipped.
 3. Plain arrow keys still speak nothing of AxDown's own.
+4. Ctrl+2: the next level-2 heading, other levels skipped, spoken "…, heading level 2"; Ctrl+Shift+2 back; past the
+   last one: "No next heading level 2". Navigate, Next and Navigate, Previous each list Heading and Heading level 1 to
+   6 with their keys, and the items do the same as the keys.

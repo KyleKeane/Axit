@@ -67,4 +67,17 @@ public sealed class MarkdownOutlineTests
         Assert.Equal(107, MarkdownOutline.PreviousHeading(Text, Text.Length + 50)!.Start);
         Assert.Equal(27, MarkdownOutline.NextHeading(Text, -5)!.Start);
     }
+
+    [Fact]
+    public void A_level_narrows_next_and_previous_to_headings_of_that_level()
+    {
+        Assert.Equal(27, MarkdownOutline.NextHeading(Text, 0, 2)!.Start);
+        Assert.Equal(42, MarkdownOutline.NextHeading(Text, 0, 3)!.Start);
+        Assert.Equal(107, MarkdownOutline.NextHeading(Text, 0, 6)!.Start);
+        Assert.Null(MarkdownOutline.NextHeading(Text, 0, 1));
+        Assert.Null(MarkdownOutline.NextHeading(Text, 0, 4));
+        Assert.Equal(0, MarkdownOutline.PreviousHeading(Text, Text.Length, 1)!.Start);
+        Assert.Equal(27, MarkdownOutline.PreviousHeading(Text, 42, 2)!.Start);
+        Assert.Null(MarkdownOutline.PreviousHeading(Text, 42, 3));
+    }
 }

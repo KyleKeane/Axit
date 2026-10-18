@@ -18,6 +18,17 @@ public static class AxDownKeys
     public const Keys NextHeading = Keys.Control | Keys.H;
     public const Keys PreviousHeading = Keys.Control | Keys.Shift | Keys.H;
 
+    /// <summary>Ctrl+1 to Ctrl+6: the next heading of that level; Ctrl+Shift+1 to Ctrl+Shift+6: the previous one (SPEC.md §9).</summary>
+    public static Keys NextHeadingLevel(int level) => Keys.Control | (Keys.D0 + level);
+
+    public static Keys PreviousHeadingLevel(int level) => Keys.Control | Keys.Shift | (Keys.D0 + level);
+
+    /// <summary>1 to 6 when the key is one of the twelve above, 0 for any other key.</summary>
+    public static int HeadingLevel(Keys key) =>
+        (key & Keys.Modifiers) is Keys.Control or (Keys.Control | Keys.Shift) && (key & Keys.KeyCode) is >= Keys.D1 and <= Keys.D6
+            ? (key & Keys.KeyCode) - Keys.D1 + 1
+            : 0;
+
     /// <summary>Every key above with its name, for the collision test and the F1 text.</summary>
     public static readonly IReadOnlyList<(string Name, Keys Key)> All =
     [
@@ -28,5 +39,7 @@ public static class AxDownKeys
         ("Word wrap", WordWrap),
         ("Next heading", NextHeading),
         ("Previous heading", PreviousHeading),
+        ..Enumerable.Range(1, 6).Select(level => ($"Next heading level {level}", NextHeadingLevel(level))),
+        ..Enumerable.Range(1, 6).Select(level => ($"Previous heading level {level}", PreviousHeadingLevel(level))),
     ];
 }

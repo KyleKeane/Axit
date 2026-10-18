@@ -80,8 +80,19 @@ internal sealed class EditorForm : Form
         navigate.DropDownItems.Add(Item("Find pre&vious", () => FindNext(-1), BundleKeys.FindPrevious));
         navigate.DropDownItems.Add(Item("&Go to line...", ShowGoToLine, AxDownKeys.GoToLine));
         navigate.DropDownItems.Add(new ToolStripSeparator());
-        navigate.DropDownItems.Add(Item("Next &heading", () => JumpToHeading(1), AxDownKeys.NextHeading));
-        navigate.DropDownItems.Add(Item("&Previous heading", () => JumpToHeading(-1), AxDownKeys.PreviousHeading));
+        // Section 9: NVDA's browse-mode letters with Ctrl, one submenu for next and one for previous, one item per kind.
+        var next = new ToolStripMenuItem("Ne&xt");
+        var previous = new ToolStripMenuItem("&Previous");
+        next.DropDownItems.Add(Item("&Heading", () => JumpToHeading(1), AxDownKeys.NextHeading));
+        previous.DropDownItems.Add(Item("&Heading", () => JumpToHeading(-1), AxDownKeys.PreviousHeading));
+        for (var level = 1; level <= 6; level++)
+        {
+            var l = level;
+            next.DropDownItems.Add(Item($"Heading level &{l}", () => JumpToHeading(1, l), AxDownKeys.NextHeadingLevel(l)));
+            previous.DropDownItems.Add(Item($"Heading level &{l}", () => JumpToHeading(-1, l), AxDownKeys.PreviousHeadingLevel(l)));
+        }
+        navigate.DropDownItems.Add(next);
+        navigate.DropDownItems.Add(previous);
 
         var view = new ToolStripMenuItem("&View");
         _wordWrapItem = Item("&Word wrap", ToggleWordWrap, AxDownKeys.WordWrap);
@@ -296,6 +307,14 @@ internal sealed class EditorForm : Form
             case AxDownKeys.PreviousHeading:
                 JumpToHeading(-1);
                 return true;
+        }
+
+        // Ctrl+1 to Ctrl+6 and Ctrl+Shift+1 to Ctrl+Shift+6: a heading of that level (SPEC.md §9).
+        var level = AxDownKeys.HeadingLevel(keyData);
+        if (level > 0)
+        {
+            JumpToHeading(keyData.HasFlag(Keys.Shift) ? -1 : 1, level);
+            return true;
         }
 
         return base.ProcessCmdKey(ref msg, keyData);
@@ -583,15 +602,15 @@ internal sealed class EditorForm : Form
     /// as NVDA's browse mode would ("Install, heading level 2"); "No next heading" or "No previous heading" when there
     /// is none, and the caret stays.
     /// </summary>
-    private void JumpToHeading(int direction)
+    private void JumpToHeading(int direction, int level = 0)
     {
         var text = _editor.Text;
         var heading = direction > 0
-            ? MarkdownOutline.NextHeading(text, _editor.SelectionStart)
-            : MarkdownOutline.PreviousHeading(text, _editor.SelectionStart);
+            ? MarkdownOutline.NextHeading(text, _editor.SelectionStart, level)
+            : MarkdownOutline.PreviousHeading(text, _editor.SelectionStart, level);
         if (heading is null)
         {
-            Announce(direction > 0 ? "No next heading" : "No previous heading", true);
+            Announce((direction > 0 ? "No next heading" : "No previous heading") + (level > 0 ? $" level {level}" : ""), true);
             return;
         }
 
