@@ -22,8 +22,8 @@ public sealed class TextEditorForm : AxitForm
     private readonly ToolStripMenuItem _recentFilesItem = new("Open &recent file");
     private readonly TextBox _editor = new();
     private readonly StatusStrip _status = new();
-    private readonly ToolStripStatusLabel _fileLabel = new();
-    private readonly ToolStripStatusLabel _positionLabel = new();
+    private readonly ToolStripStatusLabel _fileLabel;
+    private readonly ToolStripStatusLabel _positionLabel;
     private readonly ControlArea _area = new();
     private readonly ToolStripMenuItem _wordWrapItem;
     private readonly System.Windows.Forms.Timer _statusTimer = new() { Interval = 300 };
@@ -154,11 +154,8 @@ public sealed class TextEditorForm : AxitForm
             UpdateStatus();
         };
 
-        // ---- the status bar (AD-9): no AccessibleName, no Spring, as in AxClaude (its SPEC §6.2) ----
-        _fileLabel.TextAlign = ContentAlignment.MiddleLeft;
-        _positionLabel.TextAlign = ContentAlignment.MiddleLeft;
-        _status.Items.AddRange([_fileLabel, _positionLabel]);
-        _status.SizeChanged += (_, _) => StatusLayout.Fit(_status, _fileLabel, _positionLabel);
+        // ---- the status bar (AD-9): the bundle's pair, no AccessibleName, no Spring ----
+        (_fileLabel, _positionLabel) = StatusLayout.Pair(_status);
 
         Overlay.Jumps = _app.Jumps;
         _area.TabIndex = 1;

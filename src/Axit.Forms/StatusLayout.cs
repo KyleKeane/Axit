@@ -11,6 +11,20 @@ public static class StatusLayout
     /// <summary>Pixels kept free: the strip lays items out from x = 1, and an item that ends past the edge overflows.</summary>
     private const int Slack = 8;
 
+    /// <summary>
+    /// The two labels of a window's status bar, added to the strip and kept inside it as it resizes. No
+    /// AccessibleName on them (it would replace the text NVDA reads with NVDA+End) and no Spring (this WinForms
+    /// version places a Spring label outside the strip, where it is neither drawn nor exposed).
+    /// </summary>
+    public static (ToolStripStatusLabel Left, ToolStripStatusLabel Right) Pair(StatusStrip strip)
+    {
+        var left = new ToolStripStatusLabel { TextAlign = ContentAlignment.MiddleLeft };
+        var right = new ToolStripStatusLabel { TextAlign = ContentAlignment.MiddleLeft };
+        strip.Items.AddRange([left, right]);
+        strip.SizeChanged += (_, _) => Fit(strip, left, right);
+        return (left, right);
+    }
+
     public static void Fit(ToolStrip strip, ToolStripStatusLabel state, ToolStripStatusLabel folder)
     {
         var available = strip.DisplayRectangle.Width - state.Margin.Horizontal - folder.Margin.Horizontal - Slack;

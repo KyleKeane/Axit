@@ -27,8 +27,8 @@ internal sealed class MainForm : AxitForm
     private readonly ControlArea _area = new();
     private readonly MenuStrip _menu = new();
     private readonly StatusStrip _status = new();
-    private readonly ToolStripStatusLabel _state = new();
-    private readonly ToolStripStatusLabel _folderLabel = new();
+    private readonly ToolStripStatusLabel _state;
+    private readonly ToolStripStatusLabel _folderLabel;
     private readonly ToolStripMenuItem _recentFoldersItem = new("Open &recent folder");
     private readonly ToolStripMenuItem _recordItem = new(RecordItemText);
     /// <summary>Options → Sounds → Background music while Claude works, made with the menu; Ctrl+Space flips it from anywhere (FR-7.9).</summary>
@@ -137,6 +137,8 @@ internal sealed class MainForm : AxitForm
         _claudeArgs = options.ClaudeArgs is { } given ? [.. given] : null;
         _settings = settings;
         _settingsError = settingsError;
+        // The bundle's status bar pair (no AccessibleName, no Spring; StatusLayout keeps both inside the strip).
+        (_state, _folderLabel) = StatusLayout.Pair(_status);
         _folder = options.Folder ?? (settings.LastProjectFolder is { } last && Directory.Exists(last) ? last : null);
         _model = new SessionModel(options.Columns ?? settings.PtyColumns, options.Rows ?? settings.PtyRows)
         {
@@ -498,14 +500,7 @@ internal sealed class MainForm : AxitForm
         _menu.Items.AddRange([session, claude, navigate, options, axit, help]);
         MainMenuStrip = _menu;
 
-        // No AccessibleName on status labels: it would replace the text that NVDA reads with NVDA+End.
-        // No Spring either: this WinForms version places a Spring label outside the strip, so it is neither drawn
-        // nor exposed to NVDA. StatusLayout keeps both labels inside the strip whatever the texts' lengths.
         _state.Text = "Claude: starting";
-        _state.TextAlign = ContentAlignment.MiddleLeft;
-        _folderLabel.TextAlign = ContentAlignment.MiddleLeft;
-        _status.Items.AddRange([_state, _folderLabel]);
-        _status.SizeChanged += (_, _) => StatusLayout.Fit(_status, _state, _folderLabel);
 
         _input.AccessibleName = "Message to Claude";
         _input.PlaceholderText = "Message to Claude";

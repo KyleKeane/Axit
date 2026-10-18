@@ -31,8 +31,8 @@ public sealed partial class GitForm : AxitForm
     private readonly ListBox _list = new();
     private readonly TextBox _details = new();
     private readonly StatusStrip _status = new();
-    private readonly ToolStripStatusLabel _stateLabel = new();
-    private readonly ToolStripStatusLabel _pathLabel = new();
+    private readonly ToolStripStatusLabel _stateLabel;
+    private readonly ToolStripStatusLabel _pathLabel;
     private readonly ToolStripMenuItem _checkAtStartItem;
 
     /// <summary>The menu items that run git, disabled while a command runs and when git is missing (AG-5.4).</summary>
@@ -157,11 +157,8 @@ public sealed partial class GitForm : AxitForm
         _details.AccessibleName = "Details";
         _details.KeyDown += (sender, e) => EditKeys.Handle(sender, e);
 
-        // ---- the status bar (AG-2.3): no AccessibleName, no Spring ----
-        _stateLabel.TextAlign = ContentAlignment.MiddleLeft;
-        _pathLabel.TextAlign = ContentAlignment.MiddleLeft;
-        _status.Items.AddRange([_stateLabel, _pathLabel]);
-        _status.SizeChanged += (_, _) => StatusLayout.Fit(_status, _stateLabel, _pathLabel);
+        // ---- the status bar (AG-2.3): the bundle's pair, no AccessibleName, no Spring ----
+        (_stateLabel, _pathLabel) = StatusLayout.Pair(_status);
 
         SizeChanged += (_, _) => _list.Height = Math.Max(80, ClientSize.Height * 2 / 5);
 
