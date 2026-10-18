@@ -43,21 +43,26 @@ Its own code is the outline and the commands (pure, in its Core, tested), its ke
   the guide as `UserGuide.md`.
 - `AxThingApp.Run(string[] args)` and `Usage`: `Log.UseApp("axthing")` first, the crash handling as `AxDownApp` has
   it, `--help` and `--version`, the settings, `Application.Run(new ThingForm(...))`.
-- `ThingForm`: the window. Use the shared pieces, never a copy: `OverlayPanel` and `Notice` for every question and
-  text of the window's own, `ControlArea` for a field or a list in the input's place, `EditPaging` and
-  `EditParagraphs` for an edit control's page and paragraph keys, `StatusLayout` for two status labels, `Sounds.Notice` for an unprompted notice,
-  `WindowAccessibleObject` from `CreateAccessibilityInstance`. Copy the notice flow (`ShowNotice`, `CloseNotice`,
-  `WithKeyLine`, the swallowed shortcuts and Alt/F10 while a notice shows), `Announce`, the font handling, the window
-  placement and the update flow from `TextEditorForm` until a shared window base exists.
-- The menu bar gets the bundle's Axit menu before Help, `new AxitMenu(this, checkItem, updateItem, () => latestState,
-  notice => ShowNotice(notice))` (AX-9), which places the window's Check for updates and Update to items and the
-  bundle's About submenu (AX-9.9); Help holds the app's own items only; the window's title ends in ` - AxThing`,
+- `ThingForm`: the window, derived from `Axit.Forms/AxitForm` (AX-6.5), which already holds the notice flow,
+  `Announce`, the fonts, the window's place, the settings saving, the Axit menu with the update flow, find in a text
+  box, the diagnostics and the common keys. Pass the app's name, its settings (a class that implements
+  `Axit.Core/IWindowSettings`) and the settings path to the base; add `Overlay` to the controls first; fill in the
+  hooks (`Shortcuts`, `HideForNotice`, `ShowAfterNotice`, `FocusTarget`, `ApplyFont`, `RestartArguments`,
+  `UpdateRestartText`, `ProcessWindowKey`, and the optional ones `FocusToKeep`, `NoticeChime`, `OnNoticeOpened`,
+  `OnNoticeClosed`, `UpdateNoted`, `DiagnosticsLines`). Use the other shared pieces, never a copy: `ControlArea` for
+  a field or a list in the input's place, `EditKeys` for an edit control's page and paragraph keys, `StatusLayout`
+  for two status labels, `Notice` records for every question and text of the window's own. `GitForm` is the
+  smallest example.
+- The menu bar gets the bundle's Axit menu before Help, `CreateAxitMenu()` from the base (AX-9), which places the
+  window's Check for updates and Update to items and the bundle's About submenu (AX-9.9); Help holds the app's own
+  items only; the window's title ends in ` - AxThing`,
   which is how the Axit menu tells the apps' windows apart; the window calls `RecentlyClosed.Remember("AxThing", path)`
   when it closes or swaps its file (AX-9.4), and closes as on Alt+F4 when Close all windows posts `SC_CLOSE` (AX-9.8).
-- `AxThingKeys`: the window's keys as constants with an `All` list; handle every key in `ProcessCmdKey` from
-  `BundleKeys` and `AxThingKeys` and nowhere else; menu items show the key with `ShortcutKeyDisplayString`.
+- `AxThingKeys`: the window's keys as constants with an `All` list; handle every key in `ProcessWindowKey` from
+  `BundleKeys` and `AxThingKeys` and nowhere else (the base handles the text size keys, F1 and the notice's hold
+  before it); menu items show the key with `ShortcutKeyDisplayString` (`Item(text, action, key)` in the base).
 - `HelpText`: the F1 text (bundle-wide keys first, then the app's) and the embedded guide.
-- The form sets `AccessibleRole = AccessibleRole.Window`: NVDA then speaks the window's title when it opens
+- The base sets `AccessibleRole = AccessibleRole.Window`: NVDA then speaks the window's title when it opens
   ("name - AxThing window") before the focused control; without the role the window is a nameless pane to NVDA and
   the app is never named (AxDown 2.1.1).
 - Every control gets an `AccessibleName`; the caret moves only on the user's command; nothing speaks on a plain key.

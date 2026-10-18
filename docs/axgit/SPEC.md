@@ -194,9 +194,9 @@ tests/AxGit.Tests/ GitStatusTests, GitLogTests, GitBranchesTests, GitSettingsTes
 docs/axgit/       this spec, user-guide.md (embedded), nvda-test-plan.md
 ```
 
-`GitForm` copies the notice flow, the fonts, the window placement and the update flow from `TextEditorForm`, as the
-template says to do until a shared window base exists (adding-an-app.md §4); the third copy is the strongest reason
-yet to make that base.
+`GitForm` derives from the bundle's window base, `Axit.Forms/AxitForm` (bundle AX-6.5), which holds the notice flow,
+the fonts, the window's place, find and the update flow; the base was made from the editor shell when AxGit would
+have been the third copy of them.
 
 ## 6. Design decisions
 
