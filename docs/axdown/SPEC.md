@@ -326,3 +326,5 @@ the off-screen probe approach of AxClaude checks layout and keys without disturb
   and Previous submenus), the navigation keys in every notice text, the Axit menu (bundle AX-9), and the menus in
   AxClaude's shape (AD-4: Open recent file, Show current file in, Options with Text and Developer, Markdown resources);
   checked by the user with NVDA (test plan sections 3, 5, 6, 7 and 8).
+- 2.9.1 (2026-10-18): the window moved to `Axit.Forms` as the text editor shell shared with AxJSON (AD-1.4, AX-6.3);
+  AxDown is its `EditorApp` record, its Markdown keys and its texts. Nothing changed for the user.

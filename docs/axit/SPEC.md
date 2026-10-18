@@ -388,3 +388,6 @@ docs/axdown/            SPEC.md, user-guide.md (embedded by src/AxDown), nvda-te
   `TextJumps` shared for AxDown's letters and every notice text (AX-7.2); the Axit menu in every window (AX-9, B-14)
   with About in sections and the embedded Axit guide; AxClaude's Session menu and AxDown's menus in the same shape;
   an enabled item in every empty list (AX-9.5).
+- 2.9.1 (2026-10-18): AxJSON, raw mode (`docs/axjson/SPEC.md`), on the text editor shell shared with AxDown the same
+  day (`TextEditorForm`, `EditorApp`, `EditorKeys`, `EditorHost`; AX-1, AX-2, AX-6.2, AX-8.3); released at the user's
+  ask before its NVDA pass.

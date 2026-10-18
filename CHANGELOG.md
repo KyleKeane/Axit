@@ -1,5 +1,11 @@
 # Changelog
 
+## 2.9.1 - 2026-10-18
+
+- AxJSON: a new app, an editor for JSON files. It is the same window as AxDown, with keys that jump by the file's structure: Ctrl+K the next key, spoken with its value ("model: opus") or its size ("permissions, object with 2 keys"); Ctrl+J the next object; Ctrl+L the next array; Ctrl+I the next item; Ctrl+E the place where the file stops being JSON, with the line and what was expected there, or "No next error" when the file is valid; Ctrl+Shift with the letter for the previous one. Edit, Format (Ctrl+Shift+F) lays the file out two spaces per level and one key per line, repairs a trailing comma, a missing comma, single quotes, an unquoted key and comments on the way, and names what it repaired. Axit AxJSON in the Start menu, axjson in a console, Open with for .json files in File Explorer, and a .json file given to axit opens in it. The structured view, a form of fields, is planned for a later version.
+- Axit: the Axit menu's New window and Open windows by type list AxJSON, and About names the three apps.
+- For developers: the text editor window is one shared shell in Axit.Forms (TextEditorForm, with EditorApp, EditorKeys and EditorHost); AxDown and AxJSON are records of what differs. TextDocument and EditorSettings moved to Axit.Core, a TextJump carries its own outline, and the JSON parser is the bundle's own, forgiving and tested.
+
 ## 2.9.0 - 2026-10-18
 
 - Axit: every window has an Axit menu (Alt+A): New window (AxClaude or AxDown), Recently closed (the last ten files and folders any Axit window held; Enter opens one in a new window), Open windows (the other open Axit windows, the one you were in last first; Alt+A, O, 1 goes back to it), Open windows by type, Close all windows (each window asks what it would ask on Alt+F4), Check for updates, Update to the newest version while one is known, and About, a submenu with Version, Licence, Attribution, the Axit guide and Axit on GitHub. About is one text for the bundle, and every update text names Axit, whose version it is.
