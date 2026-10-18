@@ -48,3 +48,25 @@ the restart by the app itself (2.3.0).
   navigation keys and Format (AJ-D4, B-14: the shell shared, one app per file type, one file per window, the Axit menu
   for the open windows). Still to come: structured mode, a form of real input fields from templates (AJ-3), and the
   caret's path in the status bar (AJ-2.4).
+
+## Later apps (recorded 2026-10-18, not yet priorities)
+
+Each would be one more app of the bundle, a window per thing worked on, added the way `adding-an-app.md` says, with no
+library dependency (B-10: `git.exe` and the file system through the APIs already used, as Claude is `claude.exe`).
+
+- **AxGit**, a git manager for a repository. One window per repository, named after it, opened from the other windows'
+  "Show current folder in ▸" and "Show current file in ▸" submenus (the slot the specs already keep for an Axit app
+  next to File Explorer) and from the Axit menu, so that it stays tied to the folder or file the user came from and is
+  found again in Open windows (AX-9) rather than lost. Inside the window the bundle's own pieces: lists (status as
+  the changed files, log, branches), read-only text with the jump keys (a diff, a commit), one field (the commit
+  message), notices for questions. A streamlined set to start with: status, diff of a file, stage and unstage,
+  commit, log, branch and switch, fetch, pull and push; conflicts and stashes shown and left to the terminal or to
+  Claude at first. Everything through `git` commands with their text parsed, nothing reimplemented. In the same
+  window as AxClaude or the editors it would be a Git menu three times over and a second set of lists in a window
+  built around one thing; and in AxClaude much of it can already be asked of Claude, so AxGit's worth is the quick,
+  deterministic read of a repository's state without a turn.
+- **AxFile** (name not settled), a file manager: a streamlined tree, not File Explorer's context menu reproduced. A
+  list of a folder's entries with the folders first, Enter opens a file in the editor for its type or a folder in the
+  list, Backspace goes up, a few operations (new folder, rename, delete to the recycle bin, copy the path) and "Show in
+  File Explorer" for everything else. The worry on record: the whole of a file tree's behaviour is endless; the scope
+  must stay small.
