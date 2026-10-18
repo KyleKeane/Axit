@@ -1,8 +1,9 @@
 # AxDown — Specification
 
 AxDown is the second app of the Axit bundle (`docs/axit/SPEC.md`): a barebones editor for Markdown and plain text files
-for a blind developer who uses the NVDA screen reader. Describes AxDown as of Axit 2.0.0 (2026-10-02): everything in
-section 4 is built and checked with NVDA; section 9 is the next version. The document is kept in step with the code
+for a blind developer who uses the NVDA screen reader. Describes AxDown as of Axit 2.8.0 (2026-10-17): everything in
+section 4 is built and checked with NVDA; section 9, the Markdown navigation, is built and awaits its NVDA pass. The
+document is kept in step with the code
 (a behaviour change updates it in the same commit). Requirements are numbered `AD-n.m` and decisions `AD-Dn`. The
 bundle's rules that every app follows, AX-7 (accessibility) and AX-8 (keys), are cited by number and not repeated.
 In AxDown's code and documents, "SPEC.md" means this file.
@@ -12,8 +13,8 @@ In AxDown's code and documents, "SPEC.md" means this file.
 AxDown opens one text file in one window: a menu bar, one plain multi-line edit control with the whole file in it,
 and a status bar. It reads and writes the file exactly as it found it (encoding, byte order mark, line endings), asks
 before unsaved changes are lost, finds text, goes to a line, and shows the line and column on demand. That is all of
-version one. Navigation by Markdown structure (headings, list items, links, code blocks) follows in the next version
-(section 9), and everything else people expect of an editor (several files, colouring, a preview, spelling) is
+version one. Navigation by Markdown structure (headings and their levels, links, lists and list items, block quotes,
+tables) is section 9, and everything else people expect of an editor (several files, colouring, a preview, spelling) is
 deliberately absent: those are other apps of the bundle or not wanted.
 
 ## 2. Goals and non-goals
