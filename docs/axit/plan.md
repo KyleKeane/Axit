@@ -44,8 +44,10 @@ the restart by the app itself (2.3.0).
 - The text editor window is shared since AxJSON (2026-10-18: `Axit.Forms/TextEditorForm` with `EditorApp`,
   `EditorKeys`, `EditorHost`; AxDown and AxJSON are records over it). The window base `Axit.Forms/AxitForm` (AX-6.5)
   holds the notice flow, the fonts, the window's place, find and the update flow since the same day; the editor
-  shell, AxGit's window and AxClaude's `MainForm` all derive from it. Left: `ControlArea`'s use in AxClaude only,
-  and the "Open recent" and "Show current … in" menu builders, which each window still writes out.
+  shell, AxGit's window and AxClaude's `MainForm` all derive from it; the recent lists (`RecentMenu`), the Options
+  and Help menus and the File Explorer opener followed the same day. Left: `ControlArea`'s use in AxClaude only; the
+  "Show current … in" submenus stay in each window, three lines each. AxClaude's window is partial files, one per
+  section, since the same day.
 - AxJSON, an editor for JSON files (`docs/axjson/SPEC.md`): raw mode built 2026-10-18 as the editor shell plus JSON's
   navigation keys and Format (AJ-D4, B-14: the shell shared, one app per file type, one file per window, the Axit menu
   for the open windows). Still to come: structured mode, a form of real input fields from templates (AJ-3), and the
