@@ -104,34 +104,14 @@ public sealed class TextEditorForm : AxitForm
 
         // Options, as AxClaude's (AD-4.3): every setting in the submenu for what it is about, none outside one.
         var options = new ToolStripMenuItem("&Options");
-        var textMenu = new ToolStripMenuItem("&Text");
         _wordWrapItem = Item("&Word wrap", ToggleWordWrap, EditorKeys.WordWrap);
         _wordWrapItem.Checked = _settings.WordWrap;
-        textMenu.DropDownItems.Add(_wordWrapItem);
-        textMenu.DropDownItems.Add(new ToolStripSeparator());
-        textMenu.DropDownItems.Add(new ToolStripMenuItem("&Font...", null, (_, _) => ChooseFont()));
-        textMenu.DropDownItems.Add(Item("&Larger text", () => ChangeTextSize(1), BundleKeys.LargerText));
-        textMenu.DropDownItems.Add(Item("S&maller text", () => ChangeTextSize(-1), BundleKeys.SmallerText));
-        textMenu.DropDownItems.Add(new ToolStripMenuItem("Windows &text size", null, (_, _) => UseSystemFont()));
-        options.DropDownItems.Add(textMenu);
-        var developer = new ToolStripMenuItem("De&veloper");
-        developer.DropDownItems.Add(new ToolStripMenuItem("Open settings &file", null, (_, _) => OpenSettingsFile()));
-        developer.DropDownItems.Add(new ToolStripMenuItem("Copy diag&nostics", null, (_, _) => CopyDiagnostics()));
-        options.DropDownItems.Add(developer);
+        options.DropDownItems.Add(CreateTextMenu(_wordWrapItem));
+        options.DropDownItems.Add(CreateGeneralMenu());
+        options.DropDownItems.Add(CreateDeveloperMenu());
 
-        var help = new ToolStripMenuItem("&Help");
-        help.DropDownItems.Add(Item("&Keyboard shortcuts", () => ShowNotice(Notice.Plain("Keyboard shortcuts", _app.Shortcuts)), BundleKeys.Shortcuts));
-        help.DropDownItems.Add(new ToolStripMenuItem("User &guide", null, (_, _) => ShowNotice(Notice.Plain("User guide", _app.UserGuide()))));
-        help.DropDownItems.Add(new ToolStripSeparator());
         // As AxClaude's Claude Code resources: where the file format is explained, in the browser (AD-4.4).
-        var resources = new ToolStripMenuItem(_app.ResourcesLabel);
-        foreach (var (label, url) in _app.Resources)
-        {
-            var page = url;
-            resources.DropDownItems.Add(new ToolStripMenuItem(label, null, (_, _) => OpenUrl(page)));
-        }
-
-        help.DropDownItems.Add(resources);
+        var help = CreateHelpMenu(_app.UserGuide, _app.ResourcesLabel, _app.Resources);
 
         // The bundle's Axit menu (AX-9) sits before Help in every window and ends with the update items and About.
         _menu.Items.AddRange([file, edit, navigate, options, CreateAxitMenu(), help]);

@@ -137,6 +137,72 @@ public abstract class AxitForm : Form
         return item;
     }
 
+    /// <summary>A checked menu item for a setting: flipping it applies the value and saves the settings.</summary>
+    protected ToolStripMenuItem Toggle(string text, bool initial, Action<bool> apply)
+    {
+        var item = new ToolStripMenuItem(text) { CheckOnClick = true, Checked = initial };
+        item.CheckedChanged += (_, _) =>
+        {
+            apply(item.Checked);
+            SaveSettings();
+        };
+
+        return item;
+    }
+
+    /// <summary>Options → Text (AX-6.5): the window's own items first, then what every window has: Font…, Larger text, Smaller text, Windows text size.</summary>
+    protected ToolStripMenuItem CreateTextMenu(params ToolStripItem[] own)
+    {
+        var menu = new ToolStripMenuItem("&Text");
+        menu.DropDownItems.AddRange(own);
+        if (own.Length > 0)
+        {
+            menu.DropDownItems.Add(new ToolStripSeparator());
+        }
+
+        menu.DropDownItems.Add(new ToolStripMenuItem("&Font...", null, (_, _) => ChooseFont()));
+        menu.DropDownItems.Add(Item("&Larger text", () => ChangeTextSize(1), BundleKeys.LargerText));
+        menu.DropDownItems.Add(Item("S&maller text", () => ChangeTextSize(-1), BundleKeys.SmallerText));
+        menu.DropDownItems.Add(new ToolStripMenuItem("Windows &text size", null, (_, _) => UseSystemFont()));
+        return menu;
+    }
+
+    /// <summary>Options → General: Check for updates at start (AX-3.1), then the window's own items.</summary>
+    protected ToolStripMenuItem CreateGeneralMenu(params ToolStripItem[] own)
+    {
+        var menu = new ToolStripMenuItem("&General");
+        menu.DropDownItems.Add(Toggle("Check for &updates at start", Settings.CheckForUpdates, v => Settings.CheckForUpdates = v));
+        menu.DropDownItems.AddRange(own);
+        return menu;
+    }
+
+    /// <summary>Options → Developer: Open settings file, the window's own items, Copy diagnostics.</summary>
+    protected ToolStripMenuItem CreateDeveloperMenu(params ToolStripItem[] own)
+    {
+        var menu = new ToolStripMenuItem("De&veloper");
+        menu.DropDownItems.Add(new ToolStripMenuItem("Open settings &file", null, (_, _) => OpenSettingsFile()));
+        menu.DropDownItems.AddRange(own);
+        menu.DropDownItems.Add(new ToolStripMenuItem("Copy diag&nostics", null, (_, _) => CopyDiagnostics()));
+        return menu;
+    }
+
+    /// <summary>Help: Keyboard shortcuts (F1, the base's key), User guide, then a submenu of pages opened in the browser. Updates and About are the Axit menu's.</summary>
+    protected ToolStripMenuItem CreateHelpMenu(Func<string> userGuide, string resourcesLabel, IEnumerable<(string Label, string Url)> pages)
+    {
+        var help = new ToolStripMenuItem("&Help");
+        help.DropDownItems.Add(Item("&Keyboard shortcuts", () => ShowNotice(Notice.Plain("Keyboard shortcuts", Shortcuts)), BundleKeys.Shortcuts));
+        help.DropDownItems.Add(new ToolStripMenuItem("User &guide", null, (_, _) => ShowNotice(Notice.Plain("User guide", userGuide()))));
+        help.DropDownItems.Add(new ToolStripSeparator());
+        var resources = new ToolStripMenuItem(resourcesLabel);
+        foreach (var (label, url) in pages)
+        {
+            resources.DropDownItems.Add(new ToolStripMenuItem(label, null, (_, _) => OpenUrl(url)));
+        }
+
+        help.DropDownItems.Add(resources);
+        return help;
+    }
+
     protected override void OnShown(EventArgs e)
     {
         base.OnShown(e);

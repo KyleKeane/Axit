@@ -184,7 +184,10 @@ allow it, see B-9).
   the window's shortcuts swallowed while a notice shows), `Announce`, the text font with its size keys and the
   Windows font picker (the choice said), the window's place and size, the settings saving, the Axit menu with the
   update check, the update notice and the install in place (AX-3), find in a text box, Copy diagnostics, `OpenUrl`,
-  the window role for NVDA (AX-7.1) and the common part of the key switch (the text size keys everywhere, F1). A
+  the submenus and the menu every window has (Options → Text, General and Developer; Help: `CreateTextMenu`,
+  `CreateGeneralMenu`, `CreateDeveloperMenu`, `CreateHelpMenu`, each with the window's own items in their place;
+  `Toggle` for a checked setting), the window role for NVDA (AX-7.1) and the common part of the key switch (the
+  text size keys everywhere, F1). A
   window adds its controls (the `Overlay` first) and fills in the hooks: the F1 text, what to hide for a notice and
   what to show after, where the focus goes after one (`FocusTarget`, `FocusToKeep`), whether the chime follows a
   setting, what gets the font, how the new version starts it again (`RestartArguments`, `UpdateRestartText`), what

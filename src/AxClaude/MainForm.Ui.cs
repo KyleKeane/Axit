@@ -126,45 +126,28 @@ internal sealed partial class MainForm
         questions.DropDownItems.Add(Toggle("&Review answers before they go to Claude", _settings.ReviewAnswers, v => _settings.ReviewAnswers = v));
         options.DropDownItems.Add(questions);
 
-        var textMenu = new ToolStripMenuItem("&Text");
-        textMenu.DropDownItems.Add(new ToolStripMenuItem("&Font...", null, (_, _) => ChooseFont()));
-        textMenu.DropDownItems.Add(new ToolStripMenuItem("&Larger text", null, (_, _) => ChangeTextSize(1)) { ShortcutKeyDisplayString = BundleKeys.Text(BundleKeys.LargerText) });
-        textMenu.DropDownItems.Add(new ToolStripMenuItem("S&maller text", null, (_, _) => ChangeTextSize(-1)) { ShortcutKeyDisplayString = BundleKeys.Text(BundleKeys.SmallerText) });
-        textMenu.DropDownItems.Add(new ToolStripMenuItem("&Windows text size", null, (_, _) => UseSystemFont()));
-        textMenu.DropDownItems.Add(Toggle("&Time stamps on Input and Output lines", _settings.MarkerTimeStamps, v =>
+        options.DropDownItems.Add(CreateTextMenu(Toggle("Time &stamps on Input and Output lines", _settings.MarkerTimeStamps, v =>
         {
             _settings.MarkerTimeStamps = v;
             _model.TimeStamps = v;
-        }));
-        options.DropDownItems.Add(textMenu);
-
-        var general = new ToolStripMenuItem("&General");
-        general.DropDownItems.Add(Toggle("Check for &updates at start", _settings.CheckForUpdates, v => _settings.CheckForUpdates = v));
-        general.DropDownItems.Add(Toggle("&Keep recordings and exported conversations out of git", _settings.KeepFilesOutOfGit, v =>
+        })));
+        options.DropDownItems.Add(CreateGeneralMenu(Toggle("&Keep recordings and exported conversations out of git", _settings.KeepFilesOutOfGit, v =>
         {
             _settings.KeepFilesOutOfGit = v;
             KeepFilesOutOfGit();
-        }));
-        options.DropDownItems.Add(general);
+        })));
         // What only a developer or a bug report needs (FR-12.3, FR-13.3, FR-9.2), in one place.
-        var developer = new ToolStripMenuItem("De&veloper");
-        developer.DropDownItems.Add(new ToolStripMenuItem("Open settings &file", null, (_, _) => OpenSettingsFile()));
         _recordItem.Click += (_, _) => ToggleRecording();
-        developer.DropDownItems.Add(_recordItem);
-        developer.DropDownItems.Add(new ToolStripMenuItem("Copy diag&nostics", null, (_, _) => CopyDiagnostics()));
-        options.DropDownItems.Add(developer);
+        options.DropDownItems.Add(CreateDeveloperMenu(_recordItem));
 
-        var help = new ToolStripMenuItem("&Help");
-        help.DropDownItems.Add(new ToolStripMenuItem("&Keyboard shortcuts", null, (_, _) => ShowNotice(Notice.Plain("Keyboard shortcuts", HelpText.Shortcuts))) { ShortcutKeys = BundleKeys.Shortcuts });
-        help.DropDownItems.Add(new ToolStripMenuItem("User &guide", null, (_, _) => ShowNotice(Notice.Plain("User guide", HelpText.UserGuide()))));
-        help.DropDownItems.Add(new ToolStripSeparator());
-        var web = new ToolStripMenuItem("Claude Code &resources");
-        web.DropDownItems.Add(new ToolStripMenuItem("&Documentation", null, (_, _) => OpenUrl("https://code.claude.com/docs/en/overview")));
-        web.DropDownItems.Add(new ToolStripMenuItem("Slash &commands", null, (_, _) => OpenUrl("https://code.claude.com/docs/en/commands")));
-        web.DropDownItems.Add(new ToolStripMenuItem("&Keys", null, (_, _) => OpenUrl("https://code.claude.com/docs/en/interactive-mode")));
-        web.DropDownItems.Add(new ToolStripMenuItem("Command &line", null, (_, _) => OpenUrl("https://code.claude.com/docs/en/cli-reference")));
-        web.DropDownItems.Add(new ToolStripMenuItem("&Install or update Claude Code", null, (_, _) => OpenUrl(ClaudeLauncher.InstallUrl)));
-        help.DropDownItems.Add(web);
+        var help = CreateHelpMenu(HelpText.UserGuide, "Claude Code &resources",
+        [
+            ("&Documentation", "https://code.claude.com/docs/en/overview"),
+            ("Slash &commands", "https://code.claude.com/docs/en/commands"),
+            ("&Keys", "https://code.claude.com/docs/en/interactive-mode"),
+            ("Command &line", "https://code.claude.com/docs/en/cli-reference"),
+            ("&Install or update Claude Code", ClaudeLauncher.InstallUrl),
+        ]);
 
         // The bundle's Axit menu (AX-9) sits before Help in every window and ends with the update items and About
         // (AX-3.1, FR-1.10): Check for updates names the version in use and asks GitHub every time; Update to Axit n
@@ -225,17 +208,6 @@ internal sealed partial class MainForm
         _arrivals.Skip(_model.Lines);
         SaveSettings();
         Announce(ReplySpeechChoices.First(c => c.Mode == mode).Text.Replace("&", string.Empty), true);
-    }
-
-    private ToolStripMenuItem Toggle(string text, bool initial, Action<bool> apply)
-    {
-        var item = new ToolStripMenuItem(text) { CheckOnClick = true, Checked = initial };
-        item.CheckedChanged += (_, _) =>
-        {
-            apply(item.Checked);
-            SaveSettings();
-        };
-        return item;
     }
 
     private void FillRecentFolders() =>

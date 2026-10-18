@@ -33,7 +33,6 @@ public sealed partial class GitForm : AxitForm
     private readonly StatusStrip _status = new();
     private readonly ToolStripStatusLabel _stateLabel;
     private readonly ToolStripStatusLabel _pathLabel;
-    private readonly ToolStripMenuItem _checkAtStartItem;
 
     /// <summary>The menu items that run git, disabled while a command runs and when git is missing (AG-5.4).</summary>
     private readonly List<ToolStripMenuItem> _gitItems = [];
@@ -106,34 +105,12 @@ public sealed partial class GitForm : AxitForm
 
         // Options, as the other windows' (AX-6): every setting in the submenu for what it is about.
         var options = new ToolStripMenuItem("&Options");
-        var textMenu = new ToolStripMenuItem("&Text");
-        textMenu.DropDownItems.Add(new ToolStripMenuItem("&Font...", null, (_, _) => ChooseFont()));
-        textMenu.DropDownItems.Add(Item("&Larger text", () => ChangeTextSize(1), BundleKeys.LargerText));
-        textMenu.DropDownItems.Add(Item("S&maller text", () => ChangeTextSize(-1), BundleKeys.SmallerText));
-        textMenu.DropDownItems.Add(new ToolStripMenuItem("Windows &text size", null, (_, _) => UseSystemFont()));
-        options.DropDownItems.Add(textMenu);
-        var general = new ToolStripMenuItem("&General");
-        _checkAtStartItem = new ToolStripMenuItem("Check for &updates at start") { Checked = _settings.CheckForUpdates, CheckOnClick = true };
-        _checkAtStartItem.CheckedChanged += (_, _) =>
-        {
-            _settings.CheckForUpdates = _checkAtStartItem.Checked;
-            SaveSettings();
-        };
-        general.DropDownItems.Add(_checkAtStartItem);
-        options.DropDownItems.Add(general);
-        var developer = new ToolStripMenuItem("De&veloper");
-        developer.DropDownItems.Add(new ToolStripMenuItem("Open settings &file", null, (_, _) => OpenSettingsFile()));
-        developer.DropDownItems.Add(new ToolStripMenuItem("Copy diag&nostics", null, (_, _) => CopyDiagnostics()));
-        options.DropDownItems.Add(developer);
+        options.DropDownItems.Add(CreateTextMenu());
+        options.DropDownItems.Add(CreateGeneralMenu());
+        options.DropDownItems.Add(CreateDeveloperMenu());
 
-        var help = new ToolStripMenuItem("&Help");
-        help.DropDownItems.Add(Item("&Keyboard shortcuts", () => ShowNotice(Notice.Plain("Keyboard shortcuts", HelpText.Shortcuts)), BundleKeys.Shortcuts));
-        help.DropDownItems.Add(new ToolStripMenuItem("User &guide", null, (_, _) => ShowNotice(Notice.Plain("User guide", HelpText.UserGuide()))));
-        help.DropDownItems.Add(new ToolStripSeparator());
-        var resources = new ToolStripMenuItem("Git &resources");
-        resources.DropDownItems.Add(new ToolStripMenuItem("&git-scm.com", null, (_, _) => OpenUrl("https://git-scm.com")));
-        resources.DropDownItems.Add(new ToolStripMenuItem("&Pro Git, the book", null, (_, _) => OpenUrl("https://git-scm.com/book/en/v2")));
-        help.DropDownItems.Add(resources);
+        var help = CreateHelpMenu(HelpText.UserGuide, "Git &resources",
+            [("&git-scm.com", "https://git-scm.com"), ("&Pro Git, the book", "https://git-scm.com/book/en/v2")]);
 
         // The bundle's Axit menu (AX-9) sits before Help in every window and ends with the update items and About.
         _menu.Items.AddRange([repository, changes, branches, view, options, CreateAxitMenu(), help]);

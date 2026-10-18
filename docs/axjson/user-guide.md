@@ -57,7 +57,7 @@ Ctrl+Plus and Ctrl+Minus make the text larger and smaller, and AxJSON says the n
 - **File**: New, Open, Open recent file, Save, Save as, Show current file in (File Explorer, Ctrl+W; AxGit, a git manager on the repository that holds the file), Exit.
 - **Edit**: Undo, Cut, Copy, Paste, Select all, Format (Ctrl+Shift+F).
 - **Navigate**: Find, Find next, Find previous, Go to line, and the submenus Next and Previous, each with Key, Object, Array, Item and Error.
-- **Options**: Text (Word wrap, Font, Larger text, Smaller text, Windows text size) and Developer (Open settings file, which opens axjson.json in a new AxJSON window, and Copy diagnostics).
+- **Options**: Text (Word wrap, Font, Larger text, Smaller text, Windows text size), General (Check for updates at start) and Developer (Open settings file, which opens axjson.json in a new AxJSON window, and Copy diagnostics).
 - **Axit**: the bundle's menu, the same in every Axit window: New window, Recently closed, Open windows, Open windows by type, Close all windows, Check for updates, Update to the newest version while one is known, and About.
 - **Help**: Keyboard shortcuts (F1), this guide, JSON resources (the JSON syntax page and Claude Code's settings documentation, in your browser).
 
