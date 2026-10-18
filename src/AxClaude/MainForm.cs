@@ -393,13 +393,13 @@ internal sealed class MainForm : Form
 
         // What goes to Claude itself (FR-11); the raw sequences are fixed here and listed in Appendix B.
         var claude = new ToolStripMenuItem("&Claude");
+        // The session first (FR-8.6, FR-1.8): a new one with its folder and arguments, or the same one started again.
+        claude.DropDownItems.Add(new ToolStripMenuItem("&New Claude Code session...", null, (_, _) => NewSession()) { ShortcutKeys = AxClaudeKeys.NewSession });
+        claude.DropDownItems.Add(new ToolStripMenuItem("Force Claude to res&tart", null, (_, _) => RestartClaude()) { ShortcutKeys = AxClaudeKeys.RestartClaude });
+        claude.DropDownItems.Add(new ToolStripSeparator());
         claude.DropDownItems.Add(new ToolStripMenuItem("Send &message", null, (_, _) => SendInput()) { ShortcutKeyDisplayString = "Enter in the message field" });
         claude.DropDownItems.Add(new ToolStripMenuItem("Send &queued messages now", null, (_, _) => SendNow()) { ShortcutKeys = AxClaudeKeys.SendNow });
         claude.DropDownItems.Add(new ToolStripMenuItem("&Interrupt", null, (_, _) => Interrupt()) { ShortcutKeyDisplayString = BundleKeys.Text(AxClaudeKeys.Interrupt) });
-        claude.DropDownItems.Add(new ToolStripSeparator());
-        // The session (FR-8.6, FR-1.8): a new one with its folder and arguments, or the same one started again.
-        claude.DropDownItems.Add(new ToolStripMenuItem("&New Claude Code session...", null, (_, _) => NewSession()) { ShortcutKeys = AxClaudeKeys.NewSession });
-        claude.DropDownItems.Add(new ToolStripMenuItem("Force Claude to res&tart", null, (_, _) => RestartClaude()) { ShortcutKeys = AxClaudeKeys.RestartClaude });
         claude.DropDownItems.Add(new ToolStripMenuItem("Next &permission mode", null, (_, _) => Write("\x1b[Z")) { ShortcutKeys = AxClaudeKeys.NextPermissionMode });
         claude.DropDownItems.Add(new ToolStripSeparator());
         // The keys Claude's own menus take. Up and Down are menu items only (FR-2.4): Ctrl+Up and Ctrl+Down move by
