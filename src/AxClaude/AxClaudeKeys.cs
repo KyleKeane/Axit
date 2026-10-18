@@ -30,6 +30,9 @@ public static class AxClaudeKeys
     /// <summary>Background music on or off, said each time (FR-7.9).</summary>
     public const Keys ToggleMusic = Keys.Control | Keys.Space;
 
+    /// <summary>Read Claude's question or screen again while the control area shows it, from anywhere, the focus staying (D33); Q as the conversation's question key.</summary>
+    public const Keys ReadQuestion = Keys.Control | Keys.Q;
+
     /// <summary>D14: never sent to Claude; the key only says why.</summary>
     public const Keys CtrlOGuard = Keys.Control | Keys.O;
 
@@ -100,6 +103,7 @@ public static class AxClaudeKeys
         ("Bookmark this line (m)", BookmarkToggle),
         ("Line number", LineNumber),
         ("Background music on or off", ToggleMusic),
+        ("Read Claude's question or screen again", ReadQuestion),
         ("Back to the line before the jump", JumpBack),
         ("Heading level 1", HeadingLevel1),
         ("Heading level 2", HeadingLevel2),

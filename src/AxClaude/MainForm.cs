@@ -70,6 +70,9 @@ internal sealed class MainForm : Form
     /// <summary>The signature of the question or screen the control area shows (D33); null while the message field is in its place.</summary>
     private string? _shownWait;
 
+    /// <summary>What Ctrl+Q speaks while the control area shows (D33): the title and every line of the question or screen, uncut.</summary>
+    private string? _areaText;
+
     /// <summary>The signature of the question or screen that was shown in the control area or announced: it is not shown again while Claude waits on it.</summary>
     private string? _handledWait;
 
@@ -341,6 +344,9 @@ internal sealed class MainForm : Form
             case AxClaudeKeys.ToggleMusic:
                 ToggleMusic();
                 return true;
+            case AxClaudeKeys.ReadQuestion:
+                ReadQuestionAgain();
+                return true;
             case AxClaudeKeys.GoToConversation:
                 GoTo(_transcript);
                 return true;
@@ -434,6 +440,7 @@ internal sealed class MainForm : Form
         navigate.DropDownItems.Add(new ToolStripMenuItem("&Conversation", null, (_, _) => GoTo(_transcript)) { ShortcutKeyDisplayString = BundleKeys.Text(AxClaudeKeys.GoToConversation) });
         // Ctrl+3 is a ShortcutKeys key, but drawn through Text like Ctrl+1 and Ctrl+2 so that it ends in the full stop (AX-8.5).
         navigate.DropDownItems.Add(new ToolStripMenuItem("&Latest response", null, (_, _) => _transcript.JumpToLatestResponse()) { ShortcutKeys = AxClaudeKeys.LatestResponse, ShortcutKeyDisplayString = BundleKeys.Text(AxClaudeKeys.LatestResponse) });
+        navigate.DropDownItems.Add(new ToolStripMenuItem("Claude's &question again", null, (_, _) => ReadQuestionAgain()) { ShortcutKeyDisplayString = BundleKeys.Text(AxClaudeKeys.ReadQuestion) });
         navigate.DropDownItems.Add(new ToolStripSeparator());
         navigate.DropDownItems.Add(new ToolStripMenuItem("&Find...", null, (_, _) => FindDialog()) { ShortcutKeyDisplayString = BundleKeys.Text(BundleKeys.Find) });
         navigate.DropDownItems.Add(new ToolStripMenuItem("Find &next", null, (_, _) => FindNext(backward: false)) { ShortcutKeyDisplayString = BundleKeys.Text(BundleKeys.FindNext) });
@@ -2003,8 +2010,9 @@ internal sealed class MainForm : Form
     /// cut off). Without the option, the focus moves only
     /// from the bottom of the window, and from the conversation the question is said after what NVDA is reading.
     /// </summary>
-    private void ShowInArea(string signature, string name, bool unprompted, Action<bool, bool> show)
+    private void ShowInArea(string signature, string name, string text, bool unprompted, Action<bool, bool> show)
     {
+        _areaText = text;
         var interrupt = unprompted && !_noticeOpen && _settings.InterruptForQuestions;
         var focus = !_noticeOpen && (interrupt || _input.ContainsFocus || _area.ContainsFocus);
         if (unprompted && _settings.SoundOnBell)
@@ -2051,6 +2059,23 @@ internal sealed class MainForm : Form
 
         _area.Clear();
         _shownWait = null;
+        _areaText = null;
+    }
+
+    /// <summary>
+    /// Ctrl+Q (D33): the question or screen the control area shows, spoken again on demand from anywhere, the title
+    /// and all its lines and then the answer the focus is on, as when it opened; the focus stays. NVDA+Tab repeats a
+    /// question too, since its list is named with it, but a screen's lines are items and its name only the title.
+    /// </summary>
+    private void ReadQuestionAgain()
+    {
+        if (_area.Current is null || _areaText is not { } text)
+        {
+            Announce("Claude is not asking anything", true);
+            return;
+        }
+
+        Announce((text + Stop(text) + _area.CurrentItem).TrimEnd(' ', '.'), true);
     }
 
     /// <summary>
@@ -2058,7 +2083,7 @@ internal sealed class MainForm : Form
     /// when it takes several, ticked where Claude marks them. Enter hands <paramref name="choose"/> the chosen
     /// answer, or the ticked ones; <paramref name="startKey"/> starts on another answer (the setting just changed).
     /// </summary>
-    private void ShowQuestionList(string signature, string name, Question question, string? startKey, bool unprompted,
+    private void ShowQuestionList(string signature, string name, string text, Question question, string? startKey, bool unprompted,
         Action<IReadOnlyList<QuestionOption>> choose, Action escape)
     {
         var options = question.Options;
@@ -2066,7 +2091,7 @@ internal sealed class MainForm : Form
         var items = options.Select(option => $"{option.Key}. {option.Text}" + (option.Current && !several ? " (current)" : string.Empty)).ToList();
         var start = Math.Max(0, options.ToList().FindIndex(option => startKey is null ? option.Current : option.Key == startKey));
         IReadOnlyList<int>? ticked = several ? Enumerable.Range(0, options.Count).Where(i => options[i].Current).ToList() : null;
-        ShowInArea(signature, name, unprompted, (focus, hold) => _area.ShowList(name, items, start, ticked, focus, hold, (focused, ticks) =>
+        ShowInArea(signature, name, text, unprompted, (focus, hold) => _area.ShowList(name, items, start, ticked, focus, hold, (focused, ticks) =>
         {
             if (several && ticks.Count == 0)
             {
@@ -2081,14 +2106,15 @@ internal sealed class MainForm : Form
     /// <summary>
     /// What the list of a question is called, read each time the focus comes to it: the title (with its place among
     /// several) and the question's lines while they stay short, so that the review of several answers says the
-    /// answers and "Ready to submit your answers?", and a long plan is not read out whole.
+    /// answers and "Ready to submit your answers?", and a long plan is not read out whole. With no
+    /// <paramref name="limit"/>, the whole question, which Ctrl+Q speaks (<see cref="ReadQuestionAgain"/>).
     /// </summary>
-    private static string QuestionName(Question question)
+    private static string QuestionName(Question question, int limit = 1000)
     {
         var name = new StringBuilder(question.Step is (int number, int count) ? $"Question {number} of {count}: {question.Title}" : question.Title);
         foreach (var line in question.Text)
         {
-            if (name.Length + line.Length > 1000)
+            if (name.Length + line.Length > limit)
             {
                 break;
             }
@@ -2123,7 +2149,7 @@ internal sealed class MainForm : Form
         }
 
         _askedQuestion = question;
-        ShowQuestionList(question.Signature, QuestionName(question), question, null, !UserActed(_answerAt), AnswerQuestion, () =>
+        ShowQuestionList(question.Signature, QuestionName(question), QuestionName(question, int.MaxValue), question, null, !UserActed(_answerAt), AnswerQuestion, () =>
         {
             SendEscape();
             Announce("Cancelled", false);
@@ -2137,7 +2163,7 @@ internal sealed class MainForm : Form
     /// back on the setting just chosen. Escape saves and closes.
     /// </summary>
     private void ShowSettings(Question settings, bool back = false) =>
-        ShowQuestionList(settings.Signature, "Claude's settings", settings, _settingKey, !back && !UserActed(_answerAt), chosen =>
+        ShowQuestionList(settings.Signature, "Claude's settings", "Claude's settings", settings, _settingKey, !back && !UserActed(_answerAt), chosen =>
         {
             var setting = chosen[0];
             _settingKey = setting.Key;
@@ -2161,7 +2187,7 @@ internal sealed class MainForm : Form
     {
         var name = setting.Setting?.Name ?? setting.Text;
         var values = new Question(name, [], [new QuestionOption("1", "True", on), new QuestionOption("2", "False", !on)]);
-        ShowQuestionList(settings.Signature, name, values, null, false, chosen =>
+        ShowQuestionList(settings.Signature, name, name, values, null, false, chosen =>
         {
             if (chosen[0].Current)
             {
@@ -2218,7 +2244,7 @@ internal sealed class MainForm : Form
         var chosen = LineClassifier.TextPromptAnswer(prompt) ?? "an answer that asks for your own words";
         var asked = _askedQuestion is { } question ? QuestionName(question) : null;
         var name = (asked is null ? string.Empty : asked + Stop(asked)) + $"You chose {chosen}. Your answer";
-        ShowInArea(prompt, name, !UserActed(_answerAt), (focus, hold) => _area.ShowField(name, focus, hold, typed =>
+        ShowInArea(prompt, name, name, !UserActed(_answerAt), (focus, hold) => _area.ShowField(name, focus, hold, typed =>
         {
             var words = typed.Trim();
             if (words.Length == 0)
@@ -2257,7 +2283,13 @@ internal sealed class MainForm : Form
             }
         }
 
-        ShowInArea(screen.Signature, screen.Title, !UserActed(_screenKeyAt), (focus, hold) =>
+        var text = new StringBuilder(screen.Title);
+        foreach (var line in screen.Lines)
+        {
+            text.Append(Stop(text.ToString())).Append(line);
+        }
+
+        ShowInArea(screen.Signature, screen.Title, text.ToString(), !UserActed(_screenKeyAt), (focus, hold) =>
             _area.ShowList(screen.Title, items, 0, null, focus, hold, (index, _) =>
             {
                 if (index < first)

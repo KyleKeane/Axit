@@ -24,6 +24,7 @@ internal static class HelpText
           Ctrl+Alt and a letter from the Conversation list below: read every line of that kind from the caret to the end of the conversation in one go, without moving; Ctrl+Alt+P reads the paragraphs whole. Control stops NVDA
           Ctrl+Shift+K: bookmark the conversation line the caret is on, or take the bookmark away
           Ctrl+Space: background music on or off, and says which
+          Ctrl+Q: read Claude's question or screen again while it waits at the bottom, all its lines and the answer the focus is on, without moving
           Ctrl+Plus, Ctrl+Minus: bigger or smaller text
           F1: this list
           Alt+A: the Axit menu: a new AxClaude or AxDown window, the files and folders closed lately, the open Axit windows, most recent first (Alt+A, O, 1 is the one you were in last) and by type, Close all windows, Check for updates, and About
