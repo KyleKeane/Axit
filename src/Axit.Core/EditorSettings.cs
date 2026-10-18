@@ -1,9 +1,9 @@
 using Axit.Core;
 
-namespace AxDown.Core;
+namespace Axit.Core;
 
 /// <summary>
-/// Everything AxDown remembers between runs (SPEC.md AD-8), in <c>%APPDATA%\Axit\axdown.json</c> through the
+/// Everything AxDown remembers between runs (docs/axdown/SPEC.md AD-8), in <c>%APPDATA%\Axit\axdown.json</c> through the
 /// bundle's <see cref="SettingsFile"/>. A missing or unreadable file falls back to the defaults.
 /// </summary>
 public sealed class EditorSettings

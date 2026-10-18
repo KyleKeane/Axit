@@ -1,6 +1,6 @@
 # AxDown, the window
 
-The WinForms side of AxDown: one plain edit control named after the file, a menu bar and a status bar. The pure code (files, settings) is `src/AxDown.Core`, with its own `CLAUDE.md`. The spec is `docs/axdown/SPEC.md` ("SPEC.md" below); the guide `docs/axdown/user-guide.md` is embedded by `AxDown.csproj`; the manual test plan is `docs/axdown/nvda-test-plan.md`. The bundle rules are in the root `CLAUDE.md`.
+The WinForms side of AxDown: one plain edit control named after the file, a menu bar and a status bar. Its pure code (`TextDocument`, `EditorSettings`, `MarkdownOutline`) is in `src/Axit.Core` since its second use, tested in `tests/Axit.Tests`. The spec is `docs/axdown/SPEC.md` ("SPEC.md" below); the guide `docs/axdown/user-guide.md` is embedded by `AxDown.csproj`; the manual test plan is `docs/axdown/nvda-test-plan.md`. The bundle rules are in the root `CLAUDE.md`.
 
 ## Commands
 
@@ -8,7 +8,7 @@ The WinForms side of AxDown: one plain edit control named after the file, a menu
 .\run-axdown.ps1 C:\path\to\notes.md     # build Axit and start AxDown on the file (run.ps1 -App down; close a running Axit first)
 .\run-axdown.ps1                         # docs\axdown\tutorial.md, the guided tour with every Markdown structure to practise on
 dotnet build Axit.sln
-dotnet test tests/AxDown.Tests/AxDown.Tests.csproj
+dotnet test tests/Axit.Tests/Axit.Tests.csproj     # TextDocumentTests, EditorSettingsTests, MarkdownOutlineTests, TextJumpsTests
 ```
 
 ## Where things are

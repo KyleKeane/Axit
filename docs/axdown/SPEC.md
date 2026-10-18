@@ -111,7 +111,7 @@ UTF-8, UTF-16 and the system code page; files that are not text; files over 32 M
   open with an empty, untitled document, so that Save cannot write the empty editor over the file (Save as names a
   new one). A missing file opens as an empty document of that name, created by the first save.
 - AD-3.8 Open, New and Exit check for unsaved changes first (AD-6.1).
-- AD-3.9 All of this is pure code in `AxDown.Core/TextDocument` (bytes in, text plus encoding plus line ending out,
+- AD-3.9 All of this is pure code in `Axit.Core/TextDocument` (shared since AxJSON; bytes in, text plus encoding plus line ending out,
   and back), unit tested for every encoding and line ending case, with the window only calling it.
 
 ### AD-4 Commands and menus
@@ -203,7 +203,7 @@ its name (the file's) and the first line.
 
 `%APPDATA%\Axit\axdown.json` through the bundle's `SettingsFile` (AX-5): `fontFamily` (null = system), `fontSize`
 (0 = system), `fontBold`, `wordWrap` (true), `checkForUpdates` (true), `recentFiles` (the last ten files opened or saved under a name, newest first, AD-4.1), `window` (placement). A plain class,
-`EditorSettings`, in `AxDown.Core`, with the sanity checks after loading as `AppSettings` has.
+`EditorSettings`, in `Axit.Core` (shared since AxJSON, each editor app with its own file), with the sanity checks after loading as `AppSettings` has.
 
 ### AD-9 Status bar
 
@@ -237,10 +237,10 @@ size 500×300; the system font and colours, light or dark as Windows is (AX-7.7)
 ## 6. Architecture
 
 ```
-src/AxDown.Core/   class library (net10.0): TextDocument (read and write with encoding and line ending), EditorSettings,
 src/AxDown/        class library (net10.0-windows): AxDownApp (Run), EditorForm, AxDownKeys, HelpText (F1 text, the
-                   embedded user guide); references AxDown.Core, Axit.Core, Axit.Forms
-tests/AxDown.Tests/ TextDocumentTests (every encoding and line ending case, a new file, a file with no line ending),
+                   embedded user guide); references Axit.Core, Axit.Forms
+src/Axit.Core/     TextDocument (read and write with encoding and line ending), EditorSettings and MarkdownOutline,
+                   AxDown's pure code, shared since the second use (AX-6.3); tests in tests/Axit.Tests
 docs/axdown/       this spec, user-guide.md (embedded, Help, User guide), nvda-test-plan.md
 ```
 
@@ -281,7 +281,7 @@ are read and written on the UI thread (a 32 MB file is the ceiling, AD-3.7).
 
 ## 8. Testing
 
-Unit tests (xunit, `tests/AxDown.Tests`): `TextDocumentTests` with byte arrays for UTF-8 with and without a mark,
+Unit tests (xunit, `tests/Axit.Tests`, where AxDown's shared pure code is tested): `TextDocumentTests` with byte arrays for UTF-8 with and without a mark,
 UTF-16 LE and BE with marks, Windows-1252, `\r\n`, `\n`, `\r` and no line ending, round trips that reproduce the
 bytes, a new document's defaults. The window has no automated tests; `docs/axdown/nvda-test-plan.md` covers it, and
 the off-screen probe approach of AxClaude checks layout and keys without disturbing the user.

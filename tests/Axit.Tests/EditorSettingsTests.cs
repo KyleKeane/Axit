@@ -1,9 +1,8 @@
-using AxDown.Core;
 using Axit.Core;
 
-namespace AxDown.Tests;
+namespace Axit.Tests;
 
-/// <summary>AxDown's settings file (SPEC.md AD-8): round trip, defaults, sanity checks.</summary>
+/// <summary>AxDown's settings file (docs/axdown/SPEC.md AD-8): round trip, defaults, sanity checks.</summary>
 public sealed class EditorSettingsTests
 {
     [Fact]
@@ -67,7 +66,7 @@ public sealed class EditorSettingsTests
         }
     }
 
-    /// <summary>File → Open recent file (SPEC.md AD-4.1): the newest first, each path once whatever its case, ten at most.</summary>
+    /// <summary>File → Open recent file (docs/axdown/SPEC.md AD-4.1): the newest first, each path once whatever its case, ten at most.</summary>
     [Fact]
     public void Recent_files_keep_the_newest_first_once_each_and_ten_at_most()
     {

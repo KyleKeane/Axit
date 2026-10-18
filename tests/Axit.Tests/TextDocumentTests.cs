@@ -1,9 +1,9 @@
 using System.Text;
-using AxDown.Core;
+using Axit.Core;
 
-namespace AxDown.Tests;
+namespace Axit.Tests;
 
-/// <summary>Files come back as they went in (SPEC.md AD-3, AD-D4): every encoding and line ending case, and the round trip.</summary>
+/// <summary>Files come back as they went in (docs/axdown/SPEC.md AD-3, AD-D4): every encoding and line ending case, and the round trip.</summary>
 public sealed class TextDocumentTests
 {
     private static byte[] Bytes(params byte[][] parts) => parts.SelectMany(p => p).ToArray();

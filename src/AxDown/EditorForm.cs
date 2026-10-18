@@ -1,6 +1,5 @@
 using System.Diagnostics;
 using System.Net.Http;
-using AxDown.Core;
 using Axit.Core;
 using Axit.Core.Updates;
 using Axit.Forms;

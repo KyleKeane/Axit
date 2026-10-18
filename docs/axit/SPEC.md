@@ -277,9 +277,9 @@ src/Axit.Core/       class library (net10.0), no WinForms, unit tested
 src/Axit.Forms/      class library (net10.0-windows), WinForms pieces both apps use
 src/AxClaude/        class library (net10.0-windows): AxClaudeApp, MainForm, ... (AxClaude's window)
 src/AxClaude.Core/   class library (net10.0): Vt, Transcript, Pty, Privacy, AppSettings (AxClaude's pure code)
-src/AxDown/          class library (net10.0-windows): AxDownApp, EditorForm, ... (AxDown's window)
-src/AxDown.Core/     class library (net10.0): TextDocument, EditorSettings, MarkdownOutline
-tests/Axit.Tests, tests/AxClaude.Tests, tests/AxDown.Tests
+src/AxDown/          class library (net10.0-windows): AxDownApp, EditorForm, ... (AxDown's window; its pure code,
+                     TextDocument, EditorSettings and MarkdownOutline, is Axit.Core's since the second use)
+tests/Axit.Tests, tests/AxClaude.Tests
 ```
 
 References point one way: `Axit` references every app; an app's window project references its own `.Core`,
