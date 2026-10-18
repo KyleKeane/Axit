@@ -6,7 +6,7 @@ Each step says what to do and what NVDA must say or do. A step fails if NVDA say
 
 ## 1. Startup and focus
 
-1. Start the app on a folder that has never been used with Claude. NVDA reads the window title (`<folder> - AxClaude`), then "Message to Claude edit multi line", and no description.
+1. Start the app on a folder that has never been used with Claude. NVDA reads the window title (`<folder> (<full path>) - AxClaude`), then "Message to Claude edit multi line", and no description.
 2. Ctrl+Tab: "Conversation read only edit multi line", then the current line.
 3. Ctrl+Tab again: the message field.
 4. F6 twice, then Ctrl+Shift+Tab twice: as steps 2 and 3.

@@ -1132,7 +1132,9 @@ internal sealed class MainForm : Form
 
     private void UpdateFolderUi()
     {
-        Text = _folder is null ? "AxClaude" : $"{FolderName(_folder)} - AxClaude";
+        // FR-8.4: the folder's name, then its full path in parentheses, so that the name comes first in speech and
+        // two folders of one name are still told apart in Alt+Tab and in the Axit menu; announcements use the name.
+        Text = _folder is null ? "AxClaude" : $"{FolderName(_folder)} ({_folder}) - AxClaude";
         _folderLabel.Text = _folder ?? "No project folder";
         StatusLayout.Fit(_status, _state, _folderLabel);
     }

@@ -219,7 +219,7 @@ allow it, see B-9).
   to 9, then a to z), so that Alt+A, O, 1 or Alt+A, R, 1 acts without an arrow key. Enter brings a window to the
   front, restored when it was minimized. A list with nothing in it holds one disabled item, "(none)".
 - AX-9.6 The windows are the visible, unowned, titled top-level windows of every process named as this one, told
-  apart by the end of their title (" - AxClaude", " - AxDown"; AD-10, AxClaude's `<folder> - AxClaude`); a window of
+  apart by the end of their title (" - AxClaude", " - AxDown"; AD-10, AxClaude's `<folder> (<path>) - AxClaude`); a window of
   none of the apps (the bundle's own message box, AX-1.4) is listed nowhere. The lists are pure code in
   `Axit.Core/AxitWindows` and `Axit.Core/RecentlyClosed`, unit tested; only the listing and the switch (user32
   `EnumWindows`, `SetForegroundWindow`) and the menu itself are in `AxitMenu`.
