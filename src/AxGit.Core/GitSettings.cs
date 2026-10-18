@@ -6,7 +6,7 @@ namespace AxGit.Core;
 /// Everything AxGit remembers between runs (SPEC.md AG-8.1), in <c>%APPDATA%\Axit\axgit.json</c> through the bundle's
 /// <see cref="SettingsFile"/>. A missing or unreadable file falls back to the defaults.
 /// </summary>
-public sealed class GitSettings
+public sealed class GitSettings : IWindowSettings
 {
     public const int MaxRecentRepositories = 10;
 

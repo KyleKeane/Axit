@@ -1,9 +1,7 @@
 using System.Diagnostics;
-using System.Net.Http;
 using System.Text.RegularExpressions;
 using AxGit.Core;
 using Axit.Core;
-using Axit.Core.Updates;
 using Axit.Forms;
 
 namespace AxGit;
@@ -12,11 +10,10 @@ namespace AxGit;
 /// AxGit's window (SPEC.md AG-2): a menu bar, one list with three views (Changes, Log, Branches), one read-only text
 /// for the details (a diff, a commit, what git answered), and a status bar with the branch. Every action is one git
 /// command run on a background task (AG-D6); the result is one announcement, or a notice with git's whole answer.
-/// Notices (the bundle's <see cref="OverlayPanel"/>) take the place of the list and the details for the window's own
-/// questions (AX-6.4). The notice flow, the fonts, the window placement and the update flow are copied from
-/// <c>TextEditorForm</c>, as adding-an-app.md says to do until a shared window base exists.
+/// The notices, the fonts, the window's place, the update flow and find are the bundle's window base
+/// (<see cref="AxitForm"/>).
 /// </summary>
-public sealed partial class GitForm : Form
+public sealed partial class GitForm : AxitForm
 {
     private enum View
     {
@@ -27,7 +24,6 @@ public sealed partial class GitForm : Form
 
     private const int UntrackedLimit = 200 * 1024;
 
-    private readonly string _settingsPath = GitSettings.DefaultPath;
     private readonly GitSettings _settings;
     private readonly string? _startPath;
     private readonly MenuStrip _menu = new();
@@ -37,9 +33,6 @@ public sealed partial class GitForm : Form
     private readonly StatusStrip _status = new();
     private readonly ToolStripStatusLabel _stateLabel = new();
     private readonly ToolStripStatusLabel _pathLabel = new();
-    private readonly OverlayPanel _overlay = new();
-    private readonly ToolStripMenuItem _checkItem = new($"Check for &updates (Axit {BundleInfo.Version})...");
-    private readonly ToolStripMenuItem _updateItem = new() { Visible = false };
     private readonly ToolStripMenuItem _checkAtStartItem;
 
     /// <summary>The menu items that run git, disabled while a command runs and when git is missing (AG-5.4).</summary>
@@ -60,28 +53,15 @@ public sealed partial class GitForm : Form
     private string? _busy;
 
     private bool _gitMissing;
-    private bool _noticeOpen;
-    private Control? _focusBeforeNotice;
-    private string _findText = string.Empty;
-    private string _latestState = "not checked yet";
-    private ReleaseInfo? _update;
-    private bool _updateBusy;
-
-    /// <summary>After Update and restart: how the installed new version is started when this window closes; null when nothing is to start.</summary>
-    private string[]? _restartArguments;
 
     public GitForm(string? path, GitSettings settings, string? settingsError)
+        : base(AxGitApp.Name, settings, GitSettings.DefaultPath)
     {
         _settings = settings;
         _startPath = path;
-        // With the role Window, NVDA speaks the window when it opens ("Axit - AxGit window") before the list (AX-7.1).
-        AccessibleRole = AccessibleRole.Window;
-        MinimumSize = new Size(500, 300);
-        Size = new Size(900, 600);
-        StartPosition = FormStartPosition.WindowsDefaultLocation;
         Text = "No repository - " + AxGitApp.Name;
 
-        // ---- menus (AG-6.1); the keys are handled in ProcessCmdKey from the tables, the items only show them ----
+        // ---- menus (AG-6.1); the keys are handled in ProcessWindowKey from the tables, the items only show them ----
         // Repository is the thing worked on, in the standard order of a first menu (bundle AX-6): Open and the recent
         // repositories, then the slot the editors have Save in (Refresh here), then the extras, then Exit.
         var repository = new ToolStripMenuItem("&Repository");
@@ -142,7 +122,7 @@ public sealed partial class GitForm : Form
         general.DropDownItems.Add(_checkAtStartItem);
         options.DropDownItems.Add(general);
         var developer = new ToolStripMenuItem("De&veloper");
-        developer.DropDownItems.Add(new ToolStripMenuItem("Open settings &file", null, (_, _) => AxitMenu.Start(Dispatch.AxJSON, _settingsPath)));
+        developer.DropDownItems.Add(new ToolStripMenuItem("Open settings &file", null, (_, _) => AxitMenu.Start(Dispatch.AxJSON, SettingsPath)));
         developer.DropDownItems.Add(new ToolStripMenuItem("Copy diag&nostics", null, (_, _) => CopyDiagnostics()));
         options.DropDownItems.Add(developer);
 
@@ -156,17 +136,7 @@ public sealed partial class GitForm : Form
         help.DropDownItems.Add(resources);
 
         // The bundle's Axit menu (AX-9) sits before Help in every window and ends with the update items and About.
-        _checkItem.Click += (_, _) => CheckForUpdates(manual: true);
-        _updateItem.Click += (_, _) =>
-        {
-            if (_update is { } known)
-            {
-                ShowUpdateNotice(known);
-            }
-        };
-        var axit = new AxitMenu(this, _checkItem, _updateItem, () => _latestState, notice => ShowNotice(notice));
-
-        _menu.Items.AddRange([repository, changes, branches, view, options, axit, help]);
+        _menu.Items.AddRange([repository, changes, branches, view, options, CreateAxitMenu(), help]);
         MainMenuStrip = _menu;
 
         // ---- the list and the details (AG-2.1) ----
@@ -193,12 +163,11 @@ public sealed partial class GitForm : Form
         _status.Items.AddRange([_stateLabel, _pathLabel]);
         _status.SizeChanged += (_, _) => StatusLayout.Fit(_status, _stateLabel, _pathLabel);
 
-        _overlay.Chosen += OnNoticeChoice;
         SizeChanged += (_, _) => _list.Height = Math.Max(80, ClientSize.Height * 2 / 5);
 
         // Docked from the last control to the first: the menu takes the top, the status bar the bottom, the list the
         // strip under the menu, and the details (or the notice over both) what is left.
-        Controls.AddRange([_overlay, _details, _list, _status, _menu]);
+        Controls.AddRange([Overlay, _details, _list, _status, _menu]);
 
         ApplyTextFont();
         RestoreWindow();
@@ -210,22 +179,47 @@ public sealed partial class GitForm : Form
         }
     }
 
-    /// <summary>The crash handler's report, shown inside the window like every other notice.</summary>
-    public void ShowError(string title, string message) => ShowNotice(Notice.Plain(title, message) with { Unprompted = true });
+    // ---- what the window base asks for ----
+
+    protected override string Shortcuts => HelpText.Shortcuts;
+
+    protected override void HideForNotice()
+    {
+        _list.Visible = false;
+        _details.Visible = false;
+    }
+
+    protected override void ShowAfterNotice()
+    {
+        _list.Visible = true;
+        _details.Visible = true;
+    }
+
+    protected override Control FocusTarget => _list;
+
+    /// <summary>The details keep the focus across a notice when they had it.</summary>
+    protected override Control? FocusToKeep() => _details.Focused ? _details : _list;
+
+    protected override void ApplyFont(Font font)
+    {
+        _list.Font = font;
+        _details.Font = font;
+    }
+
+    protected override IReadOnlyList<string> RestartArguments() => _root is null ? [Dispatch.AxGit] : [Dispatch.AxGit, _root];
+
+    protected override string UpdateRestartText => $"closes {AxGitApp.Name}, installs it and starts it again on the same repository";
+
+    protected override IEnumerable<string> DiagnosticsLines => [$"Repository: {_root ?? "(none)"}"];
 
     protected override void OnShown(EventArgs e)
     {
-        base.OnShown(e);
-        if (!_noticeOpen)
+        if (!NoticeOpen)
         {
             _list.Select();
         }
 
-        if (_settings.CheckForUpdates)
-        {
-            CheckForUpdates(manual: false);
-        }
-
+        base.OnShown(e);
         Do(() => StartAsync(_startPath));
     }
 
@@ -237,61 +231,15 @@ public sealed partial class GitForm : Form
             RecentlyClosed.Remember(AxGitApp.Name, closing);
         }
 
-        SaveWindow();
-        SaveSettings();
-        if (_restartArguments is { } restart)
-        {
-            // AX-3.2: the update is installed; the new version starts on this repository as this process ends.
-            Updater.StartInstalled(restart);
-        }
-
         base.OnFormClosing(e);
-    }
-
-    /// <summary>The window's client area as its UI Automation rectangle, so that NVDA+End finds the status bar.</summary>
-    protected override AccessibleObject CreateAccessibilityInstance() => new WindowAccessibleObject(this);
-
-    private const int WM_SYSCOMMAND = 0x0112;
-    private const int SC_KEYMENU = 0xF100;
-
-    protected override void WndProc(ref Message m)
-    {
-        // Alt alone and F10 open the menu bar through SC_KEYMENU; while a notice holds the keyboard they do nothing.
-        if (m.Msg == WM_SYSCOMMAND && ((long)m.WParam & 0xFFF0) == SC_KEYMENU && ((long)m.LParam & 0xFFFF) == 0 && _noticeOpen)
-        {
-            return;
-        }
-
-        base.WndProc(ref m);
     }
 
     // ---- keys (AG-6.2): every key comes from BundleKeys or AxGitKeys, and is handled here only ----
 
-    protected override bool ProcessCmdKey(ref Message msg, Keys keyData)
+    protected override bool ProcessWindowKey(Keys keyData)
     {
-        if (_noticeOpen)
-        {
-            // A notice holds the keyboard: the window's shortcuts and the menu's wait. Only the text size keys stay live.
-            switch (keyData)
-            {
-                case BundleKeys.LargerText:
-                case BundleKeys.LargerTextNumpad:
-                    ChangeTextSize(1);
-                    return true;
-                case BundleKeys.SmallerText:
-                case BundleKeys.SmallerTextNumpad:
-                    ChangeTextSize(-1);
-                    return true;
-            }
-
-            return false;
-        }
-
         switch (keyData)
         {
-            case BundleKeys.Shortcuts:
-                ShowNotice(Notice.Plain("Keyboard shortcuts", HelpText.Shortcuts));
-                return true;
             case BundleKeys.NextControl:
             case BundleKeys.PreviousControl:
             case BundleKeys.NextControlAlso:
@@ -299,25 +247,17 @@ public sealed partial class GitForm : Form
                 other.Focus();
                 return true;
             case BundleKeys.Find:
-                ShowFind();
+                ShowFind(_details);
                 return true;
             case BundleKeys.FindNext:
-                FindNext(1);
+                FindNext(_details, 1);
                 return true;
             case BundleKeys.FindPrevious:
-                FindNext(-1);
+                FindNext(_details, -1);
                 return true;
             case BundleKeys.Save:
                 // The bundle's save key, with nothing here to save (AG-6.2).
                 Announce("Nothing to save here. Space stages, Ctrl+Enter commits", true);
-                return true;
-            case BundleKeys.LargerText:
-            case BundleKeys.LargerTextNumpad:
-                ChangeTextSize(1);
-                return true;
-            case BundleKeys.SmallerText:
-            case BundleKeys.SmallerTextNumpad:
-                ChangeTextSize(-1);
                 return true;
             case AxGitKeys.OpenRepository:
                 OpenRepositoryDialog();
@@ -380,7 +320,7 @@ public sealed partial class GitForm : Form
             }
         }
 
-        return base.ProcessCmdKey(ref msg, keyData);
+        return false;
     }
 
     // ---- the repository (AG-1.2) ----
@@ -990,7 +930,7 @@ public sealed partial class GitForm : Form
         [
             new OverlayChoice("&Commit", () =>
             {
-                var message = _overlay.InputText.Trim();
+                var message = Overlay.InputText.Trim();
                 Do(async () =>
                 {
                     var result = await RunGitAsync(["commit", "-m", message], GitRunner.Short, "commit");
@@ -1101,7 +1041,7 @@ public sealed partial class GitForm : Form
         [
             new OverlayChoice("C&reate", () =>
             {
-                var name = _overlay.InputText.Trim();
+                var name = Overlay.InputText.Trim();
                 Do(async () =>
                 {
                     var result = await RunGitAsync(GitBranches.CreateArguments(name), GitRunner.Short, "new branch");
@@ -1217,513 +1157,6 @@ public sealed partial class GitForm : Form
             : _repo.StatusText;
         _pathLabel.Text = _root ?? string.Empty;
         StatusLayout.Fit(_status, _stateLabel, _pathLabel);
-    }
-
-    // ---- find in the details (AG-2.4) ----
-
-    private void ShowFind() =>
-        ShowNotice(new Notice("Find", string.Empty,
-        [
-            new OverlayChoice("&Find next", () =>
-            {
-                _findText = _overlay.InputText;
-                FindNext(1);
-            }, IsDefault: true),
-            new OverlayChoice("&Cancel", IsCancel: true),
-        ])
-        {
-            Input = new OverlayInput("Text to find:", "Text to find", _findText, "Type the text to find"),
-        });
-
-    /// <summary>The next match after the selection (or the previous one before it), wrapping once; the match is selected and the details take the focus.</summary>
-    private void FindNext(int direction)
-    {
-        if (_findText.Length == 0)
-        {
-            ShowFind();
-            return;
-        }
-
-        var text = _details.Text;
-        int found;
-        if (direction > 0)
-        {
-            var from = Math.Min(_details.SelectionStart + _details.SelectionLength, text.Length);
-            found = text.IndexOf(_findText, from, StringComparison.OrdinalIgnoreCase);
-            if (found < 0 && from > 0)
-            {
-                found = text.IndexOf(_findText, 0, StringComparison.OrdinalIgnoreCase);
-            }
-        }
-        else
-        {
-            var from = _details.SelectionStart - 1;
-            found = from >= 0 ? text.LastIndexOf(_findText, from, StringComparison.OrdinalIgnoreCase) : -1;
-            if (found < 0)
-            {
-                found = text.LastIndexOf(_findText, StringComparison.OrdinalIgnoreCase);
-            }
-        }
-
-        if (found < 0)
-        {
-            Announce("Not found", true);
-            return;
-        }
-
-        _details.Select(found, _findText.Length);
-        _details.ScrollToCaret();
-        _details.Select();
-    }
-
-    // ---- fonts and the window (AX-7.6) ----
-
-    private static Font SystemTextFont() => SystemFonts.MessageBoxFont ?? DefaultFont;
-
-    private Font TextFont()
-    {
-        var system = SystemTextFont();
-        if (_settings.FontFamily is null && _settings.FontSize <= 0 && !_settings.FontBold)
-        {
-            return system;
-        }
-
-        var size = _settings.FontSize > 0 ? _settings.FontSize : system.SizeInPoints;
-        var style = _settings.FontBold ? FontStyle.Bold : FontStyle.Regular;
-        try
-        {
-            return new Font(_settings.FontFamily ?? system.FontFamily.Name, size, style);
-        }
-        catch (ArgumentException)
-        {
-            return new Font(system.FontFamily, size, style);
-        }
-    }
-
-    private void ApplyTextFont()
-    {
-        var font = TextFont();
-        _list.Font = font;
-        _details.Font = font;
-        _overlay.SetTextFont(font);
-    }
-
-    private void ChangeTextSize(int delta)
-    {
-        var size = Math.Clamp((int)Math.Round(TextFont().SizeInPoints) + delta, 6, 72);
-        _settings.FontSize = size;
-        ApplyTextFont();
-        SaveSettings();
-        Announce($"Text size {size}", true);
-    }
-
-    private void UseSystemFont()
-    {
-        _settings.FontFamily = null;
-        _settings.FontSize = 0;
-        _settings.FontBold = false;
-        ApplyTextFont();
-        SaveSettings();
-        Announce("Windows text size", true);
-    }
-
-    private void ChooseFont()
-    {
-        using var dialog = new FontDialog
-        {
-            Font = TextFont(),
-            ShowEffects = false,
-            FontMustExist = true,
-            MinSize = 6,
-            MaxSize = 72,
-        };
-        if (dialog.ShowDialog(this) != DialogResult.OK)
-        {
-            return;
-        }
-
-        _settings.FontFamily = dialog.Font.FontFamily.Name;
-        _settings.FontSize = dialog.Font.SizeInPoints;
-        _settings.FontBold = dialog.Font.Bold;
-        ApplyTextFont();
-        SaveSettings();
-    }
-
-    private void RestoreWindow()
-    {
-        if (_settings.Window is not { } placement)
-        {
-            return;
-        }
-
-        var bounds = new Rectangle(placement.X, placement.Y, placement.Width, placement.Height);
-        if (!Screen.AllScreens.Any(s => s.WorkingArea.IntersectsWith(bounds)))
-        {
-            return;
-        }
-
-        StartPosition = FormStartPosition.Manual;
-        Bounds = bounds;
-        if (placement.Maximized)
-        {
-            WindowState = FormWindowState.Maximized;
-        }
-    }
-
-    private void SaveWindow()
-    {
-        var bounds = WindowState == FormWindowState.Normal ? Bounds : RestoreBounds;
-        _settings.Window = new WindowPlacement
-        {
-            X = bounds.X,
-            Y = bounds.Y,
-            Width = bounds.Width,
-            Height = bounds.Height,
-            Maximized = WindowState == FormWindowState.Maximized,
-        };
-    }
-
-    private void SaveSettings()
-    {
-        try
-        {
-            _settings.Save(_settingsPath);
-        }
-        catch (Exception ex) when (ex is IOException or UnauthorizedAccessException)
-        {
-            Log.Error("Settings could not be saved", ex);
-        }
-    }
-
-    // ---- notices: the window's own dialogs, drawn inside the window (bundle AX-7.2, AX-6.4) ----
-
-    /// <summary>
-    /// The one place a notice is shown; callers pass only its content. It adds the key line made from the buttons,
-    /// the chime and the hold of a notice the user did not open, the focus in the notice, the blocked menu and
-    /// window shortcuts, and Enter and Escape on the default and cancel buttons.
-    /// </summary>
-    private void ShowNotice(Notice notice)
-    {
-        if (notice.Unprompted)
-        {
-            Sounds.Notice();
-        }
-
-        if (!_noticeOpen)
-        {
-            _focusBeforeNotice = _details.Focused ? _details : _list;
-        }
-
-        _noticeOpen = true;
-        _overlay.Populate(notice);
-        _overlay.Visible = true;
-        _overlay.BringToFront();
-        AcceptButton = _overlay.DefaultButton;
-        CancelButton = _overlay.CancelButton;
-        _overlay.FocusStart();
-        _list.Visible = false;
-        _details.Visible = false;
-        _menu.Enabled = false;
-        PerformLayout();
-    }
-
-    private void OnNoticeChoice(OverlayChoice choice)
-    {
-        if (choice.StaysOpen)
-        {
-            choice.Action?.Invoke();
-            return;
-        }
-
-        CloseNotice(choice.Action);
-    }
-
-    private void CloseNotice(Action? then)
-    {
-        if (!_noticeOpen)
-        {
-            return;
-        }
-
-        _noticeOpen = false;
-        _list.Visible = true;
-        _details.Visible = true;
-        _menu.Enabled = true;
-        AcceptButton = null;
-        CancelButton = null;
-        PerformLayout();
-        then?.Invoke();
-        if (IsDisposed || _noticeOpen)
-        {
-            // The window closed, or the action opened a notice of its own, which is showing now.
-            return;
-        }
-
-        if (ActiveControl is null || _overlay.Contains(ActiveControl))
-        {
-            (_focusBeforeNotice ?? _list).Select();
-        }
-
-        _overlay.Visible = false;
-    }
-
-    private void Fail(string message)
-    {
-        Log.Error(message);
-        ShowNotice(Notice.Plain("Error", message) with { Unprompted = true });
-    }
-
-    /// <summary>Speaks without moving the focus (AG-7): on the list, or on the notice while one shows.</summary>
-    private bool Announce(string text, bool interrupt)
-    {
-        if (_noticeOpen)
-        {
-            return _overlay.Announce(text, interrupt);
-        }
-
-        return Announcer.Raise(_list, text, interrupt);
-    }
-
-    // ---- help, diagnostics, updates (AX-3) ----
-
-    private void CopyDiagnostics()
-    {
-        var text = string.Join("\r\n",
-        [
-            $"{AxGitApp.Name}, Axit {BundleInfo.Version} on .NET {Environment.Version}, {Environment.OSVersion}",
-            $"Repository: {_root ?? "(none)"}",
-            $"Settings: {_settingsPath}",
-            $"Log: {Log.FilePath}",
-            string.Empty,
-            Log.Tail(200),
-        ]);
-        try
-        {
-            Clipboard.SetText(text);
-            Announce("Copied diagnostics", true);
-        }
-        catch (Exception ex) when (ex is System.Runtime.InteropServices.ExternalException or InvalidOperationException)
-        {
-            Fail("The clipboard could not be written: " + ex.Message);
-        }
-    }
-
-    private void OpenUrl(string url)
-    {
-        try
-        {
-            Process.Start(new ProcessStartInfo(url) { UseShellExecute = true });
-        }
-        catch (Exception ex) when (ex is System.ComponentModel.Win32Exception or IOException)
-        {
-            Fail("The page could not be opened: " + ex.Message);
-        }
-    }
-
-    /// <summary>AX-3: asks GitHub for the latest release, every time; a newer one is offered in a notice, a manual check reports either way.</summary>
-    private async void CheckForUpdates(bool manual)
-    {
-        if (_updateBusy)
-        {
-            return;
-        }
-
-        _updateBusy = true;
-        _checkItem.Enabled = false;
-        _updateItem.Enabled = false;
-        _latestState = "checking...";
-        try
-        {
-            using var cancellation = new CancellationTokenSource(TimeSpan.FromSeconds(30));
-            var release = await Updater.CheckAsync(cancellation.Token);
-            if (IsDisposed)
-            {
-                return;
-            }
-
-            _update = null;
-            _updateItem.Visible = false;
-            if (release is null)
-            {
-                _latestState = "none published yet";
-                if (manual)
-                {
-                    ShowNotice(Notice.Plain("Check for updates", "No release is published yet."));
-                }
-            }
-            else if (UpdateCheck.IsNewer(release, BundleInfo.Version))
-            {
-                var version = release.Version.ToString(3);
-                _update = release;
-                _latestState = $"Axit {version} (newer than this one)";
-                _updateItem.Text = $"Update &to Axit {version}...";
-                _updateItem.Visible = true;
-                Log.Info($"Update available: {release.Tag}, zip {release.ZipUrl ?? "missing"}");
-                if (manual || !_noticeOpen)
-                {
-                    ShowUpdateNotice(release, unprompted: !manual);
-                }
-                else
-                {
-                    Announce($"Update {version} in the Axit menu", false);
-                }
-            }
-            else
-            {
-                _latestState = $"Axit {release.Version.ToString(3)}";
-                if (manual)
-                {
-                    ShowNotice(Notice.Plain("Check for updates", $"You have the newest version, Axit {BundleInfo.Version}."));
-                }
-            }
-        }
-        catch (Exception ex) when (ex is HttpRequestException or TaskCanceledException or IOException or InvalidOperationException)
-        {
-            Log.Error("Update check failed", ex);
-            _latestState = "unknown, GitHub could not be reached";
-            if (manual)
-            {
-                ShowNotice(new Notice("Check for updates", "GitHub could not be reached: " + ex.Message,
-                [
-                    new OverlayChoice("&Open releases page", () => OpenUrl(UpdateCheck.ReleasesPage), StaysOpen: true),
-                    OverlayChoice.Close,
-                ]));
-            }
-        }
-        finally
-        {
-            _updateBusy = false;
-            _checkItem.Enabled = true;
-            _updateItem.Enabled = true;
-        }
-    }
-
-    private void ShowUpdateNotice(ReleaseInfo release, bool unprompted = false)
-    {
-        var version = release.Version.ToString(3);
-        var size = release.ZipSize > 0 ? $" The download is {release.ZipSize / (1024.0 * 1024.0):0} MB." : string.Empty;
-        var text =
-            $"You have Axit {BundleInfo.Version}. Axit {version} is available.\n\n" +
-            (release.Notes.Length > 0 ? release.Notes + "\n\n" : string.Empty) +
-            $"Update and restart downloads the new version, closes {AxGitApp.Name}, installs it and starts it again on the same " +
-            $"repository. Update and close installs without starting it again. A progress bar shows the download.{size}\n" +
-            "Later keeps this version; the Axit menu offers the update again.";
-        ShowNotice(new Notice($"Update to Axit {version}", text,
-        [
-            new OverlayChoice("Update and &restart", () => InstallUpdate(release, restart: true), IsDefault: true),
-            new OverlayChoice("Update and &close", () => InstallUpdate(release, restart: false)),
-            new OverlayChoice("&Open release page", () => OpenUrl(release.PageUrl), StaysOpen: true),
-            new OverlayChoice("&Later", IsCancel: true),
-        ])
-        {
-            Unprompted = unprompted,
-        });
-    }
-
-    /// <summary>
-    /// Downloads the release and installs it in place behind one notice with one progress bar (the download up to
-    /// 80 percent, the installer's steps to 100; Cancel stops the download, not the install), then closes;
-    /// OnFormClosing starts the installed new version when <paramref name="restart"/> was chosen (AX-3.2).
-    /// </summary>
-    private async void InstallUpdate(ReleaseInfo release, bool restart)
-    {
-        if (_updateBusy)
-        {
-            return;
-        }
-
-        _updateBusy = true;
-        _checkItem.Enabled = false;
-        _updateItem.Enabled = false;
-        var version = release.Version.ToString(3);
-        var size = release.ZipSize > 0 ? $" ({release.ZipSize / (1024.0 * 1024.0):0} MB)" : string.Empty;
-        using var cancellation = new CancellationTokenSource(TimeSpan.FromMinutes(10));
-        var cancelled = false;
-        var installing = false;
-        ShowNotice(new Notice($"Updating to Axit {version}",
-            $"The new version is downloaded{size} and installed; the progress bar shows how far it is. Cancel during the download keeps this version.",
-        [
-            new OverlayChoice("&Cancel", () =>
-            {
-                if (installing)
-                {
-                    Announce("Installing, this cannot be cancelled now", true);
-                    return;
-                }
-
-                cancelled = true;
-                cancellation.Cancel();
-                CloseNotice(null);
-            }, IsDefault: true, IsCancel: true, StaysOpen: true),
-        ])
-        {
-            Progress = true,
-        });
-        try
-        {
-            var folder = await Updater.DownloadAsync(release, cancellation.Token, new Progress<int>(percent => _overlay.SetProgress(percent * 80 / 100)));
-            cancellation.Token.ThrowIfCancellationRequested();
-            if (IsDisposed)
-            {
-                return;
-            }
-
-            installing = true;
-            _overlay.SetProgress(80);
-            Announce("Downloaded. Installing", true);
-            var step = 80;
-            var result = await Updater.InstallInPlaceAsync(folder, new Progress<string>(_ => _overlay.SetProgress(step = Math.Min(99, step + 3))));
-            if (IsDisposed)
-            {
-                return;
-            }
-
-            if (result.ExitCode != 0)
-            {
-                Log.Error($"The installer failed with code {result.ExitCode}:\r\n{result.Output}");
-                ShowNotice(new Notice($"Update to Axit {version}",
-                    $"The installer failed; this version keeps running.\n\n{result.Output}\n\nYou can download the zip from the release page and run install.cmd yourself.",
-                [
-                    new OverlayChoice("&Open release page", () => OpenUrl(release.PageUrl), StaysOpen: true),
-                    OverlayChoice.Close,
-                ]));
-                return;
-            }
-
-            _overlay.SetProgress(100);
-            _restartArguments = restart ? (_root is null ? [Dispatch.AxGit] : [Dispatch.AxGit, _root]) : null;
-            Log.Info($"Update {release.Tag} installed in place; restart: {restart}");
-            Announce(restart ? "Installed. Restarting" : "Installed. Closing", true);
-            Close();
-        }
-        catch (OperationCanceledException) when (cancelled && !IsDisposed)
-        {
-            Announce("Update cancelled", true);
-        }
-        catch (Exception ex) when (ex is HttpRequestException or TaskCanceledException or IOException or InvalidDataException or InvalidOperationException or UnauthorizedAccessException)
-        {
-            Log.Error("The update failed", ex);
-            Fail("The update failed, and this version keeps running: " + ex.Message);
-        }
-        finally
-        {
-            _updateBusy = false;
-            _checkItem.Enabled = true;
-            _updateItem.Enabled = true;
-        }
-    }
-
-    // ---- menu items from the key tables ----
-
-    private static ToolStripMenuItem Item(string text, Action action, Keys key)
-    {
-        var item = new ToolStripMenuItem(text, null, (_, _) => action());
-        if (key != Keys.None)
-        {
-            item.ShortcutKeyDisplayString = BundleKeys.Text(key);
-        }
-
-        return item;
     }
 
     /// <summary>An item that runs git: disabled while a command runs and when git is missing.</summary>
