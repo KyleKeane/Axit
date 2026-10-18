@@ -37,7 +37,7 @@ public enum LineKind
 /// </summary>
 public sealed class Line
 {
-    internal Line(int id, LineKind kind, string text)
+    public Line(int id, LineKind kind, string text)
     {
         Id = id;
         Kind = kind;
@@ -45,17 +45,17 @@ public sealed class Line
     }
 
     public int Id { get; }
-    public string Text { get; internal set; }
-    public LineKind Kind { get; internal set; }
-    public int HeadingLevel { get; internal set; }
+    public string Text { get; set; }
+    public LineKind Kind { get; set; }
+    public int HeadingLevel { get; set; }
 
     /// <summary>
     /// The row continues a reply row that Claude hard-wrapped at the console width (FR-3.2a): the view shows the two
     /// as one line, joined with a space.
     /// </summary>
-    public bool JoinedToPrevious { get; internal set; }
+    public bool JoinedToPrevious { get; set; }
 
-    public bool Committed { get; internal set; }
+    public bool Committed { get; set; }
     public bool Hidden => ChromeHidden || EchoHidden || ReplayHidden || RepaintHidden;
     /// <summary>
     /// A line of the app's own (a marker, a printed message line or blank line, a system line, a bookmark, the record
@@ -64,18 +64,21 @@ public sealed class Line
     /// </summary>
     public bool IsMarker => Kind is LineKind.InputMarker or LineKind.OutputMarker or LineKind.System or LineKind.UserMessage or LineKind.Bookmark or LineKind.Question;
 
-    internal bool ChromeHidden { get; set; }
-    internal string? StickyChromeText { get; set; }
-    internal bool EchoHidden { get; set; }
-    internal bool EchoHandled { get; set; }
+    public bool ChromeHidden { get; set; }
+    public string? StickyChromeText { get; set; }
+    public bool EchoHidden { get; set; }
+    public bool EchoHandled { get; set; }
     /// <summary>Printed while a restart replayed a conversation the window already shows (FR-4.8).</summary>
-    internal bool ReplayHidden { get; set; }
+    public bool ReplayHidden { get; set; }
 
     /// <summary>
     /// Printed while Claude repainted the whole conversation from the top of the screen: a copy of what the window
     /// already shows, often worded differently. Shown once a later frame writes something else on its row.
     /// </summary>
-    internal bool RepaintHidden { get; set; }
+    public bool RepaintHidden { get; set; }
+
+    /// <summary>The line is a row of the screen still, so it may be rewritten; false once its row scrolled off or was let go.</summary>
+    public bool OnScreen => Row is not null;
 
     internal Vt.Row? Row { get; set; }
 

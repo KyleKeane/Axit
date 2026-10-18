@@ -50,7 +50,7 @@ public sealed class Screen
     // One shared string per printable ASCII character: a repaint prints thousands of cells per frame.
     private static readonly string[] Ascii = Enumerable.Range(0, 128).Select(c => ((char)c).ToString()).ToArray();
 
-    private readonly SessionModel _store;
+    private readonly LineStore _store;
     private readonly Row[] _rows;
     private int _cx;
     private int _cy;
@@ -60,7 +60,7 @@ public sealed class Screen
     private int _bottom;
     private bool _pendingWrap;
 
-    public Screen(int columns, int rows, SessionModel store)
+    public Screen(int columns, int rows, LineStore store)
     {
         if (columns < 2 || rows < 2)
         {
@@ -97,9 +97,27 @@ public sealed class Screen
     /// <summary>The whole screen was erased (<c>ESC[2J</c>, <c>ESC[3J</c>) since the last frame ended.</summary>
     public bool ClearedSinceFrameEnd { get; private set; }
 
-    internal Row RowAt(int row) => _rows[row];
-
     public Line? LineAt(int row) => _rows[row].Line;
+
+    /// <summary>
+    /// At the end of a frame: the text of every row written since the last pull goes to its line through the store
+    /// (<see cref="LineStore.TextChanged"/>), where the model decides what a rewritten row means.
+    /// </summary>
+    public void PullRowText()
+    {
+        foreach (var row in _rows)
+        {
+            if (row.Line is { } line && row.Dirty)
+            {
+                var text = row.Text();
+                row.Dirty = false;
+                if (text != line.Text)
+                {
+                    _store.TextChanged(line, text);
+                }
+            }
+        }
+    }
 
     // ---- IVtSink ----
 

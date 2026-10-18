@@ -9,7 +9,7 @@ namespace AxClaude.Core.Transcript;
 /// inserts. Feed it the raw console bytes; it raises <see cref="Changed"/> at the end of every frame.
 /// Single threaded: call everything from one thread.
 /// </summary>
-public sealed partial class SessionModel
+public sealed partial class SessionModel : LineStore
 {
     /// <summary>A sent message and the block the app prints for it (FR-4.1); <see cref="Placed"/> once the block is in the transcript, which happens once.</summary>
     private sealed record PendingSend(string Text, IReadOnlyList<Line> Block, DateTime Created)
@@ -25,7 +25,6 @@ public sealed partial class SessionModel
     public const string TranscriptViewOpened = "Claude's detailed view is on. Press Ctrl+O to turn it off.";
     public const string TranscriptViewClosed = "Claude's detailed view is off.";
 
-    private readonly List<Line> _lines = [];
     private readonly List<PendingSend> _pending = [];
     /// <summary>The last line of the previous run in this window, set by <see cref="ResetScreen"/>: the replay marking starts after it (FR-4.8).</summary>
     private Line? _runBoundary;
@@ -42,7 +41,6 @@ public sealed partial class SessionModel
     /// </summary>
     private bool _repainting;
     private Line? _responseStartedFor;
-    private int _nextId;
     private int _bookmarkCount;
 
     public SessionModel(int columns, int rows)
@@ -54,7 +52,6 @@ public sealed partial class SessionModel
 
     public int Columns { get; }
     public int Rows { get; }
-    public IReadOnlyList<Line> Lines => _lines;
 
     /// <summary>Messages sent since the start, or since <see cref="Clear"/>: the n of the last exchange block (FR-4.1).</summary>
     public int ExchangeCount { get; private set; }
@@ -181,7 +178,7 @@ public sealed partial class SessionModel
             }
         }
 
-        PullRowText();
+        _screen.PullRowText();
         _anchor = ApplyChrome(out var spinner, out var mode, out var background, out var drafts, out var working);
         Spinner = spinner;
         if (mode is not null)
@@ -230,15 +227,15 @@ public sealed partial class SessionModel
         // Claude's own headings are level 2 and deeper (LineClassifier.HeadingLevel). Classify skips app lines, so
         // the levels stick and a message line is never mistaken for a label.
         var stamp = TimeStamps ? $" ({Clock():HH:mm})" : string.Empty;
-        var block = new List<Line> { new(_nextId++, LineKind.InputMarker, $"# Input {ExchangeCount}{stamp}") { HeadingLevel = 1 } };
+        var block = new List<Line> { NewLine(LineKind.InputMarker, $"# Input {ExchangeCount}{stamp}", 1) };
         foreach (var messageLine in trimmed.Replace("\r\n", "\n").Split('\n'))
         {
-            block.Add(new Line(_nextId++, LineKind.UserMessage, messageLine.TrimEnd()));
+            block.Add(NewLine(LineKind.UserMessage, messageLine.TrimEnd()));
         }
 
-        block.Add(new Line(_nextId++, LineKind.UserMessage, string.Empty));
-        block.Add(new Line(_nextId++, LineKind.OutputMarker, $"# Output {ExchangeCount} Reply from Claude{stamp}") { HeadingLevel = 1 });
-        block.Add(new Line(_nextId++, LineKind.UserMessage, string.Empty));
+        block.Add(NewLine(LineKind.UserMessage, string.Empty));
+        block.Add(NewLine(LineKind.OutputMarker, $"# Output {ExchangeCount} Reply from Claude{stamp}", 1));
+        block.Add(NewLine(LineKind.UserMessage, string.Empty));
         var send = new PendingSend(trimmed, block, Clock());
         _pending.Add(send);
         if (!Working)
@@ -252,7 +249,7 @@ public sealed partial class SessionModel
 
     public void AddSystemLine(string text)
     {
-        _lines.Insert(AnchorIndex(), new Line(_nextId++, LineKind.System, "System: " + text));
+        _lines.Insert(AnchorIndex(), NewLine(LineKind.System, "System: " + text));
         Changed?.Invoke();
     }
 
@@ -287,7 +284,7 @@ public sealed partial class SessionModel
             return;
         }
 
-        _lines.Insert(index, new Line(_nextId++, LineKind.Question, text));
+        _lines.Insert(index, NewLine(LineKind.Question, text));
         Changed?.Invoke();
     }
 
@@ -323,7 +320,7 @@ public sealed partial class SessionModel
             return (existing, false);
         }
 
-        var bookmark = new Line(_nextId++, LineKind.Bookmark, $"Bookmark {++_bookmarkCount}");
+        var bookmark = NewLine(LineKind.Bookmark, $"Bookmark {++_bookmarkCount}");
         _lines.Insert(first, bookmark);
         Changed?.Invoke();
         return (bookmark, true);
@@ -372,14 +369,14 @@ public sealed partial class SessionModel
                 continue;
             }
 
-            _lines.Insert(i, new Line(_nextId++, LineKind.InputMarker, $"# Input {n} from previous session") { HeadingLevel = 1 });
+            _lines.Insert(i, NewLine(LineKind.InputMarker, $"# Input {n} from previous session", 1));
             i++;
             end++;
             var reply = ReplyStart(i + 1, end);
             if (reply > 0)
             {
-                var output = new Line(_nextId++, LineKind.OutputMarker, $"# Output {n} from previous session Reply from Claude") { HeadingLevel = 1 };
-                _lines.InsertRange(reply, [new Line(_nextId++, LineKind.UserMessage, string.Empty), output, new Line(_nextId++, LineKind.UserMessage, string.Empty)]);
+                var output = NewLine(LineKind.OutputMarker, $"# Output {n} from previous session Reply from Claude", 1);
+                _lines.InsertRange(reply, [NewLine(LineKind.UserMessage, string.Empty), output, NewLine(LineKind.UserMessage, string.Empty)]);
                 _responseStartedFor = output;
                 end += 3;
                 i = reply + 2;
@@ -470,7 +467,7 @@ public sealed partial class SessionModel
     /// </summary>
     public void ResetScreen()
     {
-        PullRowText();
+        _screen.PullRowText();
         // A message queued for the Claude that is being stopped never reaches it: its block goes in here, at the end
         // of the old run, so that what was sent is on record with no reply after it, and nothing waits for an echo
         // from the next run (FR-4.7).
@@ -478,16 +475,7 @@ public sealed partial class SessionModel
 
         _pending.Clear();
         QueuedMessages = 0;
-        for (var r = 0; r < Rows; r++)
-        {
-            var row = _screen.RowAt(r);
-            if (row.Line is { } line)
-            {
-                Commit(line);
-                row.Line = null;
-            }
-        }
-
+        _screen.DetachRows();
         _runBoundary = _lines.Count > 0 ? _lines[^1] : null;
         StartRun();
     }
@@ -527,27 +515,17 @@ public sealed partial class SessionModel
         Changed?.Invoke();
     }
 
-    // ---- The screen's line store: where it puts the lines it creates, commits (scrolled off the top) or discards ----
+    // ---- The screen's line store (LineStore): what the lines it creates, commits or rewrites mean here ----
 
-    // Screen lines sit at the end of the list, so they are searched from the end.
-
-    internal Line CreateLine(Line? before)
+    protected internal override Line CreateLine(Line? before)
     {
-        var line = new Line(_nextId++, LineKind.Plain, string.Empty) { ReplayHidden = HideReplay, RepaintHidden = _repainting };
-        var index = before is null ? -1 : _lines.LastIndexOf(before);
-        if (index < 0)
-        {
-            _lines.Add(line);
-        }
-        else
-        {
-            _lines.Insert(index, line);
-        }
-
+        var line = base.CreateLine(before);
+        line.ReplayHidden = HideReplay;
+        line.RepaintHidden = _repainting;
         return line;
     }
 
-    internal void Commit(Line line)
+    protected internal override void Commit(Line line)
     {
         if (!line.IsMarker && line.Kind == LineKind.Plain)
         {
@@ -562,19 +540,18 @@ public sealed partial class SessionModel
             line.ChromeHidden = false;
         }
 
-        line.Committed = true;
-        line.Row = null;
+        base.Commit(line);
     }
 
-    internal void Remove(Line line)
+    protected internal override void TextChanged(Line line, string text)
     {
-        var index = _lines.LastIndexOf(line);
-        if (index >= 0)
-        {
-            _lines.RemoveAt(index);
-        }
-
-        line.Row = null;
+        // The row now shows something else: whatever the echo handling decided about it no longer applies, and a
+        // row that held hidden replay text now holds live text once the replay is over.
+        base.TextChanged(line, text);
+        line.EchoHidden = false;
+        line.EchoHandled = false;
+        line.ReplayHidden &= HideReplay;
+        line.RepaintHidden &= _repainting;
     }
 
     // ---- internals ----
@@ -625,29 +602,6 @@ public sealed partial class SessionModel
         }
 
         return false;
-    }
-
-    private void PullRowText()
-    {
-        for (var r = 0; r < Rows; r++)
-        {
-            var row = _screen.RowAt(r);
-            if (row.Line is { } line && row.Dirty)
-            {
-                var text = row.Text();
-                row.Dirty = false;
-                if (text != line.Text)
-                {
-                    // The row now shows something else: whatever the echo handling decided about it no longer applies,
-                    // and a row that held hidden replay text now holds live text once the replay is over.
-                    line.Text = text;
-                    line.EchoHidden = false;
-                    line.EchoHandled = false;
-                    line.ReplayHidden &= HideReplay;
-                    line.RepaintHidden &= _repainting;
-                }
-            }
-        }
     }
 
     /// <summary>
@@ -1149,7 +1103,7 @@ public sealed partial class SessionModel
 
         var wanted = _lines.Count / 10;
         var count = 0;
-        while (count < wanted && _lines[count].Row is null)
+        while (count < wanted && !_lines[count].OnScreen)
         {
             count++;
         }
