@@ -94,6 +94,16 @@ public sealed class Screen
     /// </summary>
     public event Action? Homed;
 
+    /// <summary>
+    /// A shell integration mark, OSC 133 (docs/axterminal/SPEC.md AT-1.3): the letter (A the prompt starts, B the
+    /// command starts, C the output starts, D the command finished) and what follows the letter's semicolon (a D's
+    /// exit code), or null. Claude Code emits C and D marks too; AxClaude does not listen.
+    /// </summary>
+    public event Action<char, string?>? Mark;
+
+    /// <summary>OSC 9;9: the shell's current directory, as Windows Terminal's shell integration reports it, without quotes.</summary>
+    public event Action<string>? DirectoryChanged;
+
     /// <summary>The whole screen was erased (<c>ESC[2J</c>, <c>ESC[3J</c>) since the last frame ended.</summary>
     public bool ClearedSinceFrameEnd { get; private set; }
 
@@ -342,6 +352,16 @@ public sealed class Screen
         if (code is "0" or "2")
         {
             TitleChanged?.Invoke(payload);
+        }
+        else if (code == "133" && payload.Length > 0)
+        {
+            // A shell integration mark (docs/axterminal/SPEC.md AT-1.3): the letter, then what follows its semicolon.
+            Mark?.Invoke(payload[0], payload.Length > 2 && payload[1] == ';' ? payload[2..] : null);
+        }
+        else if (code == "9" && payload.StartsWith("9;", StringComparison.Ordinal))
+        {
+            // The shell's current directory (Windows Terminal's convention); PowerShell's snippet quotes it.
+            DirectoryChanged?.Invoke(payload[2..].Trim().Trim('"'));
         }
     }
 
