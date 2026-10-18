@@ -41,12 +41,16 @@ allow it, see B-9).
 - **AxJSON**: `Axit.exe json [<file>]`, Start entry `Axit AxJSON`, Open with for `.json`, command `axjson`. The
   text editor shell AxDown is, with JSON's navigation keys and a Format command. Specification `docs/axjson/SPEC.md`,
   guide `docs/axjson/user-guide.md`, test plan `docs/axjson/nvda-test-plan.md`.
+- **AxGit** (first draft, 2026-10-18): `Axit.exe git [<folder or file>]`, Start entry `Axit AxGit`, command `axgit`.
+  A git manager for one repository, a window per repository, opened from the other windows' "Show current … in ▸"
+  submenus on the repository of the folder or file in hand. Specification `docs/axgit/SPEC.md`, guide
+  `docs/axgit/user-guide.md`, test plan `docs/axgit/nvda-test-plan.md`.
 
 ## 4. Functional requirements
 
 ### AX-1 Launch and dispatch
 
-- AX-1.1 The first argument may be a verb naming an app: `claude`, `down`, `json`. The rest of the arguments go to that app
+- AX-1.1 The first argument may be a verb naming an app: `claude`, `down`, `json`, `git`. The rest of the arguments go to that app
   unchanged, so `Axit.exe claude C:\src --record x.vt` is what `AxClaude.exe C:\src --record x.vt` was.
 - AX-1.2 Without a verb, a first argument that is an existing folder goes to AxClaude and an existing file to AxDown,
   or to AxJSON when its extension is `.json`, with the remaining arguments. A path that does not exist is reported with the usage text (a message box, since no
@@ -57,7 +61,7 @@ allow it, see B-9).
   usage text.
 - AX-1.5 The dispatch is pure code in `Axit.Core` (`Dispatch`): arguments in, app name and arguments out. It is unit
   tested and has no knowledge of the apps beyond their names.
-- AX-1.6 Each process sets a Windows application id before its window opens (`Axit.AxClaude`, `Axit.AxDown`), so the
+- AX-1.6 Each process sets a Windows application id before its window opens (`Axit.AxClaude`, `Axit.AxDown`, `Axit.AxJSON`, `Axit.AxGit`), so the
   taskbar shows the apps apart and Win+number keys reach the right one.
 - AX-1.7 An app is a class library with one entry point, `static void Run(string[] args)` on a class named
   `<App>App`, plus a `Usage` text. `Axit`'s `Program` owns the crash handling, the version and the log start, and calls
@@ -190,7 +194,7 @@ allow it, see B-9).
   Ctrl+Shift+Down the selection grown to there, as in Word (`EditParagraphs`; the EDIT control's own keys scroll a
   row and leave the caret where it is, as Notepad's do, which a screen reader, reading at the caret after the key,
   reports as the same text again); Alt+F4 exit; Alt and F10 the menu. Everything else is window-specific.
-- AX-8.3 Window-specific keys are defined once per window, in one table (`AxClaudeKeys`, `AxDownKeys`, `AxJSONKeys`), as constants
+- AX-8.3 Window-specific keys are defined once per window, in one table (`AxClaudeKeys`, `AxDownKeys`, `AxJSONKeys`, `AxGitKeys`), as constants
   with names that say what the key does. Changing a key is a change to that one line: the menu item and the key
   handler read the table, and the F1 text names the same keys and is changed with it. Single-letter quick keys
   (AxClaude's `h`, `i`, `o`) are in the table too. The text editor shell's keys (`Axit.Forms/EditorKeys`: Ctrl+N new,
@@ -299,7 +303,9 @@ src/AxDown/          class library (net10.0-windows): AxDownApp (its EditorApp),
                      the shell's, and its pure code (TextDocument, EditorSettings, MarkdownOutline) is Axit.Core's
 src/AxJSON/          class library (net10.0-windows): AxJSONApp (its EditorApp), AxJSONKeys, HelpText (AxJSON's app side)
 src/AxJSON.Core/     class library (net10.0): JsonScanner, JsonParser, JsonOutline, JsonFormat (AxJSON's pure code)
-tests/Axit.Tests, tests/AxClaude.Tests, tests/AxJSON.Tests
+src/AxGit/           class library (net10.0-windows): AxGitApp, GitForm, AxGitKeys, HelpText (AxGit's window)
+src/AxGit.Core/      class library (net10.0): GitRunner, GitStatus, GitLog, GitBranches, GitSettings (AxGit's pure code)
+tests/Axit.Tests, tests/AxClaude.Tests, tests/AxJSON.Tests, tests/AxGit.Tests
 ```
 
 References point one way: `Axit` references every app; an app's window project references its own `.Core`,

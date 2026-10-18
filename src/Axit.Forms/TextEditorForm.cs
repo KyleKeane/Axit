@@ -78,6 +78,8 @@ public sealed class TextEditorForm : Form
         // Show current file in ▸ File Explorer; an Axit file manager joins the submenu when there is one.
         var showIn = new ToolStripMenuItem("Show current file &in");
         showIn.DropDownItems.Add(Item("File &Explorer", ShowInExplorer, EditorKeys.ShowInExplorer));
+        // AxGit on the repository that holds the file, a new window (AD-4.1; docs/axgit/SPEC.md AG-1.4).
+        showIn.DropDownItems.Add(new ToolStripMenuItem("Ax&Git", null, (_, _) => OpenInAxGit()));
         file.DropDownItems.Add(showIn);
         file.DropDownItems.Add(new ToolStripSeparator());
         file.DropDownItems.Add(new ToolStripMenuItem("E&xit", null, (_, _) => Close()) { ShortcutKeyDisplayString = "Alt+F4" });
@@ -478,6 +480,18 @@ public sealed class TextEditorForm : Form
         {
             Fail($"File Explorer could not be started: {ex.Message}");
         }
+    }
+
+    /// <summary>File → Show current file in → AxGit (AD-4.1): a new AxGit window on the repository that holds the file.</summary>
+    private void OpenInAxGit()
+    {
+        if (_path is null)
+        {
+            Announce("No file yet", true);
+            return;
+        }
+
+        AxitMenu.Start(Dispatch.AxGit, _path);
     }
 
     /// <summary>Options → Developer → Open settings file (AD-4.3): the app's settings file in a new window of the app, as any file.</summary>

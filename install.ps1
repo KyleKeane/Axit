@@ -86,11 +86,14 @@ $appsKey = 'HKCU:\Software\Microsoft\Windows\CurrentVersion\Uninstall\Axit'
 $apps = @(
     @{ Verb = 'claude'; Start = 'Axit AxClaude.lnk'; Shim = 'axclaude.cmd'; Description = 'AxClaude, an accessible front end for Claude Code'; Icon = "$exe,0" },
     @{ Verb = 'down'; Start = 'Axit AxDown.lnk'; Shim = 'axdown.cmd'; Description = 'AxDown, a plain editor for Markdown and text files'; Icon = (Join-Path $target 'AxDown.ico') },
-    @{ Verb = 'json'; Start = 'Axit AxJSON.lnk'; Shim = 'axjson.cmd'; Description = 'AxJSON, an editor for JSON files'; Icon = (Join-Path $target 'AxJSON.ico') }
+    @{ Verb = 'json'; Start = 'Axit AxJSON.lnk'; Shim = 'axjson.cmd'; Description = 'AxJSON, an editor for JSON files'; Icon = (Join-Path $target 'AxJSON.ico') },
+    @{ Verb = 'git'; Start = 'Axit AxGit.lnk'; Shim = 'axgit.cmd'; Description = 'AxGit, a git manager for one repository'; Icon = (Join-Path $target 'AxGit.ico') }
 )
 # File Explorer: folders open in AxClaude, files in AxDown; AxDown is a program for these file types (Open with), and
 # AxJSON for .json.
 $folderKeys = @("$classes\Directory\shell\AxClaude", "$classes\Directory\Background\shell\AxClaude")
+# Open in AxGit on folders too: AxGit opens on the repository that holds the folder.
+$gitFolderKeys = @("$classes\Directory\shell\AxGit", "$classes\Directory\Background\shell\AxGit")
 $fileKey = "$classes\*\shell\AxDown"
 $progId = 'Axit.AxDown'
 $progIdKey = "$classes\$progId"
@@ -107,7 +110,7 @@ $oldStartMenu = Join-Path $programs 'AxClaude.lnk'
 
 # Everything an installation puts on the machine, this version's and 1.x's, so that one removal clears both. The
 # Open with values live inside the file types' own keys and are removed one by one (Remove-Installation).
-$places = @($target, $oldTarget, $appsKey, $oldAppsKey, $oldStartMenu, $fileKey, $progIdKey, $jsonProgIdKey) + $folderKeys +
+$places = @($target, $oldTarget, $appsKey, $oldAppsKey, $oldStartMenu, $fileKey, $progIdKey, $jsonProgIdKey) + $folderKeys + $gitFolderKeys +
     @($apps | ForEach-Object { Join-Path $programs $_.Start }) +
     @(Join-Path $bin 'axit.cmd') + @($apps | ForEach-Object { Join-Path $bin $_.Shim })
 
@@ -188,7 +191,7 @@ if (-not $sameFolder) {
     }
 
     New-Item -ItemType Directory -Force $target | Out-Null
-    foreach ($name in 'Axit.exe', 'AxDown.ico', 'AxJSON.ico', 'README.md', 'LICENSE', 'install.ps1', 'install.cmd') {
+    foreach ($name in 'Axit.exe', 'AxDown.ico', 'AxJSON.ico', 'AxGit.ico', 'README.md', 'LICENSE', 'install.ps1', 'install.cmd') {
         $file = Join-Path $source $name
         if (-not (Test-Path -LiteralPath $file)) { continue }
         $destination = Join-Path $target $name
@@ -235,6 +238,16 @@ if (-not $NoContextMenu) {
         New-Item -Path $command -Force | Out-Null
         $argument = if ($key -like '*Background*') { '%V' } else { '%1' }
         Set-ItemProperty -LiteralPath $command -Name '(default)' -Value "`"$exe`" claude `"$argument`""
+    }
+
+    foreach ($key in $gitFolderKeys) {
+        New-Item -Path $key -Force | Out-Null
+        Set-ItemProperty -LiteralPath $key -Name '(default)' -Value 'Open in AxGit'
+        Set-ItemProperty -LiteralPath $key -Name 'Icon' -Value (Join-Path $target 'AxGit.ico')
+        $command = Join-Path $key 'command'
+        New-Item -Path $command -Force | Out-Null
+        $argument = if ($key -like '*Background*') { '%V' } else { '%1' }
+        Set-ItemProperty -LiteralPath $command -Name '(default)' -Value "`"$exe`" git `"$argument`""
     }
 
     $downIcon = Join-Path $target 'AxDown.ico'
@@ -299,9 +312,9 @@ New-ItemProperty -LiteralPath $appsKey -Name 'EstimatedSize' -Value ([int]((Get-
 
 Say "Installed Axit to $target"
 Say "Settings, Apps: Axit, with Uninstall"
-if (-not $NoStartMenu) { Say "Start menu: Axit AxClaude, Axit AxDown, Axit AxJSON (type axc, axd or axj to find them)" }
-if (-not $NoContextMenu) { Say "File Explorer: right-click a folder, Open in AxClaude; right-click a file, Open in AxDown (also under Open with for .md, .markdown and .txt); AxJSON under Open with for .json" }
-Say "Console: axclaude [folder], axdown [file], axjson [file], or axit <folder or file> (shims in $bin)"
+if (-not $NoStartMenu) { Say "Start menu: Axit AxClaude, Axit AxDown, Axit AxJSON, Axit AxGit (type axc, axd, axj or axg to find them)" }
+if (-not $NoContextMenu) { Say "File Explorer: right-click a folder, Open in AxClaude or Open in AxGit; right-click a file, Open in AxDown (also under Open with for .md, .markdown and .txt); AxJSON under Open with for .json" }
+Say "Console: axclaude [folder], axdown [file], axjson [file], axgit [folder], or axit <folder or file> (shims in $bin)"
 if (-not (($env:Path -split ';') -contains $bin)) {
     Say "Note: $bin is not on PATH in this console. Open a new console, or add it, before using the commands."
 }

@@ -1,6 +1,7 @@
 using System.Runtime.InteropServices;
 using AxClaude;
 using AxDown;
+using AxGit;
 using AxJSON;
 using Axit.Core;
 
@@ -41,6 +42,10 @@ internal static class Program
             case Dispatch.AxJSON:
                 SetAppId("Axit.AxJSON");
                 AxJSONApp.Run(launch.Arguments);
+                break;
+            case Dispatch.AxGit:
+                SetAppId("Axit.AxGit");
+                AxGitApp.Run(launch.Arguments);
                 break;
             default:
                 // --help or --version for the bundle itself (AX-1.4).

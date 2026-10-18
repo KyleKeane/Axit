@@ -1,5 +1,10 @@
 # Changelog
 
+## Unreleased
+
+- AxGit: a new app of the bundle, a git manager for one repository, as a first draft (`docs/axgit/SPEC.md`). `Axit.exe git <folder or file>`, `axgit`, Start menu entry "Axit AxGit". One list with three views, Changes (Ctrl+1), Log (Ctrl+2) and Branches (Ctrl+3), a details text for a diff or a commit, and the branch in the status bar. Space stages or unstages, Enter shows the diff or the commit or switches the branch, Delete discards after a question, Ctrl+Enter commits with a message asked in a notice, Ctrl+N makes a branch, Ctrl+Shift+F, L and P fetch, pull and push, F5 refreshes, Ctrl+E opens the file in its editor. Every action is one git command on a background task and one announcement; git's whole answer comes as a notice when it fails. Not yet checked with NVDA.
+- AxClaude, AxDown, AxJSON: "Show current folder in" and "Show current file in" offer AxGit, which opens on the repository that holds the folder or file; AxGit's Repository menu sends back to AxClaude and to File Explorer.
+
 ## 2.11.0 - 2026-10-18
 
 - AxClaude: when Claude Code drafts feedback for Anthropic during a turn, the draft comes up like a question as soon as Claude is done: AxClaude opens `/feedback`, picks the draft and shows its review with Send, Discard and Later, after which the message field comes back. Drafts already waiting when AxClaude starts, and drafts put off with Later, are left for `/feedback` typed by hand, which lists them, this session's first, and shows the same review for the one chosen. The card Claude printed for the draft ("Product feedback drafted", a preview, "1 to review · 2 to send · 0 to dismiss") names keys that cannot be pressed from the message field, where a typed 2 went to Claude as a message; the card now stays out of the conversation. The "1 feedback draft" on Claude's mode line no longer counts as background work in the status or at closing.

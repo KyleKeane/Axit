@@ -16,6 +16,7 @@ public sealed class KeyTests
             ["AxDown"] = AxDown.AxDownKeys.All,
             ["AxJSON"] = AxJSON.AxJSONKeys.All,
             ["AxClaude"] = AxClaude.AxClaudeKeys.All,
+            ["AxGit"] = AxGit.AxGitKeys.All,
         };
 
     [Fact]

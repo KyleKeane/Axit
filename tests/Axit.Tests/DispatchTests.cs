@@ -26,6 +26,13 @@ public sealed class DispatchTests
         launch = Dispatch.Decide(["down", "notes.md"]);
         Assert.Equal(Dispatch.AxDown, launch.App);
         Assert.Equal(["notes.md"], launch.Arguments);
+
+        // AxGit is always named by its verb: a folder alone still means AxClaude (docs/axgit/SPEC.md AG-1.1).
+        launch = Dispatch.Decide(["git", Folder]);
+        Assert.Equal(Dispatch.AxGit, launch.App);
+        Assert.Equal([Folder], launch.Arguments);
+        Assert.Equal(Dispatch.AxClaude, Dispatch.Decide([Folder]).App);
+        Assert.Contains(Dispatch.Apps, app => app.Verb == Dispatch.AxGit && app.Name == "AxGit");
     }
 
     [Fact]
@@ -103,7 +110,7 @@ public sealed class DispatchTests
         Assert.Equal(Dispatch.AxJSON, Dispatch.Decide(["json", "x.json"]).App);
         Assert.Equal(["x.json"], Dispatch.Decide(["JSON", "x.json"]).Arguments);
         Assert.Contains("Axit json", Dispatch.Usage);
-        Assert.Equal(["AxClaude", "AxDown", "AxJSON"], Dispatch.Apps.Select(a => a.Name));
+        Assert.Equal(["AxClaude", "AxDown", "AxJSON", "AxGit"], Dispatch.Apps.Select(a => a.Name));
     }
 
     [Fact]

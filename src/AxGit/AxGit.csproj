@@ -1,0 +1,23 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <!-- AxGit's window side, as a class library inside Axit.exe (docs/axit/SPEC.md AX-1.7): the window, its key table
+       and its texts; the pure code is AxGit.Core. -->
+  <PropertyGroup>
+    <TargetFramework>net10.0-windows</TargetFramework>
+    <UseWindowsForms>true</UseWindowsForms>
+    <RootNamespace>AxGit</RootNamespace>
+    <AssemblyName>AxGit</AssemblyName>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\AxGit.Core\AxGit.Core.csproj" />
+    <ProjectReference Include="..\Axit.Core\Axit.Core.csproj" />
+    <ProjectReference Include="..\Axit.Forms\Axit.Forms.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <!-- Help, User guide shows this file. -->
+    <EmbeddedResource Include="..\..\docs\axgit\user-guide.md" LogicalName="UserGuide.md" />
+  </ItemGroup>
+
+</Project>

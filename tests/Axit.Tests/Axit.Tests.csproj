@@ -20,6 +20,7 @@
     <ProjectReference Include="..\..\src\Axit.Forms\Axit.Forms.csproj" />
     <ProjectReference Include="..\..\src\AxDown\AxDown.csproj" />
     <ProjectReference Include="..\..\src\AxJSON\AxJSON.csproj" />
+    <ProjectReference Include="..\..\src\AxGit\AxGit.csproj" />
     <ProjectReference Include="..\..\src\AxClaude\AxClaude.csproj" />
   </ItemGroup>
 

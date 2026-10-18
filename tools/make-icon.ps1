@@ -131,4 +131,5 @@ if ($Out) {
     Write-Icon (Join-Path $iconFolder 'AxClaude.ico') 'Ax' @(31, 78, 121)
     Write-Icon (Join-Path $iconFolder 'AxDown.ico') 'Ad' @(31, 110, 70)
     Write-Icon (Join-Path $iconFolder 'AxJSON.ico') 'Aj' @(120, 70, 20)
+    Write-Icon (Join-Path $iconFolder 'AxGit.ico') 'Ag' @(110, 40, 40)
 }

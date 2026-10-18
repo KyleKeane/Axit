@@ -411,6 +411,8 @@ internal sealed class MainForm : Form
         // FR-8.2: Show current folder in ▸ File Explorer; an Axit file manager joins the submenu when there is one.
         var showIn = new ToolStripMenuItem("Show current folder &in");
         showIn.DropDownItems.Add(new ToolStripMenuItem("File &Explorer", null, (_, _) => ShowInExplorer()) { ShortcutKeys = AxClaudeKeys.ShowInExplorer });
+        // AxGit on the repository that holds the project folder, a new window (FR-8.2; docs/axgit/SPEC.md AG-1.4).
+        showIn.DropDownItems.Add(new ToolStripMenuItem("Ax&Git", null, (_, _) => OpenInAxGit()));
         session.DropDownItems.Add(showIn);
         session.DropDownItems.Add(new ToolStripSeparator());
         // Not a save: the conversation is Claude's own record, and this writes a text copy of it. At the bottom, where
@@ -1564,6 +1566,18 @@ internal sealed class MainForm : Form
     // ---- project folder ----
 
     /// <summary>Session → Show current folder in → File Explorer, Ctrl+W (FR-8.2): the folder in File Explorer, one of the system's own windows (D23).</summary>
+    /// <summary>Session → Show current folder in → AxGit (FR-8.2): a new AxGit window on the repository that holds the project folder.</summary>
+    private void OpenInAxGit()
+    {
+        if (_folder is null)
+        {
+            Announce("No project folder", true);
+            return;
+        }
+
+        AxitMenu.Start(Dispatch.AxGit, _folder);
+    }
+
     private void ShowInExplorer()
     {
         if (_folder is null)

@@ -44,7 +44,7 @@ Ctrl+Plus and Ctrl+Minus make the text larger and smaller, and AxDown says the n
 
 ## Menus
 
-- **File**: New, Open, Open recent file (each as a number, the file's name and its full path), Save, Save as, Show current file in (File Explorer, Ctrl+W), Exit.
+- **File**: New, Open, Open recent file (each as a number, the file's name and its full path), Save, Save as, Show current file in (File Explorer, Ctrl+W; AxGit, a git manager on the repository that holds the file), Exit.
 - **Edit**: Undo, Cut, Copy, Paste, Select all.
 - **Navigate**: Find, Find next, Find previous, Go to line, and the submenus Next and Previous, each with Heading, Heading level 1 to 6, Link, List, List item, Block quote and Table.
 - **Options**: Text (Word wrap, Font, Larger text, Smaller text, Windows text size) and Developer (Open settings file, which opens axdown.json in a new AxDown window, and Copy diagnostics).
