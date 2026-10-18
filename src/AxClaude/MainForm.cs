@@ -2272,14 +2272,36 @@ internal sealed class MainForm : Form
         var items = screen.Lines.ToList();
         var first = items.Count;
         items.AddRange(screen.Keys.Select(key => $"{char.ToUpperInvariant(key.Action[0])}{key.Action[1..]} ({key.Name})"));
-        var escape = screen.Keys.First(key => key.Send == "\x1b");
-        // Enter on one of the screen's lines, which only inform, does what Escape does: most often it closes the screen.
+        // The key that leaves the screen: Escape, or the one key of "Any key to continue".
+        var escape = screen.Keys.FirstOrDefault(key => key.Send == "\x1b") ?? screen.Keys[0];
+        var closes = escape.Action.ToLowerInvariant() is "close" or "dismiss" or "cancel" or "exit";
+        var leaves = closes || escape.Action == "continue";
         void Leave()
         {
             SendScreenKey(escape.Send);
-            if (escape.Action.ToLowerInvariant() is "close" or "dismiss" or "cancel" or "exit")
+            if (closes)
             {
                 Announce("Closed", false);
+            }
+        }
+
+        // Enter on one of the screen's lines: on the line Claude highlights (❯) it acts on that line, as Enter does in
+        // Claude; on another line it leaves a screen that Escape closes, and otherwise names the actions, since
+        // Escape would put the screen off (the review of a feedback draft: Later) and "❯  Send feedback" was taken
+        // for the button (D33).
+        void EnterOnLine(int index)
+        {
+            if (screen.Lines[index].StartsWith('❯'))
+            {
+                SendScreenKey("\r");
+            }
+            else if (leaves)
+            {
+                Leave();
+            }
+            else
+            {
+                Announce("Actions at the end of the list: " + string.Join(", ", items.Skip(first)), true);
             }
         }
 
@@ -2294,7 +2316,7 @@ internal sealed class MainForm : Form
             {
                 if (index < first)
                 {
-                    Leave();
+                    EnterOnLine(index);
                     return;
                 }
 

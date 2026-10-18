@@ -1184,17 +1184,34 @@ public sealed partial class SessionModel
     /// </summary>
     private ClaudeScreen? ReadPendingScreen()
     {
-        // Cheap tests first: this runs at every frame end. The hint row names Esc, a tab row has wide gaps, and /mobile
-        // leaves its hint row just above the cursor.
+        // Cheap tests first: this runs at every frame end. The hint row names Esc, a tab row has wide gaps, /mobile
+        // leaves its hint row just above the cursor, a sent feedback report waits on "Any key to continue", and a
+        // field of a draft being edited has its hint row a few rows under the cursor (D33).
         var cy = _screen.CursorRow;
         var text = _screen.LineAt(cy)?.Text;
         if (text is null || !(text.Contains("Esc", StringComparison.Ordinal) || text.Contains("   ", StringComparison.Ordinal)
-            || (cy > 0 && _screen.LineAt(cy - 1)?.Text.Contains("Esc", StringComparison.Ordinal) == true)))
+            || text == "Any key to continue"
+            || (cy > 0 && _screen.LineAt(cy - 1)?.Text.Contains("Esc", StringComparison.Ordinal) == true)
+            || EditHintUnder(cy)))
         {
             return null;
         }
 
         return ScreenReader.Read(ScreenRows(), _screen.CursorRow);
+    }
+
+    /// <summary>The hint row of a field being edited ("… · Esc to cancel edit") within a few rows under <paramref name="row"/>.</summary>
+    private bool EditHintUnder(int row)
+    {
+        for (var r = row + 1; r < Rows && r - row <= ScreenReader.EditRows; r++)
+        {
+            if (_screen.LineAt(r)?.Text.Contains("to cancel edit", StringComparison.Ordinal) == true)
+            {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     private string[] ScreenRows()

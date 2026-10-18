@@ -34,9 +34,13 @@ public static partial class ScreenReader
 {
     private const int MaxRows = 60;
 
-    // "Esc to close", "Esc/Enter/Space to close", "↑/↓ to select", "x to stop": a key, or keys joined by "/", then "to".
-    [GeneratedRegex(@"^(?<keys>(?:Esc|Enter|Space|Tab|[←→↑↓]|[a-z])(?:/(?:Esc|Enter|Space|Tab|[←→↑↓]|[a-z]))*) to (?<action>.+)$")]
+    // "Esc to close", "Esc/Enter/Space to close", "↑/↓ to select", "x to stop", "ctrl+j to new line": a key, or keys
+    // joined by "/", then "to".
+    [GeneratedRegex(@"^(?<keys>(?:Esc|Enter|Space|Tab|ctrl\+[a-z]|[←→↑↓]|[a-z])(?:/(?:Esc|Enter|Space|Tab|ctrl\+[a-z]|[←→↑↓]|[a-z]))*) to (?<action>.+)$")]
     private static partial Regex HintRegex();
+
+    /// <summary>How far under the cursor the hint row of a field being edited is looked for.</summary>
+    public const int EditRows = 8;
 
     // Tab names separated by two spaces or more: three of them at least.
     [GeneratedRegex(@"^\S+(?: \S+)?(?:\s{2,}\S+(?: \S+)?){2,}$")]
@@ -67,6 +71,29 @@ public static partial class ScreenReader
             return new ClaudeScreen(lines[0], lines.Skip(1).ToList(), keysAbove) { FirstRow = lines.Count > 1 ? first : cursorRow };
         }
 
+        // A field of /feedback's review being edited (D33, recorded with 2.1.302): the highlight on Details, Area or
+        // Title puts the cursor at the end of the field's text, with the rest of the review and the hint row
+        // "↑/↓ to move · Enter to next · ctrl+j to new line · Esc to cancel edit" under it. The screen is the review
+        // with that hint row's keys; typed keys go into the field.
+        if (cursorText.Length > 0 && !LineClassifier.IsBarePrompt(cursorText))
+        {
+            for (var r = cursorRow + 1; r < rows.Count && r - cursorRow <= EditRows; r++)
+            {
+                if (Keys(rows[r].Trim()) is not { } editKeys)
+                {
+                    continue;
+                }
+
+                if (!editKeys.Any(key => key.Action == "cancel edit"))
+                {
+                    break;
+                }
+
+                var (lines, first) = LinesAbove(rows, r);
+                return lines.Count == 0 ? null : new ClaudeScreen(lines[0], lines.Skip(1).ToList(), editKeys) { FirstRow = first };
+            }
+        }
+
         if (TabRowRegex().IsMatch(cursorText))
         {
             var lines = new List<string>();
@@ -94,6 +121,13 @@ public static partial class ScreenReader
     /// <summary>The keys of a hint row that names Escape, or null when the row is no such hint row.</summary>
     public static IReadOnlyList<ScreenKey>? Keys(string text)
     {
+        // After a feedback report is sent from /feedback: "done: Feedback sent (receipt …). Thanks!" over this row
+        // (D33, recorded with 2.1.302). Enter stands for the key.
+        if (text == "Any key to continue")
+        {
+            return [new ScreenKey("\r", "Enter", "continue")];
+        }
+
         var keys = new List<ScreenKey>();
         foreach (var part in text.Split('·', StringSplitOptions.TrimEntries | StringSplitOptions.RemoveEmptyEntries))
         {
@@ -159,6 +193,8 @@ public static partial class ScreenReader
         "→" => "\x1b[C",
         "↑" => "\x1b[A",
         "↓" => "\x1b[B",
+        // "ctrl+j": the control character of the letter.
+        { Length: 6 } when key.StartsWith("ctrl+", StringComparison.Ordinal) => ((char)(key[5] - 'a' + 1)).ToString(),
         _ => key,
     };
 
@@ -169,6 +205,7 @@ public static partial class ScreenReader
         "→" => "Right",
         "↑" => "Up",
         "↓" => "Down",
+        { Length: 6 } when key.StartsWith("ctrl+", StringComparison.Ordinal) => "Ctrl+" + char.ToUpperInvariant(key[5]),
         _ => key,
     };
 }

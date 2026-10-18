@@ -215,6 +215,78 @@ public class FeedbackCardTests
         Assert.Contains("❯  Send feedback", screen.Lines);
         Assert.Contains("Fixture review test", screen.Lines);
 
+        // Up moves Claude's highlight to the transcript row, whose keys differ: Left and Right change it, Enter moves on.
+        string[] moved =
+        [
+            "you: /feedback",
+            "Feedback drafts",
+            "   Type:  idea",
+            "   Title:",
+            "Fixture review test",
+            "   Details:",
+            "> - **What happened:** a recording test of the feedback review.",
+            "End of details.",
+            "❯  Send transcript:  ◀ yes ▶  · sends this conversation to Anthropic",
+            "   Environment info (win32 x64, v2.1.302) is always attached.",
+            "   Send feedback",
+            "We may use these reports to debug related issues and improve Claude Code. Turn off Claude-drafted feedback anytime in /config.",
+            "↑/↓ to move · ←/→ to change · Enter to next · d to discard · Esc to later",
+        ];
+        var transcript = ScreenReader.Read(moved, 12)!;
+        Assert.Equal(["Up", "Down", "Left", "Right", "Enter", "d", "Escape"], transcript.Keys.Select(k => k.Name));
+        Assert.Equal(["move", "move", "change", "change", "next", "discard", "later"], transcript.Keys.Select(k => k.Action));
+        Assert.Contains("❯  Send transcript:  ◀ yes ▶  · sends this conversation to Anthropic", transcript.Lines);
+        Assert.NotEqual(screen.Signature, transcript.Signature);
+
+        // Up again puts the highlight on Details, which is at once a field being edited: the cursor sits at the end of
+        // its text, above the rest of the review and a hint row with the edit's keys. Task, Failure mode, Area and
+        // Title follow upwards; the choice rows take Left and Right, the text rows are edited the same way.
+        string[] editing =
+        [
+            "you: /feedback",
+            "Feedback drafts",
+            "   Type:  idea",
+            "   Title:",
+            "Fixture edit test three",
+            "   Area:",
+            "   Failure mode:  (none)",
+            "   Task:  (none)",
+            "❯  Details:",
+            "- **What happened:** a test of the rows of the /feedback review.",
+            "- **What the user said:** none.",
+            "- **Repro:** none.",
+            "   Send transcript:  yes  · sends this conversation to Anthropic",
+            "   Send feedback",
+            "↑/↓ to move · Enter to next · ctrl+j to new line · Esc to cancel edit",
+        ];
+        var edit = ScreenReader.Read(editing, 11)!;
+        Assert.Equal("Feedback drafts", edit.Title);
+        Assert.Equal(["Up", "Down", "Enter", "Ctrl+J", "Escape"], edit.Keys.Select(k => k.Name));
+        Assert.Equal(["move", "move", "next", "new line", "cancel edit"], edit.Keys.Select(k => k.Action));
+        Assert.Equal("\n", edit.Keys[3].Send);
+        Assert.Contains("❯  Details:", edit.Lines);
+        Assert.Contains("- **Repro:** none.", edit.Lines);
+        // A review line with the cursor on it and no edit hint under it is no screen.
+        Assert.Null(ScreenReader.Read(review, 4));
+
+        // The same frame through the model: the cursor in the field's text, the screen waits all the same.
+        var model = new SessionModel(240, 50);
+        TestHelpers.Feed(model, $"{Esc}[?25l{Esc}[2J{Esc}[H" + string.Join("\r\n", editing) + $"{Esc}[12;19H{Esc}[?25h");
+        model.EndFrame();
+        Assert.True(model.PromptPending);
+        Assert.Equal("cancel edit", model.PendingScreen!.Keys[^1].Action);
+
+        // Enter on "Send feedback": "Sending feedback…" (a spinner row), then the receipt over "Any key to continue", a
+        // screen with Enter for the key; the list comes back after it without the draft.
+        var sent = ScreenReader.Read(["you: /feedback", "Feedback drafts", "done: Feedback sent (receipt abc123). Thanks!", "Any key to continue"], 3)!;
+        Assert.Equal("Feedback drafts", sent.Title);
+        Assert.Equal(["done: Feedback sent (receipt abc123). Thanks!"], sent.Lines);
+        Assert.Equal([("Enter", "continue", "\r")], sent.Keys.Select(k => (k.Name, k.Action, k.Send)));
+        var receipt = new SessionModel(240, 50);
+        TestHelpers.Feed(receipt, $"{Esc}[?25l{Esc}[2J{Esc}[Hyou: /feedback\r\nFeedback drafts\r\ndone: Feedback sent (receipt abc123). Thanks!\r\nAny key to continue{Esc}[?25h");
+        receipt.EndFrame();
+        Assert.Equal("continue", receipt.PendingScreen!.Keys[0].Action);
+
         // Before the list, /feedback shows "Loading…" over the hint row for a moment: a spinner row, so no screen waits
         // and nothing is shown on the way to the review; without a draft the same hint row under the title is a screen.
         Assert.Null(ScreenReader.Read(["you: /feedback", "Feedback drafts", "Loading…", "Enter to write new feedback · Esc to close"], 3));
