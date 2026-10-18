@@ -1,5 +1,10 @@
 # Changelog
 
+## 2.10.0 - 2026-10-18
+
+- Axit: the numbered items of the Axit menu (Recently closed, Open windows, Open windows by type), of AxClaude's Open recent folder and of the editors' Open recent file read the same way: the number, a full stop that the synthesizer takes as a pause, then the window's title or the name with its full path in parentheses, for example "1. myproject (C:\src\myproject)". Open recent folder and Open recent file showed the bare path without a number.
+- AxJSON is in beta: it shipped in 2.9.1 before its screen reader pass, which docs/axjson/nvda-test-plan.md describes; About says so.
+
 ## 2.9.1 - 2026-10-18
 
 - AxJSON: a new app, an editor for JSON files. It is the same window as AxDown, with keys that jump by the file's structure: Ctrl+K the next key, spoken with its value ("model: opus") or its size ("permissions, object with 2 keys"); Ctrl+J the next object; Ctrl+L the next array; Ctrl+I the next item; Ctrl+E the place where the file stops being JSON, with the line and what was expected there, or "No next error" when the file is valid; Ctrl+Shift with the letter for the previous one. Edit, Format (Ctrl+Shift+F) lays the file out two spaces per level and one key per line, repairs a trailing comma, a missing comma, single quotes, an unquoted key and comments on the way, and names what it repaired. Axit AxJSON in the Start menu, axjson in a console, Open with for .json files in File Explorer, and a .json file given to axit opens in it. The structured view, a form of fields, is planned for a later version.

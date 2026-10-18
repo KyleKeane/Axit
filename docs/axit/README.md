@@ -6,7 +6,7 @@ The apps:
 
 - **AxClaude** runs the Claude Code CLI for you and shows everything Claude says in a plain text window, one line at a time, with a few keys to move around and spoken notices when Claude needs you.
 - **AxDown** is a plain editor for Markdown and text files: one file in one window, written back exactly as it was found, with find, go to line, and questions asked inside the window.
-- **AxJSON** is the same editor for JSON files, with keys that jump from key to key, object to object and array to array, a key that lands on the first mistake, and a Format command that lays the file out and repairs the small things.
+- **AxJSON** (beta) is the same editor for JSON files, with keys that jump from key to key, object to object and array to array, a key that lands on the first mistake, and a Format command that lays the file out and repairs the small things.
 
 Each app's guide is inside it: Help, User guide.
 

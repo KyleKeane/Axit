@@ -394,3 +394,5 @@ docs/axdown/            SPEC.md, user-guide.md (embedded by src/AxDown), nvda-te
 - 2.9.1 (2026-10-18): AxJSON, raw mode (`docs/axjson/SPEC.md`), on the text editor shell shared with AxDown the same
   day (`TextEditorForm`, `EditorApp`, `EditorKeys`, `EditorHost`; AX-1, AX-2, AX-6.2, AX-8.3); released at the user's
   ask before its NVDA pass.
+- 2.10.0 (2026-10-18): every numbered list item reads "N. name (path)" (AX-9.5, FR-8.5, AD-4.1); AxJSON marked beta
+  until its NVDA pass.
