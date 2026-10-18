@@ -26,12 +26,6 @@ public static class AxDownKeys
 
     public static Keys PreviousHeadingLevel(int level) => Keys.Control | Keys.Shift | (Keys.D0 + level);
 
-    /// <summary>1 to 6 when the key is one of the twelve above, 0 for any other key.</summary>
-    public static int HeadingLevel(Keys key) =>
-        (key & Keys.Modifiers) is Keys.Control or (Keys.Control | Keys.Shift) && (key & Keys.KeyCode) is >= Keys.D1 and <= Keys.D6
-            ? (key & Keys.KeyCode) - Keys.D1 + 1
-            : 0;
-
     public const Keys NextLink = Keys.Control | Keys.K;
     public const Keys PreviousLink = Keys.Control | Keys.Shift | Keys.K;
     public const Keys NextList = Keys.Control | Keys.L;
@@ -67,8 +61,8 @@ public static class AxDownKeys
         ("Previous table", PreviousTable),
     ];
 
-    /// <summary>The same keys in a notice's text (bundle AX-7.2), one pair per kind of SPEC.md §9, handed to the notice panel.</summary>
-    public static readonly IReadOnlyList<TextJump> NoticeJumps =
+    /// <summary>The keys of SPEC.md §9 as pairs, one per kind: the editor handles them through this list, and the notice text takes the same list (bundle AX-7.2).</summary>
+    public static readonly IReadOnlyList<TextJump> Jumps =
     [
         new(NextHeading, PreviousHeading, ElementKind.Heading),
         ..Enumerable.Range(1, 6).Select(level => new TextJump(NextHeadingLevel(level), PreviousHeadingLevel(level), ElementKind.Heading, level)),

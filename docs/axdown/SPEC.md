@@ -3,9 +3,9 @@
 AxDown is the second app of the Axit bundle (`docs/axit/SPEC.md`): a barebones editor for Markdown and plain text files
 for a blind developer who uses the NVDA screen reader. Describes AxDown as of Axit 2.8.0 (2026-10-17): everything in
 section 4 is built and checked with NVDA; section 9, the Markdown navigation, is built and awaits its NVDA pass. The
-document is kept in step with the code
-(a behaviour change updates it in the same commit). Requirements are numbered `AD-n.m` and decisions `AD-Dn`. The
-bundle's rules that every app follows, AX-7 (accessibility) and AX-8 (keys), are cited by number and not repeated.
+document is kept in step with the code (a behaviour change updates it in the same commit). Requirements are numbered
+`AD-n.m` and decisions `AD-Dn`. The bundle's rules that every app follows, AX-7 (accessibility) and AX-8 (keys), are
+cited by number and not repeated.
 In AxDown's code and documents, "SPEC.md" means this file.
 
 ## 1. Summary
@@ -119,9 +119,9 @@ UTF-8, UTF-16 and the system code page; files that are not text; files over 32 M
 - AD-4.1 File: New (Ctrl+N), Open… (Ctrl+O), Save (Ctrl+S), Save as… (Ctrl+Shift+S), Exit (Alt+F4).
 - AD-4.2 Edit: Undo (Ctrl+Z), Cut, Copy, Paste, Select all (the control's own, listed for discoverability).
   Navigate (as AxClaude's): Find… (Ctrl+F), Find next (F3), Find previous (Shift+F3), Go to line… (Ctrl+G), then the
-  submenus Next and Previous with one item per kind of section 9: Heading (Ctrl+H), Heading level 1 to 6 (Ctrl+1 to
-  Ctrl+6), Link (Ctrl+K), List (Ctrl+L), List item (Ctrl+I), Block quote (Ctrl+Q), Table (Ctrl+T), with Shift added
-  for Previous.
+  submenus Next and Previous with one item per kind of section 9, made from the key pairs of the table: the kind's
+  name with NVDA's letter as the mnemonic ("Heading", "Heading level 1" to "6", "Link", "List", "List item", "Block
+  quote", "Table") and the key, Ctrl+letter under Next and Ctrl+Shift+letter under Previous (AD-5, §9).
 - AD-4.3 View: Word wrap (checked; Ctrl+Shift+W), Larger text (Ctrl+Plus), Smaller text (Ctrl+Minus), Windows text
   size, Font…
 - AD-4.4 Help: Keyboard shortcuts (F1), User guide, Check for updates (Axit n) and, while a newer release is known,

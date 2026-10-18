@@ -472,31 +472,12 @@ public sealed class OverlayPanel : Panel
         LayoutSession();
     }
 
-    /// <summary>A jump key in the text: the caret to the element's start and its text spoken, or "No next heading" and the like, the caret staying.</summary>
+    /// <summary>A navigation key in the text (AX-7.2): the shared jump with the window's pairs.</summary>
     private void OnTextKeyDown(object? sender, KeyEventArgs e)
     {
-        foreach (var jump in Jumps)
+        if (TextJumps.Handle(_text, Jumps, e.KeyData, Announce))
         {
-            var backward = e.KeyData == jump.Previous;
-            if (e.KeyData != jump.Next && !backward)
-            {
-                continue;
-            }
-
             e.Handled = e.SuppressKeyPress = true;
-            var element = backward
-                ? MarkdownOutline.Previous(jump.Kind, _text.Text, _text.SelectionStart, jump.Level)
-                : MarkdownOutline.Next(jump.Kind, _text.Text, _text.SelectionStart, jump.Level);
-            if (element is null)
-            {
-                Announce($"No {(backward ? "previous" : "next")} {MarkdownOutline.Name(jump.Kind, jump.Level)}", true);
-                return;
-            }
-
-            _text.Select(element.Start, 0);
-            _text.ScrollToCaret();
-            Announce(element.Spoken, true);
-            return;
         }
     }
 

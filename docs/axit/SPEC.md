@@ -152,7 +152,7 @@ allow it, see B-9).
   field in the message field's place, with the number and page keys of every such list), `Sounds` (wave-out devices kept
   open for the life of the process), `EditPaging` (Page Up and Page Down in an edit control), `EditParagraphs`
   (Ctrl+Up and Ctrl+Down by paragraph, with Shift selecting), `EditKeys` (the KeyDown handler that gives an edit
-  control both), `Announcer` (the UI Automation notification, AX-7.1), `TextJump` (a window's key pair for one kind of element in a notice's text, AX-7.2), `StatusLayout`, the font
+  control both), `Announcer` (the UI Automation notification, AX-7.1), `TextJump` and `TextJumps` (a window's key pairs for the kinds of element in a text and the jump itself on an edit control, used by every notice text and by AxDown's editor, AX-7.2), `StatusLayout`, the font
   handling (text size and the font picker), `BundleKeys` (AX-8). The crash report (twenty lines in each app's
   `Run`) stays per app until a second copy shows what is common.
 - AX-6.3 A piece moves into a shared project only when a second app needs it, in a commit of its own, with the
@@ -203,7 +203,8 @@ These are the rules of `docs/axclaude/SPEC.md` that are not about Claude; app sp
   (the update's progress, an error, AxDown's changed-on-disk question after Save), which then stays in view. The
   Windows folder, file and font pickers are the only separate windows.
   A notice's text takes the window's own keys for moving by Markdown structure, one `TextJump` pair per kind from the
-  window's key table handed to `OverlayPanel.Jumps`: AxClaude's heading letters (h, Shift+H, 1 to 6), AxDown's
+  window's key table handed to `OverlayPanel.Jumps` and acted on by `TextJumps`, the code AxDown's editor uses for the same
+  keys: AxClaude's heading letters (h, Shift+H, 1 to 6), AxDown's
   Ctrl+letters for every kind of its section 9. The result is announced on the notice; "No next heading" and the
   like when there is none, and the caret stays.
 - AX-7.3 The caret never moves except as the direct result of the user's own command. The result of a navigation

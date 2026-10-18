@@ -80,27 +80,15 @@ internal sealed class EditorForm : Form
         navigate.DropDownItems.Add(Item("Find pre&vious", () => FindNext(-1), BundleKeys.FindPrevious));
         navigate.DropDownItems.Add(Item("&Go to line...", ShowGoToLine, AxDownKeys.GoToLine));
         navigate.DropDownItems.Add(new ToolStripSeparator());
-        // Section 9: NVDA's browse-mode letters with Ctrl, one submenu for next and one for previous, one item per kind.
+        // Section 9 (AD-D7): one item per kind under Next and under Previous, from the key pairs of the table.
         var next = new ToolStripMenuItem("Ne&xt");
         var previous = new ToolStripMenuItem("&Previous");
-        next.DropDownItems.Add(Item("&Heading", () => JumpTo(ElementKind.Heading, 1), AxDownKeys.NextHeading));
-        previous.DropDownItems.Add(Item("&Heading", () => JumpTo(ElementKind.Heading, -1), AxDownKeys.PreviousHeading));
-        for (var level = 1; level <= 6; level++)
+        foreach (var jump in AxDownKeys.Jumps)
         {
-            var l = level;
-            next.DropDownItems.Add(Item($"Heading level &{l}", () => JumpTo(ElementKind.Heading, 1, l), AxDownKeys.NextHeadingLevel(l)));
-            previous.DropDownItems.Add(Item($"Heading level &{l}", () => JumpTo(ElementKind.Heading, -1, l), AxDownKeys.PreviousHeadingLevel(l)));
+            next.DropDownItems.Add(Item(TextJumps.MenuLabel(jump), () => JumpTo(jump.Kind, 1, jump.Level), jump.Next));
+            previous.DropDownItems.Add(Item(TextJumps.MenuLabel(jump), () => JumpTo(jump.Kind, -1, jump.Level), jump.Previous));
         }
-        next.DropDownItems.Add(Item("Lin&k", () => JumpTo(ElementKind.Link, 1), AxDownKeys.NextLink));
-        next.DropDownItems.Add(Item("&List", () => JumpTo(ElementKind.List, 1), AxDownKeys.NextList));
-        next.DropDownItems.Add(Item("List &item", () => JumpTo(ElementKind.ListItem, 1), AxDownKeys.NextListItem));
-        next.DropDownItems.Add(Item("Block &quote", () => JumpTo(ElementKind.BlockQuote, 1), AxDownKeys.NextBlockQuote));
-        next.DropDownItems.Add(Item("&Table", () => JumpTo(ElementKind.Table, 1), AxDownKeys.NextTable));
-        previous.DropDownItems.Add(Item("Lin&k", () => JumpTo(ElementKind.Link, -1), AxDownKeys.PreviousLink));
-        previous.DropDownItems.Add(Item("&List", () => JumpTo(ElementKind.List, -1), AxDownKeys.PreviousList));
-        previous.DropDownItems.Add(Item("List &item", () => JumpTo(ElementKind.ListItem, -1), AxDownKeys.PreviousListItem));
-        previous.DropDownItems.Add(Item("Block &quote", () => JumpTo(ElementKind.BlockQuote, -1), AxDownKeys.PreviousBlockQuote));
-        previous.DropDownItems.Add(Item("&Table", () => JumpTo(ElementKind.Table, -1), AxDownKeys.PreviousTable));
+
         navigate.DropDownItems.Add(next);
         navigate.DropDownItems.Add(previous);
 
@@ -164,7 +152,7 @@ internal sealed class EditorForm : Form
         _status.SizeChanged += (_, _) => StatusLayout.Fit(_status, _fileLabel, _positionLabel);
 
         _overlay.Chosen += OnNoticeChoice;
-        _overlay.Jumps = AxDownKeys.NoticeJumps;
+        _overlay.Jumps = AxDownKeys.Jumps;
         _area.TabIndex = 1;
         SizeChanged += (_, _) => _area.FitHeight();
 
@@ -312,49 +300,12 @@ internal sealed class EditorForm : Form
             case AxDownKeys.WordWrap:
                 ToggleWordWrap();
                 return true;
-            case AxDownKeys.NextHeading:
-                JumpTo(ElementKind.Heading, 1);
-                return true;
-            case AxDownKeys.PreviousHeading:
-                JumpTo(ElementKind.Heading, -1);
-                return true;
-            case AxDownKeys.NextLink:
-                JumpTo(ElementKind.Link, 1);
-                return true;
-            case AxDownKeys.PreviousLink:
-                JumpTo(ElementKind.Link, -1);
-                return true;
-            case AxDownKeys.NextList:
-                JumpTo(ElementKind.List, 1);
-                return true;
-            case AxDownKeys.PreviousList:
-                JumpTo(ElementKind.List, -1);
-                return true;
-            case AxDownKeys.NextListItem:
-                JumpTo(ElementKind.ListItem, 1);
-                return true;
-            case AxDownKeys.PreviousListItem:
-                JumpTo(ElementKind.ListItem, -1);
-                return true;
-            case AxDownKeys.NextBlockQuote:
-                JumpTo(ElementKind.BlockQuote, 1);
-                return true;
-            case AxDownKeys.PreviousBlockQuote:
-                JumpTo(ElementKind.BlockQuote, -1);
-                return true;
-            case AxDownKeys.NextTable:
-                JumpTo(ElementKind.Table, 1);
-                return true;
-            case AxDownKeys.PreviousTable:
-                JumpTo(ElementKind.Table, -1);
-                return true;
         }
 
-        // Ctrl+1 to Ctrl+6 and Ctrl+Shift+1 to Ctrl+Shift+6: a heading of that level (SPEC.md §9).
-        var level = AxDownKeys.HeadingLevel(keyData);
-        if (level > 0)
+        // The navigation keys of section 9, from the pairs the key table gives the notice text as well (AD-D7).
+        if (TextJumps.Handle(_editor, AxDownKeys.Jumps, keyData, Announce))
         {
-            JumpTo(ElementKind.Heading, keyData.HasFlag(Keys.Shift) ? -1 : 1, level);
+            UpdateStatus();
             return true;
         }
 
@@ -638,26 +589,11 @@ internal sealed class EditorForm : Form
         Announce($"Line {line} of {lines}", true);
     }
 
-    /// <summary>
-    /// The navigation keys (SPEC.md §9, AD-D7): the caret to the start of the next or previous element of a kind, spoken
-    /// as NVDA's browse mode would ("Install, heading level 2", "GitHub, link", "List with 3 items, one"); "No next
-    /// heading" and the like when there is none, and the caret stays. The level narrows headings, 0 for any.
-    /// </summary>
+    /// <summary>A Navigate menu item of section 9: the shared jump on the editor (SPEC.md §9, AD-D7), then the status bar.</summary>
     private void JumpTo(ElementKind kind, int direction, int level = 0)
     {
-        var element = direction > 0
-            ? MarkdownOutline.Next(kind, _editor.Text, _editor.SelectionStart, level)
-            : MarkdownOutline.Previous(kind, _editor.Text, _editor.SelectionStart, level);
-        if (element is null)
-        {
-            Announce($"No {(direction > 0 ? "next" : "previous")} {MarkdownOutline.Name(kind, level)}", true);
-            return;
-        }
-
-        _editor.Select(element.Start, 0);
-        _editor.ScrollToCaret();
+        TextJumps.Jump(_editor, kind, direction, level, Announce);
         UpdateStatus();
-        Announce(element.Spoken, true);
     }
 
     /// <summary>The caret's line and column, counting the file's lines (not the wrapped rows), and the number of lines.</summary>
