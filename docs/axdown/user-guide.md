@@ -18,7 +18,7 @@ Each file opens in its own window; Alt+Tab moves between them.
 
 The text is an ordinary Windows edit field, so NVDA's own keys read it: arrows for characters and lines, Ctrl+Left and Ctrl+Right for words, NVDA's say-all to read on from the caret, and so on. Type to write; Enter starts a new line; Tab types a tab. Ctrl+Z undoes the last change, once. Page Up and Page Down move a screen at a time and reach the first and last line. Ctrl+Up and Ctrl+Down move to the previous and next paragraph, the first line after a blank line, and with Shift they select to there, as in Word.
 
-Long lines wrap at the window's edge, so Down Arrow reads one screen line at a time. View, Word wrap (Ctrl+Shift+W) turns that off: each line of the file is then one line in the window, however long, and AxDown says "Word wrap off". Your place in the text is kept either way.
+Long lines wrap at the window's edge, so Down Arrow reads one screen line at a time. Options, Word wrap (Ctrl+Shift+W) turns that off: each line of the file is then one line in the window, however long, and AxDown says "Word wrap off". Your place in the text is kept either way.
 
 ## Files
 
@@ -40,14 +40,14 @@ In a Markdown file, the keys NVDA uses on a web page work with Ctrl: Ctrl+H move
 
 ## Text size and fonts
 
-Ctrl+Plus and Ctrl+Minus make the text larger and smaller, and AxDown says the new size. View, Font opens the Windows font dialog. Both are remembered.
+Ctrl+Plus and Ctrl+Minus make the text larger and smaller, and AxDown says the new size. Options, Font opens the Windows font dialog. Both are remembered.
 
 ## Menus
 
 - **File**: New, Open, Save, Save as, Exit.
 - **Edit**: Undo, Cut, Copy, Paste, Select all.
 - **Navigate**: Find, Find next, Find previous, Go to line, and the submenus Next and Previous, each with Heading, Heading level 1 to 6, Link, List, List item, Block quote and Table.
-- **View**: Word wrap, Larger text, Smaller text, Windows text size, Font.
+- **Options**: Word wrap, Larger text, Smaller text, Windows text size, Font.
 - **Axit**: the bundle's menu, the same in every Axit window. New window starts another AxDown or AxClaude. Recently closed lists the last ten files and folders any Axit window held, each with a number; Enter opens one in a new window. Open windows lists the other open Axit windows, the one you were in last first, each with a number: Alt+A, O, 1 takes you back to it. Open windows by type has a submenu per app with its windows, the one you are in checked. Enter on a window brings it to the front. Close all windows closes every Axit window, each asking about unsaved changes where there are any. Then Check for updates (which names the version you have), Update to the newest version while one is known, and About, a submenu: Version (the version, the apps, the latest release and where the settings and logs are), Licence, Attribution, Axit guide (how to install, start, update and remove the bundle) and Axit on GitHub, which opens the project's page in your browser.
 - **Help**: Keyboard shortcuts (F1), this guide, Copy diagnostics.
 

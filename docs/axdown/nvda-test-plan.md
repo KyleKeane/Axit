@@ -55,7 +55,7 @@ letter), and a `long.md` with headings and lines longer than the window.
 ## 5. Text size and font
 
 1. Ctrl+Plus: "Text size n"; the text is larger; Ctrl+Minus back. Close and reopen: the size is kept.
-2. View, Font opens the Windows font dialog; a chosen font is used and kept.
+2. Options, Font opens the Windows font dialog; a chosen font is used and kept.
 
 ## 6. Menus and help
 

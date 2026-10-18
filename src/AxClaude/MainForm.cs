@@ -376,19 +376,21 @@ internal sealed class MainForm : Form
         MinimumSize = new Size(600, 400);
 
         // The menus (FR-10): short, grouped by what the items are about, every mnemonic unique within its menu.
-        // AxClaude is the app's own menu: the session, where Claude runs, and the window (A is the Axit menu's, so X).
-        var axclaude = new ToolStripMenuItem("A&xClaude");
-        axclaude.DropDownItems.Add(new ToolStripMenuItem("&New session...", null, (_, _) => NewSession()) { ShortcutKeys = AxClaudeKeys.NewSession });
-        axclaude.DropDownItems.Add(new ToolStripMenuItem("&Open folder...", null, (_, _) => OpenFolder()));
+        // Session is the thing worked on, as AxDown's File is: the session, where Claude runs, what the window holds.
+        var session = new ToolStripMenuItem("&Session");
+        session.DropDownItems.Add(new ToolStripMenuItem("&New session...", null, (_, _) => NewSession()) { ShortcutKeys = AxClaudeKeys.NewSession });
+        session.DropDownItems.Add(new ToolStripMenuItem("&Open folder...", null, (_, _) => OpenFolder()));
         _recentFoldersItem.DropDownOpening += (_, _) => FillRecentFolders();
         FillRecentFolders();
-        axclaude.DropDownItems.Add(_recentFoldersItem);
+        session.DropDownItems.Add(_recentFoldersItem);
         // FR-8.2: Show current folder in ▸ File Explorer; an Axit file manager joins the submenu when there is one.
-        var showIn = new ToolStripMenuItem("&Show current folder in");
+        var showIn = new ToolStripMenuItem("Show current folder &in");
         showIn.DropDownItems.Add(new ToolStripMenuItem("File &Explorer", null, (_, _) => ShowInExplorer()) { ShortcutKeys = AxClaudeKeys.ShowInExplorer });
-        axclaude.DropDownItems.Add(showIn);
-        axclaude.DropDownItems.Add(new ToolStripSeparator());
-        axclaude.DropDownItems.Add(new ToolStripMenuItem("E&xit", null, (_, _) => Close()) { ShortcutKeyDisplayString = "Alt+F4" });
+        session.DropDownItems.Add(showIn);
+        session.DropDownItems.Add(new ToolStripSeparator());
+        session.DropDownItems.Add(new ToolStripMenuItem("&Save conversation as...", null, (_, _) => SaveConversation()) { ShortcutKeyDisplayString = BundleKeys.Text(BundleKeys.Save) });
+        session.DropDownItems.Add(new ToolStripSeparator());
+        session.DropDownItems.Add(new ToolStripMenuItem("E&xit", null, (_, _) => Close()) { ShortcutKeyDisplayString = "Alt+F4" });
 
         // What goes to Claude itself (FR-11); the raw sequences are fixed here and listed in Appendix B.
         var claude = new ToolStripMenuItem("&Claude");
@@ -531,7 +533,7 @@ internal sealed class MainForm : Form
         };
         var axit = new AxitMenu(this, _checkItem, _updateItem, () => _latestState, notice => ShowNotice(notice));
 
-        _menu.Items.AddRange([axclaude, claude, navigate, options, axit, help]);
+        _menu.Items.AddRange([session, claude, navigate, options, axit, help]);
         MainMenuStrip = _menu;
 
         // No AccessibleName on status labels: it would replace the text that NVDA reads with NVDA+End.
@@ -1511,7 +1513,7 @@ internal sealed class MainForm : Form
 
     // ---- project folder ----
 
-    /// <summary>AxClaude → Show current folder in → File Explorer, Ctrl+W (FR-8.2): the folder in File Explorer, one of the system's own windows (D23).</summary>
+    /// <summary>Session → Show current folder in → File Explorer, Ctrl+W (FR-8.2): the folder in File Explorer, one of the system's own windows (D23).</summary>
     private void ShowInExplorer()
     {
         if (_folder is null)
@@ -1556,7 +1558,7 @@ internal sealed class MainForm : Form
         UpdateFolderUi();
     }
 
-    /// <summary>AxClaude → Open folder… (FR-8.3): the picker, then Claude restarts in the chosen folder.</summary>
+    /// <summary>Session → Open folder… (FR-8.3): the picker, then Claude restarts in the chosen folder.</summary>
     private void OpenFolder()
     {
         if (PickFolder(_folder) is { } folder)
@@ -1594,7 +1596,7 @@ internal sealed class MainForm : Form
     ];
 
     /// <summary>
-    /// AxClaude → New session… (Ctrl+N): the folder with a Choose folder button under it, the recommended argument
+    /// Session → New session… (Ctrl+N): the folder with a Choose folder button under it, the recommended argument
     /// sets as radio buttons, Custom with a free argument field. Enter stops the current session and starts a new
     /// one in the folder with those arguments; Escape keeps the current session.
     /// </summary>

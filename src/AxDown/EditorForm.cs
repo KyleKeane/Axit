@@ -92,15 +92,16 @@ internal sealed class EditorForm : Form
         navigate.DropDownItems.Add(next);
         navigate.DropDownItems.Add(previous);
 
-        var view = new ToolStripMenuItem("&View");
+        // Options, as AxClaude's: how the window behaves (AD-4.3).
+        var options = new ToolStripMenuItem("&Options");
         _wordWrapItem = Item("&Word wrap", ToggleWordWrap, AxDownKeys.WordWrap);
         _wordWrapItem.Checked = _settings.WordWrap;
-        view.DropDownItems.Add(_wordWrapItem);
-        view.DropDownItems.Add(new ToolStripSeparator());
-        view.DropDownItems.Add(Item("&Larger text", () => ChangeTextSize(1), BundleKeys.LargerText));
-        view.DropDownItems.Add(Item("S&maller text", () => ChangeTextSize(-1), BundleKeys.SmallerText));
-        view.DropDownItems.Add(new ToolStripMenuItem("Windows &text size", null, (_, _) => UseSystemFont()));
-        view.DropDownItems.Add(new ToolStripMenuItem("&Font...", null, (_, _) => ChooseFont()));
+        options.DropDownItems.Add(_wordWrapItem);
+        options.DropDownItems.Add(new ToolStripSeparator());
+        options.DropDownItems.Add(Item("&Larger text", () => ChangeTextSize(1), BundleKeys.LargerText));
+        options.DropDownItems.Add(Item("S&maller text", () => ChangeTextSize(-1), BundleKeys.SmallerText));
+        options.DropDownItems.Add(new ToolStripMenuItem("Windows &text size", null, (_, _) => UseSystemFont()));
+        options.DropDownItems.Add(new ToolStripMenuItem("&Font...", null, (_, _) => ChooseFont()));
 
         var help = new ToolStripMenuItem("&Help");
         help.DropDownItems.Add(Item("&Keyboard shortcuts", () => ShowNotice(Notice.Plain("Keyboard shortcuts", HelpText.Shortcuts)), BundleKeys.Shortcuts));
@@ -121,7 +122,7 @@ internal sealed class EditorForm : Form
         };
         var axit = new AxitMenu(this, _checkItem, _updateItem, () => _latestState, notice => ShowNotice(notice));
 
-        _menu.Items.AddRange([file, edit, navigate, view, axit, help]);
+        _menu.Items.AddRange([file, edit, navigate, options, axit, help]);
         MainMenuStrip = _menu;
 
         // ---- the editor (AD-2) ----

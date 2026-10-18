@@ -43,7 +43,7 @@ a code fence (see section 7). Ctrl+H passes over both.
 A paragraph is one or more lines of text with a blank line before and after. Markdown joins the lines of a paragraph
 when it is rendered, but AxDown is a plain editor and shows the file as it is: each line of the file is one line in
 the window. With word wrap on (the default), a long line wraps at the window's edge and Down Arrow reads one screen
-line at a time; View, Word wrap (Ctrl+Shift+W) turns that off, and each line of the file is then one line in the
+line at a time; Options, Word wrap (Ctrl+Shift+W) turns that off, and each line of the file is then one line in the
 window however long. Your place in the text is kept either way.
 
 Emphasis is written with asterisks or underscores: *italic* with one, **bold** with two, ***both*** with three, and
@@ -176,8 +176,8 @@ change now and listen to the title with NVDA+T, then undo it with Ctrl+Z.
 
 ## 11. Text size, fonts and updates
 
-Ctrl+Plus and Ctrl+Minus make the text larger and smaller and say the new size; View, Font opens the Windows font
-dialog; View, Windows text size goes back to the system's. All of it is remembered in `%APPDATA%\Axit\axdown.json`.
+Ctrl+Plus and Ctrl+Minus make the text larger and smaller and say the new size; Options, Font opens the Windows font
+dialog; Options, Windows text size goes back to the system's. All of it is remembered in `%APPDATA%\Axit\axdown.json`.
 
 New versions of Axit are published on GitHub, and every app of Axit updates together. When AxDown starts, it asks
 GitHub once whether there is a newer one; if there is, a notice opens with Update and restart, Update and close,
