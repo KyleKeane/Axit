@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased
+## 2.13.0 - 2026-10-18
 
 - Axit: the pieces every window had its own copy of are shared now: the entry point with the log and the crash handling (`AppHost`), the settings' font, update-check and window fields (`WindowSettings`), the embedded guides' reader, the "Open recent" submenus (`RecentMenu`), the status bar's two labels (`StatusLayout.Pair`) and Options → Developer → Open settings file, which opens the file in AxJSON in every window (AxDown opened its own settings in AxDown; AxClaude used the default editor). `--version` says "AxClaude, Axit n" like the other apps.
 - Axit: the Options → Text, General and Developer submenus and the Help menu are built once, in the window base, each window adding only its own items. AxDown and AxJSON gain General ▸ Check for updates at start, which only the settings file held before; AxClaude's Time stamps item moves to the top of its Text submenu, above a separator, with S as its letter.
