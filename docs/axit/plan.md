@@ -49,12 +49,13 @@ the restart by the app itself (2.3.0).
   for the open windows). Still to come: structured mode, a form of real input fields from templates (AJ-3), and the
   caret's path in the status bar (AJ-2.4).
 
-## Later apps (recorded 2026-10-18, not yet priorities)
+## Later apps (recorded 2026-10-18)
 
 Each would be one more app of the bundle, a window per thing worked on, added the way `adding-an-app.md` says, with no
 library dependency (B-10: `git.exe` and the file system through the APIs already used, as Claude is `claude.exe`).
 
-- **AxGit**, a git manager for a repository. One window per repository, named after it, opened from the other windows'
+- **AxGit**: built as a first draft the same day (`docs/axgit/SPEC.md`), unreleased until its NVDA pass; the notes
+  below were its plan. A git manager for a repository. One window per repository, named after it, opened from the other windows'
   "Show current folder in ▸" and "Show current file in ▸" submenus (the slot the specs already keep for an Axit app
   next to File Explorer) and from the Axit menu, so that it stays tied to the folder or file the user came from and is
   found again in Open windows (AX-9) rather than lost. Inside the window the bundle's own pieces: lists (status as
