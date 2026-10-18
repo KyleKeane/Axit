@@ -57,6 +57,13 @@ public static partial class QuestionReader
                     break;
                 }
 
+                // /feedback groups its drafts under "This session" and "Other sessions" (D33): headings between the
+                // answers, not the wrapped tail of the answer above them, and not answers either.
+                if (LineClassifier.IsDraftsHeading(line))
+                {
+                    continue;
+                }
+
                 wrapped.Insert(0, line);
                 continue;
             }

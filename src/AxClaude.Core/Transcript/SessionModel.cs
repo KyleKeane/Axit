@@ -83,6 +83,13 @@ public sealed partial class SessionModel
     /// </summary>
     public int FeedbackDrafts { get; private set; }
 
+    /// <summary>
+    /// The title of the draft Claude printed its card for last ("Product feedback drafted: &lt;title&gt;"), the one
+    /// /feedback opens on (<see cref="FeedbackDraftWatch"/>); null until a card is drawn. Read only with
+    /// <see cref="DetectScreens"/>, as the card's rows are.
+    /// </summary>
+    public string? DraftTitle { get; private set; }
+
     /// <summary>Look for screens that wait on a hint row (<see cref="PendingScreen"/>) and hide the feedback card; off with the Answer Claude's questions in a notice option.</summary>
     public bool DetectScreens { get; set; } = true;
 
@@ -512,6 +519,7 @@ public sealed partial class SessionModel
         TextPrompt = null;
         PendingScreen = null;
         FeedbackDrafts = 0;
+        DraftTitle = null;
         TranscriptViewOpen = false;
         Mode = null;
         Background = null;
@@ -707,7 +715,12 @@ public sealed partial class SessionModel
                 // turn while the draft waits, and the control area is where it is offered. Its plain rows only; a
                 // blank or labelled row ends it.
                 chrome = line.Text.Length > 0 && LineClassifier.Classify(line.Text, inPromptBlock: false) == LineKind.Plain;
-                inCard = chrome && !LineClassifier.IsFeedbackCardTitle(line.Text);
+                inCard = chrome;
+                if (chrome && LineClassifier.FeedbackCardTitle(line.Text) is { } title)
+                {
+                    DraftTitle = title;
+                    inCard = false;
+                }
             }
             else
             {

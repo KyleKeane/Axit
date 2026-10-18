@@ -82,7 +82,18 @@ public static partial class LineClassifier
     public static bool IsFeedbackCardHint(string text) => FeedbackCardHintRegex().IsMatch(text);
 
     /// <summary>The first row of the feedback card, which names the draft: <c>Product feedback drafted: &lt;title&gt;</c>.</summary>
-    public static bool IsFeedbackCardTitle(string text) => text.Contains(" drafted: ", StringComparison.Ordinal);
+    public static bool IsFeedbackCardTitle(string text) => FeedbackCardTitle(text) is not null;
+
+    /// <summary>A heading /feedback puts between its drafts: <c>This session</c>, <c>Other sessions</c> (2.1.302).</summary>
+    public static bool IsDraftsHeading(string text) => text is "This session" or "Other sessions";
+
+    /// <summary>The draft's title off the first row of the feedback card (<c>Product feedback drafted: &lt;title&gt;</c>); null for any other row.</summary>
+    public static string? FeedbackCardTitle(string text)
+    {
+        const string marker = " drafted: ";
+        var at = text.IndexOf(marker, StringComparison.Ordinal);
+        return at < 0 ? null : text[(at + marker.Length)..];
+    }
 
     /// <summary>A bracketed announcement row; the text inside the brackets is what Claude wants spoken.</summary>
     public static string? AnnouncementText(string text) =>

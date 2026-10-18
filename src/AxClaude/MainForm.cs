@@ -73,11 +73,20 @@ internal sealed class MainForm : Form
     /// <summary>The signature of the question or screen that was shown in the control area or announced: it is not shown again while Claude waits on it.</summary>
     private string? _handledWait;
 
-    /// <summary>The draft count of Claude's mode line that /feedback was last opened for (D33): a higher count opens it again, a lower one is followed down.</summary>
-    private int _draftsOpened;
+    /// <summary>Whether a feedback draft Claude queued in the turn that just ended waits (D33): the mode line's count against the count before the turn.</summary>
+    private readonly FeedbackDraftWatch _drafts = new();
 
     /// <summary>/feedback is about to open for a draft, once the screen has settled.</summary>
     private bool _openingDrafts;
+
+    /// <summary>When /feedback was last sent for a draft: the list that follows within <see cref="UserActionMs"/> is the app's doing.</summary>
+    private long _draftOpenedAt;
+
+    /// <summary>The title of the draft /feedback was opened for: Claude's list of drafts is answered with it, so that the review comes straight up. Null when the list is the user's own.</summary>
+    private string? _draftToReview;
+
+    /// <summary>The review of a draft the app opened is up: the list of drafts Claude shows after Send, Discard or Later is closed for the user, back to the message field.</summary>
+    private bool _reviewing;
 
     private const int DraftSettleMs = 500;
 
@@ -1007,6 +1016,11 @@ internal sealed class MainForm : Form
                 return false;
             }
 
+            if (AnswerDraftsList(question))
+            {
+                return true;
+            }
+
             MarkHandled(question.Signature);
             ShowClaudeQuestion(question);
         }
@@ -1030,12 +1044,19 @@ internal sealed class MainForm : Form
         return true;
     }
 
-    /// <summary>What Claude waits on is handled, announced or shown once, and recorded for q (nothing for the text row after Other, which belongs to the question before).</summary>
-    private void MarkHandled(string? signature)
+    /// <summary>
+    /// What Claude waits on is handled, announced or shown once, and recorded for q (nothing for the text row after
+    /// Other, which belongs to the question before); without <paramref name="mark"/> it is handled by the app on the
+    /// user's behalf and not recorded.
+    /// </summary>
+    private void MarkHandled(string? signature, bool mark = true)
     {
         _promptAnnounced = true;
         _handledWait = signature;
-        _model.MarkQuestion();
+        if (mark)
+        {
+            _model.MarkQuestion();
+        }
     }
 
     /// <summary>
@@ -1771,6 +1792,10 @@ internal sealed class MainForm : Form
         _promptAnnounced = false;
         // A question of the new Claude belongs to no slash command of the old one (QuestionRouter).
         _lastCommand = null;
+        // Its drafts are counted afresh when it is ready: none of them is a draft of a turn of this run.
+        _drafts.Opened(0);
+        _draftToReview = null;
+        _reviewing = false;
         _settings.RememberFolder(_folder!);
         SaveSettings();
         UpdateStatus();
@@ -2246,21 +2271,39 @@ internal sealed class MainForm : Form
     }
 
     /// <summary>
-    /// A feedback draft Claude has queued, counted on its mode line ("1 feedback draft", D33): /feedback opens for it
-    /// once Claude is ready and idle, after a short settle, so that Claude's list of drafts comes as a question in the
-    /// control area and the review of a draft as a screen. The card Claude prints for the draft has keys that do
-    /// nothing in screen reader mode; its rows are chrome. A count that falls (a draft sent or discarded) is followed
-    /// down, so the next draft queued opens /feedback again; a draft put off with Later stays until then. Not with
-    /// Answer from a list off, when the card stays in the conversation and /feedback is typed.
+    /// A feedback draft Claude has queued in the turn that just ended, counted on its mode line ("1 feedback draft",
+    /// D33, <see cref="FeedbackDraftWatch"/>): /feedback opens for it once Claude is idle, after a short settle, and
+    /// Claude's list of drafts is answered with the draft's title (<see cref="AnswerDraftsList"/>), so that its
+    /// review comes straight up as a screen in the control area, like a question. The card Claude prints for the
+    /// draft has keys that do nothing in screen reader mode; its rows are chrome. Drafts counted at startup or left
+    /// by other sessions, and a draft put off with Later, wait for /feedback by hand. Not with Answer from a list off,
+    /// when the card stays in the conversation and /feedback is typed.
     /// </summary>
     private void OpenDraftsWhenIdle()
     {
-        if (_model.FeedbackDrafts < _draftsOpened)
+        if (!_readyAnnounced || _host is null)
         {
-            _draftsOpened = _model.FeedbackDrafts;
+            return;
         }
 
-        if (_settings.QuestionNotices && _readyAnnounced && ClaudeIdle && _model.FeedbackDrafts > _draftsOpened && !_openingDrafts)
+        var idle = ClaudeIdle;
+        if (idle && !UserActed(Math.Max(_screenKeyAt, _draftOpenedAt)))
+        {
+            // The list never came, or the review ended without the list: nothing of the draft's is on its way.
+            _draftToReview = null;
+            _reviewing = false;
+        }
+
+        if (!_drafts.Drafted(_model.Working, idle, _model.FeedbackDrafts))
+        {
+            return;
+        }
+
+        if (!_settings.QuestionNotices)
+        {
+            _drafts.Opened(_model.FeedbackDrafts);
+        }
+        else if (!_openingDrafts)
         {
             _openingDrafts = true;
             Later(DraftSettleMs, OpenFeedbackDrafts);
@@ -2270,18 +2313,58 @@ internal sealed class MainForm : Form
     /// <summary>Claude runs, waits on nothing, and no write of the user's is on its way to it.</summary>
     private bool ClaudeIdle => _host is not null && !_model.Working && !_model.PromptPending && !_writing && _writes.Count == 0;
 
-    /// <summary>Sends /feedback as the user's own command would go, without "Sent": the list of drafts announces itself. Skipped when Claude is no longer idle or the draft is gone.</summary>
+    /// <summary>Sends /feedback as the user's own command would go, without "Sent": the review of the draft announces itself. Skipped when Claude is no longer idle.</summary>
     private void OpenFeedbackDrafts()
     {
         _openingDrafts = false;
-        if (!ClaudeIdle || _model.FeedbackDrafts <= _draftsOpened || _area.Current is not null)
+        if (!ClaudeIdle || _area.Current is not null || !_drafts.Drafted(_model.Working, idle: true, _model.FeedbackDrafts))
         {
             return;
         }
 
-        _draftsOpened = _model.FeedbackDrafts;
+        _drafts.Opened(_model.FeedbackDrafts);
+        _draftToReview = _model.DraftTitle;
+        _draftOpenedAt = Environment.TickCount64;
         _lastCommand = SlashCommands.Find("/feedback");
         QueueWrites("/feedback");
+    }
+
+    /// <summary>
+    /// Claude's list of drafts when the app opened /feedback itself (D33): answered with the draft's number, so that
+    /// the review comes straight up, or, when the review is over (Send, Discard or Later brings the list back),
+    /// closed with Escape, back to the message field. False when the list is the user's own, or the draft is not on
+    /// it: the list is shown.
+    /// </summary>
+    private bool AnswerDraftsList(Question question)
+    {
+        if (question.Title != FeedbackDraftWatch.ListTitle)
+        {
+            return false;
+        }
+
+        if (_reviewing)
+        {
+            _reviewing = false;
+            MarkHandled(question.Signature, mark: false);
+            Write("\x1b");
+            return true;
+        }
+
+        if (_draftToReview is not { } title)
+        {
+            return false;
+        }
+
+        _draftToReview = null;
+        if (FeedbackDraftWatch.Find(question, title) is not { } draft)
+        {
+            return false;
+        }
+
+        _reviewing = true;
+        MarkHandled(question.Signature, mark: false);
+        TypeAnswer(draft.Key);
+        return true;
     }
 
     /// <summary>
@@ -2318,9 +2401,23 @@ internal sealed class MainForm : Form
             return;
         }
 
-        // One keystroke per character (per rune, so an emoji stays whole): Claude's answer field takes typed keys, and
-        // several characters in one write are a paste, which it ignores ("12" in a long list, "1,3" for several
-        // answers). Then Enter.
+        TypeAnswer(key);
+        _answerAt = Environment.TickCount64;
+        _area.Hold(UserActionMs);
+        if (_settings.SoundOnBell)
+        {
+            Sounds.Sent();
+        }
+    }
+
+    /// <summary>
+    /// Types an answer: one keystroke per character (per rune, so an emoji stays whole), since Claude's answer field
+    /// takes typed keys and several characters in one write are a paste, which it ignores ("12" in a long list, "1,3"
+    /// for several answers). Then Enter. Without the sound and the hold of <see cref="SendAnswer"/>: an answer the app
+    /// gives on the user's behalf, which what follows announces as new.
+    /// </summary>
+    private void TypeAnswer(string key)
+    {
         var keys = key.EnumerateRunes().Select(rune => rune.ToString()).ToList();
         for (var i = 0; i < keys.Count; i++)
         {
@@ -2328,14 +2425,7 @@ internal sealed class MainForm : Form
         }
 
         _writes.Enqueue(("\r", 50));
-        _answerAt = Environment.TickCount64;
-        _area.Hold(UserActionMs);
         StartWrites();
-
-        if (_settings.SoundOnBell)
-        {
-            Sounds.Sent();
-        }
     }
 
     private void OnNoticeChoice(OverlayChoice choice)

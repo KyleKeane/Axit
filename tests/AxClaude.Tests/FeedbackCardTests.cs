@@ -38,6 +38,7 @@ public class FeedbackCardTests
         });
 
         Assert.True(idleWithDraft >= 2, $"Claude was idle with the draft counted at the end of {idleWithDraft} frames");
+        Assert.Equal("Fixture card test", model.DraftTitle);
 
         // /exit with a draft waiting: Claude's own question, a screen that waits on its hint row.
         var exit = Assert.Single(screens.DistinctBy(screen => screen.Signature));
@@ -76,11 +77,39 @@ public class FeedbackCardTests
         model.EndFrame();
 
         Assert.Equal(1, model.FeedbackDrafts);
+        Assert.Equal("Fixture card test", model.DraftTitle);
         Assert.Equal("auto mode on", model.Mode);
         Assert.Null(model.Background);
         Assert.False(model.Working);
         Assert.False(model.PromptPending);
         Assert.Equal(["claude: finished", "Baked for 3s · done 5:38 AM"], model.Lines.Where(line => !line.Hidden && line.Text.Length > 0).Select(line => line.Text));
+    }
+
+    [Fact]
+    public void Only_a_draft_of_the_turn_that_ended_opens()
+    {
+        // Drafts counted when Claude is ready (five queued by other sessions, or left over) do not open /feedback:
+        // they opened it on every start before 2.10.1.
+        var watch = new FeedbackDraftWatch();
+        Assert.False(watch.Drafted(working: false, idle: true, drafts: 5));
+        Assert.False(watch.Drafted(working: false, idle: true, drafts: 5));
+
+        // A turn that queues one: the count rises while Claude works and the draft opens once it is idle, and stays
+        // due until /feedback was opened for it.
+        Assert.False(watch.Drafted(working: true, idle: false, drafts: 5));
+        Assert.False(watch.Drafted(working: true, idle: false, drafts: 6));
+        Assert.False(watch.Drafted(working: false, idle: false, drafts: 6), "a write on its way to Claude");
+        Assert.True(watch.Drafted(working: false, idle: true, drafts: 6));
+        Assert.True(watch.Drafted(working: false, idle: true, drafts: 6));
+        watch.Opened(6);
+        Assert.False(watch.Drafted(working: false, idle: true, drafts: 6));
+
+        // A turn that drafts nothing, and the count followed down after a draft was sent or discarded.
+        Assert.False(watch.Drafted(working: true, idle: false, drafts: 6));
+        Assert.False(watch.Drafted(working: false, idle: true, drafts: 6));
+        Assert.False(watch.Drafted(working: false, idle: true, drafts: 5));
+        Assert.False(watch.Drafted(working: true, idle: false, drafts: 5));
+        Assert.True(watch.Drafted(working: false, idle: true, drafts: 6));
     }
 
     [Fact]
@@ -128,42 +157,68 @@ public class FeedbackCardTests
     [Fact]
     public void Feedback_lists_its_drafts_as_answers_and_reviews_one_on_a_screen()
     {
-        // The rows of /feedback, with a neutral folder in place of the account path.
+        // The rows of /feedback as Claude Code 2.1.302 drew them in a session with a draft of its own (recorded
+        // 2026-10-18, not kept: the drafts of other sessions named their folders), with a neutral folder throughout.
         string[] queue =
         [
             "you: /feedback",
             "Feedback drafts",
+            "This session",
+            "1. Fixture review test, idea · 1m · C:\\Temp\\axclaude-fixture · transcript available",
             "Other sessions",
-            "1. Fixture card test, idea · 1m · C:\\Temp\\axclaude-fixture · transcript available",
-            "2. Fixture test draft, idea · 3m · C:\\Temp\\axclaude-fixture · transcript available",
-            "3. + Write new feedback",
-            "Select with numbers [1-3]. Then Enter to submit:",
-            "Drafts live only on this machine until you send them.",
+            "2. Fixture card test, idea · 1h · C:\\Temp\\axclaude-fixture · transcript available",
+            "3. Fixture test draft, idea · 2h · C:\\Temp\\axclaude-fixture · transcript available",
+            "4. + Write new feedback",
+            "Select with numbers [1-4]. Then Enter to submit:",
+            "Drafts live only on this machine and are never sent without you. Unsent drafts expire after 30 days.",
             "Esc to close",
         ];
-        var question = QuestionReader.Read(queue, 6)!;
+        var question = QuestionReader.Read(queue, 8)!;
         Assert.Equal("Feedback drafts", question.Title);
-        Assert.Equal(["1", "2", "3"], question.Options.Select(option => option.Key));
+        Assert.Equal(["1", "2", "3", "4"], question.Options.Select(option => option.Key));
+        // The headings between the drafts are neither answers nor the wrapped tail of the answer above them.
+        Assert.Equal("Fixture review test, idea · 1m · C:\\Temp\\axclaude-fixture · transcript available", question.Options[0].Text);
         Assert.Equal(QuestionDialog.AnswerNotice, QuestionRouter.DialogFor(SlashCommands.Find("/feedback")));
+
+        // The draft the app opened /feedback for is found by the card's title, wherever Claude lists it.
+        Assert.Equal("1", FeedbackDraftWatch.Find(question, "Fixture review test")!.Key);
+        Assert.Equal("2", FeedbackDraftWatch.Find(question, "Fixture card test")!.Key);
+        Assert.Null(FeedbackDraftWatch.Find(question, "Fixture"));
+        Assert.Null(FeedbackDraftWatch.Find(question with { Title = "Select model" }, "Fixture card test"));
 
         string[] review =
         [
+            "you: /feedback",
             "Feedback drafts",
-            "Type:  idea",
-            "Title:",
-            "Fixture card test",
-            "Details:",
-            "> - **What happened:** a recording test of the feedback card.",
+            "   Type:  idea",
+            "   Title:",
+            "Fixture review test",
+            "   Area:",
+            "   Failure mode:  (none)",
+            "   Task:  (none)",
+            "   Details:",
+            "3 lines:",
+            "> - **What happened:** a recording test of the feedback review.",
+            "> - **What the user said:** none.",
+            "> - **Repro:** none.",
             "End of details.",
-            "Send transcript:  yes  · sends this conversation to Anthropic",
+            "   Send transcript:  yes  · sends this conversation to Anthropic",
+            "   Environment info (win32 x64, v2.1.302, claude-fable-5-1, effort xhigh, thinking adaptive, turn 0/14, drafted 1m ago) is always attached.",
             "❯  Send feedback",
+            "We may use these reports to debug related issues and improve Claude Code. Turn off Claude-drafted feedback anytime in /config.",
             "↑/↓ to move · Enter to send · d to discard · Esc to later",
         ];
-        var screen = ScreenReader.Read(review, 9)!;
+        var screen = ScreenReader.Read(review, 18)!;
         Assert.Equal("Feedback drafts", screen.Title);
         Assert.Equal(["Up", "Down", "Enter", "d", "Escape"], screen.Keys.Select(k => k.Name));
         Assert.Equal(["move", "move", "send", "discard", "later"], screen.Keys.Select(k => k.Action));
         Assert.Contains("❯  Send feedback", screen.Lines);
+        Assert.Contains("Fixture review test", screen.Lines);
+
+        // Before the list, /feedback shows "Loading…" over the hint row for a moment: a spinner row, so no screen waits
+        // and nothing is shown on the way to the review; without a draft the same hint row under the title is a screen.
+        Assert.Null(ScreenReader.Read(["you: /feedback", "Feedback drafts", "Loading…", "Enter to write new feedback · Esc to close"], 3));
+        Assert.Equal("Feedback drafts", ScreenReader.Read(["you: /feedback", "Feedback drafts", "Enter to write new feedback · Esc to close"], 2)!.Title);
     }
 
     private static bool IsCardRow(string text) =>
