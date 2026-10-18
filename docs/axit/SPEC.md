@@ -368,5 +368,7 @@ docs/axdown/            SPEC.md, user-guide.md (embedded by src/AxDown), nvda-te
 - 2.2.0: the update notice with Update and restart, Update and close, and a progress bar for the download.
 - 2.3.0: the in-place install with one bar for download and install and the restart by the app itself (AX-2.8,
   AX-3.2); the user ran the full path from an older build with NVDA. 2.3.1: the documents pruned after the transition.
-- After 2.8.0 (2026-10-17), on the branch `axit`, awaiting the NVDA pass: `MarkdownOutline` and `TextJumps` shared
-  for AxDown's letters and every notice text (AX-7.2); the Axit menu in every window (AX-9, B-14).
+- 2.9.0 (2026-10-18), developed on the branch `axit` and checked with NVDA by the user: `MarkdownOutline` and
+  `TextJumps` shared for AxDown's letters and every notice text (AX-7.2); the Axit menu in every window (AX-9, B-14)
+  with About in sections and the embedded Axit guide; AxClaude's Session menu and AxDown's menus in the same shape;
+  an enabled item in every empty list (AX-9.5).

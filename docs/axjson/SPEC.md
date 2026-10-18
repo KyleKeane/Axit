@@ -2,7 +2,7 @@
 
 AxJSON would be the third app of the Axit bundle (`docs/axit/SPEC.md`): an editor for JSON files for a blind developer
 who uses the NVDA screen reader. **Status on 2026-10-18: a placeholder.** No code exists and nothing below is built;
-AxDown's Markdown navigation (`docs/axdown/SPEC.md` §9) is built, awaiting NVDA. The document records the shape that was agreed
+AxDown's Markdown navigation (`docs/axdown/SPEC.md` §9) shipped in 2.9.0. The document records the shape that was agreed
 so that the work can start from it, following `docs/axit/adding-an-app.md`. Requirements are numbered `AJ-n.m` and
 decisions `AJ-Dn`; the bundle's rules, AX-7 (accessibility) and AX-8 (keys), are cited by number and not repeated.
 In AxJSON's code and documents, "SPEC.md" means this file.

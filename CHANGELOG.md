@@ -1,5 +1,16 @@
 # Changelog
 
+## 2.9.0 - 2026-10-18
+
+- Axit: every window has an Axit menu (Alt+A): New window (AxClaude or AxDown), Recently closed (the last ten files and folders any Axit window held; Enter opens one in a new window), Open windows (the other open Axit windows, the one you were in last first; Alt+A, O, 1 goes back to it), Open windows by type, Close all windows (each window asks what it would ask on Alt+F4), Check for updates, Update to the newest version while one is known, and About, a submenu with Version, Licence, Attribution, the Axit guide and Axit on GitHub. About is one text for the bundle, and every update text names Axit, whose version it is.
+- Axit: a list in a menu with nothing in it holds one item that says so ("No other open windows", "No recent files") instead of a greyed item that the keyboard skipped and NVDA could not read.
+- AxClaude: the Project menu is the Session menu: New session (Ctrl+N) first, Open folder, Open recent folder, Show current folder in File Explorer (Ctrl+W), Save conversation as (Ctrl+S), Exit. The Claude menu starts with Force Claude to restart. Help holds the app's own items: Keyboard shortcuts, User guide and Claude Code resources.
+- AxClaude: the window title is the folder's name followed by its full path in parentheses, so that two folders of one name are told apart in Alt+Tab and in the Axit menu.
+- AxClaude: the user guide, Keyboard shortcuts and the other notices take the heading keys of the conversation: h and Shift+H move by heading, 1 to 6 by level.
+- AxDown: Ctrl+1 to Ctrl+6 jump to the next heading of that level, Ctrl+K to the next link, Ctrl+L to the next list, Ctrl+I to the next list item, Ctrl+Q to the next block quote and Ctrl+T to the next table; with Shift, the previous one. Navigate has Next and Previous submenus with one item per kind. The same keys work in the user guide and the other notices.
+- AxDown: the menus take AxClaude's shape. File: New, Open, Open recent file, Show current file in File Explorer (Ctrl+W), Save, Save as, Exit. Options: Text (Word wrap, Font, Larger text, Smaller text, Windows text size) and Developer (Open settings file, Copy diagnostics). Help: Keyboard shortcuts, User guide and Markdown resources.
+- For developers: the Markdown outline and the text jump are shared pieces (Axit.Core, Axit.Forms); the Axit menu is one class every window constructs; the bundle's README is embedded as the Axit guide; docs/axjson/SPEC.md is a placeholder for the JSON editor, and the plan records the editor direction: one shell, one app per file type, one file per window.
+
 ## 2.8.0 - 2026-10-17
 
 - AxClaude: the Claude menu item for Ctrl+X Ctrl+S is "Send queued messages now", the name Claude Code's own shortcut table gives it. It was Send now; the key, Ctrl+Shift+S, is unchanged.

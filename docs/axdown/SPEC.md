@@ -1,8 +1,8 @@
 # AxDown — Specification
 
 AxDown is the second app of the Axit bundle (`docs/axit/SPEC.md`): a barebones editor for Markdown and plain text files
-for a blind developer who uses the NVDA screen reader. Describes AxDown as of Axit 2.8.0 (2026-10-17): everything in
-section 4 is built and checked with NVDA; section 9, the Markdown navigation, is built and awaits its NVDA pass. The
+for a blind developer who uses the NVDA screen reader. Describes AxDown as of Axit 2.9.0 (2026-10-18): everything in
+sections 4 and 9 is built and checked with NVDA. The
 document is kept in step with the code (a behaviour change updates it in the same commit). Requirements are numbered
 `AD-n.m` and decisions `AD-Dn`. The bundle's rules that every app follows, AX-7 (accessibility) and AX-8 (keys), are
 cited by number and not repeated.
@@ -286,7 +286,7 @@ UTF-16 LE and BE with marks, Windows-1252, `\r\n`, `\n`, `\r` and no line ending
 bytes, a new document's defaults. The window has no automated tests; `docs/axdown/nvda-test-plan.md` covers it, and
 the off-screen probe approach of AxClaude checks layout and keys without disturbing the user.
 
-## 9. Markdown navigation (headings since 2.1.0; the levels and the other letters next)
+## 9. Markdown navigation (headings since 2.1.0, the rest since 2.9.0)
 
 - `Axit.Core/MarkdownOutline` (the bundle's since its second use, AX-6.1): from the text and a caret position, the next and previous element of each kind, outside
   fenced code blocks (` ``` ` or `~~~`); pure, tested. Headings: a line of one to six `#` followed by a space (or
@@ -318,3 +318,7 @@ the off-screen probe approach of AxClaude checks layout and keys without disturb
   `AccessibleRole.Window`, is spoken as "axclaude - AxClaude window" (the folder's name, then the app's). 2.3.0: the
   in-place update (bundle AX-2.8, AX-3.2) run by the user with NVDA from an older build and no file open: one progress
   bar through download and install, "Installed. Restarting", AxDown back empty as it was (test plan 7.2).
+- 2.9.0 (2026-10-18): the rest of section 9 (heading levels, links, lists, list items, block quotes, tables; the Next
+  and Previous submenus), the navigation keys in every notice text, the Axit menu (bundle AX-9), and the menus in
+  AxClaude's shape (AD-4: Open recent file, Show current file in, Options with Text and Developer, Markdown resources);
+  checked by the user with NVDA (test plan sections 3, 5, 6, 7 and 8).

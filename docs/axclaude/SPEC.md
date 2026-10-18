@@ -565,6 +565,8 @@ The sounds and the update check are the bundle's and are tested in `tests/Axit.T
 
 ## 12. Status
 
+Axit 2.9.0 (2026-10-18): the Session menu (FR-8, FR-10), the Claude menu with the restart first, Claude Code resources in Help, the title with the folder's path (FR-8.4), the heading keys in every notice text (FR-5), and the bundle's Axit menu (bundle AX-9); checked with NVDA by the user (test plan sections 1, 7, 9, 11 and 13).
+
 Axit 2.0.0 (2026-10-02): AxClaude became one app of the Axit bundle. The window moved into a class library called by `Axit.exe claude`, the shared pieces (notices, the control area, the sounds, paging, the status layout, the log, the updater, the settings file handling) moved to `Axit.Core` and `Axit.Forms` unchanged, the settings file became `%APPDATA%\Axit\axclaude.json` (copied from the 1.x file), and the installer became the bundle's; no behaviour of this specification changed. Checked with NVDA on the notice, control area, paging and sound sections of the test plan before the release.
 
 Built 2026-09-18 to 2026-09-19: everything in §5, checked with NVDA (test plan sections 1 to 10) on the development build. The 2026-09-19 consolidation pass simplified every announcement, menu label and document, removed unused code (OSC 133, bracketed paste, soft-wrap and cursor-column tracking, unused view members) and fixed the per-frame wastes (D24).
