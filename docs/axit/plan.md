@@ -50,6 +50,10 @@ the restart by the app itself (2.3.0).
   navigation keys and Format (AJ-D4, B-14: the shell shared, one app per file type, one file per window, the Axit menu
   for the open windows). Still to come: structured mode, a form of real input fields from templates (AJ-3), and the
   caret's path in the status bar (AJ-2.4).
+- AxDown and AxJSON, a file changed outside the editor (asked 2026-10-18): today only Save notices it (AD-3.6). The
+  simple rule to build: compare the write time when the window becomes active again; with no unsaved changes reload,
+  keep the caret's line and say "Reloaded, <file> changed on disk"; with unsaved changes say once that the file
+  changed and let the save question offer "Reload and lose mine" as a third button. No watcher thread, no merging.
 
 ## Later apps (recorded 2026-10-18)
 

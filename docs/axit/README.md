@@ -15,13 +15,13 @@ Each app's guide is inside it: Help, User guide.
 
 Download `install.cmd` from the latest release on the releases page (https://github.com/KyleKeane/Axit/releases) and double-click it. It fetches the latest Axit and installs it; press a key when it is done. If you have the zip instead, extract it and double-click the `install.cmd` inside. If Windows SmartScreen warns about an unknown publisher, choose More info, then Run anyway.
 
-This puts Axit in your Programs folder (`%LOCALAPPDATA%\Programs\Axit`) and adds, for each app, a Start menu entry (`Axit AxClaude` and `Axit AxDown`: press the Windows key and type `axc` or `axd`), an entry in the right-click menu of File Explorer (`Open in AxClaude` on folders, `Open in AxDown` on files, and AxDown under `Open with` for `.md`, `.markdown` and `.txt` files) and a console command (`axclaude`, `axdown`; `axit` alone opens the app that fits the path you give it). Settings, Apps lists Axit with an Uninstall. No administrator rights are needed, and no PowerShell setting has to change. To make AxDown the program that opens `.md` files when you press Enter on one, use Settings, Apps, Default apps; Windows does not let a program set that for itself.
+This puts Axit in your Programs folder (`%LOCALAPPDATA%\Programs\Axit`) and adds, for each app, a Start menu entry (`Axit AxClaude`, `Axit AxDown`, `Axit AxJSON`, `Axit AxGit`: press the Windows key and type `axc`, `axd`, `axj` or `axg`), an entry in the right-click menu of File Explorer (`Open in AxClaude` and `Open in AxGit` on folders, `Open in AxDown` on files, AxDown under `Open with` for `.md`, `.markdown` and `.txt` files and AxJSON for `.json`) and a console command (`axclaude`, `axdown`, `axjson`, `axgit`; `axit` alone opens the app that fits the path you give it). Settings, Apps lists Axit with an Uninstall. No administrator rights are needed, and no PowerShell setting has to change. To make AxDown the program that opens `.md` files when you press Enter on one, use Settings, Apps, Default apps; Windows does not let a program set that for itself.
 
 If you had AxClaude installed before Axit existed, the installer removes it first and AxClaude takes over your settings the first time it starts.
 
 ## Start
 
-- Start menu: `Axit AxClaude`, `Axit AxDown`.
+- Start menu: `Axit AxClaude`, `Axit AxDown`, `Axit AxJSON`, `Axit AxGit`.
 - Console: `axclaude`, or `axclaude C:\my\project`; `axdown notes.md`. `axit C:\my\project` and `axit notes.md` do the same, since a folder means AxClaude and a file AxDown.
 - File Explorer: right-click a folder and choose `Open in AxClaude`; right-click a file and choose `Open in AxDown`.
 - From any Axit window: the Axit menu (Alt+A) starts a new AxClaude or AxDown, reopens a file or folder you closed lately, lists the open Axit windows, the one you were in last first and by type, closes them all, checks for updates, and has About with the version, the licence, the attribution, this guide and the project's page on GitHub.

@@ -1288,12 +1288,6 @@ internal sealed class MainForm : AxitForm
     }
 
 
-    private void OpenSettingsFile()
-    {
-        SaveSettings();
-        OpenWithShell(AppSettings.DefaultPath, "settings file");
-    }
-
     // ---- diagnostics ----
 
     private void ToggleRecording()

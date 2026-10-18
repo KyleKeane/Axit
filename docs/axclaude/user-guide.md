@@ -115,7 +115,7 @@ Ctrl+Plus and Ctrl+Minus make the text bigger or smaller and say the new size. O
 
 ## Settings
 
-Everything you change is saved in `%APPDATA%\Axit\axclaude.json` (the first start of Axit copies your settings from AxClaude 1.x there). Options, Developer, "Open settings file" opens it. Some settings have no menu item: `claudePath` names the Claude Code program when it is not on PATH, `joinWrappedLines` set to false keeps long paragraphs on separate lines, `ptyColumns` and `ptyRows` size the hidden console Claude writes to (240 by 50), and `maxTranscriptLines` caps the conversation (20000 lines).
+Everything you change is saved in `%APPDATA%\Axit\axclaude.json` (the first start of Axit copies your settings from AxClaude 1.x there). Options, Developer, "Open settings file" opens it in AxJSON. Some settings have no menu item: `claudePath` names the Claude Code program when it is not on PATH, `joinWrappedLines` set to false keeps long paragraphs on separate lines, `ptyColumns` and `ptyRows` size the hidden console Claude writes to (240 by 50), and `maxTranscriptLines` caps the conversation (20000 lines).
 
 ## Updates
 

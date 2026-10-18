@@ -122,7 +122,7 @@ public sealed partial class GitForm : AxitForm
         general.DropDownItems.Add(_checkAtStartItem);
         options.DropDownItems.Add(general);
         var developer = new ToolStripMenuItem("De&veloper");
-        developer.DropDownItems.Add(new ToolStripMenuItem("Open settings &file", null, (_, _) => AxitMenu.Start(Dispatch.AxJSON, SettingsPath)));
+        developer.DropDownItems.Add(new ToolStripMenuItem("Open settings &file", null, (_, _) => OpenSettingsFile()));
         developer.DropDownItems.Add(new ToolStripMenuItem("Copy diag&nostics", null, (_, _) => CopyDiagnostics()));
         options.DropDownItems.Add(developer);
 

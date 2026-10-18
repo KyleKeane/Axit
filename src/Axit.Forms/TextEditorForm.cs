@@ -417,9 +417,6 @@ public sealed class TextEditorForm : AxitForm
         AxitMenu.Start(Dispatch.AxGit, _path);
     }
 
-    /// <summary>Options → Developer → Open settings file (AD-4.3): the app's settings file in a new window of the app, as any file.</summary>
-    private void OpenSettingsFile() => AxitMenu.Start(_app.Verb, SettingsPath);
-
     private void OpenFile() => AskToSave(() =>
     {
         using var dialog = new OpenFileDialog { Filter = _app.FileFilter, CheckFileExists = true };

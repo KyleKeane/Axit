@@ -538,6 +538,13 @@ public abstract class AxitForm : Form
         }
     }
 
+    /// <summary>Options → Developer → Open settings file: the app's settings, written first, in a new AxJSON window, as any JSON file.</summary>
+    protected void OpenSettingsFile()
+    {
+        SaveSettings();
+        AxitMenu.Start(Dispatch.AxJSON, SettingsPath);
+    }
+
     /// <summary>A page in the default browser, one of the system's own windows; a failure is a notice.</summary>
     protected void OpenUrl(string url)
     {
