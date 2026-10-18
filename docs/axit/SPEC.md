@@ -95,9 +95,11 @@ allow it, see B-9).
 - AX-3.1 One version for the bundle, `<Version>` in `src/Axit/Axit.csproj`. A newer GitHub release is offered as
   AxClaude does (`docs/axclaude/SPEC.md` FR-1.10, D25): asked once at startup when the setting is on, a notice with
   the release notes and four buttons: Update and restart (Enter), Update and close, Open release page, Later
-  (Escape). Each app's Help menu has Check for updates (<app> <version>), always, naming the version in use and asking
-  GitHub again every time, and Update to <version> below it while a newer release is known; About names the version
-  in use and the latest release named.
+  (Escape). Every window's Axit menu (AX-9) starts with Check for updates (Axit <version>), always, naming the version
+  in use and asking GitHub again every time, Update to Axit <version> below it while a newer release is known, and
+  About, the bundle's one About notice (`Axit.Core/BundleAbout`, the same text in every window): the version in use,
+  the apps, the maker, the latest release as the window knows it, the releases page, the settings and logs folders,
+  and the disclaimer. Every text of the update flow names Axit, never an app: the version is the bundle's.
 - AX-3.2 Either update runs behind one notice with one progress bar (`Notice.Progress`; NVDA reports a progress bar
   by its own settings, so nothing is spoken about the progress itself): the zip is downloaded into
   `%LOCALAPPDATA%\Axit\updates\<version>` (the bar to 80 percent; Cancel keeps the installed version), then the
@@ -133,7 +135,8 @@ allow it, see B-9).
 ### AX-5 Settings, logs and paths
 
 - AX-5.1 Each app has its own settings file, `%APPDATA%\Axit\<app>.json` (`axclaude.json`, `axdown.json`), and its own
-  log, `%LOCALAPPDATA%\Axit\logs\<app>.log`. The updater's log is `%LOCALAPPDATA%\Axit\logs\update.log`.
+  log, `%LOCALAPPDATA%\Axit\logs\<app>.log`. The updater's log is `%LOCALAPPDATA%\Axit\logs\update.log`. The bundle
+  has one file of its own, `%APPDATA%\Axit\recently-closed.json`, the Recently closed list of the Axit menu (AX-9.4).
 - AX-5.2 On its first start under Axit, AxClaude copies `%APPDATA%\AxClaude\settings.json` to `axclaude.json` when the
   new file does not exist; the old file is left alone.
 - AX-5.3 The load-and-save pattern of a settings file (JSON, a missing or unreadable file falls back to the defaults
@@ -144,16 +147,16 @@ allow it, see B-9).
 
 ### AX-6 Shared pieces
 
-- AX-6.1 `Axit.Core` (pure, unit tested): `Dispatch`, `BundleInfo`, `AppPaths`, `SettingsFile`,
+- AX-6.1 `Axit.Core` (pure, unit tested): `Dispatch` (with `Apps`, the name and verb of each app), `BundleInfo`, `AppPaths`, `SettingsFile`,
   `Log` (per-app file name), `Updates/` (`UpdateCheck`, the release check, and `Updater`, the download and the
-  hand-over to `install.ps1`; neither needs a window), `Audio/WaveTone` (the sounds as WAV bytes), `MarkdownOutline` (the headings, links, lists, block quotes and tables of a Markdown text, with next and previous from a caret position; AxDown SPEC §9, shared since its second use).
+  hand-over to `install.ps1`; neither needs a window), `Audio/WaveTone` (the sounds as WAV bytes), `MarkdownOutline` (the headings, links, lists, block quotes and tables of a Markdown text, with next and previous from a caret position; AxDown SPEC §9, shared since its second use), `AxitWindows` (the window lists of the Axit menu from the windows the system names, AX-9), `RecentlyClosed` (the bundle's list of closed files and folders, AX-9.4), `BundleAbout` (the one About notice, AX-3.1).
 - AX-6.2 `Axit.Forms` (WinForms, no tests, checked with NVDA): `OverlayPanel` (the notices in the
   window, with the `Notice` record callers pass), `ControlArea` and `ListKeys` (a question's answers as a list or a
   field in the message field's place, with the number and page keys of every such list), `Sounds` (wave-out devices kept
   open for the life of the process), `EditPaging` (Page Up and Page Down in an edit control), `EditParagraphs`
   (Ctrl+Up and Ctrl+Down by paragraph, with Shift selecting), `EditKeys` (the KeyDown handler that gives an edit
   control both), `Announcer` (the UI Automation notification, AX-7.1), `TextJump` and `TextJumps` (a window's key pairs for the kinds of element in a text and the jump itself on an edit control, used by every notice text and by AxDown's editor, AX-7.2), `StatusLayout`, the font
-  handling (text size and the font picker), `BundleKeys` (AX-8). The crash report (twenty lines in each app's
+  handling (text size and the font picker), `BundleKeys` (AX-8), `AxitMenu` (the Axit menu every window has, AX-9). The crash report (twenty lines in each app's
   `Run`) stays per app until a second copy shows what is common.
 - AX-6.3 A piece moves into a shared project only when a second app needs it, in a commit of its own, with the
   accessibility review; it moves unchanged where possible (B-3).
@@ -190,6 +193,39 @@ allow it, see B-9).
   A key of the number row ends in a full stop ("Ctrl+1."): NVDA speaks the shortcut directly before the position of
   the item in the menu ("1 of 9"), and the synthesizer runs "Ctrl+1  1 of 9" together into "Ctrl+11 of 9"; the full
   stop is a pause between the two.
+
+### AX-9 The Axit menu
+
+- AX-9.1 Every window has an **Axit** menu (mnemonic A) between its own menus and Help, the same in every window: one
+  class, `Axit.Forms/AxitMenu`, which the window constructs with its three update items. In order: Check for updates,
+  Update to (while a newer release is known), About (AX-3.1) and Axit on GitHub (G; the repository page,
+  `UpdateCheck.RepositoryPage`, in the browser); a separator; New window ▸ and Recently closed ▸; a separator; Open
+  windows ▸ and one submenu per app. The lists are filled each time the menu opens, so that they show the windows and
+  the files of that moment.
+- AX-9.2 **New window ▸** (N): one item per app of the bundle (`Dispatch.Apps`), "AxClaude", "AxDown", with the letter
+  after Ax as the mnemonic. It starts `Axit.exe <verb>` with no arguments: a new process and a new window (B-2), the
+  app starting as it does from its Start menu entry.
+- AX-9.3 **Open windows ▸** (O): every open window of the bundle's apps except this one, the most recently used first.
+  The order is the one Windows keeps its top-level windows in, which is Alt+Tab's, so nothing is stored and Alt+A, O,
+  1 is always the window the user was in before this one. One submenu per app follows, "AxClaude (2)", "AxDown (1)",
+  the number being its open windows: that app's windows in the same order, this window included and checked, so that
+  the list also says where the user is.
+- AX-9.4 **Recently closed ▸** (R): the last ten files and folders a window of any app held when it closed or replaced
+  them (AxDown's file, AxClaude's project folder), the newest first, each app and path once, those that still exist;
+  Enter starts that app on it in a new window. The list is one file for the bundle, `%APPDATA%\Axit\recently-closed.json`
+  (AX-5.1), written whole by the window that closes or swaps (`Axit.Core/RecentlyClosed`, through `SettingsFile`; two
+  windows closing in the same instant leave the last writer's list). Nothing else about windows is stored.
+- AX-9.5 A window's or a file's item is its number and a title, "1 notes.md - AxDown", the number as the mnemonic (1
+  to 9, then a to z), so that Alt+A, O, 1 or Alt+A, R, 1 acts without an arrow key. Enter brings a window to the
+  front, restored when it was minimized. A list with nothing in it holds one disabled item, "(none)".
+- AX-9.6 The windows are the visible, unowned, titled top-level windows of every process named as this one, told
+  apart by the end of their title (" - AxClaude", " - AxDown"; AD-10, AxClaude's `<folder> - AxClaude`); a window of
+  none of the apps (the bundle's own message box, AX-1.4) is listed nowhere. The lists are pure code in
+  `Axit.Core/AxitWindows` and `Axit.Core/RecentlyClosed`, unit tested; only the listing and the switch (user32
+  `EnumWindows`, `SetForegroundWindow`) and the menu itself are in `AxitMenu`.
+- AX-9.7 Only Axit's windows are listed; Alt+Tab stays the way to everything else. Alt+A is a menu mnemonic, not a key
+  of the tables (AX-8); the F1 texts name it. A separator carries no text and NVDA passes over it; the groups are
+  told apart by their names, not by headers, which would be one more stop on every pass through the menu.
 
 ### AX-7 Accessibility rules every app follows
 
@@ -303,6 +339,12 @@ docs/axdown/            SPEC.md, user-guide.md (embedded by src/AxDown), nvda-te
   smaller model needs when the keys have to move.
 - **B-13 The notices and the question area are shared, not copied.** They work and they are what the user knows;
   every window asks the same way (AX-6.4). They moved to `Axit.Forms` unchanged when AxDown needed them (2.0.0).
+- **B-14 An Axit menu instead of tabs.** One window holds one file or one conversation (B-2), and AxJSON will keep it
+  so. Tabs in one window were considered for an editor of several files (2026-10-18) and dropped: a tab needs a
+  modified state of its own, a close of its own against the window's, a title and a status bar that follow it, and
+  keys whose meaning changes with the tab under the user's fingers, the thing a screen reader user feels first (B-12).
+  The Axit menu (AX-9) gives the one thing tabs give, a list of what is open in one place, by recency and by app;
+  Windows' own order of its windows is the recency, so nothing is stored or kept in step, and Alt+Tab is unchanged.
 
 ## 7. Status
 
@@ -314,3 +356,5 @@ docs/axdown/            SPEC.md, user-guide.md (embedded by src/AxDown), nvda-te
 - 2.2.0: the update notice with Update and restart, Update and close, and a progress bar for the download.
 - 2.3.0: the in-place install with one bar for download and install and the restart by the app itself (AX-2.8,
   AX-3.2); the user ran the full path from an older build with NVDA. 2.3.1: the documents pruned after the transition.
+- After 2.8.0 (2026-10-17), on the branch `axit`, awaiting the NVDA pass: `MarkdownOutline` and `TextJumps` shared
+  for AxDown's letters and every notice text (AX-7.2); the Axit menu in every window (AX-9, B-14).

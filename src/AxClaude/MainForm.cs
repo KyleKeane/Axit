@@ -33,7 +33,7 @@ internal sealed class MainForm : Form
     private readonly ToolStripMenuItem _currentFolderItem = new() { ShortcutKeys = AxClaudeKeys.OpenFolder };
     private readonly ToolStripMenuItem _recentFoldersItem = new("&Recent folders");
     private readonly ToolStripMenuItem _recordItem = new(RecordItemText);
-    private readonly ToolStripMenuItem _checkItem = new($"Check for &updates (AxClaude {BundleInfo.Version})...");
+    private readonly ToolStripMenuItem _checkItem = new($"Check for &updates (Axit {BundleInfo.Version})...");
     private readonly ToolStripMenuItem _updateItem = new() { Visible = false };
     /// <summary>Options → Sounds → Background music while Claude works, made with the menu; Ctrl+Space flips it from anywhere (FR-7.9).</summary>
     private ToolStripMenuItem _musicItem = null!;
@@ -228,6 +228,12 @@ internal sealed class MainForm : Form
             ConfirmClose();
             base.OnFormClosing(e);
             return;
+        }
+
+        if (_folder is { } folder)
+        {
+            // AX-9.4: the folder joins the bundle's Recently closed list.
+            RecentlyClosed.Remember("AxClaude", folder);
         }
 
         SaveWindow();
@@ -509,11 +515,11 @@ internal sealed class MainForm : Form
         web.DropDownItems.Add(new ToolStripMenuItem("Command &line", null, (_, _) => OpenUrl("https://code.claude.com/docs/en/cli-reference")));
         web.DropDownItems.Add(new ToolStripMenuItem("&Install or update Claude Code", null, (_, _) => OpenUrl(ClaudeLauncher.InstallUrl)));
         help.DropDownItems.Add(web);
-        help.DropDownItems.Add(new ToolStripSeparator());
-        // FR-1.10: Check for updates names the version in use and asks GitHub every time; Update to AxClaude n stands
-        // below it while a newer release is known. About names the version too, with the latest release named.
+
+        // The bundle's Axit menu (AX-9) sits before Help in every window; Check for updates, Update to and About are
+        // its first items (AX-3.1, FR-1.10). Check for updates names the version in use and asks GitHub every time;
+        // Update to Axit n stands below it while a newer release is known; About is the bundle's one notice.
         _checkItem.Click += (_, _) => CheckForUpdates(manual: true);
-        help.DropDownItems.Add(_checkItem);
         _updateItem.Click += (_, _) =>
         {
             if (_update is { } known)
@@ -521,11 +527,9 @@ internal sealed class MainForm : Form
                 ShowUpdateNotice(known);
             }
         };
-        help.DropDownItems.Add(_updateItem);
-        help.DropDownItems.Add(new ToolStripSeparator());
-        help.DropDownItems.Add(new ToolStripMenuItem("&About", null, (_, _) => ShowAbout()));
+        var axit = new AxitMenu(this, [_checkItem, _updateItem, new ToolStripMenuItem("&About", null, (_, _) => ShowAbout())]);
 
-        _menu.Items.AddRange([project, claude, navigate, options, help]);
+        _menu.Items.AddRange([project, claude, navigate, options, axit, help]);
         MainMenuStrip = _menu;
 
         // No AccessibleName on status labels: it would replace the text that NVDA reads with NVDA+End.
@@ -1469,7 +1473,7 @@ internal sealed class MainForm : Form
         var claude = ClaudeLauncher.Find(_options.ClaudePath ?? _settings.ClaudePath);
         var text = string.Join("\r\n",
         [
-            $"AxClaude {BundleInfo.Version} on .NET {Environment.Version}, {Environment.OSVersion}",
+            $"AxClaude, Axit {BundleInfo.Version} on .NET {Environment.Version}, {Environment.OSVersion}",
             $"Program: {Environment.ProcessPath ?? "(unknown)"} (process {Environment.ProcessId})",
             $"Claude: {claude ?? "(not found)"}",
             $"Project folder: {_folder ?? "(none)"}",
@@ -1538,6 +1542,12 @@ internal sealed class MainForm : Form
     /// <summary>Makes the folder the project folder: the title, the status bar and the Project menu follow, and the default arguments apply there again (FR-9.1).</summary>
     private void SetFolder(string folder)
     {
+        if (_folder is { } old && !string.Equals(old, folder, StringComparison.OrdinalIgnoreCase))
+        {
+            // AX-9.4: the folder left behind joins the bundle's Recently closed list.
+            RecentlyClosed.Remember("AxClaude", old);
+        }
+
         _folder = folder;
         _nothingToContinue = false;
         UpdateFolderUi();
@@ -2402,13 +2412,13 @@ internal sealed class MainForm : Form
             {
                 var version = release.Version.ToString(3);
                 _update = release;
-                _latestState = $"AxClaude {version} (newer than this one)";
-                _updateItem.Text = $"Update &to AxClaude {version}...";
+                _latestState = $"Axit {version} (newer than this one)";
+                _updateItem.Text = $"Update &to Axit {version}...";
                 _updateItem.Visible = true;
                 Log.Info($"Update available: {release.Tag}, zip {release.ZipUrl ?? "missing"}");
                 if (!manual)
                 {
-                    _model.AddSystemLine($"AxClaude {version} is available. Help menu, Update to AxClaude {version}.");
+                    _model.AddSystemLine($"Axit {version} is available. Axit menu, Update to Axit {version}.");
                 }
 
                 if (manual || !_noticeOpen)
@@ -2418,7 +2428,7 @@ internal sealed class MainForm : Form
                 }
                 else
                 {
-                    Announce($"Update {version} in the Help menu", false);
+                    Announce($"Update {version} in the Axit menu", false);
                 }
 
                 return;
@@ -2426,13 +2436,13 @@ internal sealed class MainForm : Form
             else
             {
                 var same = release.Version == UpdateCheck.ParseVersion(BundleInfo.Version);
-                _latestState = $"AxClaude {release.Version.ToString(3)} ({(same ? "this version" : "older than this build")})";
+                _latestState = $"Axit {release.Version.ToString(3)} ({(same ? "this version" : "older than this build")})";
             }
 
             if (manual)
             {
                 ShowNotice(Notice.Plain("Check for updates",
-                    $"You have the newest version, AxClaude {BundleInfo.Version}.\n" +
+                    $"You have the newest version, Axit {BundleInfo.Version}.\n" +
                     (release is null ? "No release is published yet.\n" : string.Empty) +
                     $"Releases: {UpdateCheck.ReleasesPage}"));
             }
@@ -2457,13 +2467,10 @@ internal sealed class MainForm : Form
         }
     }
 
-    private void ShowAbout() =>
-        ShowNotice(Notice.Plain("About AxClaude",
-            $"AxClaude {BundleInfo.Version}\nA screen reader friendly window for Claude Code.\nMade by Dr. Kyle Keane, www.kylekeane.com. Free under the MIT licence.\n\n" +
-            $"Latest release on GitHub: {_latestState}\nReleases: {UpdateCheck.ReleasesPage}\nClaude Code documentation: https://code.claude.com/docs\nSettings: {AppSettings.DefaultPath}\nLog: {Log.FilePath}\n\n" +
-            HelpText.Disclaimer));
+    /// <summary>The bundle's one About notice (AX-3.1), with this window's latest-release state.</summary>
+    private void ShowAbout() => ShowNotice(Notice.Plain(BundleAbout.Title, BundleAbout.Text(_latestState)));
 
-    /// <summary>While a check or an install runs, the two Help items are disabled, so that neither starts twice.</summary>
+    /// <summary>While a check or an install runs, the two update items of the Axit menu are disabled, so that neither starts twice.</summary>
     private void SetUpdateBusy(bool busy)
     {
         _updateBusy = busy;
@@ -2483,13 +2490,13 @@ internal sealed class MainForm : Form
         var version = release.Version.ToString(3);
         var size = release.ZipSize > 0 ? $" The download is {release.ZipSize / (1024.0 * 1024.0):0} MB." : string.Empty;
         var text =
-            $"You have AxClaude {BundleInfo.Version}. AxClaude {version} is available.\n\n" +
+            $"You have Axit {BundleInfo.Version}. Axit {version} is available.\n\n" +
             (release.Notes.Length > 0 ? release.Notes + "\n\n" : string.Empty) +
             "Update and restart downloads the new version, closes AxClaude, installs it and starts it again on the same folder; " +
             "the conversation is picked up again if one is open. Update and close installs without starting it again. " +
             $"A progress bar shows the download.{size}\n" +
-            "Later keeps this version; the Help menu offers the update again.";
-        ShowNotice(new Notice($"Update to AxClaude {version}", text,
+            "Later keeps this version; the Axit menu offers the update again.";
+        ShowNotice(new Notice($"Update to Axit {version}", text,
         [
             new OverlayChoice("Update and &restart", () => InstallUpdate(release, restart: true), IsDefault: true),
             new OverlayChoice("Update and &close", () => InstallUpdate(release, restart: false)),
@@ -2517,11 +2524,11 @@ internal sealed class MainForm : Form
         SetUpdateBusy(true);
         var version = release.Version.ToString(3);
         var size = release.ZipSize > 0 ? $" ({release.ZipSize / (1024.0 * 1024.0):0} MB)" : string.Empty;
-        _model.AddSystemLine($"Updating to AxClaude {version}...");
+        _model.AddSystemLine($"Updating to Axit {version}...");
         using var cancellation = new CancellationTokenSource(TimeSpan.FromMinutes(10));
         var cancelled = false;
         var installing = false;
-        ShowNotice(new Notice($"Updating to AxClaude {version}",
+        ShowNotice(new Notice($"Updating to Axit {version}",
             $"The new version is downloaded{size} and installed; the progress bar shows how far it is. Cancel during the download keeps this version.",
         [
             new OverlayChoice("&Cancel", () =>
@@ -2563,8 +2570,8 @@ internal sealed class MainForm : Form
             if (result.ExitCode != 0)
             {
                 Log.Error($"The installer failed with code {result.ExitCode}:\r\n{result.Output}");
-                _model.AddSystemLine($"The installation of AxClaude {version} failed. This version keeps running.");
-                ShowNotice(new Notice($"Update to AxClaude {version}",
+                _model.AddSystemLine($"The installation of Axit {version} failed. This version keeps running.");
+                ShowNotice(new Notice($"Update to Axit {version}",
                     $"The installer failed; this version keeps running.\n\n{result.Output}\n\nYou can download the zip from the release page and run install.cmd yourself.",
                 [
                     ReleasePageChoice(release),
@@ -2577,14 +2584,14 @@ internal sealed class MainForm : Form
             _restartArguments = restart ? RestartArguments() : null;
             Log.Info($"Update {release.Tag} installed in place; restart: {restart}");
             _model.AddSystemLine(restart
-                ? $"AxClaude {version} installed. AxClaude closes now and starts again."
-                : $"AxClaude {version} installed. AxClaude closes now; the next start is the new version.");
+                ? $"Axit {version} installed. AxClaude closes now and starts again."
+                : $"Axit {version} installed. AxClaude closes now; the next start is the new version.");
             Announce(restart ? "Installed. Restarting" : "Installed. Closing", true);
             Close();
         }
         catch (OperationCanceledException) when (cancelled && !IsDisposed)
         {
-            _model.AddSystemLine($"The download of AxClaude {version} was cancelled.");
+            _model.AddSystemLine($"The download of Axit {version} was cancelled.");
             Announce("Update cancelled", true);
         }
         catch (Exception ex) when (ex is HttpRequestException or TaskCanceledException or IOException or InvalidDataException or InvalidOperationException or UnauthorizedAccessException)
@@ -2593,8 +2600,8 @@ internal sealed class MainForm : Form
             Log.Error("The update failed", ex);
             if (!IsDisposed)
             {
-                _model.AddSystemLine($"The update to AxClaude {version} failed: {ex.Message}");
-                ShowNotice(new Notice($"Update to AxClaude {version}",
+                _model.AddSystemLine($"The update to Axit {version} failed: {ex.Message}");
+                ShowNotice(new Notice($"Update to Axit {version}",
                     $"The update failed: {ex.Message}\nThis version keeps running. You can download the zip from the release page and run install.cmd yourself.",
                 [
                     ReleasePageChoice(release),

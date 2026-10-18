@@ -18,8 +18,9 @@ its tests, then the window, then the installer.
   bundle-wide or window-specific, AX-8), notices and announcements (the list of everything spoken), settings, status
   bar, title, errors, architecture, decisions `AT-Dn`, testing, status. Cite the bundle rules (AX-7, AX-8) by number;
   "SPEC.md" in the app's code means this file.
-- `user-guide.md`: the guide the app embeds (Help, User guide) and shows under About; install, start, use, settings,
-  updates, if something goes wrong, about, disclaimer.
+- `user-guide.md`: the guide the app embeds (Help, User guide); install, start, use, settings, updates, if something
+  goes wrong, about, disclaimer. About itself is the bundle's one notice (`Axit.Core/BundleAbout`, AX-3.1): name the
+  app in its text.
 - `nvda-test-plan.md`: the manual checks, by section, run before a release.
 
 ## 3. Pure code (`src/AxThing.Core/`, `tests/AxThing.Tests/`)
@@ -42,9 +43,13 @@ its tests, then the window, then the installer.
   `WindowAccessibleObject` from `CreateAccessibilityInstance`. Copy the notice flow (`ShowNotice`, `CloseNotice`,
   `WithKeyLine`, the swallowed shortcuts and Alt/F10 while a notice shows), `Announce`, the font handling, the window
   placement and the update flow from `EditorForm` until a shared window base exists.
+- The menu bar gets the bundle's Axit menu before Help, `new AxitMenu(this, [checkItem, updateItem, aboutItem])`
+  with the window's Check for updates, Update to and About items (About shows `BundleAbout`; AX-9, AX-3.1); the
+  window's title ends in ` - AxThing`, which is how that menu tells the apps' windows apart; the window calls
+  `RecentlyClosed.Remember("AxThing", path)` when it closes or swaps its file (AX-9.4).
 - `AxThingKeys`: the window's keys as constants with an `All` list; handle every key in `ProcessCmdKey` from
   `BundleKeys` and `AxThingKeys` and nowhere else; menu items show the key with `ShortcutKeyDisplayString`.
-- `HelpText`: the F1 text (bundle-wide keys first, then the app's), the embedded guide, the disclaimer.
+- `HelpText`: the F1 text (bundle-wide keys first, then the app's) and the embedded guide.
 - The form sets `AccessibleRole = AccessibleRole.Window`: NVDA then speaks the window's title when it opens
   ("name - AxThing window") before the focused control; without the role the window is a nameless pane to NVDA and
   the app is never named (AxDown 2.1.1).
@@ -53,7 +58,9 @@ its tests, then the window, then the installer.
 
 ## 5. Wiring
 
-- `Axit.Core/Dispatch`: the verb constant, the `Decide` branch, the usage text; a test in `DispatchTests`.
+- `Axit.Core/Dispatch`: the verb constant, the `Decide` branch, the usage text, and the entry in `Apps` (the name
+  and the verb), which gives the app its item under New window and its submenu in the Axit menu (AX-9); a test in
+  `DispatchTests`.
 - `src/Axit/Program.cs`: `case Dispatch.AxThing: SetAppId("Axit.AxThing"); AxThingApp.Run(launch.Arguments);`.
 - `src/Axit/Axit.csproj`: the project reference. `Axit.sln`: the two projects (`dotnet sln add`).
 - `tests/Axit.Tests`: the project reference and the window's table in `KeyTests.Windows`.

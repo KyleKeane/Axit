@@ -106,10 +106,12 @@ internal sealed class EditorForm : Form
         help.DropDownItems.Add(Item("&Keyboard shortcuts", () => ShowNotice(Notice.Plain("Keyboard shortcuts", HelpText.Shortcuts)), BundleKeys.Shortcuts));
         help.DropDownItems.Add(new ToolStripMenuItem("User &guide", null, (_, _) => ShowNotice(Notice.Plain("User guide", HelpText.UserGuide()))));
         help.DropDownItems.Add(new ToolStripSeparator());
-        // AX-3: Check for updates names the version in use and asks GitHub every time; Update to Axit n stands below
-        // it while a newer release is known. About names the version too, with the latest release named.
+        help.DropDownItems.Add(new ToolStripMenuItem("Copy diag&nostics", null, (_, _) => CopyDiagnostics()));
+
+        // The bundle's Axit menu (AX-9) sits before Help in every window; Check for updates, Update to and About are
+        // its first items (AX-3.1). Check for updates names the version in use and asks GitHub every time; Update to
+        // Axit n stands below it while a newer release is known; About is the bundle's one notice.
         _checkItem.Click += (_, _) => CheckForUpdates(manual: true);
-        help.DropDownItems.Add(_checkItem);
         _updateItem.Click += (_, _) =>
         {
             if (_update is { } known)
@@ -117,12 +119,9 @@ internal sealed class EditorForm : Form
                 ShowUpdateNotice(known);
             }
         };
-        help.DropDownItems.Add(_updateItem);
-        help.DropDownItems.Add(new ToolStripSeparator());
-        help.DropDownItems.Add(new ToolStripMenuItem("Copy diag&nostics", null, (_, _) => CopyDiagnostics()));
-        help.DropDownItems.Add(new ToolStripMenuItem("&About", null, (_, _) => ShowAbout()));
+        var axit = new AxitMenu(this, [_checkItem, _updateItem, new ToolStripMenuItem("&About", null, (_, _) => ShowAbout())]);
 
-        _menu.Items.AddRange([file, edit, navigate, view, help]);
+        _menu.Items.AddRange([file, edit, navigate, view, axit, help]);
         MainMenuStrip = _menu;
 
         // ---- the editor (AD-2) ----
@@ -202,6 +201,12 @@ internal sealed class EditorForm : Form
             }, KeepWorkingAfterUpdate);
             base.OnFormClosing(e);
             return;
+        }
+
+        if (_path is { } closing)
+        {
+            // AX-9.4: the file joins the bundle's Recently closed list.
+            RecentlyClosed.Remember(AppName, closing);
         }
 
         SaveWindow();
@@ -333,6 +338,12 @@ internal sealed class EditorForm : Form
 
     private void LoadDocument(string? path)
     {
+        if (_path is { } old && !string.Equals(old, path, StringComparison.OrdinalIgnoreCase))
+        {
+            // AX-9.4: the file left behind joins the bundle's Recently closed list.
+            RecentlyClosed.Remember(AppName, old);
+        }
+
         _path = path;
         _document = TextDocument.Empty();
         _lastWriteTime = null;
@@ -872,11 +883,8 @@ internal sealed class EditorForm : Form
 
     // ---- help, about, diagnostics, updates (AD-4.4, AX-3) ----
 
-    private void ShowAbout() =>
-        ShowNotice(Notice.Plain($"About {AppName}",
-            $"{AppName}, part of Axit {BundleInfo.Version}\nA plain editor for Markdown and text files.\nMade by Dr. Kyle Keane, www.kylekeane.com. Free under the MIT licence.\n\n" +
-            $"Latest release on GitHub: {_latestState}\nReleases: {UpdateCheck.ReleasesPage}\nSettings: {EditorSettings.DefaultPath}\nLog: {Log.FilePath}\n\n" +
-            HelpText.Disclaimer));
+    /// <summary>The bundle's one About notice (AX-3.1), with this window's latest-release state.</summary>
+    private void ShowAbout() => ShowNotice(Notice.Plain(BundleAbout.Title, BundleAbout.Text(_latestState)));
 
     private void CopyDiagnostics()
     {
@@ -958,7 +966,7 @@ internal sealed class EditorForm : Form
                 }
                 else
                 {
-                    Announce($"Update {version} in the Help menu", false);
+                    Announce($"Update {version} in the Axit menu", false);
                 }
             }
             else
@@ -1000,7 +1008,7 @@ internal sealed class EditorForm : Form
             (release.Notes.Length > 0 ? release.Notes + "\n\n" : string.Empty) +
             $"Update and restart downloads the new version, closes {AppName} (asking first when there are unsaved changes), installs it " +
             $"and starts it again on the same file. Update and close installs without starting it again. A progress bar shows the download.{size}\n" +
-            "Later keeps this version; the Help menu offers the update again.";
+            "Later keeps this version; the Axit menu offers the update again.";
         ShowNotice(new Notice($"Update to Axit {version}", text,
         [
             new OverlayChoice("Update and &restart", () => InstallUpdate(release, restart: true), IsDefault: true),

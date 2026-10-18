@@ -5,6 +5,10 @@ namespace Axit.Core;
 /// that does not exist.</summary>
 public sealed record Launch(string App, string[] Arguments, string? Error = null);
 
+/// <summary>An app of the bundle: its name, which ends every title of its windows ("notes.md - AxDown") and names its
+/// Start menu entry, and the verb that starts it (AX-1.1).</summary>
+public sealed record App(string Name, string Verb);
+
 /// <summary>
 /// Decides which app <c>Axit.exe</c> starts (docs/axit/SPEC.md AX-1). The first argument may be a verb naming the app;
 /// without one, a folder goes to AxClaude and a file to AxDown; an option (<c>--project</c>, a bare <c>--</c>) or no
@@ -18,6 +22,9 @@ public static class Dispatch
 
     /// <summary>Not an app: the executable answers <c>--help</c> and <c>--version</c>, or reports <see cref="Launch.Error"/>.</summary>
     public const string Bundle = "axit";
+
+    /// <summary>The apps, in the order the Axit menu lists them (AX-9).</summary>
+    public static readonly IReadOnlyList<App> Apps = [new("AxClaude", AxClaude), new("AxDown", AxDown)];
 
     public const string Usage = """
         Usage: Axit [claude|down] [arguments]

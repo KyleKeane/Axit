@@ -19,6 +19,9 @@ public static class UpdateCheck
     /// <summary>The end of the zip's file name, as publish.ps1 names it: <c>Axit-2.0.0-win-x64.zip</c> (<c>AxClaude-1.7.0-win-x64.zip</c> before the bundle).</summary>
     public const string ZipSuffix = "-win-x64.zip";
 
+    /// <summary>The repository's page, Axit on GitHub in the Axit menu (AX-9.1).</summary>
+    public static string RepositoryPage => $"https://github.com/{Repository}";
+
     public static string ReleasesPage => $"https://github.com/{Repository}/releases";
     public static string LatestReleaseApi => $"https://api.github.com/repos/{Repository}/releases/latest";
 

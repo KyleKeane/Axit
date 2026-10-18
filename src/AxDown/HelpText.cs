@@ -2,15 +2,9 @@ using System.Reflection;
 
 namespace AxDown;
 
-/// <summary>The texts AxDown shows as notices: the keyboard shortcuts (F1), the user guide, the disclaimer in About.</summary>
+/// <summary>The texts AxDown shows as notices: the keyboard shortcuts (F1) and the user guide; About is the bundle's (<c>Axit.Core.BundleAbout</c>).</summary>
 internal static class HelpText
 {
-    /// <summary>Shown in About and at the end of the user guide. The LICENSE file is the binding text; this repeats it in full words.</summary>
-    public const string Disclaimer = """
-        Disclaimer
-        AxDown is free software offered under the MIT licence. It is provided "as is" and "as available", without warranty of any kind, express or implied, including but not limited to the implied warranties of merchantability, fitness for a particular purpose, title and non-infringement. The developer has no obligation to provide support, maintenance, updates or corrections. To the fullest extent permitted by law, the developer is not liable for any claim, damages or other liability, whether in contract, tort or otherwise, arising from or in connection with the software or its use, including loss of data or work. You use AxDown at your own risk.
-        """;
-
     /// <summary>The F1 text (SPEC.md AD-5). Bundle-wide keys first, then AxDown's own, then what the edit control does itself.</summary>
     public const string Shortcuts = """
         In every window of Axit
@@ -19,6 +13,7 @@ internal static class HelpText
           Ctrl+S: save the file
           Ctrl+Plus, Ctrl+Minus: bigger or smaller text
           Alt: the menu. Alt+F4: close AxDown (asks first when there are unsaved changes)
+          Alt+A: the Axit menu: updates and About, a new AxDown or AxClaude window, the files and folders closed lately, and the open Axit windows, most recent first (Alt+A, O, 1 is the one you were in last) and by app
 
         AxDown
           Ctrl+N: new, empty document

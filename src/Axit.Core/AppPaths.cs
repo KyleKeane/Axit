@@ -10,6 +10,10 @@ public static class AppPaths
     public static string SettingsFile(string app) =>
         Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "Axit", app + ".json");
 
+    /// <summary>The bundle's one list of recently closed files and folders, for the Axit menu (AX-9.4).</summary>
+    public static string RecentlyClosedFile { get; } =
+        Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "Axit", "recently-closed.json");
+
     public static string LogsFolder { get; } =
         Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "Axit", "logs");
 
