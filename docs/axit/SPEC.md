@@ -64,8 +64,11 @@ allow it, see B-9).
 - AX-1.6 Each process sets a Windows application id before its window opens (`Axit.AxClaude`, `Axit.AxDown`, `Axit.AxJSON`, `Axit.AxGit`), so the
   taskbar shows the apps apart and Win+number keys reach the right one.
 - AX-1.7 An app is a class library with one entry point, `static void Run(string[] args)` on a class named
-  `<App>App`, plus a `Usage` text. `Axit`'s `Program` owns the crash handling, the version and the log start, and calls
-  that entry point; the app owns everything after.
+  `<App>App`, plus a `Usage` text. `Axit`'s `Program` only dispatches; the entry point is one call into
+  `Axit.Forms/AppHost.Run`, which owns the log, the crash handling (an exception in a UI handler is logged and shown
+  in the window as a notice, or in a message box when no window exists yet), the start and exit lines in the log,
+  `--help` and `--version`, and runs the window the app makes from the rest of its arguments (`AppHost.OnePath`
+  for an app that takes one file or folder, `AppHost.BadCommandLine` for the rest).
 
 ### AX-2 Installation
 
@@ -169,7 +172,7 @@ allow it, see B-9).
   editor), `EditorApp` (what differs between the editor apps, as data: name, verb, settings file, file types, F1 text,
   guide, the `TextJump` pairs of its outline, its resources pages and its commands on the text), `EditorKeys` (the
   shell's keys, the same in every editor window) and `EditorHost` (the entry point every editor app's `Run` is one
-  call into: log, crash handling, command line, settings, the window); and `AxitForm`, the window base (AX-6.5).
+  call into); `AppHost` (every app's entry point, AX-1.7); and `AxitForm`, the window base (AX-6.5).
 - AX-6.3 A piece moves into a shared project only when a second app needs it, in a commit of its own, with the
   accessibility review; it moves unchanged where possible (B-3).
 - AX-6.4 The notices and the question area are the bundle's one way of asking the user something, so that every

@@ -41,8 +41,10 @@ Its own code is the outline and the commands (pure, in its Core, tested), its ke
 
 - `AxThing.csproj` (net10.0-windows, WinForms), referencing `AxThing.Core`, `Axit.Core` and `Axit.Forms`, embedding
   the guide as `UserGuide.md`.
-- `AxThingApp.Run(string[] args)` and `Usage`: `Log.UseApp("axthing")` first, the crash handling as `AxDownApp` has
-  it, `--help` and `--version`, the settings, `Application.Run(new ThingForm(...))`.
+- `AxThingApp.Run(string[] args)` and `Usage`: one call into `Axit.Forms/AppHost.Run` with the app's name, its log
+  name, its usage text and a function from the remaining arguments to the window (`AppHost.OnePath` reads one file
+  or folder and reports anything else); the host owns the log, the crash handling, `--help` and `--version`.
+  `AxGitApp` is the example.
 - `ThingForm`: the window, derived from `Axit.Forms/AxitForm` (AX-6.5), which already holds the notice flow,
   `Announce`, the fonts, the window's place, the settings saving, the Axit menu with the update flow, find in a text
   box, the diagnostics and the common keys. Pass the app's name, its settings (a class that implements

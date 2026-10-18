@@ -1,12 +1,12 @@
 using AxGit.Core;
-using Axit.Core;
+using Axit.Forms;
 
 namespace AxGit;
 
 /// <summary>
 /// AxGit's entry point inside Axit (docs/axit/SPEC.md AX-1.7; SPEC.md AG-1.3): <c>Axit.exe git [&lt;folder or file&gt;]</c>
-/// calls <see cref="Run"/>, which starts the log, the crash handling, reads the command line and the settings, and
-/// runs <see cref="GitForm"/>.
+/// calls <see cref="Run"/>, one call into the bundle's <see cref="AppHost"/> with the one path of the command line,
+/// the settings and <see cref="GitForm"/>.
 /// </summary>
 public static class AxGitApp
 {
@@ -20,68 +20,15 @@ public static class AxGitApp
           --help, --version this text, or the version
         """;
 
-    public static void Run(string[] args)
-    {
-        Log.UseApp("axgit");
-
-        // An exception in a UI handler is logged and reported instead of silently ending the process.
-        Application.SetUnhandledExceptionMode(UnhandledExceptionMode.CatchException);
-        Application.ThreadException += (_, e) => ReportCrash(e.Exception);
-        AppDomain.CurrentDomain.UnhandledException += (_, e) =>
-            Log.Error("Unhandled exception on a background thread", e.ExceptionObject as Exception);
-
-        Log.Info($"{Name} {BundleInfo.Version} starting on .NET {Environment.Version} from {Environment.ProcessPath ?? "(unknown)"} as process {Environment.ProcessId}, arguments: {string.Join(" ", args)}");
-
-        if (args.Length == 1 && args[0] is "--help" or "-h" or "-?" or "/?")
+    public static void Run(string[] args) =>
+        AppHost.Run(Name, "axgit", Usage, args, arguments =>
         {
-            MessageBox.Show(Usage, Name, MessageBoxButtons.OK, MessageBoxIcon.Information);
-            return;
-        }
-
-        if (args.Length == 1 && args[0] == "--version")
-        {
-            MessageBox.Show($"{Name}, Axit {BundleInfo.Version}", Name, MessageBoxButtons.OK, MessageBoxIcon.Information);
-            return;
-        }
-
-        if (args.Length > 1 || (args.Length == 1 && args[0].StartsWith("--", StringComparison.Ordinal)))
-        {
-            var message = args.Length > 1 ? $"{Name} opens one repository." : $"Unknown option {args[0]}.";
-            Log.Error("Bad command line: " + message);
-            MessageBox.Show(message + "\n\n" + Usage, Name, MessageBoxButtons.OK, MessageBoxIcon.Error);
-            return;
-        }
-
-        var path = args.Length == 1 ? Path.GetFullPath(args[0]) : null;
-        var settings = GitSettings.Load(GitSettings.DefaultPath, out var settingsError);
-        if (settingsError is not null)
-        {
-            Log.Error("Settings not readable, using defaults: " + settingsError);
-        }
-
-        Application.Run(new GitForm(path, settings, settingsError));
-        Log.Info($"{Name} exiting");
-    }
-
-    /// <summary>The report goes into the window as a notice; a message box only when there is no window to put it in.</summary>
-    private static void ReportCrash(Exception exception)
-    {
-        Log.Error("Unhandled exception", exception);
-        var message = $"{Name} hit an unexpected error and will keep running if it can.\n\n{exception.GetType().Name}: {exception.Message}\n\nDetails were written to {Log.FilePath}";
-        var window = Application.OpenForms.OfType<GitForm>().FirstOrDefault();
-        if (window is { IsDisposed: false, IsHandleCreated: true })
-        {
-            try
+            if (!AppHost.OnePath(Name, "folder or file", Usage, arguments, out var path))
             {
-                window.ShowError("Unexpected error", message);
-                return;
+                return null;
             }
-            catch (Exception ex)
-            {
-                Log.Error("The error could not be shown in the window", ex);
-            }
-        }
 
-        MessageBox.Show(message, $"{Name} error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-    }
+            var settings = GitSettings.Load(GitSettings.DefaultPath, out var settingsError);
+            return new GitForm(path, settings, settingsError);
+        });
 }

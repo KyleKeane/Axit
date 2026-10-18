@@ -13,7 +13,7 @@ dotnet test tests/AxGit.Tests/AxGit.Tests.csproj
 
 ## Where things are
 
-- `AxGitApp`: the entry point `Run` that Axit's `Program` calls (bundle AX-1.7): the log (`axgit.log`), the crash handling, the command line (one folder or file, `--help`, `--version`), the settings, the window.
+- `AxGitApp`: the entry point `Run` that Axit's `Program` calls (bundle AX-1.7), one call into `Axit.Forms/AppHost.Run` with the one folder or file of the command line, the settings and the window; the log (`axgit.log`), the crash handling, `--help` and `--version` are the host's.
 - `GitForm`: the window (SPEC.md AG-2). The menus (AG-6.1); `ProcessCmdKey`, the one key switch, from `BundleKeys` and `AxGitKeys`; the views (`ShowViewAsync`, `FillList`, the selection kept per view by path, hash or name); the commands, each one `RunGitAsync` call with the argument list the Core's records give (`StageToggleAsync`, `ShowDiffAsync`, `Discard`, `Commit`, `ShowCommitAsync`, `SwitchBranchAsync`, `NewBranch`, `FetchAsync`, `PullAsync`, `PushAsync`); `ShowDetails`; the notice flow, the fonts, the window placement, find and the update flow are the window base's (`Axit.Forms/AxitForm`, bundle AX-6.5), which `GitForm` fills in with its hooks: the list and the details hidden for a notice, the list as the focus target, the font on both, `git` plus the repository as the restart arguments.
 - `AxGitKeys`: the window's keys (SPEC.md AG-6.2; bundle AX-8), the one place a key is changed; `All` feeds the collision test and the F1 text names the same keys.
 - `HelpText`: the F1 text and the embedded guide; About is the bundle's.

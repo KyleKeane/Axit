@@ -56,6 +56,14 @@ public static class SettingsFile
             error = $"{path}: {ex.Message}";
             return new T();
         }
+        finally
+        {
+            if (error is not null)
+            {
+                // Logged here once, for every app; the window says it too, as a notice.
+                Log.Error("Settings not readable, using defaults: " + error);
+            }
+        }
     }
 
     /// <summary>Writes the file atomically: a temporary file next to it is moved into place.</summary>
