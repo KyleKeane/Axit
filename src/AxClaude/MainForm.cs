@@ -30,7 +30,7 @@ internal sealed class MainForm : Form
     private readonly StatusStrip _status = new();
     private readonly ToolStripStatusLabel _state = new();
     private readonly ToolStripStatusLabel _folderLabel = new();
-    private readonly ToolStripMenuItem _recentFoldersItem = new("Open &recent");
+    private readonly ToolStripMenuItem _recentFoldersItem = new("Open &recent folder");
     private readonly ToolStripMenuItem _recordItem = new(RecordItemText);
     private readonly ToolStripMenuItem _checkItem = new($"Check for &updates (Axit {BundleInfo.Version})...");
     private readonly ToolStripMenuItem _updateItem = new() { Visible = false };
@@ -376,25 +376,23 @@ internal sealed class MainForm : Form
         MinimumSize = new Size(600, 400);
 
         // The menus (FR-10): short, grouped by what the items are about, every mnemonic unique within its menu.
-        // Project is the plain file menu, where Claude runs and what the window holds; the session itself is in Claude.
-        var project = new ToolStripMenuItem("&Project");
-        project.DropDownItems.Add(new ToolStripMenuItem("&Open folder...", null, (_, _) => OpenFolder()));
+        // AxClaude is the app's own menu: the session, where Claude runs, and the window (A is the Axit menu's, so X).
+        var axclaude = new ToolStripMenuItem("A&xClaude");
+        axclaude.DropDownItems.Add(new ToolStripMenuItem("&New session...", null, (_, _) => NewSession()) { ShortcutKeys = AxClaudeKeys.NewSession });
+        axclaude.DropDownItems.Add(new ToolStripMenuItem("&Open folder...", null, (_, _) => OpenFolder()));
         _recentFoldersItem.DropDownOpening += (_, _) => FillRecentFolders();
         FillRecentFolders();
-        project.DropDownItems.Add(_recentFoldersItem);
-        // FR-8.2: Show folder in ▸ File Explorer; an Axit file manager joins the submenu when there is one.
-        var showIn = new ToolStripMenuItem("&Show folder in");
+        axclaude.DropDownItems.Add(_recentFoldersItem);
+        // FR-8.2: Show current folder in ▸ File Explorer; an Axit file manager joins the submenu when there is one.
+        var showIn = new ToolStripMenuItem("&Show current folder in");
         showIn.DropDownItems.Add(new ToolStripMenuItem("File &Explorer", null, (_, _) => ShowInExplorer()) { ShortcutKeys = AxClaudeKeys.ShowInExplorer });
-        project.DropDownItems.Add(showIn);
-        project.DropDownItems.Add(new ToolStripSeparator());
-        project.DropDownItems.Add(new ToolStripMenuItem("&Export conversation...", null, (_, _) => SaveConversation()) { ShortcutKeyDisplayString = BundleKeys.Text(BundleKeys.Save) });
-        project.DropDownItems.Add(new ToolStripSeparator());
-        project.DropDownItems.Add(new ToolStripMenuItem("E&xit", null, (_, _) => Close()) { ShortcutKeyDisplayString = "Alt+F4" });
+        axclaude.DropDownItems.Add(showIn);
+        axclaude.DropDownItems.Add(new ToolStripSeparator());
+        axclaude.DropDownItems.Add(new ToolStripMenuItem("E&xit", null, (_, _) => Close()) { ShortcutKeyDisplayString = "Alt+F4" });
 
         // What goes to Claude itself (FR-11); the raw sequences are fixed here and listed in Appendix B.
         var claude = new ToolStripMenuItem("&Claude");
-        // The session first (FR-8.6, FR-1.8): a new one with its folder and arguments, or the same one started again.
-        claude.DropDownItems.Add(new ToolStripMenuItem("&New Claude Code session...", null, (_, _) => NewSession()) { ShortcutKeys = AxClaudeKeys.NewSession });
+        // The process first (FR-1.8), then the turn.
         claude.DropDownItems.Add(new ToolStripMenuItem("Force Claude to res&tart", null, (_, _) => RestartClaude()) { ShortcutKeys = AxClaudeKeys.RestartClaude });
         claude.DropDownItems.Add(new ToolStripSeparator());
         claude.DropDownItems.Add(new ToolStripMenuItem("Send &message", null, (_, _) => SendInput()) { ShortcutKeyDisplayString = "Enter in the message field" });
@@ -512,7 +510,7 @@ internal sealed class MainForm : Form
         help.DropDownItems.Add(new ToolStripMenuItem("&Keyboard shortcuts", null, (_, _) => ShowNotice(Notice.Plain("Keyboard shortcuts", HelpText.Shortcuts))) { ShortcutKeys = BundleKeys.Shortcuts });
         help.DropDownItems.Add(new ToolStripMenuItem("User &guide", null, (_, _) => ShowNotice(Notice.Plain("User guide", HelpText.UserGuide()))));
         help.DropDownItems.Add(new ToolStripSeparator());
-        var web = new ToolStripMenuItem("Claude Code on the &web");
+        var web = new ToolStripMenuItem("Claude Code &resources");
         web.DropDownItems.Add(new ToolStripMenuItem("&Documentation", null, (_, _) => OpenUrl("https://code.claude.com/docs/en/overview")));
         web.DropDownItems.Add(new ToolStripMenuItem("Slash &commands", null, (_, _) => OpenUrl("https://code.claude.com/docs/en/commands")));
         web.DropDownItems.Add(new ToolStripMenuItem("&Keys", null, (_, _) => OpenUrl("https://code.claude.com/docs/en/interactive-mode")));
@@ -533,7 +531,7 @@ internal sealed class MainForm : Form
         };
         var axit = new AxitMenu(this, _checkItem, _updateItem, () => _latestState, notice => ShowNotice(notice));
 
-        _menu.Items.AddRange([project, claude, navigate, options, axit, help]);
+        _menu.Items.AddRange([axclaude, claude, navigate, options, axit, help]);
         MainMenuStrip = _menu;
 
         // No AccessibleName on status labels: it would replace the text that NVDA reads with NVDA+End.
@@ -1513,7 +1511,7 @@ internal sealed class MainForm : Form
 
     // ---- project folder ----
 
-    /// <summary>Project → Show folder in → File Explorer, Ctrl+W (FR-8.2): the folder in File Explorer, one of the system's own windows (D23).</summary>
+    /// <summary>AxClaude → Show current folder in → File Explorer, Ctrl+W (FR-8.2): the folder in File Explorer, one of the system's own windows (D23).</summary>
     private void ShowInExplorer()
     {
         if (_folder is null)
@@ -1544,7 +1542,7 @@ internal sealed class MainForm : Form
         return dialog.ShowDialog(this) == DialogResult.OK && !string.IsNullOrEmpty(dialog.SelectedPath) ? dialog.SelectedPath : null;
     }
 
-    /// <summary>Makes the folder the project folder: the title, the status bar and the Project menu follow, and the default arguments apply there again (FR-9.1).</summary>
+    /// <summary>Makes the folder the project folder: the title and the status bar follow, and the default arguments apply there again (FR-9.1).</summary>
     private void SetFolder(string folder)
     {
         if (_folder is { } old && !string.Equals(old, folder, StringComparison.OrdinalIgnoreCase))
@@ -1558,7 +1556,7 @@ internal sealed class MainForm : Form
         UpdateFolderUi();
     }
 
-    /// <summary>Project → Open folder… (FR-8.3): the picker, then Claude restarts in the chosen folder.</summary>
+    /// <summary>AxClaude → Open folder… (FR-8.3): the picker, then Claude restarts in the chosen folder.</summary>
     private void OpenFolder()
     {
         if (PickFolder(_folder) is { } folder)
@@ -1567,7 +1565,7 @@ internal sealed class MainForm : Form
         }
     }
 
-    /// <summary>Restarts Claude in another folder (Open folder, Open recent), with a system line and an announcement.</summary>
+    /// <summary>Restarts Claude in another folder (Open folder, Open recent folder), with a system line and an announcement.</summary>
     private void SwitchFolder(string folder)
     {
         if (!Directory.Exists(folder))
@@ -1596,7 +1594,7 @@ internal sealed class MainForm : Form
     ];
 
     /// <summary>
-    /// Claude → New Claude Code session… (Ctrl+N): the folder with a Choose folder button under it, the recommended argument
+    /// AxClaude → New session… (Ctrl+N): the folder with a Choose folder button under it, the recommended argument
     /// sets as radio buttons, Custom with a free argument field. Enter stops the current session and starts a new
     /// one in the folder with those arguments; Escape keeps the current session.
     /// </summary>
@@ -1615,7 +1613,7 @@ internal sealed class MainForm : Form
             text = $"Claude has work running in the background ({background}). A new session stops it.\n" + text;
         }
 
-        ShowNotice(new Notice("New Claude Code session", text,
+        ShowNotice(new Notice("New session", text,
         [
             new OverlayChoice("&Start session", StartNewSession, IsDefault: true),
             new OverlayChoice("Cancel", IsCancel: true),

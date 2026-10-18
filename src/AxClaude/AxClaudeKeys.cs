@@ -79,7 +79,7 @@ public static class AxClaudeKeys
         ("Read to the end: Ctrl+Alt with a quick key letter", ReadToEnd),
         ("Bookmark this line", BookmarkLine),
         ("Show the folder in File Explorer", ShowInExplorer),
-        ("New Claude Code session", NewSession),
+        ("New session", NewSession),
         ("Force Claude to restart", RestartClaude),
         ("Ctrl+O guard", CtrlOGuard),
         ("Enter: send, or quote the line", Enter),
