@@ -24,7 +24,7 @@ public static class AxClaudeKeys
     /// <summary>Ctrl+Alt with a quick key letter, from anywhere: every line of that kind from the caret's line to the end, spoken once (FR-5, D36).</summary>
     public const Keys ReadToEnd = Keys.Control | Keys.Alt;
     public const Keys BookmarkLine = Keys.Control | Keys.Shift | Keys.K;
-    public const Keys OpenFolder = Keys.Control | Keys.W;
+    public const Keys ShowInExplorer = Keys.Control | Keys.W;
     public const Keys NewSession = Keys.Control | Keys.N;
     public const Keys RestartClaude = Keys.Control | Keys.Shift | Keys.R;
     /// <summary>Background music on or off, said each time (FR-7.9).</summary>
@@ -78,8 +78,8 @@ public static class AxClaudeKeys
         ("Latest response", LatestResponse),
         ("Read to the end: Ctrl+Alt with a quick key letter", ReadToEnd),
         ("Bookmark this line", BookmarkLine),
-        ("Open the current folder", OpenFolder),
-        ("New session", NewSession),
+        ("Show the folder in File Explorer", ShowInExplorer),
+        ("New Claude Code session", NewSession),
         ("Force Claude to restart", RestartClaude),
         ("Ctrl+O guard", CtrlOGuard),
         ("Enter: send, or quote the line", Enter),
