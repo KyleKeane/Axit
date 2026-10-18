@@ -116,12 +116,12 @@ public static class AxClaudeKeys
     /// </summary>
     public static readonly IReadOnlyList<TextJump> NoticeJumps =
     [
-        new(Heading, Keys.Shift | Heading, ElementKind.Heading),
-        new(HeadingLevel1, Keys.Shift | HeadingLevel1, ElementKind.Heading, 1),
-        new(HeadingLevel2, Keys.Shift | HeadingLevel2, ElementKind.Heading, 2),
-        new(HeadingLevel3, Keys.Shift | HeadingLevel3, ElementKind.Heading, 3),
-        new(HeadingLevel4, Keys.Shift | HeadingLevel4, ElementKind.Heading, 4),
-        new(HeadingLevel5, Keys.Shift | HeadingLevel5, ElementKind.Heading, 5),
-        new(HeadingLevel6, Keys.Shift | HeadingLevel6, ElementKind.Heading, 6),
+        TextJump.Markdown(Heading, Keys.Shift | Heading, ElementKind.Heading),
+        TextJump.Markdown(HeadingLevel1, Keys.Shift | HeadingLevel1, ElementKind.Heading, 1),
+        TextJump.Markdown(HeadingLevel2, Keys.Shift | HeadingLevel2, ElementKind.Heading, 2),
+        TextJump.Markdown(HeadingLevel3, Keys.Shift | HeadingLevel3, ElementKind.Heading, 3),
+        TextJump.Markdown(HeadingLevel4, Keys.Shift | HeadingLevel4, ElementKind.Heading, 4),
+        TextJump.Markdown(HeadingLevel5, Keys.Shift | HeadingLevel5, ElementKind.Heading, 5),
+        TextJump.Markdown(HeadingLevel6, Keys.Shift | HeadingLevel6, ElementKind.Heading, 6),
     ];
 }

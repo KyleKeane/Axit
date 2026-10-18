@@ -67,12 +67,12 @@ public static class AxDownKeys
     /// <summary>The keys of SPEC.md §9 as pairs, one per kind: the editor handles them through this list, and the notice text takes the same list (bundle AX-7.2).</summary>
     public static readonly IReadOnlyList<TextJump> Jumps =
     [
-        new(NextHeading, PreviousHeading, ElementKind.Heading),
-        ..Enumerable.Range(1, 6).Select(level => new TextJump(NextHeadingLevel(level), PreviousHeadingLevel(level), ElementKind.Heading, level)),
-        new(NextLink, PreviousLink, ElementKind.Link),
-        new(NextList, PreviousList, ElementKind.List),
-        new(NextListItem, PreviousListItem, ElementKind.ListItem),
-        new(NextBlockQuote, PreviousBlockQuote, ElementKind.BlockQuote),
-        new(NextTable, PreviousTable, ElementKind.Table),
+        TextJump.Markdown(NextHeading, PreviousHeading, ElementKind.Heading),
+        ..Enumerable.Range(1, 6).Select(level => TextJump.Markdown(NextHeadingLevel(level), PreviousHeadingLevel(level), ElementKind.Heading, level)),
+        TextJump.Markdown(NextLink, PreviousLink, ElementKind.Link),
+        TextJump.Markdown(NextList, PreviousList, ElementKind.List),
+        TextJump.Markdown(NextListItem, PreviousListItem, ElementKind.ListItem),
+        TextJump.Markdown(NextBlockQuote, PreviousBlockQuote, ElementKind.BlockQuote),
+        TextJump.Markdown(NextTable, PreviousTable, ElementKind.Table),
     ];
 }

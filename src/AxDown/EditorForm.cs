@@ -94,8 +94,8 @@ internal sealed class EditorForm : Form
         var previous = new ToolStripMenuItem("&Previous");
         foreach (var jump in AxDownKeys.Jumps)
         {
-            next.DropDownItems.Add(Item(TextJumps.MenuLabel(jump), () => JumpTo(jump.Kind, 1, jump.Level), jump.Next));
-            previous.DropDownItems.Add(Item(TextJumps.MenuLabel(jump), () => JumpTo(jump.Kind, -1, jump.Level), jump.Previous));
+            next.DropDownItems.Add(Item(TextJumps.MenuLabel(jump), () => JumpTo(jump, 1), jump.Next));
+            previous.DropDownItems.Add(Item(TextJumps.MenuLabel(jump), () => JumpTo(jump, -1), jump.Previous));
         }
 
         navigate.DropDownItems.Add(next);
@@ -670,9 +670,9 @@ internal sealed class EditorForm : Form
     }
 
     /// <summary>A Navigate menu item of section 9: the shared jump on the editor (SPEC.md §9, AD-D7), then the status bar.</summary>
-    private void JumpTo(ElementKind kind, int direction, int level = 0)
+    private void JumpTo(TextJump jump, int direction)
     {
-        TextJumps.Jump(_editor, kind, direction, level, Announce);
+        TextJumps.Jump(_editor, jump, direction, Announce);
         UpdateStatus();
     }
 
