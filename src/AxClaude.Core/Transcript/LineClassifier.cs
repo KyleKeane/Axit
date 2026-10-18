@@ -11,8 +11,13 @@ public static partial class LineClassifier
 
     // A running subagent, one row each above the spinner, redrawn every second with its time and token count
     // (§4.4 item 21): "◯  general-purpose Checking callers 2m 15s · ↓ 1.2k tokens".
-    [GeneratedRegex(@"^◯\s+.*\d+[hms](?: \d+[ms])?(?: · [↓↑] [\d.]+[kM]? tokens)?$")]
+    [GeneratedRegex(@"^\s*◯\s+.*\d+[hms](?: \d+[ms])?(?: · [↓↑] [\d.]+[kM]? tokens)?$")]
     private static partial Regex AgentRowRegex();
+
+    // The git branch Claude prints under its mode line in a repository, "  ● main" (2.1.300), rewritten with the
+    // mode line and gone when the next rows are drawn.
+    [GeneratedRegex(@"^\s*● \S+$")]
+    private static partial Regex BranchRowRegex();
 
     // Shown under a message that was sent while Claude was busy; the message itself is drawn just above it.
     [GeneratedRegex(@"^ctrl\+x ctrl\+s to send now$")]
@@ -60,11 +65,24 @@ public static partial class LineClassifier
     [GeneratedRegex(@"^([-*•]|\d+[.)])\s")]
     private static partial Regex ListItemRegex();
 
+    // The last row of the card Claude prints above its prompt when it has drafted feedback for Anthropic
+    // (docs/axclaude/claude-screens.md): "1 to review · 2 to send · 0 to dismiss". In screen reader mode those keys
+    // do nothing (a typed digit lands in the prompt), so the row is interface, never conversation.
+    [GeneratedRegex(@"^\d to review · \d to send · \d to dismiss$")]
+    private static partial Regex FeedbackCardHintRegex();
+
     /// <summary>Rows that belong to the interface rather than the conversation.</summary>
     public static bool IsChrome(string text) =>
         ModeLineRegex().IsMatch(text) || SpinnerRegex().IsMatch(text) || TipRegex().IsMatch(text)
         || NotepadHintRegex().IsMatch(text) || EffortHintRegex().IsMatch(text) || BackgroundHintRegex().IsMatch(text)
-        || QueuedHintRegex().IsMatch(text) || AnnouncementRowRegex().IsMatch(text) || AgentRowRegex().IsMatch(text);
+        || QueuedHintRegex().IsMatch(text) || AnnouncementRowRegex().IsMatch(text) || AgentRowRegex().IsMatch(text)
+        || BranchRowRegex().IsMatch(text) || FeedbackCardHintRegex().IsMatch(text);
+
+    /// <summary>The key-hint row of the feedback card, <c>1 to review · 2 to send · 0 to dismiss</c> (D33).</summary>
+    public static bool IsFeedbackCardHint(string text) => FeedbackCardHintRegex().IsMatch(text);
+
+    /// <summary>The first row of the feedback card, which names the draft: <c>Product feedback drafted: &lt;title&gt;</c>.</summary>
+    public static bool IsFeedbackCardTitle(string text) => text.Contains(" drafted: ", StringComparison.Ordinal);
 
     /// <summary>A bracketed announcement row; the text inside the brackets is what Claude wants spoken.</summary>
     public static string? AnnouncementText(string text) =>
@@ -105,7 +123,8 @@ public static partial class LineClassifier
 
     /// <summary>
     /// The background work a mode line counts ("1 shell", or "1 shell, 2 agents"), "see /tasks" when it only says
-    /// "↓ to manage" (a background agent), or null when it shows none or is not a mode line.
+    /// "↓ to manage" (a background agent), or null when it shows none or is not a mode line. A feedback draft the
+    /// mode line counts ("1 feedback draft") is no work running: it waits in /feedback and is left out.
     /// </summary>
     public static string? BackgroundText(string text)
     {
@@ -122,9 +141,36 @@ public static partial class LineClassifier
         }
 
         var counts = m.Groups[2].Value.Split('·', StringSplitOptions.TrimEntries | StringSplitOptions.RemoveEmptyEntries)
-            .Where(part => char.IsAsciiDigit(part[0]))
+            .Where(part => char.IsAsciiDigit(part[0]) && !part.Contains("feedback draft", StringComparison.Ordinal))
             .ToList();
         return counts.Count > 0 ? string.Join(", ", counts) : null;
+    }
+
+    /// <summary>
+    /// The feedback drafts a mode line counts ("1 feedback draft", "2 feedback drafts"): queued by Claude Code's
+    /// SendFeedback tool, waiting in /feedback (D33). Zero when it counts none or is not a mode line.
+    /// </summary>
+    public static int FeedbackDrafts(string text)
+    {
+        var m = ModeLineRegex().Match(text);
+        if (!m.Success)
+        {
+            return 0;
+        }
+
+        var at = m.Groups[2].ValueSpan.IndexOf(" feedback draft", StringComparison.Ordinal);
+        if (at < 0)
+        {
+            return 0;
+        }
+
+        var start = at;
+        while (start > 0 && char.IsAsciiDigit(m.Groups[2].ValueSpan[start - 1]))
+        {
+            start--;
+        }
+
+        return int.TryParse(m.Groups[2].ValueSpan[start..at], out var count) ? count : 0;
     }
 
     /// <summary>A row Claude prints when it waits for an answer: a permission or trust question, a numbered menu, a yes-or-no question, the /config list (§4.4).</summary>

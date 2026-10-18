@@ -1,5 +1,10 @@
 # Changelog
 
+## 2.10.1 - 2026-10-18
+
+- AxClaude: when Claude Code drafts feedback for Anthropic by itself, AxClaude opens `/feedback` for you as soon as Claude is done: Claude's list of drafts comes as a question and the review of a draft as a screen with Send, Discard and Later, the same interface as typing `/feedback`. The card Claude printed for the draft ("Product feedback drafted", a preview, "1 to review · 2 to send · 0 to dismiss") names keys that cannot be pressed from the message field, where a typed 2 went to Claude as a message; the card now stays out of the conversation. The "1 feedback draft" on Claude's mode line no longer counts as background work in the status or at closing.
+- AxClaude: the branch Claude prints under its mode line in a git folder ("● main") and the rows of running agents are interface rows, not conversation. The branch row cut the block of interface rows, which could leave the mode line in the conversation and AxClaude thinking Claude idle while it worked.
+
 ## 2.10.0 - 2026-10-18
 
 - Axit: the numbered items of the Axit menu (Recently closed, Open windows, Open windows by type), of AxClaude's Open recent folder and of the editors' Open recent file read the same way: the number, a full stop that the synthesizer takes as a pause, then the window's title or the name with its full path in parentheses, for example "1. myproject (C:\src\myproject)". Open recent folder and Open recent file showed the bare path without a number.

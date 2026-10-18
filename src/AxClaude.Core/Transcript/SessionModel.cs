@@ -77,7 +77,13 @@ public sealed partial class SessionModel
     /// </summary>
     public ClaudeScreen? PendingScreen { get; private set; }
 
-    /// <summary>Look for screens that wait on a hint row (<see cref="PendingScreen"/>); off with the Answer Claude's questions in a notice option.</summary>
+    /// <summary>
+    /// The feedback drafts Claude's mode line counts ("1 feedback draft"): queued by Claude Code's SendFeedback tool
+    /// and waiting in /feedback, which the app opens when the count rises (D33). Zero until a mode line counts one.
+    /// </summary>
+    public int FeedbackDrafts { get; private set; }
+
+    /// <summary>Look for screens that wait on a hint row (<see cref="PendingScreen"/>) and hide the feedback card; off with the Answer Claude's questions in a notice option.</summary>
     public bool DetectScreens { get; set; } = true;
 
     /// <summary>A spinner row or an "esc to interrupt" hint was on screen at the end of the last frame.</summary>
@@ -169,11 +175,12 @@ public sealed partial class SessionModel
         }
 
         PullRowText();
-        _anchor = ApplyChrome(out var spinner, out var mode, out var background, out var working);
+        _anchor = ApplyChrome(out var spinner, out var mode, out var background, out var drafts, out var working);
         Spinner = spinner;
         if (mode is not null)
         {
             Background = background;
+            FeedbackDrafts = drafts;
         }
 
         Mode = mode ?? Mode;
@@ -504,6 +511,7 @@ public sealed partial class SessionModel
         PendingQuestion = null;
         TextPrompt = null;
         PendingScreen = null;
+        FeedbackDrafts = 0;
         TranscriptViewOpen = false;
         Mode = null;
         Background = null;
@@ -641,16 +649,18 @@ public sealed partial class SessionModel
     /// whether Claude works, counts the queued messages, follows Claude's detailed view and raises Claude's own
     /// announcements. Returns the topmost line of the chrome block, which is where the next marker is inserted.
     /// </summary>
-    private Line? ApplyChrome(out string? spinner, out string? mode, out string? background, out bool working)
+    private Line? ApplyChrome(out string? spinner, out string? mode, out string? background, out int drafts, out bool working)
     {
         var cy = _screen.CursorRow;
         Line? anchor = null;
         spinner = null;
         mode = null;
         background = null;
+        drafts = 0;
         working = false;
         var blockOpen = true;
         var inQueued = false;
+        var inCard = false;
         var queued = 0;
         var underAnnouncement = false;
         var transcriptView = false;
@@ -691,6 +701,14 @@ public sealed partial class SessionModel
                 chrome = true;
                 inQueued = !line.Text.StartsWith("you:", StringComparison.Ordinal);
             }
+            else if (inCard)
+            {
+                // The feedback card above its hint row, up to its title row (D33): Claude draws it again after every
+                // turn while the draft waits, and the control area is where it is offered. Its plain rows only; a
+                // blank or labelled row ends it.
+                chrome = line.Text.Length > 0 && LineClassifier.Classify(line.Text, inPromptBlock: false) == LineKind.Plain;
+                inCard = chrome && !LineClassifier.IsFeedbackCardTitle(line.Text);
+            }
             else
             {
                 chrome = line.Text.Length == 0 || LineClassifier.IsChrome(line.Text)
@@ -701,6 +719,10 @@ public sealed partial class SessionModel
                 {
                     queued++;
                 }
+
+                // With the control area off (DetectScreens) the card stays in the conversation, less its hint row,
+                // whose keys do nothing in screen reader mode.
+                inCard = chrome && DetectScreens && LineClassifier.IsFeedbackCardHint(line.Text);
             }
 
             if (r <= cy)
@@ -723,6 +745,7 @@ public sealed partial class SessionModel
                     {
                         mode = m;
                         background = LineClassifier.BackgroundText(line.Text);
+                        drafts = LineClassifier.FeedbackDrafts(line.Text);
                         working |= line.Text.Contains("esc to interrupt", StringComparison.Ordinal);
                     }
                 }

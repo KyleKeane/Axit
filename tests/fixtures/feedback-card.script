@@ -1,0 +1,40 @@
+mark
+wait 8000 Yes, I trust this folder
+iffound send y
+sleep 300
+send \r
+mark
+wait 30000 to edit in Notepad
+quiet 2000 15000
+send Use the SendFeedback tool now, once, to queue a draft of type idea titled Fixture card test, with details: What happened: a recording test of the feedback card. What the user said: none. Repro: none. Then reply with the single word finished.
+sleep 200
+send \r
+mark
+wait 180000 to dismiss
+quiet 3000 20000
+mark
+send 0
+quiet 2000 8000
+send \x1b
+sleep 400
+send \x1b
+quiet 2000 8000
+mark
+send Reply with the single word again.
+sleep 200
+send \r
+mark
+wait 120000 to dismiss
+quiet 3000 20000
+mark
+send /exit
+sleep 200
+send \r
+quiet 3000 15000
+mark
+send \x1b
+quiet 2000 8000
+send \x03
+sleep 400
+send \x03
+exit 8000

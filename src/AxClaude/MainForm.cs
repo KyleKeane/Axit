@@ -73,6 +73,14 @@ internal sealed class MainForm : Form
     /// <summary>The signature of the question or screen that was shown in the control area or announced: it is not shown again while Claude waits on it.</summary>
     private string? _handledWait;
 
+    /// <summary>The draft count of Claude's mode line that /feedback was last opened for (D33): a higher count opens it again, a lower one is followed down.</summary>
+    private int _draftsOpened;
+
+    /// <summary>/feedback is about to open for a draft, once the screen has settled.</summary>
+    private bool _openingDrafts;
+
+    private const int DraftSettleMs = 500;
+
     /// <summary>When a key was last sent from a screen of Claude's: the screen that follows is the user's doing and comes without the chime.</summary>
     private long _screenKeyAt;
 
@@ -748,9 +756,21 @@ internal sealed class MainForm : Form
         var queued = _model.Working;
         _model.Send(text);
         _messageSent = true;
+        QueueWrites(text);
+        Announce(queued && !answer ? "Queued" : "Sent", false);
+        if (_settings.SoundOnBell)
+        {
+            Sounds.Sent();
+        }
+    }
 
-        // Text and Enter are separate writes: text plus CR in one chunk is treated as a paste (SPEC.md 4.4).
-        // Lines of a multi-line message are joined with a lone newline write, Claude's Ctrl+J.
+    /// <summary>
+    /// Queues a message or a command for Claude: the text and Enter as separate writes, since text plus CR in one
+    /// chunk is treated as a paste (SPEC.md 4.4); the lines of a multi-line message are joined with a lone newline
+    /// write, Claude's Ctrl+J.
+    /// </summary>
+    private void QueueWrites(string text)
+    {
         var lines = text.Split('\n');
         for (var i = 0; i < lines.Length; i++)
         {
@@ -763,12 +783,6 @@ internal sealed class MainForm : Form
 
         _writes.Enqueue(("\r", 50));
         StartWrites();
-
-        Announce(queued && !answer ? "Queued" : "Sent", false);
-        if (_settings.SoundOnBell)
-        {
-            Sounds.Sent();
-        }
     }
 
     /// <summary>Starts the write pump when it is idle; a pump already running takes what was queued after it.</summary>
@@ -922,6 +936,8 @@ internal sealed class MainForm : Form
                 Sounds.Ready();
             }
         }
+
+        OpenDraftsWhenIdle();
     }
 
     private void AnnounceAttention()
@@ -2227,6 +2243,45 @@ internal sealed class MainForm : Form
 
                 SendScreenKey(screen.Keys[index - first].Send);
             }, Leave));
+    }
+
+    /// <summary>
+    /// A feedback draft Claude has queued, counted on its mode line ("1 feedback draft", D33): /feedback opens for it
+    /// once Claude is ready and idle, after a short settle, so that Claude's list of drafts comes as a question in the
+    /// control area and the review of a draft as a screen. The card Claude prints for the draft has keys that do
+    /// nothing in screen reader mode; its rows are chrome. A count that falls (a draft sent or discarded) is followed
+    /// down, so the next draft queued opens /feedback again; a draft put off with Later stays until then. Not with
+    /// Answer from a list off, when the card stays in the conversation and /feedback is typed.
+    /// </summary>
+    private void OpenDraftsWhenIdle()
+    {
+        if (_model.FeedbackDrafts < _draftsOpened)
+        {
+            _draftsOpened = _model.FeedbackDrafts;
+        }
+
+        if (_settings.QuestionNotices && _readyAnnounced && ClaudeIdle && _model.FeedbackDrafts > _draftsOpened && !_openingDrafts)
+        {
+            _openingDrafts = true;
+            Later(DraftSettleMs, OpenFeedbackDrafts);
+        }
+    }
+
+    /// <summary>Claude runs, waits on nothing, and no write of the user's is on its way to it.</summary>
+    private bool ClaudeIdle => _host is not null && !_model.Working && !_model.PromptPending && !_writing && _writes.Count == 0;
+
+    /// <summary>Sends /feedback as the user's own command would go, without "Sent": the list of drafts announces itself. Skipped when Claude is no longer idle or the draft is gone.</summary>
+    private void OpenFeedbackDrafts()
+    {
+        _openingDrafts = false;
+        if (!ClaudeIdle || _model.FeedbackDrafts <= _draftsOpened || _area.Current is not null)
+        {
+            return;
+        }
+
+        _draftsOpened = _model.FeedbackDrafts;
+        _lastCommand = SlashCommands.Find("/feedback");
+        QueueWrites("/feedback");
     }
 
     /// <summary>

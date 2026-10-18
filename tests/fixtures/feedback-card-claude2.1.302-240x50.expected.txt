@@ -1,0 +1,17 @@
+[Screen Reader Mode: on via flag]
+Claude Code v2.1.302
+Fable 5.1 with xhigh effort · Claude Max
+C:\Temp\axclaude-fixture
+you: Use the SendFeedback tool now, once, to queue a draft of type idea titled Fixture card test, with details: What happened: a recording test of the feedback card. What the user said: none. Repro: none. Then reply with the single word finished.
+claude: I'll queue the requested feedback draft now.
+tool: SendFeedback (Fixture card test)
+claude: finished
+Worked for 3s · done 6:39 AM
+you: Reply with the single word again.
+claude: finished
+Churned for 1s · done 6:39 AM
+you: /exit
+You have 1 unsent feedback draft
+Enter to review & send · Esc to discard and exit
+Resume this session with:
+claude --resume cb169331-8921-49f9-b29d-9edafc549b9c

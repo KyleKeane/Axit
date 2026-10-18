@@ -1,0 +1,86 @@
+[?9001h[?1004h[?25l[2J[m[H]0;claude[?25h[Screen Reader Mode: on via flag]
+[?2004h[?2031h[?1004h[>0q[?u]7501;?[>4m[?2031l[?2004l
+[?2004h[?2031h[?1004h[?25l[2;1H]0;✳ Claude Code[?25hClaude Code v2.1.302
+Fable 5.1 with xhigh effort · Claude Max
+C:\Temp\axclaude-fixture
+auto mode on (shift+tab to cycle)
+effort: xhigh · /effort
+$[>0q[?2004h[?25l[6;1H$[K
+[K[6;2H[?25h[?2004h$  Use the SendFeedback tool now, once, to queue a draft of type idea titled Fixture card test, with details: What happened: a recording test of the feedback card. What the user said: none. Repro: none. Then reply with the single word      
+finished.]133;A;redraw=0]0;◐ Claude Code[?25l[5;1Hyou: Use the SendFeedback tool now, once, to queue a draft of type idea titled Fixture card test, with details: What happened: a recording test of the feedback card. What the user said: none. Repro: none. Then reply with the single word    
+finished.[K
+Percolating…[K
+auto mode on (shift+tab to cycle)  ·  esc to interrupt
+$[?25h[?25l[7;1HWarping…[K
+auto mode on (shift+tab to cycle)  ·  esc to interrupt[K
+$[K[?25h]0;◑ Claude Code[?25l[7;1Hclaude: I'll queue the requested feedback draft now.[K
+Warping…[K
+auto mode on (shift+tab to cycle)  ·  esc to interrupt[K
+$[?25h]0;◐ Claude Code[?25l[8;1Htool: SendFeedback (Fixture card test)[K
+Warping…[K
+auto mode on (shift+tab to cycle)  ·  esc to interrupt[K
+$[?25h]0;◐ Fixture card test[?25l[10;55H · 1 feedback draft[11;2H[?25h]0;◑ Fixture card test]133;C]133;D[?25l[9;1Hclaude: finished[K
+Worked for 3s · done 6:39 AM[K
+Product feedback drafted: Fixture card test[K
+Draft preview, 3 lines:
+> - **What happened:** a recording test of the feedback card.
+> - **What the user said:** none.
+> - **Repro:** none.
+End of preview. Review the full draft with /feedback.
+1 to review · 2 to send · 0 to dismiss
+auto mode on (shift+tab to cycle)  ·  1 feedback draft
+$]0;✳ Fixture card test[?25h[?2004h  0Esc again to clear[K
+$  0[?25l[11;1HTurn off Claude-drafted feedback? 0 to turn off · Esc to keep[K
+auto mode on (shift+tab to cycle)  ·  1 feedback draft[K
+Esc again to clear[K
+$[K
+[K
+[K
+[K
+[K
+[K
+[K[14;2H[?25h[?25l[11;1Hauto mode on (shift+tab to cycle)  ·  1 feedback draft[K
+Esc again to clear[K
+$[K
+[K[13;2H[?25h[?25l[12;1H$[K
+[K[12;2H[?25h  Reply with the single word again.]133;A;redraw=0]0;◑ Fixture card test[?25l[11;1Hyou: Reply with the single word again.[K
+Finagling…[K
+Tip: Set CLAUDE_CODE_USE_POWERSHELL_TOOL=1 to enable the PowerShell tool (preview)
+auto mode on (shift+tab to cycle)  ·  esc to interrupt · 1 feedback draft
+$[?25h]0;◐ Fixture card test]133;C]133;D]0;✳ Fixture card test[?25l[12;1Hclaude: finished[K
+Churned for 1s · done 6:39 AM[K
+auto mode on (shift+tab to cycle)  ·  1 feedback draft[K
+$[K[?25h[?2004h[?25l[14;1H/exit                         Exit the CLI[K
+/context                      Visualize current context usage as a colored grid[K
+/usage-credits                Configure usage credits or request them from your admin when you hit a limit[39;1H$  /exit[?25h]0;◐ Fixture card test[?25l[14;1Hyou: /exit[K
+Ideating…[K
+Tip: Use Plan Mode to prepare for a complex request before making changes. Press shift+tab twice to enable.[K
+auto mode on (shift+tab to cycle)  ·  esc to interrupt · 1 feedback draft[K
+$[K
+[K
+[K
+[K
+[K
+[K
+[K
+[K
+[K
+[K
+[K
+[K
+[K
+[K
+[K
+[K
+[K
+[K
+[K
+[K
+[K
+[K[18;2H[?25h[?25l[15;1HYou have 1 unsent feedback draft[K
+Enter to review & send · Esc to discard and exit[K
+[K
+[K[16;49H]0;✳ Fixture card test[?25h[?1006l[?1003l[?1002l[?1000l[>4m[?2031l[?2004l[?1016l[2m
+Resume this session with:
+claude --resume cb169331-8921-49f9-b29d-9edafc549b9c
+]0;[?9001l[?1004l[22m

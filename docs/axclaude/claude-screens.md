@@ -30,6 +30,7 @@ The app does not need to know the command: the shape of Claude's screen decides.
 - `/mcp`: "Manage MCP servers", one answer per server with its state. An answer leads to that server's screen, another list (recorded with 2.1.282).
 - `/hooks`: "Hooks", 33 hook events. An answer leads to that event's screen, which waits on `Esc to go back`: a screen (recorded with 2.1.282). Two-digit answers are typed quickly, as the list's own type-ahead.
 - `/config` (also `/settings`): 44 numbered settings under the tab row (`Settings  Status   Config   Usage   Stats`) and the prompt row "Enter a number to change [1-44], or Escape to save and close:", printed after the frame's end. A number flips a true-or-false setting, or opens a numbered list of the setting's values ("Project instructions"), whose Escape returns to the settings; either way the list comes back. Escape on the settings saves and closes (recorded with 2.1.282). The app lists it as "Claude's settings": Enter on a true-or-false setting shows True and False first and sends the number only for a change; Enter on any other setting opens Claude's list of values.
+- `/feedback`: "Feedback drafts", the drafts Claude Code has queued on this machine ("1. <title>, idea · 1m · <folder> · transcript available", those of other sessions under "Other sessions") and "+ Write new feedback" last, with the prompt row "Select with numbers [1-N]. Then Enter to submit:" (recorded with 2.1.302). A draft leads to its review screen: Type, Title, Area, Failure mode, Task, Details, "Send transcript: yes · sends this conversation to Anthropic", "❯  Send feedback", waiting on `↑/↓ to move · Enter to send · d to discard · Esc to later`, which the area lists as Move (Up), Move (Down), Send (Enter), Discard (d) and Later (Escape). "Write new feedback" leads to typed text. With no draft queued the panel shows only `Enter to write new feedback · Esc to close`, a screen.
 
 Extra keys are not offered. `/model` names `s` (this session only) and `←/→` (effort), `/resume` Ctrl+A and Ctrl+B, `/theme` Ctrl+T. They act on the highlighted row, and a typed number answers at once without moving the highlight: `s` tried in `/model` with 2.1.282 applied to the model already highlighted. The app would first have to move Claude's highlight with the arrow keys, more machinery than these keys are worth; the message field still reaches them.
 
@@ -56,11 +57,28 @@ Recorded with Claude Code 2.1.281 (2026-09-24); every answer is typed one keystr
 - `/rewind`: "Rewind", "Nothing to rewind to yet." in a new conversation. Hint: `Esc to cancel`. With checkpoints the docs describe a list, probably numbered (not recorded).
 - `/ide`: "Select IDE", "No available IDEs detected." Hint: `Enter to confirm · Esc to cancel`. With an IDE running, probably a list.
 
+## The feedback card
+
+Claude Code drafts feedback for Anthropic by itself (its SendFeedback tool, the `feedbackDrafts` setting in `/config`) and prints a card above the prompt at the end of the turn, with the cursor back on the `$` row (recorded with 2.1.302 in `feedback-card`):
+
+```
+Product feedback drafted: <title>
+Draft preview, 3 lines:
+> - **What happened:** …
+> - **What the user said:** …
+> - **Repro:** …
+End of preview. Review the full draft with /feedback.
+1 to review · 2 to send · 0 to dismiss
+auto mode on (shift+tab to cycle)  ·  1 feedback draft
+$
+```
+
+In a repository the branch row `  ● main` can sit between the mode line and the prompt. The card's keys cannot be pressed from the app: a digit typed in the message field goes to Claude as text with Enter (a 2 went as a message), and at Claude's own prompt a digit lands in the prompt as text too, a 0 also asking `Turn off Claude-drafted feedback? 0 to turn off · Esc to keep` under it. Claude draws the card again after every turn while the draft waits, and `/exit` asks "You have 1 unsent feedback draft" with `Enter to review & send · Esc to discard and exit`, a screen. The way that works is `/feedback`, the list above, and the app opens it itself: when the mode line's count rises and Claude is idle, the app sends `/feedback` (`SessionModel.FeedbackDrafts`, SPEC.md D33), so the drafts come as a question and the review as a screen, one interface whether the user asked or Claude drafted. The card's rows stay out of the conversation, and the count is not background work. With Options → Questions → Answer from a list off, nothing opens and the card stays in the conversation as printed, less its hint row.
+
 ## Panels
 
 - `/permissions`: tabs Permissions, Recently denied, Allow, Ask, Deny, Auto mode, Workspace; a search row; a numbered list starting with "Add a new rule…". Hint: `←/→ to switch · ↓ to select · Esc to cancel`. Cursor on the tab row.
 - `/autocompact`: "Auto-compact window", a value adjusted with `←/→`; `Enter to apply · Esc to cancel`.
-- `/feedback`: "Feedback drafts"; `Enter to write new feedback · Esc to close`, and "Any other key closes this panel". Writing leads to typed text.
 - `/artifacts`: "Artifacts", "Loading artifacts…" at first; a list with actions after (not recorded).
 - `/auto-mode-setup`, `/bug` (docs only): a draft to review and save; a consent screen before a report is sent.
 
