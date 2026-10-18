@@ -12,7 +12,7 @@ dotnet test Axit.sln
 AXCLAUDE_UPDATE_EXPECTED=1 dotnet test   # regenerate tests/fixtures/*.expected.txt after a deliberate parser change; review the diff
 ```
 
-The app records the raw stream with `--record file.vt` or Help → Record raw stream (the PtyCapture format).
+The app records the raw stream with `--record file.vt` or Options → Developer → Record raw stream (the PtyCapture format).
 
 ## Where things are
 

@@ -138,7 +138,7 @@ allow it, see B-9).
   new file does not exist; the old file is left alone.
 - AX-5.3 The load-and-save pattern of a settings file (JSON, a missing or unreadable file falls back to the defaults
   and the error is reported once) is one piece of shared code, `Axit.Core/SettingsFile`; each app's settings class is
-  its own plain record of properties. A file that is not valid JSON (a typo after Options → Open settings file) is
+  its own plain record of properties. A file that is not valid JSON (a typo after Options → Developer → Open settings file) is
   copied to `<app>.json.bad` before the defaults are used, and the error names the copy: the app saves its settings
   soon after loading, which would otherwise write the defaults over every other setting in the file.
 

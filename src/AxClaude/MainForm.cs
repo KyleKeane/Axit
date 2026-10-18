@@ -489,8 +489,14 @@ internal sealed class MainForm : Form
             _settings.KeepFilesOutOfGit = v;
             KeepFilesOutOfGit();
         }));
-        general.DropDownItems.Add(new ToolStripMenuItem("Open settings &file", null, (_, _) => OpenSettingsFile()));
         options.DropDownItems.Add(general);
+        // What only a developer or a bug report needs (FR-12.3, FR-13.3, FR-9.2), in one place.
+        var developer = new ToolStripMenuItem("De&veloper");
+        developer.DropDownItems.Add(new ToolStripMenuItem("Open settings &file", null, (_, _) => OpenSettingsFile()));
+        _recordItem.Click += (_, _) => ToggleRecording();
+        developer.DropDownItems.Add(_recordItem);
+        developer.DropDownItems.Add(new ToolStripMenuItem("Copy diag&nostics", null, (_, _) => CopyDiagnostics()));
+        options.DropDownItems.Add(developer);
 
         var help = new ToolStripMenuItem("&Help");
         help.DropDownItems.Add(new ToolStripMenuItem("&Keyboard shortcuts", null, (_, _) => ShowNotice(Notice.Plain("Keyboard shortcuts", HelpText.Shortcuts))) { ShortcutKeys = BundleKeys.Shortcuts });
@@ -517,9 +523,6 @@ internal sealed class MainForm : Form
         };
         help.DropDownItems.Add(_updateItem);
         help.DropDownItems.Add(new ToolStripSeparator());
-        _recordItem.Click += (_, _) => ToggleRecording();
-        help.DropDownItems.Add(_recordItem);
-        help.DropDownItems.Add(new ToolStripMenuItem("Copy diag&nostics", null, (_, _) => CopyDiagnostics()));
         help.DropDownItems.Add(new ToolStripMenuItem("&About", null, (_, _) => ShowAbout()));
 
         _menu.Items.AddRange([project, claude, navigate, options, help]);
