@@ -617,7 +617,7 @@ internal sealed class EditorForm : Form
         _editor.Select(heading.Start, 0);
         _editor.ScrollToCaret();
         UpdateStatus();
-        Announce($"{heading.Text}, heading level {heading.Level}", true);
+        Announce(heading.Spoken, true);
     }
 
     /// <summary>The caret's line and column, counting the file's lines (not the wrapped rows), and the number of lines.</summary>
