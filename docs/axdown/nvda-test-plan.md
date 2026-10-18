@@ -62,7 +62,8 @@ letter), and a `long.md` with headings and lines longer than the window.
 1. Alt opens the menu; every item is read with its shortcut; Escape closes without changing the text.
 2. F1 opens the shortcuts notice; Page Down and Page Up move a screen of its text, Ctrl+Down and Ctrl+Up a paragraph;
    Escape closes it and the focus is back in the editor at the same place.
-3. Help, User guide shows this app's guide; Help, About names the version of Axit.
+3. Help, User guide shows this app's guide, and Ctrl+H, Ctrl+K, Ctrl+L and the other navigation keys move through it, spoken
+   as in the editor, "No next table" when there is none; Help, About names the version of Axit.
 
 ## 7. Updates and uninstall
 

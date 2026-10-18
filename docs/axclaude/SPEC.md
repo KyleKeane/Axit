@@ -215,6 +215,10 @@ Single keys act only when the view has focus and no modifier other than Shift is
 
 The key table is data (`QuickKey(Keys, Name, Matches, Previous)` in `TranscriptView`, `Previous` being a condition on the line before the target); the keys are fixed in code.
 
+The heading keys, h and Shift+H and 1 to 6 with Shift, work in a notice's text as well (the user guide, the shortcuts,
+About), by Markdown headings there, through the bundle's notice panel (AX-7.2, `AxClaudeKeys.NoticeJumps`). The other
+quick keys are about the conversation's line kinds and do nothing in a notice.
+
 ### FR-6 Focus
 
 - FR-6.1: Tab, Shift+Tab, Ctrl+Tab, Ctrl+Shift+Tab and F6 toggle between the conversation and the control at the bottom (the message field, or the control area in its place), from anywhere (D35).

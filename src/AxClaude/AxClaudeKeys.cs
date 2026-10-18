@@ -1,3 +1,6 @@
+using Axit.Core;
+using Axit.Forms;
+
 namespace AxClaude;
 
 /// <summary>
@@ -104,5 +107,21 @@ public static class AxClaudeKeys
         ("Heading level 4", HeadingLevel4),
         ("Heading level 5", HeadingLevel5),
         ("Heading level 6", HeadingLevel6),
+    ];
+
+    /// <summary>
+    /// The heading quick keys in a notice's text as well (FR-5, bundle AX-7.2): the letter for the next heading, Shift
+    /// with it for the previous one, by Markdown headings; handed to the notice panel. The other quick keys are about the
+    /// conversation's own line kinds and have no meaning in a notice.
+    /// </summary>
+    public static readonly IReadOnlyList<TextJump> NoticeJumps =
+    [
+        new(Heading, Keys.Shift | Heading, ElementKind.Heading),
+        new(HeadingLevel1, Keys.Shift | HeadingLevel1, ElementKind.Heading, 1),
+        new(HeadingLevel2, Keys.Shift | HeadingLevel2, ElementKind.Heading, 2),
+        new(HeadingLevel3, Keys.Shift | HeadingLevel3, ElementKind.Heading, 3),
+        new(HeadingLevel4, Keys.Shift | HeadingLevel4, ElementKind.Heading, 4),
+        new(HeadingLevel5, Keys.Shift | HeadingLevel5, ElementKind.Heading, 5),
+        new(HeadingLevel6, Keys.Shift | HeadingLevel6, ElementKind.Heading, 6),
     ];
 }

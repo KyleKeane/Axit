@@ -164,7 +164,7 @@ never a separate window.
   after Update and restart keeps this window on the old program file and says "Update installed. It starts with the
   next AxDown" (AX-3.2); until then a later Exit started the new version as if the restart had just been chosen.
 - AD-6.2 Changed on disk (AD-3.6); file errors (AD-3.7); the update notice (AX-3); Keyboard shortcuts; User guide;
-  About.
+  About. In the text of any of them, the navigation keys of section 9 work as in the editor (bundle AX-7.2).
 - AD-6.3 Find: the notice with the field "Text to find" (as AxClaude's); Enter finds the next match from the caret,
   wrapping once at the end, selects it and returns the focus to the editor, where NVDA reads the selection's line.
   "Not found" is spoken when there is none. F3 and Shift+F3 repeat without the notice.
@@ -291,7 +291,7 @@ the off-screen probe approach of AxClaude checks layout and keys without disturb
   with 3 items, one" (the first item follows the count); the item's text for a list item ("blank" for an empty one);
   "Block quote, first line"; "Table with 3 rows and 2 columns". "No next heading", "No previous link", "No next
   heading level 2" and so on when there is none, and the caret stays; nothing on a plain arrow key. The Navigate
-  menu lists the kinds under Next and Previous, one item per kind.
+  menu lists the kinds under Next and Previous, one item per kind. The same keys work in a notice's text (AD-6.2).
 
 ## 10. Status
 

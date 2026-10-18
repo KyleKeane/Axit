@@ -1,5 +1,16 @@
 namespace Axit.Core;
 
+/// <summary>The kinds of element the navigation keys move by (docs/axdown/SPEC.md §9).</summary>
+public enum ElementKind
+{
+    Heading,
+    Link,
+    List,
+    ListItem,
+    BlockQuote,
+    Table,
+}
+
 /// <summary>Something a navigation key stops at (docs/axdown/SPEC.md §9): where it starts and what is said on landing there.</summary>
 public abstract record Element(int Start)
 {
@@ -556,6 +567,41 @@ public static class MarkdownOutline
         var cells = Cells(s);
         return cells.Count > 0 && cells.All(c => c.Trim(':').Length > 0 && c.Trim(':').All(ch => ch == '-'));
     }
+
+    // ---- by kind ----
+
+    /// <summary>The next element of a kind from the caret, as the functions above; the level narrows headings, 0 for any.</summary>
+    public static Element? Next(ElementKind kind, string text, int caret, int level = 0) => kind switch
+    {
+        ElementKind.Heading => NextHeading(text, caret, level),
+        ElementKind.Link => NextLink(text, caret),
+        ElementKind.List => NextList(text, caret),
+        ElementKind.ListItem => NextListItem(text, caret),
+        ElementKind.BlockQuote => NextBlockQuote(text, caret),
+        _ => NextTable(text, caret),
+    };
+
+    /// <summary>The previous element of a kind from the caret, as the functions above.</summary>
+    public static Element? Previous(ElementKind kind, string text, int caret, int level = 0) => kind switch
+    {
+        ElementKind.Heading => PreviousHeading(text, caret, level),
+        ElementKind.Link => PreviousLink(text, caret),
+        ElementKind.List => PreviousList(text, caret),
+        ElementKind.ListItem => PreviousListItem(text, caret),
+        ElementKind.BlockQuote => PreviousBlockQuote(text, caret),
+        _ => PreviousTable(text, caret),
+    };
+
+    /// <summary>The kind as it is spoken when there is none: "No next heading level 2", "No previous list item".</summary>
+    public static string Name(ElementKind kind, int level = 0) => kind switch
+    {
+        ElementKind.Heading => level > 0 ? $"heading level {level}" : "heading",
+        ElementKind.Link => "link",
+        ElementKind.List => "list",
+        ElementKind.ListItem => "list item",
+        ElementKind.BlockQuote => "block quote",
+        _ => "table",
+    };
 
     // ---- shared ----
 

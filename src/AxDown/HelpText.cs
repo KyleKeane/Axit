@@ -28,6 +28,7 @@ internal static class HelpText
           Ctrl+H and Ctrl+Shift+H: next and previous Markdown heading (a line starting with #), spoken as "Install, heading level 2"
           Ctrl+1 to Ctrl+6 and Ctrl+Shift+1 to Ctrl+Shift+6: next and previous heading of that level only
           Ctrl+K, Ctrl+L, Ctrl+I, Ctrl+Q, Ctrl+T: next link, list, list item, block quote or table; with Shift the previous one
+            All of them work in the user guide and the other notices too
           Ctrl+Shift+W: word wrap on or off
 
         The text

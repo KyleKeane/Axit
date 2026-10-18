@@ -51,6 +51,7 @@ internal static class HelpText
           o and Shift+O, or r and Shift+R: next and previous "# Output" line (a reply from Claude)
           h and Shift+H: next and previous heading. 1 to 6: heading of that level
             (Input and Output lines are level 1, Claude's headings level 2 and deeper)
+            Both work in the user guide and the other help texts too, by their Markdown headings
           c and Shift+C: next and previous "claude:" line
           t and Shift+T: next and previous tool line
           p and Shift+P: next and previous paragraph (the first line after a blank line, or a "claude:" line; never a tool or thinking line)

@@ -96,6 +96,8 @@ Long paragraphs are shown as one line. Claude Code's screen decorations (the mod
 
 Ctrl+S saves the conversation as a text file. Ctrl+A and Ctrl+C in the conversation copy it.
 
+The heading keys, h, Shift+H and 1 to 6, also work in the user guide and the other help texts of the Help menu, where they move by the text's own headings.
+
 ## Menus
 
 - **Project**: Open current folder (Ctrl+W), which names the folder and opens it in File Explorer, Change folder, Recent folders, New session (Ctrl+N), Force Claude to restart (Ctrl+Shift+R), Save conversation as (Ctrl+S), Exit.

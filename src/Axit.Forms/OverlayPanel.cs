@@ -1,4 +1,6 @@
 
+using Axit.Core;
+
 namespace Axit.Forms;
 
 /// <summary>A button on a notice. Unless <see cref="StaysOpen"/> is set, the notice closes before the action runs.</summary>
@@ -120,6 +122,7 @@ public sealed class OverlayPanel : Panel
         _text.Dock = DockStyle.Fill;
         _text.TabIndex = 2;
         _text.KeyDown += EditKeys.Handle;
+        _text.KeyDown += OnTextKeyDown;
 
         _inputLabel.AutoSize = true;
         _inputLabel.Location = new Point(0, 6);
@@ -209,6 +212,14 @@ public sealed class OverlayPanel : Panel
 
     /// <summary>A button was pressed. The window closes the notice (unless the choice stays open) and runs its action.</summary>
     public event Action<OverlayChoice>? Chosen;
+
+    /// <summary>
+    /// The window's keys for moving through the text by Markdown structure (AX-7.2): one pair per kind from the window's
+    /// own table, so that a notice follows the window's convention (AxClaude's letters, AxDown's Ctrl+letters). Empty
+    /// until the window sets it.
+    /// </summary>
+    [System.ComponentModel.DesignerSerializationVisibility(System.ComponentModel.DesignerSerializationVisibility.Hidden)]
+    public IReadOnlyList<TextJump> Jumps { get; set; } = [];
 
     /// <summary>The button Enter presses: the window's AcceptButton while the notice shows. Null when there is none.</summary>
     public IButtonControl? DefaultButton { get; private set; }
@@ -459,6 +470,34 @@ public sealed class OverlayPanel : Panel
         _customRow.Visible = selected == session.Presets.Count;
         _presets[selected].Checked = true;
         LayoutSession();
+    }
+
+    /// <summary>A jump key in the text: the caret to the element's start and its text spoken, or "No next heading" and the like, the caret staying.</summary>
+    private void OnTextKeyDown(object? sender, KeyEventArgs e)
+    {
+        foreach (var jump in Jumps)
+        {
+            var backward = e.KeyData == jump.Previous;
+            if (e.KeyData != jump.Next && !backward)
+            {
+                continue;
+            }
+
+            e.Handled = e.SuppressKeyPress = true;
+            var element = backward
+                ? MarkdownOutline.Previous(jump.Kind, _text.Text, _text.SelectionStart, jump.Level)
+                : MarkdownOutline.Next(jump.Kind, _text.Text, _text.SelectionStart, jump.Level);
+            if (element is null)
+            {
+                Announce($"No {(backward ? "previous" : "next")} {MarkdownOutline.Name(jump.Kind, jump.Level)}", true);
+                return;
+            }
+
+            _text.Select(element.Start, 0);
+            _text.ScrollToCaret();
+            Announce(element.Spoken, true);
+            return;
+        }
     }
 
     private void OnCustomKeyDown(object? sender, KeyEventArgs e)

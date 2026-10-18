@@ -1,3 +1,6 @@
+using Axit.Core;
+using Axit.Forms;
+
 namespace AxDown;
 
 /// <summary>
@@ -62,5 +65,17 @@ public static class AxDownKeys
         ("Previous block quote", PreviousBlockQuote),
         ("Next table", NextTable),
         ("Previous table", PreviousTable),
+    ];
+
+    /// <summary>The same keys in a notice's text (bundle AX-7.2), one pair per kind of SPEC.md §9, handed to the notice panel.</summary>
+    public static readonly IReadOnlyList<TextJump> NoticeJumps =
+    [
+        new(NextHeading, PreviousHeading, ElementKind.Heading),
+        ..Enumerable.Range(1, 6).Select(level => new TextJump(NextHeadingLevel(level), PreviousHeadingLevel(level), ElementKind.Heading, level)),
+        new(NextLink, PreviousLink, ElementKind.Link),
+        new(NextList, PreviousList, ElementKind.List),
+        new(NextListItem, PreviousListItem, ElementKind.ListItem),
+        new(NextBlockQuote, PreviousBlockQuote, ElementKind.BlockQuote),
+        new(NextTable, PreviousTable, ElementKind.Table),
     ];
 }
