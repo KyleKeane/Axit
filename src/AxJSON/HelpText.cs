@@ -4,7 +4,7 @@ using System.Reflection;
 namespace AxJSON;
 
 /// <summary>The texts AxJSON shows as notices: the keyboard shortcuts (F1) and the user guide; About is the bundle's (<c>Axit.Core.BundleAbout</c>).</summary>
-internal static class HelpText
+public static class HelpText
 {
     /// <summary>The F1 text (SPEC.md AJ-2.2, AJ-2.3). Bundle-wide keys first, then the editor shell's and AxJSON's own, then what the edit control does itself.</summary>
     public const string Shortcuts = """

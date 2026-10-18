@@ -54,6 +54,41 @@ public sealed class KeyTests
         Assert.Empty(repeats);
     }
 
+    /// <summary>
+    /// The F1 text of every window names every key of its table that has a modifier or is a function key (AX-8.3:
+    /// the text is changed with the table), so that a key change never leaves the help text behind. Plain letters
+    /// and digits are left out: a letter is named by its word in the text ("h: the next heading").
+    /// </summary>
+    [Fact]
+    public void Every_window_key_is_named_in_its_F1_text()
+    {
+        var texts = new Dictionary<string, string>
+        {
+            ["AxDown"] = AxDown.HelpText.Shortcuts,
+            ["AxJSON"] = AxJSON.HelpText.Shortcuts,
+            ["AxClaude"] = AxClaude.HelpText.Shortcuts,
+            ["AxGit"] = AxGit.HelpText.Shortcuts,
+        };
+        var missing = new List<string>();
+        foreach (var (window, keys) in Windows)
+        {
+            foreach (var (name, key) in keys)
+            {
+                var code = key & Keys.KeyCode;
+                var modified = (key & Keys.Modifiers) != 0 && code != Keys.None;
+                var function = code is >= Keys.F1 and <= Keys.F24;
+                // A number row key's text ends in a full stop for speech ("Ctrl+1."); the help text writes it bare.
+                var text = BundleKeys.Text(key).TrimEnd('.');
+                if ((modified || function) && !texts[window].Contains(text, StringComparison.OrdinalIgnoreCase))
+                {
+                    missing.Add($"{window}: {name} ({text})");
+                }
+            }
+        }
+
+        Assert.True(missing.Count == 0, "Not in the F1 text: " + string.Join("; ", missing));
+    }
+
     /// <summary>Not a failure: the list of keys two windows use differently, printed for the person reading the test output.</summary>
     [Fact]
     public void Keys_used_differently_by_two_windows_are_listed()

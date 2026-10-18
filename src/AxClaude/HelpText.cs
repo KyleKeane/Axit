@@ -5,7 +5,7 @@ using AxClaude.Core.Pty;
 namespace AxClaude;
 
 /// <summary>The texts the window shows as notices: the keyboard shortcuts (F1), the user guide, and the help when Claude Code is missing.</summary>
-internal static class HelpText
+public static class HelpText
 {
     public const string Shortcuts = """
         Anywhere

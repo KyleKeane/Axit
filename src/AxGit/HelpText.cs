@@ -4,7 +4,7 @@ using System.Reflection;
 namespace AxGit;
 
 /// <summary>The texts AxGit shows as notices: the keyboard shortcuts (F1) and the user guide; About is the bundle's (<c>Axit.Core.BundleAbout</c>).</summary>
-internal static class HelpText
+public static class HelpText
 {
     /// <summary>The F1 text (SPEC.md AG-6.3). Bundle-wide keys first, then AxGit's own, then the controls' own.</summary>
     public const string Shortcuts = """
