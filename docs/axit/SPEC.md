@@ -12,8 +12,9 @@ Axit is one installed Windows program, `Axit.exe`, that holds several accessible
 the NVDA screen reader. Each app is a separate window that starts on its own, has its own Start menu entry, its own
 right-click entry in File Explorer and its own console command, and all of them share one installer, one updater, one
 version number and one release workflow. The first apps are **AxClaude**, the front end for the Claude Code CLI that
-exists today, and **AxDown**, a barebones editor for Markdown and text files. Later apps are planned (a collaborative
-editor, an AI-assisted editor) and follow the same pattern without changes to the bundle.
+exists today, and **AxDown**, a barebones editor for Markdown and text files. Later apps are planned (a terminal, a
+file manager with a player, a password manager, a vault manager: `docs/axit/plan.md`) and follow the same pattern
+without changes to the bundle.
 
 ## 2. Goals and non-goals
 
@@ -26,6 +27,10 @@ editor, an AI-assisted editor) and follow the same pattern without changes to th
 - **G4 Plain code.** Zero third-party runtime dependencies, as AxClaude always had, and no coding paradigm that a
   smaller model would struggle to edit: plain classes, static methods, one obvious way to do each thing.
 - **G5 Nothing breaks.** AxClaude behaves as released; every commit builds and passes the tests, and a change to a window is checked with NVDA before it is released.
+- **G6 Local first.** Every app has its full utility with the network off; AxClaude is the one exception, since
+  Claude Code is a service. The update check (AX-3) is the only call a window makes on its own, a setting that can be
+  off, and a network failure is never more than a missing update. Any AI help in the other apps is one shared,
+  optional service (B-15), never a dependency of a feature that works without it.
 
 Non-goals: a plugin system or loading apps from separate files (apps are compiled in); more than one window per
 process; an installer that needs administrator rights; setting Windows default programs silently (Windows does not
@@ -402,6 +407,15 @@ docs/axdown/            SPEC.md, user-guide.md (embedded by src/AxDown), nvda-te
   keys whose meaning changes with the tab under the user's fingers, the thing a screen reader user feels first (B-12).
   The Axit menu (AX-9) gives the one thing tabs give, a list of what is open in one place, by recency and by app;
   Windows' own order of its windows is the recency, so nothing is stored or kept in step, and Alt+Tab is unchanged.
+- **B-15 Local first; AI help is one shared, optional service (2026-10-18).** The apps are tools over files, folders,
+  repositories and a shell on the user's machine, and they stay useful on a plane or behind a firewall: every app but
+  AxClaude works entirely offline, every network connection can be disabled without loss of the app's utility, and
+  the update check is the only call a window makes on its own (G6). AI-based editing and feedback, asked for first as
+  a feature of AxDown, are not built into any one app: they are a shared service every app can call from inside its
+  window to get things done there, written once and optional, so that the apps stay plain and complete without it.
+  The bundle is to have a shared database as well, which the service and the apps share. The service's design (how it
+  reaches Claude, what it may change in a window, the database) is a specification of its own, not yet written
+  (`docs/axit/plan.md`).
 
 ## 7. Status
 

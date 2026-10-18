@@ -33,6 +33,7 @@ Specifications are the source of truth: `docs/axit/SPEC.md` for the bundle (laun
 5. Keys (SPEC AX-8): every key is either bundle-wide (`Axit.Forms/BundleKeys`, the same in every window) or window-specific (one table per window); a key is changed in its table and nowhere else; a test fails on a collision.
 6. Personal data never enters the repository or a session's output: only the licence identity (Dr. Kyle Keane, www.kylekeane.com) appears; `PrivacyTests` fails on an e-mail address or an account path; recordings are read through PtyCapture's redacting `--dump`, never `--raw`, `cat` or `type`.
 7. Git hygiene: small commits with imperative subject lines; never commit `bin/`, `obj/`, ad-hoc captures or `.claude/settings.local.json`. Every commit builds and passes the tests; `main` is always releasable. Fetch before building on the repository: `git fetch origin` at the start of a session and before its first commit, and bring in anything `origin/main` has gained (`git pull --ff-only` on `main`, a merge or rebase on a branch) before new work stacks on a stale base. `release.ps1` fetches and refuses a `main` that is behind `origin/main`; git itself only rejects the push, after local commits have piled up.
+8. Local first (SPEC G6, B-15): every app except AxClaude keeps its full utility with the network off; the update check is the only network call a window makes on its own, and it is a setting; AI help is one shared, optional service that no app's feature depends on, never a feature built into one app.
 
 ## Environment gotchas (bundle-wide)
 

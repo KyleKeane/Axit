@@ -57,6 +57,14 @@ the restart by the app itself (2.3.0).
   Reload and lose mine. No watcher thread, no merging. A watcher for live reload while the window stays active is
   the second step, only if the activation check turns out not enough.
 
+- **AI help as one shared, optional service; local first** (the user's direction, 2026-10-18; bundle G6, B-15).
+  AI-based editing and feedback tools are not AxDown's own: they are one service every app can call from inside its
+  window to get things done there, written once and optional, so that each app has its full utility without it and
+  offline. The bundle is to have a shared database as well, which the service and the apps share. Its specification,
+  not yet written, has to settle what the database holds and where it lives, how the service reaches Claude (Claude
+  Code as AxClaude runs it, or the API), what the service may change in a window and how the user sees and undoes
+  it, and the one switch that turns every network use off.
+
 ## Later apps (recorded 2026-10-18)
 
 Each would be one more app of the bundle, a window per thing worked on, added the way `adding-an-app.md` says, with no
@@ -74,8 +82,41 @@ library dependency (B-10: `git.exe` and the file system through the APIs already
   window as AxClaude or the editors it would be a Git menu three times over and a second set of lists in a window
   built around one thing; and in AxClaude much of it can already be asked of Claude, so AxGit's worth is the quick,
   deterministic read of a repository's state without a turn.
-- **AxFile** (name not settled), a file manager: a streamlined tree, not File Explorer's context menu reproduced. A
-  list of a folder's entries with the folders first, Enter opens a file in the editor for its type or a folder in the
-  list, Backspace goes up, a few operations (new folder, rename, delete to the recycle bin, copy the path) and "Show in
-  File Explorer" for everything else. The worry on record: the whole of a file tree's behaviour is endless; the scope
-  must stay small.
+- **AxTerminal** (asked 2026-10-18; specified the same day, `docs/axterminal/SPEC.md`): AxClaude's window around a
+  shell. PowerShell (or Windows PowerShell, or cmd) in a ConPTY; every row a line of the transcript; a command typed
+  in the field gets AxClaude's exchange block; the shell's prompt rows hidden and shown in the status bar; the shell's
+  integration marks (OSC 133, the Windows Terminal convention, injected by the app for the session) say when a command
+  is done and with what code, spoken with the chimes. Not a terminal emulator: programs that take the screen over are
+  out of scope. It is also the infrastructure step the user asked for first: the ConPTY host, the parser, the screen,
+  the mirror and the view move from AxClaude into the shared projects on this second use, one piece per commit, with
+  one seam (`LineStore`) between the screen and Claude's session model.
+- **AxFile** (the plan's file manager, named 2026-10-18; specified the same day, `docs/axfile/SPEC.md`): a list of
+  one folder's entries, folders first, Enter the one verb (a folder into the list, a text or Markdown file into AxDown,
+  JSON into AxJSON, a media file played, anything else to Windows' program), Backspace up, the four operations (new
+  folder, rename, delete to the Recycle Bin, copy the path) and File Explorer for the rest. **AxMedia**, asked the
+  same day as "a simple file browser that plays everything in a folder", is this window's player, not an app (AF-D2):
+  Enter on a sound or video file plays it and the folder's media files follow in order; pause, seek, next, previous,
+  speed, go to time, what is playing on Ctrl+Q; Windows' own decoders through one P/Invoke seam (MCI or MFPlay, chosen
+  by the first build), the keyboard's own volume keys. The worry on record stands: the scope stays small; copy and
+  paste wait for the ask.
+- **AxKeePassium** (asked 2026-10-18; no spec yet; the name is the user's, after the KeePass app on the phone, and is
+  someone's product name, so AxKeePass is the alternative): a KeePass client for one database (`.kdbx`) per window: the
+  entries as a list, by group and by search, Enter for an entry's fields as read-only text with the password withheld,
+  keys that copy the user name and the password to the clipboard with a timed clear, add and edit through notices, a
+  generator, lock. The engine, by the bundle's precedent (AG-D2, B-10): KeePassXC's `keepassxc-cli` as a process per
+  command (`ls`, `show`, `clip`, `add`, `edit`, `rm`, `mv`, `generate`, `db-create`), the master password handed to it on
+  standard input and held only in the window's memory until lock; the format, Argon2 and the rest stay KeePassXC's and
+  are never reimplemented. To verify before the spec: that the Windows build reads the password from a pipe, its
+  output formats, key files (`-k`). Local first (B-15): the database is a file, synced by whatever syncs the user's
+  files.
+- **AxCryptomator** (asked 2026-10-18; no spec yet; Cryptomator is a product name too, AxVault the alternative): a
+  window to unlock and lock Cryptomator vaults, since the desktop app's JavaFX window reads poorly with NVDA: a list
+  of known vaults, unlock with the password asked in a notice, the unlocked vault as a drive or folder with "Open in
+  AxFile" on it, lock. The engine: the project's own `cryptomator-cli` as a process per vault, kept running while the
+  vault is unlocked and ended to lock it; it takes the password on standard input or from a file and mounts the vault
+  (WinFsp, which the desktop installer brings) or serves it on a local address. The vault format (scrypt, AES-SIV, the
+  rest) is never reimplemented. To verify before the spec: the current release's Windows support and mount options,
+  and how it lives beside a running desktop app. Local first (B-15): the vault's cloud copy is the user's sync client's
+  business.
+- The order the user set: the spec, then the infrastructure, then the build; AxTerminal first, since its
+  infrastructure is the moves; AxFile next; the two engines verified before their specs are written.
