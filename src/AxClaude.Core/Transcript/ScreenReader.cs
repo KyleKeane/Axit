@@ -21,6 +21,12 @@ public sealed record ClaudeScreen(string Title, IReadOnlyList<string> Lines, IRe
     /// shown again all the same (MainForm).
     /// </summary>
     public string Signature => Title + "\n" + string.Join(" ", Keys.Select(key => key.Send));
+
+    /// <summary>The line Claude highlights with ❯, without the mark ("Send feedback", "Details:"); null when none is marked.</summary>
+    public string? Highlighted => Lines.FirstOrDefault(line => line.StartsWith('❯'))?[1..].Trim();
+
+    /// <summary>A text row of /feedback's review that Claude has opened for editing (D33): the hint row names "cancel edit", and typed keys go to the end of the row's text.</summary>
+    public bool Editing => Keys.Any(key => key.Action == "cancel edit");
 }
 
 /// <summary>

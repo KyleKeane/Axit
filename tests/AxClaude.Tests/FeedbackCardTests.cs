@@ -266,6 +266,12 @@ public class FeedbackCardTests
         Assert.Equal("\n", edit.Keys[3].Send);
         Assert.Contains("❯  Details:", edit.Lines);
         Assert.Contains("- **Repro:** none.", edit.Lines);
+        Assert.True(edit.Editing);
+        Assert.Equal("Details:", edit.Highlighted);
+        Assert.False(screen.Editing);
+        Assert.Equal("Send feedback", screen.Highlighted);
+        Assert.False(transcript.Editing);
+        Assert.StartsWith("Send transcript:", transcript.Highlighted);
         // A review line with the cursor on it and no edit hint under it is no screen.
         Assert.Null(ScreenReader.Read(review, 4));
 

@@ -2326,6 +2326,12 @@ internal sealed class MainForm : Form
             text.Append(Stop(text.ToString())).Append(line);
         }
 
+        if (screen.Editing)
+        {
+            ShowEditedRow(screen, text.ToString());
+            return;
+        }
+
         ShowInArea(screen.Signature, screen.Title, text.ToString(), !UserActed(_screenKeyAt), (focus, hold) =>
             _area.ShowList(screen.Title, items, 0, null, focus, hold, (index, _) =>
             {
@@ -2447,13 +2453,37 @@ internal sealed class MainForm : Form
         Write("\x1b");
     }
 
+    /// <summary>
+    /// A text row of a draft's review that Claude has opened for editing (D33, <see cref="ClaudeScreen.Editing"/>):
+    /// a field in the control area named with the row. Enter sends what was typed to the end of Claude's text, a
+    /// keystroke at a time, then Enter, which keeps it and moves the highlight on; an empty field only moves on;
+    /// Escape cancels the edit. Ctrl+Q reads the review with the row's text as it stands. Nothing is deleted from
+    /// here: a draft is reworded by discarding it and asking Claude again.
+    /// </summary>
+    private void ShowEditedRow(ClaudeScreen screen, string text)
+    {
+        var row = screen.Highlighted?.TrimEnd(':') ?? "Text";
+        var name = $"{screen.Title}. {row}, add at the end";
+        ShowInArea(screen.Signature, name, text, !UserActed(_screenKeyAt), (focus, hold) => _area.ShowField(name, focus, hold, typed =>
+        {
+            ScreenKeySent();
+            TypeAnswer(typed);
+        }, () => SendScreenKey("\x1b")));
+    }
+
     /// <summary>Sends a screen's key. The screen that shows next opens again even when its title and keys are the same (a moved selection, another tab).</summary>
     private void SendScreenKey(string key)
+    {
+        ScreenKeySent();
+        Write(key);
+    }
+
+    /// <summary>The bookkeeping of a key sent from a screen, or of text typed into one of its rows: what Claude shows next is the user's doing, and the area holds its keys meanwhile.</summary>
+    private void ScreenKeySent()
     {
         _screenKeyAt = Environment.TickCount64;
         _handledWait = null;
         _area.Hold(UserActionMs);
-        Write(key);
         // A key that changes nothing draws no frame: the timer brings the screen back all the same.
         _attention.Stop();
         _attention.Start();
