@@ -37,15 +37,5 @@ public static class BundleAbout
     public const string GuideTitle = "Axit guide";
 
     /// <summary>docs/axit/README.md, the guide shipped in the zip: install, start, update, remove.</summary>
-    public static string Guide()
-    {
-        using var stream = typeof(BundleAbout).Assembly.GetManifestResourceStream("AxitGuide.md");
-        if (stream is null)
-        {
-            return "The Axit guide is not included in this build. It is docs/axit/README.md in the source repository.";
-        }
-
-        using var reader = new StreamReader(stream);
-        return reader.ReadToEnd();
-    }
+    public static string Guide() => EmbeddedText.Read(typeof(BundleAbout).Assembly, "AxitGuide.md", "docs/axit/README.md");
 }

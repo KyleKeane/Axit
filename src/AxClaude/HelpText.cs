@@ -1,3 +1,4 @@
+using Axit.Core;
 using System.Reflection;
 using AxClaude.Core.Pty;
 
@@ -80,17 +81,7 @@ internal static class HelpText
         """;
 
     /// <summary>docs/axclaude/user-guide.md, embedded in the executable at build time.</summary>
-    public static string UserGuide()
-    {
-        using var stream = Assembly.GetExecutingAssembly().GetManifestResourceStream("UserGuide.md");
-        if (stream is null)
-        {
-            return "The user guide is not included in this build. It is docs/axclaude/user-guide.md in the source repository.";
-        }
-
-        using var reader = new StreamReader(stream);
-        return reader.ReadToEnd();
-    }
+    public static string UserGuide() => EmbeddedText.Read(Assembly.GetExecutingAssembly(), "UserGuide.md", "docs/axclaude/user-guide.md");
 
     /// <summary>FR-1.9: where the app looked, the install command, and the ways back.</summary>
     public static string ClaudeNotFound(IReadOnlyList<string> candidates)

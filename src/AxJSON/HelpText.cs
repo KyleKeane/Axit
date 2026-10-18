@@ -1,3 +1,4 @@
+using Axit.Core;
 using System.Reflection;
 
 namespace AxJSON;
@@ -43,15 +44,5 @@ internal static class HelpText
         """;
 
     /// <summary>docs/axjson/user-guide.md, embedded by AxJSON.csproj.</summary>
-    public static string UserGuide()
-    {
-        using var stream = Assembly.GetExecutingAssembly().GetManifestResourceStream("UserGuide.md");
-        if (stream is null)
-        {
-            return "The user guide is not included in this build. It is docs/axjson/user-guide.md in the source repository.";
-        }
-
-        using var reader = new StreamReader(stream);
-        return reader.ReadToEnd();
-    }
+    public static string UserGuide() => EmbeddedText.Read(Assembly.GetExecutingAssembly(), "UserGuide.md", "docs/axjson/user-guide.md");
 }

@@ -1,3 +1,4 @@
+using Axit.Core;
 using System.Reflection;
 
 namespace AxDown;
@@ -40,15 +41,5 @@ internal static class HelpText
         """;
 
     /// <summary>docs/axdown/user-guide.md, embedded in the executable at build time.</summary>
-    public static string UserGuide()
-    {
-        using var stream = Assembly.GetExecutingAssembly().GetManifestResourceStream("UserGuide.md");
-        if (stream is null)
-        {
-            return "The user guide is not included in this build. It is docs/axdown/user-guide.md in the source repository.";
-        }
-
-        using var reader = new StreamReader(stream);
-        return reader.ReadToEnd();
-    }
+    public static string UserGuide() => EmbeddedText.Read(Assembly.GetExecutingAssembly(), "UserGuide.md", "docs/axdown/user-guide.md");
 }
