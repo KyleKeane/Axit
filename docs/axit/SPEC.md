@@ -50,6 +50,10 @@ allow it, see B-9).
   A git manager for one repository, a window per repository, opened from the other windows' "Show current … in ▸"
   submenus on the repository of the folder or file in hand. Specification `docs/axgit/SPEC.md`, guide
   `docs/axgit/user-guide.md`, test plan `docs/axgit/nvda-test-plan.md`.
+- **AxTerminal** (first draft, 2026-10-18): `Axit.exe terminal [<folder>]`, Start entry `Axit AxTerminal`, `Open in
+  AxTerminal` on folders, command `axterminal`. A shell (PowerShell, or cmd) in AxClaude's window: the output as a
+  transcript with exchange blocks, the shell's integration marks for Done and Failed. Specification
+  `docs/axterminal/SPEC.md`, guide `docs/axterminal/user-guide.md`, test plan `docs/axterminal/nvda-test-plan.md`.
 
 ## 4. Functional requirements
 

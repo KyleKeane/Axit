@@ -75,6 +75,7 @@ public sealed partial class GitForm : AxitForm
         var showIn = new ToolStripMenuItem("Show current repository &in");
         showIn.DropDownItems.Add(Item("File &Explorer", ShowInExplorer, AxGitKeys.ShowInExplorer));
         showIn.DropDownItems.Add(new ToolStripMenuItem("Ax&Claude", null, (_, _) => OpenInAxClaude()));
+        showIn.DropDownItems.Add(new ToolStripMenuItem("Ax&Terminal", null, (_, _) => OpenInAxTerminal()));
         repository.DropDownItems.Add(showIn);
         repository.DropDownItems.Add(new ToolStripSeparator());
         repository.DropDownItems.Add(new ToolStripMenuItem("E&xit", null, (_, _) => Close()) { ShortcutKeyDisplayString = "Alt+F4" });
@@ -421,6 +422,18 @@ public sealed partial class GitForm : AxitForm
         }
 
         AxitMenu.Start(Dispatch.AxClaude, _root);
+    }
+
+    /// <summary>Repository → Show current repository in → AxTerminal: a new AxTerminal with a shell in the repository's folder (docs/axterminal/SPEC.md AT-1.5).</summary>
+    private void OpenInAxTerminal()
+    {
+        if (_root is null)
+        {
+            Announce("No repository", true);
+            return;
+        }
+
+        AxitMenu.Start(Dispatch.AxTerminal, _root);
     }
 
     /// <summary>Changes → Open file in editor (Ctrl+E): the selected file in AxJSON for .json, AxDown otherwise (AG-1.4).</summary>

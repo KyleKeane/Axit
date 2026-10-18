@@ -19,6 +19,18 @@ internal sealed partial class MainForm
         AxitMenu.Start(Dispatch.AxGit, _folder);
     }
 
+    /// <summary>Session → Show current folder in → AxTerminal: a new AxTerminal window with a shell in the project folder (docs/axterminal/SPEC.md AT-1.5).</summary>
+    private void OpenInAxTerminal()
+    {
+        if (_folder is null)
+        {
+            Announce("No project folder", true);
+            return;
+        }
+
+        AxitMenu.Start(Dispatch.AxTerminal, _folder);
+    }
+
     /// <summary>Session → Show current folder in → File Explorer, Ctrl+W (FR-8.2): the folder in File Explorer, one of the system's own windows (D23).</summary>
     private void ShowInExplorer()
     {

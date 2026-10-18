@@ -33,6 +33,10 @@ public sealed class DispatchTests
         Assert.Equal([Folder], launch.Arguments);
         Assert.Equal(Dispatch.AxClaude, Dispatch.Decide([Folder]).App);
         Assert.Contains(Dispatch.Apps, app => app.Verb == Dispatch.AxGit && app.Name == "AxGit");
+        launch = Dispatch.Decide(["terminal", Folder]);
+        Assert.Equal(Dispatch.AxTerminal, launch.App);
+        Assert.Equal([Folder], launch.Arguments);
+        Assert.Contains(Dispatch.Apps, app => app.Verb == Dispatch.AxTerminal && app.Name == "AxTerminal");
     }
 
     [Fact]
@@ -110,7 +114,7 @@ public sealed class DispatchTests
         Assert.Equal(Dispatch.AxJSON, Dispatch.Decide(["json", "x.json"]).App);
         Assert.Equal(["x.json"], Dispatch.Decide(["JSON", "x.json"]).Arguments);
         Assert.Contains("Axit json", Dispatch.Usage);
-        Assert.Equal(["AxClaude", "AxDown", "AxJSON", "AxGit"], Dispatch.Apps.Select(a => a.Name));
+        Assert.Equal(["AxClaude", "AxDown", "AxJSON", "AxGit", "AxTerminal"], Dispatch.Apps.Select(a => a.Name));
     }
 
     [Fact]

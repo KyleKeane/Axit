@@ -17,6 +17,7 @@ public sealed class KeyTests
             ["AxJSON"] = AxJSON.AxJSONKeys.All,
             ["AxClaude"] = AxClaude.AxClaudeKeys.All,
             ["AxGit"] = AxGit.AxGitKeys.All,
+            ["AxTerminal"] = AxTerminal.AxTerminalKeys.All,
         };
 
     [Fact]
@@ -68,6 +69,7 @@ public sealed class KeyTests
             ["AxJSON"] = AxJSON.HelpText.Shortcuts,
             ["AxClaude"] = AxClaude.HelpText.Shortcuts,
             ["AxGit"] = AxGit.HelpText.Shortcuts,
+            ["AxTerminal"] = AxTerminal.HelpText.Shortcuts,
         };
         var missing = new List<string>();
         foreach (var (window, keys) in Windows)

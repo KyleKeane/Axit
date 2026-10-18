@@ -82,7 +82,8 @@ library dependency (B-10: `git.exe` and the file system through the APIs already
   window as AxClaude or the editors it would be a Git menu three times over and a second set of lists in a window
   built around one thing; and in AxClaude much of it can already be asked of Claude, so AxGit's worth is the quick,
   deterministic read of a repository's state without a turn.
-- **AxTerminal** (asked 2026-10-18; specified the same day, `docs/axterminal/SPEC.md`): AxClaude's window around a
+- **AxTerminal** (asked 2026-10-18; specified and built as a first draft the same day, `docs/axterminal/SPEC.md`,
+  unreleased until its NVDA pass): AxClaude's window around a
   shell. PowerShell (or Windows PowerShell, or cmd) in a ConPTY; every row a line of the transcript; a command typed
   in the field gets AxClaude's exchange block; the shell's prompt rows hidden and shown in the status bar; the shell's
   integration marks (OSC 133, the Windows Terminal convention, injected by the app for the session) say when a command

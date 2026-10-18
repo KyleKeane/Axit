@@ -21,26 +21,28 @@ public static class Dispatch
     public const string AxDown = "down";
     public const string AxJSON = "json";
     public const string AxGit = "git";
+    public const string AxTerminal = "terminal";
 
     /// <summary>Not an app: the executable answers <c>--help</c> and <c>--version</c>, or reports <see cref="Launch.Error"/>.</summary>
     public const string Bundle = "axit";
 
     /// <summary>The apps, in the order the Axit menu lists them (AX-9).</summary>
-    public static readonly IReadOnlyList<App> Apps = [new("AxClaude", AxClaude), new("AxDown", AxDown), new("AxJSON", AxJSON), new("AxGit", AxGit)];
+    public static readonly IReadOnlyList<App> Apps = [new("AxClaude", AxClaude), new("AxDown", AxDown), new("AxJSON", AxJSON), new("AxGit", AxGit), new("AxTerminal", AxTerminal)];
 
     public const string Usage = """
-        Usage: Axit [claude|down|json|git] [arguments]
+        Usage: Axit [claude|down|json|git|terminal] [arguments]
 
           Axit claude [<folder>] ...  AxClaude, the front end for Claude Code (Axit claude --help lists its options)
           Axit down [<file>]          AxDown, the text editor
           Axit json [<file>]          AxJSON, the JSON editor
           Axit git [<folder or file>] AxGit, the git manager, on the repository that holds the path
+          Axit terminal [<folder>]    AxTerminal, a shell in the folder as a transcript
           Axit <folder>               the same as Axit claude <folder>
           Axit <file>                 the same as Axit down <file>, or Axit json <file> for a .json file
           Axit                        AxClaude on the current folder
           --help, --version           this text, or the version
 
-        The installed console commands axit, axclaude, axdown, axjson and axgit stand for Axit, Axit claude, Axit down, Axit json and Axit git.
+        The installed console commands axit, axclaude, axdown, axjson, axgit and axterminal stand for Axit, Axit claude, Axit down, Axit json, Axit git and Axit terminal.
         """;
 
     public static Launch Decide(string[] args)
@@ -69,6 +71,11 @@ public static class Dispatch
         if (string.Equals(first, AxGit, StringComparison.OrdinalIgnoreCase))
         {
             return new Launch(AxGit, args[1..]);
+        }
+
+        if (string.Equals(first, AxTerminal, StringComparison.OrdinalIgnoreCase))
+        {
+            return new Launch(AxTerminal, args[1..]);
         }
 
         if (first is "--help" or "-h" or "-?" or "/?" or "--version")

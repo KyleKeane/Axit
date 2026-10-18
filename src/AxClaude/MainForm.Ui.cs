@@ -29,6 +29,8 @@ internal sealed partial class MainForm
         showIn.DropDownItems.Add(new ToolStripMenuItem("File &Explorer", null, (_, _) => ShowInExplorer()) { ShortcutKeys = AxClaudeKeys.ShowInExplorer });
         // AxGit on the repository that holds the project folder, a new window (FR-8.2; docs/axgit/SPEC.md AG-1.4).
         showIn.DropDownItems.Add(new ToolStripMenuItem("Ax&Git", null, (_, _) => OpenInAxGit()));
+        // AxTerminal with a shell in the project folder, a new window (docs/axterminal/SPEC.md AT-1.5).
+        showIn.DropDownItems.Add(new ToolStripMenuItem("Ax&Terminal", null, (_, _) => OpenInAxTerminal()));
         session.DropDownItems.Add(showIn);
         session.DropDownItems.Add(new ToolStripSeparator());
         // Not a save: the conversation is Claude's own record, and this writes a text copy of it. At the bottom, where

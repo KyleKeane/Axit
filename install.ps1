@@ -87,13 +87,16 @@ $apps = @(
     @{ Verb = 'claude'; Start = 'Axit AxClaude.lnk'; Shim = 'axclaude.cmd'; Description = 'AxClaude, an accessible front end for Claude Code'; Icon = "$exe,0" },
     @{ Verb = 'down'; Start = 'Axit AxDown.lnk'; Shim = 'axdown.cmd'; Description = 'AxDown, a plain editor for Markdown and text files'; Icon = (Join-Path $target 'AxDown.ico') },
     @{ Verb = 'json'; Start = 'Axit AxJSON.lnk'; Shim = 'axjson.cmd'; Description = 'AxJSON, an editor for JSON files'; Icon = (Join-Path $target 'AxJSON.ico') },
-    @{ Verb = 'git'; Start = 'Axit AxGit.lnk'; Shim = 'axgit.cmd'; Description = 'AxGit, a git manager for one repository'; Icon = (Join-Path $target 'AxGit.ico') }
+    @{ Verb = 'git'; Start = 'Axit AxGit.lnk'; Shim = 'axgit.cmd'; Description = 'AxGit, a git manager for one repository'; Icon = (Join-Path $target 'AxGit.ico') },
+    @{ Verb = 'terminal'; Start = 'Axit AxTerminal.lnk'; Shim = 'axterminal.cmd'; Description = 'AxTerminal, a shell as a transcript'; Icon = (Join-Path $target 'AxTerminal.ico') }
 )
 # File Explorer: folders open in AxClaude, files in AxDown; AxDown is a program for these file types (Open with), and
 # AxJSON for .json.
 $folderKeys = @("$classes\Directory\shell\AxClaude", "$classes\Directory\Background\shell\AxClaude")
 # Open in AxGit on folders too: AxGit opens on the repository that holds the folder.
 $gitFolderKeys = @("$classes\Directory\shell\AxGit", "$classes\Directory\Background\shell\AxGit")
+# Open in AxTerminal on folders: a shell in the folder.
+$terminalFolderKeys = @("$classes\Directory\shell\AxTerminal", "$classes\Directory\Background\shell\AxTerminal")
 $fileKey = "$classes\*\shell\AxDown"
 $progId = 'Axit.AxDown'
 $progIdKey = "$classes\$progId"
@@ -250,6 +253,16 @@ if (-not $NoContextMenu) {
         Set-ItemProperty -LiteralPath $command -Name '(default)' -Value "`"$exe`" git `"$argument`""
     }
 
+    foreach ($key in $terminalFolderKeys) {
+        New-Item -Path $key -Force | Out-Null
+        Set-ItemProperty -LiteralPath $key -Name '(default)' -Value 'Open in AxTerminal'
+        Set-ItemProperty -LiteralPath $key -Name 'Icon' -Value (Join-Path $target 'AxTerminal.ico')
+        $command = Join-Path $key 'command'
+        New-Item -Path $command -Force | Out-Null
+        $argument = if ($key -like '*Background*') { '%V' } else { '%1' }
+        Set-ItemProperty -LiteralPath $command -Name '(default)' -Value "`"$exe`" terminal `"$argument`""
+    }
+
     $downIcon = Join-Path $target 'AxDown.ico'
     New-Item -Path $fileKey -Force | Out-Null
     Set-ItemProperty -LiteralPath $fileKey -Name '(default)' -Value 'Open in AxDown'
@@ -312,9 +325,9 @@ New-ItemProperty -LiteralPath $appsKey -Name 'EstimatedSize' -Value ([int]((Get-
 
 Say "Installed Axit to $target"
 Say "Settings, Apps: Axit, with Uninstall"
-if (-not $NoStartMenu) { Say "Start menu: Axit AxClaude, Axit AxDown, Axit AxJSON, Axit AxGit (type axc, axd, axj or axg to find them)" }
-if (-not $NoContextMenu) { Say "File Explorer: right-click a folder, Open in AxClaude or Open in AxGit; right-click a file, Open in AxDown (also under Open with for .md, .markdown and .txt); AxJSON under Open with for .json" }
-Say "Console: axclaude [folder], axdown [file], axjson [file], axgit [folder], or axit <folder or file> (shims in $bin)"
+if (-not $NoStartMenu) { Say "Start menu: Axit AxClaude, Axit AxDown, Axit AxJSON, Axit AxGit, Axit AxTerminal (type axc, axd, axj, axg or axt to find them)" }
+if (-not $NoContextMenu) { Say "File Explorer: right-click a folder, Open in AxClaude, Open in AxGit or Open in AxTerminal; right-click a file, Open in AxDown (also under Open with for .md, .markdown and .txt); AxJSON under Open with for .json" }
+Say "Console: axclaude [folder], axdown [file], axjson [file], axgit [folder], axterminal [folder], or axit <folder or file> (shims in $bin)"
 if (-not (($env:Path -split ';') -contains $bin)) {
     Say "Note: $bin is not on PATH in this console. Open a new console, or add it, before using the commands."
 }

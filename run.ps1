@@ -11,21 +11,22 @@
   .\run.ps1 -App down                        # AxDown with an empty document (run-axdown.ps1 opens the tutorial file instead)
   .\run.ps1 -App json C:\x\settings.json     # AxJSON on that file (run-axjson.ps1 says the same)
   .\run.ps1 -App git C:\src\myproject        # AxGit on the repository that holds the folder (run-axgit.ps1 says the same)
+  .\run.ps1 -App terminal C:\src\myproject   # AxTerminal with a shell in that folder (run-axterminal.ps1 says the same)
   .\run.ps1 -NoBuild                         # skip the build, just start
   .\run.ps1 -Test                            # run the unit tests instead
 
-  run-axclaude.ps1, run-axdown.ps1, run-axjson.ps1 and run-axgit.ps1 next to this script pass -App for you and take the same other arguments.
+  run-axclaude.ps1, run-axdown.ps1, run-axjson.ps1, run-axgit.ps1 and run-axterminal.ps1 next to this script pass -App for you and take the same other arguments.
   If PowerShell refuses to run scripts: powershell -ExecutionPolicy Bypass -File .\run.ps1
   Close a running Axit first: the build writes into the folder it holds open.
 #>
 [CmdletBinding()]
 param(
     # The app to start: the verb Axit.exe takes (docs/axit/SPEC.md AX-1). AxClaude unless said otherwise.
-    [ValidateSet('claude', 'down', 'json', 'git')]
+    [ValidateSet('claude', 'down', 'json', 'git', 'terminal')]
     [string]$App = 'claude',
 
     # AxClaude's project folder (default: the current folder), AxDown's or AxJSON's file (default: an empty document),
-    # or a folder or file inside AxGit's repository (default: the last one opened).
+    # a folder or file inside AxGit's repository (default: the last one opened), or AxTerminal's folder.
     [Parameter(Position = 0)]
     [Alias('Project')]
     [string]$Path,
@@ -62,7 +63,7 @@ if (-not (Test-Path $exe)) {
 }
 
 if ($App -ne 'claude') {
-    $name = switch ($App) { 'down' { 'AxDown' } 'json' { 'AxJSON' } default { 'AxGit' } }
+    $name = switch ($App) { 'down' { 'AxDown' } 'json' { 'AxJSON' } 'terminal' { 'AxTerminal' } default { 'AxGit' } }
     if ($Path) {
         Write-Host "Starting $name on $Path"
         & $exe $App $Path

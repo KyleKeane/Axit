@@ -4,6 +4,7 @@ using AxDown;
 using AxGit;
 using Axit.Core;
 using AxJSON;
+using AxTerminal;
 
 namespace Axit;
 
@@ -46,6 +47,10 @@ internal static class Program
             case Dispatch.AxGit:
                 SetAppId("Axit.AxGit");
                 AxGitApp.Run(launch.Arguments);
+                break;
+            case Dispatch.AxTerminal:
+                SetAppId("Axit.AxTerminal");
+                AxTerminalApp.Run(launch.Arguments);
                 break;
             default:
                 // --help or --version for the bundle itself (AX-1.4).

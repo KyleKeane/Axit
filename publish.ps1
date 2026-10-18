@@ -43,6 +43,7 @@ $exe = Join-Path $out 'Axit.exe'
 Copy-Item (Join-Path $root 'src\Axit\AxDown.ico') $out -Force
 Copy-Item (Join-Path $root 'src\Axit\AxJSON.ico') $out -Force
 Copy-Item (Join-Path $root 'src\Axit\AxGit.ico') $out -Force
+Copy-Item (Join-Path $root 'src\Axit\AxTerminal.ico') $out -Force
 Copy-Item (Join-Path $root 'install.ps1') $out -Force
 Copy-Item (Join-Path $root 'install.cmd') $out -Force
 Copy-Item (Join-Path $root 'LICENSE') $out -Force

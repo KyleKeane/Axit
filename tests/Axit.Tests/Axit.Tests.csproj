@@ -14,6 +14,7 @@
     <ProjectReference Include="..\..\src\AxJSON\AxJSON.csproj" />
     <ProjectReference Include="..\..\src\AxGit\AxGit.csproj" />
     <ProjectReference Include="..\..\src\AxClaude\AxClaude.csproj" />
+    <ProjectReference Include="..\..\src\AxTerminal\AxTerminal.csproj" />
   </ItemGroup>
 
 </Project>

@@ -62,6 +62,8 @@ public sealed class TextEditorForm : AxitForm
         showIn.DropDownItems.Add(Item("File &Explorer", ShowInExplorer, EditorKeys.ShowInExplorer));
         // AxGit on the repository that holds the file, a new window (AD-4.1; docs/axgit/SPEC.md AG-1.4).
         showIn.DropDownItems.Add(new ToolStripMenuItem("Ax&Git", null, (_, _) => OpenInAxGit()));
+        // AxTerminal with a shell in the file's folder, a new window (docs/axterminal/SPEC.md AT-1.5).
+        showIn.DropDownItems.Add(new ToolStripMenuItem("Ax&Terminal", null, (_, _) => OpenInAxTerminal()));
         file.DropDownItems.Add(showIn);
         file.DropDownItems.Add(new ToolStripSeparator());
         file.DropDownItems.Add(new ToolStripMenuItem("E&xit", null, (_, _) => Close()) { ShortcutKeyDisplayString = "Alt+F4" });
@@ -398,6 +400,18 @@ public sealed class TextEditorForm : AxitForm
         }
 
         AxitMenu.Start(Dispatch.AxGit, _path);
+    }
+
+    /// <summary>File → Show current file in → AxTerminal: a new AxTerminal window with a shell in the file's folder (docs/axterminal/SPEC.md AT-1.5).</summary>
+    private void OpenInAxTerminal()
+    {
+        if (_path is null || Path.GetDirectoryName(_path) is not { } folder)
+        {
+            Announce("No file yet", true);
+            return;
+        }
+
+        AxitMenu.Start(Dispatch.AxTerminal, folder);
     }
 
     private void OpenFile() => AskToSave(() =>
