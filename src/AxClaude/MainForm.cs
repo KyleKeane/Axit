@@ -11,7 +11,7 @@ using Axit.Forms;
 
 namespace AxClaude;
 
-internal sealed class MainForm : Form
+internal sealed class MainForm : AxitForm
 {
     private const string RecordItemText = "&Record raw stream for a bug report...";
 
@@ -25,15 +25,12 @@ internal sealed class MainForm : Form
     private readonly TranscriptView _transcript = new();
     private readonly TextBox _input = new();
     private readonly ControlArea _area = new();
-    private readonly OverlayPanel _overlay = new();
     private readonly MenuStrip _menu = new();
     private readonly StatusStrip _status = new();
     private readonly ToolStripStatusLabel _state = new();
     private readonly ToolStripStatusLabel _folderLabel = new();
     private readonly ToolStripMenuItem _recentFoldersItem = new("Open &recent folder");
     private readonly ToolStripMenuItem _recordItem = new(RecordItemText);
-    private readonly ToolStripMenuItem _checkItem = new($"Check for &updates (Axit {BundleInfo.Version})...");
-    private readonly ToolStripMenuItem _updateItem = new() { Visible = false };
     /// <summary>Options → Sounds → Background music while Claude works, made with the menu; Ctrl+Space flips it from anywhere (FR-7.9).</summary>
     private ToolStripMenuItem _musicItem = null!;
     private readonly System.Windows.Forms.Timer _quiet = new() { Interval = 100 };
@@ -131,18 +128,11 @@ internal sealed class MainForm : Form
     /// <summary>The folder Claude was last started in: a restart there with --continue replays what the window shows (FR-4.8).</summary>
     private string? _launchedFolder;
     private string _findText = string.Empty;
-    private Control? _focusBeforeNotice;
-    private bool _noticeOpen;
     private bool _closeConfirmed;
-    private ReleaseInfo? _update;
-    private string _latestState = "not checked yet";
-    /// <summary>After Update and restart: how the installed new version is started when this window closes (FR-1.10); null when nothing is to start.</summary>
-    private string[]? _restartArguments;
-    private bool _updateBusy;
 
     public MainForm(StartupOptions options, AppSettings settings, string? settingsError)
+        : base("AxClaude", settings, AppSettings.DefaultPath)
     {
-        AccessibleRole = AccessibleRole.Window;
         _options = options;
         _claudeArgs = options.ClaudeArgs is { } given ? [.. given] : null;
         _settings = settings;
@@ -229,11 +219,6 @@ internal sealed class MainForm : Form
         {
             StartClaude();
         }
-
-        if (_settings.CheckForUpdates)
-        {
-            CheckForUpdates(manual: false);
-        }
     }
 
     protected override void OnFormClosing(FormClosingEventArgs e)
@@ -255,16 +240,9 @@ internal sealed class MainForm : Form
             RecentlyClosed.Remember("AxClaude", folder);
         }
 
-        SaveWindow();
         StopClaude();
         StopRecording(announce: false);
-        SaveSettings();
-        if (_restartArguments is { } restart)
-        {
-            // FR-1.10: the update is installed; the new version starts on this folder as this process ends.
-            Updater.StartInstalled(restart);
-        }
-
+        // The window's place, the settings and, after Update and restart, the new version's start (AX-3.2).
         base.OnFormClosing(e);
     }
 
@@ -274,47 +252,9 @@ internal sealed class MainForm : Form
     /// <summary>The work Claude runs in the background, which outlives the turn ("1 shell"); null when none runs or Claude is stopped.</summary>
     private string? ClaudeBackground => _host is null ? null : _model.Background;
 
-    private const int WM_SYSCOMMAND = 0x0112;
-    private const int SC_KEYMENU = 0xF100;
-
-    protected override void WndProc(ref Message m)
+    /// <summary>The window's own keys; the text size keys, the notice's hold and F1 are the window base's.</summary>
+    protected override bool ProcessWindowKey(Keys keyData)
     {
-        // Alt alone and F10 open the menu bar through SC_KEYMENU; while a notice holds the keyboard they do nothing.
-        // Alt+Space (the system menu, lParam is the space character) still works.
-        if (m.Msg == WM_SYSCOMMAND && ((long)m.WParam & 0xFFF0) == SC_KEYMENU && ((long)m.LParam & 0xFFFF) == 0 && _noticeOpen)
-        {
-            return;
-        }
-
-        base.WndProc(ref m);
-    }
-
-    /// <summary>The window's client area as its UI Automation rectangle, so that NVDA+End finds the status bar (Axit.Forms.WindowAccessibleObject).</summary>
-    protected override AccessibleObject CreateAccessibilityInstance() => new WindowAccessibleObject(this);
-
-    protected override bool ProcessCmdKey(ref Message msg, Keys keyData)
-    {
-        // The text size keys work everywhere, a notice included.
-        switch (keyData)
-        {
-            case BundleKeys.LargerText:
-            case BundleKeys.LargerTextNumpad:
-                ChangeTextSize(1);
-                return true;
-            case BundleKeys.SmallerText:
-            case BundleKeys.SmallerTextNumpad:
-                ChangeTextSize(-1);
-                return true;
-        }
-
-        if (_noticeOpen)
-        {
-            // A notice holds the keyboard: the window's shortcuts and the menu's wait until it is closed. Not calling
-            // the base skips the menu shortcuts; Enter and Escape reach the notice's buttons through AcceptButton and
-            // CancelButton, Tab and the editing keys work as usual.
-            return false;
-        }
-
         // Most keys with a menu item of their own are that item's ShortcutKeys and reach the menu through the base
         // call. This switch holds the rest: the focus keys, the Ctrl+O guard, the interrupt (WinForms takes no
         // Shift-only shortcut), and the bundle and go-to keys, whose menu items only show the key.
@@ -387,7 +327,7 @@ internal sealed class MainForm : Form
             return true;
         }
 
-        return base.ProcessCmdKey(ref msg, keyData);
+        return false;
     }
 
     // ---- UI ----
@@ -553,15 +493,7 @@ internal sealed class MainForm : Form
         // The bundle's Axit menu (AX-9) sits before Help in every window and ends with the update items and About
         // (AX-3.1, FR-1.10): Check for updates names the version in use and asks GitHub every time; Update to Axit n
         // stands below it while a newer release is known; About is the bundle's sections, shown as this window's notices.
-        _checkItem.Click += (_, _) => CheckForUpdates(manual: true);
-        _updateItem.Click += (_, _) =>
-        {
-            if (_update is { } known)
-            {
-                ShowUpdateNotice(known);
-            }
-        };
-        var axit = new AxitMenu(this, _checkItem, _updateItem, () => _latestState, notice => ShowNotice(notice));
+        var axit = CreateAxitMenu();
 
         _menu.Items.AddRange([session, claude, navigate, options, axit, help]);
         MainMenuStrip = _menu;
@@ -595,11 +527,10 @@ internal sealed class MainForm : Form
         _transcript.EscapePressed += () => BottomControl.Focus();
         _transcript.LineChosen += QuoteLineInMessage;
         _transcript.BookmarkToggled += ToggleBookmark;
-        _overlay.Chosen += OnNoticeChoice;
-        _overlay.Jumps = AxClaudeKeys.NoticeJumps;
+        Overlay.Jumps = AxClaudeKeys.NoticeJumps;
 
         // The overlay is hidden until a notice shows; it then fills the space of the hidden conversation and field.
-        Controls.Add(_overlay);
+        Controls.Add(Overlay);
         Controls.Add(_transcript);
         Controls.Add(_input);
         // What Claude waits on takes the message field's place (D33), one control at a time.
@@ -1213,8 +1144,75 @@ internal sealed class MainForm : Form
     }
 
     /// <summary>Speaks without moving the focus; from the notice while one shows, since the conversation is hidden then.</summary>
-    private bool Announce(string text, bool interrupt) =>
-        _noticeOpen ? _overlay.Announce(text, interrupt) : _transcript.Announce(text, interrupt);
+    protected override bool Announce(string text, bool interrupt) =>
+        NoticeOpen ? Overlay.Announce(text, interrupt) : _transcript.Announce(text, interrupt);
+
+    // ---- what the window base asks for (bundle AX-6.5) ----
+
+    protected override string Shortcuts => HelpText.Shortcuts;
+
+    /// <summary>The notice chime follows the sounds setting (FR-7.3).</summary>
+    protected override bool NoticeChime => _settings.SoundOnBell;
+
+    protected override void HideForNotice()
+    {
+        _transcript.Visible = false;
+        _input.Visible = false;
+        _area.Visible = false;
+    }
+
+    /// <summary>The conversation, and the message field or the control area when Claude asked something while the notice showed.</summary>
+    protected override void ShowAfterNotice()
+    {
+        _transcript.Visible = true;
+        _input.Visible = _area.Current is null;
+        _area.Visible = _area.Current is not null;
+    }
+
+    /// <summary>The bottom of the window, whichever control is there when the notice closes.</summary>
+    protected override Control FocusTarget => BottomControl;
+
+    /// <summary>The conversation keeps the focus across a notice when it had it; the bottom of the window is found afresh.</summary>
+    protected override Control? FocusToKeep() => _transcript.Focused ? _transcript : null;
+
+    /// <summary>A reader keeps their line while the notice hides the conversation (FR-3.3).</summary>
+    protected override void OnNoticeOpened(Control? focusBefore) => _transcript.KeepCaret = focusBefore is not null;
+
+    /// <summary>Cleared after the notice's action, so that a system line the action adds does not move a reader's caret.</summary>
+    protected override void OnNoticeClosed() => _transcript.KeepCaret = false;
+
+    protected override void ApplyFont(Font font)
+    {
+        _transcript.Font = font;
+        _input.Font = font;
+        _input.Height = TextRenderer.MeasureText("Wg", font).Height * 3 + 8;
+        _area.Font = font;
+        _area.MinimumHeight = _input.Height;
+        _area.FitHeight();
+    }
+
+    /// <summary>How the new version starts after Update and restart: on this folder, and on the conversation when a message was sent (FR-9.1).</summary>
+    protected override IReadOnlyList<string> RestartArguments()
+    {
+        var arguments = new List<string> { "claude" };
+        if (_folder is not null)
+        {
+            arguments.Add(_folder);
+            if (_messageSent)
+            {
+                arguments.Add("--");
+                arguments.Add("--continue");
+            }
+        }
+
+        return arguments;
+    }
+
+    protected override string UpdateRestartText =>
+        "closes AxClaude, installs it and starts it again on the same folder; the conversation is picked up again if one is open";
+
+    /// <summary>The update's steps as system lines in the conversation (FR-1.10).</summary>
+    protected override void UpdateNoted(string message) => _model.AddSystemLine(message);
 
     // ---- find and save ----
 
@@ -1225,7 +1223,7 @@ internal sealed class MainForm : Form
         [
             new OverlayChoice("Find &next", () =>
             {
-                _findText = _overlay.InputText;
+                _findText = Overlay.InputText;
                 _transcript.Find(_findText, backward: false);
             }, IsDefault: true),
             new OverlayChoice("Cancel", IsCancel: true),
@@ -1303,8 +1301,6 @@ internal sealed class MainForm : Form
         Announce("Exported", true);
     }
 
-    private void OpenUrl(string url) => OpenWithShell(url, "page");
-
     /// <summary>Opens a page, a file or a folder with whatever Windows has for it; a failure is a notice, not a crash.</summary>
     private void OpenWithShell(string target, string what)
     {
@@ -1318,129 +1314,6 @@ internal sealed class MainForm : Form
         }
     }
 
-    // ---- fonts and window ----
-
-    private static Font SystemTextFont() => SystemFonts.MessageBoxFont ?? DefaultFont;
-
-    private Font TextFont()
-    {
-        var system = SystemTextFont();
-        if (_settings.FontFamily is null && _settings.FontSize <= 0 && !_settings.FontBold)
-        {
-            return system;
-        }
-
-        var size = _settings.FontSize > 0 ? _settings.FontSize : system.SizeInPoints;
-        var style = _settings.FontBold ? FontStyle.Bold : FontStyle.Regular;
-        try
-        {
-            return new Font(_settings.FontFamily ?? system.FontFamily.Name, size, style);
-        }
-        catch (ArgumentException)
-        {
-            return new Font(system.FontFamily, size, style);
-        }
-    }
-
-    private void ApplyTextFont()
-    {
-        var font = TextFont();
-        _transcript.Font = font;
-        _input.Font = font;
-        _overlay.SetTextFont(font);
-        _input.Height = TextRenderer.MeasureText("Wg", font).Height * 3 + 8;
-        _area.Font = font;
-        _area.MinimumHeight = _input.Height;
-        _area.FitHeight();
-    }
-
-    private void ChangeTextSize(int delta)
-    {
-        var size = Math.Clamp((int)Math.Round(TextFont().SizeInPoints) + delta, 6, 72);
-        _settings.FontSize = size;
-        ApplyTextFont();
-        SaveSettings();
-        Announce($"Text size {size}", true);
-    }
-
-    private void ChooseFont()
-    {
-        using var dialog = new FontDialog
-        {
-            Font = TextFont(),
-            ShowEffects = false,
-            FontMustExist = true,
-            MinSize = 6,
-            MaxSize = 72,
-        };
-        if (dialog.ShowDialog(this) != DialogResult.OK)
-        {
-            return;
-        }
-
-        _settings.FontFamily = dialog.Font.FontFamily.Name;
-        _settings.FontSize = dialog.Font.SizeInPoints;
-        _settings.FontBold = dialog.Font.Bold;
-        ApplyTextFont();
-        SaveSettings();
-        Announce($"Font {dialog.Font.FontFamily.Name} {Math.Round(dialog.Font.SizeInPoints)} point", true);
-    }
-
-    private void UseSystemFont()
-    {
-        _settings.FontFamily = null;
-        _settings.FontSize = 0;
-        _settings.FontBold = false;
-        ApplyTextFont();
-        SaveSettings();
-        Announce("Windows text size", true);
-    }
-
-    private void RestoreWindow()
-    {
-        if (_settings.Window is not { } placement)
-        {
-            return;
-        }
-
-        var bounds = new Rectangle(placement.X, placement.Y, placement.Width, placement.Height);
-        if (!Screen.AllScreens.Any(s => s.WorkingArea.IntersectsWith(bounds)))
-        {
-            return;
-        }
-
-        StartPosition = FormStartPosition.Manual;
-        Bounds = bounds;
-        if (placement.Maximized)
-        {
-            WindowState = FormWindowState.Maximized;
-        }
-    }
-
-    private void SaveWindow()
-    {
-        var bounds = WindowState == FormWindowState.Normal ? Bounds : RestoreBounds;
-        _settings.Window = new WindowPlacement
-        {
-            X = bounds.X,
-            Y = bounds.Y,
-            Width = bounds.Width,
-            Height = bounds.Height,
-            Maximized = WindowState == FormWindowState.Maximized,
-        };
-    }
-
-    private void SaveSettings()
-    {
-        try
-        {
-            _settings.Save(AppSettings.DefaultPath);
-        }
-        catch (Exception ex) when (ex is IOException or UnauthorizedAccessException)
-        {
-            Log.Error("Settings could not be saved", ex);
-        }
-    }
 
     private void OpenSettingsFile()
     {
@@ -1525,7 +1398,7 @@ internal sealed class MainForm : Form
         Announce("Recording stopped", false);
     }
 
-    private void CopyDiagnostics()
+    protected override void CopyDiagnostics()
     {
         var claude = ClaudeLauncher.Find(_options.ClaudePath ?? _settings.ClaudePath);
         var text = string.Join("\r\n",
@@ -1691,22 +1564,22 @@ internal sealed class MainForm : Form
 
     private void ChooseSessionFolder()
     {
-        if (PickFolder(_overlay.SessionFolder ?? _folder) is { } folder)
+        if (PickFolder(Overlay.SessionFolder ?? _folder) is { } folder)
         {
-            _overlay.SetSessionFolder(folder);
+            Overlay.SetSessionFolder(folder);
         }
     }
 
     private void StartNewSession()
     {
-        var folder = _overlay.SessionFolder;
+        var folder = Overlay.SessionFolder;
         if (folder is null || !Directory.Exists(folder))
         {
             Fail("The folder no longer exists: " + folder);
             return;
         }
 
-        var arguments = _overlay.SelectedPreset?.Arguments ?? ClaudeLauncher.SplitArguments(_overlay.CustomArguments);
+        var arguments = Overlay.SelectedPreset?.Arguments ?? ClaudeLauncher.SplitArguments(Overlay.CustomArguments);
         SetFolder(folder);
         _claudeArgs = [.. arguments];
         var with = arguments.Count > 0 ? " with " + ClaudeLauncher.JoinArguments(arguments) : " with no extra arguments";
@@ -1961,53 +1834,13 @@ internal sealed class MainForm : Form
         }
     }
 
-    private void Fail(string message)
+    /// <summary>An error the user must see: logged, a system line in the conversation, the status, and the notice.</summary>
+    protected override void Fail(string message)
     {
         Log.Error(message);
         _model.AddSystemLine(message);
         UpdateStatus();
         ShowError("Error", message);
-    }
-
-    /// <summary>The crash handler's report (FR-13.4), shown inside the window like every other notice.</summary>
-    public void ShowError(string title, string message) => ShowNotice(Notice.Plain(title, message) with { Unprompted = true });
-
-    // ---- notices: the app's own dialogs, drawn inside the window (D23) ----
-
-    /// <summary>
-    /// The one place a notice is shown (D23); callers pass only its content. It adds what every notice shares here:
-    /// the notice chime of a notice the user did not open, the focus in the notice (the field, the chosen answer, or
-    /// the top of the text), the blocked menu and window shortcuts, and Enter and Escape on the default and cancel
-    /// buttons; the panel's Populate adds the key line made from the buttons and the hold of an unprompted notice. A
-    /// notice shown while another is open replaces it.
-    /// </summary>
-    private void ShowNotice(Notice notice)
-    {
-        if (notice.Unprompted && _settings.SoundOnBell)
-        {
-            Sounds.Notice();
-        }
-
-        if (!_noticeOpen)
-        {
-            // The conversation, or else the bottom of the window (null: whichever control is there when the notice closes).
-            _focusBeforeNotice = _transcript.Focused ? _transcript : null;
-            // A reader keeps their line while the notice hides the conversation (FR-3.3).
-            _transcript.KeepCaret = _focusBeforeNotice is not null;
-        }
-
-        _noticeOpen = true;
-        _overlay.Populate(notice);
-        _overlay.Visible = true;
-        _overlay.BringToFront();
-        AcceptButton = _overlay.DefaultButton;
-        CancelButton = _overlay.CancelButton;
-        _overlay.FocusStart();
-        _transcript.Visible = false;
-        _input.Visible = false;
-        _area.Visible = false;
-        _menu.Enabled = false;
-        PerformLayout();
     }
 
     // ---- the control area: what Claude waits on, in the message field's place (D33) ----
@@ -2031,8 +1864,8 @@ internal sealed class MainForm : Form
     private void ShowInArea(string signature, string name, string text, bool unprompted, Action<bool, bool> show)
     {
         _areaText = text;
-        var interrupt = unprompted && !_noticeOpen && _settings.InterruptForQuestions;
-        var focus = !_noticeOpen && (interrupt || _input.ContainsFocus || _area.ContainsFocus);
+        var interrupt = unprompted && !NoticeOpen && _settings.InterruptForQuestions;
+        var focus = !NoticeOpen && (interrupt || _input.ContainsFocus || _area.ContainsFocus);
         if (unprompted && _settings.SoundOnBell)
         {
             Sounds.Notice();
@@ -2040,7 +1873,7 @@ internal sealed class MainForm : Form
 
         show(focus, unprompted);
         _input.Visible = false;
-        _area.Visible = !_noticeOpen;
+        _area.Visible = !NoticeOpen;
         _shownWait = signature;
         if (interrupt)
         {
@@ -2069,7 +1902,7 @@ internal sealed class MainForm : Form
         }
 
         var focus = _area.ContainsFocus;
-        _input.Visible = !_noticeOpen;
+        _input.Visible = !NoticeOpen;
         if (focus)
         {
             _input.Focus();
@@ -2545,64 +2378,6 @@ internal sealed class MainForm : Form
         StartWrites();
     }
 
-    private void OnNoticeChoice(OverlayChoice choice)
-    {
-        if (choice.StaysOpen)
-        {
-            choice.Action?.Invoke();
-            return;
-        }
-
-        DismissNotice(choice.Action);
-    }
-
-    /// <summary>
-    /// Brings the conversation and the message field back, runs the action, and returns the focus to the control
-    /// that had it before the notice unless the action moved it itself (Find lands in the conversation).
-    /// </summary>
-    private void DismissNotice(Action? then = null)
-    {
-        if (!_noticeOpen)
-        {
-            return;
-        }
-
-        var focusBefore = _focusBeforeNotice;
-        _noticeOpen = false;
-        _transcript.Visible = true;
-        // The message field, or the control area when Claude asked something while the notice showed.
-        _input.Visible = _area.Current is null;
-        _area.Visible = _area.Current is not null;
-        _menu.Enabled = true;
-        AcceptButton = null;
-        CancelButton = null;
-        PerformLayout();
-        then?.Invoke();
-        if (IsDisposed)
-        {
-            // The action closed the window.
-            return;
-        }
-
-        if (_noticeOpen)
-        {
-            // The action opened a notice of its own (the update's progress, an error): that one is showing now, and
-            // the reader's place from before the first notice carries over to it.
-            _focusBeforeNotice = focusBefore;
-            _transcript.KeepCaret = focusBefore is not null;
-            return;
-        }
-
-        // Cleared after the action, so that a system line the action adds does not move a reader's caret.
-        _transcript.KeepCaret = false;
-        if (ActiveControl is null || _overlay.Contains(ActiveControl))
-        {
-            (focusBefore ?? BottomControl).Select();
-        }
-
-        _overlay.Visible = false;
-    }
-
     /// <summary>
     /// FR-1.7: a close while Claude is in the middle of a turn, or runs work in the background, is confirmed first.
     /// Enter closes, Escape keeps the window.
@@ -2632,7 +2407,7 @@ internal sealed class MainForm : Form
         }
 
         var stops = ClaudeBusy ? "Claude stops in the middle of its work" : "the background work stops";
-        var consequence = _restartArguments is null
+        var consequence = !RestartPending
             ? $"If you close now, {stops}."
             : $"If you close now, {stops} and the updated AxClaude starts again.";
         ShowNotice(new Notice("Close AxClaude?",
@@ -2646,268 +2421,6 @@ internal sealed class MainForm : Form
             }, IsDefault: true),
             new OverlayChoice("&Keep working", KeepWorkingAfterUpdate, IsCancel: true),
         ]));
-    }
-
-    /// <summary>
-    /// FR-1.10: asks GitHub for the latest release, every time. A newer one is announced, noted in a system line and
-    /// offered under Help; a manual check (Help → Check for updates) reports the result either way, including a failure.
-    /// </summary>
-    private async void CheckForUpdates(bool manual)
-    {
-        if (_updateBusy)
-        {
-            return;
-        }
-
-        SetUpdateBusy(true);
-        _latestState = "checking...";
-        try
-        {
-            using var cancellation = new CancellationTokenSource(TimeSpan.FromSeconds(30));
-            var release = await Updater.CheckAsync(cancellation.Token);
-            if (IsDisposed)
-            {
-                return;
-            }
-
-            // A check answers for itself: an update known from an earlier one is replaced, or gone.
-            _update = null;
-            _updateItem.Visible = false;
-            if (release is null)
-            {
-                _latestState = "none published yet";
-            }
-            else if (UpdateCheck.IsNewer(release, BundleInfo.Version))
-            {
-                var version = release.Version.ToString(3);
-                _update = release;
-                _latestState = $"Axit {version} (newer than this one)";
-                _updateItem.Text = $"Update &to Axit {version}...";
-                _updateItem.Visible = true;
-                Log.Info($"Update available: {release.Tag}, zip {release.ZipUrl ?? "missing"}");
-                if (!manual)
-                {
-                    _model.AddSystemLine($"Axit {version} is available. Axit menu, Update to Axit {version}.");
-                }
-
-                if (manual || !_noticeOpen)
-                {
-                    // At startup the notice opens by itself: Enter updates, Escape keeps this version (FR-1.10).
-                    ShowUpdateNotice(release, unprompted: !manual);
-                }
-                else
-                {
-                    Announce($"Update {version} in the Axit menu", false);
-                }
-
-                return;
-            }
-            else
-            {
-                var same = release.Version == UpdateCheck.ParseVersion(BundleInfo.Version);
-                _latestState = $"Axit {release.Version.ToString(3)} ({(same ? "this version" : "older than this build")})";
-            }
-
-            if (manual)
-            {
-                ShowNotice(Notice.Plain("Check for updates",
-                    $"You have the newest version, Axit {BundleInfo.Version}.\n" +
-                    (release is null ? "No release is published yet.\n" : string.Empty) +
-                    $"Releases: {UpdateCheck.ReleasesPage}"));
-            }
-        }
-        catch (Exception ex) when (ex is HttpRequestException or TaskCanceledException or IOException or InvalidOperationException)
-        {
-            Log.Error("The update check failed", ex);
-            _latestState = "unknown, GitHub could not be reached";
-            if (manual && !IsDisposed)
-            {
-                ShowNotice(new Notice("Check for updates",
-                    $"GitHub could not be reached: {ex.Message}\nThe releases page: {UpdateCheck.ReleasesPage}",
-                [
-                    new OverlayChoice("&Open releases page", () => OpenUrl(UpdateCheck.ReleasesPage), StaysOpen: true),
-                    OverlayChoice.Close,
-                ]));
-            }
-        }
-        finally
-        {
-            SetUpdateBusy(false);
-        }
-    }
-
-    /// <summary>While a check or an install runs, the two update items of the Axit menu are disabled, so that neither starts twice.</summary>
-    private void SetUpdateBusy(bool busy)
-    {
-        _updateBusy = busy;
-        if (!IsDisposed)
-        {
-            _checkItem.Enabled = !busy;
-            _updateItem.Enabled = !busy;
-        }
-    }
-
-    /// <summary>The button that opens a release on GitHub and leaves the notice open.</summary>
-    private OverlayChoice ReleasePageChoice(ReleaseInfo release) => new("&Open release page", () => OpenUrl(release.PageUrl), StaysOpen: true);
-
-    /// <summary>The release notes with Update and restart, Update and close, Open release page and Later (FR-1.10); <paramref name="unprompted"/> when the check at startup found it.</summary>
-    private void ShowUpdateNotice(ReleaseInfo release, bool unprompted = false)
-    {
-        var version = release.Version.ToString(3);
-        var size = release.ZipSize > 0 ? $" The download is {release.ZipSize / (1024.0 * 1024.0):0} MB." : string.Empty;
-        var text =
-            $"You have Axit {BundleInfo.Version}. Axit {version} is available.\n\n" +
-            (release.Notes.Length > 0 ? release.Notes + "\n\n" : string.Empty) +
-            "Update and restart downloads the new version, closes AxClaude, installs it and starts it again on the same folder; " +
-            "the conversation is picked up again if one is open. Update and close installs without starting it again. " +
-            $"A progress bar shows the download.{size}\n" +
-            "Later keeps this version; the Axit menu offers the update again.";
-        ShowNotice(new Notice($"Update to Axit {version}", text,
-        [
-            new OverlayChoice("Update and &restart", () => InstallUpdate(release, restart: true), IsDefault: true),
-            new OverlayChoice("Update and &close", () => InstallUpdate(release, restart: false)),
-            ReleasePageChoice(release),
-            new OverlayChoice("&Later", IsCancel: true),
-        ])
-        {
-            Unprompted = unprompted,
-        });
-    }
-
-    /// <summary>
-    /// Update and restart, or Update and close: downloads the release and installs it in place behind one notice with
-    /// one progress bar (the download up to 80 percent, the installer's steps to 100; Cancel stops the download, not
-    /// the install), then closes the window. The close question of FR-1.7 still applies while Claude works; on the
-    /// way out, OnFormClosing starts the installed new version when <paramref name="restart"/> was chosen.
-    /// </summary>
-    private async void InstallUpdate(ReleaseInfo release, bool restart)
-    {
-        if (_updateBusy)
-        {
-            return;
-        }
-
-        SetUpdateBusy(true);
-        var version = release.Version.ToString(3);
-        var size = release.ZipSize > 0 ? $" ({release.ZipSize / (1024.0 * 1024.0):0} MB)" : string.Empty;
-        _model.AddSystemLine($"Updating to Axit {version}...");
-        using var cancellation = new CancellationTokenSource(TimeSpan.FromMinutes(10));
-        var cancelled = false;
-        var installing = false;
-        ShowNotice(new Notice($"Updating to Axit {version}",
-            $"The new version is downloaded{size} and installed; the progress bar shows how far it is. Cancel during the download keeps this version.",
-        [
-            new OverlayChoice("&Cancel", () =>
-            {
-                if (installing)
-                {
-                    Announce("Installing, this cannot be cancelled now", true);
-                    return;
-                }
-
-                cancelled = true;
-                cancellation.Cancel();
-                DismissNotice();
-            }, IsDefault: true, IsCancel: true, StaysOpen: true),
-        ])
-        {
-            Progress = true,
-        });
-        try
-        {
-            var folder = await Updater.DownloadAsync(release, cancellation.Token, new Progress<int>(percent => _overlay.SetProgress(percent * 80 / 100)));
-            // Cancel pressed while the zip was being unpacked, which the download does not watch the token for.
-            cancellation.Token.ThrowIfCancellationRequested();
-            if (IsDisposed)
-            {
-                return;
-            }
-
-            installing = true;
-            _overlay.SetProgress(80);
-            Announce("Downloaded. Installing", true);
-            var step = 80;
-            var result = await Updater.InstallInPlaceAsync(folder, new Progress<string>(_ => _overlay.SetProgress(step = Math.Min(99, step + 3))));
-            if (IsDisposed)
-            {
-                return;
-            }
-
-            if (result.ExitCode != 0)
-            {
-                Log.Error($"The installer failed with code {result.ExitCode}:\r\n{result.Output}");
-                _model.AddSystemLine($"The installation of Axit {version} failed. This version keeps running.");
-                ShowNotice(new Notice($"Update to Axit {version}",
-                    $"The installer failed; this version keeps running.\n\n{result.Output}\n\nYou can download the zip from the release page and run install.cmd yourself.",
-                [
-                    ReleasePageChoice(release),
-                    OverlayChoice.Close,
-                ]));
-                return;
-            }
-
-            _overlay.SetProgress(100);
-            _restartArguments = restart ? RestartArguments() : null;
-            Log.Info($"Update {release.Tag} installed in place; restart: {restart}");
-            _model.AddSystemLine(restart
-                ? $"Axit {version} installed. AxClaude closes now and starts again."
-                : $"Axit {version} installed. AxClaude closes now; the next start is the new version.");
-            Announce(restart ? "Installed. Restarting" : "Installed. Closing", true);
-            Close();
-        }
-        catch (OperationCanceledException) when (cancelled && !IsDisposed)
-        {
-            _model.AddSystemLine($"The download of Axit {version} was cancelled.");
-            Announce("Update cancelled", true);
-        }
-        catch (Exception ex) when (ex is HttpRequestException or TaskCanceledException or IOException or InvalidDataException or InvalidOperationException or UnauthorizedAccessException)
-        {
-            // InvalidDataException: a download that is not a zip.
-            Log.Error("The update failed", ex);
-            if (!IsDisposed)
-            {
-                _model.AddSystemLine($"The update to Axit {version} failed: {ex.Message}");
-                ShowNotice(new Notice($"Update to Axit {version}",
-                    $"The update failed: {ex.Message}\nThis version keeps running. You can download the zip from the release page and run install.cmd yourself.",
-                [
-                    ReleasePageChoice(release),
-                    OverlayChoice.Close,
-                ]));
-            }
-        }
-        finally
-        {
-            SetUpdateBusy(false);
-        }
-    }
-
-    /// <summary>How the new version starts after Update and restart: on this folder, and on the conversation when a message was sent (FR-9.1).</summary>
-    private string[] RestartArguments()
-    {
-        var arguments = new List<string> { "claude" };
-        if (_folder is not null)
-        {
-            arguments.Add(_folder);
-            if (_messageSent)
-            {
-                arguments.Add("--");
-                arguments.Add("--continue");
-            }
-        }
-
-        return arguments.ToArray();
-    }
-
-    /// <summary>Keep working after Update and restart: the update is installed already; this window stays, and the new version comes with the next start.</summary>
-    private void KeepWorkingAfterUpdate()
-    {
-        if (_restartArguments is null)
-        {
-            return;
-        }
-
-        _restartArguments = null;
-        Announce("Update installed. It starts with the next AxClaude", true);
     }
 
     /// <summary>FR-1.9: where the app looked, the install command with a button that copies it, the install page, and Locate claude.exe.</summary>
@@ -2945,7 +2458,7 @@ internal sealed class MainForm : Form
             return;
         }
 
-        DismissNotice();
+        CloseNotice(null);
         _settings.ClaudePath = dialog.FileName;
         SaveSettings();
         StartClaude();

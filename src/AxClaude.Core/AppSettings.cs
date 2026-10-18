@@ -10,7 +10,7 @@ namespace AxClaude.Core;
 /// <c>%APPDATA%\AxClaude\settings.json</c> there (<see cref="TakeOverOldFile"/>). A missing or unreadable file falls
 /// back to the defaults.
 /// </summary>
-public sealed class AppSettings
+public sealed class AppSettings : IWindowSettings
 {
     public const int MaxRecentFolders = 10;
 
