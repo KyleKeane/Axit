@@ -1,4 +1,5 @@
 using System.Text;
+using Axit.Core.Transcript;
 
 namespace AxClaude.Core.Transcript;
 

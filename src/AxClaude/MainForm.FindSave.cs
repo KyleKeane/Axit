@@ -3,6 +3,7 @@ using AxClaude.Core.Privacy;
 using AxClaude.Core.Transcript;
 using Axit.Core;
 using Axit.Forms;
+using Axit.Core.Transcript;
 
 namespace AxClaude;
 

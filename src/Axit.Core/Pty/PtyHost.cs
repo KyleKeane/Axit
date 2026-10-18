@@ -2,7 +2,7 @@ using System.Runtime.InteropServices;
 using System.Text;
 using Microsoft.Win32.SafeHandles;
 
-namespace AxClaude.Core.Pty;
+namespace Axit.Core.Pty;
 
 public sealed record PtyOptions(
     string CommandLine,

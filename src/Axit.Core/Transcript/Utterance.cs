@@ -1,6 +1,6 @@
 using System.Text;
 
-namespace AxClaude.Core.Transcript;
+namespace Axit.Core.Transcript;
 
 /// <summary>
 /// How lines join into one notification (D32): a row wrapped under the previous one joins with a space; any

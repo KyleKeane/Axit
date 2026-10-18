@@ -1,6 +1,6 @@
 using System.Globalization;
 
-namespace AxClaude.Core.Vt;
+namespace Axit.Core.Vt;
 
 /// <summary>Terminal cell width of a code point: 0 for combining and format characters, 2 for wide characters, else 1.</summary>
 internal static class Wcwidth

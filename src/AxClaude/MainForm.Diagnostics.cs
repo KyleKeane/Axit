@@ -2,6 +2,7 @@ using System.Runtime.InteropServices;
 using AxClaude.Core;
 using AxClaude.Core.Pty;
 using Axit.Core;
+using Axit.Core.Pty;
 
 namespace AxClaude;
 

@@ -1,4 +1,5 @@
 using AxClaude.Core.Pty;
+using Axit.Core.Pty;
 
 namespace AxClaude.Tests;
 

@@ -1,7 +1,7 @@
 using System.Diagnostics;
 using System.Text;
 
-namespace AxClaude.Core.Pty;
+namespace Axit.Core.Pty;
 
 /// <summary>
 /// Writes the raw console output to a <c>.vt</c> file plus a <c>.chunks.txt</c> index (offset, length, elapsed ms per

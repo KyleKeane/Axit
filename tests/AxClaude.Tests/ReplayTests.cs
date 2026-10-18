@@ -1,5 +1,6 @@
 using AxClaude.Core.Transcript;
 using static AxClaude.Tests.TestHelpers;
+using Axit.Core.Transcript;
 
 namespace AxClaude.Tests;
 

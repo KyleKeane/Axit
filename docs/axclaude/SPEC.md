@@ -392,18 +392,20 @@ While a notice shows: Tab / Shift+Tab between text, field and buttons; Enter the
 
 ```
 src/AxClaude.Core/        class library (net10.0), no WinForms
-  Pty/        PtyHost (ConPTY P/Invoke), ClaudeLauncher (find claude, command line, environment), StreamRecorder
-  Vt/         VtParser (state machine, writes into the Screen), Screen (cells, rows carrying their Line; feeds the SessionModel), Wcwidth
-  Transcript/ SessionModel, Line, LineKind, LineClassifier, Arrivals (the tick and the spoken replies), Utterance, TranscriptMirror,
+  Pty/        ClaudeLauncher (find claude, command line, environment)
+  Transcript/ SessionModel (on the bundle's LineStore), LineClassifier, Arrivals (the tick and the spoken replies),
               Question (the Question and QuestionOption records), QuestionReader, ScreenReader (ClaudeScreen, ScreenKey),
-              QuestionRouter, SlashCommands (what Claude waits on, D33)
+              QuestionRouter, SlashCommands (what Claude waits on, D33), FeedbackDraftWatch
   Privacy/    Redaction, GitExclude (D34)
   AppSettings.cs, StartupOptions.cs (the command line, FR-9)
 src/AxClaude/             class library (net10.0-windows), AxClaude's window inside Axit.exe: AxClaudeApp (the entry point
                           Run, crash handler, --help, --version), MainForm, TranscriptView, HelpText, AxClaudeKeys
 src/Axit/                 the executable of the bundle (docs/axit/SPEC.md): Program (dispatch), AxClaude.ico (tools/make-icon.ps1)
 src/Axit.Core/            shared pure code: Dispatch, BundleInfo, AppPaths, SettingsFile, WindowPlacement, Log, Paragraphs,
-                          Updates/ (UpdateCheck, Updater), Audio/WaveTone
+                          Updates/ (UpdateCheck, Updater), Audio/WaveTone; since 2026-10-18, moved from here for AxTerminal
+                          (docs/axterminal/SPEC.md §5): Pty/ (PtyHost, the ConPTY P/Invoke; StreamRecorder), Vt/ (VtParser, the
+                          state machine that writes into the Screen; Screen, cells and rows carrying their Line, writing to a
+                          LineStore; Wcwidth), Transcript/ (Line, LineKind, LineStore, TranscriptMirror, Utterance)
 src/Axit.Forms/           shared window pieces, moved from here unchanged (bundle AX-6.2): OverlayPanel and Notice (D23),
                           ControlArea and ListKeys (D33), Sounds (the wave-out devices), EditPaging, EditParagraphs, EditKeys (the page
                           and paragraph keys of a text box), Announcer (the UI Automation notification), StatusLayout,

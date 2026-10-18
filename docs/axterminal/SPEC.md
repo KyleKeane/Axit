@@ -259,11 +259,12 @@ the notices are the rest.
 ## 5. Architecture
 
 ```
-src/Axit.Core/Terminal/   from AxClaude.Core, moved on this second use (B-3), unchanged apart from the namespace and one
-                          seam each: Pty/PtyHost, Pty/StreamRecorder; Vt/VtParser (gains the OSC 133 and 9;9 events),
-                          Vt/Screen, Vt/Wcwidth; Transcript/Line, LineKind, TranscriptMirror; and LineStore, the part of
-                          SessionModel that holds the lines (the list, CreateLine, Commit, Remove), which Screen writes to;
-                          SessionModel keeps that part by deriving from it. Tested where they were (AxClaude's fixtures).
+src/Axit.Core/Pty, Vt, Transcript  from AxClaude.Core, moved on this second use (B-3) with the namespaces of their
+                          folders, unchanged apart from one seam: Pty/PtyHost, Pty/StreamRecorder; Vt/VtParser,
+                          Vt/Screen (gains the OSC 133 and 9;9 events, and PullRowText), Vt/Wcwidth; Transcript/Line,
+                          LineKind, TranscriptMirror, Utterance; and LineStore, the part of SessionModel that holds the
+                          lines (the list, CreateLine, Commit, Remove, TextChanged), which Screen writes to; SessionModel
+                          keeps that part by deriving from it. Tested where they were (AxClaude's fixtures).
 src/Axit.Forms/TranscriptView  from AxClaude, its quick-key table given by the window as data (the QuickKey records with
                           the window's keys) instead of read from AxClaudeKeys; AxClaude hands it its own table.
 src/AxTerminal.Core/      class library (net10.0): ShellLauncher (find the shells, the command line with the prompt

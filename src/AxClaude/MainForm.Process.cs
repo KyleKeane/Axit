@@ -2,6 +2,7 @@ using AxClaude.Core.Pty;
 using AxClaude.Core.Transcript;
 using Axit.Core;
 using Axit.Forms;
+using Axit.Core.Pty;
 
 namespace AxClaude;
 

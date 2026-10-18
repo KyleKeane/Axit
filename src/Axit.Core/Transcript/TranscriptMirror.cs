@@ -1,7 +1,7 @@
 using System.Runtime.InteropServices;
 using System.Text;
 
-namespace AxClaude.Core.Transcript;
+namespace Axit.Core.Transcript;
 
 /// <summary>One replacement in the mirrored text: <see cref="OldLength"/> characters at <see cref="Start"/> become <see cref="Text"/>.</summary>
 public readonly record struct MirrorEdit(int Start, int OldLength, string Text);

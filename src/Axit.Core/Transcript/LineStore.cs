@@ -1,10 +1,10 @@
-namespace AxClaude.Core.Transcript;
+namespace Axit.Core.Transcript;
 
 /// <summary>
 /// The transcript's lines and what a <see cref="Vt.Screen"/> does to them: a line for a row that gets its first text,
 /// a committed line when its row scrolls off the top or is let go, a removed line when its row is discarded, and the
 /// new text of a rewritten row at the end of a frame. The screen knows nothing beyond this. Each app's model derives
-/// from it and adds what its program's output means: AxClaude's <see cref="SessionModel"/> (Claude Code's labels,
+/// from it and adds what its program's output means: AxClaude's SessionModel (Claude Code's labels,
 /// chrome and echoes), AxTerminal's model (a shell's prompts and marks). The seam that let the screen, the parser
 /// and the mirror move into the shared project on their second use (docs/axterminal/SPEC.md AT-D6).
 /// </summary>

@@ -1,6 +1,6 @@
 using System.Text;
 
-namespace AxClaude.Core.Vt;
+namespace Axit.Core.Vt;
 
 /// <summary>
 /// Splits a stream of characters into printable runs, C0 controls, ESC sequences, CSI sequences and OSC strings.

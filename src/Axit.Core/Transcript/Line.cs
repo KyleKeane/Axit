@@ -1,4 +1,4 @@
-namespace AxClaude.Core.Transcript;
+namespace Axit.Core.Transcript;
 
 public enum LineKind
 {

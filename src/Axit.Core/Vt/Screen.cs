@@ -1,7 +1,7 @@
 using System.Text;
-using AxClaude.Core.Transcript;
+using Axit.Core.Transcript;
 
-namespace AxClaude.Core.Vt;
+namespace Axit.Core.Vt;
 
 internal sealed class Row(int columns)
 {

@@ -21,6 +21,7 @@ using System.Diagnostics;
 using System.Text;
 using AxClaude.Core.Privacy;
 using AxClaude.Core.Pty;
+using Axit.Core.Pty;
 
 namespace PtyCapture;
 

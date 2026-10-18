@@ -2,6 +2,7 @@ using System.Text;
 using System.Text.RegularExpressions;
 using AxClaude.Core.Transcript;
 using static AxClaude.Tests.TestHelpers;
+using Axit.Core.Transcript;
 
 namespace AxClaude.Tests;
 

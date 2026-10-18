@@ -1,6 +1,7 @@
 using System.Text;
 using System.Text.RegularExpressions;
-using AxClaude.Core.Vt;
+using Axit.Core.Vt;
+using Axit.Core.Transcript;
 
 namespace AxClaude.Core.Transcript;
 
@@ -517,7 +518,7 @@ public sealed partial class SessionModel : LineStore
 
     // ---- The screen's line store (LineStore): what the lines it creates, commits or rewrites mean here ----
 
-    protected internal override Line CreateLine(Line? before)
+    protected override Line CreateLine(Line? before)
     {
         var line = base.CreateLine(before);
         line.ReplayHidden = HideReplay;
@@ -525,7 +526,7 @@ public sealed partial class SessionModel : LineStore
         return line;
     }
 
-    protected internal override void Commit(Line line)
+    protected override void Commit(Line line)
     {
         if (!line.IsMarker && line.Kind == LineKind.Plain)
         {
@@ -543,7 +544,7 @@ public sealed partial class SessionModel : LineStore
         base.Commit(line);
     }
 
-    protected internal override void TextChanged(Line line, string text)
+    protected override void TextChanged(Line line, string text)
     {
         // The row now shows something else: whatever the echo handling decided about it no longer applies, and a
         // row that held hidden replay text now holds live text once the replay is over.
