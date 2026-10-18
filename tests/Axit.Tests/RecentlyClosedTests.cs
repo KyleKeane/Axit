@@ -36,10 +36,10 @@ public sealed class RecentlyClosedTests
     }
 
     [Theory]
-    [InlineData("AxDown", @"C:\work\notes.md", "notes.md - AxDown")]
-    [InlineData("AxClaude", @"C:\work\myproject\", "myproject - AxClaude")]
+    [InlineData("AxDown", @"C:\work\notes.md", @"notes.md (C:\work\notes.md) - AxDown")]
+    [InlineData("AxClaude", @"C:\work\myproject\", @"myproject (C:\work\myproject\) - AxClaude")]
     [InlineData("AxClaude", @"C:\", @"C:\ - AxClaude")]
-    public void The_title_is_the_name_and_the_app_as_a_window_title_reads(string app, string path, string title) =>
+    public void The_title_is_the_name_the_full_path_and_the_app(string app, string path, string title) =>
         Assert.Equal(title, RecentlyClosed.Title(new(app, path)));
 
     [Fact]

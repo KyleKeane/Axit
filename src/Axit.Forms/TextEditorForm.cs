@@ -450,10 +450,11 @@ public sealed class TextEditorForm : Form
             return;
         }
 
-        foreach (var file in files)
+        for (var i = 0; i < files.Count; i++)
         {
-            var target = file;
-            _recentFilesItem.DropDownItems.Add(new ToolStripMenuItem(file.Replace("&", "&&"), null, (_, _) => AskToSave(() => LoadDocument(target))));
+            // "1. notes.md (C:\notes\notes.md)", the shape of the Axit menu's items (bundle AX-9.5).
+            var target = files[i];
+            _recentFilesItem.DropDownItems.Add(new ToolStripMenuItem(AxitWindows.Label(i, $"{Path.GetFileName(target)} ({target})"), null, (_, _) => AskToSave(() => LoadDocument(target))));
         }
     }
 

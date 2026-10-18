@@ -29,14 +29,15 @@ public static class AxitWindows
         windows.Where(w => w.App == app.Name).ToList();
 
     /// <summary>
-    /// "&amp;1 notes.md - AxDown": the item's number as its mnemonic, 1 to 9 and then a to z, and the window's title;
-    /// an ampersand in a title is doubled, as a menu needs.
+    /// "&amp;1. notes.md - AxDown": the item's number as its mnemonic, 1 to 9 and then a to z, a full stop, which the
+    /// synthesizer takes as a pause before the name (AX-8.5), and the title; an ampersand in a title is doubled, as a
+    /// menu needs. The same shape serves the apps' own recent lists (FR-8.5, AD-4.1).
     /// </summary>
     public static string Label(int index, string title)
     {
         var text = title.Replace("&", "&&");
         var mnemonic = index < 9 ? (char)('1' + index) : index < 35 ? (char)('a' + index - 9) : '\0';
-        return mnemonic == '\0' ? text : $"&{mnemonic} {text}";
+        return mnemonic == '\0' ? text : $"&{mnemonic}. {text}";
     }
 
     /// <summary>"Ax&amp;Claude": the app's name with the letter after Ax as the mnemonic.</summary>

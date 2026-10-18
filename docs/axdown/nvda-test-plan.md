@@ -42,7 +42,8 @@ letter), and a `long.md` with headings and lines longer than the window.
 9. Open a locked file, or one that is not text (a `.png`): a notice names the problem; Escape closes it; the window
    stays open on an empty "Untitled" document, and Ctrl+S opens the Save dialog instead of writing over the file. A
    missing file opens as an empty document of that name, which Ctrl+S creates.
-10. File, Open recent file lists `plain.txt` and the other files opened or saved in this window, newest first;
+10. File, Open recent file lists `plain.txt` and the other files opened or saved in this window as "1. plain.txt
+    (<path>)", newest first;
     choosing one opens it, after the unsaved-changes question when there are changes; before any file, "No recent files",
     which NVDA reads and which does nothing on Enter.
 11. File, Show current file in, File Explorer (Ctrl+W): a File Explorer window opens with the file selected and NVDA
@@ -72,10 +73,10 @@ letter), and a `long.md` with headings and lines longer than the window.
    and the folders; About, Licence, Attribution and Axit guide open their notices, Escape closes each.
 4. Alt+A: the Axit menu with New window, Recently closed, Open windows, Open windows by type, Close all windows, Check
    for updates and About (bundle AX-9); About, Axit on GitHub: the browser opens the repository page. With a second
-   AxDown open, Open windows reads "1 <name> - AxDown, 1 of 1" and Enter brings that window to the front; Alt+A, B, D there
+   AxDown open, Open windows reads "1. <name> - AxDown, 1 of 1" and Enter brings that window to the front; Alt+A, B, D there
    lists both windows, the current one checked; Alt+A, N, D starts a new Untitled window. Alone, Open windows holds
-   "No other open windows", which NVDA reads and which does nothing. Close a window that has `plain.txt` open: in another window Alt+A, R reads "1 plain.txt -
-   AxDown" and Enter opens it in a new window; File, Open on another file puts the one you left there too. Alt+A, C
+   "No other open windows", which NVDA reads and which does nothing. Close a window that has `plain.txt` open: in another window Alt+A, R reads "1. plain.txt
+   (<path>) - AxDown" and Enter opens it in a new window; File, Open on another file puts the one you left there too. Alt+A, C
    (Close all windows) with unsaved changes in one window: that window asks "Save changes?" and the others close.
 5. Options, Developer, Copy diagnostics: "Copied diagnostics"; Options, Developer, Open settings file: a new AxDown
    window on `axdown.json`. Help, Markdown resources, Markdown basics: the browser opens commonmark.org; GitHub

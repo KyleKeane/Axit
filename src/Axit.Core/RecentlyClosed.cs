@@ -46,11 +46,11 @@ public static class RecentlyClosed
     public static void Write(string file, IReadOnlyList<ClosedItem> items) =>
         SettingsFile.Save(file, new RecentlyClosedList { Items = [.. items] });
 
-    /// <summary>"notes.md - AxDown", "myproject - AxClaude": the file's or folder's name and the app, as a window title reads.</summary>
+    /// <summary>"notes.md (C:\notes\notes.md) - AxDown", "myproject (C:\src\myproject) - AxClaude": the name, the full path in parentheses, the app (AX-9.5).</summary>
     public static string Title(ClosedItem item)
     {
         var name = System.IO.Path.GetFileName(System.IO.Path.TrimEndingDirectorySeparator(item.Path));
-        return (name.Length == 0 ? item.Path : name) + " - " + item.App;
+        return (name.Length == 0 ? item.Path : $"{name} ({item.Path})") + " - " + item.App;
     }
 
     private static bool Same(ClosedItem a, ClosedItem b) =>

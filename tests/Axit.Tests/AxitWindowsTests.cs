@@ -40,10 +40,10 @@ public sealed class AxitWindowsTests
     [Fact]
     public void Labels_number_the_items_and_name_the_apps_with_the_letter_after_Ax()
     {
-        Assert.Equal("&1 notes.md - AxDown", AxitWindows.Label(0, "notes.md - AxDown"));
-        Assert.Equal("&9 a", AxitWindows.Label(8, "a"));
-        Assert.Equal("&a a", AxitWindows.Label(9, "a"));
-        Assert.Equal("&2 Q && A - AxDown", AxitWindows.Label(1, "Q & A - AxDown"));
+        Assert.Equal("&1. notes.md - AxDown", AxitWindows.Label(0, "notes.md - AxDown"));
+        Assert.Equal("&9. a", AxitWindows.Label(8, "a"));
+        Assert.Equal("&a. a", AxitWindows.Label(9, "a"));
+        Assert.Equal("&2. Q && A - AxDown", AxitWindows.Label(1, "Q & A - AxDown"));
         Assert.Equal("Ax&Claude", AxitWindows.AppLabel(Dispatch.Apps[0]));
         Assert.Equal("Ax&Down", AxitWindows.AppLabel(Dispatch.Apps[1]));
     }

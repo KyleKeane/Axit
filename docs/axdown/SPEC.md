@@ -119,7 +119,8 @@ UTF-8, UTF-16 and the system code page; files that are not text; files over 32 M
 ### AD-4 Commands and menus
 
 - AD-4.1 File, shaped as AxClaude's Session menu: New (Ctrl+N), Open… (Ctrl+O), Open recent file ▸ (the last ten
-  files opened or saved under a name, newest first, those that still exist, kept in the settings; choosing one opens it
+  files opened or saved under a name, newest first, those that still exist, kept in the settings, each as its number, a
+  full stop, the file's name and its full path, "1. notes.md (C:\notes\notes.md)", the Axit menu's shape, AX-9.5; choosing one opens it
   in this window after the unsaved-changes question; "No recent files", an item that does nothing, when there are
   none, AX-9.5), Show current file in ▸
   File Explorer (Ctrl+W; the file selected in File Explorer, one of the system's own windows; "No file yet" on

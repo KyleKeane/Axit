@@ -619,10 +619,11 @@ internal sealed class MainForm : Form
             return;
         }
 
-        foreach (var folder in folders)
+        for (var i = 0; i < folders.Count; i++)
         {
-            var target = folder;
-            _recentFoldersItem.DropDownItems.Add(new ToolStripMenuItem(folder.Replace("&", "&&"), null, (_, _) => SwitchFolder(target)));
+            // "1. myproject (C:\src\myproject)", the shape of the Axit menu's items (bundle AX-9.5).
+            var target = folders[i];
+            _recentFoldersItem.DropDownItems.Add(new ToolStripMenuItem(AxitWindows.Label(i, $"{FolderName(target)} ({target})"), null, (_, _) => SwitchFolder(target)));
         }
     }
 

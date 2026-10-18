@@ -226,8 +226,11 @@ allow it, see B-9).
   Enter starts that app on it in a new window. The list is one file for the bundle, `%APPDATA%\Axit\recently-closed.json`
   (AX-5.1), written whole by the window that closes or swaps (`Axit.Core/RecentlyClosed`, through `SettingsFile`; two
   windows closing in the same instant leave the last writer's list). Nothing else about windows is stored.
-- AX-9.5 A window's or a file's item is its number and a title, "1 notes.md - AxDown", the number as the mnemonic (1
-  to 9, then a to z), so that Alt+A, O, 1 or Alt+A, R, 1 acts without an arrow key. Enter brings a window to the
+- AX-9.5 A window's or a file's item is its number, a full stop and a title, "1. notes.md (C:\notes\notes.md) - AxDown":
+  the number is the mnemonic (1 to 9, then a to z), so that Alt+A, O, 1 or Alt+A, R, 1 acts without an arrow key, and
+  the full stop is a pause before the name (AX-8.5). A window's title is the window's own; a closed item's is the
+  file's or folder's name, its full path in parentheses, and the app. The apps' own recent lists have the same shape,
+  "1. myproject (C:\src\myproject)" (AxClaude FR-8.5, AxDown AD-4.1). Enter brings a window to the
   front, restored when it was minimized. A list with nothing in it holds one item that says so and does nothing, enabled
   ("No other open windows", "No open AxDown windows", "Nothing recently closed"; the apps' own lists likewise, "No
   recent folders", "No recent files"): WinForms skips disabled items when the keyboard moves through a menu, so a
