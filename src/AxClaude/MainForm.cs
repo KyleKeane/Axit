@@ -19,7 +19,7 @@ internal sealed partial class MainForm : AxitForm
     private readonly AppSettings _settings;
     private readonly string? _settingsError;
     private readonly SessionModel _model;
-    private readonly TranscriptView _transcript = new();
+    private readonly TranscriptView _transcript = new(AxClaudeKeys.Transcript, "Conversation");
     private readonly TextBox _input = new();
     private readonly ControlArea _area = new();
     private readonly MenuStrip _menu = new();

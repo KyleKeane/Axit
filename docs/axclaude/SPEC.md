@@ -399,7 +399,8 @@ src/AxClaude.Core/        class library (net10.0), no WinForms
   Privacy/    Redaction, GitExclude (D34)
   AppSettings.cs, StartupOptions.cs (the command line, FR-9)
 src/AxClaude/             class library (net10.0-windows), AxClaude's window inside Axit.exe: AxClaudeApp (the entry point
-                          Run, crash handler, --help, --version), MainForm, TranscriptView, HelpText, AxClaudeKeys
+                          Run, crash handler, --help, --version), MainForm, HelpText, AxClaudeKeys (with Transcript, the
+                          conversation's keys for the bundle's view as data)
 src/Axit/                 the executable of the bundle (docs/axit/SPEC.md): Program (dispatch), AxClaude.ico (tools/make-icon.ps1)
 src/Axit.Core/            shared pure code: Dispatch, BundleInfo, AppPaths, SettingsFile, WindowPlacement, Log, Paragraphs,
                           Updates/ (UpdateCheck, Updater), Audio/WaveTone; since 2026-10-18, moved from here for AxTerminal
@@ -409,7 +410,8 @@ src/Axit.Core/            shared pure code: Dispatch, BundleInfo, AppPaths, Sett
 src/Axit.Forms/           shared window pieces, moved from here unchanged (bundle AX-6.2): OverlayPanel and Notice (D23),
                           ControlArea and ListKeys (D33), Sounds (the wave-out devices), EditPaging, EditParagraphs, EditKeys (the page
                           and paragraph keys of a text box), Announcer (the UI Automation notification), StatusLayout,
-                          WindowAccessibleObject, BundleKeys
+                          WindowAccessibleObject, BundleKeys; since 2026-10-18 TranscriptView with TranscriptKeys and QuickKey
+                          (§7.7; the keys handed in from AxClaudeKeys.Transcript), moved for AxTerminal
 tests/AxClaude.Tests/     xunit: FixtureTests, ReplayTests, SessionModelTests, ArrivalsTests, TranscriptMirrorTests, ReadingBreakTests,
                           ScreenTests, QuestionTests, SettingsTests, GitExcludeTests, PrivacyTests, ClaudeLauncherTests, UtteranceTests,
                           StartupOptionsTests; TestHelpers

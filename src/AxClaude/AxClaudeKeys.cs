@@ -1,4 +1,5 @@
 using Axit.Core;
+using Axit.Core.Transcript;
 using Axit.Forms;
 
 namespace AxClaude;
@@ -128,4 +129,50 @@ public static class AxClaudeKeys
         TextJump.Markdown(HeadingLevel5, Keys.Shift | HeadingLevel5, ElementKind.Heading, 5),
         TextJump.Markdown(HeadingLevel6, Keys.Shift | HeadingLevel6, ElementKind.Heading, 6),
     ];
+
+    /// <summary>k and Shift+K: the bookmarks dropped with m (FR-3.9); the Navigate menu reaches them too.</summary>
+    private static readonly QuickKey BookmarkKey = new(Bookmark, "bookmark", l => l.Kind == LineKind.Bookmark);
+
+    /// <summary>o and Shift+O: the output markers; Ctrl+3 goes to the newest one (FR-5).</summary>
+    private static readonly QuickKey ResponseKey = new(Response, "response", l => l.Kind == LineKind.OutputMarker);
+
+    /// <summary>
+    /// The conversation's keys for the bundle's transcript view (FR-5; the view is <c>Axit.Forms/TranscriptView</c>
+    /// since AxTerminal, its letters each window's own): the quick keys as data, a letter, the kind's spoken name and
+    /// which lines it stops at, and the view's other keys from this table.
+    /// </summary>
+    public static readonly TranscriptKeys Transcript = new(
+        QuickKeys:
+        [
+            new(Heading, "heading", l => l.HeadingLevel > 0),
+            // A replayed you: row has its own marker in front of it (FR-4.8); it is not a second stop.
+            new(Input, "input", l => l.Kind is LineKind.InputMarker or LineKind.UserEcho, Previous: (_, p) => p.Kind != LineKind.InputMarker),
+            ResponseKey,
+            ResponseKey with { Key = ResponseAlso },
+            new(ClaudeReply, "Claude reply", l => l.Kind == LineKind.ClaudeReply),
+            new(ToolLine, "tool line", l => l.Kind is LineKind.Tool or LineKind.ToolError),
+            // Claude prints the short messages between its tool calls with no blank line in front of them, so every claude: line is a paragraph too.
+            // Tool, tool output and thinking rows are never paragraphs, blank line in front or not: p is for the prose, t finds the tools.
+            new(Paragraph, "paragraph", l => l.Text.Length > 0 && l.Kind is not (LineKind.Tool or LineKind.ToolError or LineKind.Thinking), Previous: (l, p) => p.Text.Length == 0 || l.Kind == LineKind.ClaudeReply, ReadsWhole: true),
+            new(Error, "error", l => l.Kind is LineKind.Error or LineKind.Warning or LineKind.ToolError),
+            new(TurnSummary, "turn summary", l => l.Kind == LineKind.TurnSummary),
+            new(SystemLine, "system line", l => l.Kind == LineKind.System),
+            // The app's record of each question Claude asked (D33): Claude redraws an answered question as its result.
+            new(Question, "question", l => l.Kind == LineKind.Question),
+            BookmarkKey,
+            new(HeadingLevel1, "heading level 1", l => l.HeadingLevel == 1),
+            new(HeadingLevel2, "heading level 2", l => l.HeadingLevel == 2),
+            new(HeadingLevel3, "heading level 3", l => l.HeadingLevel == 3),
+            new(HeadingLevel4, "heading level 4", l => l.HeadingLevel == 4),
+            new(HeadingLevel5, "heading level 5", l => l.HeadingLevel == 5),
+            new(HeadingLevel6, "heading level 6", l => l.HeadingLevel == 6),
+        ],
+        Bookmark: BookmarkKey,
+        Response: ResponseKey,
+        BookmarkToggle: BookmarkToggle,
+        LineNumber: LineNumber,
+        JumpBack: JumpBack,
+        Enter: Enter,
+        Escape: Escape,
+        CopySelection: CopySelection);
 }

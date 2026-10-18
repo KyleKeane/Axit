@@ -1,16 +1,16 @@
 using System.Runtime.InteropServices;
 using System.Text;
-using AxClaude.Core.Transcript;
-using Axit.Forms;
 using Axit.Core.Transcript;
 
-namespace AxClaude;
+namespace Axit.Forms;
 
 /// <summary>
-/// The read-only conversation view. Mirrors the visible transcript lines into a native multi-line edit control
-/// with minimal edits, keeps the user's caret on the content it was on, and adds NVDA-style single-key navigation.
+/// The read-only transcript view (AxClaude's conversation, AxTerminal's terminal). Mirrors the visible transcript
+/// lines into a native multi-line edit control with minimal edits, keeps the user's caret on the content it was on,
+/// and adds NVDA-style single-key navigation with the keys the window hands in (<see cref="TranscriptKeys"/>). It
+/// came from AxClaude on its second use (docs/axterminal/SPEC.md §5); the requirement numbers below are AxClaude's.
 /// </summary>
-internal sealed class TranscriptView : TextBox
+public sealed class TranscriptView : TextBox
 {
     private const int WM_SETREDRAW = 0x000B;
     private const int EM_SCROLLCARET = 0x00B7;
@@ -23,40 +23,8 @@ internal sealed class TranscriptView : TextBox
     /// </summary>
     private const int NavigationHoldMs = 250;
 
-    /// <summary>A single-key jump target; <paramref name="Previous"/>, when given, must also hold for the line and the one before it (the first line always qualifies).</summary>
-    private sealed record QuickKey(Keys Key, string Name, Func<Line, bool> Matches, Func<Line, Line, bool>? Previous = null);
-
-    /// <summary>k and Shift+K: the bookmarks dropped with m (FR-3.9); the Navigate menu reaches them too.</summary>
-    private static readonly QuickKey BookmarkKey = new(AxClaudeKeys.Bookmark, "bookmark", l => l.Kind == LineKind.Bookmark);
-
-    /// <summary>o and Shift+O: the output markers; Ctrl+3 goes to the newest one (FR-5).</summary>
-    private static readonly QuickKey ResponseKey = new(AxClaudeKeys.Response, "response", l => l.Kind == LineKind.OutputMarker);
-
-    private static readonly QuickKey[] QuickKeys =
-    [
-        new(AxClaudeKeys.Heading, "heading", l => l.HeadingLevel > 0),
-        // A replayed you: row has its own marker in front of it (FR-4.8); it is not a second stop.
-        new(AxClaudeKeys.Input, "input", l => l.Kind is LineKind.InputMarker or LineKind.UserEcho, Previous: (_, p) => p.Kind != LineKind.InputMarker),
-        ResponseKey,
-        ResponseKey with { Key = AxClaudeKeys.ResponseAlso },
-        new(AxClaudeKeys.ClaudeReply, "Claude reply", l => l.Kind == LineKind.ClaudeReply),
-        new(AxClaudeKeys.ToolLine, "tool line", l => l.Kind is LineKind.Tool or LineKind.ToolError),
-        // Claude prints the short messages between its tool calls with no blank line in front of them, so every claude: line is a paragraph too.
-        // Tool, tool output and thinking rows are never paragraphs, blank line in front or not: p is for the prose, t finds the tools.
-        new(AxClaudeKeys.Paragraph, "paragraph", l => l.Text.Length > 0 && l.Kind is not (LineKind.Tool or LineKind.ToolError or LineKind.Thinking), Previous: (l, p) => p.Text.Length == 0 || l.Kind == LineKind.ClaudeReply),
-        new(AxClaudeKeys.Error, "error", l => l.Kind is LineKind.Error or LineKind.Warning or LineKind.ToolError),
-        new(AxClaudeKeys.TurnSummary, "turn summary", l => l.Kind == LineKind.TurnSummary),
-        new(AxClaudeKeys.SystemLine, "system line", l => l.Kind == LineKind.System),
-        // The app's record of each question Claude asked (D33): Claude redraws an answered question as its result.
-        new(AxClaudeKeys.Question, "question", l => l.Kind == LineKind.Question),
-        BookmarkKey,
-        new(AxClaudeKeys.HeadingLevel1, "heading level 1", l => l.HeadingLevel == 1),
-        new(AxClaudeKeys.HeadingLevel2, "heading level 2", l => l.HeadingLevel == 2),
-        new(AxClaudeKeys.HeadingLevel3, "heading level 3", l => l.HeadingLevel == 3),
-        new(AxClaudeKeys.HeadingLevel4, "heading level 4", l => l.HeadingLevel == 4),
-        new(AxClaudeKeys.HeadingLevel5, "heading level 5", l => l.HeadingLevel == 5),
-        new(AxClaudeKeys.HeadingLevel6, "heading level 6", l => l.HeadingLevel == 6),
-    ];
+    /// <summary>The window's keys for the view: the quick keys and the rest (AX-8.3), given once at construction.</summary>
+    private readonly TranscriptKeys _keys;
 
     /// <summary>The lines the caret left through a jump, oldest first, for Backspace (FR-3.12); the cap keeps a long session from holding every jump.</summary>
     private readonly List<Line> _jumpHistory = [];
@@ -68,8 +36,11 @@ internal sealed class TranscriptView : TextBox
     private IReadOnlyList<Line>? _lines;
     private long _lastKeyTick = long.MinValue / 2;
 
-    public TranscriptView()
+    /// <param name="keys">The window's keys for the view, from its key table.</param>
+    /// <param name="accessibleName">What NVDA calls the view: "Conversation" in AxClaude, "Terminal" in AxTerminal.</param>
+    public TranscriptView(TranscriptKeys keys, string accessibleName)
     {
+        _keys = keys;
         Multiline = true;
         ReadOnly = true;
         WordWrap = true;
@@ -79,7 +50,7 @@ internal sealed class TranscriptView : TextBox
         MaxLength = 0;
         BackColor = SystemColors.Window;
         ForeColor = SystemColors.WindowText;
-        AccessibleName = "Conversation";
+        AccessibleName = accessibleName;
         _hold.Tick += (_, _) =>
         {
             _hold.Stop();
@@ -117,14 +88,14 @@ internal sealed class TranscriptView : TextBox
         Focus();
         for (var i = _mirror.LineCount - 1; i >= 0; i--)
         {
-            if (Stops(ResponseKey, i))
+            if (Stops(_keys.Response, i))
             {
                 MoveTo(i);
                 return;
             }
         }
 
-        Announce("No response yet", true);
+        Announce($"No {_keys.Response.Name} yet", true);
     }
 
     /// <summary>m, or Navigate → Bookmark this line: focuses the view and bookmarks the caret's line, or takes its bookmark away (FR-3.9).</summary>
@@ -144,7 +115,7 @@ internal sealed class TranscriptView : TextBox
     public void JumpToBookmark(bool backward)
     {
         Focus();
-        Jump(BookmarkKey, backward);
+        Jump(_keys.Bookmark, backward);
     }
 
     /// <summary>
@@ -291,7 +262,7 @@ internal sealed class TranscriptView : TextBox
 
     protected override void OnKeyDown(KeyEventArgs e)
     {
-        if (e.KeyCode == AxClaudeKeys.BookmarkToggle && e.Modifiers == Keys.None)
+        if (e.KeyCode == _keys.BookmarkToggle && e.Modifiers == Keys.None)
         {
             // Before the hold stamp: the caret stays on its line, so the bookmark line may appear at once.
             e.Handled = e.SuppressKeyPress = true;
@@ -301,7 +272,7 @@ internal sealed class TranscriptView : TextBox
 
         _lastKeyTick = Environment.TickCount64;
         SyncAfterKey();
-        if (e.KeyCode == AxClaudeKeys.Escape)
+        if (e.KeyCode == _keys.Escape)
         {
             e.Handled = e.SuppressKeyPress = true;
             if (SelectionLength > 0)
@@ -316,7 +287,7 @@ internal sealed class TranscriptView : TextBox
             return;
         }
 
-        if (e.KeyData == AxClaudeKeys.CopySelection && SelectionLength > 0)
+        if (e.KeyData == _keys.CopySelection && SelectionLength > 0)
         {
             e.Handled = e.SuppressKeyPress = true;
             CopySelection();
@@ -334,7 +305,7 @@ internal sealed class TranscriptView : TextBox
 
         if (!e.Control && !e.Alt)
         {
-            if (e.KeyCode == AxClaudeKeys.Enter && !e.Shift)
+            if (e.KeyCode == _keys.Enter && !e.Shift)
             {
                 e.Handled = e.SuppressKeyPress = true;
                 ChooseLine();
@@ -348,21 +319,21 @@ internal sealed class TranscriptView : TextBox
                 return;
             }
 
-            if (e.KeyCode == AxClaudeKeys.JumpBack && !e.Shift)
+            if (e.KeyCode == _keys.JumpBack && !e.Shift)
             {
                 e.Handled = e.SuppressKeyPress = true;
                 JumpBack();
                 return;
             }
 
-            if (e.KeyCode == AxClaudeKeys.LineNumber)
+            if (e.KeyCode == _keys.LineNumber)
             {
                 e.Handled = e.SuppressKeyPress = true;
                 AnnounceLineNumber();
                 return;
             }
 
-            foreach (var key in QuickKeys)
+            foreach (var key in _keys.QuickKeys)
             {
                 if (key.Key == e.KeyCode)
                 {
@@ -431,7 +402,7 @@ internal sealed class TranscriptView : TextBox
     /// </summary>
     public bool ReadToEnd(Keys letter)
     {
-        var key = Array.Find(QuickKeys, k => k.Key == letter);
+        var key = _keys.QuickKeys.FirstOrDefault(k => k.Key == letter);
         if (key is null)
         {
             return false;
@@ -448,7 +419,7 @@ internal sealed class TranscriptView : TextBox
                 }
 
                 Utterance.Append(text, SpokenText(i, whole: true), joinedToPrevious: false);
-                for (var j = i + 1; key.Key == AxClaudeKeys.Paragraph && j < _mirror.LineCount && key.Matches(_mirror.LineAt(j)) && !Stops(key, j); j++)
+                for (var j = i + 1; key.ReadsWhole && j < _mirror.LineCount && key.Matches(_mirror.LineAt(j)) && !Stops(key, j); j++)
                 {
                     // The rest of the paragraph. A row wrapped under the one before is in that one's display text already.
                     if (!_mirror.LineAt(j).JoinedToPrevious)
