@@ -43,8 +43,9 @@ its tests, then the window, then the installer.
   `WindowAccessibleObject` from `CreateAccessibilityInstance`. Copy the notice flow (`ShowNotice`, `CloseNotice`,
   `WithKeyLine`, the swallowed shortcuts and Alt/F10 while a notice shows), `Announce`, the font handling, the window
   placement and the update flow from `EditorForm` until a shared window base exists.
-- The menu bar gets the bundle's Axit menu before Help, `new AxitMenu(this)` (AX-9), and Help gets Check for
-  updates, Update to and About, the last showing `BundleAbout` (AX-3.1); the window's title ends in ` - AxThing`,
+- The menu bar gets the bundle's Axit menu before Help, `new AxitMenu(this, checkItem, updateItem, () => latestState,
+  notice => ShowNotice(notice))` (AX-9), which places the window's Check for updates and Update to items and the
+  bundle's About submenu (AX-9.9); Help holds the app's own items only; the window's title ends in ` - AxThing`,
   which is how the Axit menu tells the apps' windows apart; the window calls `RecentlyClosed.Remember("AxThing", path)`
   when it closes or swaps its file (AX-9.4), and closes as on Alt+F4 when Close all windows posts `SC_CLOSE` (AX-9.8).
 - `AxThingKeys`: the window's keys as constants with an `All` list; handle every key in `ProcessCmdKey` from

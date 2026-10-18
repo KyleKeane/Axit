@@ -63,11 +63,11 @@ letter), and a `long.md` with headings and lines longer than the window.
 2. F1 opens the shortcuts notice; Page Down and Page Up move a screen of its text, Ctrl+Down and Ctrl+Up a paragraph;
    Escape closes it and the focus is back in the editor at the same place.
 3. Help, User guide shows this app's guide, and Ctrl+H, Ctrl+K, Ctrl+L and the other navigation keys move through it, spoken
-   as in the editor, "No next table" when there is none; Help, About names the version of Axit, the two apps and the
-   folders.
-4. Alt+A: the Axit menu with New window, Recently closed, Open windows, Open windows by type, Close all windows and
-   Axit on the web (bundle AX-9); Axit on the web, GitHub: the browser opens the repository page. With a second AxDown
-   open, Open windows reads "1 <name> - AxDown, 1 of 1" and Enter brings that window to the front; Alt+A, T, D there
+   as in the editor, "No next table" when there is none; Axit, About, Version names the version of Axit, the two apps
+   and the folders; About, Licence, Attribution and Axit guide open their notices, Escape closes each.
+4. Alt+A: the Axit menu with New window, Recently closed, Open windows, Open windows by type, Close all windows, Check
+   for updates and About (bundle AX-9); About, Axit on GitHub: the browser opens the repository page. With a second
+   AxDown open, Open windows reads "1 <name> - AxDown, 1 of 1" and Enter brings that window to the front; Alt+A, B, D there
    lists both windows, the current one checked; Alt+A, N, D starts a new Untitled window. Alone, Open windows holds
    "(none)", unavailable. Close a window that has `plain.txt` open: in another window Alt+A, R reads "1 plain.txt -
    AxDown" and Enter opens it in a new window; File, Open on another file puts the one you left there too. Alt+A, C
@@ -75,14 +75,14 @@ letter), and a `long.md` with headings and lines longer than the window.
 
 ## 7. Updates and uninstall
 
-1. Help, "Check for updates (Axit <version>)..." names the version you have and reports in a notice either way; Help, About names it too
+1. Axit, "Check for updates (Axit <version>)..." names the version you have and reports in a notice either way; Axit, About, Version names it too
    and "Latest release on GitHub: Axit <version>" with the releases page.
 2. With an older build installed (set `<Version>` in `src/Axit/Axit.csproj` below the latest release, `.\publish.ps1`,
    set it back), open a file: the notice "Update to Axit <newest>" opens by itself with four buttons. Escape (Later):
-   Help has "Update to Axit <newest>..." below Check for updates, and Check for updates asks GitHub again and opens
+   the Axit menu has "Update to Axit <newest>..." below Check for updates, and Check for updates asks GitHub again and opens
    the notice once more. Enter (Update and restart): the notice "Updating to Axit <newest>" with a progress bar that
    NVDA reports by its progress bar settings; "Downloaded. Installing" at about 80 percent, then "Installed.
-   Restarting"; AxDown closes and comes back on the same file (or empty, as it was), Help, About naming the newest
+   Restarting"; AxDown closes and comes back on the same file (or empty, as it was), Axit, About, Version naming the newest
    version. Again with the older build: Escape during the download says "Update cancelled" and keeps the version;
    Update and close says "Installed. Closing" and AxDown does not come back; the Start menu entry is the newest
    version. With unsaved changes, Update and restart: the "Save changes?" question; Escape (Cancel): "Update

@@ -124,17 +124,17 @@ UTF-8, UTF-16 and the system code page; files that are not text; files over 32 M
   quote", "Table") and the key, Ctrl+letter under Next and Ctrl+Shift+letter under Previous (AD-5, §9).
 - AD-4.3 View: Word wrap (checked; Ctrl+Shift+W), Larger text (Ctrl+Plus), Smaller text (Ctrl+Minus), Windows text
   size, Font…
-- AD-4.4 Help: Keyboard shortcuts (F1), User guide, Check for updates (Axit n) and, while a newer release is known,
-  Update to Axit n, as AxClaude has them (FR-1.10 there, the bundle's `Updater`, AX-3: Update and restart, Update and
-  close, Open release page, Later; one progress bar for the download and the in-place install, Cancel during the
-  download; after Update and restart AxDown starts the new version itself, on the file or empty), Copy diagnostics,
-  About (the bundle's one About notice, AX-3.1).
+- AD-4.4 Help: Keyboard shortcuts (F1), User guide, Copy diagnostics; the app's own items only.
 - AD-4.5 Axit: the bundle's menu (AX-9), between View and Help, the same in every window of Axit: New window (AxClaude,
   AxDown), Recently closed (the last ten files and folders any Axit window held, AX-9.4; AxDown adds its file when the
   window closes or opens another); Open windows (the other open Axit windows, most recently used first), Open windows
   by type (AxClaude and AxDown, that app's windows, this one checked), Close all windows (every Axit window closes as
-  on Alt+F4, asking about unsaved changes where there are any); Axit on the web (GitHub). Enter on a window brings it
-  to the front, on a closed file opens it in a new window.
+  on Alt+F4, asking about unsaved changes where there are any); Check for updates (Axit n) and, while a newer release
+  is known, Update to Axit n, as AxClaude has them (FR-1.10 there, the bundle's `Updater`, AX-3: Update and restart,
+  Update and close, Open release page, Later; one progress bar for the download and the in-place install, Cancel
+  during the download; after Update and restart AxDown starts the new version itself, on the file or empty), and
+  About, the bundle's sections (AX-9.9: Version, Licence, Attribution, Axit guide, Axit on GitHub). Enter on a window
+  brings it to the front, on a closed file opens it in a new window.
 - AD-4.6 Every menu item has a mnemonic and a shortcut or a shortcut text (AX-7.1); the Axit menu's window items,
   made when it opens, have their number as the mnemonic and no shortcut.
 

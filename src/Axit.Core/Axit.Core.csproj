@@ -5,4 +5,9 @@
     <RootNamespace>Axit.Core</RootNamespace>
   </PropertyGroup>
 
+  <ItemGroup>
+    <!-- The Axit menu's About, Axit guide shows this file (AX-9.9); publish.ps1 ships it in the zip as README.md. -->
+    <EmbeddedResource Include="../../docs/axit/README.md" LogicalName="AxitGuide.md" />
+  </ItemGroup>
+
 </Project>

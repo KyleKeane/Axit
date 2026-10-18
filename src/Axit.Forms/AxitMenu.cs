@@ -9,10 +9,11 @@ namespace Axit.Forms;
 /// <summary>
 /// The Axit menu every window has (docs/axit/SPEC.md AX-9), one class for every window: New window (one item per app)
 /// and Recently closed (the bundle's list, AX-9.4); Open windows (the other windows of the bundle's apps, most recently
-/// used first), Open windows by type (one submenu per app, the current window checked) and Close all windows; Axit on
-/// the web. The lists are filled each time the menu opens, the windows from what the system lists in Z order, which is
-/// Alt+Tab's order, so nothing about windows is stored. The lists and labels are <see cref="AxitWindows"/> and
-/// <see cref="RecentlyClosed"/>, tested; the rest is checked with NVDA.
+/// used first), Open windows by type (one submenu per app, the current window checked) and Close all windows; the
+/// window's own Check for updates and Update to items, and About, the bundle's sections (AX-9.9). The lists are filled
+/// each time the menu opens, the windows from what the system lists in Z order, which is Alt+Tab's order, so nothing
+/// about windows is stored. The lists and labels are <see cref="AxitWindows"/> and <see cref="RecentlyClosed"/>, the
+/// About texts <see cref="BundleAbout"/>, tested; the rest is checked with NVDA.
 /// </summary>
 public sealed class AxitMenu : ToolStripMenuItem
 {
@@ -22,12 +23,16 @@ public sealed class AxitMenu : ToolStripMenuItem
     private readonly List<(App App, ToolStripMenuItem Item)> _perApp = [];
 
     /// <param name="owner">The window, whose own handle is the one checked in the lists and closed last by Close all windows.</param>
-    public AxitMenu(Form owner)
+    /// <param name="checkForUpdates">The window's Check for updates item (AX-3.1).</param>
+    /// <param name="updateTo">The window's Update to item, visible while a newer release is known.</param>
+    /// <param name="latestRelease">The window's latest-release state for About, Version.</param>
+    /// <param name="showNotice">Shows an About section as a notice in the window (AX-7.2).</param>
+    public AxitMenu(Form owner, ToolStripMenuItem checkForUpdates, ToolStripMenuItem updateTo, Func<string> latestRelease, Action<Notice> showNotice)
         : base("&Axit")
     {
         _owner = owner;
         var newWindow = new ToolStripMenuItem("&New window");
-        var byType = new ToolStripMenuItem("Open windows by &type");
+        var byType = new ToolStripMenuItem("Open windows &by type");
         foreach (var app in Dispatch.Apps)
         {
             var verb = app.Verb;
@@ -37,8 +42,12 @@ public sealed class AxitMenu : ToolStripMenuItem
             _perApp.Add((app, list));
         }
 
-        var web = new ToolStripMenuItem("Axit on the &web");
-        web.DropDownItems.Add(new ToolStripMenuItem("&GitHub", null, (_, _) => OpenUrl(UpdateCheck.RepositoryPage)));
+        var about = new ToolStripMenuItem("&About");
+        about.DropDownItems.Add(new ToolStripMenuItem("&Version", null, (_, _) => showNotice(Notice.Plain(BundleAbout.VersionTitle, BundleAbout.Version(latestRelease())))));
+        about.DropDownItems.Add(new ToolStripMenuItem("&Licence", null, (_, _) => showNotice(Notice.Plain(BundleAbout.LicenceTitle, BundleAbout.Licence))));
+        about.DropDownItems.Add(new ToolStripMenuItem("&Attribution", null, (_, _) => showNotice(Notice.Plain(BundleAbout.AttributionTitle, BundleAbout.Attribution))));
+        about.DropDownItems.Add(new ToolStripMenuItem("Axit &guide", null, (_, _) => showNotice(Notice.Plain(BundleAbout.GuideTitle, BundleAbout.Guide()))));
+        about.DropDownItems.Add(new ToolStripMenuItem("Axit on Git&Hub", null, (_, _) => OpenUrl(UpdateCheck.RepositoryPage)));
 
         DropDownItems.Add(newWindow);
         DropDownItems.Add(_recentlyClosed);
@@ -47,7 +56,9 @@ public sealed class AxitMenu : ToolStripMenuItem
         DropDownItems.Add(byType);
         DropDownItems.Add(new ToolStripMenuItem("&Close all windows", null, (_, _) => CloseAll()));
         DropDownItems.Add(new ToolStripSeparator());
-        DropDownItems.Add(web);
+        DropDownItems.Add(checkForUpdates);
+        DropDownItems.Add(updateTo);
+        DropDownItems.Add(about);
         DropDownOpening += (_, _) => Fill();
         Fill();
     }
