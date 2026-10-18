@@ -59,7 +59,12 @@ public static class BundleKeys
         ("Smaller text (numpad)", SmallerTextNumpad),
     ];
 
-    /// <summary>"Ctrl+Shift+S", "F3", "Ctrl+Plus", "Shift+Escape": a key as a menu shows it next to its item, from the tables.</summary>
+    /// <summary>
+    /// "Ctrl+Shift+S", "F3", "Ctrl+Plus", "Shift+Escape": a key as a menu shows it next to its item, from the tables.
+    /// A key of the number row ends in a full stop ("Ctrl+1."): NVDA speaks the shortcut directly before the position
+    /// of the item in the menu, and the synthesizer runs "Ctrl+1  1 of 9" together into "Ctrl+11 of 9" (AX-8.5); the
+    /// full stop is a pause between the two.
+    /// </summary>
     public static string Text(Keys key)
     {
         var parts = new List<string>();
@@ -86,6 +91,7 @@ public static class BundleKeys
             >= Keys.D0 and <= Keys.D9 => ((char)('0' + (code - Keys.D0))).ToString(),
             _ => code.ToString(),
         });
-        return string.Join("+", parts);
+        var text = string.Join("+", parts);
+        return code is >= Keys.D0 and <= Keys.D9 ? text + "." : text;
     }
 }

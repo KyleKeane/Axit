@@ -6,7 +6,7 @@ namespace Axit.Tests;
 /// <summary>
 /// The key tables (docs/axit/SPEC.md AX-8.4): no window-specific key equals a bundle-wide key, no table repeats a
 /// key, and the keys two windows use for different actions are listed so that a collision between apps is seen
-/// before it is felt.
+/// before it is felt. The text a menu shows for a key (AX-8.5) is checked here too.
 /// </summary>
 public sealed class KeyTests
 {
@@ -62,5 +62,21 @@ public sealed class KeyTests
             .Select(g => $"{g.Key}: {string.Join(", ", g.Select(k => $"{k.Window} {k.Name}"))}")
             .ToList();
         Assert.True(byKey.Count >= 0, string.Join("\n", byKey));
+    }
+
+    /// <summary>
+    /// AX-8.5: the menu text of a key; a key of the number row ends in a full stop, so that NVDA does not run
+    /// "Ctrl+1" and the item's position "1 of 9" together into "Ctrl+11 of 9".
+    /// </summary>
+    [Theory]
+    [InlineData(Keys.Control | Keys.D1, "Ctrl+1.")]
+    [InlineData(Keys.Control | Keys.D3, "Ctrl+3.")]
+    [InlineData(Keys.Control | Keys.Shift | Keys.S, "Ctrl+Shift+S")]
+    [InlineData(Keys.F3, "F3")]
+    [InlineData(Keys.Shift | Keys.Escape, "Shift+Escape")]
+    [InlineData(Keys.Control | Keys.Oemplus, "Ctrl+Plus")]
+    public void Menu_text_of_a_key(Keys key, string expected)
+    {
+        Assert.Equal(expected, BundleKeys.Text(key));
     }
 }

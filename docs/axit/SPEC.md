@@ -187,6 +187,9 @@ allow it, see B-9).
   The text a menu item shows for its key comes from the tables too (`BundleKeys.Text`: "Ctrl+Shift+S", "Shift+Escape"),
   so that a key changed in its table changes in the menus by itself; only Windows' own keys (Alt+F4, the edit
   control's Ctrl+Z, Ctrl+X, Ctrl+C, Ctrl+V, Ctrl+A) and descriptions ("Enter in the message field") are written out.
+  A key of the number row ends in a full stop ("Ctrl+1."): NVDA speaks the shortcut directly before the position of
+  the item in the menu ("1 of 9"), and the synthesizer runs "Ctrl+1  1 of 9" together into "Ctrl+11 of 9"; the full
+  stop is a pause between the two.
 
 ### AX-7 Accessibility rules every app follows
 
