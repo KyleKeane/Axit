@@ -14,9 +14,9 @@ public static class BundleAbout
 
     /// <param name="latestRelease">The window's latest-release state: "Axit 2.9.0 (this version)", "not checked yet", "checking…".</param>
     public static string Version(string latestRelease) =>
-        $"Axit {BundleInfo.Version}: AxClaude, a screen reader friendly window for Claude Code, and AxDown, a plain editor for Markdown and text files.\n\n" +
+        $"Axit {BundleInfo.Version}: AxClaude, a screen reader friendly window for Claude Code; AxDown, a plain editor for Markdown and text files; AxJSON, an editor for JSON files.\n\n" +
         $"Latest release on GitHub: {latestRelease}\nReleases: {UpdateCheck.ReleasesPage}\n\n" +
-        $"Settings: {Path.GetDirectoryName(AppPaths.RecentlyClosedFile)} (axclaude.json, axdown.json)\nLogs: {AppPaths.LogsFolder}";
+        $"Settings: {Path.GetDirectoryName(AppPaths.RecentlyClosedFile)} (axclaude.json, axdown.json, axjson.json)\nLogs: {AppPaths.LogsFolder}";
 
     public const string LicenceTitle = "Licence";
 

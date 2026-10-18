@@ -44,8 +44,7 @@ the restart by the app itself (2.3.0).
 - The text editor window is shared since AxJSON (2026-10-18: `Axit.Forms/TextEditorForm` with `EditorApp`,
   `EditorKeys`, `EditorHost`; AxDown and AxJSON are records over it). AxClaude's `MainForm` still has its own notice
   and update flow; a window base for both kinds is the remaining duplication.
-- AxJSON, an editor for JSON files: `docs/axjson/SPEC.md` is a placeholder spec (2026-10-17), raw mode as AxDown plus
-  structure keys and a formatter, structured mode as a form of real input fields from templates. It starts after
-  AxDown's letters, spec first, by `adding-an-app.md`. Decided 2026-10-18 (AJ-D4, B-14): AxDown's editor shell moves
-  to the shared projects on that second use and each file type is one app over it; one file per window, no tabs; the
-  Axit menu (AX-9) lists the open windows by recency and by app.
+- AxJSON, an editor for JSON files (`docs/axjson/SPEC.md`): raw mode built 2026-10-18 as the editor shell plus JSON's
+  navigation keys and Format (AJ-D4, B-14: the shell shared, one app per file type, one file per window, the Axit menu
+  for the open windows). Still to come: structured mode, a form of real input fields from templates (AJ-3), and the
+  caret's path in the status bar (AJ-2.4).

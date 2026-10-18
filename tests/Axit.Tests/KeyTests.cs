@@ -14,6 +14,7 @@ public sealed class KeyTests
         new Dictionary<string, IReadOnlyList<(string Name, Keys Key)>>
         {
             ["AxDown"] = AxDown.AxDownKeys.All,
+            ["AxJSON"] = AxJSON.AxJSONKeys.All,
             ["AxClaude"] = AxClaude.AxClaudeKeys.All,
         };
 

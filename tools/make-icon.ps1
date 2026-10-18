@@ -1,7 +1,8 @@
 <#
 .SYNOPSIS
-  Generates the icons in src\Axit: AxClaude.ico (the letters Ax on dark blue, also the icon of Axit.exe) and
-  AxDown.ico (the letters Ad on dark green), rounded squares at the usual Windows sizes.
+  Generates the icons in src\Axit: AxClaude.ico (the letters Ax on dark blue, also the icon of Axit.exe),
+  AxDown.ico (the letters Ad on dark green) and AxJSON.ico (the letters Aj on dark brown), rounded squares at the
+  usual Windows sizes.
 
 .DESCRIPTION
   Uses System.Drawing only, so it runs on any Windows machine. The 256 pixel image is stored PNG-compressed, the
@@ -129,4 +130,5 @@ if ($Out) {
     # One line per app: the letters and the colour.
     Write-Icon (Join-Path $iconFolder 'AxClaude.ico') 'Ax' @(31, 78, 121)
     Write-Icon (Join-Path $iconFolder 'AxDown.ico') 'Ad' @(31, 110, 70)
+    Write-Icon (Join-Path $iconFolder 'AxJSON.ico') 'Aj' @(120, 70, 20)
 }

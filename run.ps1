@@ -1,6 +1,6 @@
 <#
 .SYNOPSIS
-  Builds Axit and starts one of its apps: AxClaude on a project folder (the default), or AxDown on a file.
+  Builds Axit and starts one of its apps: AxClaude on a project folder (the default), AxDown on a file, or AxJSON on a file.
 
 .EXAMPLE
   .\run.ps1                                  # AxClaude on the current folder
@@ -9,20 +9,21 @@
   .\run.ps1 C:\src\myproject -New            # a new conversation (PowerShell swallows a bare --)
   .\run.ps1 -App down C:\notes\todo.md       # AxDown on that file (run-axdown.ps1 says the same)
   .\run.ps1 -App down                        # AxDown with an empty document (run-axdown.ps1 opens the tutorial file instead)
+  .\run.ps1 -App json C:\x\settings.json     # AxJSON on that file (run-axjson.ps1 says the same)
   .\run.ps1 -NoBuild                         # skip the build, just start
   .\run.ps1 -Test                            # run the unit tests instead
 
-  run-axclaude.ps1 and run-axdown.ps1 next to this script pass -App for you and take the same other arguments.
+  run-axclaude.ps1, run-axdown.ps1 and run-axjson.ps1 next to this script pass -App for you and take the same other arguments.
   If PowerShell refuses to run scripts: powershell -ExecutionPolicy Bypass -File .\run.ps1
   Close a running Axit first: the build writes into the folder it holds open.
 #>
 [CmdletBinding()]
 param(
     # The app to start: the verb Axit.exe takes (docs/axit/SPEC.md AX-1). AxClaude unless said otherwise.
-    [ValidateSet('claude', 'down')]
+    [ValidateSet('claude', 'down', 'json')]
     [string]$App = 'claude',
 
-    # AxClaude's project folder (default: the current folder), or AxDown's file (default: an empty document).
+    # AxClaude's project folder (default: the current folder), or AxDown's or AxJSON's file (default: an empty document).
     [Parameter(Position = 0)]
     [Alias('Project')]
     [string]$Path,
@@ -58,13 +59,14 @@ if (-not (Test-Path $exe)) {
     exit 1
 }
 
-if ($App -eq 'down') {
+if ($App -ne 'claude') {
+    $name = if ($App -eq 'down') { 'AxDown' } else { 'AxJSON' }
     if ($Path) {
-        Write-Host "Starting AxDown on $Path"
-        & $exe down $Path
+        Write-Host "Starting $name on $Path"
+        & $exe $App $Path
     } else {
-        Write-Host "Starting AxDown"
-        & $exe down
+        Write-Host "Starting $name"
+        & $exe $App
     }
     exit $LASTEXITCODE
 }

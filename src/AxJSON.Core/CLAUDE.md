@@ -1,0 +1,10 @@
+# AxJSON.Core, the pure code
+
+Everything of AxJSON that does not need a window. The spec is `docs/axjson/SPEC.md` ("SPEC.md" below); the window side is `src/AxJSON`, with its own `CLAUDE.md`; the bundle rules are in the root `CLAUDE.md`. Unit tested in `tests/AxJSON.Tests` (`dotnet test tests/AxJSON.Tests/AxJSON.Tests.csproj`, which works while an app runs).
+
+- `JsonScanner` (AJ-2.3): the tokens of a text, forgivingly: comments are skipped and counted as repairs, single-quoted strings and bare words are tokens, an unclosed string ends with its line. `Unquote` and `Quote` are the string escapes both ways.
+- `JsonParser` and `JsonTree` (AJ-2.2, AJ-2.3): the tree of values (`JsonNode`: kind, start, key, text, children) from the tokens; a trailing comma, a missing comma between members or items, a single-quoted string and an unquoted key are repairs; anything else is the first `JsonProblem`, with the tree so far kept, so that the keys before it still navigate.
+- `JsonOutline` (AJ-2.2): the elements for the navigation keys in `Axit.Core.MarkdownOutline`'s shape: `Keys`, `Objects`, `Arrays`, `Items`, `Errors`, each with `Next…` and `Previous…` from a caret position, returning an `Element` with `Start` and `Spoken` (`JsonKey` "model: opus" or "permissions, object with 2 keys", `JsonObject`, `JsonArray`, `JsonItem` "Item 2 of 5, Read", `JsonError` "Error, line 12: …"). A key's caret position is its key, an item's its value.
+- `JsonFormat` (AJ-2.3): `Apply(text)` is the tree written out again (two spaces per level, one member or item per line, keys in double quotes, the text's own line ending, a final line ending) with the message "Formatted", "Formatted, repaired: …" naming each repair kind and count, "Already formatted", "Nothing to format", or "Not valid JSON: line n, …" with the text unchanged.
+
+Gotchas: positions are character offsets into the text as the edit control holds it (`\r\n` line endings), so the line of an offset counts `\n`; the scanner never throws on any input, and the parser's problem message names what was expected and what was found in the user's words ("a string", "'}'", "the end of the document").

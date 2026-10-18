@@ -6,10 +6,11 @@
   Run it from the folder that holds Axit.exe: the extracted zip, or publish\win-x64 after publish.ps1.
   Axit is one program with several apps inside (docs/axit/SPEC.md AX-2). It copies Axit to
   %LOCALAPPDATA%\Programs\Axit and creates the ways to start each app:
-    - a Start menu entry per app, "Axit AxClaude" and "Axit AxDown" (type axc or axd in the Start menu),
+    - a Start menu entry per app, "Axit AxClaude", "Axit AxDown" and "Axit AxJSON" (type axc, axd or axj in the Start menu),
     - File Explorer entries: "Open in AxClaude" in the right-click menu of folders (and of a folder's background),
-      "Open in AxDown" in the right-click menu of files, and AxDown under "Open with" for .md, .markdown and .txt,
-    - the console commands axclaude, axdown and axit (a folder opens AxClaude, a file AxDown): one-line shims in
+      "Open in AxDown" in the right-click menu of files, AxDown under "Open with" for .md, .markdown and .txt, and
+      AxJSON under "Open with" for .json,
+    - the console commands axclaude, axdown, axjson and axit (a folder opens AxClaude, a file AxDown, a .json file AxJSON): one-line shims in
       %USERPROFILE%\.local\bin, the folder that Claude Code's installer already puts on PATH.
   It also lists Axit in Settings, Apps (Add or remove programs), whose Uninstall runs install.cmd -Uninstall.
   -Uninstall removes all of that. The settings in %APPDATA%\Axit and the logs in %LOCALAPPDATA%\Axit stay.
@@ -84,14 +85,19 @@ $appsKey = 'HKCU:\Software\Microsoft\Windows\CurrentVersion\Uninstall\Axit'
 # A new app of the bundle adds a block here.
 $apps = @(
     @{ Verb = 'claude'; Start = 'Axit AxClaude.lnk'; Shim = 'axclaude.cmd'; Description = 'AxClaude, an accessible front end for Claude Code'; Icon = "$exe,0" },
-    @{ Verb = 'down'; Start = 'Axit AxDown.lnk'; Shim = 'axdown.cmd'; Description = 'AxDown, a plain editor for Markdown and text files'; Icon = (Join-Path $target 'AxDown.ico') }
+    @{ Verb = 'down'; Start = 'Axit AxDown.lnk'; Shim = 'axdown.cmd'; Description = 'AxDown, a plain editor for Markdown and text files'; Icon = (Join-Path $target 'AxDown.ico') },
+    @{ Verb = 'json'; Start = 'Axit AxJSON.lnk'; Shim = 'axjson.cmd'; Description = 'AxJSON, an editor for JSON files'; Icon = (Join-Path $target 'AxJSON.ico') }
 )
-# File Explorer: folders open in AxClaude, files in AxDown; AxDown is a program for these file types (Open with).
+# File Explorer: folders open in AxClaude, files in AxDown; AxDown is a program for these file types (Open with), and
+# AxJSON for .json.
 $folderKeys = @("$classes\Directory\shell\AxClaude", "$classes\Directory\Background\shell\AxClaude")
 $fileKey = "$classes\*\shell\AxDown"
 $progId = 'Axit.AxDown'
 $progIdKey = "$classes\$progId"
 $extensions = '.md', '.markdown', '.txt'
+$jsonProgId = 'Axit.AxJSON'
+$jsonProgIdKey = "$classes\$jsonProgId"
+$jsonExtensions = @('.json')
 
 # What AxClaude 1.x put on the machine under its own names; the rest of its places are the same as Axit's.
 $oldTarget = Join-Path $env:LOCALAPPDATA 'Programs\AxClaude'
@@ -101,7 +107,7 @@ $oldStartMenu = Join-Path $programs 'AxClaude.lnk'
 
 # Everything an installation puts on the machine, this version's and 1.x's, so that one removal clears both. The
 # Open with values live inside the file types' own keys and are removed one by one (Remove-Installation).
-$places = @($target, $oldTarget, $appsKey, $oldAppsKey, $oldStartMenu, $fileKey, $progIdKey) + $folderKeys +
+$places = @($target, $oldTarget, $appsKey, $oldAppsKey, $oldStartMenu, $fileKey, $progIdKey, $jsonProgIdKey) + $folderKeys +
     @($apps | ForEach-Object { Join-Path $programs $_.Start }) +
     @(Join-Path $bin 'axit.cmd') + @($apps | ForEach-Object { Join-Path $bin $_.Shim })
 
@@ -133,6 +139,12 @@ function Remove-Installation {
         $openWith = "$classes\$extension\OpenWithProgids"
         if ((Test-Path -LiteralPath $openWith) -and (Get-ItemProperty -LiteralPath $openWith).PSObject.Properties[$progId]) {
             Remove-ItemProperty -LiteralPath $openWith -Name $progId
+        }
+    }
+    foreach ($extension in $jsonExtensions) {
+        $openWith = "$classes\$extension\OpenWithProgids"
+        if ((Test-Path -LiteralPath $openWith) -and (Get-ItemProperty -LiteralPath $openWith).PSObject.Properties[$jsonProgId]) {
+            Remove-ItemProperty -LiteralPath $openWith -Name $jsonProgId
         }
     }
 }
@@ -176,7 +188,7 @@ if (-not $sameFolder) {
     }
 
     New-Item -ItemType Directory -Force $target | Out-Null
-    foreach ($name in 'Axit.exe', 'AxDown.ico', 'README.md', 'LICENSE', 'install.ps1', 'install.cmd') {
+    foreach ($name in 'Axit.exe', 'AxDown.ico', 'AxJSON.ico', 'README.md', 'LICENSE', 'install.ps1', 'install.cmd') {
         $file = Join-Path $source $name
         if (-not (Test-Path -LiteralPath $file)) { continue }
         $destination = Join-Path $target $name
@@ -248,6 +260,24 @@ if (-not $NoContextMenu) {
         New-Item -Path $openWith -Force | Out-Null
         New-ItemProperty -LiteralPath $openWith -Name $progId -Value ([byte[]]@()) -PropertyType None -Force | Out-Null
     }
+
+    # AxJSON the same way for .json (AX-2.3): under Open with, never the default.
+    $jsonIcon = Join-Path $target 'AxJSON.ico'
+    New-Item -Path $jsonProgIdKey -Force | Out-Null
+    Set-ItemProperty -LiteralPath $jsonProgIdKey -Name '(default)' -Value 'JSON document (AxJSON)'
+    Set-ItemProperty -LiteralPath $jsonProgIdKey -Name 'FriendlyTypeName' -Value 'JSON document (AxJSON)'
+    New-Item -Path (Join-Path $jsonProgIdKey 'DefaultIcon') -Force | Out-Null
+    Set-ItemProperty -LiteralPath (Join-Path $jsonProgIdKey 'DefaultIcon') -Name '(default)' -Value $jsonIcon
+    New-Item -Path (Join-Path $jsonProgIdKey 'Application') -Force | Out-Null
+    Set-ItemProperty -LiteralPath (Join-Path $jsonProgIdKey 'Application') -Name 'ApplicationName' -Value 'AxJSON'
+    Set-ItemProperty -LiteralPath (Join-Path $jsonProgIdKey 'Application') -Name 'ApplicationIcon' -Value $jsonIcon
+    New-Item -Path (Join-Path $jsonProgIdKey 'shell\open\command') -Force | Out-Null
+    Set-ItemProperty -LiteralPath (Join-Path $jsonProgIdKey 'shell\open\command') -Name '(default)' -Value "`"$exe`" json `"%1`""
+    foreach ($extension in $jsonExtensions) {
+        $openWith = "$classes\$extension\OpenWithProgids"
+        New-Item -Path $openWith -Force | Out-Null
+        New-ItemProperty -LiteralPath $openWith -Name $jsonProgId -Value ([byte[]]@()) -PropertyType None -Force | Out-Null
+    }
 }
 
 New-Item -Path $appsKey -Force | Out-Null
@@ -269,9 +299,9 @@ New-ItemProperty -LiteralPath $appsKey -Name 'EstimatedSize' -Value ([int]((Get-
 
 Say "Installed Axit to $target"
 Say "Settings, Apps: Axit, with Uninstall"
-if (-not $NoStartMenu) { Say "Start menu: Axit AxClaude, Axit AxDown (type axc or axd to find them)" }
-if (-not $NoContextMenu) { Say "File Explorer: right-click a folder, Open in AxClaude; right-click a file, Open in AxDown (also under Open with for .md, .markdown and .txt)" }
-Say "Console: axclaude [folder], axdown [file], or axit <folder or file> (shims in $bin)"
+if (-not $NoStartMenu) { Say "Start menu: Axit AxClaude, Axit AxDown, Axit AxJSON (type axc, axd or axj to find them)" }
+if (-not $NoContextMenu) { Say "File Explorer: right-click a folder, Open in AxClaude; right-click a file, Open in AxDown (also under Open with for .md, .markdown and .txt); AxJSON under Open with for .json" }
+Say "Console: axclaude [folder], axdown [file], axjson [file], or axit <folder or file> (shims in $bin)"
 if (-not (($env:Path -split ';') -contains $bin)) {
     Say "Note: $bin is not on PATH in this console. Open a new console, or add it, before using the commands."
 }

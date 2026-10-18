@@ -85,6 +85,28 @@ public sealed class DispatchTests
     }
 
     [Fact]
+    public void JsonFileGoesToAxJSONAndSoDoesTheVerb()
+    {
+        var file = Path.Combine(Folder, $"axit-dispatch-{Guid.NewGuid():N}.JSON");
+        File.WriteAllText(file, "{}");
+        try
+        {
+            var launch = Dispatch.Decide([file]);
+            Assert.Equal(Dispatch.AxJSON, launch.App);
+            Assert.Equal([file], launch.Arguments);
+        }
+        finally
+        {
+            File.Delete(file);
+        }
+
+        Assert.Equal(Dispatch.AxJSON, Dispatch.Decide(["json", "x.json"]).App);
+        Assert.Equal(["x.json"], Dispatch.Decide(["JSON", "x.json"]).Arguments);
+        Assert.Contains("Axit json", Dispatch.Usage);
+        Assert.Equal(["AxClaude", "AxDown", "AxJSON"], Dispatch.Apps.Select(a => a.Name));
+    }
+
+    [Fact]
     public void MissingPathIsAnError()
     {
         var missing = Path.Combine(Folder, $"axit-dispatch-{Guid.NewGuid():N}");

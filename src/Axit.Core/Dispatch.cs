@@ -19,24 +19,26 @@ public static class Dispatch
 {
     public const string AxClaude = "claude";
     public const string AxDown = "down";
+    public const string AxJSON = "json";
 
     /// <summary>Not an app: the executable answers <c>--help</c> and <c>--version</c>, or reports <see cref="Launch.Error"/>.</summary>
     public const string Bundle = "axit";
 
     /// <summary>The apps, in the order the Axit menu lists them (AX-9).</summary>
-    public static readonly IReadOnlyList<App> Apps = [new("AxClaude", AxClaude), new("AxDown", AxDown)];
+    public static readonly IReadOnlyList<App> Apps = [new("AxClaude", AxClaude), new("AxDown", AxDown), new("AxJSON", AxJSON)];
 
     public const string Usage = """
-        Usage: Axit [claude|down] [arguments]
+        Usage: Axit [claude|down|json] [arguments]
 
           Axit claude [<folder>] ...  AxClaude, the front end for Claude Code (Axit claude --help lists its options)
           Axit down [<file>]          AxDown, the text editor
+          Axit json [<file>]          AxJSON, the JSON editor
           Axit <folder>               the same as Axit claude <folder>
-          Axit <file>                 the same as Axit down <file>
+          Axit <file>                 the same as Axit down <file>, or Axit json <file> for a .json file
           Axit                        AxClaude on the current folder
           --help, --version           this text, or the version
 
-        The installed console commands axit, axclaude and axdown stand for Axit, Axit claude and Axit down.
+        The installed console commands axit, axclaude, axdown and axjson stand for Axit, Axit claude, Axit down and Axit json.
         """;
 
     public static Launch Decide(string[] args)
@@ -57,6 +59,11 @@ public static class Dispatch
             return new Launch(AxDown, args[1..]);
         }
 
+        if (string.Equals(first, AxJSON, StringComparison.OrdinalIgnoreCase))
+        {
+            return new Launch(AxJSON, args[1..]);
+        }
+
         if (first is "--help" or "-h" or "-?" or "/?" or "--version")
         {
             return new Launch(Bundle, args);
@@ -75,7 +82,9 @@ public static class Dispatch
 
         if (File.Exists(first))
         {
-            return new Launch(AxDown, args);
+            // AX-1.2: a .json file is AxJSON's, any other file AxDown's.
+            var json = Path.GetExtension(first).Equals(".json", StringComparison.OrdinalIgnoreCase);
+            return new Launch(json ? AxJSON : AxDown, args);
         }
 
         return new Launch(Bundle, args, $"There is no folder or file at {first}.");

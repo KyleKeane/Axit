@@ -38,15 +38,18 @@ allow it, see B-9).
 - **AxDown**: `Axit.exe down [<file>]`, Start entry `Axit AxDown`,
   `Open in AxDown` on files and Open with for `.md`, `.markdown`, `.txt`, command `axdown`. Specification
   `docs/axdown/SPEC.md`, guide `docs/axdown/user-guide.md`, test plan `docs/axdown/nvda-test-plan.md`.
+- **AxJSON**: `Axit.exe json [<file>]`, Start entry `Axit AxJSON`, Open with for `.json`, command `axjson`. The
+  text editor shell AxDown is, with JSON's navigation keys and a Format command. Specification `docs/axjson/SPEC.md`,
+  guide `docs/axjson/user-guide.md`, test plan `docs/axjson/nvda-test-plan.md`.
 
 ## 4. Functional requirements
 
 ### AX-1 Launch and dispatch
 
-- AX-1.1 The first argument may be a verb naming an app: `claude`, `down`. The rest of the arguments go to that app
+- AX-1.1 The first argument may be a verb naming an app: `claude`, `down`, `json`. The rest of the arguments go to that app
   unchanged, so `Axit.exe claude C:\src --record x.vt` is what `AxClaude.exe C:\src --record x.vt` was.
 - AX-1.2 Without a verb, a first argument that is an existing folder goes to AxClaude and an existing file to AxDown,
-  with the remaining arguments. A path that does not exist is reported with the usage text (a message box, since no
+  or to AxJSON when its extension is `.json`, with the remaining arguments. A path that does not exist is reported with the usage text (a message box, since no
   window exists yet, as `--help` does today).
 - AX-1.3 Without any argument, `Axit.exe` starts AxClaude on the current folder, which is what `axclaude` does today
   (B-8). AxClaude keeps its own rule for a current folder that is the program's own folder.
@@ -66,15 +69,16 @@ allow it, see B-9).
   rights, from the extracted zip or from `publish\win-x64`; `install.cmd` runs it with the execution policy bypassed
   and, downloaded alone, fetches the latest release first. `-Uninstall` removes everything of Axit and keeps the
   settings and the logs. This is AxClaude's installer today (`docs/axclaude/SPEC.md` FR-8.7, D18) with the names changed.
-- AX-2.2 Start menu: one shortcut per app, named `Axit <App>` (`Axit AxClaude`, `Axit AxDown`), each starting
-  `Axit.exe <verb>` with the app's icon. Windows search matches the start of each word, so `axc` and `axd` find them
-  and `axit` lists them (checked).
+- AX-2.2 Start menu: one shortcut per app, named `Axit <App>` (`Axit AxClaude`, `Axit AxDown`, `Axit AxJSON`), each
+  starting `Axit.exe <verb>` with the app's icon. Windows search matches the start of each word, so `axc`, `axd` and
+  `axj` find them and `axit` lists them (checked).
 - AX-2.3 File Explorer: `Open in AxClaude` on folders and on a folder's background (`Axit.exe claude "%1"`, `%V` for
   the background); `Open in AxDown` on every file (`Axit.exe down "%1"`); AxDown registered as a program for `.md`,
-  `.markdown` and `.txt`, so it appears under Open with and can be chosen as the default in Settings, Default apps
-  (B-9).
-- AX-2.4 Console commands: `axit.cmd`, `axclaude.cmd` and `axdown.cmd` in `%USERPROFILE%\.local\bin`, one line each,
-  passing their arguments to `Axit.exe`, `Axit.exe claude` and `Axit.exe down`. They work from cmd and from PowerShell.
+  `.markdown` and `.txt`, and AxJSON for `.json`, so they appear under Open with and can be chosen as the default in
+  Settings, Default apps (B-9).
+- AX-2.4 Console commands: `axit.cmd`, `axclaude.cmd`, `axdown.cmd` and `axjson.cmd` in `%USERPROFILE%\.local\bin`, one
+  line each, passing their arguments to `Axit.exe`, `Axit.exe claude`, `Axit.exe down` and `Axit.exe json`. They work
+  from cmd and from PowerShell.
 - AX-2.5 Settings, Apps lists one entry, `Axit`, with the version, the publisher and an Uninstall that runs
   `install.cmd -Uninstall`.
 - AX-2.6 Installing over an existing AxClaude installation (any version) removes it completely first: its folder,
@@ -289,7 +293,9 @@ src/AxClaude/        class library (net10.0-windows): AxClaudeApp, MainForm, ...
 src/AxClaude.Core/   class library (net10.0): Vt, Transcript, Pty, Privacy, AppSettings (AxClaude's pure code)
 src/AxDown/          class library (net10.0-windows): AxDownApp (its EditorApp), AxDownKeys, HelpText; the window is
                      the shell's, and its pure code (TextDocument, EditorSettings, MarkdownOutline) is Axit.Core's
-tests/Axit.Tests, tests/AxClaude.Tests
+src/AxJSON/          class library (net10.0-windows): AxJSONApp (its EditorApp), AxJSONKeys, HelpText (AxJSON's app side)
+src/AxJSON.Core/     class library (net10.0): JsonScanner, JsonParser, JsonOutline, JsonFormat (AxJSON's pure code)
+tests/Axit.Tests, tests/AxClaude.Tests, tests/AxJSON.Tests
 ```
 
 References point one way: `Axit` references every app; an app's window project references its own `.Core`,
