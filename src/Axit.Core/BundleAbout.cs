@@ -3,7 +3,7 @@ using Axit.Core.Updates;
 namespace Axit.Core;
 
 /// <summary>
-/// The one About notice of the bundle (docs/axit/SPEC.md AX-3.1, AX-9.1), shown from every window's Axit menu with the
+/// The one About notice of the bundle (docs/axit/SPEC.md AX-3.1), shown from every window's Help menu with the
 /// same text: the version, the apps, the maker, the latest release as the window knows it, the releases page, the
 /// folders, and the disclaimer. The LICENSE file is the binding text; the disclaimer repeats it in full words.
 /// </summary>

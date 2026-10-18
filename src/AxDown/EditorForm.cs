@@ -106,12 +106,10 @@ internal sealed class EditorForm : Form
         help.DropDownItems.Add(Item("&Keyboard shortcuts", () => ShowNotice(Notice.Plain("Keyboard shortcuts", HelpText.Shortcuts)), BundleKeys.Shortcuts));
         help.DropDownItems.Add(new ToolStripMenuItem("User &guide", null, (_, _) => ShowNotice(Notice.Plain("User guide", HelpText.UserGuide()))));
         help.DropDownItems.Add(new ToolStripSeparator());
-        help.DropDownItems.Add(new ToolStripMenuItem("Copy diag&nostics", null, (_, _) => CopyDiagnostics()));
-
-        // The bundle's Axit menu (AX-9) sits before Help in every window; Check for updates, Update to and About are
-        // its first items (AX-3.1). Check for updates names the version in use and asks GitHub every time; Update to
-        // Axit n stands below it while a newer release is known; About is the bundle's one notice.
+        // AX-3.1: Check for updates names the version in use and asks GitHub every time; Update to Axit n stands below
+        // it while a newer release is known. About is the bundle's one notice.
         _checkItem.Click += (_, _) => CheckForUpdates(manual: true);
+        help.DropDownItems.Add(_checkItem);
         _updateItem.Click += (_, _) =>
         {
             if (_update is { } known)
@@ -119,9 +117,13 @@ internal sealed class EditorForm : Form
                 ShowUpdateNotice(known);
             }
         };
-        var axit = new AxitMenu(this, [_checkItem, _updateItem, new ToolStripMenuItem("&About", null, (_, _) => ShowAbout())]);
+        help.DropDownItems.Add(_updateItem);
+        help.DropDownItems.Add(new ToolStripSeparator());
+        help.DropDownItems.Add(new ToolStripMenuItem("Copy diag&nostics", null, (_, _) => CopyDiagnostics()));
+        help.DropDownItems.Add(new ToolStripMenuItem("&About", null, (_, _) => ShowAbout()));
 
-        _menu.Items.AddRange([file, edit, navigate, view, axit, help]);
+        // The bundle's Axit menu (AX-9) sits before Help in every window.
+        _menu.Items.AddRange([file, edit, navigate, view, new AxitMenu(this), help]);
         MainMenuStrip = _menu;
 
         // ---- the editor (AD-2) ----
@@ -966,7 +968,7 @@ internal sealed class EditorForm : Form
                 }
                 else
                 {
-                    Announce($"Update {version} in the Axit menu", false);
+                    Announce($"Update {version} in the Help menu", false);
                 }
             }
             else
@@ -1008,7 +1010,7 @@ internal sealed class EditorForm : Form
             (release.Notes.Length > 0 ? release.Notes + "\n\n" : string.Empty) +
             $"Update and restart downloads the new version, closes {AppName} (asking first when there are unsaved changes), installs it " +
             $"and starts it again on the same file. Update and close installs without starting it again. A progress bar shows the download.{size}\n" +
-            "Later keeps this version; the Axit menu offers the update again.";
+            "Later keeps this version; the Help menu offers the update again.";
         ShowNotice(new Notice($"Update to Axit {version}", text,
         [
             new OverlayChoice("Update and &restart", () => InstallUpdate(release, restart: true), IsDefault: true),

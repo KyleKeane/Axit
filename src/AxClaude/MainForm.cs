@@ -519,11 +519,11 @@ internal sealed class MainForm : Form
         web.DropDownItems.Add(new ToolStripMenuItem("Command &line", null, (_, _) => OpenUrl("https://code.claude.com/docs/en/cli-reference")));
         web.DropDownItems.Add(new ToolStripMenuItem("&Install or update Claude Code", null, (_, _) => OpenUrl(ClaudeLauncher.InstallUrl)));
         help.DropDownItems.Add(web);
-
-        // The bundle's Axit menu (AX-9) sits before Help in every window; Check for updates, Update to and About are
-        // its first items (AX-3.1, FR-1.10). Check for updates names the version in use and asks GitHub every time;
-        // Update to Axit n stands below it while a newer release is known; About is the bundle's one notice.
+        help.DropDownItems.Add(new ToolStripSeparator());
+        // FR-1.10, AX-3.1: Check for updates names the version in use and asks GitHub every time; Update to Axit n
+        // stands below it while a newer release is known. About is the bundle's one notice.
         _checkItem.Click += (_, _) => CheckForUpdates(manual: true);
+        help.DropDownItems.Add(_checkItem);
         _updateItem.Click += (_, _) =>
         {
             if (_update is { } known)
@@ -531,9 +531,12 @@ internal sealed class MainForm : Form
                 ShowUpdateNotice(known);
             }
         };
-        var axit = new AxitMenu(this, [_checkItem, _updateItem, new ToolStripMenuItem("&About", null, (_, _) => ShowAbout())]);
+        help.DropDownItems.Add(_updateItem);
+        help.DropDownItems.Add(new ToolStripSeparator());
+        help.DropDownItems.Add(new ToolStripMenuItem("&About", null, (_, _) => ShowAbout()));
 
-        _menu.Items.AddRange([project, claude, navigate, options, axit, help]);
+        // The bundle's Axit menu (AX-9) sits before Help in every window.
+        _menu.Items.AddRange([project, claude, navigate, options, new AxitMenu(this), help]);
         MainMenuStrip = _menu;
 
         // No AccessibleName on status labels: it would replace the text that NVDA reads with NVDA+End.
@@ -2423,7 +2426,7 @@ internal sealed class MainForm : Form
                 Log.Info($"Update available: {release.Tag}, zip {release.ZipUrl ?? "missing"}");
                 if (!manual)
                 {
-                    _model.AddSystemLine($"Axit {version} is available. Axit menu, Update to Axit {version}.");
+                    _model.AddSystemLine($"Axit {version} is available. Help menu, Update to Axit {version}.");
                 }
 
                 if (manual || !_noticeOpen)
@@ -2433,7 +2436,7 @@ internal sealed class MainForm : Form
                 }
                 else
                 {
-                    Announce($"Update {version} in the Axit menu", false);
+                    Announce($"Update {version} in the Help menu", false);
                 }
 
                 return;
@@ -2475,7 +2478,7 @@ internal sealed class MainForm : Form
     /// <summary>The bundle's one About notice (AX-3.1), with this window's latest-release state.</summary>
     private void ShowAbout() => ShowNotice(Notice.Plain(BundleAbout.Title, BundleAbout.Text(_latestState)));
 
-    /// <summary>While a check or an install runs, the two update items of the Axit menu are disabled, so that neither starts twice.</summary>
+    /// <summary>While a check or an install runs, the two update items of the Help menu are disabled, so that neither starts twice.</summary>
     private void SetUpdateBusy(bool busy)
     {
         _updateBusy = busy;
@@ -2500,7 +2503,7 @@ internal sealed class MainForm : Form
             "Update and restart downloads the new version, closes AxClaude, installs it and starts it again on the same folder; " +
             "the conversation is picked up again if one is open. Update and close installs without starting it again. " +
             $"A progress bar shows the download.{size}\n" +
-            "Later keeps this version; the Axit menu offers the update again.";
+            "Later keeps this version; the Help menu offers the update again.";
         ShowNotice(new Notice($"Update to Axit {version}", text,
         [
             new OverlayChoice("Update and &restart", () => InstallUpdate(release, restart: true), IsDefault: true),

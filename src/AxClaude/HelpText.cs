@@ -26,7 +26,7 @@ internal static class HelpText
           Ctrl+Space: background music on or off, and says which
           Ctrl+Plus, Ctrl+Minus: bigger or smaller text
           F1: this list
-          Alt+A: the Axit menu: updates and About, a new AxClaude or AxDown window, the files and folders closed lately, and the open Axit windows, most recent first (Alt+A, O, 1 is the one you were in last) and by app
+          Alt+A: the Axit menu: a new AxClaude or AxDown window, the files and folders closed lately, the open Axit windows, most recent first (Alt+A, O, 1 is the one you were in last) and by type, Close all windows, and Axit on the web
           Alt+F4: close AxClaude (asks first while Claude is working)
 
         Message field

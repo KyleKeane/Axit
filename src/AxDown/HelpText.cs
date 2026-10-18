@@ -13,7 +13,7 @@ internal static class HelpText
           Ctrl+S: save the file
           Ctrl+Plus, Ctrl+Minus: bigger or smaller text
           Alt: the menu. Alt+F4: close AxDown (asks first when there are unsaved changes)
-          Alt+A: the Axit menu: updates and About, a new AxDown or AxClaude window, the files and folders closed lately, and the open Axit windows, most recent first (Alt+A, O, 1 is the one you were in last) and by app
+          Alt+A: the Axit menu: a new AxDown or AxClaude window, the files and folders closed lately, the open Axit windows, most recent first (Alt+A, O, 1 is the one you were in last) and by type, Close all windows, and Axit on the web
 
         AxDown
           Ctrl+N: new, empty document

@@ -22,11 +22,11 @@ If you had AxClaude installed before Axit existed, the installer removes it firs
 - Start menu: `Axit AxClaude`, `Axit AxDown`.
 - Console: `axclaude`, or `axclaude C:\my\project`; `axdown notes.md`. `axit C:\my\project` and `axit notes.md` do the same, since a folder means AxClaude and a file AxDown.
 - File Explorer: right-click a folder and choose `Open in AxClaude`; right-click a file and choose `Open in AxDown`.
-- From any Axit window: the Axit menu (Alt+A) checks for updates, opens this project on GitHub, starts a new AxClaude or AxDown, reopens a file or folder you closed lately, and lists the open Axit windows, the one you were in last first and by app.
+- From any Axit window: the Axit menu (Alt+A) starts a new AxClaude or AxDown, reopens a file or folder you closed lately, lists the open Axit windows, the one you were in last first and by type, closes them all, and opens this project on GitHub.
 
 ## Update
 
-Each app offers new versions itself (Axit menu, Check for updates and Update to). You can also run `install.cmd` again. Either way the old version is removed completely first and the new one is installed fresh. Your settings stay.
+Each app offers new versions itself (Help menu, Check for updates and Update to). You can also run `install.cmd` again. Either way the old version is removed completely first and the new one is installed fresh. Your settings stay.
 
 ## Remove
 

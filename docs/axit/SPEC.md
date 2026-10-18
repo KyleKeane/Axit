@@ -95,11 +95,11 @@ allow it, see B-9).
 - AX-3.1 One version for the bundle, `<Version>` in `src/Axit/Axit.csproj`. A newer GitHub release is offered as
   AxClaude does (`docs/axclaude/SPEC.md` FR-1.10, D25): asked once at startup when the setting is on, a notice with
   the release notes and four buttons: Update and restart (Enter), Update and close, Open release page, Later
-  (Escape). Every window's Axit menu (AX-9) starts with Check for updates (Axit <version>), always, naming the version
-  in use and asking GitHub again every time, Update to Axit <version> below it while a newer release is known, and
-  About, the bundle's one About notice (`Axit.Core/BundleAbout`, the same text in every window): the version in use,
-  the apps, the maker, the latest release as the window knows it, the releases page, the settings and logs folders,
-  and the disclaimer. Every text of the update flow names Axit, never an app: the version is the bundle's.
+  (Escape). Each app's Help menu has Check for updates (Axit <version>), always, naming the version in use and asking
+  GitHub again every time, Update to Axit <version> below it while a newer release is known, and About, the bundle's
+  one About notice (`Axit.Core/BundleAbout`, the same text in every window): the version in use, the apps, the maker,
+  the latest release as the window knows it, the releases page, the settings and logs folders, and the disclaimer.
+  Every text of the update flow names Axit, never an app: the version is the bundle's.
 - AX-3.2 Either update runs behind one notice with one progress bar (`Notice.Progress`; NVDA reports a progress bar
   by its own settings, so nothing is spoken about the progress itself): the zip is downloaded into
   `%LOCALAPPDATA%\Axit\updates\<version>` (the bar to 80 percent; Cancel keeps the installed version), then the
@@ -197,19 +197,17 @@ allow it, see B-9).
 ### AX-9 The Axit menu
 
 - AX-9.1 Every window has an **Axit** menu (mnemonic A) between its own menus and Help, the same in every window: one
-  class, `Axit.Forms/AxitMenu`, which the window constructs with its three update items. In order: Check for updates,
-  Update to (while a newer release is known), About (AX-3.1) and Axit on GitHub (G; the repository page,
-  `UpdateCheck.RepositoryPage`, in the browser); a separator; New window ▸ and Recently closed ▸; a separator; Open
-  windows ▸ and one submenu per app. The lists are filled each time the menu opens, so that they show the windows and
-  the files of that moment.
+  class, `Axit.Forms/AxitMenu`, which the window constructs with `new AxitMenu(this)`. In order: New window ▸ and
+  Recently closed ▸; a separator; Open windows ▸, Open windows by type ▸ and Close all windows; a separator; Axit on
+  the web ▸. The lists are filled each time the menu opens, so that they show the windows and the files of that moment.
 - AX-9.2 **New window ▸** (N): one item per app of the bundle (`Dispatch.Apps`), "AxClaude", "AxDown", with the letter
   after Ax as the mnemonic. It starts `Axit.exe <verb>` with no arguments: a new process and a new window (B-2), the
   app starting as it does from its Start menu entry.
 - AX-9.3 **Open windows ▸** (O): every open window of the bundle's apps except this one, the most recently used first.
   The order is the one Windows keeps its top-level windows in, which is Alt+Tab's, so nothing is stored and Alt+A, O,
-  1 is always the window the user was in before this one. One submenu per app follows, "AxClaude (2)", "AxDown (1)",
-  the number being its open windows: that app's windows in the same order, this window included and checked, so that
-  the list also says where the user is.
+  1 is always the window the user was in before this one. **Open windows by type ▸** (T) holds one submenu per app,
+  "AxClaude (2)", "AxDown (1)", the number being its open windows: that app's windows in the same order, this window
+  included and checked, so that the list also says where the user is.
 - AX-9.4 **Recently closed ▸** (R): the last ten files and folders a window of any app held when it closed or replaced
   them (AxDown's file, AxClaude's project folder), the newest first, each app and path once, those that still exist;
   Enter starts that app on it in a new window. The list is one file for the bundle, `%APPDATA%\Axit\recently-closed.json`
@@ -226,6 +224,11 @@ allow it, see B-9).
 - AX-9.7 Only Axit's windows are listed; Alt+Tab stays the way to everything else. Alt+A is a menu mnemonic, not a key
   of the tables (AX-8); the F1 texts name it. A separator carries no text and NVDA passes over it; the groups are
   told apart by their names, not by headers, which would be one more stop on every pass through the menu.
+- AX-9.8 **Close all windows** (C) posts the close command Alt+F4 sends (`WM_SYSCOMMAND` `SC_CLOSE`) to every other
+  open Axit window and then to this one; each window closes as it does on Alt+F4 and asks there what it would ask
+  then (AxDown's Save changes?, AxClaude's Close AxClaude? while Claude works), so nothing is lost without a question.
+  **Axit on the web ▸** (W) holds GitHub, the repository page (`UpdateCheck.RepositoryPage`) in the browser; more pages
+  join it when they exist.
 
 ### AX-7 Accessibility rules every app follows
 

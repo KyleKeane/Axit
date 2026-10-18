@@ -7,12 +7,12 @@ using Axit.Core.Updates;
 namespace Axit.Forms;
 
 /// <summary>
-/// The Axit menu every window has (docs/axit/SPEC.md AX-9), one class for every window: the window's own update and
-/// About items at the top with Axit on GitHub, then New window (one item per app) and Recently closed (the bundle's list, AX-9.4), then
-/// Open windows (the other windows of the bundle's apps, most recently used first) and one submenu per app with its
-/// windows, the current one checked. The lists are filled each time the menu opens, the windows from what the system
-/// lists in Z order, which is Alt+Tab's order, so nothing about windows is stored. The lists and labels are
-/// <see cref="AxitWindows"/> and <see cref="RecentlyClosed"/>, tested; the rest is checked with NVDA.
+/// The Axit menu every window has (docs/axit/SPEC.md AX-9), one class for every window: New window (one item per app)
+/// and Recently closed (the bundle's list, AX-9.4); Open windows (the other windows of the bundle's apps, most recently
+/// used first), Open windows by type (one submenu per app, the current window checked) and Close all windows; Axit on
+/// the web. The lists are filled each time the menu opens, the windows from what the system lists in Z order, which is
+/// Alt+Tab's order, so nothing about windows is stored. The lists and labels are <see cref="AxitWindows"/> and
+/// <see cref="RecentlyClosed"/>, tested; the rest is checked with NVDA.
 /// </summary>
 public sealed class AxitMenu : ToolStripMenuItem
 {
@@ -21,36 +21,33 @@ public sealed class AxitMenu : ToolStripMenuItem
     private readonly ToolStripMenuItem _openWindows = new("&Open windows");
     private readonly List<(App App, ToolStripMenuItem Item)> _perApp = [];
 
-    /// <param name="owner">The window, whose own handle is the one checked in the lists.</param>
-    /// <param name="appItems">The window's own items for the top: Check for updates, Update to, About (AX-3.1).</param>
-    public AxitMenu(Form owner, IReadOnlyList<ToolStripItem> appItems)
+    /// <param name="owner">The window, whose own handle is the one checked in the lists and closed last by Close all windows.</param>
+    public AxitMenu(Form owner)
         : base("&Axit")
     {
         _owner = owner;
-        foreach (var item in appItems)
-        {
-            DropDownItems.Add(item);
-        }
-
-        DropDownItems.Add(new ToolStripMenuItem("Axit on &GitHub", null, (_, _) => OpenUrl(UpdateCheck.RepositoryPage)));
-        DropDownItems.Add(new ToolStripSeparator());
         var newWindow = new ToolStripMenuItem("&New window");
+        var byType = new ToolStripMenuItem("Open windows by &type");
         foreach (var app in Dispatch.Apps)
         {
             var verb = app.Verb;
             newWindow.DropDownItems.Add(new ToolStripMenuItem(AxitWindows.AppLabel(app), null, (_, _) => Start(verb, null)));
-            _perApp.Add((app, new ToolStripMenuItem(AxitWindows.AppLabel(app))));
+            var list = new ToolStripMenuItem(AxitWindows.AppLabel(app));
+            byType.DropDownItems.Add(list);
+            _perApp.Add((app, list));
         }
+
+        var web = new ToolStripMenuItem("Axit on the &web");
+        web.DropDownItems.Add(new ToolStripMenuItem("&GitHub", null, (_, _) => OpenUrl(UpdateCheck.RepositoryPage)));
 
         DropDownItems.Add(newWindow);
         DropDownItems.Add(_recentlyClosed);
         DropDownItems.Add(new ToolStripSeparator());
         DropDownItems.Add(_openWindows);
-        foreach (var (_, item) in _perApp)
-        {
-            DropDownItems.Add(item);
-        }
-
+        DropDownItems.Add(byType);
+        DropDownItems.Add(new ToolStripMenuItem("&Close all windows", null, (_, _) => CloseAll()));
+        DropDownItems.Add(new ToolStripSeparator());
+        DropDownItems.Add(web);
         DropDownOpening += (_, _) => Fill();
         Fill();
     }
@@ -71,7 +68,7 @@ public sealed class AxitMenu : ToolStripMenuItem
         NoneWhenEmpty(_recentlyClosed);
 
         var windows = OpenWindows();
-        var current = _owner.IsHandleCreated ? _owner.Handle : 0;
+        var current = Current();
         FillWindows(_openWindows, AxitWindows.Others(windows, current), current);
         foreach (var (app, item) in _perApp)
         {
@@ -80,6 +77,8 @@ public sealed class AxitMenu : ToolStripMenuItem
             FillWindows(item, of, current);
         }
     }
+
+    private nint Current() => _owner.IsHandleCreated ? _owner.Handle : 0;
 
     private static void FillWindows(ToolStripMenuItem list, IReadOnlyList<AxitWindow> windows, nint current)
     {
@@ -101,6 +100,24 @@ public sealed class AxitMenu : ToolStripMenuItem
         if (list.DropDownItems.Count == 0)
         {
             list.DropDownItems.Add(new ToolStripMenuItem("(none)") { Enabled = false });
+        }
+    }
+
+    /// <summary>
+    /// AX-9.8: the close command Alt+F4 sends, posted to every other Axit window and then to this one; each window
+    /// closes as it does on Alt+F4 and asks there what it would ask then (unsaved changes, Claude working).
+    /// </summary>
+    private void CloseAll()
+    {
+        var current = Current();
+        foreach (var window in AxitWindows.Others(OpenWindows(), current))
+        {
+            PostMessage(window.Handle, WM_SYSCOMMAND, SC_CLOSE, 0);
+        }
+
+        if (current != 0)
+        {
+            PostMessage(current, WM_SYSCOMMAND, SC_CLOSE, 0);
         }
     }
 
@@ -192,6 +209,8 @@ public sealed class AxitMenu : ToolStripMenuItem
 
     private const uint GW_OWNER = 4;
     private const int SW_RESTORE = 9;
+    private const uint WM_SYSCOMMAND = 0x0112;
+    private const nint SC_CLOSE = 0xF060;
 
     private delegate bool EnumWindowsProc(nint hWnd, nint lParam);
 
@@ -221,4 +240,7 @@ public sealed class AxitMenu : ToolStripMenuItem
 
     [DllImport("user32.dll")]
     private static extern bool SetForegroundWindow(nint hWnd);
+
+    [DllImport("user32.dll")]
+    private static extern bool PostMessage(nint hWnd, uint msg, nint wParam, nint lParam);
 }
