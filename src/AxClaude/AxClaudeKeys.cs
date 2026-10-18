@@ -69,7 +69,7 @@ public static class AxClaudeKeys
         ("Go to the message field", GoToField),
         ("Go to the conversation", GoToConversation),
         ("Interrupt Claude", Interrupt),
-        ("Send the waiting message now", SendNow),
+        ("Send queued messages now", SendNow),
         ("Send Ctrl+C", SendCtrlC),
         ("Next permission mode", NextPermissionMode),
         ("Latest response", LatestResponse),

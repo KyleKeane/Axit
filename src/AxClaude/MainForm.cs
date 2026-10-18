@@ -388,7 +388,7 @@ internal sealed class MainForm : Form
         // What goes to Claude itself (FR-11); the raw sequences are fixed here and listed in Appendix B.
         var claude = new ToolStripMenuItem("&Claude");
         claude.DropDownItems.Add(new ToolStripMenuItem("Send &message", null, (_, _) => SendInput()) { ShortcutKeyDisplayString = "Enter in the message field" });
-        claude.DropDownItems.Add(new ToolStripMenuItem("Send &now", null, (_, _) => SendNow()) { ShortcutKeys = AxClaudeKeys.SendNow });
+        claude.DropDownItems.Add(new ToolStripMenuItem("Send &queued messages now", null, (_, _) => SendNow()) { ShortcutKeys = AxClaudeKeys.SendNow });
         claude.DropDownItems.Add(new ToolStripMenuItem("&Interrupt", null, (_, _) => Interrupt()) { ShortcutKeyDisplayString = BundleKeys.Text(AxClaudeKeys.Interrupt) });
         claude.DropDownItems.Add(new ToolStripMenuItem("Next &permission mode", null, (_, _) => Write("\x1b[Z")) { ShortcutKeys = AxClaudeKeys.NextPermissionMode });
         claude.DropDownItems.Add(new ToolStripSeparator());
@@ -780,7 +780,7 @@ internal sealed class MainForm : Form
     }
 
     /// <summary>
-    /// Claude → Send now (Ctrl+Shift+S): Claude's Ctrl+X Ctrl+S, which makes it take up a
+    /// Claude → Send queued messages now (Ctrl+Shift+S): Claude's Ctrl+X Ctrl+S, which makes it take up a
     /// message it holds without finishing the current step first (FR-2.8). The chord goes as two writes.
     /// </summary>
     private void SendNow()
