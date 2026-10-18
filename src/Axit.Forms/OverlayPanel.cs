@@ -25,7 +25,17 @@ public sealed record OverlayPreset(string Text, IReadOnlyList<string> Arguments)
 /// under it, the presets as radio buttons with Custom last (<paramref name="Selected"/> equal to the number of
 /// presets selects Custom), and the argument field that shows while Custom is selected.
 /// </summary>
-public sealed record OverlaySession(string? Folder, Action ChooseFolder, IReadOnlyList<OverlayPreset> Presets, int Selected, string CustomArguments);
+public sealed record OverlaySession(string? Folder, Action ChooseFolder, IReadOnlyList<OverlayPreset> Presets, int Selected, string CustomArguments)
+{
+    /// <summary>The caption of the radio button group: AxClaude's "How Claude starts", AxTerminal's "Shell".</summary>
+    public string PresetsCaption { get; init; } = "How Claude starts";
+
+    /// <summary>The accessible name of the free field under Custom.</summary>
+    public string CustomLabel { get; init; } = "Custom arguments";
+
+    /// <summary>The help line above the free field.</summary>
+    public string CustomHelp { get; init; } = "Arguments for Claude Code, one or more on each line. Enter starts the session, Shift+Enter starts a new line.";
+}
 
 /// <summary>
 /// What a notice says and offers, and nothing about how it is shown (D23): the title, the text, the buttons, at most
@@ -274,6 +284,10 @@ public sealed class OverlayPanel : Panel
         _session.Visible = session is not null;
         if (session is not null)
         {
+            // The captions are the window's: AxClaude's ways to start Claude, AxTerminal's shells.
+            _presetGroup.Text = session.PresetsCaption;
+            _custom.AccessibleName = session.CustomLabel;
+            _customLabel.Text = session.CustomHelp;
             _text.Dock = DockStyle.Top;
             _text.Height = TextStripHeight();
             FillSession(session);

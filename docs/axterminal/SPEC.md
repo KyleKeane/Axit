@@ -78,7 +78,9 @@ out of scope; programs that print and ask are in. It works entirely offline (bun
   the current `%PROMPT%` in the same marks (cmd has no exit code to give). The parser reports the marks as events (an
   addition in the shared parser; AxClaude, whose Claude emits 133 marks too, goes on ignoring them). A custom shell
   gets no snippet and no marks unless its own prompt emits them; a shell started inside the shell (`pwsh` typed) has
-  none until it exits.
+  none until it exits. With a screen reader running, PowerShell turns PSReadLine off at startup and prints a warning
+  line saying so, the first line of the transcript: the input is then the console host's own, with `>> ` continuation
+  rows printed by the host, which is what the window wants (the recorded fixtures show it).
 - AT-1.4 **State from the marks.** From Enter until the next `A` mark the window counts the command as running: the
   status bar says `Running: <the command's first line>` and the music plays when it is on (AT-5.5); the `D` mark's
   code decides between "Done" and "Failed, exit code n" (AT-5.1); the `A` mark's row is the prompt (AT-4.2); the 9;9
@@ -88,8 +90,8 @@ out of scope; programs that print and ask are in. It works entirely offline (bun
   `axterminal`, the usage text, the settings (`axterminal.json`) and the window.
 - AT-1.6 Terminal → **New shell…** (Ctrl+N), the shape of AxClaude's New session (AxClaude FR-8.6, D30): the notice
   "New shell" with `Folder: C:\path` as its first line, "Choose the shell and the folder. Starting ends the current
-  shell and starts the new one in the folder." and the key line, preceded by "A command is still running. A new shell
-  ends it." while one runs; the **Choose folder…** button (the folder picker); the group **Shell** with the radio
+  shell and starts the new one in the folder." and the key line, preceded by "<the command> is still running. A new
+  shell ends it." while one runs; the **Choose folder…** button (the folder picker); the group **Shell** with the radio
   buttons **PowerShell 7**, **Windows PowerShell**, **Command Prompt** and **Custom**, and, while Custom is selected,
   the field **Command line**; the buttons **Start shell** (Enter) and **Cancel** (Escape). Start clears the
   transcript, prints the system line `New shell: PowerShell 7 in C:\path`, announces "New shell in <folder name>" and
@@ -127,8 +129,11 @@ out of scope; programs that print and ask are in. It works entirely offline (bun
 - AT-3.1 **Enter** sends the field's text and clears it: each line as one write, a single `\r` as a separate write
   after it, with AxClaude's pacing (AxClaude FR-2.2, FR-2.5: 30 ms between lines, 100 ms before `\r`), so that the
   shell reads a multi-line command line by line as it would from the keyboard, PowerShell's `>>` continuation taking
-  the rest. **Shift+Enter** is a new line in the field (AxClaude D11). An empty field sends a bare `\r` (a new prompt,
-  or the default of a program's question). "Sent" is announced with the sent note (AT-5.1).
+  the rest; for PowerShell a command of several lines gets one more Enter at the end, since with a screen reader
+  running PowerShell turns PSReadLine off and its console host ends a block only on an empty line (with PSReadLine on
+  the extra Enter is an empty prompt, which announces nothing). **Shift+Enter** is a new line in the field (AxClaude
+  D11). An empty field sends a bare `\r` (a new prompt, or the default of a program's question). "Sent" is announced
+  with the sent note (AT-5.1).
 - AT-3.2 **The exchange block** (AxClaude FR-4.1): `# Input n`, the command's lines as sent, a blank line,
   `# Output n`, a blank line, inserted at the end of the transcript above the trailing prompt row at the moment of
   sending; *n* counts since the window started or the transcript was cleared; both markers are level 1 headings;
@@ -167,18 +172,21 @@ out of scope; programs that print and ask are in. It works entirely offline (bun
   the prompt on the same row and is nothing by itself. Without marks nothing is hidden (AT-1.4).
 - AT-4.3 **System lines** (`System: …`, found with `s`): the shell started (`Shell started: PowerShell 7 in C:\path`),
   ended, restarted, a new shell, the update's steps (the window base, AX-6.5), a recording started or stopped.
-- AT-4.4 **Clear transcript** (Ctrl+L; Terminal → Clear transcript): removes every line of the window, the recent
-  commands staying; the count of the blocks starts again; "Cleared". The shell's own `cls` or `clear` clears only its
-  screen, which the window shows as the last screenful of lines going blank and filling again; the window's clear is
-  the one to use (§7).
+- AT-4.4 **Clear transcript** (Ctrl+L; Terminal → Clear transcript): empties the window, the recent commands
+  staying; the count of the blocks starts again; "Cleared". The lines off the screen go; the lines still on the
+  screen are hidden until the shell writes over their rows, since the shell goes on drawing on that screen. The
+  shell's own `cls` or `clear` clears only its screen: the window lets the rows go first (the lines keep their text,
+  the way AxClaude keeps a repainted conversation), so what was read stays and what the shell prints next goes on at
+  the end; a program that homes the cursor to redraw the screen is treated the same, and prints its redraws as new
+  lines (the alternate screen is a non-goal).
 - AT-4.5 Bookmarks (`m`, `k`, Ctrl+Shift+K; AxClaude FR-3.9), `l` (the line number), Backspace (back from a jump,
   AxClaude FR-3.12), the reading breaks of a line being written (AxClaude FR-3.10), the selection that holds output
   back (AxClaude D29), Ctrl+C "Copied", Ctrl+A, find with Ctrl+F, F3 and Shift+F3: all the view's, unchanged.
 - AT-4.6 The transcript is capped at 20 000 lines (`maxTranscriptLines`), trimmed from the top (AxClaude FR-3.6).
 - AT-4.7 **Export transcript…** (Ctrl+S, the bottom of the Terminal menu before Exit; AxClaude FR-3.8): the file
-  picker, the default name `axterminal-<yyyy-MM-dd-HHmm>.md` in the current directory, the visible lines as text,
-  "Exported". Options → General → Keep exports out of git adds `axterminal-*` to the repository's `.git\info\exclude`
-  as AxClaude does for its own files (AxClaude D34).
+  picker, the default name `axterminal-<yyyy-MM-dd-HHmm>.md` in the shell's current directory (the Documents folder
+  when it is gone), the visible lines as text, "Exported". No git exclude of its own: AxClaude's (D34) is about the
+  files AxClaude writes into the project it runs in; an exported transcript is the user's file where they put it.
 
 ### AT-5 Announcements and signals
 
@@ -210,15 +218,15 @@ out of scope; programs that print and ask are in. It works entirely offline (bun
   folder ▸ (ten, "1. name (path)", AX-9.5) | ─ | Restart shell Ctrl+Shift+R | Clear transcript Ctrl+L | ─ | Show
   current folder in ▸ (File Explorer Ctrl+W | AxClaude | AxGit | AxFile), on the shell's current directory | ─ |
   Export transcript… Ctrl+S | Exit Alt+F4. **Shell (S):** Interrupt Ctrl+Shift+C | Send Escape Shift+Escape | Send
-  key ▸ (Up | Down | Ctrl+D) | ─ | Recent commands… Ctrl+R | Send without recording (Ctrl+Enter in the command
-  field) | ─ | What is running Ctrl+Q. **Navigate (N):** AxClaude's Navigate menu with the kinds the terminal has:
-  Command field Ctrl+1 | Terminal Ctrl+2 | Latest output Ctrl+3 | ─ | Next ▸ and Previous ▸ (input i, output o,
-  heading h, paragraph p, system line s, bookmark k) | Read to the end ▸ (the Ctrl+Alt layer) | Bookmark this line
-  Ctrl+Shift+K | Back Backspace. **Options (O):** Sounds ▸ (Chimes ✓ | Ticks for new lines ✓ | Background music while
-  a command runs Ctrl+Space) | Speech ▸ (Speak output: none ○ | Speak output: all lines ○ | ─ | Say when a program
-  asks ✓) | When a command is done ▸ (Louder alert when the window is in the background | Flash the taskbar ✓) | Text
-  ▸ (Time stamps | ─ | Font… | Larger text | Smaller text | Windows text size) | General ▸ (Check for updates at start
-  ✓ | Keep exports out of git ✓) | Developer ▸ (Open settings file | Record raw stream | Copy diagnostics). **Axit
+  key ▸ (Up | Down | Ctrl+D (end of input)) | ─ | Recent commands… Ctrl+R | Send without recording (Ctrl+Enter in the
+  command field) | ─ | What is running Ctrl+Q. **Navigate (N):** AxClaude's Navigate menu with the kinds the terminal
+  has: Command field Ctrl+1 | Terminal Ctrl+2 | Latest output Ctrl+3 | ─ | Find… Ctrl+F | Find next F3 | Find
+  previous Shift+F3 | ─ | Bookmark this line Ctrl+Shift+K | Next bookmark | Previous bookmark (the other quick keys
+  are the terminal's letters, named in the F1 text). **Options (O):** Sounds ▸ (Chimes ✓ | Ticks for new lines ✓ |
+  Background music while a command runs Ctrl+Space) | Speech ▸ (Speak output: none ○ | Speak output: all lines ○ |
+  ─ | Say when a program asks ✓) | When a command is done ▸ (Flash the taskbar button ✓ | Louder alert when the window
+  is in the background) | Text ▸ (Time stamps | ─ | Font… | Larger text | Smaller text | Windows text size) | General
+  ▸ (Check for updates at start ✓) | Developer ▸ (Open settings file | Record raw stream | Copy diagnostics). **Axit
   (A)** (AX-9). **Help (H):** Keyboard shortcuts F1 | User guide | ─ | Shell resources ▸ (PowerShell documentation |
   Windows Terminal shell integration). Every item has a mnemonic (AX-7.4).
 - AT-6.2 Keys (AX-8). Bundle-wide: F1, the control keys, Ctrl+F, F3, Shift+F3, Ctrl+S, Ctrl+Plus, Ctrl+Minus, Page
@@ -237,20 +245,21 @@ One UI Automation notification each, on the view, or on the notice or the list w
 "Sent, not recorded", "Done", "Failed, exit code n", "Failed", "Ready", "Asks: <row>", "Interrupt sent", "Escape
 sent", "Line copied", "No recent commands", "Shift+Escape sends Escape, Ctrl+Shift+C interrupts", "The shell ended",
 "The shell ended. Ctrl+Shift+R starts it again", "Restarting", "New shell in <folder>", "Cleared", "Exported",
-"Copied", "Not found", "Line n of m", "Bookmark n" and "Bookmark removed", "No next input" and the other jump results
-with the kind's name, "Command", "Terminal" and the other names when the control already has the focus, "Running: …"
-and "Idle, …" on Ctrl+Q, "Background music on" and "off" (AxClaude FR-7.9), "Text size n", "Windows text size",
-"Copied diagnostics", "Recording to <file>" and "Recording stopped". The speech of output (AT-5.3) and the texts of
-the notices are the rest.
+"Copied", "Not found", "Line n of m", "Bookmark n added" and "Bookmark n removed", "Line gone", "No next input" and
+the other jump results with the kind's name, "Command", "Terminal" and the other names when the control already has
+the focus, "Running: …", "Idle, …", "Shell ended" and "No marks from this shell" on Ctrl+Q, "Up sent", "Down sent"
+and "Ctrl+D sent" (the Send key menu), "Folder <name>" (a recent folder), "Folder missing", "Speak output: none" and
+"Speak output: all lines" (the choice made), "Background music on" and "off" (AxClaude FR-7.9), "Text size n",
+"Windows text size", "Copied diagnostics", "Recording started" and "Recording stopped" (the system lines name the
+file). The speech of output (AT-5.3) and the texts of the notices are the rest.
 
 ### AT-8 Settings, log, status
 
 - AT-8.1 `%APPDATA%\Axit\axterminal.json` (AX-5.3; `TerminalSettings` on `WindowSettings`): `shell` (`pwsh`,
   `powershell`, `cmd`, `custom`), `customShell`, `lastFolder`, `recentFolders` (ten), `ptyColumns` 240, `ptyRows` 50,
   `soundOnBell` on, `clickOnNewLine` on, `workingMusic` off, `backgroundAlert` off, `flashTaskbar` on, `outputSpeech`
-  `none`, `announceQuestions` on, `markerTimeStamps` off, `joinWrappedLines` on, `keepFilesOutOfGit` on,
-  `maxTranscriptLines` 20000, and the window base's font, update check and window fields. Unknown or out-of-range
-  values fall back to the defaults.
+  `none`, `announceQuestions` on, `markerTimeStamps` off, `joinWrappedLines` on, `maxTranscriptLines` 20000, and the
+  window base's font, update check and window fields. Unknown or out-of-range values fall back to the defaults.
 - AT-8.2 The log is `%LOCALAPPDATA%\Axit\logs\axterminal.log`: the shell's start with its command line and folder,
   its exit code, restarts, errors; never a command or a line of output (a command can hold a secret). Options →
   Developer → Record raw stream writes the console stream to a `.vt` file in the PtyCapture format for a fixture
@@ -274,8 +283,10 @@ src/AxTerminal.Core/      class library (net10.0): ShellLauncher (find the shell
                           again against the shell fixtures rather than carved out of it), CommandHistory, TerminalSettings;
                           references Axit.Core
 src/AxTerminal/           class library (net10.0-windows): AxTerminalApp (Run, Usage), TerminalForm (the window, on
-                          AxitForm), AxTerminalKeys, HelpText (F1 text, the embedded guide); references AxTerminal.Core,
-                          Axit.Core, Axit.Forms
+                          AxitForm, in partial files by section: the base's hooks and the key switch, the menus and the
+                          status, the field and the sending, the process, what the model reports, New shell and the
+                          folders, find and export and recording), AxTerminalKeys (with Transcript, the view's keys as
+                          data), HelpText (F1 text, the embedded guide); references AxTerminal.Core, Axit.Core, Axit.Forms
 tests/AxTerminal.Tests/   fixtures recorded with tools/PtyCapture of pwsh, powershell and cmd under the launcher's command
                           line (a dir, a failing command, a y/n prompt, a multi-line command, cls, exit): golden
                           transcripts, the state after each frame, the prompts in the status; ShellLauncherTests,
@@ -329,12 +340,18 @@ its notes record what moved.
   version one.
 - Running a program instead of a shell (`axterminal -- npm start`), a window per long-running process.
 - Whether Speak output should default to all lines in a terminal (AxClaude's default is none).
-- `cls` leaving a screenful of blank lines (AT-4.4): mapping the shell's clear to the window's would mean knowing the
-  command, which AT-D2 avoids.
+- The "a program asks" heuristic (AT-5.4): whether two seconds and the four end characters are right, after the NVDA
+  pass.
 - A history that persists across windows (`CommandHistory` to the settings file; AT-3.4 keeps the secrets out of it).
 - Whether a `D` mark with a non-zero code should classify the output's last lines as errors for `e`.
+- PowerShell 7 is untested here (the machine has Windows PowerShell 5.1 only); its snippet is the same.
 
 ## 8. Status
 
 - Planned 2026-10-18 at the user's ask, with AxFile (`docs/axfile/SPEC.md`), AxKeePassium and AxCryptomator
-  (`docs/axit/plan.md`). Nothing built; the moves of §5 are the first step.
+  (`docs/axit/plan.md`).
+- Built the same day as a first draft, in the order of §5: the `LineStore` seam and the moves into the shared
+  projects (AxClaude's tests unchanged), the marks as events, the view with its keys as data, `AxTerminal.Core` with
+  the two recorded sessions (Windows PowerShell 5.1 and cmd, `tests/fixtures/shell-*`), the window, the wiring. AT-1
+  to AT-8 as described above, the git exclude left out (AT-4.7). Not yet heard under NVDA:
+  `docs/axterminal/nvda-test-plan.md` is to run before a release names it more than a first draft.

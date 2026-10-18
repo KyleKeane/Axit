@@ -49,7 +49,6 @@ public sealed class TerminalSettings : WindowSettings
 
     public bool MarkerTimeStamps { get; set; }
     public bool JoinWrappedLines { get; set; } = true;
-    public bool KeepFilesOutOfGit { get; set; } = true;
     public int MaxTranscriptLines { get; set; } = 20000;
 
     public static string DefaultPath => AppPaths.SettingsFile("axterminal");
