@@ -385,7 +385,6 @@ internal sealed class MainForm : Form
         FillRecentFolders();
         project.DropDownItems.Add(_recentFoldersItem);
         project.DropDownItems.Add(new ToolStripMenuItem("&New session...", null, (_, _) => NewSession()) { ShortcutKeys = AxClaudeKeys.NewSession });
-        project.DropDownItems.Add(new ToolStripMenuItem("Force Claude to res&tart", null, (_, _) => RestartClaude()) { ShortcutKeys = AxClaudeKeys.RestartClaude });
         project.DropDownItems.Add(new ToolStripSeparator());
         project.DropDownItems.Add(new ToolStripMenuItem("&Save conversation as...", null, (_, _) => SaveConversation()) { ShortcutKeyDisplayString = BundleKeys.Text(BundleKeys.Save) });
         project.DropDownItems.Add(new ToolStripSeparator());
@@ -396,6 +395,7 @@ internal sealed class MainForm : Form
         claude.DropDownItems.Add(new ToolStripMenuItem("Send &message", null, (_, _) => SendInput()) { ShortcutKeyDisplayString = "Enter in the message field" });
         claude.DropDownItems.Add(new ToolStripMenuItem("Send &queued messages now", null, (_, _) => SendNow()) { ShortcutKeys = AxClaudeKeys.SendNow });
         claude.DropDownItems.Add(new ToolStripMenuItem("&Interrupt", null, (_, _) => Interrupt()) { ShortcutKeyDisplayString = BundleKeys.Text(AxClaudeKeys.Interrupt) });
+        claude.DropDownItems.Add(new ToolStripMenuItem("Force Claude to res&tart", null, (_, _) => RestartClaude()) { ShortcutKeys = AxClaudeKeys.RestartClaude });
         claude.DropDownItems.Add(new ToolStripMenuItem("Next &permission mode", null, (_, _) => Write("\x1b[Z")) { ShortcutKeys = AxClaudeKeys.NextPermissionMode });
         claude.DropDownItems.Add(new ToolStripSeparator());
         // The keys Claude's own menus take. Up and Down are menu items only (FR-2.4): Ctrl+Up and Ctrl+Down move by
@@ -1653,7 +1653,7 @@ internal sealed class MainForm : Form
     private IReadOnlyList<string> ClaudeArgs => _claudeArgs ?? (_nothingToContinue ? [] : ["--continue"]);
 
     /// <summary>
-    /// Project → Force Claude to restart (Ctrl+Shift+R, FR-1.8): the same folder and arguments; the conversation
+    /// Claude → Force Claude to restart (Ctrl+Shift+R, FR-1.8): the same folder and arguments; the conversation
     /// stays. A running Claude is stopped only after the Force Claude to restart? notice; a stopped one starts at once.
     /// </summary>
     private void RestartClaude()
