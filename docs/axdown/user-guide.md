@@ -34,9 +34,9 @@ Ctrl+F opens Find in the window: type the text, press Enter, and the caret lands
 
 Ctrl+G asks for a line number; the field is named with where you are, for example "Go to line (now line 12, column 4)", so Ctrl+G is also how you ask where you are. Type a number and press Enter, or press Escape to stay. The status bar carries the line, the column and the encoding too; NVDA+End reads it.
 
-## Move by heading
+## Move by structure
 
-In a Markdown file, Ctrl+H moves to the next heading (a line that starts with one or more `#`) and Ctrl+Shift+H to the previous one, the way H and Shift+H move on a web page in NVDA's browse mode. The caret lands at the start of the heading's line and AxDown says the heading as NVDA would, for example "Install, heading level 2". At the last heading Ctrl+H says "No next heading" and the caret stays. Headings inside fenced code blocks (between lines of three backticks or tildes) are skipped. More of NVDA's letters, for lists, links, quotes and tables, come in later versions. Ctrl+1 to Ctrl+6 move to the next heading of that level only, and Ctrl+Shift+1 to Ctrl+Shift+6 to the previous one, as 1 to 6 do in browse mode; AxDown says "No next heading level 2" when there is none.
+In a Markdown file, the keys NVDA uses on a web page work with Ctrl: Ctrl+H moves to the next heading (a line that starts with one or more `#`) and Ctrl+Shift+H to the previous one; Ctrl+1 to Ctrl+6 to the next heading of that level only; Ctrl+K to the next link, Ctrl+L to the next list, Ctrl+I to the next list item, Ctrl+Q to the next block quote and Ctrl+T to the next table, each with Shift added for the previous one. The caret lands at the start of what was found and AxDown says what it is, as NVDA would: "Install, heading level 2", "GitHub, link", "List with 3 items, one", "Block quote, …", "Table with 3 rows and 2 columns". When there is none, AxDown says so ("No next link") and the caret stays. Lines inside fenced code blocks are skipped. The Navigate menu lists all of them under Next and Previous.
 
 ## Text size and fonts
 
@@ -46,7 +46,7 @@ Ctrl+Plus and Ctrl+Minus make the text larger and smaller, and AxDown says the n
 
 - **File**: New, Open, Save, Save as, Exit.
 - **Edit**: Undo, Cut, Copy, Paste, Select all.
-- **Navigate**: Find, Find next, Find previous, Go to line, and the submenus Next and Previous, each with Heading and Heading level 1 to 6.
+- **Navigate**: Find, Find next, Find previous, Go to line, and the submenus Next and Previous, each with Heading, Heading level 1 to 6, Link, List, List item, Block quote and Table.
 - **View**: Word wrap, Larger text, Smaller text, Windows text size, Font.
 - **Help**: Keyboard shortcuts (F1), this guide, Check for updates (which names the version you have), Update to the newest version while one is known, Copy diagnostics, About, which names the version you have and the latest release.
 

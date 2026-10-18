@@ -40,8 +40,6 @@ the restart by the app itself (2.3.0).
 
 ## Still to come
 
-- The rest of NVDA's letters in AxDown: 1 to 6 for heading levels, K links, L lists, I list items, Q block quotes,
-  T tables (AxDown SPEC §9, AD-D7).
 - AxClaude's open items are in `docs/axclaude/SPEC.md` §12 To do, the one list for them.
 - A shared window base in `Axit.Forms` for the notice and update flows, which exist twice (`MainForm`,
   `EditorForm`), when a third window arrives.

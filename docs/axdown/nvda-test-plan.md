@@ -91,3 +91,10 @@ letter), and a `long.md` with headings and lines longer than the window.
 4. Ctrl+2: the next level-2 heading, other levels skipped, spoken "…, heading level 2"; Ctrl+Shift+2 back; past the
    last one: "No next heading level 2". Navigate, Next and Navigate, Previous each list Heading and Heading level 1 to
    6 with their keys, and the items do the same as the keys.
+5. Ctrl+K: the caret on the next link's first character, "GitHub, link"; Ctrl+Shift+K from inside a link: the link
+   before it; a bare https address and an `<https://…>` address count, an image does not.
+6. Ctrl+L: "List with 3 items, one" at the first item; Ctrl+I: the next item's text, nested items included; a numbered
+   list after a bulleted one is a second list.
+7. Ctrl+Q: "Block quote, " and the first line; Ctrl+T: "Table with 3 rows and 2 columns" at the header line; nothing
+   inside a fenced code block counts. Navigate, Next and Navigate, Previous list Link, List, List item, Block quote
+   and Table with their keys.

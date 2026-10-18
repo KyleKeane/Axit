@@ -29,6 +29,17 @@ public static class AxDownKeys
             ? (key & Keys.KeyCode) - Keys.D1 + 1
             : 0;
 
+    public const Keys NextLink = Keys.Control | Keys.K;
+    public const Keys PreviousLink = Keys.Control | Keys.Shift | Keys.K;
+    public const Keys NextList = Keys.Control | Keys.L;
+    public const Keys PreviousList = Keys.Control | Keys.Shift | Keys.L;
+    public const Keys NextListItem = Keys.Control | Keys.I;
+    public const Keys PreviousListItem = Keys.Control | Keys.Shift | Keys.I;
+    public const Keys NextBlockQuote = Keys.Control | Keys.Q;
+    public const Keys PreviousBlockQuote = Keys.Control | Keys.Shift | Keys.Q;
+    public const Keys NextTable = Keys.Control | Keys.T;
+    public const Keys PreviousTable = Keys.Control | Keys.Shift | Keys.T;
+
     /// <summary>Every key above with its name, for the collision test and the F1 text.</summary>
     public static readonly IReadOnlyList<(string Name, Keys Key)> All =
     [
@@ -41,5 +52,15 @@ public static class AxDownKeys
         ("Previous heading", PreviousHeading),
         ..Enumerable.Range(1, 6).Select(level => ($"Next heading level {level}", NextHeadingLevel(level))),
         ..Enumerable.Range(1, 6).Select(level => ($"Previous heading level {level}", PreviousHeadingLevel(level))),
+        ("Next link", NextLink),
+        ("Previous link", PreviousLink),
+        ("Next list", NextList),
+        ("Previous list", PreviousList),
+        ("Next list item", NextListItem),
+        ("Previous list item", PreviousListItem),
+        ("Next block quote", NextBlockQuote),
+        ("Previous block quote", PreviousBlockQuote),
+        ("Next table", NextTable),
+        ("Previous table", PreviousTable),
     ];
 }

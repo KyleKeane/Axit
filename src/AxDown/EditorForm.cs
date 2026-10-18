@@ -91,6 +91,16 @@ internal sealed class EditorForm : Form
             next.DropDownItems.Add(Item($"Heading level &{l}", () => JumpToHeading(1, l), AxDownKeys.NextHeadingLevel(l)));
             previous.DropDownItems.Add(Item($"Heading level &{l}", () => JumpToHeading(-1, l), AxDownKeys.PreviousHeadingLevel(l)));
         }
+        next.DropDownItems.Add(Item("Lin&k", () => JumpToLink(1), AxDownKeys.NextLink));
+        next.DropDownItems.Add(Item("&List", () => JumpToList(1), AxDownKeys.NextList));
+        next.DropDownItems.Add(Item("List &item", () => JumpToListItem(1), AxDownKeys.NextListItem));
+        next.DropDownItems.Add(Item("Block &quote", () => JumpToBlockQuote(1), AxDownKeys.NextBlockQuote));
+        next.DropDownItems.Add(Item("&Table", () => JumpToTable(1), AxDownKeys.NextTable));
+        previous.DropDownItems.Add(Item("Lin&k", () => JumpToLink(-1), AxDownKeys.PreviousLink));
+        previous.DropDownItems.Add(Item("&List", () => JumpToList(-1), AxDownKeys.PreviousList));
+        previous.DropDownItems.Add(Item("List &item", () => JumpToListItem(-1), AxDownKeys.PreviousListItem));
+        previous.DropDownItems.Add(Item("Block &quote", () => JumpToBlockQuote(-1), AxDownKeys.PreviousBlockQuote));
+        previous.DropDownItems.Add(Item("&Table", () => JumpToTable(-1), AxDownKeys.PreviousTable));
         navigate.DropDownItems.Add(next);
         navigate.DropDownItems.Add(previous);
 
@@ -306,6 +316,36 @@ internal sealed class EditorForm : Form
                 return true;
             case AxDownKeys.PreviousHeading:
                 JumpToHeading(-1);
+                return true;
+            case AxDownKeys.NextLink:
+                JumpToLink(1);
+                return true;
+            case AxDownKeys.PreviousLink:
+                JumpToLink(-1);
+                return true;
+            case AxDownKeys.NextList:
+                JumpToList(1);
+                return true;
+            case AxDownKeys.PreviousList:
+                JumpToList(-1);
+                return true;
+            case AxDownKeys.NextListItem:
+                JumpToListItem(1);
+                return true;
+            case AxDownKeys.PreviousListItem:
+                JumpToListItem(-1);
+                return true;
+            case AxDownKeys.NextBlockQuote:
+                JumpToBlockQuote(1);
+                return true;
+            case AxDownKeys.PreviousBlockQuote:
+                JumpToBlockQuote(-1);
+                return true;
+            case AxDownKeys.NextTable:
+                JumpToTable(1);
+                return true;
+            case AxDownKeys.PreviousTable:
+                JumpToTable(-1);
                 return true;
         }
 
@@ -598,26 +638,42 @@ internal sealed class EditorForm : Form
     }
 
     /// <summary>
-    /// Ctrl+H and Ctrl+Shift+H (SPEC.md §9, AD-D7): the caret to the start of the next or previous heading line, spoken
-    /// as NVDA's browse mode would ("Install, heading level 2"); "No next heading" or "No previous heading" when there
-    /// is none, and the caret stays.
+    /// The navigation keys (SPEC.md §9, AD-D7): the caret to the start of the next or previous element of a kind, spoken
+    /// as NVDA's browse mode would ("Install, heading level 2", "GitHub, link", "List with 3 items, one"); "No next
+    /// heading" and the like when there is none, and the caret stays.
     /// </summary>
-    private void JumpToHeading(int direction, int level = 0)
+    private void JumpToHeading(int direction, int level = 0) =>
+        JumpTo(direction, level > 0 ? $"heading level {level}" : "heading", (text, caret) =>
+            direction > 0 ? MarkdownOutline.NextHeading(text, caret, level) : MarkdownOutline.PreviousHeading(text, caret, level));
+
+    private void JumpToLink(int direction) =>
+        JumpTo(direction, "link", (text, caret) => direction > 0 ? MarkdownOutline.NextLink(text, caret) : MarkdownOutline.PreviousLink(text, caret));
+
+    private void JumpToList(int direction) =>
+        JumpTo(direction, "list", (text, caret) => direction > 0 ? MarkdownOutline.NextList(text, caret) : MarkdownOutline.PreviousList(text, caret));
+
+    private void JumpToListItem(int direction) =>
+        JumpTo(direction, "list item", (text, caret) => direction > 0 ? MarkdownOutline.NextListItem(text, caret) : MarkdownOutline.PreviousListItem(text, caret));
+
+    private void JumpToBlockQuote(int direction) =>
+        JumpTo(direction, "block quote", (text, caret) => direction > 0 ? MarkdownOutline.NextBlockQuote(text, caret) : MarkdownOutline.PreviousBlockQuote(text, caret));
+
+    private void JumpToTable(int direction) =>
+        JumpTo(direction, "table", (text, caret) => direction > 0 ? MarkdownOutline.NextTable(text, caret) : MarkdownOutline.PreviousTable(text, caret));
+
+    private void JumpTo(int direction, string kind, Func<string, int, Element?> find)
     {
-        var text = _editor.Text;
-        var heading = direction > 0
-            ? MarkdownOutline.NextHeading(text, _editor.SelectionStart, level)
-            : MarkdownOutline.PreviousHeading(text, _editor.SelectionStart, level);
-        if (heading is null)
+        var element = find(_editor.Text, _editor.SelectionStart);
+        if (element is null)
         {
-            Announce((direction > 0 ? "No next heading" : "No previous heading") + (level > 0 ? $" level {level}" : ""), true);
+            Announce($"No {(direction > 0 ? "next" : "previous")} {kind}", true);
             return;
         }
 
-        _editor.Select(heading.Start, 0);
+        _editor.Select(element.Start, 0);
         _editor.ScrollToCaret();
         UpdateStatus();
-        Announce(heading.Spoken, true);
+        Announce(element.Spoken, true);
     }
 
     /// <summary>The caret's line and column, counting the file's lines (not the wrapped rows), and the number of lines.</summary>

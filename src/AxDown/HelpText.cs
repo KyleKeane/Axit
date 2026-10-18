@@ -27,6 +27,7 @@ internal static class HelpText
           Ctrl+G: go to a line; the field also says where you are, like "Go to line (now line 12, column 4)"
           Ctrl+H and Ctrl+Shift+H: next and previous Markdown heading (a line starting with #), spoken as "Install, heading level 2"
           Ctrl+1 to Ctrl+6 and Ctrl+Shift+1 to Ctrl+Shift+6: next and previous heading of that level only
+          Ctrl+K, Ctrl+L, Ctrl+I, Ctrl+Q, Ctrl+T: next link, list, list item, block quote or table; with Shift the previous one
           Ctrl+Shift+W: word wrap on or off
 
         The text
