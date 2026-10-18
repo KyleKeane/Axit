@@ -1,25 +1,22 @@
 using System.Diagnostics;
-using System.Net.Http;
 using Axit.Core;
-using Axit.Core.Updates;
 
 namespace Axit.Forms;
 
 /// <summary>
 /// The text editor window every editor app of the bundle is (docs/axdown/SPEC.md §5, docs/axjson/SPEC.md AJ-D4):
 /// a menu bar, one plain multi-line edit control named after the file, and a status bar, with the app's own name,
-/// file types, keys, texts and commands as data (<see cref="EditorApp"/>). Notices (the bundle's
-/// <see cref="OverlayPanel"/>) take the editor's place for the window's own questions; the question area
+/// file types, keys, texts and commands as data (<see cref="EditorApp"/>). The notices, the fonts, the window's
+/// place, the update flow and find are the bundle's window base (<see cref="AxitForm"/>); the question area
 /// (<see cref="ControlArea"/>) holds the Go to line field under the editor. The caret moves only on the user's
 /// command, and nothing is spoken unless asked for or a command finishes (AD-2.6, AD-7). It was AxDown's
 /// <c>EditorForm</c> and moved here on its second use, AxJSON (AX-6.3).
 /// </summary>
-public sealed class TextEditorForm : Form
+public sealed class TextEditorForm : AxitForm
 {
     private const string Untitled = "Untitled";
 
     private readonly EditorApp _app;
-    private readonly string _settingsPath;
     private readonly EditorSettings _settings;
     private readonly MenuStrip _menu = new();
     private readonly ToolStripMenuItem _recentFilesItem = new("Open &recent file");
@@ -27,11 +24,8 @@ public sealed class TextEditorForm : Form
     private readonly StatusStrip _status = new();
     private readonly ToolStripStatusLabel _fileLabel = new();
     private readonly ToolStripStatusLabel _positionLabel = new();
-    private readonly OverlayPanel _overlay = new();
     private readonly ControlArea _area = new();
     private readonly ToolStripMenuItem _wordWrapItem;
-    private readonly ToolStripMenuItem _checkItem = new($"Check for &updates (Axit {BundleInfo.Version})...");
-    private readonly ToolStripMenuItem _updateItem = new() { Visible = false };
     private readonly System.Windows.Forms.Timer _statusTimer = new() { Interval = 300 };
 
     private TextDocument _document = TextDocument.Empty();
@@ -39,29 +33,15 @@ public sealed class TextEditorForm : Form
     private DateTime? _lastWriteTime;
     private bool _changed;
     private bool _loading;
-    private bool _noticeOpen;
     private bool _closeConfirmed;
-    private string _findText = string.Empty;
-    private string _latestState = "not checked yet";
-    private ReleaseInfo? _update;
-    private bool _updateBusy;
-
-    /// <summary>After Update and restart: how the installed new version is started when this window closes; null when nothing is to start.</summary>
-    private string[]? _restartArguments;
 
     public TextEditorForm(EditorApp app, string? path, EditorSettings settings, string? settingsError)
+        : base(app.Name, settings, AppPaths.SettingsFile(app.SettingsName))
     {
         _app = app;
-        _settingsPath = AppPaths.SettingsFile(app.SettingsName);
         _settings = settings;
-        // With the role Window, NVDA speaks the window when it opens ("README.md - AxDown window") before the field;
-        // without it the window is a nameless pane to NVDA and only the field is heard (AD-7, bundle AX-7.1).
-        AccessibleRole = AccessibleRole.Window;
-        MinimumSize = new Size(500, 300);
-        Size = new Size(900, 600);
-        StartPosition = FormStartPosition.WindowsDefaultLocation;
 
-        // ---- menus (AD-4); the keys are handled in ProcessCmdKey from the tables, the items only show them ----
+        // ---- menus (AD-4); the keys are handled in ProcessWindowKey from the tables, the items only show them ----
         // File is the thing worked on, in the standard order of a File menu (AD-4.1, bundle AX-6): New, Open and the
         // recent files, then Save and Save as where every Windows program has them, then the extras, then Exit.
         // AxClaude's Session menu has the same order with the Save slot empty and its export before Exit.
@@ -102,9 +82,9 @@ public sealed class TextEditorForm : Form
         }
 
         var navigate = new ToolStripMenuItem("&Navigate");
-        navigate.DropDownItems.Add(Item("&Find...", ShowFind, BundleKeys.Find));
-        navigate.DropDownItems.Add(Item("Find &next", () => FindNext(1), BundleKeys.FindNext));
-        navigate.DropDownItems.Add(Item("Find pre&vious", () => FindNext(-1), BundleKeys.FindPrevious));
+        navigate.DropDownItems.Add(Item("&Find...", () => ShowFind(_editor), BundleKeys.Find));
+        navigate.DropDownItems.Add(Item("Find &next", () => FindInEditor(1), BundleKeys.FindNext));
+        navigate.DropDownItems.Add(Item("Find pre&vious", () => FindInEditor(-1), BundleKeys.FindPrevious));
         navigate.DropDownItems.Add(Item("&Go to line...", ShowGoToLine, EditorKeys.GoToLine));
         navigate.DropDownItems.Add(new ToolStripSeparator());
         // One item per kind under Next and under Previous, from the key pairs of the app's table (AD-D7, AX-7.2).
@@ -150,20 +130,8 @@ public sealed class TextEditorForm : Form
 
         help.DropDownItems.Add(resources);
 
-        // The bundle's Axit menu (AX-9) sits before Help in every window and ends with the update items and About
-        // (AX-3.1): Check for updates names the version in use and asks GitHub every time; Update to Axit n stands
-        // below it while a newer release is known; About is the bundle's sections, shown as this window's notices.
-        _checkItem.Click += (_, _) => CheckForUpdates(manual: true);
-        _updateItem.Click += (_, _) =>
-        {
-            if (_update is { } known)
-            {
-                ShowUpdateNotice(known);
-            }
-        };
-        var axit = new AxitMenu(this, _checkItem, _updateItem, () => _latestState, notice => ShowNotice(notice));
-
-        _menu.Items.AddRange([file, edit, navigate, options, axit, help]);
+        // The bundle's Axit menu (AX-9) sits before Help in every window and ends with the update items and About.
+        _menu.Items.AddRange([file, edit, navigate, options, CreateAxitMenu(), help]);
         MainMenuStrip = _menu;
 
         // ---- the editor (AD-2) ----
@@ -192,14 +160,13 @@ public sealed class TextEditorForm : Form
         _status.Items.AddRange([_fileLabel, _positionLabel]);
         _status.SizeChanged += (_, _) => StatusLayout.Fit(_status, _fileLabel, _positionLabel);
 
-        _overlay.Chosen += OnNoticeChoice;
-        _overlay.Jumps = _app.Jumps;
+        Overlay.Jumps = _app.Jumps;
         _area.TabIndex = 1;
         SizeChanged += (_, _) => _area.FitHeight();
 
         // Docked from the last control to the first: the menu takes the top, the status bar the bottom, the question
         // area the strip above it, and the editor (or the notice over it) what is left.
-        Controls.AddRange([_overlay, _editor, _area, _status, _menu]);
+        Controls.AddRange([Overlay, _editor, _area, _status, _menu]);
 
         ApplyTextFont();
         RestoreWindow();
@@ -211,23 +178,52 @@ public sealed class TextEditorForm : Form
         }
     }
 
-    /// <summary>The crash handler's report (AD-11), shown inside the window like every other notice.</summary>
-    public void ShowError(string title, string message) => ShowNotice(Notice.Plain(title, message) with { Unprompted = true });
-
     private string DocumentName => _path is null ? Untitled : Path.GetFileName(_path);
+
+    // ---- what the window base asks for ----
+
+    protected override string Shortcuts => _app.Shortcuts;
+
+    protected override void HideForNotice()
+    {
+        _editor.Visible = false;
+        _area.Visible = false;
+    }
+
+    protected override void ShowAfterNotice()
+    {
+        _editor.Visible = true;
+        _area.Visible = _area.Current is not null;
+    }
+
+    /// <summary>The editor, or the Go to line field while it shows.</summary>
+    protected override Control FocusTarget => _area.Current ?? _editor;
+
+    protected override Control AnnounceSource => _editor;
+
+    protected override void ApplyFont(Font font)
+    {
+        _editor.Font = font;
+        _area.Font = font;
+        _area.MinimumHeight = TextRenderer.MeasureText("Wg", font).Height * 2 + 12;
+        _area.FitHeight();
+    }
+
+    protected override IReadOnlyList<string> RestartArguments() => _path is null ? [_app.Verb] : [_app.Verb, _path];
+
+    protected override string UpdateRestartText =>
+        $"closes {_app.Name} (asking first when there are unsaved changes), installs it and starts it again on the same file";
+
+    protected override IEnumerable<string> DiagnosticsLines => [$"File: {_path ?? "(none)"} ({_document.EncodingName}, {_document.LineEndingName})"];
 
     protected override void OnShown(EventArgs e)
     {
-        base.OnShown(e);
-        if (!_noticeOpen)
+        if (!NoticeOpen)
         {
             _editor.Select();
         }
 
-        if (_settings.CheckForUpdates)
-        {
-            CheckForUpdates(manual: false);
-        }
+        base.OnShown(e);
     }
 
     protected override void OnFormClosing(FormClosingEventArgs e)
@@ -251,61 +247,15 @@ public sealed class TextEditorForm : Form
             RecentlyClosed.Remember(_app.Name, closing);
         }
 
-        SaveWindow();
-        SaveSettings();
-        if (_restartArguments is { } restart)
-        {
-            // AX-3.2: the update is installed; the new version starts on this file (or empty) as this process ends.
-            Updater.StartInstalled(restart);
-        }
-
         base.OnFormClosing(e);
-    }
-
-    /// <summary>The window's client area as its UI Automation rectangle, so that NVDA+End finds the status bar.</summary>
-    protected override AccessibleObject CreateAccessibilityInstance() => new WindowAccessibleObject(this);
-
-    private const int WM_SYSCOMMAND = 0x0112;
-    private const int SC_KEYMENU = 0xF100;
-
-    protected override void WndProc(ref Message m)
-    {
-        // Alt alone and F10 open the menu bar through SC_KEYMENU; while a notice holds the keyboard they do nothing.
-        if (m.Msg == WM_SYSCOMMAND && ((long)m.WParam & 0xFFF0) == SC_KEYMENU && ((long)m.LParam & 0xFFFF) == 0 && _noticeOpen)
-        {
-            return;
-        }
-
-        base.WndProc(ref m);
     }
 
     // ---- keys (AD-5): every key comes from BundleKeys, EditorKeys or the app's table, and is handled here only ----
 
-    protected override bool ProcessCmdKey(ref Message msg, Keys keyData)
+    protected override bool ProcessWindowKey(Keys keyData)
     {
-        if (_noticeOpen)
-        {
-            // A notice holds the keyboard: the window's shortcuts and the menu's wait. Only the text size keys stay live.
-            switch (keyData)
-            {
-                case BundleKeys.LargerText:
-                case BundleKeys.LargerTextNumpad:
-                    ChangeTextSize(1);
-                    return true;
-                case BundleKeys.SmallerText:
-                case BundleKeys.SmallerTextNumpad:
-                    ChangeTextSize(-1);
-                    return true;
-            }
-
-            return false;
-        }
-
         switch (keyData)
         {
-            case BundleKeys.Shortcuts:
-                ShowNotice(Notice.Plain("Keyboard shortcuts", _app.Shortcuts));
-                return true;
             case BundleKeys.NextControl:
             case BundleKeys.PreviousControl:
             case BundleKeys.NextControlAlso:
@@ -313,24 +263,16 @@ public sealed class TextEditorForm : Form
                 (_area.Current ?? _editor).Focus();
                 return true;
             case BundleKeys.Find:
-                ShowFind();
+                ShowFind(_editor);
                 return true;
             case BundleKeys.FindNext:
-                FindNext(1);
+                FindInEditor(1);
                 return true;
             case BundleKeys.FindPrevious:
-                FindNext(-1);
+                FindInEditor(-1);
                 return true;
             case BundleKeys.Save:
                 Save();
-                return true;
-            case BundleKeys.LargerText:
-            case BundleKeys.LargerTextNumpad:
-                ChangeTextSize(1);
-                return true;
-            case BundleKeys.SmallerText:
-            case BundleKeys.SmallerTextNumpad:
-                ChangeTextSize(-1);
                 return true;
             case EditorKeys.NewDocument:
                 NewDocument();
@@ -368,7 +310,7 @@ public sealed class TextEditorForm : Form
             return true;
         }
 
-        return base.ProcessCmdKey(ref msg, keyData);
+        return false;
     }
 
     private void OnEditorKeyDown(object? sender, KeyEventArgs e)
@@ -495,7 +437,7 @@ public sealed class TextEditorForm : Form
     }
 
     /// <summary>Options → Developer → Open settings file (AD-4.3): the app's settings file in a new window of the app, as any file.</summary>
-    private void OpenSettingsFile() => AxitMenu.Start(_app.Verb, _settingsPath);
+    private void OpenSettingsFile() => AxitMenu.Start(_app.Verb, SettingsPath);
 
     private void OpenFile() => AskToSave(() =>
     {
@@ -601,18 +543,6 @@ public sealed class TextEditorForm : Form
         ]));
     }
 
-    /// <summary>Cancel in the save question after Update and restart: the update is installed already; this window stays, and the new version comes with the next start.</summary>
-    private void KeepWorkingAfterUpdate()
-    {
-        if (_restartArguments is null)
-        {
-            return;
-        }
-
-        _restartArguments = null;
-        Announce($"Update installed. It starts with the next {_app.Name}", true);
-    }
-
     /// <summary>An app command on the whole text (AJ-2.3): the text replaced in one undo step, the caret kept at its offset, one announcement.</summary>
     private void RunCommand(EditorCommand command)
     {
@@ -632,60 +562,13 @@ public sealed class TextEditorForm : Form
 
     // ---- find and go to line (AD-6.3, AD-6.4) ----
 
-    private void ShowFind() =>
-        ShowNotice(new Notice("Find", string.Empty,
-        [
-            new OverlayChoice("&Find next", () =>
-            {
-                _findText = _overlay.InputText;
-                FindNext(1);
-            }, IsDefault: true),
-            new OverlayChoice("&Cancel", IsCancel: true),
-        ])
-        {
-            Input = new OverlayInput("Text to find:", "Text to find", _findText, "Type the text to find"),
-        });
-
-    /// <summary>The next match after the selection (or the previous one before it), wrapping once; the match is selected and the editor takes the focus.</summary>
-    private void FindNext(int direction)
+    /// <summary>F3 and Shift+F3: the base's find on the editor, then the status bar for the new caret.</summary>
+    private void FindInEditor(int direction)
     {
-        if (_findText.Length == 0)
+        if (FindNext(_editor, direction))
         {
-            ShowFind();
-            return;
+            ScheduleStatus();
         }
-
-        var text = _editor.Text;
-        int found;
-        if (direction > 0)
-        {
-            var from = Math.Min(_editor.SelectionStart + _editor.SelectionLength, text.Length);
-            found = text.IndexOf(_findText, from, StringComparison.OrdinalIgnoreCase);
-            if (found < 0 && from > 0)
-            {
-                found = text.IndexOf(_findText, 0, StringComparison.OrdinalIgnoreCase);
-            }
-        }
-        else
-        {
-            var from = _editor.SelectionStart - 1;
-            found = from >= 0 ? text.LastIndexOf(_findText, from, StringComparison.OrdinalIgnoreCase) : -1;
-            if (found < 0)
-            {
-                found = text.LastIndexOf(_findText, StringComparison.OrdinalIgnoreCase);
-            }
-        }
-
-        if (found < 0)
-        {
-            Announce("Not found", true);
-            return;
-        }
-
-        _editor.Select(found, _findText.Length);
-        _editor.ScrollToCaret();
-        _editor.Select();
-        ScheduleStatus();
     }
 
     private void ShowGoToLine()
@@ -787,7 +670,7 @@ public sealed class TextEditorForm : Form
         StatusLayout.Fit(_status, _fileLabel, _positionLabel);
     }
 
-    // ---- word wrap, fonts and the window (AD-2.4, AD-2.7, AD-8) ----
+    // ---- word wrap (AD-2.4) ----
 
     private void ToggleWordWrap()
     {
@@ -804,455 +687,5 @@ public sealed class TextEditorForm : Form
         _wordWrapItem.Checked = _settings.WordWrap;
         SaveSettings();
         Announce(_settings.WordWrap ? "Word wrap on" : "Word wrap off", true);
-    }
-
-    private static Font SystemTextFont() => SystemFonts.MessageBoxFont ?? DefaultFont;
-
-    private Font TextFont()
-    {
-        var system = SystemTextFont();
-        if (_settings.FontFamily is null && _settings.FontSize <= 0 && !_settings.FontBold)
-        {
-            return system;
-        }
-
-        var size = _settings.FontSize > 0 ? _settings.FontSize : system.SizeInPoints;
-        var style = _settings.FontBold ? FontStyle.Bold : FontStyle.Regular;
-        try
-        {
-            return new Font(_settings.FontFamily ?? system.FontFamily.Name, size, style);
-        }
-        catch (ArgumentException)
-        {
-            return new Font(system.FontFamily, size, style);
-        }
-    }
-
-    private void ApplyTextFont()
-    {
-        var font = TextFont();
-        _editor.Font = font;
-        _overlay.SetTextFont(font);
-        _area.Font = font;
-        _area.MinimumHeight = TextRenderer.MeasureText("Wg", font).Height * 2 + 12;
-        _area.FitHeight();
-    }
-
-    private void ChangeTextSize(int delta)
-    {
-        var size = Math.Clamp((int)Math.Round(TextFont().SizeInPoints) + delta, 6, 72);
-        _settings.FontSize = size;
-        ApplyTextFont();
-        SaveSettings();
-        Announce($"Text size {size}", true);
-    }
-
-    private void UseSystemFont()
-    {
-        _settings.FontFamily = null;
-        _settings.FontSize = 0;
-        _settings.FontBold = false;
-        ApplyTextFont();
-        SaveSettings();
-        Announce("Windows text size", true);
-    }
-
-    private void ChooseFont()
-    {
-        using var dialog = new FontDialog
-        {
-            Font = TextFont(),
-            ShowEffects = false,
-            FontMustExist = true,
-            MinSize = 6,
-            MaxSize = 72,
-        };
-        if (dialog.ShowDialog(this) != DialogResult.OK)
-        {
-            return;
-        }
-
-        _settings.FontFamily = dialog.Font.FontFamily.Name;
-        _settings.FontSize = dialog.Font.SizeInPoints;
-        _settings.FontBold = dialog.Font.Bold;
-        ApplyTextFont();
-        SaveSettings();
-    }
-
-    private void RestoreWindow()
-    {
-        if (_settings.Window is not { } placement)
-        {
-            return;
-        }
-
-        var bounds = new Rectangle(placement.X, placement.Y, placement.Width, placement.Height);
-        if (!Screen.AllScreens.Any(s => s.WorkingArea.IntersectsWith(bounds)))
-        {
-            return;
-        }
-
-        StartPosition = FormStartPosition.Manual;
-        Bounds = bounds;
-        if (placement.Maximized)
-        {
-            WindowState = FormWindowState.Maximized;
-        }
-    }
-
-    private void SaveWindow()
-    {
-        var bounds = WindowState == FormWindowState.Normal ? Bounds : RestoreBounds;
-        _settings.Window = new WindowPlacement
-        {
-            X = bounds.X,
-            Y = bounds.Y,
-            Width = bounds.Width,
-            Height = bounds.Height,
-            Maximized = WindowState == FormWindowState.Maximized,
-        };
-    }
-
-    private void SaveSettings()
-    {
-        try
-        {
-            _settings.Save(_settingsPath);
-        }
-        catch (Exception ex) when (ex is IOException or UnauthorizedAccessException)
-        {
-            Log.Error("Settings could not be saved", ex);
-        }
-    }
-
-    // ---- notices: the window's own dialogs, drawn inside the window (bundle AX-7.2, AX-6.4) ----
-
-    /// <summary>
-    /// The one place a notice is shown; callers pass only its content. It adds the key line made from the buttons,
-    /// the chime and the hold of a notice the user did not open, the focus in the notice, the blocked menu and
-    /// window shortcuts, and Enter and Escape on the default and cancel buttons.
-    /// </summary>
-    private void ShowNotice(Notice notice)
-    {
-        if (notice.Unprompted)
-        {
-            Sounds.Notice();
-        }
-
-        _noticeOpen = true;
-        _overlay.Populate(notice);
-        _overlay.Visible = true;
-        _overlay.BringToFront();
-        AcceptButton = _overlay.DefaultButton;
-        CancelButton = _overlay.CancelButton;
-        _overlay.FocusStart();
-        _editor.Visible = false;
-        _area.Visible = false;
-        _menu.Enabled = false;
-        PerformLayout();
-    }
-
-    /// <summary>"Enter: Save. Escape: Cancel." or "Enter or Escape: Close." as the last line of every notice with text.</summary>
-    private void OnNoticeChoice(OverlayChoice choice)
-    {
-        if (choice.StaysOpen)
-        {
-            choice.Action?.Invoke();
-            return;
-        }
-
-        CloseNotice(choice.Action);
-    }
-
-    private void CloseNotice(Action? then)
-    {
-        if (!_noticeOpen)
-        {
-            return;
-        }
-
-        _noticeOpen = false;
-        _editor.Visible = true;
-        _area.Visible = _area.Current is not null;
-        _menu.Enabled = true;
-        AcceptButton = null;
-        CancelButton = null;
-        PerformLayout();
-        then?.Invoke();
-        if (IsDisposed || _noticeOpen)
-        {
-            // The window closed, or the action opened a notice of its own (the update's progress, the changed-on-disk
-            // question after Save), which is showing now.
-            return;
-        }
-
-        if (ActiveControl is null || _overlay.Contains(ActiveControl))
-        {
-            (_area.Current ?? _editor).Select();
-        }
-
-        _overlay.Visible = false;
-    }
-
-    private void Fail(string message)
-    {
-        Log.Error(message);
-        ShowNotice(Notice.Plain("Error", message) with { Unprompted = true });
-    }
-
-    /// <summary>Speaks without moving the focus (AD-7): on the editor, or on the notice while one shows.</summary>
-    private bool Announce(string text, bool interrupt)
-    {
-        if (_noticeOpen)
-        {
-            return _overlay.Announce(text, interrupt);
-        }
-
-        return Announcer.Raise(_editor, text, interrupt);
-    }
-
-    // ---- help, diagnostics, updates (AD-4.4, AX-3) ----
-
-    private void CopyDiagnostics()
-    {
-        var text = string.Join("\r\n",
-        [
-            $"{_app.Name}, Axit {BundleInfo.Version} on .NET {Environment.Version}, {Environment.OSVersion}",
-            $"File: {_path ?? "(none)"} ({_document.EncodingName}, {_document.LineEndingName})",
-            $"Settings: {_settingsPath}",
-            $"Log: {Log.FilePath}",
-            string.Empty,
-            Log.Tail(200),
-        ]);
-        try
-        {
-            Clipboard.SetText(text);
-            Announce("Copied diagnostics", true);
-        }
-        catch (Exception ex) when (ex is System.Runtime.InteropServices.ExternalException or InvalidOperationException)
-        {
-            Fail("The clipboard could not be written: " + ex.Message);
-        }
-    }
-
-    private void OpenUrl(string url)
-    {
-        try
-        {
-            Process.Start(new ProcessStartInfo(url) { UseShellExecute = true });
-        }
-        catch (Exception ex) when (ex is System.ComponentModel.Win32Exception or IOException)
-        {
-            Fail("The page could not be opened: " + ex.Message);
-        }
-    }
-
-    /// <summary>AX-3: asks GitHub for the latest release, every time; a newer one is offered in a notice, a manual check reports either way.</summary>
-    private async void CheckForUpdates(bool manual)
-    {
-        if (_updateBusy)
-        {
-            return;
-        }
-
-        _updateBusy = true;
-        _checkItem.Enabled = false;
-        _updateItem.Enabled = false;
-        _latestState = "checking...";
-        try
-        {
-            using var cancellation = new CancellationTokenSource(TimeSpan.FromSeconds(30));
-            var release = await Updater.CheckAsync(cancellation.Token);
-            if (IsDisposed)
-            {
-                return;
-            }
-
-            // A check answers for itself: an update known from an earlier one is replaced, or gone.
-            _update = null;
-            _updateItem.Visible = false;
-            if (release is null)
-            {
-                _latestState = "none published yet";
-                if (manual)
-                {
-                    ShowNotice(Notice.Plain("Check for updates", "No release is published yet."));
-                }
-            }
-            else if (UpdateCheck.IsNewer(release, BundleInfo.Version))
-            {
-                var version = release.Version.ToString(3);
-                _update = release;
-                _latestState = $"Axit {version} (newer than this one)";
-                _updateItem.Text = $"Update &to Axit {version}...";
-                _updateItem.Visible = true;
-                Log.Info($"Update available: {release.Tag}, zip {release.ZipUrl ?? "missing"}");
-                if (manual || !_noticeOpen)
-                {
-                    ShowUpdateNotice(release, unprompted: !manual);
-                }
-                else
-                {
-                    Announce($"Update {version} in the Axit menu", false);
-                }
-            }
-            else
-            {
-                _latestState = $"Axit {release.Version.ToString(3)}";
-                if (manual)
-                {
-                    ShowNotice(Notice.Plain("Check for updates", $"You have the newest version, Axit {BundleInfo.Version}."));
-                }
-            }
-        }
-        catch (Exception ex) when (ex is HttpRequestException or TaskCanceledException or IOException or InvalidOperationException)
-        {
-            Log.Error("Update check failed", ex);
-            _latestState = "unknown, GitHub could not be reached";
-            if (manual)
-            {
-                ShowNotice(new Notice("Check for updates", "GitHub could not be reached: " + ex.Message,
-                [
-                    new OverlayChoice("&Open releases page", () => OpenUrl(UpdateCheck.ReleasesPage), StaysOpen: true),
-                    OverlayChoice.Close,
-                ]));
-            }
-        }
-        finally
-        {
-            _updateBusy = false;
-            _checkItem.Enabled = true;
-            _updateItem.Enabled = true;
-        }
-    }
-
-    private void ShowUpdateNotice(ReleaseInfo release, bool unprompted = false)
-    {
-        var version = release.Version.ToString(3);
-        var size = release.ZipSize > 0 ? $" The download is {release.ZipSize / (1024.0 * 1024.0):0} MB." : string.Empty;
-        var text =
-            $"You have Axit {BundleInfo.Version}. Axit {version} is available.\n\n" +
-            (release.Notes.Length > 0 ? release.Notes + "\n\n" : string.Empty) +
-            $"Update and restart downloads the new version, closes {_app.Name} (asking first when there are unsaved changes), installs it " +
-            $"and starts it again on the same file. Update and close installs without starting it again. A progress bar shows the download.{size}\n" +
-            "Later keeps this version; the Axit menu offers the update again.";
-        ShowNotice(new Notice($"Update to Axit {version}", text,
-        [
-            new OverlayChoice("Update and &restart", () => InstallUpdate(release, restart: true), IsDefault: true),
-            new OverlayChoice("Update and &close", () => InstallUpdate(release, restart: false)),
-            new OverlayChoice("&Open release page", () => OpenUrl(release.PageUrl), StaysOpen: true),
-            new OverlayChoice("&Later", IsCancel: true),
-        ])
-        {
-            Unprompted = unprompted,
-        });
-    }
-
-    /// <summary>
-    /// Downloads the release and installs it in place behind one notice with one progress bar (the download up to
-    /// 80 percent, the installer's steps to 100; Cancel stops the download, not the install), then closes;
-    /// OnFormClosing starts the installed new version when <paramref name="restart"/> was chosen (AX-3.2).
-    /// </summary>
-    private async void InstallUpdate(ReleaseInfo release, bool restart)
-    {
-        if (_updateBusy)
-        {
-            return;
-        }
-
-        _updateBusy = true;
-        _checkItem.Enabled = false;
-        _updateItem.Enabled = false;
-        var version = release.Version.ToString(3);
-        var size = release.ZipSize > 0 ? $" ({release.ZipSize / (1024.0 * 1024.0):0} MB)" : string.Empty;
-        using var cancellation = new CancellationTokenSource(TimeSpan.FromMinutes(10));
-        var cancelled = false;
-        var installing = false;
-        ShowNotice(new Notice($"Updating to Axit {version}",
-            $"The new version is downloaded{size} and installed; the progress bar shows how far it is. Cancel during the download keeps this version.",
-        [
-            new OverlayChoice("&Cancel", () =>
-            {
-                if (installing)
-                {
-                    Announce("Installing, this cannot be cancelled now", true);
-                    return;
-                }
-
-                cancelled = true;
-                cancellation.Cancel();
-                CloseNotice(null);
-            }, IsDefault: true, IsCancel: true, StaysOpen: true),
-        ])
-        {
-            Progress = true,
-        });
-        try
-        {
-            var folder = await Updater.DownloadAsync(release, cancellation.Token, new Progress<int>(percent => _overlay.SetProgress(percent * 80 / 100)));
-            // Cancel pressed while the zip was being unpacked, which the download does not watch the token for.
-            cancellation.Token.ThrowIfCancellationRequested();
-            if (IsDisposed)
-            {
-                return;
-            }
-
-            installing = true;
-            _overlay.SetProgress(80);
-            Announce("Downloaded. Installing", true);
-            var step = 80;
-            var result = await Updater.InstallInPlaceAsync(folder, new Progress<string>(_ => _overlay.SetProgress(step = Math.Min(99, step + 3))));
-            if (IsDisposed)
-            {
-                return;
-            }
-
-            if (result.ExitCode != 0)
-            {
-                Log.Error($"The installer failed with code {result.ExitCode}:\r\n{result.Output}");
-                ShowNotice(new Notice($"Update to Axit {version}",
-                    $"The installer failed; this version keeps running.\n\n{result.Output}\n\nYou can download the zip from the release page and run install.cmd yourself.",
-                [
-                    new OverlayChoice("&Open release page", () => OpenUrl(release.PageUrl), StaysOpen: true),
-                    OverlayChoice.Close,
-                ]));
-                return;
-            }
-
-            _overlay.SetProgress(100);
-            _restartArguments = restart ? (_path is null ? [_app.Verb] : [_app.Verb, _path]) : null;
-            Log.Info($"Update {release.Tag} installed in place; restart: {restart}");
-            Announce(restart ? "Installed. Restarting" : "Installed. Closing", true);
-            Close();
-        }
-        catch (OperationCanceledException) when (cancelled && !IsDisposed)
-        {
-            Announce("Update cancelled", true);
-        }
-        catch (Exception ex) when (ex is HttpRequestException or TaskCanceledException or IOException or InvalidDataException or InvalidOperationException or UnauthorizedAccessException)
-        {
-            // InvalidDataException: a download that is not a zip.
-            Log.Error("The update failed", ex);
-            Fail("The update failed, and this version keeps running: " + ex.Message);
-        }
-        finally
-        {
-            _updateBusy = false;
-            _checkItem.Enabled = true;
-            _updateItem.Enabled = true;
-        }
-    }
-
-    // ---- menu items from the key tables ----
-
-    private static ToolStripMenuItem Item(string text, Action action, Keys key)
-    {
-        var item = new ToolStripMenuItem(text, null, (_, _) => action());
-        if (key != Keys.None)
-        {
-            item.ShortcutKeyDisplayString = BundleKeys.Text(key);
-        }
-
-        return item;
     }
 }

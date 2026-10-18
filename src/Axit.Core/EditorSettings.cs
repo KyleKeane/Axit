@@ -6,7 +6,7 @@ namespace Axit.Core;
 /// Everything AxDown remembers between runs (docs/axdown/SPEC.md AD-8), in <c>%APPDATA%\Axit\axdown.json</c> through the
 /// bundle's <see cref="SettingsFile"/>. A missing or unreadable file falls back to the defaults.
 /// </summary>
-public sealed class EditorSettings
+public sealed class EditorSettings : IWindowSettings
 {
     /// <summary>Null means the Windows system font (which follows the text size setting under Accessibility).</summary>
     public string? FontFamily { get; set; }
