@@ -406,6 +406,8 @@ internal sealed class MainForm : Form
         _recentFoldersItem.DropDownOpening += (_, _) => FillRecentFolders();
         FillRecentFolders();
         session.DropDownItems.Add(_recentFoldersItem);
+        // The standard order of a File menu (bundle AX-6): the editors have Save and Save as here; AxClaude has none.
+        session.DropDownItems.Add(new ToolStripSeparator());
         // FR-8.2: Show current folder in ▸ File Explorer; an Axit file manager joins the submenu when there is one.
         var showIn = new ToolStripMenuItem("Show current folder &in");
         showIn.DropDownItems.Add(new ToolStripMenuItem("File &Explorer", null, (_, _) => ShowInExplorer()) { ShortcutKeys = AxClaudeKeys.ShowInExplorer });

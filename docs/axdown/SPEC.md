@@ -122,10 +122,10 @@ UTF-8, UTF-16 and the system code page; files that are not text; files over 32 M
   files opened or saved under a name, newest first, those that still exist, kept in the settings, each as its number, a
   full stop, the file's name and its full path, "1. notes.md (C:\notes\notes.md)", the Axit menu's shape, AX-9.5; choosing one opens it
   in this window after the unsaved-changes question; "No recent files", an item that does nothing, when there are
-  none, AX-9.5), Show current file in ▸
+  none, AX-9.5); then Save (Ctrl+S), Save as… (Ctrl+Shift+S), where every Windows program has them (the standard
+  order of a File menu, shared with AxClaude's Session menu, whose Save slot is empty, 2.10.1); then Show current file in ▸
   File Explorer (Ctrl+W; the file selected in File Explorer, one of the system's own windows; "No file yet" on
-  Untitled; an Axit file manager joins the submenu when there is one); then Save (Ctrl+S), Save as… (Ctrl+Shift+S);
-  then Exit (Alt+F4).
+  Untitled; an Axit file manager joins the submenu when there is one); then Exit (Alt+F4).
 - AD-4.2 Edit: Undo (Ctrl+Z), Cut, Copy, Paste, Select all (the control's own, listed for discoverability).
   Navigate (as AxClaude's): Find… (Ctrl+F), Find next (F3), Find previous (Shift+F3), Go to line… (Ctrl+G), then the
   submenus Next and Previous with one item per kind of section 9, made from the key pairs of the table: the kind's

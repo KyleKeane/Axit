@@ -62,20 +62,23 @@ public sealed class TextEditorForm : Form
         StartPosition = FormStartPosition.WindowsDefaultLocation;
 
         // ---- menus (AD-4); the keys are handled in ProcessCmdKey from the tables, the items only show them ----
-        // File is the thing worked on, shaped as AxClaude's Session menu (AD-4.1).
+        // File is the thing worked on, in the standard order of a File menu (AD-4.1, bundle AX-6): New, Open and the
+        // recent files, then Save and Save as where every Windows program has them, then the extras, then Exit.
+        // AxClaude's Session menu has the same order with the Save slot empty and its export before Exit.
         var file = new ToolStripMenuItem("&File");
         file.DropDownItems.Add(Item("&New", NewDocument, EditorKeys.NewDocument));
         file.DropDownItems.Add(Item("&Open...", OpenFile, EditorKeys.Open));
         _recentFilesItem.DropDownOpening += (_, _) => FillRecentFiles();
         FillRecentFiles();
         file.DropDownItems.Add(_recentFilesItem);
+        file.DropDownItems.Add(new ToolStripSeparator());
+        file.DropDownItems.Add(Item("&Save", () => Save(), BundleKeys.Save));
+        file.DropDownItems.Add(Item("Save &as...", () => SaveAs(), EditorKeys.SaveAs));
+        file.DropDownItems.Add(new ToolStripSeparator());
         // Show current file in ▸ File Explorer; an Axit file manager joins the submenu when there is one.
         var showIn = new ToolStripMenuItem("Show current file &in");
         showIn.DropDownItems.Add(Item("File &Explorer", ShowInExplorer, EditorKeys.ShowInExplorer));
         file.DropDownItems.Add(showIn);
-        file.DropDownItems.Add(new ToolStripSeparator());
-        file.DropDownItems.Add(Item("&Save", () => Save(), BundleKeys.Save));
-        file.DropDownItems.Add(Item("Save &as...", () => SaveAs(), EditorKeys.SaveAs));
         file.DropDownItems.Add(new ToolStripSeparator());
         file.DropDownItems.Add(new ToolStripMenuItem("E&xit", null, (_, _) => Close()) { ShortcutKeyDisplayString = "Alt+F4" });
 
