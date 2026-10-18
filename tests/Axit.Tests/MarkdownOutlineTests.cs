@@ -1,8 +1,8 @@
-using AxDown.Core;
+using Axit.Core;
 
-namespace AxDown.Tests;
+namespace Axit.Tests;
 
-/// <summary>Headings for the navigation keys (SPEC.md §9): what counts, what is skipped, and next and previous from a caret.</summary>
+/// <summary>Headings for the navigation keys (docs/axdown/SPEC.md §9): what counts, what is skipped, and next and previous from a caret.</summary>
 public sealed class MarkdownOutlineTests
 {
     private const string Text =

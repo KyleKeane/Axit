@@ -222,11 +222,9 @@ size 500×300; the system font and colours, light or dark as Windows is (AX-7.7)
 
 ```
 src/AxDown.Core/   class library (net10.0): TextDocument (read and write with encoding and line ending), EditorSettings,
-                   MarkdownOutline (section 9)
 src/AxDown/        class library (net10.0-windows): AxDownApp (Run), EditorForm, AxDownKeys, HelpText (F1 text, the
                    embedded user guide); references AxDown.Core, Axit.Core, Axit.Forms
 tests/AxDown.Tests/ TextDocumentTests (every encoding and line ending case, a new file, a file with no line ending),
-                   MarkdownOutlineTests (section 9)
 docs/axdown/       this spec, user-guide.md (embedded, Help, User guide), nvda-test-plan.md
 ```
 
@@ -274,7 +272,7 @@ the off-screen probe approach of AxClaude checks layout and keys without disturb
 
 ## 9. Markdown navigation (headings since 2.1.0; the levels and the other letters next)
 
-- `AxDown.Core/MarkdownOutline`: from the text and a caret position, the next and previous element of each kind, outside
+- `Axit.Core/MarkdownOutline` (the bundle's since its second use, AX-6.1): from the text and a caret position, the next and previous element of each kind, outside
   fenced code blocks (` ``` ` or `~~~`); pure, tested. Headings: a line of one to six `#` followed by a space (or
   hashes alone), after at most three spaces; the text without the marks and closing hashes, and the level, which the
   level keys filter by. Links: `[text](target)`, `[text][ref]`, `<https://…>` and bare addresses starting with

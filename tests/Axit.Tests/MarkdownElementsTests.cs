@@ -1,8 +1,8 @@
-using AxDown.Core;
+using Axit.Core;
 
-namespace AxDown.Tests;
+namespace Axit.Tests;
 
-/// <summary>Links, lists and their items, block quotes and tables for the navigation keys (SPEC.md §9): what counts, what is skipped, what is spoken, next and previous.</summary>
+/// <summary>Links, lists and their items, block quotes and tables for the navigation keys (docs/axdown/SPEC.md §9): what counts, what is skipped, what is spoken, next and previous.</summary>
 public sealed class MarkdownElementsTests
 {
     private static readonly string[] LinesOfText =

@@ -1,6 +1,6 @@
-namespace AxDown.Core;
+namespace Axit.Core;
 
-/// <summary>Something a navigation key stops at (SPEC.md §9): where it starts and what is said on landing there.</summary>
+/// <summary>Something a navigation key stops at (docs/axdown/SPEC.md §9): where it starts and what is said on landing there.</summary>
 public abstract record Element(int Start)
 {
     public abstract string Spoken { get; }
@@ -43,7 +43,7 @@ public sealed record Table(int Start, int Rows, int Columns) : Element(Start)
 }
 
 /// <summary>
-/// The structure of a Markdown text for the navigation keys (SPEC.md §9), outside fenced code blocks (lines opening
+/// The structure of a Markdown text for the navigation keys (docs/axdown/SPEC.md §9), outside fenced code blocks (lines opening
 /// and closing with <c>```</c> or <c>~~~</c>): headings, links, lists and their items, block quotes and tables, each
 /// with a next and a previous from a caret position. The block kinds are found by line: next means on a line after
 /// the caret's, previous on a line before it, so a jump from inside one never lands on itself. Links are inline:
