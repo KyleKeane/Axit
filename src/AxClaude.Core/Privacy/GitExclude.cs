@@ -1,7 +1,7 @@
 namespace AxClaude.Core.Privacy;
 
 /// <summary>
-/// Keeps AxClaude's own files (raw recordings, saved conversations; all named <c>axclaude-…</c>) out of the git
+/// Keeps AxClaude's own files (raw recordings, exported conversations; all named <c>axclaude-…</c>) out of the git
 /// repository of the project folder Claude runs in (D34). The patterns go into the repository's local exclude file,
 /// <c>.git\info\exclude</c>, which git reads like a <c>.gitignore</c> but never commits, so the project's own files are
 /// not touched. A marked block holds them; off removes the block, to commit such a file on purpose.

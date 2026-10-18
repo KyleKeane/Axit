@@ -81,7 +81,7 @@ public sealed class AppSettings
     public bool ReviewAnswers { get; set; }
 
     /// <summary>
-    /// AxClaude's recordings and saved conversations (<c>axclaude-…</c>) are listed in the project repository's local
+    /// AxClaude's recordings and exported conversations (<c>axclaude-…</c>) are listed in the project repository's local
     /// exclude file, so git never offers them for a commit (D34). Off removes the lines.
     /// </summary>
     public bool KeepFilesOutOfGit { get; set; } = true;

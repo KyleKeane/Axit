@@ -182,8 +182,9 @@ allow it, see B-9).
 - AX-8.2 Bundle-wide keys are defined once, in `Axit.Forms/BundleKeys`, a plain static class of constants, and every
   window uses those constants. The list: F1 the keyboard shortcuts; Tab,
   Shift+Tab, Ctrl+Tab, Ctrl+Shift+Tab and F6 move between the window's controls (and between a notice's text, field
-  and buttons); Ctrl+F find, F3 and Shift+F3 next and previous; Ctrl+S save (what the window holds: a conversation,
-  a file); Ctrl+Plus and Ctrl+Minus text size; Enter and Escape on a notice; Page Up and Page Down one screen in an
+  and buttons); Ctrl+F find, F3 and Shift+F3 next and previous; Ctrl+S save (what the window holds: the editors' file; AxClaude, which has no
+  document of its own, exports its conversation to a text file with it, from the bottom of its first menu, so that
+  Save and Save as keep their place in the editors' and the first menus share one order); Ctrl+Plus and Ctrl+Minus text size; Enter and Escape on a notice; Page Up and Page Down one screen in an
   edit control; Ctrl+Up and Ctrl+Down the start of the previous and next paragraph in an edit control, a paragraph
   starting at the first line or at a line with text directly after a blank line, and Ctrl+Shift+Up and
   Ctrl+Shift+Down the selection grown to there, as in Word (`EditParagraphs`; the EDIT control's own keys scroll a

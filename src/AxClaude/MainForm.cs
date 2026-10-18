@@ -373,7 +373,7 @@ internal sealed class MainForm : Form
                 FindNext(backward: true);
                 return true;
             case BundleKeys.Save:
-                SaveConversation();
+                ExportConversation();
                 return true;
             case AxClaudeKeys.Interrupt:
                 // The interrupt key (FR-2.3). Ctrl+Escape opens the Start menu and never reaches the app.
@@ -411,7 +411,9 @@ internal sealed class MainForm : Form
         showIn.DropDownItems.Add(new ToolStripMenuItem("File &Explorer", null, (_, _) => ShowInExplorer()) { ShortcutKeys = AxClaudeKeys.ShowInExplorer });
         session.DropDownItems.Add(showIn);
         session.DropDownItems.Add(new ToolStripSeparator());
-        session.DropDownItems.Add(new ToolStripMenuItem("&Save conversation as...", null, (_, _) => SaveConversation()) { ShortcutKeyDisplayString = BundleKeys.Text(BundleKeys.Save) });
+        // Not a save: the conversation is Claude's own record, and this writes a text copy of it. At the bottom, where
+        // the editors have Save and Save as, so that the first menu of every window keeps the same order (bundle AX-6).
+        session.DropDownItems.Add(new ToolStripMenuItem("&Export conversation...", null, (_, _) => ExportConversation()) { ShortcutKeyDisplayString = BundleKeys.Text(BundleKeys.Save) });
         session.DropDownItems.Add(new ToolStripSeparator());
         session.DropDownItems.Add(new ToolStripMenuItem("E&xit", null, (_, _) => Close()) { ShortcutKeyDisplayString = "Alt+F4" });
 
@@ -518,7 +520,7 @@ internal sealed class MainForm : Form
 
         var general = new ToolStripMenuItem("&General");
         general.DropDownItems.Add(Toggle("Check for &updates at start", _settings.CheckForUpdates, v => _settings.CheckForUpdates = v));
-        general.DropDownItems.Add(Toggle("&Keep recordings and saved conversations out of git", _settings.KeepFilesOutOfGit, v =>
+        general.DropDownItems.Add(Toggle("&Keep recordings and exported conversations out of git", _settings.KeepFilesOutOfGit, v =>
         {
             _settings.KeepFilesOutOfGit = v;
             KeepFilesOutOfGit();
@@ -1264,12 +1266,12 @@ internal sealed class MainForm : Form
         }
     }
 
-    /// <summary>Writes the conversation as the reader sees it (hidden rows left out) to a UTF-8 text file (FR-3.8).</summary>
-    private void SaveConversation()
+    /// <summary>Exports the conversation as the reader sees it (hidden rows left out) to a UTF-8 text file (FR-3.8).</summary>
+    private void ExportConversation()
     {
         using var dialog = new SaveFileDialog
         {
-            Title = "Save the conversation as text",
+            Title = "Export the conversation as text",
             Filter = "Text files (*.txt)|*.txt|All files (*.*)|*.*",
             // Outside the project, and named axclaude-… so the exclude patterns catch it wherever it goes (D34).
             FileName = $"axclaude-{(_folder is null ? "conversation" : FolderName(_folder))}-{DateTime.Now:yyyyMMdd-HHmm}.txt",
@@ -1289,12 +1291,12 @@ internal sealed class MainForm : Form
         }
         catch (Exception ex) when (ex is IOException or UnauthorizedAccessException)
         {
-            Fail("The conversation could not be saved: " + ex.Message);
+            Fail("The conversation could not be exported: " + ex.Message);
             return;
         }
 
-        Log.Info("Conversation saved to " + dialog.FileName);
-        Announce("Saved", true);
+        Log.Info("Conversation exported to " + dialog.FileName);
+        Announce("Exported", true);
     }
 
     private void OpenUrl(string url) => OpenWithShell(url, "page");

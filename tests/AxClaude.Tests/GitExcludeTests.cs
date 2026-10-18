@@ -75,7 +75,7 @@ public class GitExcludeTests
     [Fact]
     public void A_file_the_app_offers_to_save_matches_a_pattern()
     {
-        // The default names of Save conversation and Record raw stream (MainForm).
+        // The default names of Export conversation and Record raw stream (MainForm).
         foreach (var name in new[] { "axclaude-myproject-20260925-1300.txt", "axclaude-20260925-1300.vt", "axclaude-20260925-1300.vt.chunks.txt" })
         {
             Assert.Contains(GitExclude.Patterns, pattern => System.IO.Enumeration.FileSystemName.MatchesSimpleExpression(pattern, name));
