@@ -58,8 +58,10 @@ UTF-8, UTF-16 and the system code page; files that are not text; files over 32 M
 - AD-1.2 With an existing file, it is opened (AD-3). With a path that does not exist, the document is empty and has
   that name; the file is created on the first save. Without a file, the document is empty and called Untitled.
 - AD-1.3 One window, one document (AD-D3). A second file opens a second window, as File Explorer does.
-- AD-1.4 `AxDownApp.Run(args)` is the entry point (AX-1.7): it names the log (`Log.UseApp("axdown")`), reads the
-  settings (AD-8), opens `EditorForm` and owns the crash handling, as `AxClaudeApp` does.
+- AD-1.4 `AxDownApp.Run(args)` is the entry point (AX-1.7): one call into the editor shell's `EditorHost.Run` with
+  AxDown's `EditorApp` (its name, verb, settings file, file types, F1 text, guide, Markdown keys and resources),
+  which names the log, reads the settings (AD-8), opens the shell's `TextEditorForm` and owns the crash handling.
+  The window was AxDown's own `EditorForm` until AxJSON, the second editor, when it moved to `Axit.Forms` (AX-6.3).
 
 ### AD-2 The editor
 
@@ -237,8 +239,10 @@ size 500×300; the system font and colours, light or dark as Windows is (AX-7.7)
 ## 6. Architecture
 
 ```
-src/AxDown/        class library (net10.0-windows): AxDownApp (Run), EditorForm, AxDownKeys, HelpText (F1 text, the
-                   embedded user guide); references Axit.Core, Axit.Forms
+src/AxDown/        class library (net10.0-windows): AxDownApp (Run, and AxDown's EditorApp record), AxDownKeys,
+                   HelpText (F1 text, the embedded user guide); references Axit.Core, Axit.Forms
+src/Axit.Forms/    TextEditorForm (the window), EditorApp, EditorKeys, EditorHost: the text editor shell, AxDown's
+                   window until AxJSON, shared since (AX-6.2, AX-6.3)
 src/Axit.Core/     TextDocument (read and write with encoding and line ending), EditorSettings and MarkdownOutline,
                    AxDown's pure code, shared since the second use (AX-6.3); tests in tests/Axit.Tests
 docs/axdown/       this spec, user-guide.md (embedded, Help, User guide), nvda-test-plan.md

@@ -33,6 +33,12 @@ its tests, then the window, then the installer.
 
 ## 4. The window (`src/AxThing/`)
 
+A text editor app, one more file type, has no window of its own: it is an `EditorApp` record (name, verb, settings
+file, file filter, F1 text, guide, the `TextJump` pairs of its outline, its resources pages, its commands on the text)
+handed to `Axit.Forms/EditorHost.Run`, as `AxDownApp` and `AxJSONApp` do; the window is `Axit.Forms/TextEditorForm`.
+Its own code is the outline and the commands (pure, in its Core, tested), its key table (the shell's keys through
+`EditorKeys.All` plus its letters) and its texts. The rest of this section is for a window of a new kind.
+
 - `AxThing.csproj` (net10.0-windows, WinForms), referencing `AxThing.Core`, `Axit.Core` and `Axit.Forms`, embedding
   the guide as `UserGuide.md`.
 - `AxThingApp.Run(string[] args)` and `Usage`: `Log.UseApp("axthing")` first, the crash handling as `AxDownApp` has
@@ -42,7 +48,7 @@ its tests, then the window, then the installer.
   `EditParagraphs` for an edit control's page and paragraph keys, `StatusLayout` for two status labels, `Sounds.Notice` for an unprompted notice,
   `WindowAccessibleObject` from `CreateAccessibilityInstance`. Copy the notice flow (`ShowNotice`, `CloseNotice`,
   `WithKeyLine`, the swallowed shortcuts and Alt/F10 while a notice shows), `Announce`, the font handling, the window
-  placement and the update flow from `EditorForm` until a shared window base exists.
+  placement and the update flow from `TextEditorForm` until a shared window base exists.
 - The menu bar gets the bundle's Axit menu before Help, `new AxitMenu(this, checkItem, updateItem, () => latestState,
   notice => ShowNotice(notice))` (AX-9), which places the window's Check for updates and Update to items and the
   bundle's About submenu (AX-9.9); Help holds the app's own items only; the window's title ends in ` - AxThing`,

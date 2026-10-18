@@ -23,7 +23,7 @@ The app records the raw stream with `--record file.vt` or Options → Developer 
 - `HelpText`: the F1 shortcuts, the embedded user guide, the Claude-not-found text. `AxClaudeApp`: the entry point `Run` that the Program of Axit calls (docs/axit/SPEC.md AX-1.7); it names the log (`Log.UseApp`), takes over the 1.x settings file, holds the crash handler, `--help` and `--version`.
 - In `src/Axit.Core` since 2.0.0: `Log` (`%LOCALAPPDATA%\Axit\logs\axclaude.log`), `Updater` (the download into `%LOCALAPPDATA%\Axit\updates` and the hand-over to the new version's `install.ps1 -WaitForProcess`, FR-1.10, D25), `BundleInfo.Version`.
 
-Possible later move: the notice flow of `MainForm` (`ShowNotice`, `DismissNotice`, the swallowed shortcuts) and the update flow exist twice, here and in AxDown's `EditorForm`; a shared window base in `Axit.Forms` is the way to unify them when a third window arrives.
+Possible later move: the notice flow of `MainForm` (`ShowNotice`, `DismissNotice`, the swallowed shortcuts) and the update flow exist twice, here and in the editor shell's `TextEditorForm`; a shared window base in `Axit.Forms` is the way to unify them when a third window arrives.
 
 ## Rules
 

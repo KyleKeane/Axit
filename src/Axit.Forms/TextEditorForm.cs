@@ -2,22 +2,24 @@ using System.Diagnostics;
 using System.Net.Http;
 using Axit.Core;
 using Axit.Core.Updates;
-using Axit.Forms;
 
-namespace AxDown;
+namespace Axit.Forms;
 
 /// <summary>
-/// AxDown's window (SPEC.md §5): a menu bar, one plain multi-line edit control named after the file, and a status bar.
-/// Notices (the bundle's <see cref="OverlayPanel"/>) take the editor's place for the window's own questions; the
-/// question area (<see cref="ControlArea"/>) holds the Go to line field under the editor. The caret moves only on
-/// the user's command, and nothing is spoken unless asked for or a command finishes (AD-2.6, AD-7).
+/// The text editor window every editor app of the bundle is (docs/axdown/SPEC.md §5, docs/axjson/SPEC.md AJ-D4):
+/// a menu bar, one plain multi-line edit control named after the file, and a status bar, with the app's own name,
+/// file types, keys, texts and commands as data (<see cref="EditorApp"/>). Notices (the bundle's
+/// <see cref="OverlayPanel"/>) take the editor's place for the window's own questions; the question area
+/// (<see cref="ControlArea"/>) holds the Go to line field under the editor. The caret moves only on the user's
+/// command, and nothing is spoken unless asked for or a command finishes (AD-2.6, AD-7). It was AxDown's
+/// <c>EditorForm</c> and moved here on its second use, AxJSON (AX-6.3).
 /// </summary>
-internal sealed class EditorForm : Form
+public sealed class TextEditorForm : Form
 {
-    private const string AppName = "AxDown";
     private const string Untitled = "Untitled";
-    private const string FileFilter = "Markdown and text files (*.md;*.markdown;*.txt)|*.md;*.markdown;*.txt|All files (*.*)|*.*";
 
+    private readonly EditorApp _app;
+    private readonly string _settingsPath;
     private readonly EditorSettings _settings;
     private readonly MenuStrip _menu = new();
     private readonly ToolStripMenuItem _recentFilesItem = new("Open &recent file");
@@ -47,8 +49,10 @@ internal sealed class EditorForm : Form
     /// <summary>After Update and restart: how the installed new version is started when this window closes; null when nothing is to start.</summary>
     private string[]? _restartArguments;
 
-    public EditorForm(string? path, EditorSettings settings, string? settingsError)
+    public TextEditorForm(EditorApp app, string? path, EditorSettings settings, string? settingsError)
     {
+        _app = app;
+        _settingsPath = AppPaths.SettingsFile(app.SettingsName);
         _settings = settings;
         // With the role Window, NVDA speaks the window when it opens ("README.md - AxDown window") before the field;
         // without it the window is a nameless pane to NVDA and only the field is heard (AD-7, bundle AX-7.1).
@@ -60,18 +64,18 @@ internal sealed class EditorForm : Form
         // ---- menus (AD-4); the keys are handled in ProcessCmdKey from the tables, the items only show them ----
         // File is the thing worked on, shaped as AxClaude's Session menu (AD-4.1).
         var file = new ToolStripMenuItem("&File");
-        file.DropDownItems.Add(Item("&New", NewDocument, AxDownKeys.NewDocument));
-        file.DropDownItems.Add(Item("&Open...", OpenFile, AxDownKeys.Open));
+        file.DropDownItems.Add(Item("&New", NewDocument, EditorKeys.NewDocument));
+        file.DropDownItems.Add(Item("&Open...", OpenFile, EditorKeys.Open));
         _recentFilesItem.DropDownOpening += (_, _) => FillRecentFiles();
         FillRecentFiles();
         file.DropDownItems.Add(_recentFilesItem);
         // Show current file in ▸ File Explorer; an Axit file manager joins the submenu when there is one.
         var showIn = new ToolStripMenuItem("Show current file &in");
-        showIn.DropDownItems.Add(Item("File &Explorer", ShowInExplorer, AxDownKeys.ShowInExplorer));
+        showIn.DropDownItems.Add(Item("File &Explorer", ShowInExplorer, EditorKeys.ShowInExplorer));
         file.DropDownItems.Add(showIn);
         file.DropDownItems.Add(new ToolStripSeparator());
         file.DropDownItems.Add(Item("&Save", () => Save(), BundleKeys.Save));
-        file.DropDownItems.Add(Item("Save &as...", () => SaveAs(), AxDownKeys.SaveAs));
+        file.DropDownItems.Add(Item("Save &as...", () => SaveAs(), EditorKeys.SaveAs));
         file.DropDownItems.Add(new ToolStripSeparator());
         file.DropDownItems.Add(new ToolStripMenuItem("E&xit", null, (_, _) => Close()) { ShortcutKeyDisplayString = "Alt+F4" });
 
@@ -82,17 +86,26 @@ internal sealed class EditorForm : Form
         edit.DropDownItems.Add(new ToolStripMenuItem("&Copy", null, (_, _) => _editor.Copy()) { ShortcutKeyDisplayString = "Ctrl+C" });
         edit.DropDownItems.Add(new ToolStripMenuItem("&Paste", null, (_, _) => _editor.Paste()) { ShortcutKeyDisplayString = "Ctrl+V" });
         edit.DropDownItems.Add(new ToolStripMenuItem("Select &all", null, (_, _) => _editor.SelectAll()) { ShortcutKeyDisplayString = "Ctrl+A" });
+        if (_app.Commands.Count > 0)
+        {
+            // The app's own commands on the whole text (AJ-2.3), after the control's own.
+            edit.DropDownItems.Add(new ToolStripSeparator());
+            foreach (var command in _app.Commands)
+            {
+                edit.DropDownItems.Add(Item(command.Label, () => RunCommand(command), command.Key));
+            }
+        }
 
         var navigate = new ToolStripMenuItem("&Navigate");
         navigate.DropDownItems.Add(Item("&Find...", ShowFind, BundleKeys.Find));
         navigate.DropDownItems.Add(Item("Find &next", () => FindNext(1), BundleKeys.FindNext));
         navigate.DropDownItems.Add(Item("Find pre&vious", () => FindNext(-1), BundleKeys.FindPrevious));
-        navigate.DropDownItems.Add(Item("&Go to line...", ShowGoToLine, AxDownKeys.GoToLine));
+        navigate.DropDownItems.Add(Item("&Go to line...", ShowGoToLine, EditorKeys.GoToLine));
         navigate.DropDownItems.Add(new ToolStripSeparator());
-        // Section 9 (AD-D7): one item per kind under Next and under Previous, from the key pairs of the table.
+        // One item per kind under Next and under Previous, from the key pairs of the app's table (AD-D7, AX-7.2).
         var next = new ToolStripMenuItem("Ne&xt");
         var previous = new ToolStripMenuItem("&Previous");
-        foreach (var jump in AxDownKeys.Jumps)
+        foreach (var jump in _app.Jumps)
         {
             next.DropDownItems.Add(Item(TextJumps.MenuLabel(jump), () => JumpTo(jump, 1), jump.Next));
             previous.DropDownItems.Add(Item(TextJumps.MenuLabel(jump), () => JumpTo(jump, -1), jump.Previous));
@@ -104,7 +117,7 @@ internal sealed class EditorForm : Form
         // Options, as AxClaude's (AD-4.3): every setting in the submenu for what it is about, none outside one.
         var options = new ToolStripMenuItem("&Options");
         var textMenu = new ToolStripMenuItem("&Text");
-        _wordWrapItem = Item("&Word wrap", ToggleWordWrap, AxDownKeys.WordWrap);
+        _wordWrapItem = Item("&Word wrap", ToggleWordWrap, EditorKeys.WordWrap);
         _wordWrapItem.Checked = _settings.WordWrap;
         textMenu.DropDownItems.Add(_wordWrapItem);
         textMenu.DropDownItems.Add(new ToolStripSeparator());
@@ -119,13 +132,17 @@ internal sealed class EditorForm : Form
         options.DropDownItems.Add(developer);
 
         var help = new ToolStripMenuItem("&Help");
-        help.DropDownItems.Add(Item("&Keyboard shortcuts", () => ShowNotice(Notice.Plain("Keyboard shortcuts", HelpText.Shortcuts)), BundleKeys.Shortcuts));
-        help.DropDownItems.Add(new ToolStripMenuItem("User &guide", null, (_, _) => ShowNotice(Notice.Plain("User guide", HelpText.UserGuide()))));
+        help.DropDownItems.Add(Item("&Keyboard shortcuts", () => ShowNotice(Notice.Plain("Keyboard shortcuts", _app.Shortcuts)), BundleKeys.Shortcuts));
+        help.DropDownItems.Add(new ToolStripMenuItem("User &guide", null, (_, _) => ShowNotice(Notice.Plain("User guide", _app.UserGuide()))));
         help.DropDownItems.Add(new ToolStripSeparator());
         // As AxClaude's Claude Code resources: where the file format is explained, in the browser (AD-4.4).
-        var resources = new ToolStripMenuItem("Markdown &resources");
-        resources.DropDownItems.Add(new ToolStripMenuItem("Markdown &basics", null, (_, _) => OpenUrl("https://commonmark.org/help/")));
-        resources.DropDownItems.Add(new ToolStripMenuItem("&GitHub Flavored Markdown", null, (_, _) => OpenUrl("https://github.github.com/gfm/")));
+        var resources = new ToolStripMenuItem(_app.ResourcesLabel);
+        foreach (var (label, url) in _app.Resources)
+        {
+            var page = url;
+            resources.DropDownItems.Add(new ToolStripMenuItem(label, null, (_, _) => OpenUrl(page)));
+        }
+
         help.DropDownItems.Add(resources);
 
         // The bundle's Axit menu (AX-9) sits before Help in every window and ends with the update items and About
@@ -171,7 +188,7 @@ internal sealed class EditorForm : Form
         _status.SizeChanged += (_, _) => StatusLayout.Fit(_status, _fileLabel, _positionLabel);
 
         _overlay.Chosen += OnNoticeChoice;
-        _overlay.Jumps = AxDownKeys.Jumps;
+        _overlay.Jumps = _app.Jumps;
         _area.TabIndex = 1;
         SizeChanged += (_, _) => _area.FitHeight();
 
@@ -226,7 +243,7 @@ internal sealed class EditorForm : Form
         if (_path is { } closing)
         {
             // AX-9.4: the file joins the bundle's Recently closed list.
-            RecentlyClosed.Remember(AppName, closing);
+            RecentlyClosed.Remember(_app.Name, closing);
         }
 
         SaveWindow();
@@ -257,7 +274,7 @@ internal sealed class EditorForm : Form
         base.WndProc(ref m);
     }
 
-    // ---- keys (AD-5): every key comes from BundleKeys or AxDownKeys, and is handled here only ----
+    // ---- keys (AD-5): every key comes from BundleKeys, EditorKeys or the app's table, and is handled here only ----
 
     protected override bool ProcessCmdKey(ref Message msg, Keys keyData)
     {
@@ -282,7 +299,7 @@ internal sealed class EditorForm : Form
         switch (keyData)
         {
             case BundleKeys.Shortcuts:
-                ShowNotice(Notice.Plain("Keyboard shortcuts", HelpText.Shortcuts));
+                ShowNotice(Notice.Plain("Keyboard shortcuts", _app.Shortcuts));
                 return true;
             case BundleKeys.NextControl:
             case BundleKeys.PreviousControl:
@@ -310,28 +327,37 @@ internal sealed class EditorForm : Form
             case BundleKeys.SmallerTextNumpad:
                 ChangeTextSize(-1);
                 return true;
-            case AxDownKeys.NewDocument:
+            case EditorKeys.NewDocument:
                 NewDocument();
                 return true;
-            case AxDownKeys.Open:
+            case EditorKeys.Open:
                 OpenFile();
                 return true;
-            case AxDownKeys.ShowInExplorer:
+            case EditorKeys.ShowInExplorer:
                 ShowInExplorer();
                 return true;
-            case AxDownKeys.SaveAs:
+            case EditorKeys.SaveAs:
                 SaveAs();
                 return true;
-            case AxDownKeys.GoToLine:
+            case EditorKeys.GoToLine:
                 ShowGoToLine();
                 return true;
-            case AxDownKeys.WordWrap:
+            case EditorKeys.WordWrap:
                 ToggleWordWrap();
                 return true;
         }
 
-        // The navigation keys of section 9, from the pairs the key table gives the notice text as well (AD-D7).
-        if (TextJumps.Handle(_editor, AxDownKeys.Jumps, keyData, Announce))
+        foreach (var command in _app.Commands)
+        {
+            if (keyData == command.Key)
+            {
+                RunCommand(command);
+                return true;
+            }
+        }
+
+        // The app's navigation keys, from the pairs its table gives the notice text as well (AD-D7).
+        if (TextJumps.Handle(_editor, _app.Jumps, keyData, Announce))
         {
             UpdateStatus();
             return true;
@@ -364,7 +390,7 @@ internal sealed class EditorForm : Form
         if (_path is { } old && !string.Equals(old, path, StringComparison.OrdinalIgnoreCase))
         {
             // AX-9.4: the file left behind joins the bundle's Recently closed list.
-            RecentlyClosed.Remember(AppName, old);
+            RecentlyClosed.Remember(_app.Name, old);
         }
 
         _path = path;
@@ -376,7 +402,7 @@ internal sealed class EditorForm : Form
             {
                 _document = TextDocument.Read(path);
                 _lastWriteTime = File.GetLastWriteTimeUtc(path);
-                // AD-4.1: Open recent file, written at once so that another AxDown window lists it too.
+                // AD-4.1: Open recent file, written at once so that another window of the app lists it too.
                 _settings.RememberFile(path);
                 SaveSettings();
             }
@@ -450,12 +476,12 @@ internal sealed class EditorForm : Form
         }
     }
 
-    /// <summary>Options → Developer → Open settings file (AD-4.3): axdown.json in a new AxDown window, as any file.</summary>
-    private void OpenSettingsFile() => AxitMenu.Start(Dispatch.AxDown, EditorSettings.DefaultPath);
+    /// <summary>Options → Developer → Open settings file (AD-4.3): the app's settings file in a new window of the app, as any file.</summary>
+    private void OpenSettingsFile() => AxitMenu.Start(_app.Verb, _settingsPath);
 
     private void OpenFile() => AskToSave(() =>
     {
-        using var dialog = new OpenFileDialog { Filter = FileFilter, CheckFileExists = true };
+        using var dialog = new OpenFileDialog { Filter = _app.FileFilter, CheckFileExists = true };
         if (_path is not null)
         {
             dialog.InitialDirectory = Path.GetDirectoryName(_path);
@@ -495,9 +521,9 @@ internal sealed class EditorForm : Form
     {
         using var dialog = new SaveFileDialog
         {
-            Filter = FileFilter,
+            Filter = _app.FileFilter,
             FileName = DocumentName,
-            DefaultExt = _path is null ? "md" : Path.GetExtension(_path).TrimStart('.'),
+            DefaultExt = _path is null ? _app.DefaultExtension : Path.GetExtension(_path).TrimStart('.'),
             AddExtension = _path is null,
             OverwritePrompt = true,
         };
@@ -566,7 +592,24 @@ internal sealed class EditorForm : Form
         }
 
         _restartArguments = null;
-        Announce("Update installed. It starts with the next AxDown", true);
+        Announce($"Update installed. It starts with the next {_app.Name}", true);
+    }
+
+    /// <summary>An app command on the whole text (AJ-2.3): the text replaced in one undo step, the caret kept at its offset, one announcement.</summary>
+    private void RunCommand(EditorCommand command)
+    {
+        var result = command.Run(_editor.Text);
+        if (result.Text != _editor.Text)
+        {
+            var caret = _editor.SelectionStart;
+            _editor.SelectAll();
+            _editor.SelectedText = result.Text;
+            _editor.Select(Math.Min(caret, result.Text.Length), 0);
+            _editor.ScrollToCaret();
+            UpdateStatus();
+        }
+
+        Announce(result.Message, true);
     }
 
     // ---- find and go to line (AD-6.3, AD-6.4) ----
@@ -669,7 +712,7 @@ internal sealed class EditorForm : Form
         Announce($"Line {line} of {lines}", true);
     }
 
-    /// <summary>A Navigate menu item of section 9: the shared jump on the editor (SPEC.md §9, AD-D7), then the status bar.</summary>
+    /// <summary>A Navigate menu item: the shared jump on the editor (AD-D7), then the status bar.</summary>
     private void JumpTo(TextJump jump, int direction)
     {
         TextJumps.Jump(_editor, jump, direction, Announce);
@@ -708,7 +751,7 @@ internal sealed class EditorForm : Form
 
     private void UpdateTitle()
     {
-        Text = (_changed ? "*" : string.Empty) + DocumentName + " - " + AppName;
+        Text = (_changed ? "*" : string.Empty) + DocumentName + " - " + _app.Name;
         _editor.AccessibleName = DocumentName;
     }
 
@@ -856,7 +899,7 @@ internal sealed class EditorForm : Form
     {
         try
         {
-            _settings.Save(EditorSettings.DefaultPath);
+            _settings.Save(_settingsPath);
         }
         catch (Exception ex) when (ex is IOException or UnauthorizedAccessException)
         {
@@ -950,15 +993,15 @@ internal sealed class EditorForm : Form
         return Announcer.Raise(_editor, text, interrupt);
     }
 
-    // ---- help, about, diagnostics, updates (AD-4.4, AX-3) ----
+    // ---- help, diagnostics, updates (AD-4.4, AX-3) ----
 
     private void CopyDiagnostics()
     {
         var text = string.Join("\r\n",
         [
-            $"{AppName}, Axit {BundleInfo.Version} on .NET {Environment.Version}, {Environment.OSVersion}",
+            $"{_app.Name}, Axit {BundleInfo.Version} on .NET {Environment.Version}, {Environment.OSVersion}",
             $"File: {_path ?? "(none)"} ({_document.EncodingName}, {_document.LineEndingName})",
-            $"Settings: {EditorSettings.DefaultPath}",
+            $"Settings: {_settingsPath}",
             $"Log: {Log.FilePath}",
             string.Empty,
             Log.Tail(200),
@@ -1072,7 +1115,7 @@ internal sealed class EditorForm : Form
         var text =
             $"You have Axit {BundleInfo.Version}. Axit {version} is available.\n\n" +
             (release.Notes.Length > 0 ? release.Notes + "\n\n" : string.Empty) +
-            $"Update and restart downloads the new version, closes {AppName} (asking first when there are unsaved changes), installs it " +
+            $"Update and restart downloads the new version, closes {_app.Name} (asking first when there are unsaved changes), installs it " +
             $"and starts it again on the same file. Update and close installs without starting it again. A progress bar shows the download.{size}\n" +
             "Later keeps this version; the Axit menu offers the update again.";
         ShowNotice(new Notice($"Update to Axit {version}", text,
@@ -1159,7 +1202,7 @@ internal sealed class EditorForm : Form
             }
 
             _overlay.SetProgress(100);
-            _restartArguments = restart ? (_path is null ? ["down"] : ["down", _path]) : null;
+            _restartArguments = restart ? (_path is null ? [_app.Verb] : [_app.Verb, _path]) : null;
             Log.Info($"Update {release.Tag} installed in place; restart: {restart}");
             Announce(restart ? "Installed. Restarting" : "Installed. Closing", true);
             Close();

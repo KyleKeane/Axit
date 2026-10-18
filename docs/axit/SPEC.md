@@ -155,8 +155,14 @@ allow it, see B-9).
   open for the life of the process), `EditPaging` (Page Up and Page Down in an edit control), `EditParagraphs`
   (Ctrl+Up and Ctrl+Down by paragraph, with Shift selecting), `EditKeys` (the KeyDown handler that gives an edit
   control both), `Announcer` (the UI Automation notification, AX-7.1), `TextJump` and `TextJumps` (a window's key pairs for the kinds of element in a text and the jump itself on an edit control, used by every notice text and by AxDown's editor, AX-7.2), `StatusLayout`, the font
-  handling (text size and the font picker), `BundleKeys` (AX-8), `AxitMenu` (the Axit menu every window has, AX-9). The crash report (twenty lines in each app's
-  `Run`) stays per app until a second copy shows what is common.
+  handling (text size and the font picker), `BundleKeys` (AX-8), `AxitMenu` (the Axit menu every window has, AX-9),
+  and the text editor shell: `TextEditorForm` (the window every text editor app is: the file, the menus, find, go to
+  line, the status bar, the notices, the fonts, the update flow; AxDown's `EditorForm` until AxJSON, the second
+  editor), `EditorApp` (what differs between the editor apps, as data: name, verb, settings file, file types, F1 text,
+  guide, the `TextJump` pairs of its outline, its resources pages and its commands on the text), `EditorKeys` (the
+  shell's keys, the same in every editor window) and `EditorHost` (the entry point every editor app's `Run` is one
+  call into: log, crash handling, command line, settings, the window). AxClaude's `MainForm` keeps its own notice and
+  update flow; a window base for both kinds is the remaining duplication (plan).
 - AX-6.3 A piece moves into a shared project only when a second app needs it, in a commit of its own, with the
   accessibility review; it moves unchanged where possible (B-3).
 - AX-6.4 The notices and the question area are the bundle's one way of asking the user something, so that every
@@ -179,10 +185,13 @@ allow it, see B-9).
   Ctrl+Shift+Down the selection grown to there, as in Word (`EditParagraphs`; the EDIT control's own keys scroll a
   row and leave the caret where it is, as Notepad's do, which a screen reader, reading at the caret after the key,
   reports as the same text again); Alt+F4 exit; Alt and F10 the menu. Everything else is window-specific.
-- AX-8.3 Window-specific keys are defined once per window, in one table (`AxClaudeKeys`, `AxDownKeys`), as constants
+- AX-8.3 Window-specific keys are defined once per window, in one table (`AxClaudeKeys`, `AxDownKeys`, `AxJSONKeys`), as constants
   with names that say what the key does. Changing a key is a change to that one line: the menu item and the key
   handler read the table, and the F1 text names the same keys and is changed with it. Single-letter quick keys
-  (AxClaude's `h`, `i`, `o`) are in the table too.
+  (AxClaude's `h`, `i`, `o`) are in the table too. The text editor shell's keys (`Axit.Forms/EditorKeys`: Ctrl+N new,
+  Ctrl+O open, Ctrl+Shift+S save as, Ctrl+G go to line, Ctrl+Shift+W word wrap, Ctrl+W show in File Explorer) are
+  defined once for every editor window, and each editor app's table includes them, so that one table per window
+  still holds every key and the collision test sees them.
 - AX-8.4 A unit test in `tests/Axit.Tests` fails when a window-specific key equals a bundle-wide key, and lists the
   keys that two windows use for different actions, so that a collision between apps is seen before it is felt.
 - AX-8.5 A key is never handled anywhere but through its table, and no key is intercepted that NVDA uses (AX-7.4).
@@ -274,11 +283,12 @@ These are the rules of `docs/axclaude/SPEC.md` that are not about Claude; app sp
 ```
 src/Axit/            executable (net10.0-windows): Program (crash handling, version, log start, dispatch), icons
 src/Axit.Core/       class library (net10.0), no WinForms, unit tested
-src/Axit.Forms/      class library (net10.0-windows), WinForms pieces both apps use
+src/Axit.Forms/      class library (net10.0-windows), WinForms pieces the apps use, among them the text editor shell
+                     (TextEditorForm, EditorApp, EditorKeys, EditorHost)
 src/AxClaude/        class library (net10.0-windows): AxClaudeApp, MainForm, ... (AxClaude's window)
 src/AxClaude.Core/   class library (net10.0): Vt, Transcript, Pty, Privacy, AppSettings (AxClaude's pure code)
-src/AxDown/          class library (net10.0-windows): AxDownApp, EditorForm, ... (AxDown's window; its pure code,
-                     TextDocument, EditorSettings and MarkdownOutline, is Axit.Core's since the second use)
+src/AxDown/          class library (net10.0-windows): AxDownApp (its EditorApp), AxDownKeys, HelpText; the window is
+                     the shell's, and its pure code (TextDocument, EditorSettings, MarkdownOutline) is Axit.Core's
 tests/Axit.Tests, tests/AxClaude.Tests
 ```
 

@@ -27,8 +27,6 @@ public sealed class EditorSettings
 
     public WindowPlacement? Window { get; set; }
 
-    public static string DefaultPath => AppPaths.SettingsFile("axdown");
-
     /// <summary>Loads the file, or returns defaults. <paramref name="error"/> describes an unreadable file.</summary>
     public static EditorSettings Load(string path, out string? error)
     {
