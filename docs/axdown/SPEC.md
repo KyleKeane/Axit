@@ -116,15 +116,23 @@ UTF-8, UTF-16 and the system code page; files that are not text; files over 32 M
 
 ### AD-4 Commands and menus
 
-- AD-4.1 File: New (Ctrl+N), Open… (Ctrl+O), Save (Ctrl+S), Save as… (Ctrl+Shift+S), Exit (Alt+F4).
+- AD-4.1 File, shaped as AxClaude's Session menu: New (Ctrl+N), Open… (Ctrl+O), Open recent file ▸ (the last ten
+  files opened or saved under a name, newest first, those that still exist, kept in the settings; choosing one opens it
+  in this window after the unsaved-changes question; "(none)", disabled, when there are none), Show current file in ▸
+  File Explorer (Ctrl+W; the file selected in File Explorer, one of the system's own windows; "No file yet" on
+  Untitled; an Axit file manager joins the submenu when there is one); then Save (Ctrl+S), Save as… (Ctrl+Shift+S);
+  then Exit (Alt+F4).
 - AD-4.2 Edit: Undo (Ctrl+Z), Cut, Copy, Paste, Select all (the control's own, listed for discoverability).
   Navigate (as AxClaude's): Find… (Ctrl+F), Find next (F3), Find previous (Shift+F3), Go to line… (Ctrl+G), then the
   submenus Next and Previous with one item per kind of section 9, made from the key pairs of the table: the kind's
   name with NVDA's letter as the mnemonic ("Heading", "Heading level 1" to "6", "Link", "List", "List item", "Block
   quote", "Table") and the key, Ctrl+letter under Next and Ctrl+Shift+letter under Previous (AD-5, §9).
-- AD-4.3 Options (named as AxClaude's, the menu for how the window behaves): Word wrap (checked; Ctrl+Shift+W), Larger text (Ctrl+Plus), Smaller text (Ctrl+Minus), Windows text
-  size, Font…
-- AD-4.4 Help: Keyboard shortcuts (F1), User guide, Copy diagnostics; the app's own items only.
+- AD-4.3 Options, as AxClaude's: every setting lives in the submenu for what it is about, none outside one. Text ▸:
+  Word wrap (checked; Ctrl+Shift+W), Font…, Larger text (Ctrl+Plus), Smaller text (Ctrl+Minus), Windows text size.
+  Developer ▸: Open settings file (axdown.json in a new AxDown window, as any file), Copy diagnostics (AD-11).
+- AD-4.4 Help: Keyboard shortcuts (F1), User guide, Markdown resources ▸ (Markdown basics, `https://commonmark.org/help/`;
+  GitHub Flavored Markdown, `https://github.github.com/gfm/`; in the browser), as AxClaude's Help has Claude Code
+  resources; the app's own items only.
 - AD-4.5 Axit: the bundle's menu (AX-9), between Options and Help, the same in every window of Axit: New window (AxClaude,
   AxDown), Recently closed (the last ten files and folders any Axit window held, AX-9.4; AxDown adds its file when the
   window closes or opens another); Open windows (the other open Axit windows, most recently used first), Open windows
@@ -149,7 +157,7 @@ buttons); Ctrl+F find, F3 and Shift+F3 next and previous; Ctrl+S save; Ctrl+Plus
 and Escape on a notice; Page Up and Page Down one screen in an edit control; Ctrl+Up and Ctrl+Down the previous and
 next paragraph, with Shift selecting to there (AD-2.3); Alt+F4 exit; Alt and F10 the menu.
 
-Window-specific: Ctrl+N new document; Ctrl+O open; Ctrl+Shift+S save as; Ctrl+G go to line; Ctrl+Shift+W word wrap;
+Window-specific: Ctrl+N new document; Ctrl+O open; Ctrl+Shift+S save as; Ctrl+W show the file in File Explorer (AxClaude's key for its folder); Ctrl+G go to line; Ctrl+Shift+W word wrap;
 Ctrl+H heading, Ctrl+1 to Ctrl+6 a heading of that level, Ctrl+K link, Ctrl+L list, Ctrl+I list item, Ctrl+Q block
 quote, Ctrl+T table, each the next one, and with Shift the previous one (section 9).
 Everything else in the editor is the control's own: arrows, Home, End, Ctrl+Home, Ctrl+End, Ctrl+Left and
@@ -185,7 +193,7 @@ never a separate window.
 On opening, NVDA speaks the window ("README.md - AxDown window"), then the field ("README.md edit multi line"): the
 window has the accessible role Window, as AxClaude's has, so that NVDA names it; nothing of AxDown's own is spoken
 then. Afterwards, spoken through one UI Automation notification on the editor (AX-7.3), and only these: "Saved" (after a save and
-after Save as); "Not found" (find); "Line n of m" after Go to line, or "Not a line number"; "Word wrap on" / "Word wrap off"; "Text size n";
+after Save as); "Not found" (find); "Line n of m" after Go to line, or "Not a line number"; "Word wrap on" / "Word wrap off"; "Text size n"; "No file yet" (Show current file in on Untitled);
 "Install, heading level 2" after a heading jump, "No next heading" / "No previous heading" when there is none;
 "Copied" is NVDA's own. Opening a file speaks nothing of its own: the focus arrives in the editor and NVDA reads
 its name (the file's) and the first line.
@@ -193,7 +201,7 @@ its name (the file's) and the first line.
 ### AD-8 Settings
 
 `%APPDATA%\Axit\axdown.json` through the bundle's `SettingsFile` (AX-5): `fontFamily` (null = system), `fontSize`
-(0 = system), `fontBold`, `wordWrap` (true), `checkForUpdates` (true), `window` (placement). A plain class,
+(0 = system), `fontBold`, `wordWrap` (true), `checkForUpdates` (true), `recentFiles` (the last ten files opened or saved under a name, newest first, AD-4.1), `window` (placement). A plain class,
 `EditorSettings`, in `AxDown.Core`, with the sanity checks after loading as `AppSettings` has.
 
 ### AD-9 Status bar
@@ -210,7 +218,7 @@ reads it with NVDA+End; nothing is spoken automatically.
 ### AD-11 Errors and diagnostics
 
 As AxClaude's FR-13: an exception in a handler is logged to `%LOCALAPPDATA%\Axit\logs\axdown.log` and shown as a
-notice; Help, Copy diagnostics puts the version, the paths and the log's tail on the clipboard.
+notice; Options, Developer, Copy diagnostics puts the version, the paths and the log's tail on the clipboard.
 
 ## 5. User interface
 

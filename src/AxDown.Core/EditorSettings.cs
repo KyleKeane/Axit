@@ -20,6 +20,11 @@ public sealed class EditorSettings
     /// <summary>Ask GitHub once at startup whether a newer release exists (docs/axit/SPEC.md AX-3).</summary>
     public bool CheckForUpdates { get; set; } = true;
 
+    /// <summary>The last files opened or saved under a name, newest first, for File → Open recent file (AD-4.1); at most <see cref="MaxRecentFiles"/>.</summary>
+    public List<string> RecentFiles { get; set; } = [];
+
+    public const int MaxRecentFiles = 10;
+
     public WindowPlacement? Window { get; set; }
 
     public static string DefaultPath => AppPaths.SettingsFile("axdown");
@@ -34,8 +39,28 @@ public sealed class EditorSettings
 
     public void Save(string path) => SettingsFile.Save(path, this);
 
+    /// <summary>Puts the file at the front of <see cref="RecentFiles"/>, once, and keeps the list to <see cref="MaxRecentFiles"/>.</summary>
+    public void RememberFile(string path)
+    {
+        RecentFiles.RemoveAll(f => string.Equals(f, path, StringComparison.OrdinalIgnoreCase));
+        RecentFiles.Insert(0, path);
+        Trim();
+    }
+
+    private void Trim()
+    {
+        if (RecentFiles.Count > MaxRecentFiles)
+        {
+            RecentFiles.RemoveRange(MaxRecentFiles, RecentFiles.Count - MaxRecentFiles);
+        }
+    }
+
     private void Sanitize()
     {
+        RecentFiles ??= [];
+        RecentFiles.RemoveAll(string.IsNullOrWhiteSpace);
+        Trim();
+
         if (FontSize is < 0 or > 96)
         {
             FontSize = 0;

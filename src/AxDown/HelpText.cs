@@ -19,6 +19,7 @@ internal static class HelpText
           Ctrl+N: new, empty document
           Ctrl+O: open a file
           Ctrl+Shift+S: save under a new name
+          Ctrl+W: show the current file in File Explorer
           Ctrl+G: go to a line; the field also says where you are, like "Go to line (now line 12, column 4)"
           Ctrl+H and Ctrl+Shift+H: next and previous Markdown heading (a line starting with #), spoken as "Install, heading level 2"
           Ctrl+1 to Ctrl+6 and Ctrl+Shift+1 to Ctrl+Shift+6: next and previous heading of that level only

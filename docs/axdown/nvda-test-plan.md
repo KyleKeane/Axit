@@ -42,6 +42,11 @@ letter), and a `long.md` with headings and lines longer than the window.
 9. Open a locked file, or one that is not text (a `.png`): a notice names the problem; Escape closes it; the window
    stays open on an empty "Untitled" document, and Ctrl+S opens the Save dialog instead of writing over the file. A
    missing file opens as an empty document of that name, which Ctrl+S creates.
+10. File, Open recent file lists `plain.txt` and the other files opened or saved in this window, newest first;
+    choosing one opens it, after the unsaved-changes question when there are changes; before any file, "(none)",
+    unavailable.
+11. File, Show current file in, File Explorer (Ctrl+W): a File Explorer window opens with the file selected and NVDA
+    reads its title; Alt+F4 closes it and the focus is back in AxDown. On Untitled: "No file yet".
 
 ## 4. Find and go to line
 
@@ -55,7 +60,7 @@ letter), and a `long.md` with headings and lines longer than the window.
 ## 5. Text size and font
 
 1. Ctrl+Plus: "Text size n"; the text is larger; Ctrl+Minus back. Close and reopen: the size is kept.
-2. Options, Font opens the Windows font dialog; a chosen font is used and kept.
+2. Options, Text, Font opens the Windows font dialog; a chosen font is used and kept.
 
 ## 6. Menus and help
 
@@ -72,6 +77,9 @@ letter), and a `long.md` with headings and lines longer than the window.
    "(none)", unavailable. Close a window that has `plain.txt` open: in another window Alt+A, R reads "1 plain.txt -
    AxDown" and Enter opens it in a new window; File, Open on another file puts the one you left there too. Alt+A, C
    (Close all windows) with unsaved changes in one window: that window asks "Save changes?" and the others close.
+5. Options, Developer, Copy diagnostics: "Copied diagnostics"; Options, Developer, Open settings file: a new AxDown
+   window on `axdown.json`. Help, Markdown resources, Markdown basics: the browser opens commonmark.org; GitHub
+   Flavored Markdown opens its page.
 
 ## 7. Updates and uninstall
 

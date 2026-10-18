@@ -18,11 +18,11 @@ Each file opens in its own window; Alt+Tab moves between them.
 
 The text is an ordinary Windows edit field, so NVDA's own keys read it: arrows for characters and lines, Ctrl+Left and Ctrl+Right for words, NVDA's say-all to read on from the caret, and so on. Type to write; Enter starts a new line; Tab types a tab. Ctrl+Z undoes the last change, once. Page Up and Page Down move a screen at a time and reach the first and last line. Ctrl+Up and Ctrl+Down move to the previous and next paragraph, the first line after a blank line, and with Shift they select to there, as in Word.
 
-Long lines wrap at the window's edge, so Down Arrow reads one screen line at a time. Options, Word wrap (Ctrl+Shift+W) turns that off: each line of the file is then one line in the window, however long, and AxDown says "Word wrap off". Your place in the text is kept either way.
+Long lines wrap at the window's edge, so Down Arrow reads one screen line at a time. Options, Text, Word wrap (Ctrl+Shift+W) turns that off: each line of the file is then one line in the window, however long, and AxDown says "Word wrap off". Your place in the text is kept either way.
 
 ## Files
 
-Ctrl+S saves and AxDown says "Saved". A new document asks for a name first, with the Windows file dialog; Ctrl+Shift+S, Save as, asks every time. Ctrl+O opens another file in this window and Ctrl+N starts an empty one; both ask first if you have unsaved changes, as does closing the window: a notice says "Save changes to notes.md?" with Save, Don't save and Cancel; Enter saves, Escape cancels.
+Ctrl+S saves and AxDown says "Saved". A new document asks for a name first, with the Windows file dialog; Ctrl+Shift+S, Save as, asks every time. Ctrl+O opens another file in this window and Ctrl+N starts an empty one; both ask first if you have unsaved changes, as does closing the window: a notice says "Save changes to notes.md?" with Save, Don't save and Cancel; Enter saves, Escape cancels. File, Open recent file lists the last ten files you opened or saved; File, Show current file in, File Explorer (Ctrl+W) opens File Explorer with the file selected.
 
 AxDown writes a file back the way it found it: the same encoding, with or without a byte order mark, and the same kind of line ending. The status bar shows what it found, for example "UTF-8 · CRLF". A new document is UTF-8 without a mark. If the file changed on disk while you had it open, saving asks before writing over it.
 
@@ -40,16 +40,16 @@ In a Markdown file, the keys NVDA uses on a web page work with Ctrl: Ctrl+H move
 
 ## Text size and fonts
 
-Ctrl+Plus and Ctrl+Minus make the text larger and smaller, and AxDown says the new size. Options, Font opens the Windows font dialog. Both are remembered.
+Ctrl+Plus and Ctrl+Minus make the text larger and smaller, and AxDown says the new size. Options, Text, Font opens the Windows font dialog. Both are remembered.
 
 ## Menus
 
-- **File**: New, Open, Save, Save as, Exit.
+- **File**: New, Open, Open recent file, Show current file in (File Explorer, Ctrl+W), Save, Save as, Exit.
 - **Edit**: Undo, Cut, Copy, Paste, Select all.
 - **Navigate**: Find, Find next, Find previous, Go to line, and the submenus Next and Previous, each with Heading, Heading level 1 to 6, Link, List, List item, Block quote and Table.
-- **Options**: Word wrap, Larger text, Smaller text, Windows text size, Font.
+- **Options**: Text (Word wrap, Font, Larger text, Smaller text, Windows text size) and Developer (Open settings file, which opens axdown.json in a new AxDown window, and Copy diagnostics).
 - **Axit**: the bundle's menu, the same in every Axit window. New window starts another AxDown or AxClaude. Recently closed lists the last ten files and folders any Axit window held, each with a number; Enter opens one in a new window. Open windows lists the other open Axit windows, the one you were in last first, each with a number: Alt+A, O, 1 takes you back to it. Open windows by type has a submenu per app with its windows, the one you are in checked. Enter on a window brings it to the front. Close all windows closes every Axit window, each asking about unsaved changes where there are any. Then Check for updates (which names the version you have), Update to the newest version while one is known, and About, a submenu: Version (the version, the apps, the latest release and where the settings and logs are), Licence, Attribution, Axit guide (how to install, start, update and remove the bundle) and Axit on GitHub, which opens the project's page in your browser.
-- **Help**: Keyboard shortcuts (F1), this guide, Copy diagnostics.
+- **Help**: Keyboard shortcuts (F1), this guide, Markdown resources (Markdown basics and GitHub Flavored Markdown, in your browser).
 
 ## Settings
 
@@ -62,7 +62,7 @@ New versions of Axit are published on GitHub, and every app of Axit updates toge
 ## If something goes wrong
 
 - A file that cannot be opened, is not text, or is larger than 32 MB, is reported in a notice; the window stays open, empty and untitled, so that saving cannot write over the file.
-- An error from AxDown is a notice inside the window. Escape closes it. Help, Copy diagnostics puts the version, the paths and the last log lines on the clipboard for a bug report; the log is in `%LOCALAPPDATA%\Axit\logs\axdown.log`.
+- An error from AxDown is a notice inside the window. Escape closes it. Options, Developer, Copy diagnostics puts the version, the paths and the last log lines on the clipboard for a bug report; the log is in `%LOCALAPPDATA%\Axit\logs\axdown.log`.
 
 ## About AxDown
 

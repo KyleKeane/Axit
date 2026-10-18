@@ -16,6 +16,8 @@ public static class AxDownKeys
     public const Keys SaveAs = Keys.Control | Keys.Shift | Keys.S;
     public const Keys GoToLine = Keys.Control | Keys.G;
     public const Keys WordWrap = Keys.Control | Keys.Shift | Keys.W;
+    /// <summary>File → Show current file in → File Explorer (AD-4.1), the key AxClaude uses for its folder.</summary>
+    public const Keys ShowInExplorer = Keys.Control | Keys.W;
 
     // Navigation (SPEC.md §9, AD-D7): NVDA's browse-mode letters with Ctrl for the next item, Ctrl+Shift for the previous.
     public const Keys NextHeading = Keys.Control | Keys.H;
@@ -43,6 +45,7 @@ public static class AxDownKeys
         ("New document", NewDocument),
         ("Open", Open),
         ("Save as", SaveAs),
+        ("Show the file in File Explorer", ShowInExplorer),
         ("Go to line", GoToLine),
         ("Word wrap", WordWrap),
         ("Next heading", NextHeading),

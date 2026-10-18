@@ -21,6 +21,7 @@ internal sealed class EditorForm : Form
 
     private readonly EditorSettings _settings;
     private readonly MenuStrip _menu = new();
+    private readonly ToolStripMenuItem _recentFilesItem = new("Open &recent file");
     private readonly TextBox _editor = new();
     private readonly StatusStrip _status = new();
     private readonly ToolStripStatusLabel _fileLabel = new();
@@ -58,9 +59,18 @@ internal sealed class EditorForm : Form
         StartPosition = FormStartPosition.WindowsDefaultLocation;
 
         // ---- menus (AD-4); the keys are handled in ProcessCmdKey from the tables, the items only show them ----
+        // File is the thing worked on, shaped as AxClaude's Session menu (AD-4.1).
         var file = new ToolStripMenuItem("&File");
         file.DropDownItems.Add(Item("&New", NewDocument, AxDownKeys.NewDocument));
         file.DropDownItems.Add(Item("&Open...", OpenFile, AxDownKeys.Open));
+        _recentFilesItem.DropDownOpening += (_, _) => FillRecentFiles();
+        FillRecentFiles();
+        file.DropDownItems.Add(_recentFilesItem);
+        // Show current file in ▸ File Explorer; an Axit file manager joins the submenu when there is one.
+        var showIn = new ToolStripMenuItem("Show current file &in");
+        showIn.DropDownItems.Add(Item("File &Explorer", ShowInExplorer, AxDownKeys.ShowInExplorer));
+        file.DropDownItems.Add(showIn);
+        file.DropDownItems.Add(new ToolStripSeparator());
         file.DropDownItems.Add(Item("&Save", () => Save(), BundleKeys.Save));
         file.DropDownItems.Add(Item("Save &as...", () => SaveAs(), AxDownKeys.SaveAs));
         file.DropDownItems.Add(new ToolStripSeparator());
@@ -92,22 +102,32 @@ internal sealed class EditorForm : Form
         navigate.DropDownItems.Add(next);
         navigate.DropDownItems.Add(previous);
 
-        // Options, as AxClaude's: how the window behaves (AD-4.3).
+        // Options, as AxClaude's (AD-4.3): every setting in the submenu for what it is about, none outside one.
         var options = new ToolStripMenuItem("&Options");
+        var textMenu = new ToolStripMenuItem("&Text");
         _wordWrapItem = Item("&Word wrap", ToggleWordWrap, AxDownKeys.WordWrap);
         _wordWrapItem.Checked = _settings.WordWrap;
-        options.DropDownItems.Add(_wordWrapItem);
-        options.DropDownItems.Add(new ToolStripSeparator());
-        options.DropDownItems.Add(Item("&Larger text", () => ChangeTextSize(1), BundleKeys.LargerText));
-        options.DropDownItems.Add(Item("S&maller text", () => ChangeTextSize(-1), BundleKeys.SmallerText));
-        options.DropDownItems.Add(new ToolStripMenuItem("Windows &text size", null, (_, _) => UseSystemFont()));
-        options.DropDownItems.Add(new ToolStripMenuItem("&Font...", null, (_, _) => ChooseFont()));
+        textMenu.DropDownItems.Add(_wordWrapItem);
+        textMenu.DropDownItems.Add(new ToolStripSeparator());
+        textMenu.DropDownItems.Add(new ToolStripMenuItem("&Font...", null, (_, _) => ChooseFont()));
+        textMenu.DropDownItems.Add(Item("&Larger text", () => ChangeTextSize(1), BundleKeys.LargerText));
+        textMenu.DropDownItems.Add(Item("S&maller text", () => ChangeTextSize(-1), BundleKeys.SmallerText));
+        textMenu.DropDownItems.Add(new ToolStripMenuItem("Windows &text size", null, (_, _) => UseSystemFont()));
+        options.DropDownItems.Add(textMenu);
+        var developer = new ToolStripMenuItem("De&veloper");
+        developer.DropDownItems.Add(new ToolStripMenuItem("Open settings &file", null, (_, _) => OpenSettingsFile()));
+        developer.DropDownItems.Add(new ToolStripMenuItem("Copy diag&nostics", null, (_, _) => CopyDiagnostics()));
+        options.DropDownItems.Add(developer);
 
         var help = new ToolStripMenuItem("&Help");
         help.DropDownItems.Add(Item("&Keyboard shortcuts", () => ShowNotice(Notice.Plain("Keyboard shortcuts", HelpText.Shortcuts)), BundleKeys.Shortcuts));
         help.DropDownItems.Add(new ToolStripMenuItem("User &guide", null, (_, _) => ShowNotice(Notice.Plain("User guide", HelpText.UserGuide()))));
         help.DropDownItems.Add(new ToolStripSeparator());
-        help.DropDownItems.Add(new ToolStripMenuItem("Copy diag&nostics", null, (_, _) => CopyDiagnostics()));
+        // As AxClaude's Claude Code resources: where the file format is explained, in the browser (AD-4.4).
+        var resources = new ToolStripMenuItem("Markdown &resources");
+        resources.DropDownItems.Add(new ToolStripMenuItem("Markdown &basics", null, (_, _) => OpenUrl("https://commonmark.org/help/")));
+        resources.DropDownItems.Add(new ToolStripMenuItem("&GitHub Flavored Markdown", null, (_, _) => OpenUrl("https://github.github.com/gfm/")));
+        help.DropDownItems.Add(resources);
 
         // The bundle's Axit menu (AX-9) sits before Help in every window and ends with the update items and About
         // (AX-3.1): Check for updates names the version in use and asks GitHub every time; Update to Axit n stands
@@ -297,6 +317,9 @@ internal sealed class EditorForm : Form
             case AxDownKeys.Open:
                 OpenFile();
                 return true;
+            case AxDownKeys.ShowInExplorer:
+                ShowInExplorer();
+                return true;
             case AxDownKeys.SaveAs:
                 SaveAs();
                 return true;
@@ -354,6 +377,9 @@ internal sealed class EditorForm : Form
             {
                 _document = TextDocument.Read(path);
                 _lastWriteTime = File.GetLastWriteTimeUtc(path);
+                // AD-4.1: Open recent file, written at once so that another AxDown window lists it too.
+                _settings.RememberFile(path);
+                SaveSettings();
             }
             catch (Exception ex) when (ex is InvalidOperationException or IOException or UnauthorizedAccessException)
             {
@@ -386,6 +412,46 @@ internal sealed class EditorForm : Form
     }
 
     private void NewDocument() => AskToSave(() => LoadDocument(null));
+
+    /// <summary>File → Open recent file (AD-4.1): the last ten files opened or saved under a name, from the settings; one that no longer exists is left out.</summary>
+    private void FillRecentFiles()
+    {
+        _recentFilesItem.DropDownItems.Clear();
+        var files = _settings.RecentFiles.Where(File.Exists).ToList();
+        if (files.Count == 0)
+        {
+            _recentFilesItem.DropDownItems.Add(new ToolStripMenuItem("(none)") { Enabled = false });
+            return;
+        }
+
+        foreach (var file in files)
+        {
+            var target = file;
+            _recentFilesItem.DropDownItems.Add(new ToolStripMenuItem(file.Replace("&", "&&"), null, (_, _) => AskToSave(() => LoadDocument(target))));
+        }
+    }
+
+    /// <summary>File → Show current file in → File Explorer, Ctrl+W (AD-4.1): the file selected in File Explorer, one of the system's own windows (AX-7.2).</summary>
+    private void ShowInExplorer()
+    {
+        if (_path is null)
+        {
+            Announce("No file yet", true);
+            return;
+        }
+
+        try
+        {
+            Process.Start(new ProcessStartInfo("explorer.exe", $"/select,\"{_path}\"") { UseShellExecute = false });
+        }
+        catch (Exception ex) when (ex is System.ComponentModel.Win32Exception or InvalidOperationException)
+        {
+            Fail($"File Explorer could not be started: {ex.Message}");
+        }
+    }
+
+    /// <summary>Options → Developer → Open settings file (AD-4.3): axdown.json in a new AxDown window, as any file.</summary>
+    private void OpenSettingsFile() => AxitMenu.Start(Dispatch.AxDown, EditorSettings.DefaultPath);
 
     private void OpenFile() => AskToSave(() =>
     {
@@ -447,6 +513,8 @@ internal sealed class EditorForm : Form
         }
 
         _path = dialog.FileName;
+        _settings.RememberFile(_path);
+        SaveSettings();
         WriteFile(_path, then);
     }
 
