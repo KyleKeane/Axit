@@ -21,7 +21,7 @@ Each step says what to do and what NVDA must say or do. A step fails if NVDA say
 2. Ctrl+Tab, type `y`, Enter: "Sent". Within a few seconds: "Done" or "Claude asks" (a second startup dialog may follow; answer it).
 3. Type `What is 2+2?`, Shift+Enter, `Answer in one line.` NVDA reads the new line as you type. Enter: "Sent" with a short low note; the field empties and keeps the focus. Then "Responding" with a rising chime, then "Done" with three falling notes.
 4. Ctrl+Tab, Shift+O: "# Output 1 Reply from Claude". Down Arrow: a blank line, then Claude's reply. Up Arrow from the marker: a blank line, "Answer in one line.", "What is 2+2?", "# Input 1". No line starts with "you:".
-5. `i`: "No next input". Shift+I: "# Input 1".
+5. `i`: "No next input". Shift+I: "Input 1 heading level 1".
 6. Ctrl+Tab. Up and Down in the empty field: NVDA says "blank", nothing is put into the field and AxClaude says nothing.
 7. Page keys in the field. With one line typed: Page Down and Page Up read that line again, nothing else happens. Type five short lines, Ctrl+Home: Page Down reads the fourth line, then the fifth, then the fifth again; Page Up reads the third, then the first, then the first again. End reads nothing new and Home returns to the start of the line; Ctrl+End puts the caret after the fifth line and Ctrl+Home before the first. The app says nothing for any of these. Ctrl+A, Delete.
 7a. Paragraph keys in the field. Type `one`, Shift+Enter twice, `two`, Shift+Enter, `three`, Shift+Enter twice, `four`: three paragraphs, the second of two lines. Ctrl+Home, then Ctrl+Down reads "two", then "four", then "four" again as the caret reaches the end of the message. Ctrl+Up reads "four" (its start), then "two", then "one", then "one" again. End, then Ctrl+Shift+Up: NVDA says "selected" with "four"; Ctrl+Shift+Down: "unselected four". The app says nothing. Ctrl+A, Delete.
@@ -39,7 +39,7 @@ Each step says what to do and what NVDA must say or do. A step fails if NVDA say
 ## 4. Headings and quick keys
 
 1. Ask for a markdown answer with two `##` headings and a bulleted list.
-2. Ctrl+Home, then `h` repeatedly: the "# Input" and "# Output" line of each exchange, each followed by "heading level 1", and Claude's headings followed by "heading level 2", in order. Shift+H goes back. `1`: only the markers.
+2. Ctrl+Home, then `h` repeatedly: the "# Input" and "# Output" line of each exchange, spoken without the hash and followed by "heading level 1", and Claude's headings followed by "heading level 2", in order. Shift+H goes back. `1`: only the markers.
 3. `2`: only Claude's level 2 headings. `3`: "No next heading level 3".
 4. `p`: the first line of the next paragraph (a line with text after a blank line, or a `claude:` line), read out; Shift+P goes back. Past the last one: "No next paragraph". After a turn with several tool calls, `o` to its output marker and then `p` repeatedly: each of Claude's short messages between the tool calls is a stop, although no blank line sits in front of it, then each paragraph of the final reply; the tool lines and their output are not stops, even after a blank line, and Ctrl+Alt+P from the output marker reads the same stops without them.
 5. `o` / Shift+O, `r` / Shift+R (the same lines as `o`), `i` / Shift+I, `c`, `t`, `e`, `d`, `s`: each announcement matches SPEC.md §6.4.

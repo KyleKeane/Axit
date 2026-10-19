@@ -544,6 +544,12 @@ public sealed class TranscriptView : TextBox
     {
         var line = _mirror.LineAt(index);
         var text = whole ? _mirror.DisplayTextAt(index) : line.Text;
+        if (line.HeadingLevel > 0)
+        {
+            // The # marker is for the eye and the export; the ear gets the level instead.
+            text = text.TrimStart('#').TrimStart(' ');
+        }
+
         if (text.Length == 0)
         {
             text = "blank";

@@ -49,7 +49,7 @@ out of scope; programs that print and ask are in. It works entirely offline (bun
    key". Ctrl+Enter sends the field's text without recording it; "Sent, not recorded". The push goes on; "Done".
 4. `npm start` runs on: lines arrive with their ticks; Ctrl+Shift+C: "Interrupt sent"; the prompt returns, "Done".
 5. Ctrl+R: the window's recent commands as a list, the newest first; Enter puts `dotnet test` back in the field, Enter
-   again runs it. Or `i` in the view finds `# Input 1`, Down twice, past the folder line, and Enter on the command line copies it into the field.
+   again runs it. Or `i` in the view finds `# Input 1`, `2` twice finds `## Command`, Down, and Enter on the command line copies it into the field.
 6. `cd ..`: the title and the status bar follow the shell's directory. Alt+S, I, F: AxFile on that folder; Alt+S, I,
    G: AxGit on its repository.
 7. In AxDown on `notes.md`, Alt+F, I, T: a terminal in the file's folder.
@@ -147,10 +147,12 @@ out of scope; programs that print and ask are in. It works entirely offline (bun
   the extra Enter is an empty prompt, which announces nothing). **Shift+Enter** is a new line in the field (AxClaude
   D11). An empty field sends a bare `\r` (a new prompt, or the default of a program's question). "Sent" is announced
   with the sent note (AT-5.1).
-- AT-3.2 **The exchange block** (AxClaude FR-4.1): `# Input n`, the line `Folder: C:\path` with the directory the
-  command runs in (the shell's current directory at the moment of sending: the 9;9 mark's, or the start folder
-  while a shell gives no marks; AT-D9), the command's lines as sent, a blank line, `# Output n`, a blank line,
-  inserted at the end of the transcript above the trailing prompt row at the moment of sending; *n* counts since the window started or the transcript was cleared; both markers are level 1 headings;
+- AT-3.2 **The exchange block** (AxClaude FR-4.1): `# Input n`, then `## Folder` with the directory the command runs
+  in on the line under it (the shell's current directory at the moment of sending: the 9;9 mark's, or the start
+  folder while a shell gives no marks; left out when neither is known; AT-D9), then `## Command` with the command's
+  lines as sent under it, a blank line, `# Output n`, a blank line, inserted at the end of the transcript above the
+  trailing prompt row at the moment of sending; the `##` lines are level 2 headings, so `h` and `2` find them, and
+  a jump speaks a heading without its marker, "Input 1 heading level 1" (AxClaude §6.4); *n* counts since the window started or the transcript was cleared; both markers are level 1 headings;
   Options → Text → Time stamps adds the time to both (AxClaude FR-4.6). The shell's echo of the command, the prompt
   row holding the command after its prompt, stays hidden: the block stands for it (AxClaude D22), and so do the
   continuation rows of a multi-line command, the shell's continuation prompt with the line after it (PowerShell's
@@ -353,8 +355,9 @@ its notes record what moved.
   the state, the command, how long, the prompt.
 - **AT-D9 Every block names its folder.** The user asked for the directory a command ran in to be on hand in the
   transcript itself: the prompt rows that would say it are hidden, a `cd` between two commands leaves the output's
-  place unknown when the text is read back or exported, and the status bar only has the directory of now. One line
-  after `# Input n`, in the shape of the New session notice's `Folder:` line, costs a Down and answers it; Ctrl+P (Session → Say current folder) says the directory of now, the full path, on
+  place unknown when the text is read back or exported, and the status bar only has the directory of now. A `## Folder`
+  heading with the path under it and a `## Command` heading over the command give the block the shape of a small
+  document, which the heading keys walk and the export keeps; Ctrl+P (Session → Say current folder) says the directory of now, the full path, on
   demand.
 
 ## 7. Open questions

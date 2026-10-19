@@ -341,7 +341,7 @@ While a notice shows: Tab / Shift+Tab between text, field and buttons; Enter the
 
 | Event | Text |
 | :-- | :-- |
-| Jump to a line | the line text; headings add ` heading level N` |
+| Jump to a line | the line text, a heading without its `#` marker; headings add ` heading level N` |
 | No target | `No next input` / `No previous heading` etc. |
 | Ctrl+Alt+letter | the lines of that kind from the caret to the end, joined like a spoken reply (D32); `No next paragraph` etc. when none |
 | `l` | `Line 12 of 340`; `Empty` when empty |

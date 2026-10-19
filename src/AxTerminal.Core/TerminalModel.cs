@@ -104,10 +104,11 @@ public sealed class TerminalModel : LineStore
     public void EndFrame() => CompleteFrame();
 
     /// <summary>
-    /// Records that the user sent a command and prints its exchange block (AT-3.2): the input marker, the folder line
-    /// (<paramref name="directory"/>, the window's current directory, or the shell's own from the 9;9 mark when none
-    /// is given; no line when neither is known), the command's lines, a blank line, the output marker and a blank
-    /// line, above the prompt row while the shell is idle, at the end while a command runs (an answer to a program).
+    /// Records that the user sent a command and prints its exchange block (AT-3.2): the input marker, `## Folder` with
+    /// the directory under it (<paramref name="directory"/>, the window's current directory, or the shell's own from
+    /// the 9;9 mark when none is given; left out when neither is known), `## Command` with the command's lines under
+    /// it, a blank line, the output marker and a blank line, above the prompt row while the shell is idle, at the end
+    /// while a command runs (an answer to a program).
     /// Returns false for an empty text, which gets no block and counts as no command (AT-3.1, AT-5.1).
     /// <paramref name="record"/> false sends without a block (AT-3.4).
     /// </summary>
@@ -145,9 +146,11 @@ public sealed class TerminalModel : LineStore
         var block = new List<Line> { NewLine(LineKind.InputMarker, $"# Input {ExchangeCount}{stamp}", 1) };
         if ((directory ?? Directory) is { } folder)
         {
-            block.Add(NewLine(LineKind.UserMessage, "Folder: " + folder));
+            block.Add(NewLine(LineKind.UserMessage, "## Folder", 2));
+            block.Add(NewLine(LineKind.UserMessage, folder));
         }
 
+        block.Add(NewLine(LineKind.UserMessage, "## Command", 2));
         foreach (var line in lines)
         {
             block.Add(NewLine(LineKind.UserMessage, line));

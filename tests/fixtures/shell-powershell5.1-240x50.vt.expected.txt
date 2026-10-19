@@ -1,20 +1,26 @@
 Warning: PowerShell detected that you might be using a screen reader and has disabled PSReadLine for compatibility purposes. If you want to re-enable it, run 'Import-Module PSReadLine'.
 
 # Input 1
-Folder: C:\axit-fixture
+## Folder
+C:\axit-fixture
+## Command
 Write-Output hello
 
 # Output 1
 
 hello
 # Input 2
-Folder: C:\axit-fixture
+## Folder
+C:\axit-fixture
+## Command
 cmd /c exit 3
 
 # Output 2
 
 # Input 3
-Folder: C:\axit-fixture
+## Folder
+C:\axit-fixture
+## Command
 Get-ChildItem -Name
 
 # Output 3
@@ -23,21 +29,27 @@ sub
 a.txt
 b.md
 # Input 4
-Folder: C:\axit-fixture
+## Folder
+C:\axit-fixture
+## Command
 Read-Host "Continue? (y/n)"
 
 # Output 4
 
 Continue? (y/n): y
 # Input 5
-Folder: C:\axit-fixture
+## Folder
+C:\axit-fixture
+## Command
 y
 
 # Output 5
 
 y
 # Input 6
-Folder: C:\axit-fixture
+## Folder
+C:\axit-fixture
+## Command
 if ($true) {
 "yes"
 }
@@ -46,20 +58,26 @@ if ($true) {
 
 yes
 # Input 7
-Folder: C:\axit-fixture
+## Folder
+C:\axit-fixture
+## Command
 cls
 
 # Output 7
 
 # Input 8
-Folder: C:\axit-fixture
+## Folder
+C:\axit-fixture
+## Command
 Write-Output after-cls
 
 # Output 8
 
 after-cls
 # Input 9
-Folder: C:\axit-fixture
+## Folder
+C:\axit-fixture
+## Command
 exit
 
 # Output 9

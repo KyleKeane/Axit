@@ -1,38 +1,50 @@
 # Input 1
-Folder: C:\axit-fixture
+## Folder
+C:\axit-fixture
+## Command
 echo hello
 
 # Output 1
 
 hello
 # Input 2
-Folder: C:\axit-fixture
+## Folder
+C:\axit-fixture
+## Command
 (exit 3)
 
 # Output 2
 
 # Input 3
-Folder: C:\axit-fixture
+## Folder
+C:\axit-fixture
+## Command
 ls
 
 # Output 3
 
 a.txt  b.md  sub/
 # Input 4
-Folder: C:\axit-fixture
+## Folder
+C:\axit-fixture
+## Command
 read -p "Continue? (y/n): " answer
 
 # Output 4
 
 Continue? (y/n): y
 # Input 5
-Folder: C:\axit-fixture
+## Folder
+C:\axit-fixture
+## Command
 y
 
 # Output 5
 
 # Input 6
-Folder: C:\axit-fixture
+## Folder
+C:\axit-fixture
+## Command
 for i in 1 2; do
 echo $i
 done
@@ -42,20 +54,26 @@ done
 1
 2
 # Input 7
-Folder: C:\axit-fixture
+## Folder
+C:\axit-fixture
+## Command
 clear
 
 # Output 7
 
 # Input 8
-Folder: C:\axit-fixture
+## Folder
+C:\axit-fixture
+## Command
 echo after-clear
 
 # Output 8
 
 after-clear
 # Input 9
-Folder: C:\axit-fixture
+## Folder
+C:\axit-fixture
+## Command
 exit
 
 # Output 9

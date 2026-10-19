@@ -32,7 +32,7 @@ From the top: the menu bar (Alt), the terminal (the text of everything so far), 
 
 ## Run a command
 
-Type the command in the field and press Enter. You hear "Sent" with a low note. The terminal gets a `# Input 1` line, a `Folder:` line with the folder the command runs in, your command, then `# Output 1`, and what the shell prints follows, with a short tick for each new line. When the prompt comes back you hear "Done" with the falling chime, or "Failed, exit code 1" when the command failed (PowerShell says "Failed" for an error of its own; Command Prompt gives no code). Ctrl+3 then takes you to the start of the output; read down with the arrow keys.
+Type the command in the field and press Enter. You hear "Sent" with a low note. The terminal gets a `# Input 1` heading, `## Folder` with the folder the command runs in under it, `## Command` with your command under it, then `# Output 1`, and what the shell prints follows, with a short tick for each new line. When the prompt comes back you hear "Done" with the falling chime, or "Failed, exit code 1" when the command failed (PowerShell says "Failed" for an error of its own; Command Prompt gives no code). Ctrl+3 then takes you to the start of the output; read down with the arrow keys.
 
 - Shift+Enter starts a new line in the field. A command of several lines goes to the shell line by line; for PowerShell one more Enter follows, which its console host wants to end a block.
 - An empty field sends a plain Enter.

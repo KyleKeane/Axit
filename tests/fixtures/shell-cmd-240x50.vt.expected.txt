@@ -2,7 +2,9 @@ Microsoft Windows [Version 10.0.26200.9711]
 (c) Microsoft Corporation. All rights reserved.
 
 # Input 1
-Folder: C:\axit-fixture
+## Folder
+C:\axit-fixture
+## Command
 echo hello
 
 # Output 1
@@ -10,14 +12,18 @@ echo hello
 hello
 
 # Input 2
-Folder: C:\axit-fixture
+## Folder
+C:\axit-fixture
+## Command
 cmd /c exit 3
 
 # Output 2
 
 
 # Input 3
-Folder: C:\axit-fixture
+## Folder
+C:\axit-fixture
+## Command
 dir /b
 
 # Output 3
@@ -27,28 +33,36 @@ b.md
 sub
 
 # Input 4
-Folder: C:\axit-fixture
+## Folder
+C:\axit-fixture
+## Command
 set /p answer=Continue? (y/n):
 
 # Output 4
 
 Continue? (y/n):y
 # Input 5
-Folder: C:\axit-fixture
+## Folder
+C:\axit-fixture
+## Command
 y
 
 # Output 5
 
 
 # Input 6
-Folder: C:\axit-fixture
+## Folder
+C:\axit-fixture
+## Command
 cls
 
 # Output 6
 
 
 # Input 7
-Folder: C:\axit-fixture
+## Folder
+C:\axit-fixture
+## Command
 echo after-cls
 
 # Output 7
@@ -56,7 +70,9 @@ echo after-cls
 after-cls
 
 # Input 8
-Folder: C:\axit-fixture
+## Folder
+C:\axit-fixture
+## Command
 exit
 
 # Output 8
