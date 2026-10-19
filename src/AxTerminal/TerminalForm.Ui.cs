@@ -15,31 +15,31 @@ internal sealed partial class TerminalForm
         MinimumSize = new Size(600, 400);
 
         // The menus (SPEC.md AT-6.1), every mnemonic unique within its menu; the keys are handled in ProcessWindowKey
-        // from the table, the items only show them. Terminal is the thing worked on, in the standard order of a first
+        // from the table, the items only show them. Session, the shell in its folder, is the thing worked on, in the standard order of a first
         // menu (bundle AX-6): New, the recent folders, the slot the editors have Save in, Show current folder in, the
         // export, Exit.
-        var terminal = new ToolStripMenuItem("&Terminal");
-        terminal.DropDownItems.Add(Item("&New shell...", NewShell, AxTerminalKeys.NewShell));
+        var session = new ToolStripMenuItem("&Session");
+        session.DropDownItems.Add(Item("&New shell...", NewShell, AxTerminalKeys.NewShell));
         _recentFoldersItem.DropDownOpening += (_, _) => FillRecentFolders();
         FillRecentFolders();
-        terminal.DropDownItems.Add(_recentFoldersItem);
-        terminal.DropDownItems.Add(new ToolStripSeparator());
-        terminal.DropDownItems.Add(Item("Res&tart shell", RestartShell, AxTerminalKeys.RestartShell));
-        terminal.DropDownItems.Add(Item("&Clear transcript", ClearTranscript, AxTerminalKeys.ClearTranscript));
-        terminal.DropDownItems.Add(new ToolStripSeparator());
+        session.DropDownItems.Add(_recentFoldersItem);
+        session.DropDownItems.Add(new ToolStripSeparator());
+        session.DropDownItems.Add(Item("Res&tart shell", RestartShell, AxTerminalKeys.RestartShell));
+        session.DropDownItems.Add(Item("&Clear transcript", ClearTranscript, AxTerminalKeys.ClearTranscript));
+        session.DropDownItems.Add(new ToolStripSeparator());
         // AT-1.5: the way to the other windows, on the shell's current directory.
         var showIn = new ToolStripMenuItem("Show current folder &in");
         showIn.DropDownItems.Add(Item("File &Explorer", ShowInExplorer, AxTerminalKeys.ShowInExplorer));
         showIn.DropDownItems.Add(new ToolStripMenuItem("Ax&Claude", null, (_, _) => OpenIn(Dispatch.AxClaude)));
         showIn.DropDownItems.Add(new ToolStripMenuItem("Ax&Git", null, (_, _) => OpenIn(Dispatch.AxGit)));
-        terminal.DropDownItems.Add(showIn);
-        terminal.DropDownItems.Add(new ToolStripSeparator());
-        terminal.DropDownItems.Add(new ToolStripMenuItem("&Export transcript...", null, (_, _) => ExportTranscript()) { ShortcutKeyDisplayString = BundleKeys.Text(BundleKeys.Save) });
-        terminal.DropDownItems.Add(new ToolStripSeparator());
-        terminal.DropDownItems.Add(new ToolStripMenuItem("E&xit", null, (_, _) => Close()) { ShortcutKeyDisplayString = "Alt+F4" });
+        session.DropDownItems.Add(showIn);
+        session.DropDownItems.Add(new ToolStripSeparator());
+        session.DropDownItems.Add(new ToolStripMenuItem("&Export transcript...", null, (_, _) => ExportTranscript()) { ShortcutKeyDisplayString = BundleKeys.Text(BundleKeys.Save) });
+        session.DropDownItems.Add(new ToolStripSeparator());
+        session.DropDownItems.Add(new ToolStripMenuItem("E&xit", null, (_, _) => Close()) { ShortcutKeyDisplayString = "Alt+F4" });
 
         // What goes to the shell itself (AT-3.5), and the field's extras.
-        var shell = new ToolStripMenuItem("&Shell");
+        var shell = new ToolStripMenuItem("Sh&ell");
         shell.DropDownItems.Add(Item("&Interrupt", Interrupt, AxTerminalKeys.Interrupt));
         shell.DropDownItems.Add(Item("Send &Escape", SendEscape, AxTerminalKeys.SendEscape));
         var sendKey = new ToolStripMenuItem("Send &key");
@@ -116,7 +116,7 @@ internal sealed partial class TerminalForm
 
         var axit = CreateAxitMenu();
 
-        _menu.Items.AddRange([terminal, shell, navigate, options, axit, help]);
+        _menu.Items.AddRange([session, shell, navigate, options, axit, help]);
         MainMenuStrip = _menu;
 
         _state.Text = "Starting";

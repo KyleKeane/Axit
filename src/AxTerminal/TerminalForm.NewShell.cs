@@ -17,7 +17,7 @@ internal sealed partial class TerminalForm
     ];
 
     /// <summary>
-    /// Terminal → New shell… (Ctrl+N): the folder with a Choose folder button under it, the shells as radio buttons,
+    /// Session → New shell… (Ctrl+N): the folder with a Choose folder button under it, the shells as radio buttons,
     /// Custom with a command line field. Enter ends the current shell and starts the chosen one in the folder, the
     /// transcript cleared; Escape keeps the current shell.
     /// </summary>
@@ -100,7 +100,7 @@ internal sealed partial class TerminalForm
         _folder = folder;
     }
 
-    /// <summary>Terminal → Open recent folder: a shell in that folder, the transcript cleared, with a system line and an announcement.</summary>
+    /// <summary>Session → Open recent folder: a shell in that folder, the transcript cleared, with a system line and an announcement.</summary>
     private void SwitchFolder(string folder)
     {
         if (!Directory.Exists(folder))
@@ -114,7 +114,7 @@ internal sealed partial class TerminalForm
         Relaunch($"New shell: {ShellLauncher.Describe(_shell)} in {folder}", clearTranscript: true);
     }
 
-    /// <summary>Terminal → Show current folder in → File Explorer (Ctrl+W): the shell's current directory, one of the system's own windows.</summary>
+    /// <summary>Session → Show current folder in → File Explorer (Ctrl+W): the shell's current directory, one of the system's own windows.</summary>
     private void ShowInExplorer()
     {
         if (!Directory.Exists(CurrentDirectory))
@@ -126,6 +126,6 @@ internal sealed partial class TerminalForm
         OpenInExplorer(CurrentDirectory);
     }
 
-    /// <summary>Terminal → Show current folder in → AxClaude or AxGit (AT-1.5): a new window of that app on the shell's current directory.</summary>
+    /// <summary>Session → Show current folder in → AxClaude or AxGit (AT-1.5): a new window of that app on the shell's current directory.</summary>
     private void OpenIn(string verb) => AxitMenu.Start(verb, CurrentDirectory);
 }

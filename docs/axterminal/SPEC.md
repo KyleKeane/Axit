@@ -50,7 +50,7 @@ out of scope; programs that print and ask are in. It works entirely offline (bun
 4. `npm start` runs on: lines arrive with their ticks; Ctrl+Shift+C: "Interrupt sent"; the prompt returns, "Done".
 5. Ctrl+R: the window's recent commands as a list, the newest first; Enter puts `dotnet test` back in the field, Enter
    again runs it. Or `i` in the view finds `# Input 1`, Down, and Enter on the command line copies it into the field.
-6. `cd ..`: the title and the status bar follow the shell's directory. Alt+T, I, F: AxFile on that folder; Alt+T, I,
+6. `cd ..`: the title and the status bar follow the shell's directory. Alt+S, I, F: AxFile on that folder; Alt+S, I,
    G: AxGit on its repository.
 7. In AxDown on `notes.md`, Alt+F, I, T: a terminal in the file's folder.
 
@@ -88,14 +88,14 @@ out of scope; programs that print and ask are in. It works entirely offline (bun
   announced at the end of a command, and the cursor row shows as a line.
 - AT-1.5 `AxTerminalApp.Run(args)` is the entry point (AX-1.7), one call into `AppHost.Run` with the log name
   `axterminal`, the usage text, the settings (`axterminal.json`) and the window.
-- AT-1.6 Terminal → **New shell…** (Ctrl+N), the shape of AxClaude's New session (AxClaude FR-8.6, D30): the notice
+- AT-1.6 Session → **New shell…** (Ctrl+N), the shape of AxClaude's New session (AxClaude FR-8.6, D30): the notice
   "New shell" with `Folder: C:\path` as its first line, "Choose the shell and the folder. Starting ends the current
   shell and starts the new one in the folder." and the key line, preceded by "<the command> is still running. A new
   shell ends it." while one runs; the **Choose folder…** button (the folder picker); the group **Shell** with the radio
   buttons **PowerShell 7**, **Windows PowerShell**, **Command Prompt** and **Custom**, and, while Custom is selected,
   the field **Command line**; the buttons **Start shell** (Enter) and **Cancel** (Escape). Start clears the
   transcript, prints the system line `New shell: PowerShell 7 in C:\path`, announces "New shell in <folder name>" and
-  remembers the folder and the shell. Terminal → **Restart shell** (Ctrl+Shift+R) ends the shell and starts the same
+  remembers the folder and the shell. Session → **Restart shell** (Ctrl+Shift+R) ends the shell and starts the same
   one again in its current directory, keeping the transcript, after the notice "Restart the shell?" while a command
   runs ("Enter: Restart now. Escape: Keep it running."); a shell that ended restarts at once. "Restarting" is
   announced.
@@ -172,7 +172,7 @@ out of scope; programs that print and ask are in. It works entirely offline (bun
   the prompt on the same row and is nothing by itself. Without marks nothing is hidden (AT-1.4).
 - AT-4.3 **System lines** (`System: …`, found with `s`): the shell started (`Shell started: PowerShell 7 in C:\path`),
   ended, restarted, a new shell, the update's steps (the window base, AX-6.5), a recording started or stopped.
-- AT-4.4 **Clear transcript** (Ctrl+L; Terminal → Clear transcript): empties the window, the recent commands
+- AT-4.4 **Clear transcript** (Ctrl+L; Session → Clear transcript): empties the window, the recent commands
   staying; the count of the blocks starts again; "Cleared". The lines off the screen go; the lines still on the
   screen are hidden until the shell writes over their rows, since the shell goes on drawing on that screen. The
   shell's own `cls` or `clear` clears only its screen: the window lets the rows go first (the lines keep their text,
@@ -183,7 +183,7 @@ out of scope; programs that print and ask are in. It works entirely offline (bun
   AxClaude FR-3.12), the reading breaks of a line being written (AxClaude FR-3.10), the selection that holds output
   back (AxClaude D29), Ctrl+C "Copied", Ctrl+A, find with Ctrl+F, F3 and Shift+F3: all the view's, unchanged.
 - AT-4.6 The transcript is capped at 20 000 lines (`maxTranscriptLines`), trimmed from the top (AxClaude FR-3.6).
-- AT-4.7 **Export transcript…** (Ctrl+S, the bottom of the Terminal menu before Exit; AxClaude FR-3.8): the file
+- AT-4.7 **Export transcript…** (Ctrl+S, the bottom of the Session menu before Exit; AxClaude FR-3.8): the file
   picker, the default name `axterminal-<yyyy-MM-dd-HHmm>.md` in the shell's current directory (the Documents folder
   when it is gone), the visible lines as text, "Exported". No git exclude of its own: AxClaude's (D34) is about the
   files AxClaude writes into the project it runs in; an exported transcript is the user's file where they put it.
@@ -214,10 +214,10 @@ out of scope; programs that print and ask are in. It works entirely offline (bun
 
 ### AT-6 Menus, keys, texts
 
-- AT-6.1 Menus, in the standard order of a first menu (AX-6): **Terminal (T):** New shell… Ctrl+N | Open recent
+- AT-6.1 Menus, in the standard order of a first menu (AX-6): **Session (S):** New shell… Ctrl+N | Open recent
   folder ▸ (ten, "1. name (path)", AX-9.5) | ─ | Restart shell Ctrl+Shift+R | Clear transcript Ctrl+L | ─ | Show
   current folder in ▸ (File Explorer Ctrl+W | AxClaude | AxGit | AxFile), on the shell's current directory | ─ |
-  Export transcript… Ctrl+S | Exit Alt+F4. **Shell (S):** Interrupt Ctrl+Shift+C | Send Escape Shift+Escape | Send
+  Export transcript… Ctrl+S | Exit Alt+F4. **Shell (E):** Interrupt Ctrl+Shift+C | Send Escape Shift+Escape | Send
   key ▸ (Up | Down | Ctrl+D (end of input)) | ─ | Recent commands… Ctrl+R | Send without recording (Ctrl+Enter in the
   command field) | ─ | What is running Ctrl+Q. **Navigate (N):** AxClaude's Navigate menu with the kinds the terminal
   has: Command field Ctrl+1 | Terminal Ctrl+2 | Latest output Ctrl+3 | ─ | Find… Ctrl+F | Find next F3 | Find
@@ -229,6 +229,8 @@ out of scope; programs that print and ask are in. It works entirely offline (bun
   ▸ (Check for updates at start ✓) | Developer ▸ (Open settings file | Record raw stream | Copy diagnostics). **Axit
   (A)** (AX-9). **Help (H):** Keyboard shortcuts F1 | User guide | ─ | Shell resources ▸ (PowerShell documentation |
   Windows Terminal shell integration). Every item has a mnemonic (AX-7.4).
+  The first menu is Session, as in AxClaude, since what it holds is the shell in its folder, the thing the window
+  is about; Shell takes E, S being Session's.
 - AT-6.2 Keys (AX-8). Bundle-wide: F1, the control keys, Ctrl+F, F3, Shift+F3, Ctrl+S, Ctrl+Plus, Ctrl+Minus, Page
   Up, Page Down, Ctrl+Up and Ctrl+Down with Shift, Alt+F4. Window-specific (`AxTerminalKeys`): Ctrl+N, Ctrl+Shift+R,
   Ctrl+L, Ctrl+W, Ctrl+1, Ctrl+2, Ctrl+3, Ctrl+Shift+C, Shift+Escape, Ctrl+R, Ctrl+Q, Ctrl+Space, Ctrl+Shift+K; in

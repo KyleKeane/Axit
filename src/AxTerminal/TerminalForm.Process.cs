@@ -154,7 +154,7 @@ internal sealed partial class TerminalForm
     }
 
     /// <summary>
-    /// Terminal → Restart shell (Ctrl+Shift+R, AT-1.6): the same shell again in its current directory, the transcript
+    /// Session → Restart shell (Ctrl+Shift+R, AT-1.6): the same shell again in its current directory, the transcript
     /// kept. A running command is ended only after the Restart the shell? notice; an ended shell starts at once.
     /// </summary>
     private void RestartShell()

@@ -161,7 +161,7 @@ internal sealed partial class TerminalForm
         Announce(_model.Prompt is { } prompt ? $"{text}, {prompt}" : $"{text}, {CurrentDirectory}", true);
     }
 
-    /// <summary>Terminal → Clear transcript (Ctrl+L, AT-4.4): the window empties; the shell goes on.</summary>
+    /// <summary>Session → Clear transcript (Ctrl+L, AT-4.4): the window empties; the shell goes on.</summary>
     private void ClearTranscript()
     {
         _model.Clear();
