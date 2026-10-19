@@ -113,7 +113,7 @@ $oldStartMenu = Join-Path $programs 'AxClaude.lnk'
 
 # Everything an installation puts on the machine, this version's and 1.x's, so that one removal clears both. The
 # Open with values live inside the file types' own keys and are removed one by one (Remove-Installation).
-$places = @($target, $oldTarget, $appsKey, $oldAppsKey, $oldStartMenu, $fileKey, $progIdKey, $jsonProgIdKey) + $folderKeys + $gitFolderKeys +
+$places = @($target, $oldTarget, $appsKey, $oldAppsKey, $oldStartMenu, $fileKey, $progIdKey, $jsonProgIdKey) + $folderKeys + $gitFolderKeys + $terminalFolderKeys +
     @($apps | ForEach-Object { Join-Path $programs $_.Start }) +
     @(Join-Path $bin 'axit.cmd') + @($apps | ForEach-Object { Join-Path $bin $_.Shim })
 
