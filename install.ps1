@@ -30,7 +30,8 @@
 
   The apps' own Update (Help menu) runs the downloaded version's copy of this script as
     install.ps1 -InPlace -LogFile <file>
-  while the app keeps running (AX-2.8): nothing is removed, the new files are written over the old ones, and the
+  while the app keeps running (AX-2.8): the new files are written over the old ones, what earlier versions left goes
+  (their File Explorer entries, AxClaude 1.x's folder and entries, files this version does not ship), and the
   running Axit.exe is renamed Axit.old.exe first, since a running program file can be renamed but not overwritten;
   the app then starts the new version itself, and the next start removes the old file. Copies before 2.3.0 call
     install.ps1 -WaitForProcess <pid> [-Start <folder> [-ContinueConversation]] [-StartFile <file>] -LogFile <file>
@@ -186,9 +187,9 @@ $sameFolder = [string]::Equals((Resolve-Path $source).Path.TrimEnd('\'), $target
 if (-not $sameFolder) {
     # A previous installation, of Axit or of AxClaude 1.x, is removed completely first, so nothing of it stays
     # behind; then this one is installed fresh. The older updaters come here too, after the running app has closed.
-    # In place (-InPlace, the apps' own update) the app keeps running: nothing is removed but the File Explorer
-    # entries of earlier versions (below), the files are written over the old ones, and the running program file is
-    # renamed, since it can be renamed but not overwritten or deleted.
+    # In place (-InPlace, the apps' own update) the app keeps running: the files are written over the old ones, the
+    # running program file is renamed, since it can be renamed but not overwritten or deleted, and what earlier
+    # versions left goes afterwards, so that an update leaves the machine as a fresh install would.
     $found = @($places | Where-Object { Test-Path -LiteralPath $_ })
     if ($found -and -not $InPlace) {
         if (Test-Running) {
@@ -217,6 +218,18 @@ if (-not $sameFolder) {
             Say "Moved the running program file aside as $(Split-Path -Leaf $old); the next start removes it."
         }
         Copy-Item -LiteralPath $file -Destination $target -Force
+    }
+
+    if ($InPlace) {
+        # What earlier versions left and this one does not write again: AxClaude 1.x's folder, Apps entry and Start
+        # menu entry, and files in the folder this version does not ship (the program file moved aside goes at the
+        # next start). The File Explorer entries of earlier versions go below, with the menu.
+        foreach ($item in $oldTarget, $oldAppsKey, $oldStartMenu) {
+            if (Test-Path -LiteralPath $item) { try { Remove-Item -LiteralPath $item -Recurse -Force } catch { } }
+        }
+        foreach ($stale in Get-ChildItem -LiteralPath $target -File | Where-Object { $files -notcontains $_.Name -and $_.Name -notlike 'Axit.old*.exe' }) {
+            try { Remove-Item -LiteralPath $stale.FullName -Force } catch { }
+        }
     }
 }
 

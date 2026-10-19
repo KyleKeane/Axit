@@ -120,8 +120,10 @@ allow it, see B-9).
   -LogFile <file>` installs after that process ends and starts AxClaude on the folder, as the 1.7.0 updater expects.
   `-StartFile <file>` starts AxDown on the file the same way; nothing is renamed. Copies up to 2.2.0 update
   this way; from 2.3.0 the apps use AX-2.8.
-- AX-2.8 In place: `install.ps1 -InPlace -LogFile <file>` installs while the app keeps running. Nothing is removed;
-  the new files are written over the old ones; the running `Axit.exe` is first renamed `Axit.old.exe` (a running
+- AX-2.8 In place: `install.ps1 -InPlace -LogFile <file>` installs while the app keeps running. The new files are
+  written over the old ones, and what earlier versions left goes, as on a fresh install: their File Explorer
+  entries, AxClaude 1.x's folder, Apps entry and Start menu entry, and files in the folder this version does not ship
+  (from 3.0.0; before, nothing was removed in place); the running `Axit.exe` is first renamed `Axit.old.exe` (a running
   program file can be renamed but not overwritten or deleted), and `Axit.exe` deletes any `Axit.old*.exe` next to it
   when it starts. The shortcuts, menus, shims and the Apps entry are written again, so the version shown in Settings,
   Apps is the new one. The app, not the installer, starts the new version afterwards (AX-3.2).
