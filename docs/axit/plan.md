@@ -64,6 +64,13 @@ the restart by the app itself (2.3.0).
   not yet written, has to settle what the database holds and where it lives, how the service reaches Claude (Claude
   Code as AxClaude runs it, or the API), what the service may change in a window and how the user sees and undoes
   it, and the one switch that turns every network use off.
+- **A gutter for the transcript views** (the user's idea, 2026-10-19, agreed as a later bundle feature): two narrow
+  columns to the left of a transcript, the line number and the jump letter of the line's kind (`i`, `o`, `h2`), for
+  sighted helpers, drawn next to the view and never spoken, since in an edit control what is in the text is what NVDA
+  reads; and, as two options off by default, the same two as text in front of each line, which NVDA then reads on
+  every arrow. What is spoken stays on demand: `l` for the line number, the jump keys with their announcements, and
+  Options → Text → Markers in the text (AxClaude FR-4.6a, built 2026-10-19) for the `#` markers. The spoken-but-
+  invisible variant would need a rich edit control and is not planned.
 
 ## Later apps (recorded 2026-10-18)
 
