@@ -18,6 +18,7 @@ public sealed class KeyTests
             ["AxClaude"] = AxClaude.AxClaudeKeys.All,
             ["AxGit"] = AxGit.AxGitKeys.All,
             ["AxTerminal"] = AxTerminal.AxTerminalKeys.All,
+            ["AxFile"] = AxFile.AxFileKeys.All,
         };
 
     [Fact]
@@ -70,6 +71,7 @@ public sealed class KeyTests
             ["AxClaude"] = AxClaude.HelpText.Shortcuts,
             ["AxGit"] = AxGit.HelpText.Shortcuts,
             ["AxTerminal"] = AxTerminal.HelpText.Shortcuts,
+            ["AxFile"] = AxFile.HelpText.Shortcuts,
         };
         var missing = new List<string>();
         foreach (var (window, keys) in Windows)
@@ -114,6 +116,9 @@ public sealed class KeyTests
     [InlineData(Keys.F3, "F3")]
     [InlineData(Keys.Shift | Keys.Escape, "Shift+Escape")]
     [InlineData(Keys.Control | Keys.Oemplus, "Ctrl+Plus")]
+    [InlineData(Keys.Control | Keys.Shift | Keys.OemPeriod, "Ctrl+Shift+Period")]
+    [InlineData(Keys.Control | Keys.Shift | Keys.Oemcomma, "Ctrl+Shift+Comma")]
+    [InlineData(Keys.Back, "Backspace")]
     public void Menu_text_of_a_key(Keys key, string expected)
     {
         Assert.Equal(expected, BundleKeys.Text(key));

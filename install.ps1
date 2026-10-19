@@ -8,11 +8,11 @@
   %LOCALAPPDATA%\Programs\Axit and creates the ways to start each app, all from the table $apps below:
     - a Start menu entry per app, "Axit AxClaude", "Axit AxDown" and so on (type axit in the Start menu to list them),
     - one submenu in File Explorer's right-click menu, "Open with Axit", on folders (and on a folder's background) and
-      on files, listing the apps that open what was right-clicked: AxClaude, AxGit and AxTerminal on folders, AxDown
-      on every file, AxJSON on .json files; and AxDown under Windows' own "Open with" for .md, .markdown and .txt,
-      AxJSON for .json,
-    - the console commands axclaude, axdown, axjson, axgit, axterminal and axit (a folder opens AxClaude, a file
-      AxDown, a .json file AxJSON): one-line shims in %USERPROFILE%\.local\bin, the folder that Claude Code's
+      on files, listing the apps that open what was right-clicked: AxClaude, AxGit, AxTerminal and AxFile on folders,
+      AxDown and AxFile on every file, AxJSON on .json files; and AxDown under Windows' own "Open with" for .md,
+      .markdown and .txt, AxJSON for .json,
+    - the console commands axclaude, axdown, axjson, axgit, axterminal, axfile and axit (a folder opens AxClaude, a
+      file AxDown, a .json file AxJSON): one-line shims in %USERPROFILE%\.local\bin, the folder that Claude Code's
       installer already puts on PATH.
   It also lists Axit in Settings, Apps (Add or remove programs), whose Uninstall runs install.cmd -Uninstall.
   -Uninstall removes all of that. The settings in %APPDATA%\Axit and the logs in %LOCALAPPDATA%\Axit stay.
@@ -96,7 +96,8 @@ $apps = @(
     @{ Name = 'AxDown'; Verb = 'down'; Description = 'AxDown, a plain editor for Markdown and text files'; Icon = (Join-Path $target 'AxDown.ico'); Opens = 'files'; OpenWith = '.md', '.markdown', '.txt'; TypeName = 'Text document (AxDown)' },
     @{ Name = 'AxJSON'; Verb = 'json'; Description = 'AxJSON, an editor for JSON files'; Icon = (Join-Path $target 'AxJSON.ico'); Opens = 'files'; Types = '.json'; OpenWith = '.json'; TypeName = 'JSON document (AxJSON)' },
     @{ Name = 'AxGit'; Verb = 'git'; Description = 'AxGit, a git manager for one repository'; Icon = (Join-Path $target 'AxGit.ico'); Opens = 'folders' },
-    @{ Name = 'AxTerminal'; Verb = 'terminal'; Description = 'AxTerminal, a shell as a transcript'; Icon = (Join-Path $target 'AxTerminal.ico'); Opens = 'folders' }
+    @{ Name = 'AxTerminal'; Verb = 'terminal'; Description = 'AxTerminal, a shell as a transcript'; Icon = (Join-Path $target 'AxTerminal.ico'); Opens = 'folders' },
+    @{ Name = 'AxFile'; Verb = 'file'; Description = 'AxFile, a file manager for one folder, with a player'; Icon = (Join-Path $target 'AxFile.ico'); Opens = 'folders', 'files' }
 )
 # The places that follow from the name.
 foreach ($app in $apps) {

@@ -1,7 +1,8 @@
 <#
 .SYNOPSIS
   Generates the icons in src\Axit: AxClaude.ico (the letters Ax on dark blue, also the icon of Axit.exe),
-  AxDown.ico (the letters Ad on dark green) and AxJSON.ico (the letters Aj on dark brown), rounded squares at the
+  AxDown.ico (the letters Ad on dark green), AxJSON.ico (the letters Aj on dark brown), AxGit.ico, AxTerminal.ico and
+  AxFile.ico (the letters Af on purple), rounded squares at the
   usual Windows sizes.
 
 .DESCRIPTION
@@ -133,4 +134,5 @@ if ($Out) {
     Write-Icon (Join-Path $iconFolder 'AxJSON.ico') 'Aj' @(120, 70, 20)
     Write-Icon (Join-Path $iconFolder 'AxGit.ico') 'Ag' @(110, 40, 40)
     Write-Icon (Join-Path $iconFolder 'AxTerminal.ico') 'At' @(40, 40, 40)
+    Write-Icon (Join-Path $iconFolder 'AxFile.ico') 'Af' @(90, 50, 130)
 }

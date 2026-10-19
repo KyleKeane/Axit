@@ -37,6 +37,12 @@ public sealed class DispatchTests
         Assert.Equal(Dispatch.AxTerminal, launch.App);
         Assert.Equal([Folder], launch.Arguments);
         Assert.Contains(Dispatch.Apps, app => app.Verb == Dispatch.AxTerminal && app.Name == "AxTerminal");
+        // AxFile is always named by its verb too (docs/axfile/SPEC.md AF-1.1).
+        launch = Dispatch.Decide(["file", Folder]);
+        Assert.Equal(Dispatch.AxFile, launch.App);
+        Assert.Equal([Folder], launch.Arguments);
+        Assert.Contains(Dispatch.Apps, app => app.Verb == Dispatch.AxFile && app.Name == "AxFile");
+        Assert.Contains("Axit file", Dispatch.Usage);
     }
 
     [Fact]
@@ -114,7 +120,7 @@ public sealed class DispatchTests
         Assert.Equal(Dispatch.AxJSON, Dispatch.Decide(["json", "x.json"]).App);
         Assert.Equal(["x.json"], Dispatch.Decide(["JSON", "x.json"]).Arguments);
         Assert.Contains("Axit json", Dispatch.Usage);
-        Assert.Equal(["AxClaude", "AxDown", "AxJSON", "AxGit", "AxTerminal"], Dispatch.Apps.Select(a => a.Name));
+        Assert.Equal(["AxClaude", "AxDown", "AxJSON", "AxGit", "AxTerminal", "AxFile"], Dispatch.Apps.Select(a => a.Name));
     }
 
     [Fact]

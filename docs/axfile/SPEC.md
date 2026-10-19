@@ -1,9 +1,9 @@
 # AxFile — Specification
 
-AxFile is a planned app of the Axit bundle (`docs/axit/SPEC.md`): a file manager for one folder, with a player for the
-sound and video files in it, for a blind developer who uses the NVDA screen reader. Describes AxFile as planned on
-2026-10-18; nothing is built yet, and once it is the document is kept in step with the code (a behaviour change updates
-it in the same commit). Requirements are numbered `AF-n.m` and decisions `AF-Dn`; the bundle's rules, AX-7
+AxFile is an app of the Axit bundle (`docs/axit/SPEC.md`): a file manager for one folder, with a player for the
+sound and video files in it, for a blind developer who uses the NVDA screen reader. Specified 2026-10-18 and built as a
+first draft 2026-10-19 (section 8); the document is kept in step with the code (a behaviour change updates it in the
+same commit). Requirements are numbered `AF-n.m` and decisions `AF-Dn`; the bundle's rules, AX-7
 (accessibility), AX-8 (keys) and AX-9 (the Axit menu), are cited by number and not repeated. In AxFile's code and
 documents, "SPEC.md" means this file.
 
@@ -62,7 +62,7 @@ windows on the folder of the file or project in hand, and sends back. It works e
   the usage text, the settings (`axfile.json`) and the window.
 - AF-1.3 **To and from the other windows.** AxClaude's Session → Show current folder in ▸ **AxFile**, the editors'
   File → Show current file in ▸ **AxFile** (the file's folder, the file selected), AxGit's Repository → Show current
-  repository in ▸ **AxFile** and AxTerminal's Terminal → Show current folder in ▸ **AxFile** each start a new AxFile
+  repository in ▸ **AxFile** and AxTerminal's Session → Show current folder in ▸ **AxFile** each start a new AxFile
   window (`AxitMenu.Start`, found again in the Axit menu, AX-9.3). From AxFile, Folder → Show current folder in ▸
   **File Explorer** (Ctrl+W), **AxClaude**, **AxGit**, **AxTerminal**; Item → **Show in File Explorer**
   (Ctrl+Shift+W) opens File Explorer with the selected entry selected; Item → **Open in editor** (Ctrl+E) opens the
@@ -91,25 +91,29 @@ windows on the folder of the file or project in hand, and sends back. It works e
 - AF-3.2 **Enter** on a file: `.md`, `.markdown` and `.txt` open in AxDown and `.json` in AxJSON, each a new window of
   that app; a media file plays (AF-5); any other file opens with the program Windows has for it (`ShellExecute`, as
   Enter in File Explorer); when Windows has none, "No program opens .xyz. Ctrl+E opens it as text".
-- AF-3.3 **Open folder…** (Ctrl+O): the Windows folder picker. **Open recent folder ▸**: the last ten folders, "1.
-  name (path)" (AX-9.5). **Go to folder…** (Ctrl+G): the notice "Go to folder" with the field "Path", which takes a
-  path with environment variables (`%USERPROFILE%\Downloads`) and a file's path (its folder, the file selected); "Not
-  found: <path>" when there is no such place.
+- AF-3.3 **Open folder…** (Ctrl+O): the Windows folder picker. **Open recent folder ▸**: the last ten folders opened
+  by command, "1. name (path)" (AX-9.5): the start, Open folder, Go to folder, a recent item, and the folder the
+  window closed on; Enter and Backspace browse without joining the list, so that a walk through a tree does not fill
+  it. **Go to folder…** (Ctrl+G): the notice "Go to folder" with the field "Path" holding the current folder, which
+  takes a path with environment variables (`%USERPROFILE%\Downloads`) and a file's path (its folder, the file
+  selected); "Not found: <path>" when there is no such place.
 - AF-3.4 **Refresh** (F5) reads the folder again keeping the selection by name; "Refreshed". Coming back to the window
   after another program changed the folder refreshes it the same way, silently (the list is a view and holds nothing
   unsaved; AxDown AD-3.6 is the editors' rule).
 - AF-3.5 A folder that is gone when it is asked for (deleted, an unplugged drive) gives the notice "Folder not found"
   naming it, and the list shows the nearest parent that exists.
 - AF-3.6 The list's own keys stay native: arrows, Home, End, Page Up and Page Down, a typed letter to the next name
-  starting with it. **Find** (Ctrl+F, the base's find notice) selects the first entry after the current one whose name
-  contains the text, "Not found" otherwise; F3 and Shift+F3 the next and the previous.
+  starting with it. **Find** (Ctrl+F, the notice "Find" with the field "Name contains") selects the first entry after
+  the current one whose name contains the text, wrapping round the end once, "Not found" otherwise; F3 and Shift+F3
+  the next and the previous. NVDA reads the selected entry; the app adds nothing.
 
 ### AF-4 Operations
 
 - AF-4.1 **New folder…** (Ctrl+Shift+N): the notice "New folder" with the field "Name" and the buttons Create and
   Cancel; Create makes it in the current folder, selects it and says "Created <name>".
 - AF-4.2 **Rename…** (F2): the notice "Rename <name>" with the field "New name" holding the name, the part before the
-  extension selected, and the buttons Rename and Cancel; "Renamed to <new name>".
+  extension selected (the whole name for a folder; the notice field's `SelectLength`, added to `Axit.Forms` for this),
+  and the buttons Rename and Cancel; "Renamed to <new name>". A change of case alone is a rename too.
 - AF-4.3 **Delete…** (Delete): the notice "Delete <name>? It goes to the Recycle Bin." (for a folder: "… with
   everything in it.") with the buttons Delete and Cancel; the deletion goes through the shell (`SHFileOperationW` with
   `FOF_ALLOWUNDO`, silent and without the shell's own confirmation), so that the Recycle Bin takes it; "Deleted
@@ -126,11 +130,12 @@ windows on the folder of the file or project in hand, and sends back. It works e
   Whether Windows plays one depends on its decoders (the Store's extensions for some); a file that cannot be opened
   says "Cannot play <name>: <reason>" and the player moves to the next.
 - AF-5.2 **Engine**: Windows' own media stack through one P/Invoke seam, `MediaPlayer` in `AxFile.Core`, no package
-  (B-10). The first build measures the two candidates and records the choice here (AF-D3): MCI (`mciSendString` of
-  winmm, the DLL the sounds already use: open, play, pause, seek, speed, position and length, as strings) for its
-  plainness, and Media Foundation's MFPlay (`MFPCreateMediaPlayer`, COM through P/Invoke) for the formats Windows
-  decodes today (FLAC, AAC) and a speed change that keeps the pitch. The criterion is the user's: an audiobook at 1.5
-  with the voice unchanged.
+  (B-10): Media Foundation through MFPlay (`MFPCreateMediaPlayer`, `IMFPMediaPlayer` and `IMFPMediaItem` of
+  `mfplay.dll`, COM through P/Invoke; AF-D3). The file is opened synchronously, so that one that cannot be opened
+  says so at once; playing starts when the engine reports the item set; its events (started, ended, failed) come back
+  on the window's thread. A rate other than 1 is stretched in time by Media Foundation's audio renderer, which keeps
+  the pitch, the user's criterion (an audiobook at 1.5 with the voice unchanged; heard in the test plan, §4.3). A
+  rate the engine refuses: "Speed n is not supported here", and the speed stays.
 - AF-5.3 **Play** (Enter on a media file; Player → Play): plays it; "Playing <name>". When it ends, the next media
   file of the same folder, in the list's order, plays, to the end of the folder: "End of folder" with the done chime
   (the shared `Sounds`, AxClaude FR-7.3). The queue is the folder's media files as they were when Enter was pressed,
@@ -163,7 +168,8 @@ windows on the folder of the file or project in hand, and sends back. It works e
   Ctrl+Shift+Period | Slower Ctrl+Shift+Comma | Normal speed | ─ | Say each file as it starts ✓ | What is playing
   Ctrl+Q. **Options (O):** Text ▸ (Font… | Larger text Ctrl+Plus | Smaller text Ctrl+Minus | Windows text size) |
   General ▸ (Check for updates at start ✓) | Developer ▸ (Open settings file | Copy diagnostics). **Axit (A)**
-  (AX-9). **Help (H):** Keyboard shortcuts F1 | User guide. Every item has a mnemonic (AX-7.4).
+  (AX-9). **Help (H):** Keyboard shortcuts F1 | User guide | ─ | File resources ▸ (Keyboard shortcuts in Windows, the
+  Microsoft page, in the browser). Every item has a mnemonic (AX-7.4).
 - AF-6.2 Keys (AX-8). Bundle-wide: F1, the control keys, Ctrl+F, F3, Shift+F3, Ctrl+S ("Nothing to save here"),
   Ctrl+Plus, Ctrl+Minus, Page Up and Page Down (the list's own here), Ctrl+Up and Ctrl+Down with Shift (edit controls
   only; the list leaves them alone), Alt+F4. Window-specific (`AxFileKeys`): Enter, Backspace, Alt+Up, F5, F2, Delete,
@@ -181,8 +187,10 @@ One UI Automation notification each, on the list, or on the notice while one sho
 "Nothing playing", "Playing <name>, m:ss of m:ss, speed n", "Cannot play <name>: <reason>", "Created <name>", "Renamed
 to <name>", "Deleted <name>", "Copied path", "Refreshed", "Top of the drive", "Not found: <path>", "No program opens
 .xyz. Ctrl+E opens it as text", "Failed: <message>", "<name>, <size>, modified <date>" (Ctrl+I), "Not found" (find),
-"Nothing to save here", "Text size n", "Windows text size", "Copied diagnostics". A new selection is NVDA's own
-reading.
+"Nothing to save here", "Text size n", "Windows text size", "Copied diagnostics"; and the guards "No folder" (nothing
+listed yet), "Nothing selected" (an empty folder), "Not a file" (Ctrl+E on a folder), "Not a sound or video file"
+(Player → Play on another entry), "Not a time" (Go to time), "Speed n is not supported here", "Type a name" and the
+other reasons of `FileOperations.CheckName`. A new selection is NVDA's own reading.
 
 ### AF-8 Settings, log, status
 
@@ -196,22 +204,26 @@ reading.
 
 ```
 src/AxFile.Core/    class library (net10.0): FolderListing (a folder's entries as records, folders first in natural
-                    order, hidden left out; what Enter does with an entry, by its extension), MediaFiles (the extensions,
-                    the queue from a listing, the time format, the speed steps), MediaPlayer (the Windows media API
-                    through P/Invoke: open, play, pause, position, length, speed, the end-of-file event, a window handle
-                    for video; AF-5.2), FileOperations (new folder, rename, delete to the Recycle Bin through
-                    SHFileOperationW, the messages), FileSettings; references Axit.Core
-src/AxFile/         class library (net10.0-windows): AxFileApp (Run, Usage), FileForm (the window, on AxitForm),
-                    AxFileKeys, HelpText (F1 text, the embedded guide); references AxFile.Core, Axit.Core, Axit.Forms
+                    order, hidden left out; what Enter does with an entry, by its extension; the list's name, the
+                    information line, the parent, a typed path), NaturalOrder (StrCmpLogicalW), MediaFiles (the
+                    extensions, the queue from a listing, the time format and the typed time, the speed steps),
+                    MediaPlayer (MFPlay through P/Invoke: open, play, pause, position, length, speed, the started,
+                    ended and failed events, a window handle for video; AF-5.2), FileOperations (the name check, new
+                    folder, rename, delete to the Recycle Bin through SHFileOperationW, the messages), FileSettings;
+                    references Axit.Core
+src/AxFile/         class library (net10.0-windows): AxFileApp (Run, Usage), FileForm (the window, on AxitForm, in
+                    four partial files: the controls, menus, hooks and keys; Browse; Operations; Player), AxFileKeys,
+                    HelpText (F1 text, the embedded guide); references AxFile.Core, Axit.Core, Axit.Forms
 tests/AxFile.Tests/ FolderListingTests and FileOperationsTests over temporary folders (the Recycle Bin is not
                     exercised), MediaFilesTests (extensions, queue order, time format, speed steps), FileSettingsTests;
                     the player itself is checked by ear
 docs/axfile/        this spec, user-guide.md (embedded), nvda-test-plan.md
 ```
 
-`FileForm` derives from the window base (AX-6.5): the notices, the fonts, the window's place, find and the update flow
-are the base's. The player runs on the UI thread through the API's own events; the folder reads and the operations run
-on background tasks (AX-7.5).
+`FileForm` derives from the window base (AX-6.5): the notices, the fonts, the window's place and the update flow are
+the base's (find is the window's own, over the list). The player is driven from the UI thread and its events are
+posted back to it; the folder reads and the operations run on background tasks, the shell's delete on a
+single-threaded-apartment thread of its own (AX-7.5).
 
 ## 6. Design decisions
 
@@ -223,10 +235,15 @@ on background tasks (AX-7.5).
   fewer verbs and a second window for the same folder; the Axit menu names an AxFile window by its folder, which is
   how a playlist is named anyway. The player's keys are with Ctrl and Shift, so that the list's own letters and arrows
   stay what they are.
-- **AF-D3 Windows' own decoders through one seam, chosen by measurement.** No codec ships with the bundle (B-10);
-  Windows decodes what the user's other players decode. MCI is a single function and strings; MFPlay is a COM
-  interface but decodes more and may keep the pitch at speed. The spec records the choice when the build has made it,
-  with the formats that worked on the user's machine.
+- **AF-D3 Windows' own decoders through one seam: MFPlay.** No codec ships with the bundle (B-10); Windows decodes
+  what the user's other players decode. The first build (2026-10-19) chose Media Foundation's MFPlay over MCI without
+  measuring MCI: MCI's digital video device plays through DirectShow, whose documentation says a changed rate changes
+  the pitch of audio, and DirectShow has no decoder for FLAC, AAC in MP4 or Opus, whereas Media Foundation's audio
+  renderer is documented to adjust the pitch at a changed rate and decodes those formats. MFPlay is the plainest way
+  in (one function, two interfaces, the events on the creating thread), and `mfplay.dll` ships with Windows 11; its
+  documentation calls it superseded by `IMFMediaEngine` and the WinRT `MediaPlayer`, so the Media Engine, the same
+  pipeline with more plumbing, is the fallback should a Windows drop it. The formats that worked on the user's
+  machine are recorded here after the NVDA pass.
 - **AF-D4 Volume is Windows'.** The keyboard's volume keys change the system volume from any window and are read by
   NVDA; two more keys in the app would duplicate them, and the bundle's Ctrl+Up and Ctrl+Down are the paragraph keys
   (AX-8.2).
@@ -249,4 +266,8 @@ on background tasks (AX-7.5).
 
 ## 8. Status
 
-- Planned 2026-10-18 at the user's ask (as AxMedia, then as AxFile's player, AF-D2). Nothing built.
+- Planned 2026-10-18 at the user's ask (as AxMedia, then as AxFile's player, AF-D2).
+- Built 2026-10-19 as a first draft, on the branch `axfile`: the window, the four operations, the player on MFPlay,
+  the wiring into the bundle (the dispatcher, the installer's table, the icon, the other windows' submenus), the tests
+  of the pure code (77), the guide and the test plan. Not yet checked with NVDA; the player not yet heard by the user;
+  the window and the player exercised by an off-screen probe only.

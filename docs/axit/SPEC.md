@@ -12,9 +12,9 @@ Axit is one installed Windows program, `Axit.exe`, that holds several accessible
 the NVDA screen reader. Each app is a separate window that starts on its own, has its own Start menu entry, its place in
 File Explorer's Open with Axit submenu and its own console command, and all of them share one installer, one updater, one
 version number and one release workflow. The first apps are **AxClaude**, the front end for the Claude Code CLI that
-exists today, and **AxDown**, a barebones editor for Markdown and text files. Later apps are planned (a terminal, a
-file manager with a player, a password manager, a vault manager: `docs/axit/plan.md`) and follow the same pattern
-without changes to the bundle.
+exists today, and **AxDown**, a barebones editor for Markdown and text files; **AxJSON**, **AxGit**, **AxTerminal** and
+**AxFile** followed (section 3). Later apps are planned (a password manager, a vault manager: `docs/axit/plan.md`) and
+follow the same pattern without changes to the bundle.
 
 ## 2. Goals and non-goals
 
@@ -54,6 +54,10 @@ allow it, see B-9).
   Axit on folders, command `axterminal`. A shell (PowerShell, or cmd) in AxClaude's window: the output as a
   transcript with exchange blocks, the shell's integration marks for Done and Failed. Specification
   `docs/axterminal/SPEC.md`, guide `docs/axterminal/user-guide.md`, test plan `docs/axterminal/nvda-test-plan.md`.
+- **AxFile** (first draft, 2026-10-19): `Axit.exe file [<folder or file>]`, Start entry `Axit AxFile`, Open with Axit
+  on folders and on files, command `axfile`. A file manager for one folder as one list, Enter the verb, the four
+  operations, and a player for the folder's sound and video files through Windows' own decoders. Specification
+  `docs/axfile/SPEC.md`, guide `docs/axfile/user-guide.md`, test plan `docs/axfile/nvda-test-plan.md`.
 
 ## 4. Functional requirements
 
@@ -70,7 +74,7 @@ allow it, see B-9).
   usage text.
 - AX-1.5 The dispatch is pure code in `Axit.Core` (`Dispatch`): arguments in, app name and arguments out. It is unit
   tested and has no knowledge of the apps beyond their names.
-- AX-1.6 Each process sets a Windows application id before its window opens (`Axit.AxClaude`, `Axit.AxDown`, `Axit.AxJSON`, `Axit.AxGit`), so the
+- AX-1.6 Each process sets a Windows application id before its window opens (`Axit.AxClaude`, `Axit.AxDown`, `Axit.AxJSON`, `Axit.AxGit`, `Axit.AxTerminal`, `Axit.AxFile`), so the
   taskbar shows the apps apart and Win+number keys reach the right one.
 - AX-1.7 An app is a class library with one entry point, `static void Run(string[] args)` on a class named
   `<App>App`, plus a `Usage` text. `Axit`'s `Program` only dispatches; the entry point is one call into
@@ -104,7 +108,7 @@ allow it, see B-9).
   | AxJSON | | `.json` | `.json` (`Axit.AxJSON`) |
   | AxGit | yes | | |
   | AxTerminal | yes | | |
-  | AxFile (planned) | yes | every file (its folder, the file selected) | |
+  | AxFile | yes | every file (its folder, the file selected) | |
 
   On Windows 11 the submenu is in the full menu (Shift+F10, or Show more options), as every program's own entries
   are. Up to 2.13.0 each app had an entry of its own (`Open in AxClaude` and the like); the installer removes them.
@@ -240,7 +244,7 @@ allow it, see B-9).
   Ctrl+Shift+Down the selection grown to there, as in Word (`EditParagraphs`; the EDIT control's own keys scroll a
   row and leave the caret where it is, as Notepad's do, which a screen reader, reading at the caret after the key,
   reports as the same text again); Alt+F4 exit; Alt and F10 the menu. Everything else is window-specific.
-- AX-8.3 Window-specific keys are defined once per window, in one table (`AxClaudeKeys`, `AxDownKeys`, `AxJSONKeys`, `AxGitKeys`), as constants
+- AX-8.3 Window-specific keys are defined once per window, in one table (`AxClaudeKeys`, `AxDownKeys`, `AxJSONKeys`, `AxGitKeys`, `AxTerminalKeys`, `AxFileKeys`), as constants
   with names that say what the key does. Changing a key is a change to that one line: the menu item and the key
   handler read the table, and the F1 text names the same keys and is changed with it. Single-letter quick keys
   (AxClaude's `h`, `i`, `o`) are in the table too. The text editor shell's keys (`Axit.Forms/EditorKeys`: Ctrl+N new,
@@ -351,7 +355,12 @@ src/AxJSON/          class library (net10.0-windows): AxJSONApp (its EditorApp),
 src/AxJSON.Core/     class library (net10.0): JsonScanner, JsonParser, JsonOutline, JsonFormat (AxJSON's pure code)
 src/AxGit/           class library (net10.0-windows): AxGitApp, GitForm, AxGitKeys, HelpText (AxGit's window)
 src/AxGit.Core/      class library (net10.0): GitRunner, GitStatus, GitLog, GitBranches, GitSettings (AxGit's pure code)
-tests/Axit.Tests, tests/AxClaude.Tests, tests/AxJSON.Tests, tests/AxGit.Tests
+src/AxTerminal/      class library (net10.0-windows): AxTerminalApp, TerminalForm, AxTerminalKeys, HelpText (AxTerminal's window)
+src/AxTerminal.Core/ class library (net10.0): ShellLauncher, TerminalModel, TerminalSettings, … (AxTerminal's pure code)
+src/AxFile/          class library (net10.0-windows): AxFileApp, FileForm, AxFileKeys, HelpText (AxFile's window)
+src/AxFile.Core/     class library (net10.0): FolderListing, NaturalOrder, MediaFiles, MediaPlayer, FileOperations,
+                     FileSettings (AxFile's pure code and its one seam to Windows' media stack)
+tests/Axit.Tests, tests/AxClaude.Tests, tests/AxJSON.Tests, tests/AxGit.Tests, tests/AxTerminal.Tests, tests/AxFile.Tests
 ```
 
 References point one way: `Axit` references every app; an app's window project references its own `.Core`,

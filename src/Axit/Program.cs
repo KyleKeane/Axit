@@ -1,6 +1,7 @@
 using System.Runtime.InteropServices;
 using AxClaude;
 using AxDown;
+using AxFile;
 using AxGit;
 using Axit.Core;
 using AxJSON;
@@ -51,6 +52,10 @@ internal static class Program
             case Dispatch.AxTerminal:
                 SetAppId("Axit.AxTerminal");
                 AxTerminalApp.Run(launch.Arguments);
+                break;
+            case Dispatch.AxFile:
+                SetAppId("Axit.AxFile");
+                AxFileApp.Run(launch.Arguments);
                 break;
             default:
                 // --help or --version for the bundle itself (AX-1.4).
