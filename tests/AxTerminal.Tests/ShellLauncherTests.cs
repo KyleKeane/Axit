@@ -15,6 +15,7 @@ public sealed class ShellLauncherTests
         Assert.Equal("cat", env["GIT_PAGER"]);
         Assert.Equal("cat", env["GH_PAGER"]);
         Assert.Equal("xterm-256color", env["TERM"]);
+        Assert.False(env.TryGetValue("PROMPT_COMMAND", out var bash) && bash == ShellLauncher.BashPromptCommand);
     }
 
     [Fact]
@@ -29,6 +30,30 @@ public sealed class ShellLauncherTests
         Assert.Contains("ProgressPreference", decoded);
         Assert.DoesNotContain("`e", decoded);
         Assert.False(ShellLauncher.BuildEnvironment(ShellKind.WindowsPowerShell).ContainsKey("PROMPT_AXIT"));
+    }
+
+    [Fact]
+    public void Git_bash_gets_the_marks_through_its_prompt_command()
+    {
+        var command = ShellLauncher.BuildEnvironment(ShellKind.GitBash)["PROMPT_COMMAND"];
+        Assert.Equal(ShellLauncher.BashPromptCommand, command);
+        // The exit code is read before anything else can change it; the marks and the directory follow; B goes on PS1.
+        Assert.StartsWith("__axit_code=$?;", command);
+        Assert.Contains("133;D;%s", command);
+        Assert.Contains("133;A", command);
+        Assert.Contains("9;9;%s", command);
+        Assert.Contains("PS1=\"$PS1\"", command);
+        Assert.Contains("133;B", command);
+        Assert.DoesNotContain("\n", command);
+        if (ShellLauncher.Find(ShellKind.GitBash) is { } bash)
+        {
+            Assert.EndsWith(@"\Git\bin\bash.exe", bash, StringComparison.OrdinalIgnoreCase);
+            Assert.EndsWith(" --login -i", ShellLauncher.BuildCommandLine(ShellKind.GitBash));
+        }
+        else
+        {
+            Assert.Null(ShellLauncher.BuildCommandLine(ShellKind.GitBash));
+        }
     }
 
     [Fact]
@@ -61,7 +86,13 @@ public sealed class ShellLauncherTests
         }
 
         Assert.Equal(ShellLauncher.DefaultKind(), ShellLauncher.Parse(null));
-        Assert.Equal(ShellLauncher.DefaultKind(), ShellLauncher.Parse("bash"));
+        Assert.Equal(ShellLauncher.DefaultKind(), ShellLauncher.Parse("fish"));
+        Assert.Equal(ShellKind.GitBash, ShellLauncher.Parse("bash"));
         Assert.Equal("Windows PowerShell", ShellLauncher.Describe(ShellKind.WindowsPowerShell));
+        Assert.Equal("Git Bash", ShellLauncher.Describe(ShellKind.GitBash));
+        Assert.Equal(">> ", ShellLauncher.ContinuationPrompt(ShellKind.WindowsPowerShell));
+        Assert.Equal("> ", ShellLauncher.ContinuationPrompt(ShellKind.GitBash));
+        Assert.Equal("More? ", ShellLauncher.ContinuationPrompt(ShellKind.CommandPrompt));
+        Assert.Null(ShellLauncher.ContinuationPrompt(ShellKind.Custom));
     }
 }

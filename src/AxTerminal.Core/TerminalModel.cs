@@ -63,6 +63,13 @@ public sealed class TerminalModel : LineStore
     /// <summary>A row that fills every column and is followed by a row with text is a hard wrap, joined in the view (AT-4.1).</summary>
     public bool JoinWrappedLines { get; set; } = true;
 
+    /// <summary>
+    /// What the shell prints at the start of a continuation row of a multi-line command, which the echo hides with
+    /// the prompt rows (AT-3.2): PowerShell's <c>&gt;&gt; </c>, bash's <c>&gt; </c>, cmd's <c>More? </c>; null when the
+    /// shell has none known, and then no row is taken for one.
+    /// </summary>
+    public string? ContinuationPrompt { get; set; } = ">> ";
+
     /// <summary>The time on the markers (AT-3.2).</summary>
     public bool TimeStamps { get; set; }
 
@@ -358,20 +365,22 @@ public sealed class TerminalModel : LineStore
     }
 
     /// <summary>
-    /// PowerShell's continuation rows of a multi-line command (<c>&gt;&gt; </c>) are the echo's too: hidden while
-    /// they sit directly under the prompt row or under another hidden continuation row (AT-3.2).
+    /// The continuation rows of a multi-line command (the shell's <see cref="ContinuationPrompt"/>: PowerShell's
+    /// <c>&gt;&gt; </c>, bash's <c>&gt; </c>) are the echo's too: hidden while they sit directly under the prompt row
+    /// or under another hidden continuation row (AT-3.2).
     /// </summary>
     private void HideContinuationRows()
     {
-        if (_promptLines.Count == 0 || _promptRow < 0)
+        if (_promptLines.Count == 0 || _promptRow < 0 || ContinuationPrompt is null)
         {
             return;
         }
 
+        var bare = ContinuationPrompt.TrimEnd();
         for (var r = _promptRow + 1; r < Rows; r++)
         {
             var line = _screen.LineAt(r);
-            if (line is null || !line.Text.StartsWith(">> ", StringComparison.Ordinal) && line.Text != ">>")
+            if (line is null || !line.Text.StartsWith(ContinuationPrompt, StringComparison.Ordinal) && line.Text != bare)
             {
                 return;
             }

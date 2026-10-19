@@ -14,6 +14,7 @@ internal sealed partial class TerminalForm
         new(ShellLauncher.Describe(ShellKind.PowerShell7), [ShellLauncher.Key(ShellKind.PowerShell7)]),
         new(ShellLauncher.Describe(ShellKind.WindowsPowerShell), [ShellLauncher.Key(ShellKind.WindowsPowerShell)]),
         new(ShellLauncher.Describe(ShellKind.CommandPrompt), [ShellLauncher.Key(ShellKind.CommandPrompt)]),
+        new(ShellLauncher.Describe(ShellKind.GitBash), [ShellLauncher.Key(ShellKind.GitBash)]),
     ];
 
     /// <summary>

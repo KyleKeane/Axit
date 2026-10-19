@@ -13,10 +13,12 @@ public sealed class ShellFixtureTests
 {
     public const string PowerShell = "shell-powershell5.1-240x50.vt";
     public const string Cmd = "shell-cmd-240x50.vt";
+    public const string Bash = "shell-bash5.2-240x50.vt";
 
-    /// <summary>The prompt's B mark with its terminator, so that the mark is complete before the command goes: PowerShell's snippet ends it with BEL, cmd's PROMPT with ESC backslash.</summary>
+    /// <summary>The prompt's B mark with its terminator, so that the mark is complete before the command goes: PowerShell's snippet and bash's PS1 end it with BEL, cmd's PROMPT with ESC backslash.</summary>
     private const string PowerShellPrompt = "\\e]133;B\\a";
     private const string CmdPrompt = "\\e]133;B\\e\\";
+    private const string BashPrompt = "\\e]133;B\\a";
 
     /// <summary>The script's sends, each after what the script waited for.</summary>
     private static readonly (string Trigger, string Command)[] PowerShellSends =
@@ -47,14 +49,49 @@ public sealed class ShellFixtureTests
         (CmdPrompt, "exit"),
     ];
 
-    private static (string Trigger, string Command)[] SendsOf(string fixture) => fixture == PowerShell ? PowerShellSends : CmdSends;
+    private static readonly (string Trigger, string Command)[] BashSends =
+    [
+        (BashPrompt, "echo hello"),
+        (BashPrompt, "(exit 3)"),
+        (BashPrompt, "ls"),
+        (BashPrompt, "read -p \"Continue? (y/n): \" answer"),
+        // The question row: bash turns bracketed paste off before a command's output, so that sequence precedes it; the echo has the words in quotes.
+        ("\\e[?2004lContinue? (y/n): ", "y"),
+        (BashPrompt, "for i in 1 2; do\necho $i\ndone"),
+        (BashPrompt, "clear"),
+        (BashPrompt, "echo after-clear"),
+        (BashPrompt, ""),
+        (BashPrompt, "exit"),
+    ];
+
+    private static (string Trigger, string Command)[] SendsOf(string fixture) => fixture switch
+    {
+        PowerShell => PowerShellSends,
+        Cmd => CmdSends,
+        _ => BashSends,
+    };
+
+    private static ShellKind KindOf(string fixture) => fixture switch
+    {
+        PowerShell => ShellKind.WindowsPowerShell,
+        Cmd => ShellKind.CommandPrompt,
+        _ => ShellKind.GitBash,
+    };
+
+    /// <summary>What the window sets on the model for the shell (the continuation prompt), then the test's own subscriptions.</summary>
+    private static Action<TerminalModel> Configure(string fixture, Action<TerminalModel>? more = null) => m =>
+    {
+        m.ContinuationPrompt = ShellLauncher.ContinuationPrompt(KindOf(fixture));
+        more?.Invoke(m);
+    };
 
     [Theory]
     [InlineData(PowerShell)]
     [InlineData(Cmd)]
+    [InlineData(Bash)]
     public void Transcript_matches_the_expected_file(string fixture)
     {
-        var model = Replay(fixture, SendsOf(fixture));
+        var model = Replay(fixture, SendsOf(fixture), subscribe: Configure(fixture));
         var actual = Render(model).Replace("\r\n", "\n").TrimEnd('\n');
         var path = Path.Combine(FixtureDirectory(), fixture + ".expected.txt");
         if (Environment.GetEnvironmentVariable("AXTERMINAL_UPDATE_EXPECTED") == "1")
@@ -68,12 +105,13 @@ public sealed class ShellFixtureTests
     [Theory]
     [InlineData(PowerShell)]
     [InlineData(Cmd)]
+    [InlineData(Bash)]
     public void Chunk_boundaries_do_not_change_the_transcript(string fixture)
     {
-        var expected = Render(Replay(fixture, SendsOf(fixture)));
+        var expected = Render(Replay(fixture, SendsOf(fixture), subscribe: Configure(fixture)));
         for (var seed = 1; seed <= 5; seed++)
         {
-            Assert.Equal(expected, Render(Replay(fixture, SendsOf(fixture), seed)));
+            Assert.Equal(expected, Render(Replay(fixture, SendsOf(fixture), seed, Configure(fixture))));
         }
     }
 
@@ -82,11 +120,11 @@ public sealed class ShellFixtureTests
     {
         var ready = 0;
         var finished = new List<int?>();
-        var model = Replay(PowerShell, PowerShellSends, subscribe: m =>
+        var model = Replay(PowerShell, PowerShellSends, subscribe: Configure(PowerShell, m =>
         {
             m.Ready += () => ready++;
             m.CommandFinished += finished.Add;
-        });
+        }));
 
         Assert.Equal(1, ready);
         // hello, exit 3, the listing, Read-Host, the block, cls, after-cls; the bare Enter is no command and exit prints no prompt.
@@ -113,7 +151,7 @@ public sealed class ShellFixtureTests
     public void Command_prompt_marks_give_the_state_without_codes()
     {
         var finished = new List<int?>();
-        var model = Replay(Cmd, CmdSends, subscribe: m => m.CommandFinished += finished.Add);
+        var model = Replay(Cmd, CmdSends, subscribe: Configure(Cmd, m => m.CommandFinished += finished.Add));
         model.ShellExited(0);
         Assert.Equal([null, null, null, null, null, null], finished);
         Assert.False(model.Running);
@@ -124,5 +162,37 @@ public sealed class ShellFixtureTests
         Assert.Contains("hello", visible);
         Assert.Contains("a.txt", visible);
         Assert.Contains("after-cls", visible);
+    }
+
+    [Fact]
+    public void Git_bash_marks_give_the_state_with_codes()
+    {
+        var ready = 0;
+        var finished = new List<int?>();
+        var model = Replay(Bash, BashSends, subscribe: Configure(Bash, m =>
+        {
+            m.Ready += () => ready++;
+            m.CommandFinished += finished.Add;
+        }));
+
+        Assert.Equal(1, ready);
+        // hello, exit 3, the listing, read, the loop, clear, after-clear; the bare Enter is no command (bash's D repeats the last code, to no one) and exit prints no prompt.
+        Assert.Equal([0, 3, 0, 0, 0, 0, 0], finished);
+        Assert.True(model.Running);
+        model.ShellExited(0);
+        Assert.False(model.Running);
+        Assert.Equal("$", model.Prompt);
+        // The directory as a Windows path, converted by the prompt command itself.
+        Assert.Equal("C:\\axit-fixture", model.Directory);
+        var visible = model.Lines.Where(l => !l.Hidden).Select(l => l.Text).ToList();
+        Assert.DoesNotContain(visible, t => t.StartsWith("$ ", StringComparison.Ordinal) || t == "$");
+        Assert.DoesNotContain(visible, t => t.StartsWith("> ", StringComparison.Ordinal) || t == ">");
+        Assert.Contains("hello", visible);
+        // ls prints the folder on one row.
+        Assert.Contains("a.txt  b.md  sub/", visible);
+        Assert.Contains("Continue? (y/n): y", visible);
+        Assert.Contains("1", visible);
+        Assert.Contains("2", visible);
+        Assert.Contains("after-clear", visible);
     }
 }

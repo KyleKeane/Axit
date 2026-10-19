@@ -17,6 +17,7 @@ internal sealed partial class TerminalForm
             return;
         }
 
+        _model.ContinuationPrompt = ShellLauncher.ContinuationPrompt(_shell);
         var commandLine = ShellLauncher.BuildCommandLine(_shell, _customShell);
         if (commandLine is null)
         {

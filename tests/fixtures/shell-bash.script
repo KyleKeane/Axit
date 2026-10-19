@@ -1,0 +1,71 @@
+# Git Bash under AxTerminal's launcher (PtyCapture --shell bash): a command, a failing command, a listing, a question
+# answered, a multi-line command, clear, a bare Enter, exit. Recorded in C:\axit-fixture with HOME set to a folder
+# whose .config/git/git-prompt.sh holds PS1='$ ' (Git's profile sources it instead of its own prompt), so that no
+# user or machine name is in the prompt.
+mark
+wait 20000 \e]133;B
+sleep 500
+send echo hello
+sleep 200
+send \r
+mark
+wait 10000 \e]133;B
+sleep 500
+send (exit 3)
+sleep 200
+send \r
+mark
+wait 10000 \e]133;B
+sleep 500
+send ls
+sleep 200
+send \r
+mark
+wait 10000 \e]133;B
+sleep 500
+send read -p "Continue? (y/n): " answer
+sleep 200
+send \r
+mark
+wait 10000 (y/n)
+sleep 2500
+send y
+sleep 200
+send \r
+mark
+wait 10000 \e]133;B
+sleep 500
+send for i in 1 2; do
+sleep 200
+send \r
+sleep 400
+send echo $i
+sleep 200
+send \r
+sleep 400
+send done
+sleep 200
+send \r
+mark
+wait 10000 \e]133;B
+sleep 500
+send clear
+sleep 200
+send \r
+mark
+wait 10000 \e]133;B
+sleep 500
+send echo after-clear
+sleep 200
+send \r
+mark
+wait 10000 \e]133;B
+sleep 500
+send \r
+mark
+wait 10000 \e]133;B
+sleep 500
+send exit
+sleep 200
+send \r
+exit 10000

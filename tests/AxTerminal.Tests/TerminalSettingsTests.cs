@@ -31,7 +31,7 @@ public sealed class TerminalSettingsTests
         var path = Path.Combine(dir, "axterminal.json");
         try
         {
-            File.WriteAllText(path, """{"shell":"bash","ptyColumns":3,"ptyRows":9000,"maxTranscriptLines":5,"recentFolders":["", "C:\\src"],"outputSpeech":7}""");
+            File.WriteAllText(path, """{"shell":"fish","ptyColumns":3,"ptyRows":9000,"maxTranscriptLines":5,"recentFolders":["", "C:\\src"],"outputSpeech":7}""");
             var settings = TerminalSettings.Load(path, out var error);
             Assert.Null(error);
             Assert.Null(settings.Shell);

@@ -8,6 +8,7 @@ public enum ShellKind
     PowerShell7,
     WindowsPowerShell,
     CommandPrompt,
+    GitBash,
     Custom,
 }
 
@@ -15,8 +16,9 @@ public enum ShellKind
 /// Finds the shells and builds the command line and the environment the window starts one with (SPEC.md AT-1.2,
 /// AT-1.3, AT-D2, AT-D7): PowerShell gets a snippet after its profile that wraps the user's prompt in the integration
 /// marks (OSC 133 A, B and D with the exit code, OSC 9;9 with the directory, the Windows Terminal convention) and
-/// silences the progress bar; Command Prompt gets the same marks through its PROMPT variable; a custom command line
-/// gets nothing. The environment keeps the user's and adds TERM and the two pager settings.
+/// silences the progress bar; Command Prompt gets the same marks through its PROMPT variable; Git Bash through a
+/// PROMPT_COMMAND in its environment; a custom command line gets nothing. The environment keeps the user's and adds
+/// TERM and the two pager settings.
 /// </summary>
 public static class ShellLauncher
 {
@@ -62,13 +64,41 @@ public static class ShellLauncher
         $global:ProgressPreference = 'SilentlyContinue'
         """;
 
+    /// <summary>
+    /// Git Bash's marks: the PROMPT_COMMAND bash runs before every prompt, handed in through the environment so that
+    /// no file of the user's is touched (Git's profile sets PS1 and leaves PROMPT_COMMAND alone). The exit code is
+    /// read first; D carries it from the second prompt on (the first prompt follows no command); then A and 9;9 with
+    /// the directory as a Windows path (a /c/… path is converted in bash itself, anything else through cygpath); and
+    /// B is appended to PS1 once, after the profile has set it, so the user's prompt text stays. A profile of the
+    /// user's that sets PROMPT_COMMAND itself replaces this, and the shell then runs without marks, as a custom one.
+    /// </summary>
+    public const string BashPromptCommand =
+        "__axit_code=$?; __axit_dir=$PWD; "
+        + "case \"$__axit_dir\" in /[A-Za-z]/*) __axit_dir=\"${__axit_dir:1:1}:${__axit_dir:2}\"; __axit_dir=${__axit_dir^};; "
+        + "/[A-Za-z]) __axit_dir=\"${__axit_dir:1:1}:/\"; __axit_dir=${__axit_dir^};; "
+        + "*) __axit_dir=$(cygpath -w \"$__axit_dir\" 2>/dev/null || printf %s \"$__axit_dir\");; esac; "
+        + "__axit_dir=${__axit_dir//\\//\\\\}; "
+        + "if [ -n \"$__axit_ran\" ]; then printf '\\033]133;D;%s\\007' \"$__axit_code\"; fi; __axit_ran=1; "
+        + "printf '\\033]133;A\\007\\033]9;9;%s\\007' \"$__axit_dir\"; "
+        + "case \"$PS1\" in *'133;B'*) ;; *) PS1=\"$PS1\"'\\[\\033]133;B\\007\\]';; esac";
+
     /// <summary>What the menus and the system lines call each shell.</summary>
     public static string Describe(ShellKind kind) => kind switch
     {
         ShellKind.PowerShell7 => "PowerShell 7",
         ShellKind.WindowsPowerShell => "Windows PowerShell",
         ShellKind.CommandPrompt => "Command Prompt",
+        ShellKind.GitBash => "Git Bash",
         _ => "Custom shell",
+    };
+
+    /// <summary>What a shell prints at the start of a continuation row of a multi-line command (AT-3.2), for the model to hide with the prompt; null for a custom shell, whose rows are all kept.</summary>
+    public static string? ContinuationPrompt(ShellKind kind) => kind switch
+    {
+        ShellKind.PowerShell7 or ShellKind.WindowsPowerShell => ">> ",
+        ShellKind.CommandPrompt => "More? ",
+        ShellKind.GitBash => "> ",
+        _ => null,
     };
 
     /// <summary>The settings file's word for a shell (SPEC.md AT-8.1) and back; an unknown word is the default.</summary>
@@ -77,6 +107,7 @@ public static class ShellLauncher
         ShellKind.PowerShell7 => "pwsh",
         ShellKind.WindowsPowerShell => "powershell",
         ShellKind.CommandPrompt => "cmd",
+        ShellKind.GitBash => "bash",
         _ => "custom",
     };
 
@@ -85,6 +116,7 @@ public static class ShellLauncher
         "pwsh" => ShellKind.PowerShell7,
         "powershell" => ShellKind.WindowsPowerShell,
         "cmd" => ShellKind.CommandPrompt,
+        "bash" => ShellKind.GitBash,
         "custom" => ShellKind.Custom,
         _ => DefaultKind(),
     };
@@ -103,15 +135,42 @@ public static class ShellLauncher
                 return Existing(Path.Combine(SystemRoot(), "System32", "WindowsPowerShell", "v1.0", "powershell.exe")) ?? FindOnPath("powershell.exe");
             case ShellKind.CommandPrompt:
                 return Existing(Environment.GetEnvironmentVariable("ComSpec")) ?? Existing(Path.Combine(SystemRoot(), "System32", "cmd.exe"));
+            case ShellKind.GitBash:
+                return FindGitBash();
             default:
                 return null;
         }
     }
 
     /// <summary>
+    /// Git for Windows' own bash, <c>Git\bin\bash.exe</c>: under Program Files, Program Files (x86) or the user's
+    /// Programs folder, or next to the git.exe on the PATH (<c>Git\cmd</c>, <c>Git\bin</c> or <c>Git\mingw64\bin</c>).
+    /// Never a bash.exe on the PATH itself: in System32 that is WSL's launcher.
+    /// </summary>
+    private static string? FindGitBash()
+    {
+        foreach (var root in new[] { Environment.GetEnvironmentVariable("ProgramFiles"), Environment.GetEnvironmentVariable("ProgramFiles(x86)"), Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "Programs") })
+        {
+            if (!string.IsNullOrEmpty(root) && Existing(Path.Combine(root, "Git", "bin", "bash.exe")) is { } bash)
+            {
+                return bash;
+            }
+        }
+
+        if (FindOnPath("git.exe") is { } git && Path.GetDirectoryName(git) is { } dir)
+        {
+            return Existing(Path.GetFullPath(Path.Combine(dir, "..", "bin", "bash.exe")))
+                ?? Existing(Path.GetFullPath(Path.Combine(dir, "..", "..", "bin", "bash.exe")));
+        }
+
+        return null;
+    }
+
+    /// <summary>
     /// The command line the pseudo console starts: the shell's program with the snippet for PowerShell, the program
-    /// alone for Command Prompt (its marks come through the environment), the custom line as typed. Null when the
-    /// shell is not installed or the custom line is empty.
+    /// alone for Command Prompt (its marks come through the environment), bash as Git's own shortcut starts it
+    /// (<c>--login -i</c>, its marks through the environment too), the custom line as typed. Null when the shell is
+    /// not installed or the custom line is empty.
     /// </summary>
     public static string? BuildCommandLine(ShellKind kind, string? customCommandLine = null)
     {
@@ -126,9 +185,12 @@ public static class ShellLauncher
             return null;
         }
 
-        return kind == ShellKind.CommandPrompt
-            ? Quote(program)
-            : $"{Quote(program)} -NoLogo -NoExit -EncodedCommand {EncodedSnippet()}";
+        return kind switch
+        {
+            ShellKind.CommandPrompt => Quote(program),
+            ShellKind.GitBash => $"{Quote(program)} --login -i",
+            _ => $"{Quote(program)} -NoLogo -NoExit -EncodedCommand {EncodedSnippet()}",
+        };
     }
 
     /// <summary>The snippet as <c>-EncodedCommand</c> takes it: base64 of its UTF-16 text.</summary>
@@ -137,7 +199,7 @@ public static class ShellLauncher
     /// <summary>
     /// The user's environment, plus TERM for the programs that look, GIT_PAGER and GH_PAGER set to cat, which git and
     /// the GitHub CLI document as "no pager" (AT-D7), and for Command Prompt the PROMPT with the marks around the
-    /// prompt it had.
+    /// prompt it had, for Git Bash the PROMPT_COMMAND with the marks.
     /// </summary>
     public static Dictionary<string, string> BuildEnvironment(ShellKind kind)
     {
@@ -154,6 +216,10 @@ public static class ShellLauncher
         {
             env.TryGetValue("PROMPT", out var current);
             env["PROMPT"] = CommandPromptWithMarks(current);
+        }
+        else if (kind == ShellKind.GitBash)
+        {
+            env["PROMPT_COMMAND"] = BashPromptCommand;
         }
 
         return env;

@@ -112,6 +112,7 @@ internal sealed partial class TerminalForm
         [
             ("&PowerShell documentation", "https://learn.microsoft.com/powershell/"),
             ("&Windows Terminal shell integration (the marks)", "https://learn.microsoft.com/windows/terminal/tutorials/shell-integration"),
+            ("&Bash manual", "https://www.gnu.org/software/bash/manual/"),
         ]);
 
         var axit = CreateAxitMenu();

@@ -1,0 +1,68 @@
+[?9001h[?1004h[?25l[2J[m[H]0;C:\Program Files\Git\bin\bash.exe[?25h]133;A]9;9;C:\axit-fixture[?2004h$ ]133;Becho hello
+[?2004lhello
+]133;D;0]133;A]9;9;C:\axit-fixture[?2004h$ ]133;B(exit 3)
+[?2004l]133;D;3]133;A]9;9;C:\axit-fixture[?2004h$ ]133;Bls
+[?2004la.txt  b.md  [34m[1msub[m/
+]133;D;0]133;A]9;9;C:\axit-fixture[?2004h$ ]133;Bread -p "Continue? (y/n): " answer
+[?2004lContinue? (y/n): y
+]133;D;0]133;A]9;9;C:\axit-fixture[?2004h$ ]133;Bfor i in 1 2; do
+[?2004l[?2004h> echo $i
+[?2004l[?2004h> done
+[?2004l1
+2
+]133;D;0]133;A]9;9;C:\axit-fixture[?2004h$ ]133;Bclear
+[?2004l[?25l[H[?25h[2J[3J[?25l[K
+[K
+[K
+[K
+[K
+[K
+[K
+[K
+[K
+[K
+[K
+[K
+[K
+[K
+[K
+[K
+[K
+[K
+[K
+[K
+[K
+[K
+[K
+[K
+[K
+[K
+[K
+[K
+[K
+[K
+[K
+[K
+[K
+[K
+[K
+[K
+[K
+[K
+[K
+[K
+[K
+[K
+[K
+[K
+[K
+[K
+[K
+[K
+[K
+[K[H[?25h]133;D;0]133;A]9;9;C:\axit-fixture[?2004h$ ]133;Becho after-clear
+[?2004lafter-clear
+]133;D;0]133;A]9;9;C:\axit-fixture[?2004h$ ]133;B
+[?2004l]133;D;0]133;A]9;9;C:\axit-fixture[?2004h$ ]133;Bexit
+[?2004llogout
+[?9001l[?1004l

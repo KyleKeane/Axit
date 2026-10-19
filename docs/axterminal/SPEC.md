@@ -63,8 +63,11 @@ out of scope; programs that print and ask are in. It works entirely offline (bun
   means AxClaude (AX-1.2); AxTerminal is always named by its verb. Without a folder: the process's current folder
   (the Start menu entry starts it in the user's profile folder, as the shells do).
 - AT-1.2 **The shell.** One of PowerShell 7 (`pwsh.exe`, found on the PATH or under `%ProgramFiles%\PowerShell\7`),
-  Windows PowerShell (`powershell.exe`), Command Prompt (`cmd.exe`) or a custom command line; the default is
-  PowerShell 7 when it is installed, otherwise Windows PowerShell. The choice is made in the New shell notice (AT-1.6)
+  Windows PowerShell (`powershell.exe`), Command Prompt (`cmd.exe`), Git Bash (Git for Windows' `Git\bin\bash.exe`
+  under Program Files, Program Files (x86) or `%LOCALAPPDATA%\Programs`, or next to the `git.exe` on the PATH; never
+  a `bash.exe` on the PATH, which in System32 is WSL's launcher; started `--login -i`, as Git's own shortcut does) or
+  a custom command line; the default is PowerShell 7 when it is installed, otherwise Windows PowerShell. The choice
+  is made in the New shell notice (AT-1.6)
   and remembered in the settings (`shell`, `customShell`) for the next window. The shell starts in the folder with the
   window's environment plus `TERM=xterm-256color` for the programs that look, and `GIT_PAGER=cat` and `GH_PAGER=cat`,
   which switch git's and the GitHub CLI's pager off (AT-D7); nothing is taken out of the environment.
@@ -75,7 +78,11 @@ out of scope; programs that print and ask are in. It works entirely offline (bun
   text in the marks (the shape Windows Terminal documents for oh-my-posh), written with `[char]27` so that Windows
   PowerShell takes it too, and sets `$ProgressPreference` to `SilentlyContinue`, since a progress bar drawn over the
   top rows of the screen would rewrite lines already read; Command Prompt starts with the `PROMPT` variable wrapping
-  the current `%PROMPT%` in the same marks (cmd has no exit code to give). The parser reports the marks as events (an
+  the current `%PROMPT%` in the same marks (cmd has no exit code to give); Git Bash starts with a `PROMPT_COMMAND`
+  in its environment that prints `D` with the exit code (from the second prompt on, the first following no
+  command), `A` and the directory as a Windows path, and appends `B` to `PS1` once the profile has set it, so the
+  user's prompt text stays (a profile that sets `PROMPT_COMMAND` itself replaces it, and the shell then runs
+  without marks, as a custom one). The parser reports the marks as events (an
   addition in the shared parser; AxClaude, whose Claude emits 133 marks too, goes on ignoring them). A custom shell
   gets no snippet and no marks unless its own prompt emits them; a shell started inside the shell (`pwsh` typed) has
   none until it exits. With a screen reader running, PowerShell turns PSReadLine off at startup and prints a warning
@@ -92,7 +99,7 @@ out of scope; programs that print and ask are in. It works entirely offline (bun
   "New shell" with `Folder: C:\path` as its first line, "Choose the shell and the folder. Starting ends the current
   shell and starts the new one in the folder." and the key line, preceded by "<the command> is still running. A new
   shell ends it." while one runs; the **Choose folder…** button (the folder picker); the group **Shell** with the radio
-  buttons **PowerShell 7**, **Windows PowerShell**, **Command Prompt** and **Custom**, and, while Custom is selected,
+  buttons **PowerShell 7**, **Windows PowerShell**, **Command Prompt**, **Git Bash** and **Custom**, and, while Custom is selected,
   the field **Command line**; the buttons **Start shell** (Enter) and **Cancel** (Escape). Start clears the
   transcript, prints the system line `New shell: PowerShell 7 in C:\path`, announces "New shell in <folder name>" and
   remembers the folder and the shell. Session → **Restart shell** (Ctrl+Shift+R) ends the shell and starts the same
@@ -138,7 +145,9 @@ out of scope; programs that print and ask are in. It works entirely offline (bun
   `# Output n`, a blank line, inserted at the end of the transcript above the trailing prompt row at the moment of
   sending; *n* counts since the window started or the transcript was cleared; both markers are level 1 headings;
   Options → Text → Time stamps adds the time to both (AxClaude FR-4.6). The shell's echo of the command, the prompt
-  row holding the command after its prompt, stays hidden: the block stands for it (AxClaude D22). Every Enter is an
+  row holding the command after its prompt, stays hidden: the block stands for it (AxClaude D22), and so do the
+  continuation rows of a multi-line command, the shell's continuation prompt with the line after it (PowerShell's
+  `>> `, bash's `> `, cmd's `More? `; a custom shell has none known, and its rows all stay). Every Enter is an
   exchange, also one that answers a running program (AT-D3).
 - AT-3.3 **No send lock** (AxClaude D12): while a command runs, the text goes at once as input to the running program
   (an answer, or what the shell reads next), with its block; the status keeps the running command's name.
@@ -228,7 +237,7 @@ out of scope; programs that print and ask are in. It works entirely offline (bun
   is in the background) | Text ▸ (Time stamps | ─ | Font… | Larger text | Smaller text | Windows text size) | General
   ▸ (Check for updates at start ✓) | Developer ▸ (Open settings file | Record raw stream | Copy diagnostics). **Axit
   (A)** (AX-9). **Help (H):** Keyboard shortcuts F1 | User guide | ─ | Shell resources ▸ (PowerShell documentation |
-  Windows Terminal shell integration). Every item has a mnemonic (AX-7.4).
+  Windows Terminal shell integration | Bash manual). Every item has a mnemonic (AX-7.4).
   The first menu is Session, as in AxClaude, since what it holds is the shell in its folder, the thing the window
   is about; Shell takes E, S being Session's.
 - AT-6.2 Keys (AX-8). Bundle-wide: F1, the control keys, Ctrl+F, F3, Shift+F3, Ctrl+S, Ctrl+Plus, Ctrl+Minus, Page
@@ -258,7 +267,7 @@ file). The speech of output (AT-5.3) and the texts of the notices are the rest.
 ### AT-8 Settings, log, status
 
 - AT-8.1 `%APPDATA%\Axit\axterminal.json` (AX-5.3; `TerminalSettings` on `WindowSettings`): `shell` (`pwsh`,
-  `powershell`, `cmd`, `custom`), `customShell`, `lastFolder`, `recentFolders` (ten), `ptyColumns` 240, `ptyRows` 50,
+  `powershell`, `cmd`, `bash`, `custom`), `customShell`, `lastFolder`, `recentFolders` (ten), `ptyColumns` 240, `ptyRows` 50,
   `soundOnBell` on, `clickOnNewLine` on, `workingMusic` off, `backgroundAlert` off, `flashTaskbar` on, `outputSpeech`
   `none`, `announceQuestions` on, `markerTimeStamps` off, `joinWrappedLines` on, `maxTranscriptLines` 20000, and the
   window base's font, update check and window fields. Unknown or out-of-range values fall back to the defaults.
@@ -289,7 +298,7 @@ src/AxTerminal/           class library (net10.0-windows): AxTerminalApp (Run, U
                           status, the field and the sending, the process, what the model reports, New shell and the
                           folders, find and export and recording), AxTerminalKeys (with Transcript, the view's keys as
                           data), HelpText (F1 text, the embedded guide); references AxTerminal.Core, Axit.Core, Axit.Forms
-tests/AxTerminal.Tests/   fixtures recorded with tools/PtyCapture of pwsh, powershell and cmd under the launcher's command
+tests/AxTerminal.Tests/   fixtures recorded with tools/PtyCapture of powershell, cmd and bash under the launcher's command
                           line (a dir, a failing command, a y/n prompt, a multi-line command, cls, exit): golden
                           transcripts, the state after each frame, the prompts in the status; ShellLauncherTests,
                           CommandHistoryTests, TerminalSettingsTests

@@ -25,6 +25,7 @@ Manual checks with NVDA running, before a release that changes AxTerminal (`docs
 ## 3. Shells and folders (AT-1.2, AT-1.6)
 
 - Ctrl+N: the notice "New shell", its text, "Folder: …", Choose folder button, the Shell group with the radio buttons and Custom, Start shell and Cancel. Choose Command Prompt, Enter: "New shell in …"; the window empties; "Ready"; `echo hello`, Enter: "Done" (no code). Ctrl+N back to Windows PowerShell.
+- Ctrl+N again, choose Git Bash, Enter: "New shell in …", the status bar shows `$`, the title names the folder, nothing of the prompt in the terminal. `ls`, Enter: the listing, then "Done". `(exit 3)`, Enter: "Failed, exit code 3". `cd ..`, Enter: the title follows. Ctrl+N, choose the shell you had.
 - `cd ..`, Enter: the title and the status bar name the parent folder. Ctrl+W: File Explorer opens on it. Alt+S, I, C: AxClaude opens on it; Alt+A, O, 1: back.
 - Ctrl+Shift+R while idle: "Restarting", a system line, "Ready", the transcript kept. While `Start-Sleep 30` runs: the notice "Restart the shell?"; Escape keeps it; again, Enter: restarts.
 - Terminal, Open recent folder: the folders as "1. name (path)"; Enter on one: a new shell there.

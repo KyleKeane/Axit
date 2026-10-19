@@ -87,7 +87,7 @@ public sealed class TerminalSettings : WindowSettings
         RecentFolders ??= [];
         RecentFolders.RemoveAll(string.IsNullOrWhiteSpace);
         TrimRecent();
-        if (Shell is not null && Shell is not ("pwsh" or "powershell" or "cmd" or "custom"))
+        if (Shell is not null && Shell is not ("pwsh" or "powershell" or "cmd" or "bash" or "custom"))
         {
             Shell = null;
         }

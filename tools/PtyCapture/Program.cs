@@ -5,9 +5,10 @@
 //
 // Usage:
 //   PtyCapture --out <file.vt> [--cwd <dir>] [--cols N] [--rows N] [--script <file>] -- <command line>
-//   PtyCapture --out <file.vt> --shell pwsh|powershell|cmd [--cwd <dir>] [--cols N] [--rows N] [--script <file>]
+//   PtyCapture --out <file.vt> --shell pwsh|powershell|cmd|bash [--cwd <dir>] [--cols N] [--rows N] [--script <file>] [--env NAME=VALUE]
 //                                          (the shell as AxTerminal starts it: its command line with the prompt
-//                                          snippet and its environment, ShellLauncher in AxTerminal.Core)
+//                                          snippet and its environment, ShellLauncher in AxTerminal.Core;
+//                                          --env sets or replaces one variable of that environment)
 //   PtyCapture --dump <file.vt> [--raw]    (print a human readable rendering of a recording; e-mail addresses,
 //                                          the account in paths, pipe names and session ids are replaced unless --raw)
 //
@@ -34,6 +35,7 @@ internal static class Program
     private static int Main(string[] args)
     {
         string? cwd = null, outPath = null, scriptPath = null, dumpPath = null, shell = null;
+        var envOverrides = new List<string>();
         int cols = 120, rows = 40;
         var raw = false;
         var command = new List<string>();
@@ -46,6 +48,7 @@ internal static class Program
                 case "--out": outPath = args[++i]; break;
                 case "--script": scriptPath = args[++i]; break;
                 case "--shell": shell = args[++i]; break;
+                case "--env": envOverrides.Add(args[++i]); break;
                 case "--dump": dumpPath = args[++i]; break;
                 case "--raw": raw = true; break;
                 case "--cols": cols = int.Parse(args[++i]); break;
@@ -72,7 +75,7 @@ internal static class Program
         if (outPath is null || (command.Count == 0 && shell is null))
         {
             Console.Error.WriteLine("Usage: PtyCapture --out <file.vt> [--cwd <dir>] [--cols N] [--rows N] [--script <file>] -- <command line>");
-            Console.Error.WriteLine("       PtyCapture --out <file.vt> --shell pwsh|powershell|cmd [--cwd <dir>] [--cols N] [--rows N] [--script <file>]");
+            Console.Error.WriteLine("       PtyCapture --out <file.vt> --shell pwsh|powershell|cmd|bash [--cwd <dir>] [--cols N] [--rows N] [--script <file>] [--env NAME=VALUE]");
             Console.Error.WriteLine("       PtyCapture --dump <file.vt> [--raw]");
             return 2;
         }
@@ -97,6 +100,19 @@ internal static class Program
         {
             commandLine = ClaudeLauncher.BuildCommandLine(command[0], command.Skip(1));
             environment = ClaudeLauncher.BuildEnvironment();
+        }
+
+        foreach (var pair in envOverrides)
+        {
+            // NAME=VALUE, set or replaced for this recording (a HOME for bash's fixture, so that no name of the user's is in it).
+            var at = pair.IndexOf('=');
+            if (at <= 0)
+            {
+                Console.Error.WriteLine($"--env takes NAME=VALUE: {pair}");
+                return 2;
+            }
+
+            environment[pair[..at]] = pair[(at + 1)..];
         }
 
         string[] script = scriptPath is null ? [] : File.ReadAllLines(scriptPath);

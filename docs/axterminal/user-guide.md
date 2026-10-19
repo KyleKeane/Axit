@@ -61,9 +61,9 @@ Options, Speech, Speak output: all lines reads each line as it arrives, joined i
 
 ## The shell
 
-Session, New shell (Ctrl+N) opens a notice with the folder, a Choose folder button, the shells (PowerShell 7, Windows PowerShell, Command Prompt, or Custom with a command line of your own) and Start shell. Starting ends the current shell and starts the new one in the folder; the terminal is cleared. Open recent folder does the same for a folder you had before. Restart shell (Ctrl+Shift+R) starts the same shell again in its current folder and keeps the text. While a command runs, both ask first.
+Session, New shell (Ctrl+N) opens a notice with the folder, a Choose folder button, the shells (PowerShell 7, Windows PowerShell, Command Prompt, Git Bash, or Custom with a command line of your own) and Start shell. Starting ends the current shell and starts the new one in the folder; the terminal is cleared. Open recent folder does the same for a folder you had before. Restart shell (Ctrl+Shift+R) starts the same shell again in its current folder and keeps the text. While a command runs, both ask first.
 
-The shell's prompt is not shown in the terminal: it is in the status bar, and the folder it names follows your `cd`. The prompt rows are recognised through marks the shell prints for terminals (the Windows Terminal convention), which AxTerminal adds to PowerShell's prompt and to Command Prompt's PROMPT for the session; your profile is not touched. A shell of your own gives no marks unless its prompt prints them, and then the window shows every row and says nothing when a command ends.
+The shell's prompt is not shown in the terminal: it is in the status bar, and the folder it names follows your `cd`. The prompt rows are recognised through marks the shell prints for terminals (the Windows Terminal convention), which AxTerminal adds to PowerShell's prompt, to Command Prompt's PROMPT and to Git Bash's prompt command for the session; your profile is not touched. A shell of your own gives no marks unless its prompt prints them, and then the window shows every row and says nothing when a command ends.
 
 `exit` ends the shell: a system line says so, and Ctrl+Shift+R starts it again. Closing the window ends the shell and whatever runs in it, after a question while a command runs.
 
