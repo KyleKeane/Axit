@@ -1,0 +1,78 @@
+using AxFile.Core;
+
+namespace AxFile.Tests;
+
+/// <summary>The settings file (docs/axfile/SPEC.md AF-8.1): defaults, the recent list, and nonsense sanitized.</summary>
+public sealed class FileSettingsTests
+{
+    [Fact]
+    public void Defaults()
+    {
+        var settings = new FileSettings();
+        Assert.Null(settings.LastFolder);
+        Assert.Empty(settings.RecentFolders);
+        Assert.False(settings.ShowHidden);
+        Assert.True(settings.SayEachFile);
+        Assert.Equal(1, settings.Speed);
+        Assert.Equal(15, settings.SeekSeconds);
+        Assert.True(settings.CheckForUpdates);
+    }
+
+    [Fact]
+    public void Remembered_folders_go_first_once_and_stay_ten()
+    {
+        var settings = new FileSettings();
+        for (var i = 0; i < 12; i++)
+        {
+            settings.RememberFolder($"C:\\f{i}");
+        }
+
+        settings.RememberFolder("c:\\F5");
+        Assert.Equal(10, settings.RecentFolders.Count);
+        Assert.Equal("c:\\F5", settings.RecentFolders[0]);
+        Assert.Equal("c:\\F5", settings.LastFolder);
+        Assert.Single(settings.RecentFolders, f => string.Equals(f, "C:\\f5", StringComparison.OrdinalIgnoreCase));
+    }
+
+    [Fact]
+    public void Nonsense_in_the_file_falls_back()
+    {
+        var path = Path.Combine(Path.GetTempPath(), "axfile-settings-" + Guid.NewGuid().ToString("N") + ".json");
+        File.WriteAllText(path, """{ "speed": 9, "seekSeconds": 0, "lastFolder": " ", "recentFolders": ["", "C:\\x"], "fontSize": 500 }""");
+        try
+        {
+            var settings = FileSettings.Load(path, out var error);
+            Assert.Null(error);
+            Assert.Equal(3, settings.Speed);
+            Assert.Equal(15, settings.SeekSeconds);
+            Assert.Null(settings.LastFolder);
+            Assert.Equal(["C:\\x"], settings.RecentFolders);
+            Assert.Equal(0, settings.FontSize);
+        }
+        finally
+        {
+            File.Delete(path);
+        }
+    }
+
+    [Fact]
+    public void Round_trip()
+    {
+        var path = Path.Combine(Path.GetTempPath(), "axfile-settings-" + Guid.NewGuid().ToString("N") + ".json");
+        try
+        {
+            var settings = new FileSettings { Speed = 1.5, ShowHidden = true, SayEachFile = false };
+            settings.RememberFolder("C:\\a");
+            settings.Save(path);
+            var loaded = FileSettings.Load(path, out _);
+            Assert.Equal(1.5, loaded.Speed);
+            Assert.True(loaded.ShowHidden);
+            Assert.False(loaded.SayEachFile);
+            Assert.Equal("C:\\a", loaded.LastFolder);
+        }
+        finally
+        {
+            File.Delete(path);
+        }
+    }
+}

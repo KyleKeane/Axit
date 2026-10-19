@@ -1,0 +1,143 @@
+using AxFile.Core;
+
+namespace AxFile.Tests;
+
+/// <summary>A folder's entries as the list shows them (docs/axfile/SPEC.md AF-2.2, AF-2.4, AF-3.1 to AF-3.3), over a temporary folder.</summary>
+public sealed class FolderListingTests : IDisposable
+{
+    private readonly string _folder = Path.Combine(Path.GetTempPath(), "axfile-tests-" + Guid.NewGuid().ToString("N"));
+
+    public FolderListingTests()
+    {
+        Directory.CreateDirectory(_folder);
+        Directory.CreateDirectory(Path.Combine(_folder, "b"));
+        Directory.CreateDirectory(Path.Combine(_folder, "a"));
+        File.WriteAllText(Path.Combine(_folder, "10.txt"), "ten");
+        File.WriteAllText(Path.Combine(_folder, "2.txt"), "two");
+        File.WriteAllText(Path.Combine(_folder, "Zed.mp3"), "not really");
+        var hidden = Path.Combine(_folder, "hidden.txt");
+        File.WriteAllText(hidden, "x");
+        File.SetAttributes(hidden, FileAttributes.Hidden);
+    }
+
+    public void Dispose()
+    {
+        try
+        {
+            Directory.Delete(_folder, recursive: true);
+        }
+        catch (IOException)
+        {
+        }
+    }
+
+    [Fact]
+    public void Folders_first_then_files_in_natural_order_without_hidden_entries()
+    {
+        var entries = FolderListing.Read(_folder, showHidden: false);
+        Assert.Equal(["a", "b", "2.txt", "10.txt", "Zed.mp3"], entries.Select(e => e.Name));
+        Assert.Equal(["a, folder", "b, folder", "2.txt", "10.txt", "Zed.mp3"], entries.Select(e => e.Label));
+        Assert.True(entries[0].IsFolder);
+        Assert.Equal(3, entries[2].Size);
+        Assert.Equal(Path.Combine(_folder, "2.txt"), entries[2].Path);
+    }
+
+    [Fact]
+    public void Hidden_entries_show_when_asked()
+    {
+        var entries = FolderListing.Read(_folder, showHidden: true);
+        Assert.Contains(entries, e => e.Name == "hidden.txt");
+    }
+
+    [Fact]
+    public void A_missing_folder_throws()
+    {
+        Assert.ThrowsAny<IOException>(() => FolderListing.Read(Path.Combine(_folder, "nope"), showHidden: false));
+    }
+
+    [Fact]
+    public void Sort_is_natural_and_stable()
+    {
+        var sorted = FolderListing.Sort(
+        [
+            new Entry("file 10", "x", false, 0, DateTime.Now),
+            new Entry("Folder", "x", true, 0, DateTime.Now),
+            new Entry("file 9", "x", false, 0, DateTime.Now),
+            new Entry("another", "x", true, 0, DateTime.Now),
+        ]);
+        Assert.Equal(["another", "Folder", "file 9", "file 10"], sorted.Select(e => e.Name));
+    }
+
+    [Theory]
+    [InlineData("notes.md", OpenWay.AxDown)]
+    [InlineData("README.MARKDOWN", OpenWay.AxDown)]
+    [InlineData("todo.txt", OpenWay.AxDown)]
+    [InlineData("settings.JSON", OpenWay.AxJSON)]
+    [InlineData("01 Chapter 1.mp3", OpenWay.Play)]
+    [InlineData("clip.mkv", OpenWay.Play)]
+    [InlineData("report.pdf", OpenWay.Windows)]
+    [InlineData("program", OpenWay.Windows)]
+    public void Enter_does_what_the_extension_says(string name, OpenWay expected)
+    {
+        Assert.Equal(expected, FolderListing.WayOf(Path.Combine("C:\\x", name)));
+        Assert.Equal(expected, FolderListing.WayOf(new Entry(name, Path.Combine("C:\\x", name), false, 0, DateTime.Now)));
+    }
+
+    [Fact]
+    public void A_folder_entry_opens_as_a_folder()
+    {
+        Assert.Equal(OpenWay.Folder, FolderListing.WayOf(new Entry("notes.md", "C:\\x\\notes.md", true, 0, DateTime.Now)));
+    }
+
+    [Theory]
+    [InlineData("C:\\Music\\Dune", 24, "Dune, 24 items")]
+    [InlineData("C:\\Music\\Dune\\", 1, "Dune, 1 item")]
+    [InlineData("C:\\Music\\Dune", 0, "Dune, empty")]
+    [InlineData("C:\\", 3, "C:\\, 3 items")]
+    public void The_list_is_named_with_the_folder_and_the_count(string folder, int count, string expected)
+    {
+        Assert.Equal(expected, FolderListing.ListName(folder, count));
+    }
+
+    [Theory]
+    [InlineData(0, "0 bytes")]
+    [InlineData(1, "1 byte")]
+    [InlineData(512, "512 bytes")]
+    [InlineData(12 * 1024, "12 KB")]
+    [InlineData(1258291, "1.2 MB")]
+    [InlineData(3758096384, "3.5 GB")]
+    public void Sizes_read_as_people_say_them(long bytes, string expected)
+    {
+        Assert.Equal(expected, FolderListing.FormatSize(bytes));
+    }
+
+    [Fact]
+    public void Information_names_the_size_or_the_folder_and_the_date()
+    {
+        var when = new DateTime(2026, 10, 18, 14, 2, 30);
+        Assert.Equal("report.pdf, 1.2 MB, modified 2026-10-18 14:02", FolderListing.Information(new Entry("report.pdf", "x", false, 1258291, when)));
+        Assert.Equal("docs, folder, modified 2026-10-18 14:02", FolderListing.Information(new Entry("docs", "x", true, 0, when)));
+    }
+
+    [Fact]
+    public void The_parent_stops_at_the_drive()
+    {
+        Assert.Equal("C:\\a", FolderListing.Parent("C:\\a\\b"));
+        Assert.Equal("C:\\a", FolderListing.Parent("C:\\a\\b\\"));
+        Assert.Equal("C:\\", FolderListing.Parent("C:\\a"));
+        Assert.Null(FolderListing.Parent("C:\\"));
+    }
+
+    [Fact]
+    public void A_typed_path_resolves_with_variables_and_files()
+    {
+        Environment.SetEnvironmentVariable("AXFILE_TEST_FOLDER", _folder);
+        Assert.Equal((_folder, (string?)null), FolderListing.Resolve("%AXFILE_TEST_FOLDER%"));
+        Assert.Equal((_folder, (string?)null), FolderListing.Resolve($"  \"{_folder}\\\"  "));
+        var file = Path.Combine(_folder, "2.txt");
+        Assert.Equal((_folder, file), FolderListing.Resolve(file));
+        Assert.Null(FolderListing.Resolve(Path.Combine(_folder, "nope")));
+        Assert.Null(FolderListing.Resolve(string.Empty));
+        Assert.Null(FolderListing.Resolve("   "));
+    }
+}
