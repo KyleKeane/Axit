@@ -45,6 +45,7 @@ internal sealed partial class TerminalForm
         session.DropDownItems.Add(Item("Res&tart shell", RestartShell, AxTerminalKeys.RestartShell));
         session.DropDownItems.Add(Item("&Clear transcript", ClearTranscript, AxTerminalKeys.ClearTranscript));
         session.DropDownItems.Add(new ToolStripSeparator());
+        session.DropDownItems.Add(Item("Say current fol&der", SayFolder, AxTerminalKeys.SayFolder));
         // AT-1.5: the way to the other windows, on the shell's current directory.
         var showIn = new ToolStripMenuItem("Show current folder &in");
         showIn.DropDownItems.Add(Item("File &Explorer", ShowInExplorer, AxTerminalKeys.ShowInExplorer));

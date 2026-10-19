@@ -39,8 +39,8 @@ public sealed class TerminalModelTests
         Assert.Equal([0], finished);
         Assert.False(model.Running);
         Assert.Equal(1, ready);
-        Assert.Equal("# Input 1\r\necho hello\r\n\r\n# Output 1\r\n\r\nhello", Render(model));
-        Assert.Equal(["# Input 1", "echo hello", "", "# Output 1", "", "hello"], model.Lines.Where(l => !l.Hidden).Select(l => l.Text));
+        Assert.Equal("# Input 1\r\nFolder: C:\\src\r\necho hello\r\n\r\n# Output 1\r\n\r\nhello", Render(model));
+        Assert.Equal(["# Input 1", "Folder: C:\\src", "echo hello", "", "# Output 1", "", "hello"], model.Lines.Where(l => !l.Hidden).Select(l => l.Text));
         Assert.Equal(LineKind.InputMarker, model.Lines[0].Kind);
         Assert.Equal(1, model.Lines[0].HeadingLevel);
     }
@@ -89,7 +89,7 @@ public sealed class TerminalModelTests
         Feed(model, $"y\r\ndone\r\n{Prompt("0")}");
         model.EndFrame();
         Assert.Equal(
-            ["# Input 1", "ask", "", "# Output 1", "", "Continue? (y/n): y", "# Input 2", "y", "", "# Output 2", "", "done"],
+            ["# Input 1", "Folder: C:\\src", "ask", "", "# Output 1", "", "Continue? (y/n): y", "# Input 2", "Folder: C:\\src", "y", "", "# Output 2", "", "done"],
             model.Lines.Where(l => !l.Hidden).Select(l => l.Text));
         Assert.Null(model.CursorRowText);
     }
@@ -120,7 +120,7 @@ public sealed class TerminalModelTests
         Feed(model, $"echo one\r\none\r\n{Prompt("0")}");
         model.EndFrame();
         model.AddSystemLine("note");
-        Assert.Equal(["# Input 1", "echo one", "", "# Output 1", "", "one", "System: note"], model.Lines.Where(l => !l.Hidden).Select(l => l.Text));
+        Assert.Equal(["# Input 1", "Folder: C:\\src", "echo one", "", "# Output 1", "", "one", "System: note"], model.Lines.Where(l => !l.Hidden).Select(l => l.Text));
 
         model.Clear();
         Assert.DoesNotContain(model.Lines, l => !l.Hidden);
@@ -129,7 +129,7 @@ public sealed class TerminalModelTests
         model.Send("echo two");
         Feed(model, $"echo two\r\ntwo\r\n{Prompt("0")}");
         model.EndFrame();
-        Assert.Equal(["# Input 1", "echo two", "", "# Output 1", "", "two"], model.Lines.Where(l => !l.Hidden).Select(l => l.Text));
+        Assert.Equal(["# Input 1", "Folder: C:\\src", "echo two", "", "# Output 1", "", "two"], model.Lines.Where(l => !l.Hidden).Select(l => l.Text));
     }
 
     [Fact]
@@ -161,7 +161,7 @@ public sealed class TerminalModelTests
         model.Send("if ($true) {\n\"yes\"\n}");
         Feed(model, $"if ($true) {{\r\n>> \"yes\"\r\n>> }}\r\n>>\r\nyes\r\n{Prompt("0")}");
         model.EndFrame();
-        Assert.Equal(["# Input 1", "if ($true) {", "\"yes\"", "}", "", "# Output 1", "", "yes"], model.Lines.Where(l => !l.Hidden).Select(l => l.Text));
+        Assert.Equal(["# Input 1", "Folder: C:\\src", "if ($true) {", "\"yes\"", "}", "", "# Output 1", "", "yes"], model.Lines.Where(l => !l.Hidden).Select(l => l.Text));
     }
 
     [Fact]
@@ -177,7 +177,7 @@ public sealed class TerminalModelTests
         var added = model.ToggleBookmark(one);
         Assert.True(added?.Added);
         Assert.Equal("Bookmark 1", added?.Bookmark.Text);
-        Assert.Equal(["# Input 1", "echo one", "", "# Output 1", "", "Bookmark 1", "one"], model.Lines.Where(l => !l.Hidden).Select(l => l.Text));
+        Assert.Equal(["# Input 1", "Folder: C:\\src", "echo one", "", "# Output 1", "", "Bookmark 1", "one"], model.Lines.Where(l => !l.Hidden).Select(l => l.Text));
         Assert.False(model.ToggleBookmark(one)?.Added);
 
         var ready = 0;
@@ -189,7 +189,7 @@ public sealed class TerminalModelTests
         model.EndFrame();
         Assert.Equal(1, ready);
         Assert.Equal("PS D:\\other>", model.Prompt);
-        Assert.Equal(["# Input 1", "echo one", "", "# Output 1", "", "one"], model.Lines.Where(l => !l.Hidden).Select(l => l.Text));
+        Assert.Equal(["# Input 1", "Folder: C:\\src", "echo one", "", "# Output 1", "", "one"], model.Lines.Where(l => !l.Hidden).Select(l => l.Text));
     }
 
     [Fact]

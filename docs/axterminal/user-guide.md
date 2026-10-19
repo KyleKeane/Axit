@@ -19,7 +19,7 @@ Axit's installer installs AxTerminal with the other apps: see the Axit guide (Al
 - File Explorer: right-click a folder, open `Open with Axit` and choose AxTerminal.
 - From AxClaude: Session, Show current folder in, AxTerminal. From AxDown or AxJSON: File, Show current file in, AxTerminal (the file's folder). From AxGit: Repository, Show current repository in, AxTerminal. Each opens a new AxTerminal window.
 
-The window opens with the command field focused. When the shell's first prompt appears you hear "Ready" with a short ping. The status bar shows the state on the left (Idle, or Running with the command) and the shell's prompt on the right, which is where you are. The title is the name of the current folder and the shell.
+The window opens with the command field focused. When the shell's first prompt appears you hear "Ready" with a short ping. The status bar shows the state on the left (Idle, or Running with the command) and the shell's prompt on the right, which is where you are. The title is the name of the current folder and the shell. Ctrl+P says the current folder, the full path.
 
 With a screen reader running, PowerShell turns its line editor (PSReadLine) off and prints a line saying so. That is expected: AxTerminal's field is the editor.
 
@@ -32,7 +32,7 @@ From the top: the menu bar (Alt), the terminal (the text of everything so far), 
 
 ## Run a command
 
-Type the command in the field and press Enter. You hear "Sent" with a low note. The terminal gets a `# Input 1` line with your command, then `# Output 1`, and what the shell prints follows, with a short tick for each new line. When the prompt comes back you hear "Done" with the falling chime, or "Failed, exit code 1" when the command failed (PowerShell says "Failed" for an error of its own; Command Prompt gives no code). Ctrl+3 then takes you to the start of the output; read down with the arrow keys.
+Type the command in the field and press Enter. You hear "Sent" with a low note. The terminal gets a `# Input 1` line, a `Folder:` line with the folder the command runs in, your command, then `# Output 1`, and what the shell prints follows, with a short tick for each new line. When the prompt comes back you hear "Done" with the falling chime, or "Failed, exit code 1" when the command failed (PowerShell says "Failed" for an error of its own; Command Prompt gives no code). Ctrl+3 then takes you to the start of the output; read down with the arrow keys.
 
 - Shift+Enter starts a new line in the field. A command of several lines goes to the shell line by line; for PowerShell one more Enter follows, which its console host wants to end a block.
 - An empty field sends a plain Enter.
@@ -71,7 +71,7 @@ Clear transcript (Ctrl+L) empties the window; the shell's own `cls` clears only 
 
 ## Menus
 
-Alt opens the menu bar. Session: new session, the recent folders, switch shell, restart, clear, Show current folder in (File Explorer, AxClaude, AxGit), export the transcript as a Markdown file (Ctrl+S), exit. Shell: interrupt, Escape, the keys, the recent commands, send without recording, what is running. Navigate: the field, the terminal, the latest output, find, the bookmarks. Options: Sounds (the chimes, the ticks, background music while a command runs, Ctrl+Space), Speech (speak output, say when a program asks), When a command is done (the taskbar flash, the louder alert for the background), Text (time stamps, the font and size), General, Developer. Axit: the bundle's menu. Help: the shortcuts (F1), this guide, shell resources.
+Alt opens the menu bar. Session: new session, the recent folders, switch shell, restart, clear, say current folder (Ctrl+P), Show current folder in (File Explorer, AxClaude, AxGit), export the transcript as a Markdown file (Ctrl+S), exit. Shell: interrupt, Escape, the keys, the recent commands, send without recording, what is running. Navigate: the field, the terminal, the latest output, find, the bookmarks. Options: Sounds (the chimes, the ticks, background music while a command runs, Ctrl+Space), Speech (speak output, say when a program asks), When a command is done (the taskbar flash, the louder alert for the background), Text (time stamps, the font and size), General, Developer. Axit: the bundle's menu. Help: the shortcuts (F1), this guide, shell resources.
 
 ## Settings
 

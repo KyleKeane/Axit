@@ -2,6 +2,7 @@ Microsoft Windows [Version 10.0.26200.9711]
 (c) Microsoft Corporation. All rights reserved.
 
 # Input 1
+Folder: C:\axit-fixture
 echo hello
 
 # Output 1
@@ -9,12 +10,14 @@ echo hello
 hello
 
 # Input 2
+Folder: C:\axit-fixture
 cmd /c exit 3
 
 # Output 2
 
 
 # Input 3
+Folder: C:\axit-fixture
 dir /b
 
 # Output 3
@@ -24,24 +27,28 @@ b.md
 sub
 
 # Input 4
+Folder: C:\axit-fixture
 set /p answer=Continue? (y/n):
 
 # Output 4
 
 Continue? (y/n):y
 # Input 5
+Folder: C:\axit-fixture
 y
 
 # Output 5
 
 
 # Input 6
+Folder: C:\axit-fixture
 cls
 
 # Output 6
 
 
 # Input 7
+Folder: C:\axit-fixture
 echo after-cls
 
 # Output 7
@@ -49,6 +56,7 @@ echo after-cls
 after-cls
 
 # Input 8
+Folder: C:\axit-fixture
 exit
 
 # Output 8

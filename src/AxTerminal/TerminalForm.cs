@@ -193,6 +193,9 @@ internal sealed partial class TerminalForm : AxitForm
             case AxTerminalKeys.WhatIsRunning:
                 SayWhatIsRunning();
                 return true;
+            case AxTerminalKeys.SayFolder:
+                SayFolder();
+                return true;
             case AxTerminalKeys.ToggleMusic:
                 ToggleMusic();
                 return true;

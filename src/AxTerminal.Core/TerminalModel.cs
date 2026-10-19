@@ -104,12 +104,14 @@ public sealed class TerminalModel : LineStore
     public void EndFrame() => CompleteFrame();
 
     /// <summary>
-    /// Records that the user sent a command and prints its exchange block (AT-3.2): the input marker, the command's
-    /// lines, a blank line, the output marker and a blank line, above the prompt row while the shell is idle, at the
-    /// end while a command runs (an answer to a program). Returns false for an empty text, which gets no block and
-    /// counts as no command (AT-3.1, AT-5.1). <paramref name="record"/> false sends without a block (AT-3.4).
+    /// Records that the user sent a command and prints its exchange block (AT-3.2): the input marker, the folder line
+    /// (<paramref name="directory"/>, the window's current directory, or the shell's own from the 9;9 mark when none
+    /// is given; no line when neither is known), the command's lines, a blank line, the output marker and a blank
+    /// line, above the prompt row while the shell is idle, at the end while a command runs (an answer to a program).
+    /// Returns false for an empty text, which gets no block and counts as no command (AT-3.1, AT-5.1).
+    /// <paramref name="record"/> false sends without a block (AT-3.4).
     /// </summary>
-    public bool Send(string text, bool record = true)
+    public bool Send(string text, bool record = true, string? directory = null)
     {
         var lines = text.Replace("\r\n", "\n").Split('\n').Select(l => l.TrimEnd()).ToList();
         while (lines.Count > 0 && lines[^1].Length == 0)
@@ -141,6 +143,11 @@ public sealed class TerminalModel : LineStore
         ExchangeCount++;
         var stamp = TimeStamps ? $" ({Clock():HH:mm})" : string.Empty;
         var block = new List<Line> { NewLine(LineKind.InputMarker, $"# Input {ExchangeCount}{stamp}", 1) };
+        if ((directory ?? Directory) is { } folder)
+        {
+            block.Add(NewLine(LineKind.UserMessage, "Folder: " + folder));
+        }
+
         foreach (var line in lines)
         {
             block.Add(NewLine(LineKind.UserMessage, line));

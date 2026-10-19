@@ -32,6 +32,8 @@ public static class AxTerminalKeys
     public const Keys RecentCommands = Keys.Control | Keys.R;
     /// <summary>What the window is doing: the state, the command, how long, the prompt (AT-2.3, AT-D8).</summary>
     public const Keys WhatIsRunning = Keys.Control | Keys.Q;
+    /// <summary>The current folder, the full path, on demand (AT-D9).</summary>
+    public const Keys SayFolder = Keys.Control | Keys.P;
     /// <summary>Background music on or off, said each time (AT-5.5).</summary>
     public const Keys ToggleMusic = Keys.Control | Keys.Space;
 
@@ -78,6 +80,7 @@ public static class AxTerminalKeys
         ("Clear transcript", ClearTranscript),
         ("Recent commands", RecentCommands),
         ("What is running", WhatIsRunning),
+        ("Say current folder", SayFolder),
         ("Background music on or off", ToggleMusic),
         ("Enter: send, or copy the line", Enter),
         ("Send without recording", SendWithoutRecording),

@@ -11,7 +11,7 @@ Manual checks with NVDA running, before a release that changes AxTerminal (`docs
 
 ## 2. Commands (AT-3, AT-5)
 
-- Type `Write-Output hello`, Enter: "Sent" with its note; a tick; the chime and "Done". Ctrl+3: "# Output 1 heading level 1"; Down: "hello". Shift+I: "# Input 1"; Down: "Write-Output hello".
+- Type `Write-Output hello`, Enter: "Sent" with its note; a tick; the chime and "Done". Ctrl+3: "# Output 1 heading level 1"; Down: "hello". Shift+I: "# Input 1"; Down: "Folder:" and the folder; Down: "Write-Output hello".
 - `cmd /c exit 3`, Enter: "Failed, exit code 3". `Get-ChildItem`, Enter: ticks, "Done"; Ctrl+3 and read down: the listing, no prompt rows.
 - `Read-Host "Continue? (y/n)"`, Enter: after two seconds of quiet, the question chime and "Asks: Continue? (y/n):". Type `y`, Enter: "Sent", then "Done"; the terminal shows the question row with the answer, then `# Input 2` with y.
 - Type `if ($true) {`, Shift+Enter, `"yes"`, Shift+Enter, `}`, Enter: "Done"; Ctrl+3, Down: "yes"; no `>>` rows.
@@ -26,7 +26,7 @@ Manual checks with NVDA running, before a release that changes AxTerminal (`docs
 
 - Ctrl+N: the notice "New session", its text, "Folder: …", Choose folder button, the Shell group with the radio buttons and Custom, Start session and Cancel. Choose Command Prompt, Enter: "New session in …"; the window empties; "Ready"; the title ends "- Command Prompt - AxTerminal"; `echo hello`, Enter: "Done" (no code). Alt+S, W: the Switch shell submenu, Command Prompt checked; choose Windows PowerShell: "Windows PowerShell", a system line, "Ready", the transcript kept.
 - Alt+S, W, G: "Git Bash", the status bar shows `$`, the title names the folder and Git Bash, nothing of the prompt in the terminal. `ls`, Enter: the listing, then "Done". `(exit 3)`, Enter: "Failed, exit code 3". `cd ..`, Enter: the title follows. Ctrl+Q: "Idle, Git Bash, $". Alt+S, W: back to the shell you had.
-- `cd ..`, Enter: the title and the status bar name the parent folder. Ctrl+W: File Explorer opens on it. Alt+S, I, C: AxClaude opens on it; Alt+A, O, 1: back.
+- `cd ..`, Enter: the title and the status bar name the parent folder. Ctrl+P: its full path. Ctrl+W: File Explorer opens on it. Alt+S, I, C: AxClaude opens on it; Alt+A, O, 1: back.
 - Ctrl+Shift+R while idle: "Restarting", a system line, "Ready", the transcript kept. While `Start-Sleep 30` runs: the notice "Restart the shell?"; Escape keeps it; again, Enter: restarts.
 - Session, Open recent folder: the folders as "1. name (path)"; Enter on one: a new session there.
 - `exit`, Enter: "The shell ended"; the system line; Enter in the field: "The shell ended. Ctrl+Shift+R starts it again"; Ctrl+Shift+R: "Ready".

@@ -50,7 +50,7 @@ internal sealed partial class TerminalForm
             return;
         }
 
-        _model.Send(text, record);
+        _model.Send(text, record, CurrentDirectory);
         if (record)
         {
             _history.Add(text);

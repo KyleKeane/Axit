@@ -15,6 +15,7 @@ public static class HelpText
           Shift+Escape: send Escape to the shell
           Ctrl+R: the recent commands of this window as a list; Enter puts one back in the field
           Ctrl+Q: say what is running, for how long, and the prompt; the shell too while idle
+          Ctrl+P: say the current folder, the full path
           Ctrl+F: find text in the terminal. F3 and Shift+F3: next or previous match
           Ctrl+S: export the transcript as a Markdown file
           Ctrl+W: show the current folder in File Explorer

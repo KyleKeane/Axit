@@ -49,7 +49,7 @@ out of scope; programs that print and ask are in. It works entirely offline (bun
    key". Ctrl+Enter sends the field's text without recording it; "Sent, not recorded". The push goes on; "Done".
 4. `npm start` runs on: lines arrive with their ticks; Ctrl+Shift+C: "Interrupt sent"; the prompt returns, "Done".
 5. Ctrl+R: the window's recent commands as a list, the newest first; Enter puts `dotnet test` back in the field, Enter
-   again runs it. Or `i` in the view finds `# Input 1`, Down, and Enter on the command line copies it into the field.
+   again runs it. Or `i` in the view finds `# Input 1`, Down twice, past the folder line, and Enter on the command line copies it into the field.
 6. `cd ..`: the title and the status bar follow the shell's directory. Alt+S, I, F: AxFile on that folder; Alt+S, I,
    G: AxGit on its repository.
 7. In AxDown on `notes.md`, Alt+F, I, T: a terminal in the file's folder.
@@ -147,9 +147,10 @@ out of scope; programs that print and ask are in. It works entirely offline (bun
   the extra Enter is an empty prompt, which announces nothing). **Shift+Enter** is a new line in the field (AxClaude
   D11). An empty field sends a bare `\r` (a new prompt, or the default of a program's question). "Sent" is announced
   with the sent note (AT-5.1).
-- AT-3.2 **The exchange block** (AxClaude FR-4.1): `# Input n`, the command's lines as sent, a blank line,
-  `# Output n`, a blank line, inserted at the end of the transcript above the trailing prompt row at the moment of
-  sending; *n* counts since the window started or the transcript was cleared; both markers are level 1 headings;
+- AT-3.2 **The exchange block** (AxClaude FR-4.1): `# Input n`, the line `Folder: C:\path` with the directory the
+  command runs in (the shell's current directory at the moment of sending: the 9;9 mark's, or the start folder
+  while a shell gives no marks; AT-D9), the command's lines as sent, a blank line, `# Output n`, a blank line,
+  inserted at the end of the transcript above the trailing prompt row at the moment of sending; *n* counts since the window started or the transcript was cleared; both markers are level 1 headings;
   Options → Text → Time stamps adds the time to both (AxClaude FR-4.6). The shell's echo of the command, the prompt
   row holding the command after its prompt, stays hidden: the block stands for it (AxClaude D22), and so do the
   continuation rows of a multi-line command, the shell's continuation prompt with the line after it (PowerShell's
@@ -231,8 +232,8 @@ out of scope; programs that print and ask are in. It works entirely offline (bun
 
 - AT-6.1 Menus, in the standard order of a first menu (AX-6): **Session (S):** New session… Ctrl+N | Open recent
   folder ▸ (ten, "1. name (path)", AX-9.5) | Switch shell ▸ (PowerShell 7 | Windows PowerShell | Command Prompt |
-  Git Bash | Custom…) | ─ | Restart shell Ctrl+Shift+R | Clear transcript Ctrl+L | ─ | Show
-  current folder in ▸ (File Explorer Ctrl+W | AxClaude | AxGit | AxFile), on the shell's current directory | ─ |
+  Git Bash | Custom…) | ─ | Restart shell Ctrl+Shift+R | Clear transcript Ctrl+L | ─ | Say current folder Ctrl+P |
+  Show current folder in ▸ (File Explorer Ctrl+W | AxClaude | AxGit | AxFile), on the shell's current directory | ─ |
   Export transcript… Ctrl+S | Exit Alt+F4. **Shell (E):** Interrupt Ctrl+Shift+C | Send Escape Shift+Escape | Send
   key ▸ (Up | Down | Ctrl+D (end of input)) | ─ | Recent commands… Ctrl+R | Send without recording (Ctrl+Enter in the
   command field) | ─ | What is running Ctrl+Q. **Navigate (N):** AxClaude's Navigate menu with the kinds the terminal
@@ -249,7 +250,7 @@ out of scope; programs that print and ask are in. It works entirely offline (bun
   is about; Shell takes E, S being Session's.
 - AT-6.2 Keys (AX-8). Bundle-wide: F1, the control keys, Ctrl+F, F3, Shift+F3, Ctrl+S, Ctrl+Plus, Ctrl+Minus, Page
   Up, Page Down, Ctrl+Up and Ctrl+Down with Shift, Alt+F4. Window-specific (`AxTerminalKeys`): Ctrl+N, Ctrl+Shift+R,
-  Ctrl+L, Ctrl+W, Ctrl+1, Ctrl+2, Ctrl+3, Ctrl+Shift+C, Shift+Escape, Ctrl+R, Ctrl+Q, Ctrl+Space, Ctrl+Shift+K; in
+  Ctrl+L, Ctrl+W, Ctrl+1, Ctrl+2, Ctrl+3, Ctrl+Shift+C, Shift+Escape, Ctrl+R, Ctrl+Q, Ctrl+P, Ctrl+Space, Ctrl+Shift+K; in
   the field Enter, Shift+Enter, Ctrl+Enter, Escape; in the view the quick keys `i`, `o`, `h`, `1` to `6`, `p`, `s`,
   `k` with Shift, `m`, `l`, Enter, Escape, Backspace, and Ctrl+Alt with `i`, `o`, `h`, `p`, `s`, `k`. AxClaude's `c`,
   `t`, `d`, `e`, `q` and `r` have no kind here and do nothing. The collision test covers the table and lists the keys
@@ -265,7 +266,7 @@ sent", "Line copied", "No recent commands", "Shift+Escape sends Escape, Ctrl+Shi
 "The shell ended. Ctrl+Shift+R starts it again", "Restarting", "New session in <folder>", the shell's name on Switch shell, "Cleared", "Exported",
 "Copied", "Not found", "Line n of m", "Bookmark n added" and "Bookmark n removed", "Line gone", "No next input" and
 the other jump results with the kind's name, "Command", "Terminal" and the other names when the control already has
-the focus, "Running: …", "Idle, …", "Shell ended" and "No marks from this shell" on Ctrl+Q, "Up sent", "Down sent"
+the focus, "Running: …", "Idle, …", "Shell ended" and "No marks from this shell" on Ctrl+Q, the folder's full path on Ctrl+P, "Up sent", "Down sent"
 and "Ctrl+D sent" (the Send key menu), "Folder <name>" (a recent folder), "Folder missing", "Speak output: none" and
 "Speak output: all lines" (the choice made), "Background music on" and "off" (AxClaude FR-7.9), "Text size n",
 "Windows text size", "Copied diagnostics", "Recording started" and "Recording stopped" (the system lines name the
@@ -350,6 +351,11 @@ its notes record what moved.
   them otherwise. Other pagers are left alone (`q` and Enter leave them).
 - **AT-D8 Ctrl+Q says what the window is doing.** On demand, from anywhere, like AxClaude's Ctrl+Q for a question:
   the state, the command, how long, the prompt.
+- **AT-D9 Every block names its folder.** The user asked for the directory a command ran in to be on hand in the
+  transcript itself: the prompt rows that would say it are hidden, a `cd` between two commands leaves the output's
+  place unknown when the text is read back or exported, and the status bar only has the directory of now. One line
+  after `# Input n`, in the shape of the New session notice's `Folder:` line, costs a Down and answers it; Ctrl+P (Session → Say current folder) says the directory of now, the full path, on
+  demand.
 
 ## 7. Open questions
 

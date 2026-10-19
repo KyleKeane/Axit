@@ -161,6 +161,9 @@ internal sealed partial class TerminalForm
         Announce(_model.Prompt is { } prompt ? $"{text}, {prompt}" : $"{text}, {CurrentDirectory}", true);
     }
 
+    /// <summary>Session → Say current folder (Ctrl+P, AT-D9): the full path of the shell's directory, or of the start folder while the shell gives no marks.</summary>
+    private void SayFolder() => Announce(CurrentDirectory, true);
+
     /// <summary>Session → Clear transcript (Ctrl+L, AT-4.4): the window empties; the shell goes on.</summary>
     private void ClearTranscript()
     {
