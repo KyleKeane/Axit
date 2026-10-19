@@ -67,7 +67,7 @@ out of scope; programs that print and ask are in. It works entirely offline (bun
   under Program Files, Program Files (x86) or `%LOCALAPPDATA%\Programs`, or next to the `git.exe` on the PATH; never
   a `bash.exe` on the PATH, which in System32 is WSL's launcher; started `--login -i`, as Git's own shortcut does) or
   a custom command line; the default is PowerShell 7 when it is installed, otherwise Windows PowerShell. The choice
-  is made in the New shell notice (AT-1.6)
+  is made in the New session notice and the Switch shell submenu (AT-1.6)
   and remembered in the settings (`shell`, `customShell`) for the next window. The shell starts in the folder with the
   window's environment plus `TERM=xterm-256color` for the programs that look, and `GIT_PAGER=cat` and `GH_PAGER=cat`,
   which switch git's and the GitHub CLI's pager off (AT-D7); nothing is taken out of the environment.
@@ -91,18 +91,24 @@ out of scope; programs that print and ask are in. It works entirely offline (bun
 - AT-1.4 **State from the marks.** From Enter until the next `A` mark the window counts the command as running: the
   status bar says `Running: <the command's first line>` and the music plays when it is on (AT-5.5); the `D` mark's
   code decides between "Done" and "Failed, exit code n" (AT-5.1); the `A` mark's row is the prompt (AT-4.2); the 9;9
-  directory names the title. Without marks the window has no state: the status's left label stays empty, nothing is
+  directory and the shell's name make the title. Without marks the window has no state: the status's left label stays empty, nothing is
   announced at the end of a command, and the cursor row shows as a line.
 - AT-1.5 `AxTerminalApp.Run(args)` is the entry point (AX-1.7), one call into `AppHost.Run` with the log name
   `axterminal`, the usage text, the settings (`axterminal.json`) and the window.
-- AT-1.6 Session → **New shell…** (Ctrl+N), the shape of AxClaude's New session (AxClaude FR-8.6, D30): the notice
-  "New shell" with `Folder: C:\path` as its first line, "Choose the shell and the folder. Starting ends the current
-  shell and starts the new one in the folder." and the key line, preceded by "<the command> is still running. A new
-  shell ends it." while one runs; the **Choose folder…** button (the folder picker); the group **Shell** with the radio
-  buttons **PowerShell 7**, **Windows PowerShell**, **Command Prompt**, **Git Bash** and **Custom**, and, while Custom is selected,
-  the field **Command line**; the buttons **Start shell** (Enter) and **Cancel** (Escape). Start clears the
-  transcript, prints the system line `New shell: PowerShell 7 in C:\path`, announces "New shell in <folder name>" and
-  remembers the folder and the shell. Session → **Restart shell** (Ctrl+Shift+R) ends the shell and starts the same
+- AT-1.6 Session → **New session…** (Ctrl+N), the shape and the name of AxClaude's New session (AxClaude FR-8.6,
+  D30): the notice "New session" with `Folder: C:\path` as its first line, "Choose the shell and the folder. Starting
+  ends the current shell and starts a new session in the folder." and the key line, preceded by "<the command> is
+  still running. A new session ends it." while one runs; the **Choose folder…** button (the folder picker); the group
+  **Shell** with the radio buttons **PowerShell 7**, **Windows PowerShell**, **Command Prompt**, **Git Bash** and
+  **Custom**, and, while Custom is selected, the field **Command line**; the buttons **Start session** (Enter) and
+  **Cancel** (Escape). Start clears the transcript, prints the system line `New session: PowerShell 7 in C:\path`,
+  announces "New session in <folder name>" and remembers the folder and the shell. Session → **Switch shell ▸** lists
+  the shells (PowerShell 7, Windows PowerShell, Command Prompt, Git Bash, the current one checked, then Custom…,
+  which opens the New session notice): choosing one ends the shell and starts the chosen one in the current
+  directory, keeping the transcript, with the system line `Switched to Git Bash in C:\path` and the shell's name
+  announced; while a command runs, the notice "Switch the shell?" comes first ("Enter: Switch now. Escape: Keep it
+  running."). The title names the shell (AT-2.3) and Ctrl+Q says it while idle (AT-D8), so the shell in hand is
+  always one key away. Session → **Restart shell** (Ctrl+Shift+R) ends the shell and starts the same
   one again in its current directory, keeping the transcript, after the notice "Restart the shell?" while a command
   runs ("Enter: Restart now. Escape: Keep it running."); a shell that ended restarts at once. "Restarting" is
   announced.
@@ -124,12 +130,12 @@ out of scope; programs that print and ask are in. It works entirely offline (bun
   (bundle AX-8.2); Ctrl+1 the field, Ctrl+2 the view, Ctrl+3 the view at the latest output marker, from anywhere, each
   naming the control when it has the focus already (AxClaude FR-6.5, D26). The focus starts in the field and stays
   there after sending.
-- AT-2.3 The title is `<current directory's name> - AxTerminal`, the directory being the shell's (9;9) and the start
+- AT-2.3 The title is `<current directory's name> - <the shell's name> - AxTerminal`, the directory being the shell's (9;9) and the start
   folder before the first mark. The status bar's left label: `Idle`, `Running: dotnet test`, `Shell ended`,
   `Starting`; the right label: the shell's last prompt, the row's text between the `A` and `B` marks
   (`PS C:\src\myproject>`), or the full directory before the first prompt. No AccessibleName, no Spring (AxClaude
   §6.2). Ctrl+Q, from anywhere, says both with the time since the command started: "Running: dotnet test, 40 seconds,
-  PS C:\src\myproject>" or "Idle, PS C:\src\myproject>" (AT-D8).
+  PS C:\src\myproject>" or "Idle, Windows PowerShell, PS C:\src\myproject>" (AT-D8), the shell named while idle.
 
 ### AT-3 The command field and the sending
 
@@ -223,8 +229,9 @@ out of scope; programs that print and ask are in. It works entirely offline (bun
 
 ### AT-6 Menus, keys, texts
 
-- AT-6.1 Menus, in the standard order of a first menu (AX-6): **Session (S):** New shell… Ctrl+N | Open recent
-  folder ▸ (ten, "1. name (path)", AX-9.5) | ─ | Restart shell Ctrl+Shift+R | Clear transcript Ctrl+L | ─ | Show
+- AT-6.1 Menus, in the standard order of a first menu (AX-6): **Session (S):** New session… Ctrl+N | Open recent
+  folder ▸ (ten, "1. name (path)", AX-9.5) | Switch shell ▸ (PowerShell 7 | Windows PowerShell | Command Prompt |
+  Git Bash | Custom…) | ─ | Restart shell Ctrl+Shift+R | Clear transcript Ctrl+L | ─ | Show
   current folder in ▸ (File Explorer Ctrl+W | AxClaude | AxGit | AxFile), on the shell's current directory | ─ |
   Export transcript… Ctrl+S | Exit Alt+F4. **Shell (E):** Interrupt Ctrl+Shift+C | Send Escape Shift+Escape | Send
   key ▸ (Up | Down | Ctrl+D (end of input)) | ─ | Recent commands… Ctrl+R | Send without recording (Ctrl+Enter in the
@@ -255,7 +262,7 @@ out of scope; programs that print and ask are in. It works entirely offline (bun
 One UI Automation notification each, on the view, or on the notice or the list while one shows (AX-7.3): "Sent",
 "Sent, not recorded", "Done", "Failed, exit code n", "Failed", "Ready", "Asks: <row>", "Interrupt sent", "Escape
 sent", "Line copied", "No recent commands", "Shift+Escape sends Escape, Ctrl+Shift+C interrupts", "The shell ended",
-"The shell ended. Ctrl+Shift+R starts it again", "Restarting", "New shell in <folder>", "Cleared", "Exported",
+"The shell ended. Ctrl+Shift+R starts it again", "Restarting", "New session in <folder>", the shell's name on Switch shell, "Cleared", "Exported",
 "Copied", "Not found", "Line n of m", "Bookmark n added" and "Bookmark n removed", "Line gone", "No next input" and
 the other jump results with the kind's name, "Command", "Terminal" and the other names when the control already has
 the focus, "Running: …", "Idle, …", "Shell ended" and "No marks from this shell" on Ctrl+Q, "Up sent", "Down sent"
@@ -295,7 +302,7 @@ src/AxTerminal.Core/      class library (net10.0): ShellLauncher (find the shell
                           references Axit.Core
 src/AxTerminal/           class library (net10.0-windows): AxTerminalApp (Run, Usage), TerminalForm (the window, on
                           AxitForm, in partial files by section: the base's hooks and the key switch, the menus and the
-                          status, the field and the sending, the process, what the model reports, New shell and the
+                          status, the field and the sending, the process, what the model reports, New session, Switch shell and the
                           folders, find and export and recording), AxTerminalKeys (with Transcript, the view's keys as
                           data), HelpText (F1 text, the embedded guide); references AxTerminal.Core, Axit.Core, Axit.Forms
 tests/AxTerminal.Tests/   fixtures recorded with tools/PtyCapture of powershell, cmd and bash under the launcher's command

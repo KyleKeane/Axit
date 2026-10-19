@@ -155,7 +155,7 @@ internal sealed partial class TerminalForm
         }
         else
         {
-            text = _model.Prompt is null ? "Starting" : "Idle";
+            text = _model.Prompt is null ? "Starting" : $"Idle, {ShellLauncher.Describe(_shell)}";
         }
 
         Announce(_model.Prompt is { } prompt ? $"{text}, {prompt}" : $"{text}, {CurrentDirectory}", true);

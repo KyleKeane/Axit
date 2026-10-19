@@ -37,6 +37,7 @@ internal sealed partial class TerminalForm : AxitForm
     /// <summary>Options → Sounds → Background music while a command runs, made with the menu; Ctrl+Space flips it from anywhere (AT-5.5).</summary>
     private ToolStripMenuItem _musicItem = null!;
     private readonly List<(OutputSpeechMode Mode, ToolStripMenuItem Item)> _speechItems = [];
+    private readonly List<(ShellKind Kind, ToolStripMenuItem Item)> _shellItems = [];
 
     /// <summary>The Speak output choices of Options → Speech in menu order (AT-5.3); the text without its mnemonic is what the choice announces.</summary>
     private static readonly (OutputSpeechMode Mode, string Text)[] SpeechChoices =
@@ -177,8 +178,8 @@ internal sealed partial class TerminalForm : AxitForm
             case AxTerminalKeys.LatestOutput:
                 _transcript.JumpToLatestResponse();
                 return true;
-            case AxTerminalKeys.NewShell:
-                NewShell();
+            case AxTerminalKeys.NewSession:
+                NewSession();
                 return true;
             case AxTerminalKeys.RestartShell:
                 RestartShell();

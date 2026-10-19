@@ -19,10 +19,28 @@ internal sealed partial class TerminalForm
         // menu (bundle AX-6): New, the recent folders, the slot the editors have Save in, Show current folder in, the
         // export, Exit.
         var session = new ToolStripMenuItem("&Session");
-        session.DropDownItems.Add(Item("&New shell...", NewShell, AxTerminalKeys.NewShell));
+        session.DropDownItems.Add(Item("&New session...", NewSession, AxTerminalKeys.NewSession));
         _recentFoldersItem.DropDownOpening += (_, _) => FillRecentFolders();
         FillRecentFolders();
         session.DropDownItems.Add(_recentFoldersItem);
+        // AT-1.6: the shell changed in place, the current one checked when the submenu opens.
+        var switchShell = new ToolStripMenuItem("S&witch shell");
+        foreach (var (kind, text) in ShellChoices)
+        {
+            var item = new ToolStripMenuItem(text, null, (_, _) => SwitchShell(kind));
+            _shellItems.Add((kind, item));
+            switchShell.DropDownItems.Add(item);
+        }
+
+        switchShell.DropDownItems.Add(new ToolStripMenuItem("C&ustom...", null, (_, _) => NewSession()));
+        switchShell.DropDownOpening += (_, _) =>
+        {
+            foreach (var (kind, item) in _shellItems)
+            {
+                item.Checked = kind == _shell;
+            }
+        };
+        session.DropDownItems.Add(switchShell);
         session.DropDownItems.Add(new ToolStripSeparator());
         session.DropDownItems.Add(Item("Res&tart shell", RestartShell, AxTerminalKeys.RestartShell));
         session.DropDownItems.Add(Item("&Clear transcript", ClearTranscript, AxTerminalKeys.ClearTranscript));
@@ -179,7 +197,7 @@ internal sealed partial class TerminalForm
     /// <summary>The title is the current directory's name (AT-2.3), which the Axit menu lists the window by.</summary>
     private void UpdateTitle()
     {
-        var text = $"{RecentMenu.FolderName(CurrentDirectory)} - {AxTerminalApp.Name}";
+        var text = $"{RecentMenu.FolderName(CurrentDirectory)} - {ShellLauncher.Describe(_shell)} - {AxTerminalApp.Name}";
         if (Text != text)
         {
             Text = text;

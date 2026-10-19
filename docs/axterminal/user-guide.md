@@ -19,7 +19,7 @@ Axit's installer installs AxTerminal with the other apps: see the Axit guide (Al
 - File Explorer: right-click a folder, open `Open with Axit` and choose AxTerminal.
 - From AxClaude: Session, Show current folder in, AxTerminal. From AxDown or AxJSON: File, Show current file in, AxTerminal (the file's folder). From AxGit: Repository, Show current repository in, AxTerminal. Each opens a new AxTerminal window.
 
-The window opens with the command field focused. When the shell's first prompt appears you hear "Ready" with a short ping. The status bar shows the state on the left (Idle, or Running with the command) and the shell's prompt on the right, which is where you are. The title is the name of the current folder.
+The window opens with the command field focused. When the shell's first prompt appears you hear "Ready" with a short ping. The status bar shows the state on the left (Idle, or Running with the command) and the shell's prompt on the right, which is where you are. The title is the name of the current folder and the shell.
 
 With a screen reader running, PowerShell turns its line editor (PSReadLine) off and prints a line saying so. That is expected: AxTerminal's field is the editor.
 
@@ -61,7 +61,7 @@ Options, Speech, Speak output: all lines reads each line as it arrives, joined i
 
 ## The shell
 
-Session, New shell (Ctrl+N) opens a notice with the folder, a Choose folder button, the shells (PowerShell 7, Windows PowerShell, Command Prompt, Git Bash, or Custom with a command line of your own) and Start shell. Starting ends the current shell and starts the new one in the folder; the terminal is cleared. Open recent folder does the same for a folder you had before. Restart shell (Ctrl+Shift+R) starts the same shell again in its current folder and keeps the text. While a command runs, both ask first.
+Session, New session (Ctrl+N) opens a notice with the folder, a Choose folder button, the shells (PowerShell 7, Windows PowerShell, Command Prompt, Git Bash, or Custom with a command line of your own) and Start session. Starting ends the current shell and starts the new one in the folder; the terminal is cleared. Session, Switch shell lists the shells: choosing one starts it in the same folder and keeps the text. The title names the shell you are in, and Ctrl+Q says it while nothing runs. Open recent folder does what New session does for a folder you had before. Restart shell (Ctrl+Shift+R) starts the same shell again in its current folder and keeps the text. While a command runs, all of them ask first.
 
 The shell's prompt is not shown in the terminal: it is in the status bar, and the folder it names follows your `cd`. The prompt rows are recognised through marks the shell prints for terminals (the Windows Terminal convention), which AxTerminal adds to PowerShell's prompt, to Command Prompt's PROMPT and to Git Bash's prompt command for the session; your profile is not touched. A shell of your own gives no marks unless its prompt prints them, and then the window shows every row and says nothing when a command ends.
 
@@ -71,7 +71,7 @@ Clear transcript (Ctrl+L) empties the window; the shell's own `cls` clears only 
 
 ## Menus
 
-Alt opens the menu bar. Session: new shell, the recent folders, restart, clear, Show current folder in (File Explorer, AxClaude, AxGit), export the transcript as a Markdown file (Ctrl+S), exit. Shell: interrupt, Escape, the keys, the recent commands, send without recording, what is running. Navigate: the field, the terminal, the latest output, find, the bookmarks. Options: Sounds (the chimes, the ticks, background music while a command runs, Ctrl+Space), Speech (speak output, say when a program asks), When a command is done (the taskbar flash, the louder alert for the background), Text (time stamps, the font and size), General, Developer. Axit: the bundle's menu. Help: the shortcuts (F1), this guide, shell resources.
+Alt opens the menu bar. Session: new session, the recent folders, switch shell, restart, clear, Show current folder in (File Explorer, AxClaude, AxGit), export the transcript as a Markdown file (Ctrl+S), exit. Shell: interrupt, Escape, the keys, the recent commands, send without recording, what is running. Navigate: the field, the terminal, the latest output, find, the bookmarks. Options: Sounds (the chimes, the ticks, background music while a command runs, Ctrl+Space), Speech (speak output, say when a program asks), When a command is done (the taskbar flash, the louder alert for the background), Text (time stamps, the font and size), General, Developer. Axit: the bundle's menu. Help: the shortcuts (F1), this guide, shell resources.
 
 ## Settings
 

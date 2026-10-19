@@ -6,9 +6,9 @@ namespace AxTerminal;
 
 internal sealed partial class TerminalForm
 {
-    // ---- New shell (AT-1.6), folders (AT-1.5) ----
+    // ---- New session and Switch shell (AT-1.6), folders (AT-1.5) ----
 
-    /// <summary>The shells of the New shell notice, in its order; Custom comes after them. The argument is the settings' word for the shell.</summary>
+    /// <summary>The shells of the New session notice, in its order; Custom comes after them. The argument is the settings' word for the shell.</summary>
     private static readonly OverlayPreset[] ShellPresets =
     [
         new(ShellLauncher.Describe(ShellKind.PowerShell7), [ShellLauncher.Key(ShellKind.PowerShell7)]),
@@ -17,23 +17,32 @@ internal sealed partial class TerminalForm
         new(ShellLauncher.Describe(ShellKind.GitBash), [ShellLauncher.Key(ShellKind.GitBash)]),
     ];
 
+    /// <summary>The Switch shell submenu's shells, each with its letter; Custom… follows them and opens the notice.</summary>
+    private static readonly (ShellKind Kind, string Text)[] ShellChoices =
+    [
+        (ShellKind.PowerShell7, "PowerShell &7"),
+        (ShellKind.WindowsPowerShell, "&Windows PowerShell"),
+        (ShellKind.CommandPrompt, "&Command Prompt"),
+        (ShellKind.GitBash, "&Git Bash"),
+    ];
+
     /// <summary>
-    /// Session → New shell… (Ctrl+N): the folder with a Choose folder button under it, the shells as radio buttons,
+    /// Session → New session… (Ctrl+N): the folder with a Choose folder button under it, the shells as radio buttons,
     /// Custom with a command line field. Enter ends the current shell and starts the chosen one in the folder, the
     /// transcript cleared; Escape keeps the current shell.
     /// </summary>
-    private void NewShell()
+    private void NewSession()
     {
         var selected = _shell == ShellKind.Custom ? ShellPresets.Length : Array.FindIndex(ShellPresets, p => p.Arguments[0] == ShellLauncher.Key(_shell));
-        var text = "Choose the shell and the folder. Starting ends the current shell and starts the new one in the folder.";
+        var text = "Choose the shell and the folder. Starting ends the current shell and starts a new session in the folder.";
         if (_host is not null && _model.Running)
         {
-            text = $"{_model.RunningCommand} is still running. A new shell ends it.\n" + text;
+            text = $"{_model.RunningCommand} is still running. A new session ends it.\n" + text;
         }
 
-        ShowNotice(new Notice("New shell", text,
+        ShowNotice(new Notice("New session", text,
         [
-            new OverlayChoice("&Start shell", StartNewShell, IsDefault: true),
+            new OverlayChoice("&Start session", StartSession, IsDefault: true),
             new OverlayChoice("Cancel", IsCancel: true),
         ])
         {
@@ -53,7 +62,7 @@ internal sealed partial class TerminalForm
         }
     }
 
-    private void StartNewShell()
+    private void StartSession()
     {
         var folder = Overlay.SessionFolder;
         if (folder is null || !Directory.Exists(folder))
@@ -73,8 +82,36 @@ internal sealed partial class TerminalForm
         }
 
         SetFolder(folder);
-        Announce($"New shell in {RecentMenu.FolderName(folder)}", false);
-        Relaunch($"New shell: {ShellLauncher.Describe(_shell)} in {folder}", clearTranscript: true);
+        Announce($"New session in {RecentMenu.FolderName(folder)}", false);
+        Relaunch($"New session: {ShellLauncher.Describe(_shell)} in {folder}", clearTranscript: true);
+    }
+
+    /// <summary>
+    /// Session → Switch shell → a shell (AT-1.6): the chosen shell in the current folder, the transcript kept; after the
+    /// notice "Switch the shell?" while a command runs. Custom… in the submenu opens the New session notice instead.
+    /// </summary>
+    private void SwitchShell(ShellKind kind)
+    {
+        if (_host is not null && _model.Running)
+        {
+            ShowNotice(new Notice("Switch the shell?",
+                $"{_model.RunningCommand} is still running. Switching ends it and starts {ShellLauncher.Describe(kind)} in the same folder. The transcript stays in the window.",
+            [
+                new OverlayChoice("&Switch now", () => ForceSwitch(kind), IsDefault: true),
+                new OverlayChoice("&Keep it running", IsCancel: true),
+            ]));
+            return;
+        }
+
+        ForceSwitch(kind);
+    }
+
+    private void ForceSwitch(ShellKind kind)
+    {
+        _shell = kind;
+        _folder = Directory.Exists(CurrentDirectory) ? CurrentDirectory : _folder;
+        Announce(ShellLauncher.Describe(kind), false);
+        Relaunch($"Switched to {ShellLauncher.Describe(kind)} in {_folder}", clearTranscript: false);
     }
 
     /// <summary>The standard folder picker (one of the few separate windows, AX-7.2); null when it was cancelled.</summary>
@@ -112,7 +149,7 @@ internal sealed partial class TerminalForm
 
         SetFolder(folder);
         Announce($"Folder {RecentMenu.FolderName(folder)}", false);
-        Relaunch($"New shell: {ShellLauncher.Describe(_shell)} in {folder}", clearTranscript: true);
+        Relaunch($"New session: {ShellLauncher.Describe(_shell)} in {folder}", clearTranscript: true);
     }
 
     /// <summary>Session → Show current folder in → File Explorer (Ctrl+W): the shell's current directory, one of the system's own windows.</summary>

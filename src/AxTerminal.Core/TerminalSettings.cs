@@ -22,7 +22,7 @@ public sealed class TerminalSettings : WindowSettings
     /// <summary>The shell's word (<see cref="ShellLauncher.Key"/>); null means the default of the machine.</summary>
     public string? Shell { get; set; }
 
-    /// <summary>The command line of the custom shell, kept for the New shell notice.</summary>
+    /// <summary>The command line of the custom shell, kept for the New session notice.</summary>
     public string? CustomShell { get; set; }
 
     public string? LastFolder { get; set; }

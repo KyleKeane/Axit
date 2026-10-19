@@ -14,11 +14,11 @@ public static class HelpText
           Ctrl+Shift+C: interrupt, that is send Ctrl+C to the shell
           Shift+Escape: send Escape to the shell
           Ctrl+R: the recent commands of this window as a list; Enter puts one back in the field
-          Ctrl+Q: say what is running, for how long, and the prompt
+          Ctrl+Q: say what is running, for how long, and the prompt; the shell too while idle
           Ctrl+F: find text in the terminal. F3 and Shift+F3: next or previous match
           Ctrl+S: export the transcript as a Markdown file
           Ctrl+W: show the current folder in File Explorer
-          Ctrl+N: new shell: choose the folder and the shell (PowerShell 7, Windows PowerShell, Command Prompt, or a custom command line)
+          Ctrl+N: new session: choose the folder and the shell (PowerShell 7, Windows PowerShell, Command Prompt, Git Bash, or a custom command line); Session, Switch shell changes the shell in the same folder and keeps the text
           Ctrl+Shift+R: restart the shell in its current folder, after a confirmation while a command runs
           Ctrl+L: clear the transcript (the shell's own cls clears only its screen)
           Ctrl+Alt and a letter from the Terminal list below: read every line of that kind from the caret to the end of the terminal in one go, without moving; Ctrl+Alt+P reads the paragraphs whole. Control stops NVDA

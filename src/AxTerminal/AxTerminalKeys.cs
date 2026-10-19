@@ -26,7 +26,7 @@ public static class AxTerminalKeys
     public const Keys ReadToEnd = Keys.Control | Keys.Alt;
     public const Keys BookmarkLine = Keys.Control | Keys.Shift | Keys.K;
     public const Keys ShowInExplorer = Keys.Control | Keys.W;
-    public const Keys NewShell = Keys.Control | Keys.N;
+    public const Keys NewSession = Keys.Control | Keys.N;
     public const Keys RestartShell = Keys.Control | Keys.Shift | Keys.R;
     public const Keys ClearTranscript = Keys.Control | Keys.L;
     public const Keys RecentCommands = Keys.Control | Keys.R;
@@ -73,7 +73,7 @@ public static class AxTerminalKeys
         ("Read to the end: Ctrl+Alt with a quick key letter", ReadToEnd),
         ("Bookmark this line", BookmarkLine),
         ("Show the folder in File Explorer", ShowInExplorer),
-        ("New shell", NewShell),
+        ("New session", NewSession),
         ("Restart shell", RestartShell),
         ("Clear transcript", ClearTranscript),
         ("Recent commands", RecentCommands),
