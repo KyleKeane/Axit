@@ -51,6 +51,7 @@ internal sealed partial class TerminalForm
         showIn.DropDownItems.Add(Item("File &Explorer", ShowInExplorer, AxTerminalKeys.ShowInExplorer));
         showIn.DropDownItems.Add(new ToolStripMenuItem("Ax&Claude", null, (_, _) => OpenIn(Dispatch.AxClaude)));
         showIn.DropDownItems.Add(new ToolStripMenuItem("Ax&Git", null, (_, _) => OpenIn(Dispatch.AxGit)));
+        showIn.DropDownItems.Add(new ToolStripMenuItem("Ax&File", null, (_, _) => OpenIn(Dispatch.AxFile)));
         session.DropDownItems.Add(showIn);
         session.DropDownItems.Add(new ToolStripSeparator());
         session.DropDownItems.Add(new ToolStripMenuItem("&Export transcript...", null, (_, _) => ExportTranscript()) { ShortcutKeyDisplayString = BundleKeys.Text(BundleKeys.Save) });

@@ -71,11 +71,12 @@ public sealed partial class GitForm : AxitForm
         repository.DropDownItems.Add(new ToolStripSeparator());
         repository.DropDownItems.Add(Git(Item("Re&fresh", () => Do(() => RefreshAsync(announce: true)), AxGitKeys.Refresh)));
         repository.DropDownItems.Add(new ToolStripSeparator());
-        // Show current repository in ▸ File Explorer, AxClaude: the way back to where the user came from (AG-1.4).
+        // Show current repository in ▸ File Explorer, AxClaude, AxTerminal, AxFile: the way back to where the user came from (AG-1.4).
         var showIn = new ToolStripMenuItem("Show current repository &in");
         showIn.DropDownItems.Add(Item("File &Explorer", ShowInExplorer, AxGitKeys.ShowInExplorer));
         showIn.DropDownItems.Add(new ToolStripMenuItem("Ax&Claude", null, (_, _) => OpenInAxClaude()));
         showIn.DropDownItems.Add(new ToolStripMenuItem("Ax&Terminal", null, (_, _) => OpenInAxTerminal()));
+        showIn.DropDownItems.Add(new ToolStripMenuItem("Ax&File", null, (_, _) => OpenInAxFile()));
         repository.DropDownItems.Add(showIn);
         repository.DropDownItems.Add(new ToolStripSeparator());
         repository.DropDownItems.Add(new ToolStripMenuItem("E&xit", null, (_, _) => Close()) { ShortcutKeyDisplayString = "Alt+F4" });
@@ -434,6 +435,18 @@ public sealed partial class GitForm : AxitForm
         }
 
         AxitMenu.Start(Dispatch.AxTerminal, _root);
+    }
+
+    /// <summary>Repository → Show current repository in → AxFile: a new AxFile window listing the repository's folder (docs/axfile/SPEC.md AF-1.3).</summary>
+    private void OpenInAxFile()
+    {
+        if (_root is null)
+        {
+            Announce("No repository", true);
+            return;
+        }
+
+        AxitMenu.Start(Dispatch.AxFile, _root);
     }
 
     /// <summary>Changes → Open file in editor (Ctrl+E): the selected file in AxJSON for .json, AxDown otherwise (AG-1.4).</summary>

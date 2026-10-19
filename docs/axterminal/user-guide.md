@@ -17,7 +17,7 @@ Axit's installer installs AxTerminal with the other apps: see the Axit guide (Al
 - Start menu: `Axit AxTerminal`. Press the Windows key and type `axt`.
 - Console: `axterminal`, or `axterminal C:\src\myproject` to start the shell in that folder.
 - File Explorer: right-click a folder, open `Open with Axit` and choose AxTerminal.
-- From AxClaude: Session, Show current folder in, AxTerminal. From AxDown or AxJSON: File, Show current file in, AxTerminal (the file's folder). From AxGit: Repository, Show current repository in, AxTerminal. Each opens a new AxTerminal window.
+- From AxClaude: Session, Show current folder in, AxTerminal. From AxDown or AxJSON: File, Show current file in, AxTerminal (the file's folder). From AxGit: Repository, Show current repository in, AxTerminal. From AxFile: Folder, Show current folder in, AxTerminal. Each opens a new AxTerminal window.
 
 The window opens with the command field focused. When the shell's first prompt appears you hear "Ready" with a short ping. The status bar shows the state on the left (Idle, or Running with the command) and the shell's prompt on the right, which is where you are. The title is the name of the current folder and the shell. Ctrl+P says the current folder, the full path.
 
@@ -71,7 +71,7 @@ Clear transcript (Ctrl+L) empties the window; the shell's own `cls` clears only 
 
 ## Menus
 
-Alt opens the menu bar. Session: new session, the recent folders, switch shell, restart, clear, say current folder (Ctrl+P), Show current folder in (File Explorer, AxClaude, AxGit), export the transcript as a Markdown file (Ctrl+S), exit. Shell: interrupt, Escape, the keys, the recent commands, send without recording, what is running. Navigate: the field, the terminal, the latest output, find, the bookmarks. Options: Sounds (the chimes, the ticks, background music while a command runs, Ctrl+Space), Speech (speak output, say when a program asks), When a command is done (the taskbar flash, the louder alert for the background), Text (time stamps, markers in the text, the font and size), General, Developer. Axit: the bundle's menu. Help: the shortcuts (F1), this guide, shell resources.
+Alt opens the menu bar. Session: new session, the recent folders, switch shell, restart, clear, say current folder (Ctrl+P), Show current folder in (File Explorer, AxClaude, AxGit, AxFile), export the transcript as a Markdown file (Ctrl+S), exit. Shell: interrupt, Escape, the keys, the recent commands, send without recording, what is running. Navigate: the field, the terminal, the latest output, find, the bookmarks. Options: Sounds (the chimes, the ticks, background music while a command runs, Ctrl+Space), Speech (speak output, say when a program asks), When a command is done (the taskbar flash, the louder alert for the background), Text (time stamps, markers in the text, the font and size), General, Developer. Axit: the bundle's menu. Help: the shortcuts (F1), this guide, shell resources.
 
 ## Settings
 

@@ -11,7 +11,7 @@ AxGit is part of Axit. Installing Axit (see the Axit guide in the Axit menu, Abo
 - From AxClaude: Session, Show current folder in, AxGit (Alt+S, I, G). AxGit opens on the repository that holds the project folder.
 - From AxDown or AxJSON: File, Show current file in, AxGit (Alt+F, I, G). AxGit opens on the repository that holds the file.
 - From the Start menu, `Axit AxGit`, or the console: `axgit C:\my\project`. Without a folder, AxGit opens the last repository you had, or asks for one with Repository, Open repository (Ctrl+O).
-- To go back: Alt+A, O lists the open Axit windows, most recent first, so Alt+A, O, 1 is the window you came from. From AxGit, Repository, Show current repository in, AxClaude opens a new AxClaude on the repository, and File Explorer (Ctrl+W) shows the folder.
+- To go back: Alt+A, O lists the open Axit windows, most recent first, so Alt+A, O, 1 is the window you came from. From AxGit, Repository, Show current repository in, AxClaude opens a new AxClaude on the repository, AxTerminal a shell there, AxFile the folder's files, and File Explorer (Ctrl+W) shows the folder.
 
 The window is named after the repository's folder: "myproject - AxGit".
 
@@ -47,7 +47,7 @@ AxGit does not merge, rebase or resolve conflicts. For those, use the terminal o
 
 ## Menus
 
-- **Repository**: Open repository (Ctrl+O), Open recent repository, Refresh (F5), Show current repository in (File Explorer Ctrl+W, AxClaude), Exit.
+- **Repository**: Open repository (Ctrl+O), Open recent repository, Refresh (F5), Show current repository in (File Explorer Ctrl+W, AxClaude, AxTerminal, AxFile), Exit.
 - **Changes**: Stage or unstage (Space), Stage all, Unstage all, Show diff (Enter), Open file in editor (Ctrl+E), Discard changes (Delete), Commit (Ctrl+Enter).
 - **Branches**: Switch to branch (Enter), New branch (Ctrl+N), Fetch, Pull, Push.
 - **View**: Changes, Log, Branches.

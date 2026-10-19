@@ -57,13 +57,15 @@ public sealed class TextEditorForm : AxitForm
         file.DropDownItems.Add(Item("&Save", () => Save(), BundleKeys.Save));
         file.DropDownItems.Add(Item("Save &as...", () => SaveAs(), EditorKeys.SaveAs));
         file.DropDownItems.Add(new ToolStripSeparator());
-        // Show current file in ▸ File Explorer; an Axit file manager joins the submenu when there is one.
+        // Show current file in ▸ File Explorer and the other apps' windows on the file or its folder (AD-4.1).
         var showIn = new ToolStripMenuItem("Show current file &in");
         showIn.DropDownItems.Add(Item("File &Explorer", ShowInExplorer, EditorKeys.ShowInExplorer));
         // AxGit on the repository that holds the file, a new window (AD-4.1; docs/axgit/SPEC.md AG-1.4).
         showIn.DropDownItems.Add(new ToolStripMenuItem("Ax&Git", null, (_, _) => OpenInAxGit()));
         // AxTerminal with a shell in the file's folder, a new window (docs/axterminal/SPEC.md AT-1.5).
         showIn.DropDownItems.Add(new ToolStripMenuItem("Ax&Terminal", null, (_, _) => OpenInAxTerminal()));
+        // AxFile on the file's folder with the file selected, a new window (docs/axfile/SPEC.md AF-1.3).
+        showIn.DropDownItems.Add(new ToolStripMenuItem("Ax&File", null, (_, _) => OpenInAxFile()));
         file.DropDownItems.Add(showIn);
         file.DropDownItems.Add(new ToolStripSeparator());
         file.DropDownItems.Add(new ToolStripMenuItem("E&xit", null, (_, _) => Close()) { ShortcutKeyDisplayString = "Alt+F4" });
@@ -412,6 +414,18 @@ public sealed class TextEditorForm : AxitForm
         }
 
         AxitMenu.Start(Dispatch.AxTerminal, folder);
+    }
+
+    /// <summary>File → Show current file in → AxFile: a new AxFile window on the file's folder with the file selected (docs/axfile/SPEC.md AF-1.3).</summary>
+    private void OpenInAxFile()
+    {
+        if (_path is null)
+        {
+            Announce("No file yet", true);
+            return;
+        }
+
+        AxitMenu.Start(Dispatch.AxFile, _path);
     }
 
     private void OpenFile() => AskToSave(() =>

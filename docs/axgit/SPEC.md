@@ -18,7 +18,8 @@ status bar with the branch, and the bundle's notices for the commit message and 
 
 The window is reached from the other windows: AxClaude's Session → Show current folder in ▸ AxGit and the editors'
 File → Show current file in ▸ AxGit open AxGit on the repository that holds the folder or file, and AxGit's Repository
-→ Show current repository in ▸ sends the user back to AxClaude on the repository or to File Explorer; a changed file
+→ Show current repository in ▸ sends the user back to AxClaude on the repository, to AxTerminal, to AxFile or to File
+Explorer; a changed file
 opens in the editor for its type (AG-1.4, AG-D1).
 
 ## 2. Goals and non-goals
@@ -67,9 +68,10 @@ opens in the editor for its type (AG-1.4, AG-D1).
 - AG-1.4 **To and from the other windows.** AxClaude's Session → Show current folder in ▸ **AxGit** starts AxGit on
   the project folder (AxClaude FR-8.2); AxDown's and AxJSON's File → Show current file in ▸ **AxGit** on the file
   (AxDown AD-4.1). Each is a new window, a new process (`AxitMenu.Start`), found again in the Axit menu's Open windows
-  (AX-9.3). From AxGit, Repository → Show current repository in ▸ **File Explorer** (Ctrl+W) and ▸ **AxClaude**
-  (a new AxClaude on the repository's folder), and Changes → **Open file in editor** (Ctrl+E) opens the selected file
-  in AxJSON for `.json` and AxDown otherwise.
+  (AX-9.3). From AxGit, Repository → Show current repository in ▸ **File Explorer** (Ctrl+W), ▸ **AxClaude**
+  (a new AxClaude on the repository's folder), ▸ **AxTerminal** (a shell there, docs/axterminal/SPEC.md AT-1.5) and
+  ▸ **AxFile** (the folder listed, docs/axfile/SPEC.md AF-1.3), and Changes → **Open file in editor** (Ctrl+E) opens
+  the selected file in AxJSON for `.json` and AxDown otherwise.
 - AG-1.5 Git itself: `git` on the PATH, run with `-C <repository>`, `-c core.quotepath=false`, `-c color.ui=never`,
   `GIT_TERMINAL_PROMPT=0` and UTF-8 output; one command at a time, on a background task, never on the UI thread
   (AX-7.5), with a timeout (60 seconds, 10 minutes for fetch, pull and push). When `git` is not found, the notice
@@ -144,7 +146,7 @@ opens in the editor for its type (AG-1.4, AG-D1).
 
 - AG-6.1 Menus, in the standard order of a first menu (bundle AX-6): **Repository (R):** Open repository… Ctrl+O |
   Open recent repository ▸ (ten, "1. name (path)", AX-9.5; "No recent repositories" when none) | ─ | Refresh F5 | ─ |
-  Show current repository in ▸ (File Explorer Ctrl+W | AxClaude) | ─ | Exit Alt+F4. **Changes (C):** Stage or unstage
+  Show current repository in ▸ (File Explorer Ctrl+W | AxClaude | AxTerminal | AxFile) | ─ | Exit Alt+F4. **Changes (C):** Stage or unstage
   Space | Stage all Ctrl+Shift+A | Unstage all Ctrl+Shift+U | ─ | Show diff Enter | Open file in editor Ctrl+E |
   Discard changes… Delete | ─ | Commit… Ctrl+Enter. **Branches (B):** Switch to branch Enter | New branch… Ctrl+N |
   ─ | Fetch Ctrl+Shift+F | Pull Ctrl+Shift+L | Push Ctrl+Shift+P. **View (V):** Changes Ctrl+1 | Log Ctrl+2 |
