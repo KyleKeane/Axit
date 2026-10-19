@@ -186,8 +186,9 @@ $sameFolder = [string]::Equals((Resolve-Path $source).Path.TrimEnd('\'), $target
 if (-not $sameFolder) {
     # A previous installation, of Axit or of AxClaude 1.x, is removed completely first, so nothing of it stays
     # behind; then this one is installed fresh. The older updaters come here too, after the running app has closed.
-    # In place (-InPlace, the apps' own update) the app keeps running: nothing is removed, the files are written over
-    # the old ones, and the running program file is renamed, since it can be renamed but not overwritten or deleted.
+    # In place (-InPlace, the apps' own update) the app keeps running: nothing is removed but the File Explorer
+    # entries of earlier versions (below), the files are written over the old ones, and the running program file is
+    # renamed, since it can be renamed but not overwritten or deleted.
     $found = @($places | Where-Object { Test-Path -LiteralPath $_ })
     if ($found -and -not $InPlace) {
         if (Test-Running) {
@@ -245,7 +246,12 @@ if (-not $NoStartMenu) {
 if (-not $NoContextMenu) {
     # A static cascading menu (Windows 7 and later): the submenu's key has its name in MUIVerb and an empty
     # SubCommands, and the entries are verbs under its shell subkey. AppliesTo keeps an entry to the file types it
-    # names (Advanced Query Syntax, as Windows' own verbs do).
+    # names (Advanced Query Syntax, as Windows' own verbs do). The entries of earlier versions go first, on every
+    # path through here, the in-place update's included.
+    foreach ($key in $oldMenuKeys) {
+        if (Test-Path -LiteralPath $key) { Remove-Item -LiteralPath $key -Recurse -Force }
+    }
+
     foreach ($menu in $menus) {
         New-Item -Path $menu.Key -Force | Out-Null
         Set-ItemProperty -LiteralPath $menu.Key -Name 'MUIVerb' -Value 'Open with Axit'
