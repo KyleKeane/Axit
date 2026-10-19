@@ -10,7 +10,7 @@ Axit installs all its apps at once; see the Axit guide (Axit menu, About, Axit g
 
 - Start menu: Axit AxJSON opens an empty document.
 - Console: `axjson settings.json` opens that file; so does `axit settings.json`, since a `.json` file means AxJSON.
-- File Explorer: right-click a `.json` file, Open with, AxJSON.
+- File Explorer: right-click a `.json` file, Open with Axit, AxJSON; or Windows' own Open with, AxJSON.
 
 ## Write and read
 

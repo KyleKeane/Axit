@@ -59,7 +59,7 @@ out of scope; programs that print and ask are in. It works entirely offline (bun
 ### AT-1 Launch and the shell
 
 - AT-1.1 `Axit.exe terminal [<folder>]`; the console command `axterminal`; the Start menu entry "Axit AxTerminal";
-  "Open in AxTerminal" on folders in File Explorer, as AxClaude's entry. A folder given alone to `Axit.exe` still
+  AxTerminal under "Open with Axit" on folders in File Explorer (AX-2.3). A folder given alone to `Axit.exe` still
   means AxClaude (AX-1.2); AxTerminal is always named by its verb. Without a folder: the process's current folder
   (the Start menu entry starts it in the user's profile folder, as the shells do).
 - AT-1.2 **The shell.** One of PowerShell 7 (`pwsh.exe`, found on the PATH or under `%ProgramFiles%\PowerShell\7`),

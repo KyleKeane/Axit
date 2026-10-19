@@ -5,13 +5,15 @@
 .DESCRIPTION
   Run it from the folder that holds Axit.exe: the extracted zip, or publish\win-x64 after publish.ps1.
   Axit is one program with several apps inside (docs/axit/SPEC.md AX-2). It copies Axit to
-  %LOCALAPPDATA%\Programs\Axit and creates the ways to start each app:
-    - a Start menu entry per app, "Axit AxClaude", "Axit AxDown" and "Axit AxJSON" (type axc, axd or axj in the Start menu),
-    - File Explorer entries: "Open in AxClaude" in the right-click menu of folders (and of a folder's background),
-      "Open in AxDown" in the right-click menu of files, AxDown under "Open with" for .md, .markdown and .txt, and
-      AxJSON under "Open with" for .json,
-    - the console commands axclaude, axdown, axjson and axit (a folder opens AxClaude, a file AxDown, a .json file AxJSON): one-line shims in
-      %USERPROFILE%\.local\bin, the folder that Claude Code's installer already puts on PATH.
+  %LOCALAPPDATA%\Programs\Axit and creates the ways to start each app, all from the table $apps below:
+    - a Start menu entry per app, "Axit AxClaude", "Axit AxDown" and so on (type axit in the Start menu to list them),
+    - one submenu in File Explorer's right-click menu, "Open with Axit", on folders (and on a folder's background) and
+      on files, listing the apps that open what was right-clicked: AxClaude, AxGit and AxTerminal on folders, AxDown
+      on every file, AxJSON on .json files; and AxDown under Windows' own "Open with" for .md, .markdown and .txt,
+      AxJSON for .json,
+    - the console commands axclaude, axdown, axjson, axgit, axterminal and axit (a folder opens AxClaude, a file
+      AxDown, a .json file AxJSON): one-line shims in %USERPROFILE%\.local\bin, the folder that Claude Code's
+      installer already puts on PATH.
   It also lists Axit in Settings, Apps (Add or remove programs), whose Uninstall runs install.cmd -Uninstall.
   -Uninstall removes all of that. The settings in %APPDATA%\Axit and the logs in %LOCALAPPDATA%\Axit stay.
   An installation of AxClaude 1.x, from before the bundle, is removed completely first; its settings file stays in
@@ -81,41 +83,52 @@ $classes = 'HKCU:\Software\Classes'
 # The entry in Settings, Apps (Add or remove programs) for this user; its Uninstall runs install.cmd -Uninstall.
 $appsKey = 'HKCU:\Software\Microsoft\Windows\CurrentVersion\Uninstall\Axit'
 
-# The apps (AX-2): the verb Axit.exe takes, the Start menu entry, the console command, the description and the icon.
-# A new app of the bundle adds a block here.
+# The apps (AX-2), one block each; a new app of the bundle adds a block here and nothing else. Name: the app's name,
+# which gives the Start menu entry "Axit <Name>", the console command <name> and the ProgID Axit.<Name>. Verb: what
+# Axit.exe takes. Icon: the file the Start menu entry and the File Explorer entries show. Opens: what the app opens
+# from File Explorer's "Open with Axit" submenu (AX-2.3): 'folders' (a folder, and a folder's background), 'files',
+# or both. Types: the file types a files entry is shown on; every file when absent. OpenWith: the file types the app
+# is registered as a program for, under Windows' own "Open with" and in Settings, Default apps (B-9), with the
+# TypeName that Windows shows for them.
 $apps = @(
-    @{ Verb = 'claude'; Start = 'Axit AxClaude.lnk'; Shim = 'axclaude.cmd'; Description = 'AxClaude, an accessible front end for Claude Code'; Icon = "$exe,0" },
-    @{ Verb = 'down'; Start = 'Axit AxDown.lnk'; Shim = 'axdown.cmd'; Description = 'AxDown, a plain editor for Markdown and text files'; Icon = (Join-Path $target 'AxDown.ico') },
-    @{ Verb = 'json'; Start = 'Axit AxJSON.lnk'; Shim = 'axjson.cmd'; Description = 'AxJSON, an editor for JSON files'; Icon = (Join-Path $target 'AxJSON.ico') },
-    @{ Verb = 'git'; Start = 'Axit AxGit.lnk'; Shim = 'axgit.cmd'; Description = 'AxGit, a git manager for one repository'; Icon = (Join-Path $target 'AxGit.ico') },
-    @{ Verb = 'terminal'; Start = 'Axit AxTerminal.lnk'; Shim = 'axterminal.cmd'; Description = 'AxTerminal, a shell as a transcript'; Icon = (Join-Path $target 'AxTerminal.ico') }
+    @{ Name = 'AxClaude'; Verb = 'claude'; Description = 'AxClaude, an accessible front end for Claude Code'; Icon = $exe; Opens = 'folders' },
+    @{ Name = 'AxDown'; Verb = 'down'; Description = 'AxDown, a plain editor for Markdown and text files'; Icon = (Join-Path $target 'AxDown.ico'); Opens = 'files'; OpenWith = '.md', '.markdown', '.txt'; TypeName = 'Text document (AxDown)' },
+    @{ Name = 'AxJSON'; Verb = 'json'; Description = 'AxJSON, an editor for JSON files'; Icon = (Join-Path $target 'AxJSON.ico'); Opens = 'files'; Types = '.json'; OpenWith = '.json'; TypeName = 'JSON document (AxJSON)' },
+    @{ Name = 'AxGit'; Verb = 'git'; Description = 'AxGit, a git manager for one repository'; Icon = (Join-Path $target 'AxGit.ico'); Opens = 'folders' },
+    @{ Name = 'AxTerminal'; Verb = 'terminal'; Description = 'AxTerminal, a shell as a transcript'; Icon = (Join-Path $target 'AxTerminal.ico'); Opens = 'folders' }
 )
-# File Explorer: folders open in AxClaude, files in AxDown; AxDown is a program for these file types (Open with), and
-# AxJSON for .json.
-$folderKeys = @("$classes\Directory\shell\AxClaude", "$classes\Directory\Background\shell\AxClaude")
-# Open in AxGit on folders too: AxGit opens on the repository that holds the folder.
-$gitFolderKeys = @("$classes\Directory\shell\AxGit", "$classes\Directory\Background\shell\AxGit")
-# Open in AxTerminal on folders: a shell in the folder.
-$terminalFolderKeys = @("$classes\Directory\shell\AxTerminal", "$classes\Directory\Background\shell\AxTerminal")
-$fileKey = "$classes\*\shell\AxDown"
-$progId = 'Axit.AxDown'
-$progIdKey = "$classes\$progId"
-$extensions = '.md', '.markdown', '.txt'
-$jsonProgId = 'Axit.AxJSON'
-$jsonProgIdKey = "$classes\$jsonProgId"
-$jsonExtensions = @('.json')
+# The places that follow from the name.
+foreach ($app in $apps) {
+    $app.Start = Join-Path $programs "Axit $($app.Name).lnk"
+    $app.Shim = Join-Path $bin ($app.Name.ToLower() + '.cmd')
+    $app.ProgId = "Axit.$($app.Name)"
+}
 
-# What AxClaude 1.x put on the machine under its own names; the rest of its places are the same as Axit's.
+# File Explorer's "Open with Axit" submenu (AX-2.3): on folders, on a folder's background and on files, each listing
+# the apps whose Opens says so, in the order of their names. The registry shows an app only where it belongs, so
+# no app has to check the path it is given.
+$menus = @(
+    @{ Key = "$classes\Directory\shell\Axit"; Opens = 'folders'; Argument = '%1' },
+    @{ Key = "$classes\Directory\Background\shell\Axit"; Opens = 'folders'; Argument = '%V' },
+    @{ Key = "$classes\*\shell\Axit"; Opens = 'files'; Argument = '%1' }
+)
+
+# What earlier versions put on the machine: one entry per app in File Explorer's menus, before the submenu (up to
+# 2.13.0), and AxClaude 1.x under its own names; the rest of 1.x's places are the same as Axit's.
+$oldMenuKeys = @("$classes\Directory\shell\AxClaude", "$classes\Directory\Background\shell\AxClaude",
+    "$classes\Directory\shell\AxGit", "$classes\Directory\Background\shell\AxGit",
+    "$classes\Directory\shell\AxTerminal", "$classes\Directory\Background\shell\AxTerminal", "$classes\*\shell\AxDown")
 $oldTarget = Join-Path $env:LOCALAPPDATA 'Programs\AxClaude'
 $oldExe = Join-Path $oldTarget 'AxClaude.exe'
 $oldAppsKey = 'HKCU:\Software\Microsoft\Windows\CurrentVersion\Uninstall\AxClaude'
 $oldStartMenu = Join-Path $programs 'AxClaude.lnk'
 
-# Everything an installation puts on the machine, this version's and 1.x's, so that one removal clears both. The
-# Open with values live inside the file types' own keys and are removed one by one (Remove-Installation).
-$places = @($target, $oldTarget, $appsKey, $oldAppsKey, $oldStartMenu, $fileKey, $progIdKey, $jsonProgIdKey) + $folderKeys + $gitFolderKeys + $terminalFolderKeys +
-    @($apps | ForEach-Object { Join-Path $programs $_.Start }) +
-    @(Join-Path $bin 'axit.cmd') + @($apps | ForEach-Object { Join-Path $bin $_.Shim })
+# Everything an installation puts on the machine, this version's and the earlier ones', so that one removal clears
+# all of them. The Open with values live inside the file types' own keys and are removed one by one
+# (Remove-Installation).
+$places = @($target, $oldTarget, $appsKey, $oldAppsKey, $oldStartMenu) + @($menus | ForEach-Object { $_.Key }) + $oldMenuKeys +
+    @($apps | Where-Object { $_.OpenWith } | ForEach-Object { "$classes\$($_.ProgId)" }) +
+    @($apps | ForEach-Object { $_.Start }) + @(Join-Path $bin 'axit.cmd') + @($apps | ForEach-Object { $_.Shim })
 
 function Get-Version([string]$path) {
     (Get-Item $path).VersionInfo.FileVersion -replace '^(\d+\.\d+\.\d+).*', '$1'
@@ -127,7 +140,7 @@ function Test-Running {
 
 # Removes everything an installation put on the machine, whatever version made it. The settings and the logs stay.
 # Windows can hold the executable for a moment after the app exits, so a folder is tried again for a few seconds.
-# Registry paths go through -LiteralPath: the file key has a * in it, which PowerShell would otherwise expand.
+# Registry paths go through -LiteralPath: the file keys have a * in them, which PowerShell would otherwise expand.
 function Remove-Installation {
     foreach ($folder in $target, $oldTarget) {
         for ($attempt = 1; Test-Path -LiteralPath $folder; $attempt++) {
@@ -141,16 +154,12 @@ function Remove-Installation {
     foreach ($item in $places) {
         if (Test-Path -LiteralPath $item) { Remove-Item -LiteralPath $item -Recurse -Force }
     }
-    foreach ($extension in $extensions) {
-        $openWith = "$classes\$extension\OpenWithProgids"
-        if ((Test-Path -LiteralPath $openWith) -and (Get-ItemProperty -LiteralPath $openWith).PSObject.Properties[$progId]) {
-            Remove-ItemProperty -LiteralPath $openWith -Name $progId
-        }
-    }
-    foreach ($extension in $jsonExtensions) {
-        $openWith = "$classes\$extension\OpenWithProgids"
-        if ((Test-Path -LiteralPath $openWith) -and (Get-ItemProperty -LiteralPath $openWith).PSObject.Properties[$jsonProgId]) {
-            Remove-ItemProperty -LiteralPath $openWith -Name $jsonProgId
+    foreach ($app in ($apps | Where-Object { $_.OpenWith })) {
+        foreach ($extension in $app.OpenWith) {
+            $openWith = "$classes\$extension\OpenWithProgids"
+            if ((Test-Path -LiteralPath $openWith) -and (Get-ItemProperty -LiteralPath $openWith).PSObject.Properties[$app.ProgId]) {
+                Remove-ItemProperty -LiteralPath $openWith -Name $app.ProgId
+            }
         }
     }
 }
@@ -194,7 +203,8 @@ if (-not $sameFolder) {
     }
 
     New-Item -ItemType Directory -Force $target | Out-Null
-    foreach ($name in 'Axit.exe', 'AxDown.ico', 'AxJSON.ico', 'AxGit.ico', 'README.md', 'LICENSE', 'install.ps1', 'install.cmd') {
+    $files = @('Axit.exe', 'README.md', 'LICENSE', 'install.ps1', 'install.cmd') + @($apps | ForEach-Object { Split-Path -Leaf $_.Icon }) | Select-Object -Unique
+    foreach ($name in $files) {
         $file = Join-Path $source $name
         if (-not (Test-Path -LiteralPath $file)) { continue }
         $destination = Join-Path $target $name
@@ -216,93 +226,62 @@ try { Get-ChildItem $target -File | Unblock-File -ErrorAction Stop } catch { }
 New-Item -ItemType Directory -Force $bin | Out-Null
 Set-Content -Path (Join-Path $bin 'axit.cmd') -Value @('@echo off', "`"$exe`" %*") -Encoding ascii
 foreach ($app in $apps) {
-    Set-Content -Path (Join-Path $bin $app.Shim) -Value @('@echo off', "`"$exe`" $($app.Verb) %*") -Encoding ascii
+    Set-Content -Path $app.Shim -Value @('@echo off', "`"$exe`" $($app.Verb) %*") -Encoding ascii
 }
 
 if (-not $NoStartMenu) {
     $shell = New-Object -ComObject WScript.Shell
     foreach ($app in $apps) {
-        $link = $shell.CreateShortcut((Join-Path $programs $app.Start))
+        $link = $shell.CreateShortcut($app.Start)
         $link.TargetPath = $exe
         $link.Arguments = $app.Verb
         $link.WorkingDirectory = $target
         $link.Description = $app.Description
-        $link.IconLocation = $app.Icon
+        $link.IconLocation = "$($app.Icon),0"
         $link.Save()
     }
 }
 
 if (-not $NoContextMenu) {
-    foreach ($key in $folderKeys) {
-        New-Item -Path $key -Force | Out-Null
-        Set-ItemProperty -LiteralPath $key -Name '(default)' -Value 'Open in AxClaude'
-        Set-ItemProperty -LiteralPath $key -Name 'Icon' -Value "`"$exe`",0"
-        $command = Join-Path $key 'command'
-        New-Item -Path $command -Force | Out-Null
-        $argument = if ($key -like '*Background*') { '%V' } else { '%1' }
-        Set-ItemProperty -LiteralPath $command -Name '(default)' -Value "`"$exe`" claude `"$argument`""
+    # A static cascading menu (Windows 7 and later): the submenu's key has its name in MUIVerb and an empty
+    # SubCommands, and the entries are verbs under its shell subkey. AppliesTo keeps an entry to the file types it
+    # names (Advanced Query Syntax, as Windows' own verbs do).
+    foreach ($menu in $menus) {
+        New-Item -Path $menu.Key -Force | Out-Null
+        Set-ItemProperty -LiteralPath $menu.Key -Name 'MUIVerb' -Value 'Open with Axit'
+        Set-ItemProperty -LiteralPath $menu.Key -Name 'Icon' -Value "`"$exe`",0"
+        Set-ItemProperty -LiteralPath $menu.Key -Name 'SubCommands' -Value ''
+        foreach ($app in ($apps | Where-Object { $_.Opens -contains $menu.Opens })) {
+            $key = Join-Path $menu.Key "shell\$($app.Name)"
+            New-Item -Path (Join-Path $key 'command') -Force | Out-Null
+            Set-ItemProperty -LiteralPath $key -Name 'MUIVerb' -Value $app.Name
+            Set-ItemProperty -LiteralPath $key -Name 'Icon' -Value "`"$($app.Icon)`",0"
+            if ($app.Types) {
+                Set-ItemProperty -LiteralPath $key -Name 'AppliesTo' -Value (($app.Types | ForEach-Object { "System.FileExtension:=`"$_`"" }) -join ' OR ')
+            }
+            Set-ItemProperty -LiteralPath (Join-Path $key 'command') -Name '(default)' -Value "`"$exe`" $($app.Verb) `"$($menu.Argument)`""
+        }
     }
 
-    foreach ($key in $gitFolderKeys) {
-        New-Item -Path $key -Force | Out-Null
-        Set-ItemProperty -LiteralPath $key -Name '(default)' -Value 'Open in AxGit'
-        Set-ItemProperty -LiteralPath $key -Name 'Icon' -Value (Join-Path $target 'AxGit.ico')
-        $command = Join-Path $key 'command'
-        New-Item -Path $command -Force | Out-Null
-        $argument = if ($key -like '*Background*') { '%V' } else { '%1' }
-        Set-ItemProperty -LiteralPath $command -Name '(default)' -Value "`"$exe`" git `"$argument`""
-    }
-
-    foreach ($key in $terminalFolderKeys) {
-        New-Item -Path $key -Force | Out-Null
-        Set-ItemProperty -LiteralPath $key -Name '(default)' -Value 'Open in AxTerminal'
-        Set-ItemProperty -LiteralPath $key -Name 'Icon' -Value (Join-Path $target 'AxTerminal.ico')
-        $command = Join-Path $key 'command'
-        New-Item -Path $command -Force | Out-Null
-        $argument = if ($key -like '*Background*') { '%V' } else { '%1' }
-        Set-ItemProperty -LiteralPath $command -Name '(default)' -Value "`"$exe`" terminal `"$argument`""
-    }
-
-    $downIcon = Join-Path $target 'AxDown.ico'
-    New-Item -Path $fileKey -Force | Out-Null
-    Set-ItemProperty -LiteralPath $fileKey -Name '(default)' -Value 'Open in AxDown'
-    Set-ItemProperty -LiteralPath $fileKey -Name 'Icon' -Value $downIcon
-    New-Item -Path (Join-Path $fileKey 'command') -Force | Out-Null
-    Set-ItemProperty -LiteralPath (Join-Path $fileKey 'command') -Name '(default)' -Value "`"$exe`" down `"%1`""
-
-    # The ProgID that Open with and Default apps know AxDown by (AX-2.3, B-9): the user makes it the default, never this script.
-    New-Item -Path $progIdKey -Force | Out-Null
-    Set-ItemProperty -LiteralPath $progIdKey -Name '(default)' -Value 'Text document (AxDown)'
-    Set-ItemProperty -LiteralPath $progIdKey -Name 'FriendlyTypeName' -Value 'Text document (AxDown)'
-    New-Item -Path (Join-Path $progIdKey 'DefaultIcon') -Force | Out-Null
-    Set-ItemProperty -LiteralPath (Join-Path $progIdKey 'DefaultIcon') -Name '(default)' -Value $downIcon
-    New-Item -Path (Join-Path $progIdKey 'Application') -Force | Out-Null
-    Set-ItemProperty -LiteralPath (Join-Path $progIdKey 'Application') -Name 'ApplicationName' -Value 'AxDown'
-    Set-ItemProperty -LiteralPath (Join-Path $progIdKey 'Application') -Name 'ApplicationIcon' -Value $downIcon
-    New-Item -Path (Join-Path $progIdKey 'shell\open\command') -Force | Out-Null
-    Set-ItemProperty -LiteralPath (Join-Path $progIdKey 'shell\open\command') -Name '(default)' -Value "`"$exe`" down `"%1`""
-    foreach ($extension in $extensions) {
-        $openWith = "$classes\$extension\OpenWithProgids"
-        New-Item -Path $openWith -Force | Out-Null
-        New-ItemProperty -LiteralPath $openWith -Name $progId -Value ([byte[]]@()) -PropertyType None -Force | Out-Null
-    }
-
-    # AxJSON the same way for .json (AX-2.3): under Open with, never the default.
-    $jsonIcon = Join-Path $target 'AxJSON.ico'
-    New-Item -Path $jsonProgIdKey -Force | Out-Null
-    Set-ItemProperty -LiteralPath $jsonProgIdKey -Name '(default)' -Value 'JSON document (AxJSON)'
-    Set-ItemProperty -LiteralPath $jsonProgIdKey -Name 'FriendlyTypeName' -Value 'JSON document (AxJSON)'
-    New-Item -Path (Join-Path $jsonProgIdKey 'DefaultIcon') -Force | Out-Null
-    Set-ItemProperty -LiteralPath (Join-Path $jsonProgIdKey 'DefaultIcon') -Name '(default)' -Value $jsonIcon
-    New-Item -Path (Join-Path $jsonProgIdKey 'Application') -Force | Out-Null
-    Set-ItemProperty -LiteralPath (Join-Path $jsonProgIdKey 'Application') -Name 'ApplicationName' -Value 'AxJSON'
-    Set-ItemProperty -LiteralPath (Join-Path $jsonProgIdKey 'Application') -Name 'ApplicationIcon' -Value $jsonIcon
-    New-Item -Path (Join-Path $jsonProgIdKey 'shell\open\command') -Force | Out-Null
-    Set-ItemProperty -LiteralPath (Join-Path $jsonProgIdKey 'shell\open\command') -Name '(default)' -Value "`"$exe`" json `"%1`""
-    foreach ($extension in $jsonExtensions) {
-        $openWith = "$classes\$extension\OpenWithProgids"
-        New-Item -Path $openWith -Force | Out-Null
-        New-ItemProperty -LiteralPath $openWith -Name $jsonProgId -Value ([byte[]]@()) -PropertyType None -Force | Out-Null
+    # The ProgID that Open with and Default apps know an app by (AX-2.3, B-9): the user makes it the default, never
+    # this script.
+    foreach ($app in ($apps | Where-Object { $_.OpenWith })) {
+        $progIdKey = "$classes\$($app.ProgId)"
+        New-Item -Path $progIdKey -Force | Out-Null
+        Set-ItemProperty -LiteralPath $progIdKey -Name '(default)' -Value $app.TypeName
+        Set-ItemProperty -LiteralPath $progIdKey -Name 'FriendlyTypeName' -Value $app.TypeName
+        New-Item -Path (Join-Path $progIdKey 'DefaultIcon') -Force | Out-Null
+        Set-ItemProperty -LiteralPath (Join-Path $progIdKey 'DefaultIcon') -Name '(default)' -Value $app.Icon
+        New-Item -Path (Join-Path $progIdKey 'Application') -Force | Out-Null
+        Set-ItemProperty -LiteralPath (Join-Path $progIdKey 'Application') -Name 'ApplicationName' -Value $app.Name
+        Set-ItemProperty -LiteralPath (Join-Path $progIdKey 'Application') -Name 'ApplicationIcon' -Value $app.Icon
+        New-Item -Path (Join-Path $progIdKey 'shell\open\command') -Force | Out-Null
+        Set-ItemProperty -LiteralPath (Join-Path $progIdKey 'shell\open\command') -Name '(default)' -Value "`"$exe`" $($app.Verb) `"%1`""
+        foreach ($extension in $app.OpenWith) {
+            $openWith = "$classes\$extension\OpenWithProgids"
+            New-Item -Path $openWith -Force | Out-Null
+            New-ItemProperty -LiteralPath $openWith -Name $app.ProgId -Value ([byte[]]@()) -PropertyType None -Force | Out-Null
+        }
     }
 }
 
@@ -323,11 +302,17 @@ foreach ($name in $entries.Keys) { Set-ItemProperty -LiteralPath $appsKey -Name 
 foreach ($name in 'NoModify', 'NoRepair') { New-ItemProperty -LiteralPath $appsKey -Name $name -Value 1 -PropertyType DWord -Force | Out-Null }
 New-ItemProperty -LiteralPath $appsKey -Name 'EstimatedSize' -Value ([int]((Get-Item $exe).Length / 1KB)) -PropertyType DWord -Force | Out-Null
 
+$names = @($apps | ForEach-Object { $_.Name })
 Say "Installed Axit to $target"
 Say "Settings, Apps: Axit, with Uninstall"
-if (-not $NoStartMenu) { Say "Start menu: Axit AxClaude, Axit AxDown, Axit AxJSON, Axit AxGit, Axit AxTerminal (type axc, axd, axj, axg or axt to find them)" }
-if (-not $NoContextMenu) { Say "File Explorer: right-click a folder, Open in AxClaude, Open in AxGit or Open in AxTerminal; right-click a file, Open in AxDown (also under Open with for .md, .markdown and .txt); AxJSON under Open with for .json" }
-Say "Console: axclaude [folder], axdown [file], axjson [file], axgit [folder], axterminal [folder], or axit <folder or file> (shims in $bin)"
+if (-not $NoStartMenu) { Say "Start menu: $(($names | ForEach-Object { "Axit $_" }) -join ', ') (press the Windows key and type axit to list them)" }
+if (-not $NoContextMenu) {
+    $onFolders = @($apps | Where-Object { $_.Opens -contains 'folders' } | ForEach-Object { $_.Name }) -join ', '
+    $onFiles = @($apps | Where-Object { $_.Opens -contains 'files' } | ForEach-Object { if ($_.Types) { "$($_.Name) on $($_.Types -join ', ')" } else { "$($_.Name) on every file" } }) -join ', '
+    $openWith = @($apps | Where-Object { $_.OpenWith } | ForEach-Object { "$($_.Name) for $($_.OpenWith -join ', ')" }) -join '; '
+    Say "File Explorer: Open with Axit in the right-click menu: $onFolders on folders; $onFiles. Under Open with: $openWith"
+}
+Say "Console: $(($names | ForEach-Object { $_.ToLower() }) -join ', '), each taking a folder or file, or axit <folder or file> (shims in $bin)"
 if (-not (($env:Path -split ';') -contains $bin)) {
     Say "Note: $bin is not on PATH in this console. Open a new console, or add it, before using the commands."
 }

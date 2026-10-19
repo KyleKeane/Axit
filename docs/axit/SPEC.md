@@ -9,8 +9,8 @@ they never clash with an app's `FR-n.m` and `D-n`.
 ## 1. Summary
 
 Axit is one installed Windows program, `Axit.exe`, that holds several accessible apps for a blind developer who uses
-the NVDA screen reader. Each app is a separate window that starts on its own, has its own Start menu entry, its own
-right-click entry in File Explorer and its own console command, and all of them share one installer, one updater, one
+the NVDA screen reader. Each app is a separate window that starts on its own, has its own Start menu entry, its place in
+File Explorer's Open with Axit submenu and its own console command, and all of them share one installer, one updater, one
 version number and one release workflow. The first apps are **AxClaude**, the front end for the Claude Code CLI that
 exists today, and **AxDown**, a barebones editor for Markdown and text files. Later apps are planned (a terminal, a
 file manager with a player, a password manager, a vault manager: `docs/axit/plan.md`) and follow the same pattern
@@ -38,20 +38,20 @@ allow it, see B-9).
 
 ## 3. The apps
 
-- **AxClaude** (built): `Axit.exe claude [<folder>] [options]`, Start entry `Axit AxClaude`, `Open in AxClaude` on
+- **AxClaude** (built): `Axit.exe claude [<folder>] [options]`, Start entry `Axit AxClaude`, Open with Axit on
   folders, command `axclaude`. Specification `docs/axclaude/SPEC.md`.
 - **AxDown**: `Axit.exe down [<file>]`, Start entry `Axit AxDown`,
-  `Open in AxDown` on files and Open with for `.md`, `.markdown`, `.txt`, command `axdown`. Specification
+  Open with Axit on files and Open with for `.md`, `.markdown`, `.txt`, command `axdown`. Specification
   `docs/axdown/SPEC.md`, guide `docs/axdown/user-guide.md`, test plan `docs/axdown/nvda-test-plan.md`.
-- **AxJSON**: `Axit.exe json [<file>]`, Start entry `Axit AxJSON`, Open with for `.json`, command `axjson`. The
-  text editor shell AxDown is, with JSON's navigation keys and a Format command. Specification `docs/axjson/SPEC.md`,
-  guide `docs/axjson/user-guide.md`, test plan `docs/axjson/nvda-test-plan.md`.
-- **AxGit** (first draft, 2026-10-18): `Axit.exe git [<folder or file>]`, Start entry `Axit AxGit`, command `axgit`.
-  A git manager for one repository, a window per repository, opened from the other windows' "Show current … in ▸"
-  submenus on the repository of the folder or file in hand. Specification `docs/axgit/SPEC.md`, guide
-  `docs/axgit/user-guide.md`, test plan `docs/axgit/nvda-test-plan.md`.
-- **AxTerminal** (first draft, 2026-10-18): `Axit.exe terminal [<folder>]`, Start entry `Axit AxTerminal`, `Open in
-  AxTerminal` on folders, command `axterminal`. A shell (PowerShell, or cmd) in AxClaude's window: the output as a
+- **AxJSON**: `Axit.exe json [<file>]`, Start entry `Axit AxJSON`, Open with Axit on `.json` files and Open with
+  for `.json`, command `axjson`. The text editor shell AxDown is, with JSON's navigation keys and a Format command.
+  Specification `docs/axjson/SPEC.md`, guide `docs/axjson/user-guide.md`, test plan `docs/axjson/nvda-test-plan.md`.
+- **AxGit** (first draft, 2026-10-18): `Axit.exe git [<folder or file>]`, Start entry `Axit AxGit`, Open with Axit
+  on folders, command `axgit`. A git manager for one repository, a window per repository, opened from the other
+  windows' "Show current … in ▸" submenus on the repository of the folder or file in hand. Specification
+  `docs/axgit/SPEC.md`, guide `docs/axgit/user-guide.md`, test plan `docs/axgit/nvda-test-plan.md`.
+- **AxTerminal** (first draft, 2026-10-18): `Axit.exe terminal [<folder>]`, Start entry `Axit AxTerminal`, Open with
+  Axit on folders, command `axterminal`. A shell (PowerShell, or cmd) in AxClaude's window: the output as a
   transcript with exchange blocks, the shell's integration marks for Done and Failed. Specification
   `docs/axterminal/SPEC.md`, guide `docs/axterminal/user-guide.md`, test plan `docs/axterminal/nvda-test-plan.md`.
 
@@ -85,16 +85,32 @@ allow it, see B-9).
   rights, from the extracted zip or from `publish\win-x64`; `install.cmd` runs it with the execution policy bypassed
   and, downloaded alone, fetches the latest release first. `-Uninstall` removes everything of Axit and keeps the
   settings and the logs. This is AxClaude's installer today (`docs/axclaude/SPEC.md` FR-8.7, D18) with the names changed.
-- AX-2.2 Start menu: one shortcut per app, named `Axit <App>` (`Axit AxClaude`, `Axit AxDown`, `Axit AxJSON`), each
-  starting `Axit.exe <verb>` with the app's icon. Windows search matches the start of each word, so `axc`, `axd` and
-  `axj` find them and `axit` lists them (checked).
-- AX-2.3 File Explorer: `Open in AxClaude` on folders and on a folder's background (`Axit.exe claude "%1"`, `%V` for
-  the background); `Open in AxDown` on every file (`Axit.exe down "%1"`); AxDown registered as a program for `.md`,
-  `.markdown` and `.txt`, and AxJSON for `.json`, so they appear under Open with and can be chosen as the default in
-  Settings, Default apps (B-9).
-- AX-2.4 Console commands: `axit.cmd`, `axclaude.cmd`, `axdown.cmd` and `axjson.cmd` in `%USERPROFILE%\.local\bin`, one
-  line each, passing their arguments to `Axit.exe`, `Axit.exe claude`, `Axit.exe down` and `Axit.exe json`. They work
-  from cmd and from PowerShell.
+- AX-2.2 Start menu: one shortcut per app, named `Axit <App>`, each starting `Axit.exe <verb>` with the app's icon.
+  Windows search matches the start of each word, so `axc`, `axd` and `axj` find them and `axit` lists them (checked).
+- AX-2.3 File Explorer: one submenu, **Open with Axit**, in the right-click menu of folders, of a folder's background
+  and of files, listing the apps that open what was right-clicked, by name, in the order of their names. It is a
+  static cascading menu (`HKCU\Software\Classes\Directory\shell\Axit`, `Directory\Background\shell\Axit` and
+  `*\shell\Axit`, each with `MUIVerb`, an empty `SubCommands` and the apps as verbs under its `shell` subkey, running
+  `Axit.exe <verb> "%1"`, `%V` on the background). An app that opens only some file types says so with `AppliesTo`
+  (`System.FileExtension:=".json"`), so the registry shows an app only where it belongs and no app checks the path
+  it is given. The table is held once, in `install.ps1`'s `$apps`, one block per app; an app that is also a program
+  for its file types, under Windows' own Open with and in Settings, Default apps (where the user, never the
+  installer, makes it the default, B-9), says so in the same block:
+
+  | App | Folders, and a folder's background | Files | Program for (Open with, Default apps) |
+  | --- | --- | --- | --- |
+  | AxClaude | yes | | |
+  | AxDown | | every file | `.md`, `.markdown`, `.txt` (`Axit.AxDown`) |
+  | AxJSON | | `.json` | `.json` (`Axit.AxJSON`) |
+  | AxGit | yes | | |
+  | AxTerminal | yes | | |
+  | AxFile (planned) | yes | every file (its folder, the file selected) | |
+
+  On Windows 11 the submenu is in the full menu (Shift+F10, or Show more options), as every program's own entries
+  are. Up to 2.13.0 each app had an entry of its own (`Open in AxClaude` and the like); the installer removes them.
+- AX-2.4 Console commands: `axit.cmd` and one `<app>.cmd` per app (`axclaude.cmd`, `axdown.cmd`, `axjson.cmd`,
+  `axgit.cmd`, `axterminal.cmd`) in `%USERPROFILE%\.local\bin`, one line each, passing their arguments to `Axit.exe`
+  and `Axit.exe <verb>`. They work from cmd and from PowerShell.
 - AX-2.5 Settings, Apps lists one entry, `Axit`, with the version, the publisher and an Uninstall that runs
   `install.cmd -Uninstall`.
 - AX-2.6 Installing over an existing AxClaude installation (any version) removes it completely first: its folder,

@@ -1,6 +1,6 @@
 # Axit
 
-Axit is one Windows program that holds several apps for people who use a screen reader. It is made for NVDA and works with any screen reader that reads ordinary Windows text fields. Each app has its own window, its own Start menu entry, its own right-click entry in File Explorer and its own console command, and all of them share this one installation and update together.
+Axit is one Windows program that holds several apps for people who use a screen reader. It is made for NVDA and works with any screen reader that reads ordinary Windows text fields. Each app has its own window, its own Start menu entry, its place in File Explorer's Open with Axit submenu and its own console command, and all of them share this one installation and update together.
 
 The apps:
 
@@ -16,7 +16,7 @@ Each app's guide is inside it: Help, User guide.
 
 Download `install.cmd` from the latest release on the releases page (https://github.com/KyleKeane/Axit/releases) and double-click it. It fetches the latest Axit and installs it; press a key when it is done. If you have the zip instead, extract it and double-click the `install.cmd` inside. If Windows SmartScreen warns about an unknown publisher, choose More info, then Run anyway.
 
-This puts Axit in your Programs folder (`%LOCALAPPDATA%\Programs\Axit`) and adds, for each app, a Start menu entry (`Axit AxClaude`, `Axit AxDown`, `Axit AxJSON`, `Axit AxGit`, `Axit AxTerminal`: press the Windows key and type `axc`, `axd`, `axj`, `axg` or `axt`), an entry in the right-click menu of File Explorer (`Open in AxClaude`, `Open in AxGit` and `Open in AxTerminal` on folders, `Open in AxDown` on files, AxDown under `Open with` for `.md`, `.markdown` and `.txt` files and AxJSON for `.json`) and a console command (`axclaude`, `axdown`, `axjson`, `axgit`, `axterminal`; `axit` alone opens the app that fits the path you give it). Settings, Apps lists Axit with an Uninstall. No administrator rights are needed, and no PowerShell setting has to change. To make AxDown the program that opens `.md` files when you press Enter on one, use Settings, Apps, Default apps; Windows does not let a program set that for itself.
+This puts Axit in your Programs folder (`%LOCALAPPDATA%\Programs\Axit`) and adds, for each app, a Start menu entry (`Axit AxClaude`, `Axit AxDown`, `Axit AxJSON`, `Axit AxGit`, `Axit AxTerminal`: press the Windows key and type `axc`, `axd`, `axj`, `axg` or `axt`), a place in the `Open with Axit` submenu of File Explorer's right-click menu (AxClaude, AxGit and AxTerminal on folders, AxDown on every file, AxJSON on `.json` files; AxDown is also under Windows' own `Open with` for `.md`, `.markdown` and `.txt` files, and AxJSON for `.json`) and a console command (`axclaude`, `axdown`, `axjson`, `axgit`, `axterminal`; `axit` alone opens the app that fits the path you give it). Settings, Apps lists Axit with an Uninstall. No administrator rights are needed, and no PowerShell setting has to change. To make AxDown the program that opens `.md` files when you press Enter on one, use Settings, Apps, Default apps; Windows does not let a program set that for itself.
 
 If you had AxClaude installed before Axit existed, the installer removes it first and AxClaude takes over your settings the first time it starts.
 
@@ -24,7 +24,7 @@ If you had AxClaude installed before Axit existed, the installer removes it firs
 
 - Start menu: `Axit AxClaude`, `Axit AxDown`, `Axit AxJSON`, `Axit AxGit`, `Axit AxTerminal`.
 - Console: `axclaude`, or `axclaude C:\my\project`; `axdown notes.md`; `axterminal C:\my\project`. `axit C:\my\project` and `axit notes.md` do the same as the first two, since a folder means AxClaude and a file AxDown.
-- File Explorer: right-click a folder and choose `Open in AxClaude` or `Open in AxTerminal`; right-click a file and choose `Open in AxDown`.
+- File Explorer: right-click a folder, open `Open with Axit` and choose AxClaude, AxGit or AxTerminal; right-click a file, open `Open with Axit` and choose AxDown, or AxJSON on a `.json` file. On Windows 11 the submenu is in the full menu (Shift+F10, or Show more options).
 - From any Axit window: the Axit menu (Alt+A) starts a new AxClaude or AxDown, reopens a file or folder you closed lately, lists the open Axit windows, the one you were in last first and by type, closes them all, checks for updates, and has About with the version, the licence, the attribution, this guide and the project's page on GitHub.
 
 ## Update

@@ -4,7 +4,7 @@ AxGit is a git manager for one repository, made for screen reader users. One win
 
 ## Install
 
-AxGit is part of Axit. Installing Axit (see the Axit guide in the Axit menu, About) gives you a Start menu entry `Axit AxGit`, a console command `axgit`, and `Open in AxGit` when you right-click a folder in File Explorer. You also need git itself, from https://git-scm.com; if it is missing, AxGit says so when it starts.
+AxGit is part of Axit. Installing Axit (see the Axit guide in the Axit menu, About) gives you a Start menu entry `Axit AxGit`, a console command `axgit`, and AxGit in the `Open with Axit` submenu when you right-click a folder in File Explorer. You also need git itself, from https://git-scm.com; if it is missing, AxGit says so when it starts.
 
 ## Start
 

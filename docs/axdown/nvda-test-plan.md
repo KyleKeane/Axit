@@ -9,7 +9,8 @@ letter), and a `long.md` with headings and lines longer than the window.
 
 1. `.\publish.ps1` installs Axit. Press the Windows key, type `axd`: "Axit AxDown" is offered; Enter opens an
    empty window. NVDA reads the title "Untitled - AxDown" and then "Untitled edit multi line".
-2. Right-click `plain.txt` in File Explorer: "Open in AxDown" is in the menu; Enter opens the file. "Open with"
+2. Right-click `plain.txt` in File Explorer: the "Open with Axit" submenu lists AxDown, and not AxJSON; Enter on
+   AxDown opens the file. "Open with"
    lists AxDown for `.md`, `.markdown` and `.txt`.
 3. In a console: `axdown plain.txt` opens it; `axit plain.txt` opens it in AxDown, `axit <folder>` opens AxClaude;
    `axdown missing.md` opens an empty document named `missing.md`.

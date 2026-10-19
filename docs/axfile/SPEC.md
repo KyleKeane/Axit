@@ -55,9 +55,9 @@ windows on the folder of the file or project in hand, and sends back. It works e
 ### AF-1 Launch
 
 - AF-1.1 `Axit.exe file [<folder or file>]` (a file opens its folder with the file selected); the console command
-  `axfile`; the Start menu entry "Axit AxFile"; "Open in AxFile" on folders in File Explorer. A folder or file given
-  alone to `Axit.exe` still means AxClaude or an editor (AX-1.2); AxFile is always named by its verb. Without a path:
-  the last folder opened, or the user's profile folder.
+  `axfile`; the Start menu entry "Axit AxFile"; AxFile under "Open with Axit" on folders and on files in File
+  Explorer (AX-2.3). A folder or file given alone to `Axit.exe` still means AxClaude or an editor (AX-1.2); AxFile is
+  always named by its verb. Without a path: the last folder opened, or the user's profile folder.
 - AF-1.2 `AxFileApp.Run(args)` is the entry point (AX-1.7), one call into `AppHost.Run` with the log name `axfile`,
   the usage text, the settings (`axfile.json`) and the window.
 - AF-1.3 **To and from the other windows.** AxClaude's Session → Show current folder in ▸ **AxFile**, the editors'

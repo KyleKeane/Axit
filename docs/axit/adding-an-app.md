@@ -85,11 +85,12 @@ Its own code is the outline and the commands (pure, in its Core, tested), its ke
 
 - `tools/make-icon.ps1`: a line at the end with the app's letters and colour; run it; `publish.ps1` copies the icon
   next to the executable (a project item would be bundled into the single file).
-- `install.ps1`: a block in `$apps` (verb, Start menu entry, shim, description, icon); File Explorer keys if the app
-  opens folders or files (`-LiteralPath` for keys with `*`), a ProgID and `OpenWithProgids` values for its file
-  types; add the new places to `$places` and the file-type values to `Remove-Installation`; copy the icon; the
-  `Say` lines; a `-Start…` parameter for the updater if the app should come back on what it had open, and the
-  matching argument in `Updater.LaunchInstaller`.
+- `install.ps1`: one block in `$apps` (the name, the verb, the description, the icon, what the app opens from File
+  Explorer's Open with Axit submenu: folders, files, or both, and the file types a files entry is shown on; the file
+  types it is a program for under Open with, with their type name). The Start menu entry, the shim, the submenu
+  entries, the ProgID, the icon's copy, the removal and the `Say` lines all follow from the block (AX-2.3). A
+  `-Start…` parameter for the updater if the app should come back on what it had open, and the matching argument
+  in `Updater.LaunchInstaller`.
 - `docs/axit/README.md` (the zip's guide): the app in the list, its Start entry, its command.
 - `docs/axit/SPEC.md` section 3: the app. `CLAUDE.md` (root): the map line. `CHANGELOG.md`: bullets with the app's
   name in front.

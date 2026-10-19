@@ -36,7 +36,7 @@ UTF-8, UTF-16 and the system code page; files that are not text; files over 32 M
 
 ## 3. Scenarios
 
-- S1 Open from File Explorer: right-click `notes.md`, Open in AxDown; the window opens with the caret at the start
+- S1 Open from File Explorer: right-click `notes.md`, Open with Axit, AxDown; the window opens with the caret at the start
   and NVDA reads the editor's name, which is the file's name.
 - S2 Start empty: Start menu, Axit AxDown; an empty document named Untitled; type; Ctrl+S asks for a name.
 - S3 Edit and save: arrows and NVDA's reading keys to move, type, Ctrl+S; "Saved" is spoken, the title loses its
@@ -290,8 +290,8 @@ are read and written on the UI thread (a 32 MB file is the ceiling, AD-3.7).
   AxDown does not have.
 - **AD-D8 No file watching.** The changed-on-disk check at save time catches the case that loses work; a watcher
   would speak at the wrong moments and add a thread.
-- **AD-D9 Open with, not the default.** AxDown registers for `.md`, `.markdown` and `.txt` and appears in the
-  right-click menu of every file; Windows decides defaults (AX B-9).
+- **AD-D9 Open with, not the default.** AxDown registers for `.md`, `.markdown` and `.txt` and is in the Open
+  with Axit submenu of every file; Windows decides defaults (AX B-9).
 
 ## 8. Testing
 

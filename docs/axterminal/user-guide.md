@@ -10,13 +10,13 @@ AxTerminal is a terminal for a blind developer who uses a screen reader: a shell
 
 ## Install
 
-Axit's installer installs AxTerminal with the other apps: see the Axit guide (Alt+A, About, Axit guide) or the README that came with the download. It adds the Start menu entry `Axit AxTerminal`, the console command `axterminal` and `Open in AxTerminal` on folders in File Explorer.
+Axit's installer installs AxTerminal with the other apps: see the Axit guide (Alt+A, About, Axit guide) or the README that came with the download. It adds the Start menu entry `Axit AxTerminal`, the console command `axterminal` and AxTerminal in the `Open with Axit` submenu on folders in File Explorer.
 
 ## Start
 
 - Start menu: `Axit AxTerminal`. Press the Windows key and type `axt`.
 - Console: `axterminal`, or `axterminal C:\src\myproject` to start the shell in that folder.
-- File Explorer: right-click a folder and choose `Open in AxTerminal`.
+- File Explorer: right-click a folder, open `Open with Axit` and choose AxTerminal.
 - From AxClaude: Session, Show current folder in, AxTerminal. From AxDown or AxJSON: File, Show current file in, AxTerminal (the file's folder). From AxGit: Repository, Show current repository in, AxTerminal. Each opens a new AxTerminal window.
 
 The window opens with the command field focused. When the shell's first prompt appears you hear "Ready" with a short ping. The status bar shows the state on the left (Idle, or Running with the command) and the shell's prompt on the right, which is where you are. The title is the name of the current folder.

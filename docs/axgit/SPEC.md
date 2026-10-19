@@ -55,8 +55,8 @@ opens in the editor for its type (AG-1.4, AG-D1).
 
 ### AG-1 Launch
 
-- AG-1.1 `Axit.exe git [<folder or file>]`; the console command `axgit`; the Start menu entry "Axit AxGit"; "Open in
-  AxGit" on folders in File Explorer. A folder or file given alone to `Axit.exe` still means AxClaude or an editor
+- AG-1.1 `Axit.exe git [<folder or file>]`; the console command `axgit`; the Start menu entry "Axit AxGit"; AxGit under
+  "Open with Axit" on folders in File Explorer (AX-2.3). A folder or file given alone to `Axit.exe` still means AxClaude or an editor
   (AX-1.2); AxGit is always named by its verb.
 - AG-1.2 The repository is the one that holds the path: `git rev-parse --show-toplevel` from the folder (or the file's
   folder). Without a path, the last repository opened, or none: the window opens with "No repository" and Open
