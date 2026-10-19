@@ -87,6 +87,7 @@ internal sealed partial class TerminalForm : AxitForm
             JoinWrappedLines = settings.JoinWrappedLines,
             TimeStamps = settings.MarkerTimeStamps,
         };
+        _transcript.ShowMarkers = settings.ShowMarkers;
         _model.Changed += OnModelChanged;
         _model.Ready += OnReady;
         _model.CommandFinished += OnCommandFinished;

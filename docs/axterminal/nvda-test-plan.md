@@ -11,7 +11,7 @@ Manual checks with NVDA running, before a release that changes AxTerminal (`docs
 
 ## 2. Commands (AT-3, AT-5)
 
-- Type `Write-Output hello`, Enter: "Sent" with its note; a tick; the chime and "Done". Ctrl+3: "Output 1 heading level 1"; Down: "hello". Shift+I: "Input 1 heading level 1"; Down: "## Folder"; Down: the folder; Down: "## Command"; Down: "Write-Output hello". `2`: "Folder heading level 2"; `2`: "Command heading level 2".
+- Type `Write-Output hello`, Enter: "Sent" with its note; a tick; the chime and "Done". Ctrl+3: "Output 1 heading level 1"; Down: "hello". Shift+I: "Input 1 heading level 1"; Down: "## Folder"; Down: the folder; Down: "## Command"; Down: "Write-Output hello". `2`: "Folder heading level 2"; `2`: "Command heading level 2". Options → Text → Markers in the text off: Up and Down read "Input 1" and "Folder" without the hashes, `h` still says "heading level 1"; on again.
 - `cmd /c exit 3`, Enter: "Failed, exit code 3". `Get-ChildItem`, Enter: ticks, "Done"; Ctrl+3 and read down: the listing, no prompt rows.
 - `Read-Host "Continue? (y/n)"`, Enter: after two seconds of quiet, the question chime and "Asks: Continue? (y/n):". Type `y`, Enter: "Sent", then "Done"; the terminal shows the question row with the answer, then `# Input 2` with y.
 - Type `if ($true) {`, Shift+Enter, `"yes"`, Shift+Enter, `}`, Enter: "Done"; Ctrl+3, Down: "yes"; no `>>` rows.

@@ -153,7 +153,7 @@ out of scope; programs that print and ask are in. It works entirely offline (bun
   lines as sent under it, a blank line, `# Output n`, a blank line, inserted at the end of the transcript above the
   trailing prompt row at the moment of sending; the `##` lines are level 2 headings, so `h` and `2` find them, and
   a jump speaks a heading without its marker, "Input 1 heading level 1" (AxClaude §6.4); *n* counts since the window started or the transcript was cleared; both markers are level 1 headings;
-  Options → Text → Time stamps adds the time to both (AxClaude FR-4.6). The shell's echo of the command, the prompt
+  Options → Text → Time stamps adds the time to both (AxClaude FR-4.6), and Options → Text → Markers in the text (AxClaude FR-4.6a) shows or hides the `#` markers of every heading line in the view, the lines, the keys and the export unchanged. The shell's echo of the command, the prompt
   row holding the command after its prompt, stays hidden: the block stands for it (AxClaude D22), and so do the
   continuation rows of a multi-line command, the shell's continuation prompt with the line after it (PowerShell's
   `>> `, bash's `> `, cmd's `More? `; a custom shell has none known, and its rows all stay). Every Enter is an
@@ -244,7 +244,7 @@ out of scope; programs that print and ask are in. It works entirely offline (bun
   are the terminal's letters, named in the F1 text). **Options (O):** Sounds ▸ (Chimes ✓ | Ticks for new lines ✓ |
   Background music while a command runs Ctrl+Space) | Speech ▸ (Speak output: none ○ | Speak output: all lines ○ |
   ─ | Say when a program asks ✓) | When a command is done ▸ (Flash the taskbar button ✓ | Louder alert when the window
-  is in the background) | Text ▸ (Time stamps | ─ | Font… | Larger text | Smaller text | Windows text size) | General
+  is in the background) | Text ▸ (Time stamps | Markers in the text ✓ | ─ | Font… | Larger text | Smaller text | Windows text size) | General
   ▸ (Check for updates at start ✓) | Developer ▸ (Open settings file | Record raw stream | Copy diagnostics). **Axit
   (A)** (AX-9). **Help (H):** Keyboard shortcuts F1 | User guide | ─ | Shell resources ▸ (PowerShell documentation |
   Windows Terminal shell integration | Bash manual). Every item has a mnemonic (AX-7.4).
@@ -279,7 +279,7 @@ file). The speech of output (AT-5.3) and the texts of the notices are the rest.
 - AT-8.1 `%APPDATA%\Axit\axterminal.json` (AX-5.3; `TerminalSettings` on `WindowSettings`): `shell` (`pwsh`,
   `powershell`, `cmd`, `bash`, `custom`), `customShell`, `lastFolder`, `recentFolders` (ten), `ptyColumns` 240, `ptyRows` 50,
   `soundOnBell` on, `clickOnNewLine` on, `workingMusic` off, `backgroundAlert` off, `flashTaskbar` on, `outputSpeech`
-  `none`, `announceQuestions` on, `markerTimeStamps` off, `joinWrappedLines` on, `maxTranscriptLines` 20000, and the
+  `none`, `announceQuestions` on, `markerTimeStamps` off, `showMarkers` on, `joinWrappedLines` on, `maxTranscriptLines` 20000, and the
   window base's font, update check and window fields. Unknown or out-of-range values fall back to the defaults.
 - AT-8.2 The log is `%LOCALAPPDATA%\Axit\logs\axterminal.log`: the shell's start with its command line and folder,
   its exit code, restarts, errors; never a command or a line of output (a command can hold a secret). Options →

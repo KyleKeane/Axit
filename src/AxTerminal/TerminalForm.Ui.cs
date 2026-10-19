@@ -118,11 +118,19 @@ internal sealed partial class TerminalForm
         done.DropDownItems.Add(Toggle("&Louder alert when the window is in the background", _settings.BackgroundAlert, v => _settings.BackgroundAlert = v));
         options.DropDownItems.Add(done);
 
-        options.DropDownItems.Add(CreateTextMenu(Toggle("Time &stamps on Input and Output lines", _settings.MarkerTimeStamps, v =>
-        {
-            _settings.MarkerTimeStamps = v;
-            _model.TimeStamps = v;
-        })));
+        options.DropDownItems.Add(CreateTextMenu(
+            Toggle("Time &stamps on Input and Output lines", _settings.MarkerTimeStamps, v =>
+            {
+                _settings.MarkerTimeStamps = v;
+                _model.TimeStamps = v;
+            }),
+            // AxClaude FR-4.6a: the # markers of the heading lines shown or hidden; the lines, the keys and the export unchanged.
+            Toggle("Mar&kers in the text", _settings.ShowMarkers, v =>
+            {
+                _settings.ShowMarkers = v;
+                _transcript.ShowMarkers = v;
+                _transcript.Sync(_model.Lines);
+            })));
         options.DropDownItems.Add(CreateGeneralMenu());
         _recordItem.Click += (_, _) => ToggleRecording();
         options.DropDownItems.Add(CreateDeveloperMenu(_recordItem));

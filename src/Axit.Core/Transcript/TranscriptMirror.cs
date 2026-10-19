@@ -54,6 +54,15 @@ public sealed class TranscriptMirror
     /// <summary>True while reading breaks are rendered (FR-3.10).</summary>
     public bool HasBreaks => _breaks.Count > 0;
 
+    /// <summary>
+    /// The Markdown markers of the heading lines in the text (AxClaude FR-4.6a): off, a heading line is shown as its
+    /// <see cref="Line.BareText"/>; the lines, the keys and <see cref="Render"/> (the export) are unchanged. The
+    /// window re-syncs after a change, and every heading line is then an edit.
+    /// </summary>
+    public bool ShowMarkers { get; set; } = true;
+
+    private string TextOf(Line line) => ShowMarkers ? line.Text : line.BareText;
+
     public Line LineAt(int index) => _shown[index];
 
     public string TextAt(int index) => _text[index];
@@ -303,7 +312,7 @@ public sealed class TranscriptMirror
         edits.Clear();
         for (var i = 0; i < prefix; i++)
         {
-            if (_text[i] != next[i].Text || _extra[i] != ExtraOf(i, next[i]))
+            if (_text[i] != TextOf(next[i]) || _extra[i] != ExtraOf(i, next[i]))
             {
                 edits.Add(new MirrorEdit(_starts[i], _text[i].Length + _extra[i], Rendered(next[i])));
             }
@@ -313,7 +322,7 @@ public sealed class TranscriptMirror
         {
             var shownIndex = _shown.Count - k;
             var nextIndex = next.Count - k;
-            if (_text[shownIndex] != next[nextIndex].Text || _extra[shownIndex] != ExtraOf(nextIndex, next[nextIndex]))
+            if (_text[shownIndex] != TextOf(next[nextIndex]) || _extra[shownIndex] != ExtraOf(nextIndex, next[nextIndex]))
             {
                 edits.Add(new MirrorEdit(_starts[shownIndex], _text[shownIndex].Length + _extra[shownIndex], Rendered(next[nextIndex])));
             }
@@ -366,7 +375,7 @@ public sealed class TranscriptMirror
         // Everything up to the first prefix line whose text changed keeps its text, offset, separator and display
         // line; only the rest is recomputed. The old start offsets stay intact for the caret mapping.
         var stable = 0;
-        while (stable < prefix && ReferenceEquals(_text[stable], next[stable].Text) && _extra[stable] == ExtraOf(stable, next[stable]))
+        while (stable < prefix && ReferenceEquals(_text[stable], TextOf(next[stable])) && _extra[stable] == ExtraOf(stable, next[stable]))
         {
             stable++;
         }
@@ -395,11 +404,11 @@ public sealed class TranscriptMirror
             }
 
             var extra = ExtraOf(i, line);
-            _text.Add(line.Text);
+            _text.Add(TextOf(line));
             _extra.Add(extra);
             starts.Add(offset);
             _display.Add(displayLine);
-            offset += line.Text.Length + extra;
+            offset += TextOf(line).Length + extra;
         }
 
         var update = new MirrorUpdate(edits, _shown, _starts, next, _text, _extra, starts, prefix, suffix);
@@ -439,7 +448,7 @@ public sealed class TranscriptMirror
     {
         foreach (var b in _breaks)
         {
-            if (ReferenceEquals(b.Row, row) && ResolveColumn(b, row.Text) == row.Text.Length)
+            if (ReferenceEquals(b.Row, row) && ResolveColumn(b, TextOf(row)) == TextOf(row).Length)
             {
                 return true;
             }
@@ -462,7 +471,7 @@ public sealed class TranscriptMirror
         var extra = 0;
         foreach (var b in _breaks)
         {
-            if (ReferenceEquals(b.Row, line) && ResolveColumn(b, line.Text) is var c && c > 0 && c < line.Text.Length)
+            if (ReferenceEquals(b.Row, line) && ResolveColumn(b, TextOf(line)) is var c && c > 0 && c < TextOf(line).Length)
             {
                 extra += 2;
             }
@@ -476,10 +485,10 @@ public sealed class TranscriptMirror
     {
         if (ExtraOf(line) == 0)
         {
-            return line.Text;
+            return TextOf(line);
         }
 
-        var text = line.Text;
+        var text = TextOf(line);
         var sb = new StringBuilder(text.Length + 2 * _breaks.Count);
         var from = 0;
         foreach (var b in _breaks)
@@ -545,7 +554,7 @@ public sealed class TranscriptMirror
         {
             var b = _breaks[i];
             var index = IndexOf(next, b.Row);
-            if (index < 0 || b.Mark > next[index].Text.Length)
+            if (index < 0 || b.Mark > TextOf(next[index]).Length)
             {
                 _breaks.RemoveAt(i);
             }

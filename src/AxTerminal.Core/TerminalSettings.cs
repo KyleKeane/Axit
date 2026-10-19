@@ -48,6 +48,9 @@ public sealed class TerminalSettings : WindowSettings
     public bool AnnounceQuestions { get; set; } = true;
 
     public bool MarkerTimeStamps { get; set; }
+
+    /// <summary>The # markers of the heading lines shown in the view (AxClaude FR-4.6a, AT-3.2); the export keeps them either way.</summary>
+    public bool ShowMarkers { get; set; } = true;
     public bool JoinWrappedLines { get; set; } = true;
     public int MaxTranscriptLines { get; set; } = 20000;
 

@@ -49,6 +49,30 @@ public sealed class Line
     public LineKind Kind { get; set; }
     public int HeadingLevel { get; set; }
 
+    private string? _bare;
+    private string? _bareOf;
+    private int _bareLevel;
+
+    /// <summary>
+    /// The text without its Markdown heading marker (<c>## Folder</c> as <c>Folder</c>), for a view whose markers are
+    /// hidden (AxClaude FR-4.6a): the text itself for a line that is no heading, and the same object while the text
+    /// and the level are unchanged, so that a mirror can tell a changed line by reference.
+    /// </summary>
+    public string BareText
+    {
+        get
+        {
+            if (!ReferenceEquals(_bareOf, Text) || _bareLevel != HeadingLevel)
+            {
+                _bareOf = Text;
+                _bareLevel = HeadingLevel;
+                _bare = HeadingLevel > 0 && Text.StartsWith('#') ? Text.TrimStart('#').TrimStart(' ') : Text;
+            }
+
+            return _bare!;
+        }
+    }
+
     /// <summary>
     /// The row continues a reply row that Claude hard-wrapped at the console width (FR-3.2a): the view shows the two
     /// as one line, joined with a space.

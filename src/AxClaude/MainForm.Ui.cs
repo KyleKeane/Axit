@@ -128,11 +128,19 @@ internal sealed partial class MainForm
         questions.DropDownItems.Add(Toggle("&Review answers before they go to Claude", _settings.ReviewAnswers, v => _settings.ReviewAnswers = v));
         options.DropDownItems.Add(questions);
 
-        options.DropDownItems.Add(CreateTextMenu(Toggle("Time &stamps on Input and Output lines", _settings.MarkerTimeStamps, v =>
-        {
-            _settings.MarkerTimeStamps = v;
-            _model.TimeStamps = v;
-        })));
+        options.DropDownItems.Add(CreateTextMenu(
+            Toggle("Time &stamps on Input and Output lines", _settings.MarkerTimeStamps, v =>
+            {
+                _settings.MarkerTimeStamps = v;
+                _model.TimeStamps = v;
+            }),
+            // FR-4.6a: the # markers of the heading lines shown or hidden; the lines, the keys and the export unchanged.
+            Toggle("Mar&kers in the text", _settings.ShowMarkers, v =>
+            {
+                _settings.ShowMarkers = v;
+                _transcript.ShowMarkers = v;
+                _transcript.Sync(_model.Lines);
+            })));
         options.DropDownItems.Add(CreateGeneralMenu(Toggle("&Keep recordings and exported conversations out of git", _settings.KeepFilesOutOfGit, v =>
         {
             _settings.KeepFilesOutOfGit = v;

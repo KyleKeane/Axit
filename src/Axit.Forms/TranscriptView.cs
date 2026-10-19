@@ -79,6 +79,10 @@ public sealed class TranscriptView : TextBox
     [System.ComponentModel.DefaultValue(false)]
     public bool KeepCaret { get; set; }
 
+    /// <summary>The # markers of the heading lines in the text (AxClaude FR-4.6a); the window re-syncs after a change.</summary>
+    [System.ComponentModel.DefaultValue(true)]
+    public bool ShowMarkers { get => _mirror.ShowMarkers; set => _mirror.ShowMarkers = value; }
+
     /// <summary>Speaks text through a UI Automation notification without moving focus (FR-7.1). Returns false when unsupported.</summary>
     public bool Announce(string text, bool interrupt) => Announcer.Raise(this, text, interrupt);
 

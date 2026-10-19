@@ -40,7 +40,7 @@ Each step says what to do and what NVDA must say or do. A step fails if NVDA say
 
 1. Ask for a markdown answer with two `##` headings and a bulleted list.
 2. Ctrl+Home, then `h` repeatedly: the "# Input" and "# Output" line of each exchange, spoken without the hash and followed by "heading level 1", and Claude's headings followed by "heading level 2", in order. Shift+H goes back. `1`: only the markers.
-3. `2`: only Claude's level 2 headings. `3`: "No next heading level 3".
+3. `2`: only Claude's level 2 headings. `3`: "No next heading level 3". Options → Text → Markers in the text off: `h` still says "Input 1 heading level 1", Up and Down read "Input 1" without the hash, the caret stays on its line, and an exported conversation keeps `# Input 1`; on again.
 4. `p`: the first line of the next paragraph (a line with text after a blank line, or a `claude:` line), read out; Shift+P goes back. Past the last one: "No next paragraph". After a turn with several tool calls, `o` to its output marker and then `p` repeatedly: each of Claude's short messages between the tool calls is a stop, although no blank line sits in front of it, then each paragraph of the final reply; the tool lines and their output are not stops, even after a blank line, and Ctrl+Alt+P from the output marker reads the same stops without them.
 5. `o` / Shift+O, `r` / Shift+R (the same lines as `o`), `i` / Shift+I, `c`, `t`, `e`, `d`, `s`: each announcement matches SPEC.md §6.4.
 6. Escape in the conversation: the message field has the focus and nothing was sent (the status still says "ready").

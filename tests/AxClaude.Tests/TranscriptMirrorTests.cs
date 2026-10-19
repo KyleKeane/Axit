@@ -31,6 +31,32 @@ public class TranscriptMirrorTests
     }
 
     [Fact]
+    public void Hidden_markers_strip_the_heading_marker_from_the_text_and_the_export_keeps_it()
+    {
+        var mirror = new TranscriptMirror();
+        var heading = new Line(1, LineKind.InputMarker, "# Input 1") { HeadingLevel = 1 };
+        var sub = new Line(2, LineKind.UserMessage, "## Folder") { HeadingLevel = 2 };
+        List<Line> lines = [heading, sub, L("C:\\src")];
+        var text = Apply(new StringBuilder(), mirror.Update(lines));
+        Assert.Equal("# Input 1\r\n## Folder\r\nC:\\src", text.ToString());
+
+        mirror.ShowMarkers = false;
+        var update = mirror.Update(lines);
+        Apply(text, update);
+        Assert.Equal("Input 1\r\nFolder\r\nC:\\src", text.ToString());
+        Assert.Equal("Input 1", mirror.TextAt(0));
+        // The caret at the start of the plain line stays on it.
+        Assert.Equal("Input 1\r\nFolder\r\n".Length, update.MapPosition("# Input 1\r\n## Folder\r\n".Length));
+        // An unchanged frame is still no edit, and the export is still the Markdown.
+        Assert.Empty(mirror.Update(lines).Edits);
+        Assert.Equal("# Input 1\r\n## Folder\r\nC:\\src", TranscriptMirror.Render(lines));
+
+        mirror.ShowMarkers = true;
+        Apply(text, mirror.Update(lines));
+        Assert.Equal("# Input 1\r\n## Folder\r\nC:\\src", text.ToString());
+    }
+
+    [Fact]
     public void A_frame_that_changes_nothing_allocates_nothing_and_keeps_every_caret_position()
     {
         var mirror = new TranscriptMirror();

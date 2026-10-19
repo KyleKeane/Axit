@@ -50,6 +50,9 @@ public sealed class AppSettings : WindowSettings
     /// <summary>Time of sending in the Input and Output markers (FR-4.6).</summary>
     public bool MarkerTimeStamps { get; set; }
 
+    /// <summary>The # markers of the heading lines shown in the view (FR-4.6a); the export keeps them either way.</summary>
+    public bool ShowMarkers { get; set; } = true;
+
     /// <summary>Show reply rows that Claude wrapped at the console width as one line (FR-3.2a). File only, no menu item.</summary>
     public bool JoinWrappedLines { get; set; } = true;
 

@@ -6,6 +6,7 @@
 - Axit: the console-to-transcript pieces are the bundle's now, moved from AxClaude for AxTerminal: the ConPTY host, the parser, the screen model, the lines and their store, the mirror and the transcript view, whose keys each window hands in from its own table. AxClaude behaves as before; its recorded fixtures give the same transcripts.
 - Axit: File Explorer's right-click menu has one submenu for the bundle, Open with Axit, instead of an entry per app: on folders and on a folder's background it lists AxClaude, AxGit and AxTerminal; on files AxDown, and on `.json` files AxJSON too, which had no entry before. The old entries (Open in AxClaude, Open in AxGit, Open in AxDown) are removed by the install. The installer's table of apps says what each one opens, so a new app is one block there (bundle AX-2.3). The install also copies AxTerminal's icon, which it had missed.
 - Axit: a jump to a heading in AxClaude's and AxTerminal's transcripts speaks it without its `#` marker: "Input 1 heading level 1".
+- Axit: Options → Text → Markers in the text, in AxClaude and AxTerminal: off, the heading lines show without their `#` markers; the keys, their announcements and the export are unchanged.
 
 ## 2.13.0 - 2026-10-18
 

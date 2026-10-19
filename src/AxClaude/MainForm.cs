@@ -144,6 +144,7 @@ internal sealed partial class MainForm : AxitForm
             TimeStamps = settings.MarkerTimeStamps,
             DetectScreens = settings.QuestionNotices,
         };
+        _transcript.ShowMarkers = settings.ShowMarkers;
         _model.Changed += OnModelChanged;
         _model.ResponseStarted += () =>
         {
