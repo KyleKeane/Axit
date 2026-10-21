@@ -27,8 +27,8 @@ public sealed class FileSettings : WindowSettings
     /// <summary>The list's order (AF-3.8), kept for the next folder and the next window.</summary>
     public SortBy SortBy { get; set; } = SortBy.Name;
 
-    /// <summary>The folders the user pinned with Ctrl+D (AF-3.9), in the order added, for Folder → Favourites.</summary>
-    public List<string> Favourites { get; set; } = [];
+    /// <summary>The folders the user pinned with Ctrl+D (AF-3.9), in the order added, for Folder → Favorites.</summary>
+    public List<string> Favorites { get; set; } = [];
 
     /// <summary>The one unprompted announcement: the name of the next file when the player moves on (AF-5.4, G5).</summary>
     public bool SayEachFile { get; set; } = true;
@@ -94,24 +94,24 @@ public sealed class FileSettings : WindowSettings
             SortBy = SortBy.Name;
         }
 
-        Favourites ??= [];
-        Favourites.RemoveAll(string.IsNullOrWhiteSpace);
-        Favourites = Favourites.Distinct(StringComparer.OrdinalIgnoreCase).ToList();
+        Favorites ??= [];
+        Favorites.RemoveAll(string.IsNullOrWhiteSpace);
+        Favorites = Favorites.Distinct(StringComparer.OrdinalIgnoreCase).ToList();
     }
 
-    /// <summary>Whether the folder is a favourite (AF-3.9).</summary>
-    public bool IsFavourite(string folder) => Favourites.Any(f => string.Equals(f, folder, StringComparison.OrdinalIgnoreCase));
+    /// <summary>Whether the folder is a favorite (AF-3.9).</summary>
+    public bool IsFavorite(string folder) => Favorites.Any(f => string.Equals(f, folder, StringComparison.OrdinalIgnoreCase));
 
-    /// <summary>Adds the folder to the favourites, or removes it when it is one; true when it was added.</summary>
-    public bool ToggleFavourite(string folder)
+    /// <summary>Adds the folder to the favorites, or removes it when it is one; true when it was added.</summary>
+    public bool ToggleFavorite(string folder)
     {
-        if (IsFavourite(folder))
+        if (IsFavorite(folder))
         {
-            Favourites.RemoveAll(f => string.Equals(f, folder, StringComparison.OrdinalIgnoreCase));
+            Favorites.RemoveAll(f => string.Equals(f, folder, StringComparison.OrdinalIgnoreCase));
             return false;
         }
 
-        Favourites.Add(folder);
+        Favorites.Add(folder);
         return true;
     }
 }

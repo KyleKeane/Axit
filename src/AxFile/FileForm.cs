@@ -19,7 +19,7 @@ public sealed partial class FileForm : AxitForm
     private readonly string? _startPath;
     private readonly MenuStrip _menu = new();
     private readonly ToolStripMenuItem _recentItem = new("Open &recent folder");
-    private readonly ToolStripMenuItem _favouritesItem = new("Fa&vourites");
+    private readonly ToolStripMenuItem _favoritesItem = new("Fa&vourites");
     private readonly List<(SortBy By, ToolStripMenuItem Item)> _sortItems = [];
     private readonly ItemMenu _itemMenu;
     private readonly ListBox _list = new();
@@ -47,9 +47,9 @@ public sealed partial class FileForm : AxitForm
         FillRecent();
         folder.DropDownItems.Add(_recentItem);
         // AF-3.9: the pinned folders, refilled when the submenu opens, with the key's item under them.
-        _favouritesItem.DropDownOpening += (_, _) => FillFavourites();
-        FillFavourites();
-        folder.DropDownItems.Add(_favouritesItem);
+        _favoritesItem.DropDownOpening += (_, _) => FillFavorites();
+        FillFavorites();
+        folder.DropDownItems.Add(_favoritesItem);
         folder.DropDownItems.Add(Item("&Go to folder...", GoToFolder, AxFileKeys.GoToFolder));
         folder.DropDownItems.Add(new ToolStripSeparator());
         folder.DropDownItems.Add(Item("&Up one level", GoUp, AxFileKeys.Up));
@@ -77,9 +77,10 @@ public sealed partial class FileForm : AxitForm
         folder.DropDownItems.Add(new ToolStripSeparator());
         folder.DropDownItems.Add(new ToolStripMenuItem("E&xit", null, (_, _) => Close()) { ShortcutKeyDisplayString = "Alt+F4" });
 
-        // Item is the entry's menu (AF-4.6): one ItemMenu as the bar's drop-down and one as the list's context menu,
-        // filled the same way, so that the two are one menu.
-        var item = new ToolStripMenuItem("&Item") { DropDown = new ItemMenu(SayInformation) };
+        // Item is the entry's menu (AF-4.6): the bar's drop-down and the list's context menu, filled the same way, so
+        // that the two are one menu. The bar's drop-down is the one WinForms makes (AX-6.6): a hand-made one loses
+        // its owner item when it closes, and the bar then opens its neighbours' menus on Left and Right.
+        var item = new ToolStripMenuItem("&Item");
         FillItemMenu(item.DropDownItems);
         _itemMenu = new ItemMenu(SayInformation) { AccessibleName = "Item" };
         FillItemMenu(_itemMenu.Items);
@@ -183,56 +184,52 @@ public sealed partial class FileForm : AxitForm
         }
     }
 
-    /// <summary>The entry's menu (AF-6.1), filled for the menu bar and again for the list's context menu (AF-4.6).</summary>
+    /// <summary>
+    /// The entry's menu (AF-4.6, AF-6.1), filled for the menu bar and again for the list's context menu: one flat
+    /// list in File Explorer's order and words, with two submenus for the ways to open (Open with: Windows and the
+    /// user's programs, AF-4.7, AF-4.11; Open in Axit: the bundle's apps, AF-4.9).
+    /// </summary>
     private void FillItemMenu(ToolStripItemCollection items)
     {
-        // AF-4.8, AF-4.1 to AF-4.4: the operations first, in one submenu.
-        var operations = new ToolStripMenuItem("&File operations");
-        operations.DropDownItems.Add(Item("Cu&t", () => CopyOrCut(cut: true), AxFileKeys.Cut));
-        operations.DropDownItems.Add(Item("&Copy", () => CopyOrCut(cut: false), AxFileKeys.Copy));
-        operations.DropDownItems.Add(Item("&Paste", Paste, AxFileKeys.Paste));
-        operations.DropDownItems.Add(new ToolStripSeparator());
-        // AF-3.7: the selection the operations act on.
-        operations.DropDownItems.Add(Item("&Select or deselect", ToggleSelection, AxFileKeys.Select));
-        operations.DropDownItems.Add(Item("Select &all", SelectAll, AxFileKeys.SelectAll));
-        operations.DropDownItems.Add(Item("Select n&one", SelectNone, AxFileKeys.SelectNone));
-        operations.DropDownItems.Add(new ToolStripSeparator());
-        operations.DropDownItems.Add(Item("&New folder...", NewFolder, AxFileKeys.NewFolder));
-        operations.DropDownItems.Add(Item("New &text file", NewFile, AxFileKeys.NewFile));
-        operations.DropDownItems.Add(new ToolStripMenuItem("&Move into new folder...", null, (_, _) => MoveIntoNewFolder()));
-        // Posted, so that the menu has closed and the list has the focus back before the box takes it.
-        operations.DropDownItems.Add(Item("&Rename", () => BeginInvoke(() => Rename()), AxFileKeys.Rename));
-        operations.DropDownItems.Add(Item("&Delete...", Delete, AxFileKeys.Delete));
-        operations.DropDownItems.Add(Item("Cop&y path", CopyPath, AxFileKeys.CopyPath));
-        operations.DropDownItems.Add(new ToolStripSeparator());
-        // AF-4.12: zip files, through .NET's own ZipFile.
-        operations.DropDownItems.Add(new ToolStripMenuItem("Compress to &zip", null, (_, _) => Compress()));
-        operations.DropDownItems.Add(new ToolStripMenuItem("E&xtract here", null, (_, _) => Extract()));
-        items.Add(operations);
-        items.Add(new ToolStripSeparator());
-        // The ways to open the entry: AxFile's own verb, the editors, every app of the bundle (AF-4.9), Windows (AF-4.7).
         items.Add(Item("&Open", OpenSelected, AxFileKeys.Open));
-        items.Add(Item("Open in &editor", OpenInEditor, AxFileKeys.OpenInEditor));
+        var openWith = new ToolStripMenuItem("Open &with");
+        openWith.DropDownOpening += (_, _) => FillOpenWith(openWith);
+        FillOpenWith(openWith);
+        items.Add(openWith);
         var axit = new ToolStripMenuItem("Open in &Axit");
+        axit.DropDownItems.Add(Item("&Editor", OpenInEditor, AxFileKeys.OpenInEditor));
+        axit.DropDownItems.Add(new ToolStripSeparator());
         foreach (var app in Dispatch.Apps)
         {
             axit.DropDownItems.Add(new ToolStripMenuItem("Ax&" + app.Name[2..], null, (_, _) => OpenInAxit(app.Verb)));
         }
 
         items.Add(axit);
-        items.Add(new ToolStripMenuItem("Open with &Windows", null, (_, _) => OpenSelectedWithWindows()));
-        items.Add(new ToolStripMenuItem("Open with another pro&gram...", null, (_, _) => OpenWith()));
-        // AF-4.11: the user's own programs and scripts, refilled from the settings each time the submenu opens.
-        var custom = new ToolStripMenuItem("Open with a c&ustom program");
-        custom.DropDownOpening += (_, _) => FillPrograms(custom);
-        FillPrograms(custom);
-        items.Add(custom);
-        items.Add(Item("&Show in File Explorer", ShowItemInExplorer, AxFileKeys.ShowItemInExplorer));
+        items.Add(new ToolStripSeparator());
+        items.Add(Item("Cu&t", () => CopyOrCut(cut: true), AxFileKeys.Cut));
+        items.Add(Item("&Copy", () => CopyOrCut(cut: false), AxFileKeys.Copy));
+        items.Add(Item("&Paste", Paste, AxFileKeys.Paste));
+        items.Add(new ToolStripSeparator());
+        // Posted, so that the menu has closed and the list has the focus back before the box takes it.
+        items.Add(Item("Rena&me", () => BeginInvoke(() => Rename()), AxFileKeys.Rename));
+        items.Add(Item("&Delete", Delete, AxFileKeys.Delete));
+        items.Add(new ToolStripSeparator());
+        items.Add(Item("&New folder...", NewFolder, AxFileKeys.NewFolder));
+        items.Add(Item("New text &file", NewFile, AxFileKeys.NewFile));
+        items.Add(new ToolStripMenuItem("Mo&ve to new folder...", null, (_, _) => MoveIntoNewFolder()));
+        items.Add(new ToolStripMenuItem("Compress to &zip", null, (_, _) => Compress()));
+        items.Add(new ToolStripMenuItem("E&xtract here", null, (_, _) => Extract()));
+        items.Add(new ToolStripSeparator());
+        items.Add(Item("&Select all", SelectAll, AxFileKeys.SelectAll));
+        items.Add(Item("Select non&e", SelectNone, AxFileKeys.SelectNone));
+        items.Add(new ToolStripSeparator());
+        items.Add(Item("Copy pat&h", CopyPath, AxFileKeys.CopyPath));
+        items.Add(Item("Show in File Exp&lorer", ShowItemInExplorer, AxFileKeys.ShowItemInExplorer));
         items.Add(Item("&Information", SayInformation, AxFileKeys.Information));
-        items.Add(Item("&Properties", ShowProperties, AxFileKeys.Properties));
+        items.Add(Item("Prope&rties", ShowProperties, AxFileKeys.Properties));
         items.Add(new ToolStripSeparator());
         // AF-4.7: the shell's own menu, behind one item of ours (AF-D8).
-        items.Add(new ToolStripMenuItem("&More from Windows...", null, (_, _) => ShowWindowsMenu()));
+        items.Add(new ToolStripMenuItem("Windows men&u...", null, (_, _) => ShowWindowsMenu()));
     }
 
     // ---- what the window base asks for ----
@@ -340,8 +337,8 @@ public sealed partial class FileForm : AxitForm
             case AxFileKeys.Filter:
                 ShowFilterNotice();
                 return true;
-            case AxFileKeys.Favourite:
-                ToggleFavourite();
+            case AxFileKeys.Favorite:
+                ToggleFavorite();
                 return true;
             case AxFileKeys.OpenFolder:
                 OpenFolderDialog();

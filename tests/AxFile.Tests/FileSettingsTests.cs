@@ -17,19 +17,19 @@ public sealed class FileSettingsTests
         Assert.Equal(1, settings.Speed);
         Assert.Equal(15, settings.SeekSeconds);
         Assert.Equal(SortBy.Name, settings.SortBy);
-        Assert.Empty(settings.Favourites);
+        Assert.Empty(settings.Favorites);
         Assert.True(settings.CheckForUpdates);
     }
 
     [Fact]
-    public void A_favourite_is_added_once_and_removed_by_the_same_toggle()
+    public void A_favorite_is_added_once_and_removed_by_the_same_toggle()
     {
         var settings = new FileSettings();
-        Assert.True(settings.ToggleFavourite("C:\\Music"));
-        Assert.True(settings.ToggleFavourite("C:\\Docs"));
-        Assert.True(settings.IsFavourite("c:\\music"));
-        Assert.False(settings.ToggleFavourite("c:\\MUSIC"));
-        Assert.Equal(["C:\\Docs"], settings.Favourites);
+        Assert.True(settings.ToggleFavorite("C:\\Music"));
+        Assert.True(settings.ToggleFavorite("C:\\Docs"));
+        Assert.True(settings.IsFavorite("c:\\music"));
+        Assert.False(settings.ToggleFavorite("c:\\MUSIC"));
+        Assert.Equal(["C:\\Docs"], settings.Favorites);
     }
 
     [Fact]
@@ -52,7 +52,7 @@ public sealed class FileSettingsTests
     public void Nonsense_in_the_file_falls_back()
     {
         var path = Path.Combine(Path.GetTempPath(), "axfile-settings-" + Guid.NewGuid().ToString("N") + ".json");
-        File.WriteAllText(path, """{ "speed": 9, "seekSeconds": 0, "lastFolder": " ", "recentFolders": ["", "C:\\x"], "favourites": ["C:\\f", " ", "c:\\F"], "fontSize": 500, "programs": [{ "name": "", "path": "C:\\a.exe" }, { "name": "b", "path": "C:\\b.exe" }] }""");
+        File.WriteAllText(path, """{ "speed": 9, "seekSeconds": 0, "lastFolder": " ", "recentFolders": ["", "C:\\x"], "favorites": ["C:\\f", " ", "c:\\F"], "fontSize": 500, "programs": [{ "name": "", "path": "C:\\a.exe" }, { "name": "b", "path": "C:\\b.exe" }] }""");
         try
         {
             var settings = FileSettings.Load(path, out var error);
@@ -63,7 +63,7 @@ public sealed class FileSettingsTests
             Assert.Equal(["C:\\x"], settings.RecentFolders);
             Assert.Equal(0, settings.FontSize);
             Assert.Equal([new UserProgram("b", "C:\\b.exe")], settings.Programs);
-            Assert.Equal(["C:\\f"], settings.Favourites);
+            Assert.Equal(["C:\\f"], settings.Favorites);
         }
         finally
         {

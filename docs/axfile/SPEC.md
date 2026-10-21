@@ -67,7 +67,7 @@ windows on the folder of the file or project in hand, and sends back. It works e
   repository in ▸ **AxFile** and AxTerminal's Session → Show current folder in ▸ **AxFile** each start a new AxFile
   window (`AxitMenu.Start`, found again in the Axit menu, AX-9.3). From AxFile, Folder → Show current folder in ▸
   **File Explorer** (Ctrl+W), **AxClaude**, **AxGit**, **AxTerminal**; Item → **Show in File Explorer**
-  (Ctrl+Shift+W) opens File Explorer with the selected entry selected; Item → **Open in editor** (Ctrl+E) opens the
+  (Ctrl+Shift+W) opens File Explorer with the selected entry selected; Item → Open in Axit ▸ **Editor** (Ctrl+E) opens the
   selected file in AxJSON for `.json` and AxDown for anything else, whatever Enter would do with it.
 
 ### AF-2 The window
@@ -127,7 +127,7 @@ windows on the folder of the file or project in hand, and sends back. It works e
   "docs, folder, selected"), so that an arrow key onto it says so and nothing is said on the others; the key answers
   "Selected" or "Deselected", with ", n selected" when more than that one is marked ("Selected, 3 selected";
   "Deselected, 2 selected"). **Ctrl+A** marks every entry, "n selected"; **Ctrl+Shift+A** unmarks them all, "None
-  selected"; the three are in File operations ▸. Ctrl+I adds ", n selected" to the entry's information while any are
+  selected"; Select all and Select none are in the Item menu, Space is a key alone. Ctrl+I adds ", n selected" to the entry's information while any are
   marked (AF-2.4). Cut, Copy, Delete and Copy path act on the marked entries when there are any, and on the current
   entry alone otherwise (AF-4.3, AF-4.4, AF-4.8); Enter, Rename, the ways to open and the Windows items stay on the
   current entry. The marks live in one folder: showing another folder drops them, a refresh of the same folder keeps
@@ -144,11 +144,11 @@ windows on the folder of the file or project in hand, and sends back. It works e
   it says the same. The filter lives in the folder: another folder drops it, a refresh keeps it. What the list shows
   is what the commands see: Select all marks the shown entries, the player's queue is the shown media files (AF-5.3),
   find moves among the shown entries. Find (AF-3.6) jumps, the filter narrows; both are kept.
-- AF-3.9 **Favourites** (asked 2026-10-21). **Ctrl+D** (Folder → Favourites ▸ → Add or remove this folder) pins the
-  folder shown, "Added to Favourites", or unpins it when it is one, "Removed from Favourites"; the browsers' bookmark
-  key. **Folder → Favourites ▸** lists them as "1. name (path)" (AX-9.5) in the order they were added, those that
-  still exist, or "No favourites yet", with the key's item under a separator; choosing one shows the folder and it
-  joins the recent list. The favourites are a setting (`favourites`, AF-8.1), so every window and the next start
+- AF-3.9 **Favorites** (asked 2026-10-21). **Ctrl+D** (Folder → Favorites ▸ → Add or remove this folder) pins the
+  folder shown, "Added to Favorites", or unpins it when it is one, "Removed from Favorites"; the browsers' bookmark
+  key. **Folder → Favorites ▸** lists them as "1. name (path)" (AX-9.5) in the order they were added, those that
+  still exist, or "No favorites yet", with the key's item under a separator; choosing one shows the folder and it
+  joins the recent list. The favorites are a setting (`favorites`, AF-8.1), so every window and the next start
   have them.
 - AF-3.10 **This PC** (asked 2026-10-21): the level above the drives. Backspace or Alt+Up at a drive's root shows it,
   the drive just left selected; its entries are the ready drives in letter order, "Local Disk (C:), drive" (the
@@ -159,7 +159,7 @@ windows on the folder of the file or project in hand, and sends back. It works e
   order leaves the letter order alone, and the commands that need a folder say "Choose a drive first" (New folder,
   Paste, Rename, Delete, Cut, Copy, Ctrl+D, Show current folder in ▸ the other apps); Show current folder in ▸ File
   Explorer opens File Explorer's own This PC. The other items of the entry's menu work on a drive as on a folder
-  (Open in Axit ▸, Show in File Explorer, Properties, More from Windows…).
+  (Open in Axit ▸, Show in File Explorer, Properties, Windows menu…).
 
 ### AF-4 Operations
 
@@ -191,20 +191,22 @@ windows on the folder of the file or project in hand, and sends back. It works e
 - AF-4.6 **The entry's menu** (Shift+F10, the Applications key, a right click): the Item menu as the list's context
   menu, the same items in the same order, on the selected entry (a right click selects the entry under it first, as
   File Explorer does). It is the window's own menu, fixed, with mnemonics and listed in F1, not the shell's (AF-D8).
-  Its shape (AF-6.1): File operations ▸ first, then the ways to open (Open, Open in editor, Open in Axit ▸, Open with
-  Windows, Open with another program…, Open with a custom program ▸), then Show in File Explorer, Information and
-  Properties, and More from Windows… last. One `ItemMenu` is the list's context menu and another the bar's Item drop-down, both filled by the
-  same method, so that the bar's menu is an exact copy.
+  Its shape (AF-6.1; reshaped 2026-10-21 at the user's ask for File Explorer's plain words and one flat list): Open,
+  Open with ▸, Open in Axit ▸ | Cut, Copy, Paste | Rename, Delete | New folder…, New text file, Move to new folder…,
+  Compress to zip, Extract here | Select all, Select none | Copy path, Show in File Explorer, Information,
+  Properties | Windows menu…. The list's context menu is an `ItemMenu` (AF-4.10) and the bar's Item menu the
+  standard drop-down, both filled by the same method, so that the bar's menu is an exact copy; the bar's drop-down is
+  never a hand-made one (AX-6.6).
 - AF-4.7 **Windows' own ways**, items of the entry's menu, each one of the system's own windows like the folder picker
-  (AX-7.2): **Open with Windows** opens the entry with the program Windows has for it (a folder in File Explorer),
+  (AX-7.2): Open with ▸ **Windows default** opens the entry with the program Windows has for it (a folder in File Explorer),
   or, when Windows has none, the Windows dialog that picks a program and runs it, as File Explorer does on Enter;
-  **Open with another program…** shows that dialog always ("Not a file" on a folder); **Properties** (Alt+Enter, File
-  Explorer's key) shows the Windows Properties sheet of a file or a folder; **More from Windows…**, the last item,
+  **Choose a program…** shows that dialog always ("Not a file" on a folder); **Properties** (Alt+Enter, File
+  Explorer's key) shows the Windows Properties sheet of a file or a folder; **Windows menu…**, the last item,
   shows the shell's own context menu for the entry, File Explorer's classic menu with every installed program's
   entries (`IShellFolder` and `IContextMenu` through P/Invoke, tracked as a native popup the window owns, its first
   item selected, the shell's submenus such as Send to filled through the window's messages), and runs what is chosen.
   A refusal by Windows is "Failed: <reason>"; closing the dialog or the menu is not one.
-- AF-4.8 **Cut, Copy, Paste** (Ctrl+X, Ctrl+C, Ctrl+V, in the list; File operations ▸): the entry, or the marked
+- AF-4.8 **Cut, Copy, Paste** (Ctrl+X, Ctrl+C, Ctrl+V, in the list; the Item menu): the entry, or the marked
   entries (AF-3.7), go on the clipboard as files in File Explorer's own formats (`CF_HDROP` and "Preferred
   DropEffect", move for a cut, copy otherwise), "Cut <name>" or "Copied <name>", "Cut n items" or "Copied n items",
   so that File Explorer can paste them and AxFile can paste what File Explorer cut or copied. Paste copies the clipboard's files into the folder shown, or moves them after a cut, through
@@ -216,14 +218,15 @@ windows on the folder of the file or project in hand, and sends back. It works e
 - AF-4.9 **Open in Axit ▸**: one item per app of the bundle, from `Dispatch.Apps`, a new window of that app on the
   entry: AxDown and AxJSON on the file ("Not a file" on a folder), AxGit on the repository that holds the entry, AxFile
   on the folder (or the file in its folder), AxClaude and AxTerminal on the folder, or on the entry's folder for a
-  file. Open in editor (Ctrl+E) stays the quick way to the right editor.
-- AF-4.10 **Ctrl+I inside the open menu** says the entry's information (AF-7) without closing the menu, so that the
-  entry a menu is about can be checked before choosing. WinForms routes the keys of an open menu to the menu, not to
-  the window, so `ItemMenu` takes the key itself. The Windows menu (More from Windows…) is Windows' own and does not
-  have it.
-- AF-4.11 **Open with a custom program ▸** (asked 2026-10-21): the user's own list of programs and scripts, kept in
-  the settings (`programs`, a name and a path each, AF-8.1), shown as "1. name (path)" (AX-9.5), or "No programs
-  yet" while the list is empty, then ─, **Add a program…** and **Remove a program ▸**. Add a program… opens the
+  file; Editor (Ctrl+E), the submenu's first item, is the quick way to the right editor.
+- AF-4.10 **Ctrl+I inside the open context menu** says the entry's information (AF-7) without closing the menu, so
+  that the entry a menu is about can be checked before choosing. WinForms routes the keys of an open menu to the
+  menu, not to the window, so `ItemMenu`, the context menu, takes the key itself. The bar's Item menu is the standard
+  drop-down (AX-6.6) and does not have it, nor does the Windows menu, which is Windows' own.
+- AF-4.11 **The user's own programs in Open with ▸** (asked 2026-10-21): a list of programs and scripts, kept in the
+  settings (`programs`, a name and a path each, AF-8.1), shown under Windows default and Choose a program… (AF-4.7)
+  as "1. name (path)" (AX-9.5), or "No programs of your own yet" while the list is empty, then **Add a program…**
+  and **Remove a program ▸**. Add a program… opens the
   Windows file picker on programs and scripts (`.exe`, `.cmd`, `.bat`, `.ps1`, `.py`; every file behind the second
   filter), then the notice "Add a program" with the field "Name" holding the file's name without its extension and
   the buttons Add and Cancel; "Added <name>". Remove a program ▸ lists them by name; choosing one takes it off,
@@ -236,17 +239,17 @@ windows on the folder of the file or project in hand, and sends back. It works e
   are the window's, AF-8.1). It is the shape the user-defined shells of AxTerminal are to take (docs/axit/plan.md):
   a list in the app's settings, added through the file picker and a notice for the name, removed from a submenu.
   `UserPrograms` in `AxFile.Core` is tested; the menu and the start are the window's.
-- AF-4.12 **Compress to zip, Extract here** (File operations ▸; asked 2026-10-21), through .NET's own `ZipFile`, no
+- AF-4.12 **Compress to zip, Extract here** (the Item menu; asked 2026-10-21), through .NET's own `ZipFile`, no
   package (`Archives` in `AxFile.Core`, tested). **Compress to zip** puts the selected entries, or the current one
   (AF-3.7), into a new zip in the folder shown, named after the one entry without its extension ("notes.zip") or
   after the folder for several ("Dune.zip"), "name - 2.zip" when the name is taken, a folder's contents under its
   name; "Compressed to <name>", the zip selected; "Compressing, please wait" when it passes a second. **Extract
   here** on a `.zip` makes a new folder named after it next to it ("Dune", or "Dune - 2" when taken) and extracts
   into it, so that nothing is written over; "Extracted to <name>", the folder selected; "Not a zip file" on anything
-  else. A failure is "Failed: <reason>" (AF-4.5). Other archive kinds are the shell's (More from Windows…) or an
+  else. A failure is "Failed: <reason>" (AF-4.5). Other archive kinds are the shell's (Windows menu…) or an
   installed program's (AF-4.11).
-- AF-4.13 **Move into new folder…** (File operations ▸; asked 2026-10-21, "like zip but not compressed"): the notice
-  "Move into new folder" with the field "Name" and the buttons Move and Cancel, its text naming what moves ("a.txt
+- AF-4.13 **Move to new folder…** (the Item menu; asked 2026-10-21, "like zip but not compressed"): the notice
+  "Move to new folder" with the field "Name" and the buttons Move and Cancel, its text naming what moves ("a.txt
   will move into the new folder", "3 items will move into the new folder"); Move makes the folder in the current
   folder (a taken name is "Failed: There is already an entry named …", as New folder) and moves the selected entries,
   or the current one (AF-3.7), into it through the shell (AF-4.8, undo allowed, names chosen first); "Moved <name>
@@ -289,18 +292,16 @@ windows on the folder of the file or project in hand, and sends back. It works e
 ### AF-6 Menus, keys, texts
 
 - AF-6.1 Menus, in the standard order of a first menu (AX-6): **Folder (F):** New window Ctrl+N | Open folder… Ctrl+O |
-  Open recent folder ▸ | Favourites ▸ (1. name (path) … or No favourites yet | ─ | Add or remove this folder Ctrl+D) |
+  Open recent folder ▸ | Favorites ▸ (1. name (path) … or No favorites yet | ─ | Add or remove this folder Ctrl+D) |
   Go to folder… Ctrl+G | ─ | Up one level Backspace | Refresh F5 | ─ | Sort by ▸ (Name ✓ |
   Date | Size) | Filter… Ctrl+Shift+F | ─ | Show current folder in ▸ (File Explorer
-  Ctrl+W | AxClaude | AxGit | AxTerminal) | ─ | Exit Alt+F4. **Item (I):** File operations ▸ (Cut Ctrl+X | Copy Ctrl+C |
-  Paste Ctrl+V | ─ | Select or deselect Space | Select all Ctrl+A | Select none Ctrl+Shift+A | ─ | New folder…
-  Ctrl+Shift+N | New text file Ctrl+Shift+T | Move into new folder… | Rename F2 | Delete… Delete | Copy path
-  Ctrl+Shift+C | ─ | Compress to zip | Extract here) | ─ | Open
-  Enter
-  | Open in editor Ctrl+E | Open in Axit ▸ (AxClaude | AxDown | AxJSON | AxGit | AxTerminal | AxFile) | Open with
-  Windows | Open with another program… | Open with a custom program ▸ (1. name (path) … or No programs yet | ─ | Add a
-  program… | Remove a program ▸) | Show in File Explorer Ctrl+Shift+W | Information Ctrl+I | Properties Alt+Enter | ─
-  | More from Windows…; the same menu is the list's context menu (AF-4.6). **Player (P):** Play Enter | Pause or resume Ctrl+P | Next file Ctrl+Shift+Right | Previous
+  Ctrl+W | AxClaude | AxGit | AxTerminal) | ─ | Exit Alt+F4. **Item (I):** Open Enter | Open with ▸ (Windows default |
+  Choose a program… | ─ | 1. name (path) … or No programs of your own yet | Add a program… | Remove a program ▸) |
+  Open in Axit ▸ (Editor Ctrl+E | ─ | AxClaude | AxDown | AxJSON | AxGit | AxTerminal | AxFile) | ─ | Cut Ctrl+X |
+  Copy Ctrl+C | Paste Ctrl+V | ─ | Rename F2 | Delete Delete | ─ | New folder… Ctrl+Shift+N | New text file
+  Ctrl+Shift+T | Move to new folder… | Compress to zip | Extract here | ─ | Select all Ctrl+A | Select none
+  Ctrl+Shift+A | ─ | Copy path Ctrl+Shift+C | Show in File Explorer Ctrl+Shift+W | Information Ctrl+I | Properties
+  Alt+Enter | ─ | Windows menu…; the same menu is the list's context menu (AF-4.6). **Player (P):** Play Enter | Pause or resume Ctrl+P | Next file Ctrl+Shift+Right | Previous
   file Ctrl+Shift+Left | Forward 15 seconds Ctrl+Right | Back 15 seconds Ctrl+Left | Go to time… Ctrl+T | ─ | Faster
   Ctrl+Shift+Period | Slower Ctrl+Shift+Comma | Normal speed | ─ | Say each file as it starts ✓ | What is playing
   Ctrl+Q. **Options (O):** Text ▸ (Font… | Larger text Ctrl+Plus | Smaller text Ctrl+Minus | Windows text size) |
@@ -331,8 +332,8 @@ One UI Automation notification each, on the list, or on the notice while one sho
 <what> into <name>" (AF-4.13), "Renamed
 to <name>", "Deleted <name>", "Deleted n items", "Copied path", "Copied n paths", "Cut <name>", "Copied <name>", "Cut n
 items", "Copied n items", "Selected", "Deselected", "Selected, n selected", "Deselected, n selected", "n selected",
-"None selected" (AF-3.7), "Sorted by <order>", "Filter cleared" (AF-3.8), "Added to Favourites", "Removed from
-Favourites" (AF-3.9), "Top" (This PC, AF-3.10), "Added <name>", "Removed <name>", "Started <name>" (AF-4.11),
+"None selected" (AF-3.7), "Sorted by <order>", "Filter cleared" (AF-3.8), "Added to Favorites", "Removed from
+Favorites" (AF-3.9), "Top" (This PC, AF-3.10), "Added <name>", "Removed <name>", "Started <name>" (AF-4.11),
 "Compressed to <name>", "Extracted to <name>", "Compressing, please wait", "Extracting, please wait" (AF-4.12), "Pasted
 <name>", "Pasted n items",
 "Pasting, please wait" (a paste longer than a second), "Refreshed", "Not found: <path>", "No program opens
@@ -349,7 +350,7 @@ other reasons of `FileOperations.CheckName`. A new selection is NVDA's own readi
 ### AF-8 Settings, log, status
 
 - AF-8.1 `%APPDATA%\Axit\axfile.json` (AX-5.3; `FileSettings` on `WindowSettings`): `lastFolder`, `recentFolders`
-  (ten), `favourites` (the pinned folders in the order added, AF-3.9; blanks and repeats dropped), `showHidden` off,
+  (ten), `favorites` (the pinned folders in the order added, AF-3.9; blanks and repeats dropped), `showHidden` off,
   `showDotFiles` off (AF-2.2), `sortBy` name (`name`, `date` or `size`, AF-3.8), `sayEachFile` on, `speed` 1,
   `seekSeconds` 15, `programs` (the user's own, each a `name` and a `path`, AF-4.11; an entry without either is
   dropped), and the window base's font, update check and window fields.
@@ -425,7 +426,7 @@ single-threaded-apartment thread of its own (AX-7.5).
   installed and with Windows updates, under the user's fingers. The window's own Item menu is fixed, has mnemonics,
   is listed in F1 and is covered by the collision test, so it is the context menu (AF-4.6), and the two things people
   reach for in the shell's menu, Open with and Properties, are items of it (AF-4.7). The whole shell menu stays one
-  explicit item away, More from Windows…, for the rest (Send to, an archiver's entries), chosen knowingly.
+  explicit item away, Windows menu…, for the rest (Send to, an archiver's entries), chosen knowingly.
 - **AF-D9 Marks in the items, not the list box's multiple selection.** Asked 2026-10-21: select and deselect with
   Space. A multiple-selection list box (`LBS_MULTIPLESEL`) does that natively, but its arrow keys move a caret the
   app has to read and set through messages for everything "current" (Enter, F2, the folder's first entry, find), a
@@ -464,9 +465,9 @@ single-threaded-apartment thread of its own (AX-7.5).
   the notices. AxFile is no longer unchecked; it stays a first draft in scope (§7).
 - 2026-10-21, after the release, on the branch `axfile`, at the user's ask: the one item of an empty folder (AF-2.2),
   Ctrl+N for a new window (AF-3.3), the selection with Space and the operations on it (AF-3.7, AF-D9; pause moved to
-  Ctrl+P), Open with a custom program ▸, the user's own programs and scripts (AF-4.11), and, chosen by the user from a
-  list of what a file browser makes easy, Sort by and the filter (AF-3.8), Favourites (AF-3.9), This PC (AF-3.10)
+  Ctrl+P), the user's own programs in Open with ▸ (AF-4.11), and, chosen by the user from a
+  list of what a file browser makes easy, Sort by and the filter (AF-3.8), Favorites (AF-3.9), This PC (AF-3.10)
   and Compress to zip with Extract here (AF-4.12); then, from one more message: the list named by its count alone
   (AF-2.1), the two switches of Options → General with the not-shown line (AF-2.2), "name - 2" on a pasted or zipped
-  name already there (AF-4.8), New text file into the rename box (AF-4.1) and Move into new folder… (AF-4.13). Not
+  name already there (AF-4.8), New text file into the rename box (AF-4.1) and Move to new folder… (AF-4.13); then the entry's menu reshaped as one flat list in File Explorer's words and the bar's Item menu made a standard drop-down (AF-4.6, AX-6.6), at the user's ask after Left and Right opened the menus. Not
   yet checked with NVDA.

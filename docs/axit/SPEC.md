@@ -310,6 +310,13 @@ allow it, see B-9).
   the zip's guide, embedded by `Axit.Core`: install, start, update, remove; its headings take the window's heading
   keys, AX-7.2), and **Axit on GitHub** (H; the repository page, `UpdateCheck.RepositoryPage`, in the browser).
 
+- AX-6.6 **Menus are the standard ones.** A menu bar item's drop-down is the one WinForms makes for it; no window
+  assigns a drop-down of its own (a `ContextMenuStrip` or any `ToolStripDropDown` set as `DropDown`). A hand-made
+  drop-down has its owner item cleared when it closes, after which the bar no longer leaves auto-expansion on Escape,
+  and Left and Right open the neighbours' menus instead of moving along the bar (AxFile, 2026-10-21). `MenuTests` in
+  `tests/Axit.Tests` scans the sources for the construct. A key that must work inside an open menu goes in a context
+  menu subclass (AxFile's `ItemMenu`), which has no owner item.
+
 ### AX-7 Accessibility rules every app follows
 
 These are the rules of `docs/axclaude/SPEC.md` that are not about Claude; app specifications refer to them by number.

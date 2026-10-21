@@ -353,27 +353,27 @@ public sealed partial class FileForm
         return false;
     }
 
-    // ---- favourites (AF-3.9) ----
+    // ---- favorites (AF-3.9) ----
 
-    /// <summary>Folder → Favourites ▸: the pinned folders that still exist as "1. name (path)", or "No favourites yet", then the key's item.</summary>
-    private void FillFavourites()
+    /// <summary>Folder → Favorites ▸: the pinned folders that still exist as "1. name (path)", or "No favorites yet", then the key's item.</summary>
+    private void FillFavorites()
     {
-        RecentMenu.Fill(_favouritesItem, _settings.Favourites, Directory.Exists, RecentMenu.FolderName, "&No favourites yet", target => Do(() => ShowFolderAsync(target, null, remember: true)));
-        _favouritesItem.DropDownItems.Add(new ToolStripSeparator());
-        _favouritesItem.DropDownItems.Add(Item("&Add or remove this folder", ToggleFavourite, AxFileKeys.Favourite));
+        RecentMenu.Fill(_favoritesItem, _settings.Favorites, Directory.Exists, RecentMenu.FolderName, "&No favorites yet", target => Do(() => ShowFolderAsync(target, null, remember: true)));
+        _favoritesItem.DropDownItems.Add(new ToolStripSeparator());
+        _favoritesItem.DropDownItems.Add(Item("&Add or remove this folder", ToggleFavorite, AxFileKeys.Favorite));
     }
 
-    /// <summary>Ctrl+D: the folder shown pinned, "Added to Favourites", or unpinned again, "Removed from Favourites".</summary>
-    private void ToggleFavourite()
+    /// <summary>Ctrl+D: the folder shown pinned, "Added to Favorites", or unpinned again, "Removed from Favorites".</summary>
+    private void ToggleFavorite()
     {
         if (NoFolderHere() || _folder is not { } folder)
         {
             return;
         }
 
-        var added = _settings.ToggleFavourite(folder);
+        var added = _settings.ToggleFavorite(folder);
         SaveSettings();
-        Announce(added ? "Added to Favourites" : "Removed from Favourites", true);
+        Announce(added ? "Added to Favorites" : "Removed from Favorites", true);
     }
 
     /// <summary>The entry under the selection; null on the lines after the entries (an empty list's, the not-shown line), which are not entries.</summary>

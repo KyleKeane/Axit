@@ -51,7 +51,7 @@ public sealed class LayoutTests
     private static string AppOf(string project) =>
         project.EndsWith(".Core", StringComparison.Ordinal) ? project[..^".Core".Length] : project;
 
-    private static string RepositoryRoot()
+    internal static string RepositoryRoot()
     {
         var dir = new DirectoryInfo(AppContext.BaseDirectory);
         while (dir is not null && !File.Exists(Path.Combine(dir.FullName, "Axit.sln")))

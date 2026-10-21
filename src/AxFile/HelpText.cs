@@ -19,7 +19,7 @@ public static class HelpText
           Arrow keys, Home, End, Page Up, Page Down: move through the entries; a typed letter jumps to the next name starting with it
           Enter: open the entry: a folder in this list, a Markdown or text file in AxDown, a JSON file in AxJSON, a sound or video file in the player, anything else in the program Windows has for it, or the Windows dialog that picks one when there is none
           Backspace, or Alt+Up: the folder above, with the folder you left selected; from a drive's top, This PC with the drives
-          Ctrl+D: add this folder to Favourites, or remove it; Folder, Favourites lists them by number
+          Ctrl+D: add this folder to Favorites, or remove it; Folder, Favorites lists them by number
           Ctrl+I: say the entry's size and date; for a drive, the free space
           Ctrl+E: open the file in AxDown, or AxJSON for a .json file, whatever Enter would do
           Ctrl+Shift+W: show the entry in File Explorer. Ctrl+W: show the folder in File Explorer
@@ -27,13 +27,13 @@ public static class HelpText
           Ctrl+N: a new AxFile window on this folder
           F5: read the folder again
           Ctrl+Shift+F: filter the list to the names containing a text; Escape in the list clears the filter. Folder, Sort by: name, date or size
-          Ctrl+Shift+N: a new folder, after its name. Ctrl+Shift+T: a new empty text file, with the rename box open on it and its whole name selected: type the name with its extension, Enter. File operations, Move into new folder: a new folder here, after its name, with the entry, or the selected entries, moved into it
+          Ctrl+Shift+N: a new folder, after its name. Ctrl+Shift+T: a new empty text file, with the rename box open on it and its whole name selected: type the name with its extension, Enter. Move to new folder, in the entry's menu: a new folder here, after its name, with the entry, or the selected entries, moved into it
           F2: rename in place, in a box over the entry with the name before the extension selected; Enter renames, Escape keeps the name. Delete: delete to the Recycle Bin, after a question
           Space: select the entry, or deselect it; it reads "selected" after its name while it is. Ctrl+A: select all. Ctrl+Shift+A: select none. Ctrl+I says how many are selected
           Ctrl+X, Ctrl+C, Ctrl+V: cut, copy or paste as files, to and from File Explorer too; a pasted name already in the folder gets a number. Cut, Copy, Delete and Copy path act on the selected entries, or on the entry you are on when none is selected
           Ctrl+Shift+C: copy the entry's full path, or every selected entry's, one per line
-          File operations, Compress to zip: the entry, or the selected entries, into a new zip file here; Extract here: a zip file into a new folder named after it
-          Shift+F10, or the Applications key: the entry's menu: File operations, Open, Open in editor, Open in Axit, Open with Windows, Open with another program, Open with a custom program (your own programs and scripts, with Add a program and Remove a program), Show in File Explorer, Information, Properties, More from Windows. Ctrl+I inside the menu says the entry without closing it
+          In the entry's menu without a key: Move to new folder, Compress to zip, Extract here, Open with (Windows default, Choose a program, your own programs), Windows menu
+          Shift+F10, or the Applications key: the entry's menu, one list in File Explorer's order: Open, Open with, Open in Axit, Cut, Copy, Paste, Rename, Delete, New folder, New text file, Move to new folder, Compress to zip, Extract here, Select all, Select none, Copy path, Show in File Explorer, Information, Properties, Windows menu. Ctrl+I inside this menu says the entry without closing it
           Alt+Enter: the entry's Properties, the Windows sheet
           Ctrl+S: nothing to save here; AxFile says so
 

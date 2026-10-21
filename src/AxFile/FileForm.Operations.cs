@@ -115,7 +115,7 @@ public sealed partial class FileForm
     }
 
     /// <summary>
-    /// File operations → Move into new folder… (AF-4.13): the name asked in the notice "Move into new folder", the
+    /// Item → Move to new folder… (AF-4.13): the name asked in the notice "Move to new folder", the
     /// folder made here and the selected entries, or the current one, moved into it; "Moved <what> into <name>",
     /// the folder selected.
     /// </summary>
@@ -133,7 +133,7 @@ public sealed partial class FileForm
         }
 
         var what = targets.Count == 1 ? targets[0].Name : $"{targets.Count} items";
-        ShowNotice(new Notice("Move into new folder", $"{what} will move into the new folder.",
+        ShowNotice(new Notice("Move to new folder", $"{what} will move into the new folder.",
         [
             new OverlayChoice("&Move", () =>
             {
@@ -698,14 +698,20 @@ public sealed partial class FileForm
 
     // ---- the user's own programs (AF-4.11): a list in the settings, each run on the entries as its arguments ----
 
-    /// <summary>Open with a custom program ▸: "1. name (path)" per program, then Add a program… and Remove a program ▸; one enabled line when there are none (AX-9.5).</summary>
-    private void FillPrograms(ToolStripMenuItem menu)
+    /// <summary>
+    /// Open with ▸ (AF-4.7, AF-4.11): Windows default and Choose a program…, then the user's own programs as
+    /// "1. name (path)" with Add a program… and Remove a program ▸ under them; refilled each time it opens.
+    /// </summary>
+    private void FillOpenWith(ToolStripMenuItem menu)
     {
         menu.DropDownItems.Clear();
+        menu.DropDownItems.Add(new ToolStripMenuItem("Windows &default", null, (_, _) => OpenSelectedWithWindows()));
+        menu.DropDownItems.Add(new ToolStripMenuItem("&Choose a program...", null, (_, _) => OpenWith()));
+        menu.DropDownItems.Add(new ToolStripSeparator());
         var programs = _settings.Programs;
         if (programs.Count == 0)
         {
-            menu.DropDownItems.Add(new ToolStripMenuItem("&No programs yet"));
+            menu.DropDownItems.Add(new ToolStripMenuItem("&No programs of your own yet"));
         }
 
         for (var i = 0; i < programs.Count; i++)
@@ -714,12 +720,11 @@ public sealed partial class FileForm
             menu.DropDownItems.Add(new ToolStripMenuItem(AxitWindows.Label(i, $"{program.Name} ({program.Path})"), null, (_, _) => RunProgram(program)));
         }
 
-        menu.DropDownItems.Add(new ToolStripSeparator());
         menu.DropDownItems.Add(new ToolStripMenuItem("&Add a program...", null, (_, _) => AddProgram()));
         var remove = new ToolStripMenuItem("&Remove a program");
         if (programs.Count == 0)
         {
-            remove.DropDownItems.Add(new ToolStripMenuItem("&No programs yet"));
+            remove.DropDownItems.Add(new ToolStripMenuItem("&No programs of your own yet"));
         }
 
         for (var i = 0; i < programs.Count; i++)
