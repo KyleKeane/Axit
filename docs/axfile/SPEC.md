@@ -368,6 +368,39 @@ other reasons of `FileOperations.CheckName`. A new selection is NVDA's own readi
 - AF-8.2 The log is `%LOCALAPPDATA%\Axit\logs\axfile.log`: the start, the exit, the errors of the operations and the
   player with Windows' message; no names of files or folders.
 
+### AF-9 The queue pane (specified 2026-10-21, not yet built)
+
+- AF-9.1 **What it is.** A second list under the folder list, named "Queue", the window's other control: the player's
+  queue made visible and the place where the operations report. It appears when it first has anything to show and
+  stays for the window's life; **Ctrl+Tab** and **F6** (the bundle's control keys, AX-8.2) move between the folder
+  list and the pane, and Tab does the same, so that the pane is found the way AxClaude's message field is. One list,
+  not tabs: NVDA reads a list and its place in it; a tab control would be a third thing to learn (AF-D1).
+- AF-9.2 **The queue.** Its items are the queued media files in order, "03 Chapter 3.mp3", the one playing marked
+  "03 Chapter 3.mp3 (playing)" and the ones played left in place until the queue is cleared, so that Up reaches them
+  again. **Play folder** (Player → Play folder, Ctrl+Enter in the folder list) replaces the queue with the folder's
+  media files from the first and plays; Enter on a media file keeps today's meaning, the folder's files from that one
+  (AF-5.3). **Add to queue** (Player → Add to queue, Ctrl+Shift+Q in the folder list) appends the entry, the marked
+  entries (AF-3.7), or a folder's media files in the list's order, "Added 12 to the queue"; nothing starts playing if
+  nothing was. **Clear queue** (Player → Clear queue) empties it and stops, "Queue cleared". In the pane: **Enter**
+  plays that item, **Delete** takes it out ("Removed <name>"; the one playing goes on to the next), **Ctrl+I** says
+  its place and length, "3 of 12, 45:30", and **Ctrl+Q** says what is playing as elsewhere. Ctrl+Shift+Right and
+  Ctrl+Shift+Left move through the queue as now (AF-5.4). The queue is kept across folders, as it is today (AF-D6),
+  and a window closes with it; whether it should be kept for the next start is an open question with the resume
+  position (§7). Reordering by key is left out of the first version.
+- AF-9.3 **The operations' status.** An operation that runs on a task (a paste, a move to a new folder, a compress,
+  an extract, a delete of several) adds a line to the pane when it starts, "Copying 3 items", and replaces it when it
+  ends, "Copied 3 items" or "Failed: <reason>", under the queue's items; the announcements of AF-7 stay as they are,
+  the pane is where they can be read again and where a slow operation can be watched. A compress and an extract
+  count their files, "Compressing, 40 of 120 files"; a paste through the shell has no count to give (`SHFileOperationW`
+  is silent) and shows "Copying, please wait" until it ends; a count for it would need the shell's newer file
+  operation interface with its progress sink, a later step. The last twenty lines stay; **Clear queue** clears them
+  too; the lines are not kept across windows or starts.
+- AF-9.4 **Shape and names.** The pane is a plain `ListBox` named "Queue", its height a third of the window at most
+  (the folder list keeps the rest), the status bar unchanged. Its items are names and words, nothing spoken on an
+  arrow key (AF-D7); each command's result is one announcement (AF-7), on the control that has the focus. Keys new
+  to the table (AF-6.2): Ctrl+Enter, Ctrl+Shift+Q; in the pane only: Enter, Delete, Ctrl+I, Ctrl+Q keep their
+  meanings on the pane's item. The empty pane, once it has shown, holds one line, "Queue is empty" (AX-9.5).
+
 ## 5. Architecture
 
 ```
@@ -455,7 +488,9 @@ single-threaded-apartment thread of its own (AX-7.5).
   (AF-4.8); a paste of many items that names them.
 - Shift+Delete, a permanent delete, after its own question.
 - A "media only" filter of the list (the name filter and the sort orders came 2026-10-21, AF-3.8).
-- Whether a `.m3u` file in the folder should be the queue when there is one.
+- Whether a `.m3u` file in the folder should be the queue when there is one; with the queue pane (AF-9), Enter on a
+  `.m3u` could load it into the pane.
+- Whether the queue (AF-9) is kept for the next start, with the resume position above.
 
 ## 8. Status
 
