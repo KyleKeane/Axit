@@ -198,8 +198,10 @@ public sealed partial class FileForm : AxitForm
         operations.DropDownItems.Add(Item("Select n&one", SelectNone, AxFileKeys.SelectNone));
         operations.DropDownItems.Add(new ToolStripSeparator());
         operations.DropDownItems.Add(Item("&New folder...", NewFolder, AxFileKeys.NewFolder));
+        operations.DropDownItems.Add(Item("New &text file", NewFile, AxFileKeys.NewFile));
+        operations.DropDownItems.Add(new ToolStripMenuItem("&Move into new folder...", null, (_, _) => MoveIntoNewFolder()));
         // Posted, so that the menu has closed and the list has the focus back before the box takes it.
-        operations.DropDownItems.Add(Item("&Rename", () => BeginInvoke(Rename), AxFileKeys.Rename));
+        operations.DropDownItems.Add(Item("&Rename", () => BeginInvoke(() => Rename()), AxFileKeys.Rename));
         operations.DropDownItems.Add(Item("&Delete...", Delete, AxFileKeys.Delete));
         operations.DropDownItems.Add(Item("Cop&y path", CopyPath, AxFileKeys.CopyPath));
         operations.DropDownItems.Add(new ToolStripSeparator());
@@ -364,6 +366,9 @@ public sealed partial class FileForm : AxitForm
                 return true;
             case AxFileKeys.NewFolder:
                 NewFolder();
+                return true;
+            case AxFileKeys.NewFile:
+                NewFile();
                 return true;
             case AxFileKeys.CopyPath:
                 CopyPath();

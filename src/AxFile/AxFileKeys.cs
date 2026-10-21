@@ -38,6 +38,9 @@ public static class AxFileKeys
     public const Keys Information = Keys.Control | Keys.I;
     public const Keys NewFolder = Keys.Control | Keys.Shift | Keys.N;
 
+    /// <summary>An empty text file made and the rename box opened on it (AF-4.1).</summary>
+    public const Keys NewFile = Keys.Control | Keys.Shift | Keys.T;
+
     /// <summary>In the list: the rename in place, a box over the entry (AF-4.2).</summary>
     public const Keys Rename = Keys.F2;
 
@@ -103,6 +106,7 @@ public static class AxFileKeys
         ("Open the file in its editor", OpenInEditor),
         ("Information about the entry", Information),
         ("New folder", NewFolder),
+        ("New text file", NewFile),
         ("Rename (in the list)", Rename),
         ("Delete (in the list)", Delete),
         ("Copy path", CopyPath),

@@ -57,6 +57,17 @@ public sealed class FileOperationsTests : IDisposable
     }
 
     [Fact]
+    public void A_new_file_is_empty_and_the_next_one_gets_a_number()
+    {
+        var first = FileOperations.CreateFile(_folder);
+        var second = FileOperations.CreateFile(_folder);
+        Assert.Equal(Path.Combine(_folder, "New file.txt"), first);
+        Assert.Equal(Path.Combine(_folder, "New file - 2.txt"), second);
+        Assert.Equal(0, new FileInfo(first).Length);
+        Assert.True(File.Exists(second));
+    }
+
+    [Fact]
     public void A_file_and_a_folder_are_renamed_in_place()
     {
         var file = FileOperations.Rename(Path.Combine(_folder, "notes.md"), "todo.md");

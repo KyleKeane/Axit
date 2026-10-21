@@ -72,8 +72,114 @@ public sealed partial class FileForm
 
     // ---- the rename in place (AF-4.2): a box over the entry, Enter renames, Escape or leaving the box keeps the name ----
 
-    /// <summary>File operations → Rename (F2): the box over the entry with its name, the part before the extension selected.</summary>
-    private void Rename()
+    /// <summary>
+    /// File operations → New text file (Ctrl+Shift+T, AF-4.1): an empty "New file.txt" made and selected, and the
+    /// rename box opened on it with the whole name selected, so that the name typed, extension included, replaces
+    /// it; "Created <name>" when the box cannot open (the file hidden by the filter, the focus elsewhere).
+    /// </summary>
+    private void NewFile()
+    {
+        if (NoFolderHere() || _folder is not { } folder)
+        {
+            return;
+        }
+
+        Do(async () =>
+        {
+            string path;
+            try
+            {
+                path = await Task.Run(() => FileOperations.CreateFile(folder));
+            }
+            catch (Exception ex) when (ex is IOException or UnauthorizedAccessException)
+            {
+                Failed("New file failed", FileOperations.Message(ex));
+                return;
+            }
+
+            var name = Path.GetFileName(path);
+            if (!await ShowFolderAsync(folder, name, remember: false))
+            {
+                return;
+            }
+
+            if (_list.Focused && string.Equals(CurrentEntry()?.Path, path, StringComparison.OrdinalIgnoreCase))
+            {
+                Rename(wholeName: true);
+            }
+            else
+            {
+                Announce($"Created {name}", true);
+            }
+        });
+    }
+
+    /// <summary>
+    /// File operations → Move into new folder… (AF-4.13): the name asked in the notice "Move into new folder", the
+    /// folder made here and the selected entries, or the current one, moved into it; "Moved <what> into <name>",
+    /// the folder selected.
+    /// </summary>
+    private void MoveIntoNewFolder()
+    {
+        if (NoFolderHere() || _folder is not { } folder)
+        {
+            return;
+        }
+
+        var targets = Targets();
+        if (targets.Count == 0)
+        {
+            return;
+        }
+
+        var what = targets.Count == 1 ? targets[0].Name : $"{targets.Count} items";
+        ShowNotice(new Notice("Move into new folder", $"{what} will move into the new folder.",
+        [
+            new OverlayChoice("&Move", () =>
+            {
+                var name = Overlay.InputText.Trim();
+                if (FileOperations.CheckName(name) is { } problem)
+                {
+                    Announce(problem, true);
+                    return;
+                }
+
+                Do(async () =>
+                {
+                    string made;
+                    try
+                    {
+                        made = await Task.Run(() => FileOperations.CreateFolder(folder, name));
+                    }
+                    catch (Exception ex) when (ex is IOException or UnauthorizedAccessException)
+                    {
+                        Failed("Move failed", FileOperations.Message(ex));
+                        return;
+                    }
+
+                    var sources = targets.Select(target => target.Path).ToList();
+                    var destinations = await Task.Run(() => FileOperations.Destinations(sources, made));
+                    if (await FileOperations.CopyOrMoveAsync(sources, destinations, move: true) is { } reason)
+                    {
+                        Failed("Move failed", reason);
+                        return;
+                    }
+
+                    if (await ShowFolderAsync(folder, name, remember: false))
+                    {
+                        Announce($"Moved {what} into {name}", true);
+                    }
+                });
+            }, IsDefault: true),
+            new OverlayChoice("&Cancel", IsCancel: true),
+        ])
+        {
+            Input = new OverlayInput("Name:", "Name", string.Empty, "Type a name"),
+        });
+    }
+
+    /// <summary>File operations → Rename (F2): the box over the entry with its name, the part before the extension selected; the whole name for a folder, or when asked (a new file, AF-4.1).</summary>
+    private void Rename(bool wholeName = false)
     {
         if (_renaming is not null || NoFolderHere())
         {
@@ -90,7 +196,7 @@ public sealed partial class FileForm
         _renameBox.Bounds = _list.GetItemRectangle(_list.SelectedIndex);
         _renameBox.Text = entry.Name;
         // The selection goes before the focus: a text box that gets the focus selects everything unless one was set.
-        _renameBox.Select(0, entry.IsFolder ? entry.Name.Length : Path.GetFileNameWithoutExtension(entry.Name).Length);
+        _renameBox.Select(0, wholeName || entry.IsFolder ? entry.Name.Length : Path.GetFileNameWithoutExtension(entry.Name).Length);
         _renameBox.Visible = true;
         _renameBox.BringToFront();
         _renameBox.Select();

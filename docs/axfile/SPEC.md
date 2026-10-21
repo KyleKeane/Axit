@@ -164,7 +164,12 @@ windows on the folder of the file or project in hand, and sends back. It works e
 ### AF-4 Operations
 
 - AF-4.1 **New folder…** (Ctrl+Shift+N): the notice "New folder" with the field "Name" and the buttons Create and
-  Cancel; Create makes it in the current folder, selects it and says "Created <name>".
+  Cancel; Create makes it in the current folder, selects it and says "Created <name>". **New text file**
+  (Ctrl+Shift+T; asked 2026-10-21): an empty file "New file.txt" ("New file - 2.txt" when that is taken,
+  `FileOperations.CreateFile`, tested) is made in the current folder and selected, and the rename box (AF-4.2) opens
+  on it at once with the whole name selected, not the stem alone, so that the name typed with its extension
+  replaces it; Enter renames it, Escape keeps "New file.txt". When the box cannot open (the file hidden by the
+  filter, the focus not on the list), "Created <name>" instead.
 - AF-4.2 **Rename** (F2): in place, as in File Explorer: a box ("New name") opens over the entry holding its name, the
   part before the extension selected (the whole name for a folder), so that typing replaces the name and keeps the
   extension; Enter renames, "Renamed to <new name>", the entry selected under its new name; Escape, or leaving the box
@@ -240,6 +245,12 @@ windows on the folder of the file or project in hand, and sends back. It works e
   into it, so that nothing is written over; "Extracted to <name>", the folder selected; "Not a zip file" on anything
   else. A failure is "Failed: <reason>" (AF-4.5). Other archive kinds are the shell's (More from Windows…) or an
   installed program's (AF-4.11).
+- AF-4.13 **Move into new folder…** (File operations ▸; asked 2026-10-21, "like zip but not compressed"): the notice
+  "Move into new folder" with the field "Name" and the buttons Move and Cancel, its text naming what moves ("a.txt
+  will move into the new folder", "3 items will move into the new folder"); Move makes the folder in the current
+  folder (a taken name is "Failed: There is already an entry named …", as New folder) and moves the selected entries,
+  or the current one (AF-3.7), into it through the shell (AF-4.8, undo allowed, names chosen first); "Moved <name>
+  into <folder>" or "Moved n items into <folder>", the new folder selected.
 
 ### AF-5 The player
 
@@ -283,7 +294,8 @@ windows on the folder of the file or project in hand, and sends back. It works e
   Date | Size) | Filter… Ctrl+Shift+F | ─ | Show current folder in ▸ (File Explorer
   Ctrl+W | AxClaude | AxGit | AxTerminal) | ─ | Exit Alt+F4. **Item (I):** File operations ▸ (Cut Ctrl+X | Copy Ctrl+C |
   Paste Ctrl+V | ─ | Select or deselect Space | Select all Ctrl+A | Select none Ctrl+Shift+A | ─ | New folder…
-  Ctrl+Shift+N | Rename F2 | Delete… Delete | Copy path Ctrl+Shift+C | ─ | Compress to zip | Extract here) | ─ | Open
+  Ctrl+Shift+N | New text file Ctrl+Shift+T | Move into new folder… | Rename F2 | Delete… Delete | Copy path
+  Ctrl+Shift+C | ─ | Compress to zip | Extract here) | ─ | Open
   Enter
   | Open in editor Ctrl+E | Open in Axit ▸ (AxClaude | AxDown | AxJSON | AxGit | AxTerminal | AxFile) | Open with
   Windows | Open with another program… | Open with a custom program ▸ (1. name (path) … or No programs yet | ─ | Add a
@@ -299,7 +311,8 @@ windows on the folder of the file or project in hand, and sends back. It works e
 - AF-6.2 Keys (AX-8). Bundle-wide: F1, the control keys, Ctrl+F, F3, Shift+F3, Ctrl+S ("Nothing to save here"),
   Ctrl+Plus, Ctrl+Minus, Page Up and Page Down (the list's own here), Ctrl+Up and Ctrl+Down with Shift (edit controls
   only; the list leaves them alone), Alt+F4. Window-specific (`AxFileKeys`): Enter, Backspace, Alt+Up, F5, F2, Delete,
-  Ctrl+N, Ctrl+O, Ctrl+G, Ctrl+D, Ctrl+W, Ctrl+Shift+W, Ctrl+E, Ctrl+I, Ctrl+Shift+N, Ctrl+Shift+C, Ctrl+Shift+F, Escape,
+  Ctrl+N, Ctrl+O, Ctrl+G, Ctrl+D, Ctrl+W, Ctrl+Shift+W, Ctrl+E, Ctrl+I, Ctrl+Shift+N, Ctrl+Shift+T, Ctrl+Shift+C,
+  Ctrl+Shift+F, Escape,
   Space, Ctrl+A, Ctrl+Shift+A, Ctrl+P, Ctrl+Right, Ctrl+Left, Ctrl+Shift+Right, Ctrl+Shift+Left, Ctrl+T,
   Ctrl+Shift+Period, Ctrl+Shift+Comma, Ctrl+Q, Shift+F10, the Applications key, Alt+Enter, Ctrl+X, Ctrl+C, Ctrl+V.
   Enter, Backspace, Space, Escape, F2, Delete, Ctrl+X, Ctrl+C, Ctrl+V, Ctrl+A, Ctrl+Shift+A, Shift+F10 and the
@@ -314,7 +327,8 @@ windows on the folder of the file or project in hand, and sends back. It works e
 
 One UI Automation notification each, on the list, or on the notice while one shows (AX-7.3): "Playing <name>",
 "Paused at m:ss", "Playing" (resumed), "m:ss" after a seek or Go to time, "Speed n", "First file", "End of folder",
-"Nothing playing", "Playing <name>, m:ss of m:ss, speed n", "Cannot play <name>: <reason>", "Created <name>", "Renamed
+"Nothing playing", "Playing <name>, m:ss of m:ss, speed n", "Cannot play <name>: <reason>", "Created <name>", "Moved
+<what> into <name>" (AF-4.13), "Renamed
 to <name>", "Deleted <name>", "Deleted n items", "Copied path", "Copied n paths", "Cut <name>", "Copied <name>", "Cut n
 items", "Copied n items", "Selected", "Deselected", "Selected, n selected", "Deselected, n selected", "n selected",
 "None selected" (AF-3.7), "Sorted by <order>", "Filter cleared" (AF-3.8), "Added to Favourites", "Removed from
@@ -452,4 +466,7 @@ single-threaded-apartment thread of its own (AX-7.5).
   Ctrl+N for a new window (AF-3.3), the selection with Space and the operations on it (AF-3.7, AF-D9; pause moved to
   Ctrl+P), Open with a custom program ▸, the user's own programs and scripts (AF-4.11), and, chosen by the user from a
   list of what a file browser makes easy, Sort by and the filter (AF-3.8), Favourites (AF-3.9), This PC (AF-3.10)
-  and Compress to zip with Extract here (AF-4.12). Not yet checked with NVDA.
+  and Compress to zip with Extract here (AF-4.12); then, from one more message: the list named by its count alone
+  (AF-2.1), the two switches of Options → General with the not-shown line (AF-2.2), "name - 2" on a pasted or zipped
+  name already there (AF-4.8), New text file into the rename box (AF-4.1) and Move into new folder… (AF-4.13). Not
+  yet checked with NVDA.

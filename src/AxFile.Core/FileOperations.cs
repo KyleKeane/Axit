@@ -45,6 +45,14 @@ public static class FileOperations
         return path;
     }
 
+    /// <summary>Makes an empty file in <paramref name="folder"/>, "New file.txt", or "New file - 2.txt" when that is taken (AF-4.1), and returns its path.</summary>
+    public static string CreateFile(string folder)
+    {
+        var path = FreeName(folder, "New file", ".txt");
+        File.WriteAllBytes(path, []);
+        return path;
+    }
+
     /// <summary>Renames the file or folder at <paramref name="path"/> inside its folder and returns the new path; a name already taken is an error, a changed case is a rename.</summary>
     public static string Rename(string path, string newName)
     {
