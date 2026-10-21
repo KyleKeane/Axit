@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased
+## 3.2.0 - 2026-10-21
 
 - AxFile: the entry's menu is one flat list in File Explorer's order and words: Open, Open with (Windows default, Choose a program, your own programs), Open in Axit (Editor and every app), Cut, Copy, Paste, Rename, Delete, New folder, New text file, Move to new folder, Compress to zip, Extract here, Select all, Select none, Copy path, Show in File Explorer, Information, Properties, Windows menu. The File operations submenu is gone. The menu bar's Item menu is a standard drop-down: it was a hand-made one, which lost its place on the bar when it closed, so that Left and Right after Escape opened the next menus instead of moving along the bar; a test now refuses a hand-made drop-down anywhere in the bundle. Ctrl+I inside the open menu works in the context menu (Shift+F10). Favorites is spelled as Windows spells it.
 - AxFile: an empty folder shows one line, "No items in this folder", instead of an empty list; a command on it says the same.
