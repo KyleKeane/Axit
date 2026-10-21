@@ -368,38 +368,52 @@ other reasons of `FileOperations.CheckName`. A new selection is NVDA's own readi
 - AF-8.2 The log is `%LOCALAPPDATA%\Axit\logs\axfile.log`: the start, the exit, the errors of the operations and the
   player with Windows' message; no names of files or folders.
 
-### AF-9 The queue pane (specified 2026-10-21, not yet built)
+### AF-9 The pane (specified 2026-10-21, not yet built)
 
-- AF-9.1 **What it is.** A second list under the folder list, named "Queue", the window's other control: the player's
-  queue made visible and the place where the operations report. It appears when it first has anything to show and
-  stays for the window's life; **Ctrl+Tab** and **F6** (the bundle's control keys, AX-8.2) move between the folder
-  list and the pane, and Tab does the same, so that the pane is found the way AxClaude's message field is. One list,
-  not tabs: NVDA reads a list and its place in it; a tab control would be a third thing to learn (AF-D1).
-- AF-9.2 **The queue.** Its items are the queued media files in order, "03 Chapter 3.mp3", the one playing marked
-  "03 Chapter 3.mp3 (playing)" and the ones played left in place until the queue is cleared, so that Up reaches them
-  again. **Play folder** (Player → Play folder, Ctrl+Enter in the folder list) replaces the queue with the folder's
-  media files from the first and plays; Enter on a media file keeps today's meaning, the folder's files from that one
-  (AF-5.3). **Add to queue** (Player → Add to queue, Ctrl+Shift+Q in the folder list) appends the entry, the marked
-  entries (AF-3.7), or a folder's media files in the list's order, "Added 12 to the queue"; nothing starts playing if
-  nothing was. **Clear queue** (Player → Clear queue) empties it and stops, "Queue cleared". In the pane: **Enter**
-  plays that item, **Delete** takes it out ("Removed <name>"; the one playing goes on to the next), **Ctrl+I** says
-  its place and length, "3 of 12, 45:30", and **Ctrl+Q** says what is playing as elsewhere. Ctrl+Shift+Right and
-  Ctrl+Shift+Left move through the queue as now (AF-5.4). The queue is kept across folders, as it is today (AF-D6),
-  and a window closes with it; whether it should be kept for the next start is an open question with the resume
-  position (§7). Reordering by key is left out of the first version.
-- AF-9.3 **The operations' status.** An operation that runs on a task (a paste, a move to a new folder, a compress,
-  an extract, a delete of several) adds a line to the pane when it starts, "Copying 3 items", and replaces it when it
-  ends, "Copied 3 items" or "Failed: <reason>", under the queue's items; the announcements of AF-7 stay as they are,
-  the pane is where they can be read again and where a slow operation can be watched. A compress and an extract
-  count their files, "Compressing, 40 of 120 files"; a paste through the shell has no count to give (`SHFileOperationW`
-  is silent) and shows "Copying, please wait" until it ends; a count for it would need the shell's newer file
-  operation interface with its progress sink, a later step. The last twenty lines stay; **Clear queue** clears them
-  too; the lines are not kept across windows or starts.
-- AF-9.4 **Shape and names.** The pane is a plain `ListBox` named "Queue", its height a third of the window at most
-  (the folder list keeps the rest), the status bar unchanged. Its items are names and words, nothing spoken on an
-  arrow key (AF-D7); each command's result is one announcement (AF-7), on the control that has the focus. Keys new
-  to the table (AF-6.2): Ctrl+Enter, Ctrl+Shift+Q; in the pane only: Enter, Delete, Ctrl+I, Ctrl+Q keep their
-  meanings on the pane's item. The empty pane, once it has shown, holds one line, "Queue is empty" (AX-9.5).
+- AF-9.1 **What it is.** A second control under the folder list, holding one thing at a time and named after it:
+  the player's queue, the operations' status, or a file's text to read. It appears when it first has something to
+  show and stays for the window's life; **Ctrl+Tab**, **F6** and Tab move between the folder list and the pane
+  (AX-8.2), the way AxClaude's conversation and message field are moved between. One control, not tabs: NVDA reads a
+  list and its place in it, or a text and its line; a tab control would be a third thing to learn (AF-D1). Each
+  command's result is one announcement (AF-7) on the control that has the focus; nothing is spoken on an arrow key
+  (AF-D7). The pane takes a third of the window at most; the folder list keeps the rest; the status bar is unchanged.
+  **Escape** in the pane goes back to the folder list. Once shown, an empty pane holds one line, "Queue is empty"
+  (AX-9.5), rather than vanishing from under the keys.
+- AF-9.2 **The queue.** A list named "Queue": the queued media files in order, "03 Chapter 3.mp3", the one playing
+  marked "(playing)", the ones played left in place until the queue is cleared. **Play folder** (Player → Play
+  folder, Ctrl+Enter in the folder list) replaces the queue with the folder's media files and plays from the first;
+  Enter on a media file keeps today's meaning, the folder's files from that one (AF-5.3). **Add to queue** (Player
+  → Add to queue, Ctrl+Shift+Q in the folder list) appends the entry, the marked entries (AF-3.7), or a folder's
+  media files in the list's order, "Added 12 to the queue"; nothing starts playing if nothing was. **Clear queue**
+  (Player → Clear queue) empties it and stops, "Queue cleared". In the queue: **Enter** plays that item, **Delete**
+  takes it out ("Removed <name>"; the one playing goes on to the next), **Ctrl+I** says its place and length, "3 of
+  12, 45:30", **Ctrl+Q** what is playing. Ctrl+Shift+Right and Ctrl+Shift+Left move through the queue as now
+  (AF-5.4). The queue is kept across folders (AF-D6) and goes with the window; keeping it for the next start is an
+  open question with the resume position (§7). Reordering by key is left out of the first version.
+- AF-9.3 **The operations' status.** The same list: an operation that runs on a task (a paste, a move to a new
+  folder, a compress, an extract, a delete of several) adds a line under the queue's items when it starts, "Copying 3
+  items", and replaces it when it ends, "Copied 3 items" or "Failed: <reason>"; the announcements of AF-7 stay as
+  they are, the pane is where they can be read again and a slow operation watched. A compress and an extract count
+  their files, "Compressing, 40 of 120 files"; a paste through the shell has no count to give (`SHFileOperationW` is
+  silent) and shows "Copying, please wait" until it ends; a count for it needs the shell's newer file operation
+  interface with its progress sink, a later step. The last twenty lines stay; Clear queue clears them too; nothing
+  of this is kept across windows or starts.
+- AF-9.4 **A file to read.** **Preview** (Item → Preview, Ctrl+Shift+P on a text file: the types AxDown and AxJSON
+  open, and any file whose first bytes are text, up to 1 MB) shows the file's text in the pane as a read-only text
+  named "<name>, preview", the focus on its first line, and the player's list comes back with the next queue
+  command or Player → Show queue. The text has what every read-only text of the bundle has (AX-7.2): Ctrl+F, F3 and
+  Shift+F3, the page keys, Ctrl+Up and Ctrl+Down by paragraph, `l` for the line number, and for a Markdown file the
+  heading and element keys of AxDown through the bundle's `TextJumps`; Ctrl+A and Ctrl+C copy. Nothing is edited
+  there: Ctrl+E opens the file in its editor as before. A file that is not text, "Not a text file"; one over the
+  limit shows its first 1 MB and says so in its name. The folder list keeps the focus's place, so Escape returns to
+  the entry.
+- AF-9.5 **Later uses**, noted so that the pane's shape allows them, each a list or a text named after itself: the
+  matches of a search through a folder's tree, "Search results, 12", Enter going to the file (a find across folders
+  does not exist today); a folder's summary on Ctrl+I over a folder, its counts and size, which take a walk of the
+  tree; a `.m3u` or `.pls` file loaded as the queue (§7). None is in the first build.
+- AF-9.6 **Keys new to the table** (AF-6.2): Ctrl+Enter (Play folder), Ctrl+Shift+Q (Add to queue), Ctrl+Shift+P
+  (Preview); Ctrl+Tab, F6 and Tab are the bundle's; in the pane, Enter, Delete, Escape, Ctrl+I and Ctrl+Q act on the
+  pane's item, and the list's own keys (AF-3.6) stay native.
 
 ## 5. Architecture
 
@@ -517,3 +531,6 @@ single-threaded-apartment thread of its own (AX-7.5).
   (AF-2.1), the two switches of Options → General with the not-shown line (AF-2.2), "name - 2" on a pasted or zipped
   name already there (AF-4.8), New text file into the rename box (AF-4.1) and Move to new folder… (AF-4.13); then the entry's menu reshaped as one flat list in File Explorer's words and the bar's Item menu made a standard drop-down (AF-4.6, AX-6.6), at the user's ask after Left and Right opened the menus; and the Drives menu with the shell's Eject (AF-3.11). Not
   yet checked with NVDA.
+- 2026-10-21, late: the pane specified at the user's ask (AF-9): a second control under the folder list, one thing at a time, for
+  the player's queue with Play folder and Add to queue, the operations' status lines, and a read-only preview of a text file, with
+  later uses noted; to be built next, after the user has read it.
