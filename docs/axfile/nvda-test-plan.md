@@ -16,6 +16,7 @@ Run with NVDA before a release, on a folder with a few subfolders, text files an
 10. Ctrl+F, type part of a name further down, Enter: NVDA reads that entry. F3: the next match, or "Not found". Shift+F3: back.
 11. Ctrl+S: "Nothing to save here". F1: the Keyboard shortcuts notice; Escape closes it.
 12. Delete the folder shown in File Explorer while AxFile is on it, then Alt+Tab back: the notice "Folder not found" naming it; Enter: the list shows the folder above.
+13. Space on a file: "Selected", nothing else (a second reading of the entry here is a defect to report). Down, Up: "<name>, selected". Down, Space: "Selected, 2 selected". Ctrl+I: "…, 2 selected". Space: "Deselected, 1 selected". Ctrl+A: "N selected"; Down: "<name>, selected". Ctrl+Shift+A: "None selected"; Down: the name alone. Space on one, Enter on a folder, Backspace: the entry reads its name alone, the selection gone.
 
 ## 2. From and to the other windows (AF-1.3)
 
@@ -29,9 +30,9 @@ Run with NVDA before a release, on a folder with a few subfolders, text files an
 1. Ctrl+Shift+N: the notice "New folder" with the field "Name"; Enter on the empty field: "Type a name", the notice stays; type `notes`, Enter: "Created notes", the focus in the list on "notes, folder".
 2. F2 on it: NVDA reads "New name, edit, notes, selected notes"; type `Notes`, Enter: "Renamed to Notes", the focus in the list on "Notes, folder". F2 on a file `a.txt`: the box holds "a.txt" with "a" selected, so typing replaces the name and keeps the extension; Escape: the box closes, the list reads "a.txt" again, nothing renamed. F2, Enter without typing: "Name unchanged".
 3. Delete on Notes: the notice "Delete Notes?" with "It goes to the Recycle Bin with everything in it." and the buttons Delete and Cancel; Escape: nothing happens; Delete, Enter: "Deleted Notes", the focus on the next entry. Open the Recycle Bin in File Explorer: Notes is there.
-4. Ctrl+Shift+C on a file: "Copied path"; paste somewhere: the full path.
+4. Ctrl+Shift+C on a file: "Copied path"; paste somewhere: the full path. Space on two files, Ctrl+Shift+C: "Copied 2 paths"; paste: two lines.
 5. Ctrl+Shift+N with the name of an existing entry: "Failed: There is already an entry named …". F2 with `a?b`, Enter: "A name cannot contain …", the box stays.
-6. Ctrl+C on a file: "Copied a.txt"; Ctrl+V: "Pasted a.txt", a second file with a number in its name is in the list. Ctrl+X on it: "Cut …"; Ctrl+V here: "Already in this folder"; Enter on a folder, Ctrl+V: "Pasted …", the file is in the list, and Backspace shows it gone from the folder above. Copy a file in File Explorer, Ctrl+V in AxFile: it arrives; Ctrl+X in AxFile, paste in File Explorer: it moves. Ctrl+V with text on the clipboard: "Nothing to paste".
+6. Ctrl+C on a file: "Copied a.txt"; Ctrl+V: "Pasted a.txt", a second file with a number in its name is in the list. Ctrl+X on it: "Cut …"; Ctrl+V here: "Already in this folder"; Enter on a folder, Ctrl+V: "Pasted …", the file is in the list, and Backspace shows it gone from the folder above. Copy a file in File Explorer, Ctrl+V in AxFile: it arrives; Ctrl+X in AxFile, paste in File Explorer: it moves. Ctrl+V with text on the clipboard: "Nothing to paste". Space on two files, Ctrl+C: "Copied 2 items"; Enter on a folder, Ctrl+V: "Pasted 2 items". Space on both of them there, Delete: "Delete 2 items?" with "They go to the Recycle Bin."; Enter: "Deleted 2 items", the focus on the entry that follows them, or the one before when none follows.
 7. Shift+F10 on a file: the entry's menu opens as a context menu and NVDA reads its first item, "File operations submenu"; Right into it: Cut Ctrl+X, Copy Ctrl+C, Paste Ctrl+V, New folder, Rename F2, Delete, Copy path; Left, Down through the rest: Open Enter, Open in editor, Open in Axit submenu, Open with Windows, Open with another program, Show in File Explorer, Information, Properties Alt+Enter, More from Windows; Escape closes it and the focus is back on the entry. The Applications key does the same. Alt+I: the same items in the menu bar.
 8. Shift+F10, then Ctrl+I: the entry's name, size and date are said and the menu stays open; Down still moves in it. The same from Alt+I.
 9. Shift+F10, A: the Open in Axit submenu, AxClaude, AxDown, AxJSON, AxGit, AxTerminal, AxFile; D on a `.txt` file: a new AxDown window on it; Alt+F4 brings the focus back to the entry. On a folder, D: "Not a file". T on a folder: AxTerminal on it.
@@ -41,13 +42,13 @@ Run with NVDA before a release, on a folder with a few subfolders, text files an
 ## 4. The player (AF-5)
 
 1. Enter on the first MP3 of a chapters folder: "Playing <name>" and the sound starts. NVDA+End: "Playing <name> 0:03 / 45:30", the time moving.
-2. Space: "Paused at 0:05", the sound stops. Space: "Playing". Ctrl+Right: "0:20" and the sound jumps. Ctrl+Left: "0:05". Ctrl+T, type `1:00`, Enter: "1:00".
+2. Ctrl+P: "Paused at 0:05", the sound stops. Ctrl+P: "Playing". Ctrl+Right: "0:20" and the sound jumps. Ctrl+Left: "0:05". Ctrl+T, type `1:00`, Enter: "1:00".
 3. Ctrl+Shift+Period: "Speed 1.25"; the voice is faster at the same pitch. Ctrl+Shift+Period twice: "Speed 1.75". Ctrl+Shift+Comma: "Speed 1.5". Player, Normal speed: "Speed 1". Set 1.5 again, Alt+F4, start AxFile again and play: the speed is 1.5 (Ctrl+Q says so).
 4. Ctrl+Q: "Playing <name>, 1:12 of 45:30, speed 1.5". Ctrl+Shift+Right: "Playing <next name>". Ctrl+Shift+Left: "Playing <first name>". Ctrl+Shift+Left again: "First file".
 5. Ctrl+T, type `45:20` (near the end), Enter; wait: "Playing <next name>" spoken on its own, the next file plays. Player, Say each file as it starts, off; the same again: the next file plays and nothing is spoken.
-6. Backspace to the folder above while it plays: the sound goes on; Space pauses it from there; Enter on another media file elsewhere: "Playing <that name>", the first queue is dropped.
-7. On the last file, Ctrl+T near its end, Enter; wait: "End of folder" with the done chime; NVDA+End: the left of the status bar is empty. Ctrl+Q: "Nothing playing". Space: "Nothing playing".
-8. Enter on a video file (`.mp4`): "Playing <name>", the picture appears at the top of the window, the focus stays in the list; Space pauses; Ctrl+Shift+Right or the end hides the picture.
+6. Backspace to the folder above while it plays: the sound goes on; Ctrl+P pauses it from there; Enter on another media file elsewhere: "Playing <that name>", the first queue is dropped.
+7. On the last file, Ctrl+T near its end, Enter; wait: "End of folder" with the done chime; NVDA+End: the left of the status bar is empty. Ctrl+Q: "Nothing playing". Ctrl+P: "Nothing playing".
+8. Enter on a video file (`.mp4`): "Playing <name>", the picture appears at the top of the window, the focus stays in the list; Ctrl+P pauses; Ctrl+Shift+Right or the end hides the picture.
 9. Enter on a file Windows cannot decode (an `.opus` without the Store codec): "Cannot play <name>: …" and the next file plays.
 10. Alt+Tab to another program while a file plays, let it end: whether "Playing <next>" is heard from the background; the sound carries on either way. Alt+F4 on AxFile: the sound stops.
 

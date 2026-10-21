@@ -4,11 +4,14 @@ using Axit.Forms;
 
 namespace AxFile;
 
-/// <summary>The folder and the list (SPEC.md AF-3): the reads, the navigation, the ways to another folder, find, information.</summary>
+/// <summary>The folder and the list (SPEC.md AF-3): the reads, the navigation, the ways to another folder, find, information, the selection.</summary>
 public sealed partial class FileForm
 {
     private string? _folder;
     private IReadOnlyList<Entry> _entries = [];
+
+    /// <summary>The paths selected with Space (AF-3.7), kept while the same folder shows; their items read ", selected".</summary>
+    private readonly HashSet<string> _selected = new(StringComparer.OrdinalIgnoreCase);
 
     /// <summary>The folder's last write time at the last read, so that coming back to the window knows whether to read again (AF-3.4).</summary>
     private DateTime _folderStamp;
@@ -85,6 +88,16 @@ public sealed partial class FileForm
             return false;
         }
 
+        // AF-3.7: the selection lives in one folder: another folder starts with none, the same one keeps what is still there.
+        if (!string.Equals(folder, _folder, StringComparison.OrdinalIgnoreCase))
+        {
+            _selected.Clear();
+        }
+        else
+        {
+            _selected.IntersectWith(entries.Select(entry => entry.Path));
+        }
+
         _folder = folder;
         _entries = entries;
         _folderStamp = Stamp(folder);
@@ -112,7 +125,7 @@ public sealed partial class FileForm
     {
         _list.BeginUpdate();
         _list.Items.Clear();
-        _list.Items.AddRange(_entries.Select(entry => (object)entry.Label).ToArray());
+        _list.Items.AddRange(_entries.Select(entry => (object)ItemText(entry)).ToArray());
         if (_entries.Count == 0)
         {
             _list.Items.Add(EmptyFolderText);
@@ -127,6 +140,82 @@ public sealed partial class FileForm
     /// <summary>The guard of every command on an entry (AF-7): why there is none.</summary>
     private void SayNoEntry() =>
         Announce(_folder is null ? "No folder" : _entries.Count == 0 ? EmptyFolderText : "Nothing selected", true);
+
+    /// <summary>The list item of an entry (AF-2.2): its label, with ", selected" while it is (AF-3.7).</summary>
+    private string ItemText(Entry entry) => _selected.Contains(entry.Path) ? entry.Label + ", selected" : entry.Label;
+
+    // ---- the selection (AF-3.7): marks on entries, which the operations act on instead of the current entry ----
+
+    /// <summary>Space in the list: the entry selected, or deselected again, its item reading ", selected" while it is; "Selected" or "Deselected", with the count when more are.</summary>
+    private void ToggleSelection()
+    {
+        if (CurrentEntry() is not { } entry)
+        {
+            SayNoEntry();
+            return;
+        }
+
+        var on = _selected.Add(entry.Path);
+        if (!on)
+        {
+            _selected.Remove(entry.Path);
+        }
+
+        _list.Items[_list.SelectedIndex] = ItemText(entry);
+        var count = _selected.Count;
+        var word = on ? "Selected" : "Deselected";
+        Announce(count > (on ? 1 : 0) ? $"{word}, {count} selected" : word, true);
+    }
+
+    /// <summary>Ctrl+A in the list, File operations → Select all: every entry, "n selected".</summary>
+    private void SelectAll()
+    {
+        if (_entries.Count == 0)
+        {
+            SayNoEntry();
+            return;
+        }
+
+        foreach (var entry in _entries)
+        {
+            _selected.Add(entry.Path);
+        }
+
+        FillList(CurrentEntry()?.Name);
+        Announce($"{_entries.Count} selected", true);
+    }
+
+    /// <summary>Ctrl+Shift+A in the list, File operations → Select none: the marks cleared, "None selected".</summary>
+    private void SelectNone()
+    {
+        if (_selected.Count > 0)
+        {
+            _selected.Clear();
+            FillList(CurrentEntry()?.Name);
+        }
+
+        Announce("None selected", true);
+    }
+
+    /// <summary>The selected entries in the list's order; none when nothing is selected.</summary>
+    private List<Entry> SelectedEntries() => _entries.Where(entry => _selected.Contains(entry.Path)).ToList();
+
+    /// <summary>What an operation acts on (AF-3.7): the selected entries, or the current entry alone when none is selected; empty, and said, when there is no entry.</summary>
+    private List<Entry> Targets()
+    {
+        var targets = SelectedEntries();
+        if (targets.Count == 0 && CurrentEntry() is { } entry)
+        {
+            targets.Add(entry);
+        }
+
+        if (targets.Count == 0)
+        {
+            SayNoEntry();
+        }
+
+        return targets;
+    }
 
     private int IndexOfName(string name)
     {
@@ -327,7 +416,7 @@ public sealed partial class FileForm
         Announce("Not found", true);
     }
 
-    /// <summary>Item → Information (Ctrl+I): the entry's size, or that it is a folder, and its date, on demand (AF-D7).</summary>
+    /// <summary>Item → Information (Ctrl+I): the entry's size, or that it is a folder, and its date, on demand (AF-D7); and how many entries are selected, when any are (AF-3.7).</summary>
     private void SayInformation()
     {
         if (CurrentEntry() is not { } entry)
@@ -336,6 +425,7 @@ public sealed partial class FileForm
             return;
         }
 
-        Announce(FolderListing.Information(entry), true);
+        var count = _selected.Count;
+        Announce(FolderListing.Information(entry) + (count > 0 ? $", {count} selected" : string.Empty), true);
     }
 }

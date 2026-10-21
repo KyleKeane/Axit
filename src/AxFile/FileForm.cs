@@ -10,8 +10,8 @@ namespace AxFile;
 /// the list, a file in its app or in the player. The folder reads and the operations run on background tasks; the
 /// player's events come on this thread. The notices, the fonts, the window's place, the update flow and the
 /// announcements are the bundle's window base (<see cref="AxitForm"/>). The window is in four files: this one (the
-/// controls, the menus, the hooks, the keys), Browse (the folder and the list), Operations (the four operations and
-/// the ways out) and Player (the player).
+/// controls, the menus, the hooks, the keys), Browse (the folder, the list and the selection), Operations (the
+/// operations and the ways out) and Player (the player).
 /// </summary>
 public sealed partial class FileForm : AxitForm
 {
@@ -162,6 +162,11 @@ public sealed partial class FileForm : AxitForm
         operations.DropDownItems.Add(Item("&Copy", () => CopyOrCut(cut: false), AxFileKeys.Copy));
         operations.DropDownItems.Add(Item("&Paste", Paste, AxFileKeys.Paste));
         operations.DropDownItems.Add(new ToolStripSeparator());
+        // AF-3.7: the selection the operations act on.
+        operations.DropDownItems.Add(Item("&Select or deselect", ToggleSelection, AxFileKeys.Select));
+        operations.DropDownItems.Add(Item("Select &all", SelectAll, AxFileKeys.SelectAll));
+        operations.DropDownItems.Add(Item("Select n&one", SelectNone, AxFileKeys.SelectNone));
+        operations.DropDownItems.Add(new ToolStripSeparator());
         operations.DropDownItems.Add(Item("&New folder...", NewFolder, AxFileKeys.NewFolder));
         // Posted, so that the menu has closed and the list has the focus back before the box takes it.
         operations.DropDownItems.Add(Item("&Rename", () => BeginInvoke(Rename), AxFileKeys.Rename));
@@ -285,6 +290,9 @@ public sealed partial class FileForm : AxitForm
             case AxFileKeys.NewWindow:
                 NewWindow();
                 return true;
+            case AxFileKeys.PauseResume:
+                PauseResume();
+                return true;
             case AxFileKeys.Refresh:
                 Do(() => RefreshAsync(announce: true));
                 return true;
@@ -343,7 +351,7 @@ public sealed partial class FileForm : AxitForm
 
         if (_list.Focused)
         {
-            // Enter, Backspace, Space, F2, Delete and the clipboard keys act in the list only (AF-6.2).
+            // Enter, Backspace, Space, F2, Delete, the clipboard keys and the selection keys act in the list only (AF-6.2).
             switch (keyData)
             {
                 case AxFileKeys.Cut:
@@ -355,14 +363,20 @@ public sealed partial class FileForm : AxitForm
                 case AxFileKeys.Paste:
                     Paste();
                     return true;
+                case AxFileKeys.Select:
+                    ToggleSelection();
+                    return true;
+                case AxFileKeys.SelectAll:
+                    SelectAll();
+                    return true;
+                case AxFileKeys.SelectNone:
+                    SelectNone();
+                    return true;
                 case AxFileKeys.Open:
                     OpenSelected();
                     return true;
                 case AxFileKeys.Up:
                     GoUp();
-                    return true;
-                case AxFileKeys.PauseResume:
-                    PauseResume();
                     return true;
                 case AxFileKeys.Rename:
                     Rename();

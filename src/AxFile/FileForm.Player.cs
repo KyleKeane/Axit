@@ -136,7 +136,7 @@ public sealed partial class FileForm
         Announce("End of folder", false);
     }
 
-    /// <summary>Space in the list, Player → Pause or resume (AF-5.4).</summary>
+    /// <summary>Ctrl+P, Player → Pause or resume (AF-5.4), from anywhere in the window.</summary>
     private void PauseResume()
     {
         switch (_player?.State)

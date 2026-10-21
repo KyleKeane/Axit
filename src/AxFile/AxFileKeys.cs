@@ -4,8 +4,8 @@ namespace AxFile;
 /// AxFile's window-specific keys (SPEC.md AF-6.2; bundle AX-8). A key is changed here and nowhere else: the menu
 /// items, the key switch in <c>FileForm.ProcessWindowKey</c> and the F1 text read this table. The bundle-wide keys
 /// (F1, the control keys, find, Ctrl+S, text size) are <c>Axit.Forms.BundleKeys</c>. Enter, Backspace, Space, F2,
-/// Delete, Ctrl+X, Ctrl+C, Ctrl+V, Shift+F10 and the Applications key act in the list only; in a notice's field or
-/// the rename box they are the field's own.
+/// Delete, Ctrl+X, Ctrl+C, Ctrl+V, Ctrl+A, Ctrl+Shift+A, Shift+F10 and the Applications key act in the list only; in
+/// a notice's field or the rename box they are the field's own.
 /// </summary>
 public static class AxFileKeys
 {
@@ -46,6 +46,15 @@ public static class AxFileKeys
     /// <summary>In the list: the clipboard's files copied or moved into the folder shown.</summary>
     public const Keys Paste = Keys.Control | Keys.V;
 
+    /// <summary>In the list: the entry selected, or deselected again (AF-3.7); the operations act on the selected entries.</summary>
+    public const Keys Select = Keys.Space;
+
+    /// <summary>In the list: every entry selected.</summary>
+    public const Keys SelectAll = Keys.Control | Keys.A;
+
+    /// <summary>In the list: no entry selected.</summary>
+    public const Keys SelectNone = Keys.Control | Keys.Shift | Keys.A;
+
     /// <summary>In the list: the Item menu on the entry, as the list's own context menu (AF-4.6); the list shows it itself, so the key switch has no case for it.</summary>
     public const Keys ContextMenu = Keys.Shift | Keys.F10;
 
@@ -55,8 +64,8 @@ public static class AxFileKeys
     /// <summary>The Windows Properties sheet of the entry, File Explorer's key for it (AF-4.7).</summary>
     public const Keys Properties = Keys.Alt | Keys.Return;
 
-    /// <summary>In the list: the player pauses or resumes.</summary>
-    public const Keys PauseResume = Keys.Space;
+    /// <summary>The player pauses or resumes, from anywhere in the window (AF-5.4); Space is the selection's since 2026-10-21.</summary>
+    public const Keys PauseResume = Keys.Control | Keys.P;
 
     public const Keys Forward = Keys.Control | Keys.Right;
     public const Keys Back = Keys.Control | Keys.Left;
@@ -88,10 +97,13 @@ public static class AxFileKeys
         ("Cut (in the list)", Cut),
         ("Copy (in the list)", Copy),
         ("Paste (in the list)", Paste),
+        ("Select or deselect (in the list)", Select),
+        ("Select all (in the list)", SelectAll),
+        ("Select none (in the list)", SelectNone),
         ("Item menu (in the list)", ContextMenu),
         ("Item menu (in the list)", ContextMenuAlso),
         ("Properties", Properties),
-        ("Pause or resume (in the list)", PauseResume),
+        ("Pause or resume", PauseResume),
         ("Forward", Forward),
         ("Back", Back),
         ("Next file", NextFile),

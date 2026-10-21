@@ -29,16 +29,17 @@ The list is the one control. Arrow keys, Home, End, Page Up and Page Down move t
 - **Ctrl+N** opens a second AxFile window on the same folder, as in File Explorer, so you can go elsewhere in one and paste in the other; Alt+A, O moves between them.
 - **F5** reads the folder again, "Refreshed". Coming back to the window after another program changed the folder does the same silently.
 - **Ctrl+F** finds the next entry whose name contains the text; F3 and Shift+F3 the next and the previous match; "Not found" otherwise.
+- **Space** selects the entry you are on, "Selected", and deselects it again, "Deselected"; while it is selected its line reads "notes.md, selected", so arrowing over it tells you. With more than one selected the key adds the count, "Selected, 3 selected". **Ctrl+A** selects every entry, "24 selected"; **Ctrl+Shift+A** deselects them all, "None selected"; Ctrl+I adds "3 selected" to the entry's information. Cut, Copy, Delete and Copy path then act on the selected entries; everything else, Enter, Rename, the ways to open, acts on the entry you are on. Going to another folder clears the selection.
 
 ## File operations
 
 - **Ctrl+Shift+N**, New folder: a notice asks for the name; Enter makes it in the current folder, selects it and says "Created notes".
 - **F2**, Rename: a box opens over the entry with its name, the part before the extension selected, so typing replaces the name and keeps the extension; Enter renames, "Renamed to Notes", and Escape keeps the old name. Leaving the box keeps it too.
-- **Delete**: a notice asks "Delete notes? It goes to the Recycle Bin." (with everything in it, for a folder); Enter deletes, Escape keeps it. "Deleted notes", and you are on the next entry. The Recycle Bin can bring it back; AxFile has no permanent delete.
-- **Ctrl+X** and **Ctrl+C** put the entry on the clipboard as a file, "Cut notes.md" or "Copied notes.md"; **Ctrl+V** pastes the clipboard's files into the folder shown, "Pasted notes.md" or "Pasted 3 items", moving them after a cut and copying them otherwise. File Explorer sees the same clipboard, so you can cut in AxFile and paste in File Explorer, and back. A name already in the folder gets a number; nothing is overwritten. A paste that takes more than a second says "Pasting, please wait" first. Pasting a cut entry into its own folder says "Already in this folder".
-- **Ctrl+Shift+C** copies the entry's full path, "Copied path".
+- **Delete**: a notice asks "Delete notes? It goes to the Recycle Bin." (with everything in it, for a folder); Enter deletes, Escape keeps it. "Deleted notes", and you are on the next entry. With entries selected: "Delete 3 items? They go to the Recycle Bin.", "Deleted 3 items". The Recycle Bin can bring them back; AxFile has no permanent delete.
+- **Ctrl+X** and **Ctrl+C** put the entry, or the selected entries, on the clipboard as files, "Cut notes.md", "Copied 3 items"; **Ctrl+V** pastes the clipboard's files into the folder shown, "Pasted notes.md" or "Pasted 3 items", moving them after a cut and copying them otherwise. File Explorer sees the same clipboard, so you can cut in AxFile and paste in File Explorer, and back. A name already in the folder gets a number; nothing is overwritten. A paste that takes more than a second says "Pasting, please wait" first. Pasting a cut entry into its own folder says "Already in this folder".
+- **Ctrl+Shift+C** copies the entry's full path, "Copied path", or every selected entry's, one per line, "Copied 3 paths".
 
-A name Windows refuses, a file in use or a folder you may not touch gives one line, "Failed: Access denied". All of these are in the File operations submenu, the first item of the entry's menu.
+A name Windows refuses, a file in use or a folder you may not touch gives one line, "Failed: Access denied". All of these, and Select or deselect, Select all and Select none, are in the File operations submenu, the first item of the entry's menu.
 
 ## The entry's menu, and what Windows does for you
 
@@ -54,22 +55,22 @@ A name Windows refuses, a file in use or a folder you may not touch gives one li
 
 Enter on a sound or video file plays it, "Playing 03 Chapter 3.mp3", and when it ends the next media file of the same folder plays, to the end of the folder: "End of folder" with the done chime. The queue is the folder as it was when you pressed Enter, so you can browse elsewhere in the window, or leave it in the background, while it plays; the keys work from the list in any folder.
 
-- **Space** pauses, "Paused at 12:40", and resumes, "Playing".
+- **Ctrl+P** pauses, "Paused at 12:40", and resumes, "Playing". It works from anywhere in the window; Space is for selecting entries.
 - **Ctrl+Right** and **Ctrl+Left** move 15 seconds forward or back and say the new position, "12:25".
 - **Ctrl+Shift+Right** and **Ctrl+Shift+Left** play the next or the previous file of the folder; "First file" and "End of folder" at the ends.
 - **Ctrl+Shift+Period** and **Ctrl+Shift+Comma** make it faster or slower by a quarter, between a half and three times: "Speed 1.25". The voice keeps its pitch. Player, Normal speed goes back to 1. The speed stays for the next file and the next window.
 - **Ctrl+T** goes to a time: `12:40`, `1:02:10`, or `750` for seconds.
 - **Ctrl+Q** says what is playing: "Playing 03 Chapter 3.mp3, 12:52 of 45:30, speed 1.25", or "Nothing playing".
 - Player, Say each file as it starts (on by default) is the one thing AxFile says on its own: the next file's name when it moves on.
-- Enter on another media file switches to it. Closing the window stops the player; there is no Stop key, Space pauses.
+- Enter on another media file switches to it. Closing the window stops the player; there is no Stop key, Ctrl+P pauses.
 
 The volume is Windows' own: your keyboard's volume keys work from anywhere. A video's picture is drawn in an area at the top of the window while it plays; the keys are the same. The formats are whatever Windows decodes: MP3, WAV, WMA, M4A and M4B, AAC and FLAC are built in; OGG, Opus and some video formats need the free codec extensions from the Microsoft Store. A file Windows cannot play is said, "Cannot play clip.ogg: this kind of file is not supported", and the player moves to the next.
 
 ## Menus
 
 - **Folder**: New window (Ctrl+N), Open folder (Ctrl+O), Open recent folder, Go to folder (Ctrl+G), Up one level (Backspace), Refresh (F5), Show current folder in (File Explorer Ctrl+W, AxClaude, AxGit, AxTerminal), Exit.
-- **Item**: File operations (Cut Ctrl+X, Copy Ctrl+C, Paste Ctrl+V, New folder Ctrl+Shift+N, Rename F2, Delete, Copy path Ctrl+Shift+C), Open (Enter), Open in editor (Ctrl+E), Open in Axit (every app), Open with Windows, Open with another program, Show in File Explorer (Ctrl+Shift+W), Information (Ctrl+I), Properties (Alt+Enter), More from Windows. The same menu opens on the entry with Shift+F10, the Applications key or a right click; Ctrl+I inside it says the entry.
-- **Player**: Play (Enter), Pause or resume (Space), Next file, Previous file, Forward 15 seconds, Back 15 seconds, Go to time (Ctrl+T), Faster, Slower, Normal speed, Say each file as it starts, What is playing (Ctrl+Q).
+- **Item**: File operations (Cut Ctrl+X, Copy Ctrl+C, Paste Ctrl+V, Select or deselect Space, Select all Ctrl+A, Select none Ctrl+Shift+A, New folder Ctrl+Shift+N, Rename F2, Delete, Copy path Ctrl+Shift+C), Open (Enter), Open in editor (Ctrl+E), Open in Axit (every app), Open with Windows, Open with another program, Show in File Explorer (Ctrl+Shift+W), Information (Ctrl+I), Properties (Alt+Enter), More from Windows. The same menu opens on the entry with Shift+F10, the Applications key or a right click; Ctrl+I inside it says the entry.
+- **Player**: Play (Enter), Pause or resume (Ctrl+P), Next file, Previous file, Forward 15 seconds, Back 15 seconds, Go to time (Ctrl+T), Faster, Slower, Normal speed, Say each file as it starts, What is playing (Ctrl+Q).
 - **Options**: Text (font and size), General (the update check), Developer (the settings file, diagnostics).
 - **Axit**: new windows of every app, the files and folders closed lately, the open windows, updates, About.
 - **Help**: Keyboard shortcuts (F1), this guide, File resources.

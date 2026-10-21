@@ -37,7 +37,7 @@ windows on the folder of the file or project in hand, and sends back. It works e
 ## 3. Scenarios
 
 1. Start menu, "Axit AxFile": the last folder opens, the list focused; NVDA reads "Dune, 24 items, list, 01 Chapter
-   1.mp3, 1 of 24". Down twice, Enter: "Playing 03 Chapter 3.mp3". Space: "Paused at 12:40". Space: "Playing".
+   1.mp3, 1 of 24". Down twice, Enter: "Playing 03 Chapter 3.mp3". Ctrl+P: "Paused at 12:40". Ctrl+P: "Playing".
    Ctrl+Left: "12:25". Ctrl+Shift+Period: "Speed 1.25". Ctrl+Q: "Playing 03 Chapter 3.mp3, 12:52 of 45:30, speed
    1.25".
 2. The chapter ends: "Playing 04 Chapter 4.mp3" and the next chapter plays; the window can be left in the background,
@@ -49,6 +49,8 @@ windows on the folder of the file or project in hand, and sends back. It works e
 5. Ctrl+Shift+C on `report.pdf`: "Copied path"; Enter on it: the PDF opens in the program Windows has for it.
 6. Ctrl+F, type `chap`, Enter: the first entry whose name holds it is selected; F3 the next.
 7. Ctrl+G, type `%USERPROFILE%\Downloads`, Enter: the list is the Downloads folder.
+8. Space on `a.txt`: "Selected"; Down, Space: "Selected, 2 selected"; Up: "a.txt, selected"; Ctrl+X: "Cut 2 items";
+   Enter on `docs`, Ctrl+V: "Pasted 2 items". Space on one of them, Delete: "Delete a.txt?", Enter: "Deleted a.txt".
 
 ## 4. Functional requirements
 
@@ -112,6 +114,18 @@ windows on the folder of the file or project in hand, and sends back. It works e
   starting with it. **Find** (Ctrl+F, the notice "Find" with the field "Name contains") selects the first entry after
   the current one whose name contains the text, wrapping round the end once, "Not found" otherwise; F3 and Shift+F3
   the next and the previous. NVDA reads the selected entry; the app adds nothing.
+- AF-3.7 **Selection** (asked 2026-10-21). The list stays a single-selection list box, where the arrow keys choose
+  the current entry (AF-3.6); the selection the operations act on is a set of marks on top of it. **Space** marks the
+  current entry, or unmarks it again: its item reads "<name>, selected" while it is marked ("notes.md, selected";
+  "docs, folder, selected"), so that an arrow key onto it says so and nothing is said on the others; the key answers
+  "Selected" or "Deselected", with ", n selected" when more than that one is marked ("Selected, 3 selected";
+  "Deselected, 2 selected"). **Ctrl+A** marks every entry, "n selected"; **Ctrl+Shift+A** unmarks them all, "None
+  selected"; the three are in File operations ▸. Ctrl+I adds ", n selected" to the entry's information while any are
+  marked (AF-2.4). Cut, Copy, Delete and Copy path act on the marked entries when there are any, and on the current
+  entry alone otherwise (AF-4.3, AF-4.4, AF-4.8); Enter, Rename, the ways to open and the Windows items stay on the
+  current entry. The marks live in one folder: showing another folder drops them, a refresh of the same folder keeps
+  those still there, and a renamed or deleted entry loses its mark. A mouse click chooses the current entry as before
+  and marks nothing. The marks are text in the items rather than the list box's own multiple selection (AF-D9).
 
 ### AF-4 Operations
 
@@ -126,8 +140,12 @@ windows on the folder of the file or project in hand, and sends back. It works e
 - AF-4.3 **Delete…** (Delete): the notice "Delete <name>? It goes to the Recycle Bin." (for a folder: "… with
   everything in it.") with the buttons Delete and Cancel; the deletion goes through the shell (`SHFileOperationW` with
   `FOF_ALLOWUNDO`, silent and without the shell's own confirmation), so that the Recycle Bin takes it; "Deleted
-  <name>", the selection moves to the next entry. A permanent delete is not offered (§7).
-- AF-4.4 **Copy path** (Ctrl+Shift+C): the full path to the clipboard, "Copied path".
+  <name>", the selection moves to the next entry. With entries marked (AF-3.7): "Delete n items? They go to the
+  Recycle Bin." ("…, the folders with everything in them." when one is a folder), one shell operation for them all,
+  "Deleted n items", and the first entry after the current one that stays is selected, else the last one before it.
+  A permanent delete is not offered (§7).
+- AF-4.4 **Copy path** (Ctrl+Shift+C): the full path to the clipboard, "Copied path"; with entries marked, each path
+  on a line, "Copied n paths".
 - AF-4.5 A failure (a name taken, a file in use, access denied) is one announcement, "Failed: <Windows' message>",
   when it is one line, a notice otherwise (AxGit AG-7). Every operation runs on a background task; the list refreshes
   after it.
@@ -147,10 +165,10 @@ windows on the folder of the file or project in hand, and sends back. It works e
   entries (`IShellFolder` and `IContextMenu` through P/Invoke, tracked as a native popup the window owns, its first
   item selected, the shell's submenus such as Send to filled through the window's messages), and runs what is chosen.
   A refusal by Windows is "Failed: <reason>"; closing the dialog or the menu is not one.
-- AF-4.8 **Cut, Copy, Paste** (Ctrl+X, Ctrl+C, Ctrl+V, in the list; File operations ▸): the entry goes on the
-  clipboard as a file in File Explorer's own formats (`CF_HDROP` and "Preferred DropEffect", move for a cut, copy
-  otherwise), "Cut <name>" or "Copied <name>", so that File Explorer can paste it and AxFile can paste what File
-  Explorer cut or copied. Paste copies the clipboard's files into the folder shown, or moves them after a cut, through
+- AF-4.8 **Cut, Copy, Paste** (Ctrl+X, Ctrl+C, Ctrl+V, in the list; File operations ▸): the entry, or the marked
+  entries (AF-3.7), go on the clipboard as files in File Explorer's own formats (`CF_HDROP` and "Preferred
+  DropEffect", move for a cut, copy otherwise), "Cut <name>" or "Copied <name>", "Cut n items" or "Copied n items",
+  so that File Explorer can paste them and AxFile can paste what File Explorer cut or copied. Paste copies the clipboard's files into the folder shown, or moves them after a cut, through
   the shell (`SHFileOperationW`, undo allowed, a number on a name already there rather than a question, nothing
   overwritten; `FileOperations.CopyOrMoveAsync`, tested): "Pasted <name>" or "Pasted n items", the first one selected;
   "Pasting, please wait" when it takes longer than a second; after a move the clipboard is cleared, as File Explorer
@@ -183,8 +201,8 @@ windows on the folder of the file or project in hand, and sends back. It works e
   (the shared `Sounds`, AxClaude FR-7.3). The queue is the folder's media files as they were when Enter was pressed,
   so browsing elsewhere in the window changes nothing (AF-D6). Enter on another media file while one plays switches
   to it.
-- AF-5.4 **Keys**, from the list, whatever folder it shows: **Space** pauses or resumes ("Paused at 12:40" /
-  "Playing"); **Ctrl+Right** and **Ctrl+Left** move 15 seconds forward or back (`seekSeconds`), announcing the new
+- AF-5.4 **Keys**, from anywhere in the window, whatever folder the list shows: **Ctrl+P** pauses or resumes ("Paused
+  at 12:40" / "Playing"; Space until 2026-10-21, when Space became the selection's key, AF-3.7); **Ctrl+Right** and **Ctrl+Left** move 15 seconds forward or back (`seekSeconds`), announcing the new
   position ("12:25"); **Ctrl+Shift+Right** and **Ctrl+Shift+Left** the next and the previous file of the queue
   ("Playing <name>"; "First file" and "End of folder" at the ends); **Ctrl+Shift+Period** and **Ctrl+Shift+Comma**
   faster and slower by 0.25 between 0.5 and 3 ("Speed 1.25"), Player → Normal speed back to 1 ("Speed 1"), the
@@ -193,8 +211,8 @@ windows on the folder of the file or project in hand, and sends back. It works e
   "Playing <name>, 12:52 of 45:30, speed 1.25", "Paused …" or "Nothing playing". "Say each file as it starts"
   (`sayEachFile`, default on; the Player menu) is the one unprompted announcement (G5). The volume is Windows' own:
   the keyboard's volume keys work from anywhere and the app has none (AF-D4).
-- AF-5.5 Closing the window stops the player. Stop as a command is not offered: Space pauses, and the next Enter plays
-  something else (§7).
+- AF-5.5 Closing the window stops the player. Stop as a command is not offered: Ctrl+P pauses, and the next Enter
+  plays something else (§7).
 - AF-5.6 A video's picture is drawn in an area at the top of the window (`Video`, not focusable; never a window of its
   own, AX-7.2), its sound through the same path; the area is hidden while nothing plays or sound plays.
 - AF-5.7 The time format is `m:ss` under an hour and `h:mm:ss` over (`MediaFiles.FormatTime`, tested).
@@ -204,10 +222,11 @@ windows on the folder of the file or project in hand, and sends back. It works e
 - AF-6.1 Menus, in the standard order of a first menu (AX-6): **Folder (F):** New window Ctrl+N | Open folder… Ctrl+O |
   Open recent folder ▸ | Go to folder… Ctrl+G | ─ | Up one level Backspace | Refresh F5 | ─ | Show current folder in ▸ (File Explorer
   Ctrl+W | AxClaude | AxGit | AxTerminal) | ─ | Exit Alt+F4. **Item (I):** File operations ▸ (Cut Ctrl+X | Copy Ctrl+C |
-  Paste Ctrl+V | ─ | New folder… Ctrl+Shift+N | Rename F2 | Delete… Delete | Copy path Ctrl+Shift+C) | ─ | Open Enter
+  Paste Ctrl+V | ─ | Select or deselect Space | Select all Ctrl+A | Select none Ctrl+Shift+A | ─ | New folder…
+  Ctrl+Shift+N | Rename F2 | Delete… Delete | Copy path Ctrl+Shift+C) | ─ | Open Enter
   | Open in editor Ctrl+E | Open in Axit ▸ (AxClaude | AxDown | AxJSON | AxGit | AxTerminal | AxFile) | Open with
   Windows | Open with another program… | Show in File Explorer Ctrl+Shift+W | Information Ctrl+I | Properties
-  Alt+Enter | ─ | More from Windows…; the same menu is the list's context menu (AF-4.6). **Player (P):** Play Enter | Pause or resume Space | Next file Ctrl+Shift+Right | Previous
+  Alt+Enter | ─ | More from Windows…; the same menu is the list's context menu (AF-4.6). **Player (P):** Play Enter | Pause or resume Ctrl+P | Next file Ctrl+Shift+Right | Previous
   file Ctrl+Shift+Left | Forward 15 seconds Ctrl+Right | Back 15 seconds Ctrl+Left | Go to time… Ctrl+T | ─ | Faster
   Ctrl+Shift+Period | Slower Ctrl+Shift+Comma | Normal speed | ─ | Say each file as it starts ✓ | What is playing
   Ctrl+Q. **Options (O):** Text ▸ (Font… | Larger text Ctrl+Plus | Smaller text Ctrl+Minus | Windows text size) |
@@ -217,13 +236,14 @@ windows on the folder of the file or project in hand, and sends back. It works e
 - AF-6.2 Keys (AX-8). Bundle-wide: F1, the control keys, Ctrl+F, F3, Shift+F3, Ctrl+S ("Nothing to save here"),
   Ctrl+Plus, Ctrl+Minus, Page Up and Page Down (the list's own here), Ctrl+Up and Ctrl+Down with Shift (edit controls
   only; the list leaves them alone), Alt+F4. Window-specific (`AxFileKeys`): Enter, Backspace, Alt+Up, F5, F2, Delete,
-  Ctrl+N, Ctrl+O, Ctrl+G, Ctrl+W, Ctrl+Shift+W, Ctrl+E, Ctrl+I, Ctrl+Shift+N, Ctrl+Shift+C, Space, Ctrl+Right, Ctrl+Left,
-  Ctrl+Shift+Right, Ctrl+Shift+Left, Ctrl+T, Ctrl+Shift+Period, Ctrl+Shift+Comma, Ctrl+Q, Shift+F10, the Applications
-  key, Alt+Enter, Ctrl+X, Ctrl+C, Ctrl+V. Enter, Backspace, Space, F2, Delete, Ctrl+X, Ctrl+C, Ctrl+V, Shift+F10 and
-  the Applications key act only while the list has the focus (in a notice's field or the rename box they are the
-  field's; the two menu keys are the list's own, which shows its context menu itself, so the key switch has no case
-  for them; Ctrl+I has a second handler, the open menu's, AF-4.10). The collision test covers the table and lists the
-  keys other windows use otherwise (Ctrl+G, Ctrl+E, Ctrl+T, Ctrl+C, Ctrl+Shift+C).
+  Ctrl+N, Ctrl+O, Ctrl+G, Ctrl+W, Ctrl+Shift+W, Ctrl+E, Ctrl+I, Ctrl+Shift+N, Ctrl+Shift+C, Space, Ctrl+A,
+  Ctrl+Shift+A, Ctrl+P, Ctrl+Right, Ctrl+Left, Ctrl+Shift+Right, Ctrl+Shift+Left, Ctrl+T, Ctrl+Shift+Period,
+  Ctrl+Shift+Comma, Ctrl+Q, Shift+F10, the Applications key, Alt+Enter, Ctrl+X, Ctrl+C, Ctrl+V. Enter, Backspace,
+  Space, F2, Delete, Ctrl+X, Ctrl+C, Ctrl+V, Ctrl+A, Ctrl+Shift+A, Shift+F10 and the Applications key act only while
+  the list has the focus (in a notice's field or the rename box they are the field's; the two menu keys are the list's
+  own, which shows its context menu itself, so the key switch has no case for them; Ctrl+I has a second handler, the
+  open menu's, AF-4.10). The collision test covers the table and lists the keys other windows use otherwise (Ctrl+N,
+  Ctrl+G, Ctrl+E, Ctrl+T, Ctrl+P, Ctrl+C, Ctrl+Shift+C).
 - AF-6.3 The F1 text (`HelpText.Shortcuts`) names them all; `docs/axfile/user-guide.md` is embedded (Help → User
   guide); About is the bundle's (AX-9.9).
 
@@ -232,10 +252,13 @@ windows on the folder of the file or project in hand, and sends back. It works e
 One UI Automation notification each, on the list, or on the notice while one shows (AX-7.3): "Playing <name>",
 "Paused at m:ss", "Playing" (resumed), "m:ss" after a seek or Go to time, "Speed n", "First file", "End of folder",
 "Nothing playing", "Playing <name>, m:ss of m:ss, speed n", "Cannot play <name>: <reason>", "Created <name>", "Renamed
-to <name>", "Deleted <name>", "Copied path", "Cut <name>", "Copied <name>", "Pasted <name>", "Pasted n items",
+to <name>", "Deleted <name>", "Deleted n items", "Copied path", "Copied n paths", "Cut <name>", "Copied <name>", "Cut n
+items", "Copied n items", "Selected", "Deselected", "Selected, n selected", "Deselected, n selected", "n selected",
+"None selected" (AF-3.7), "Pasted <name>", "Pasted n items",
 "Pasting, please wait" (a paste longer than a second), "Refreshed", "Top of the drive", "Not found: <path>", "No program opens
 .xyz. Ctrl+E opens it as text", "Failed: <message>", "<name>, <size>, modified <date>" (Ctrl+I), "Not found" (find),
-"Nothing to save here", "Text size n", "Windows text size", "Copied diagnostics"; and the guards "No folder" (nothing
+"Nothing to save here", "Text size n", "Windows text size", "Copied diagnostics", "<name>, <size>, modified <date>, n
+selected" (Ctrl+I with marks); and the guards "No folder" (nothing
 listed yet), "No items in this folder" (a command on an empty folder's one item, AF-2.2), "Nothing selected", "Not a file" (Ctrl+E or Open with… on a folder), "Not a sound or video file"
 (Player → Play on another entry), "Not a time" (Go to time), "Speed n is not supported here", "Name unchanged" (a
 rename to the same name), "Nothing to paste" (no files on the clipboard), "Already in this folder" (a cut entry
@@ -318,6 +341,14 @@ single-threaded-apartment thread of its own (AX-7.5).
   is listed in F1 and is covered by the collision test, so it is the context menu (AF-4.6), and the two things people
   reach for in the shell's menu, Open with and Properties, are items of it (AF-4.7). The whole shell menu stays one
   explicit item away, More from Windows…, for the rest (Send to, an archiver's entries), chosen knowingly.
+- **AF-D9 Marks in the items, not the list box's multiple selection.** Asked 2026-10-21: select and deselect with
+  Space. A multiple-selection list box (`LBS_MULTIPLESEL`) does that natively, but its arrow keys move a caret the
+  app has to read and set through messages for everything "current" (Enter, F2, the folder's first entry, find), a
+  screen reader may add "not selected" to every unmarked entry, and whether it speaks the toggle at all was not
+  known. The marks are kept by the window and written into the items (", selected"), which NVDA reads as part of
+  the name, so that the single-selection list the NVDA pass covered stays as it was and the feedback is one
+  announcement of the app's own; a sighted helper sees the word. Space was the player's pause key; pause moved to
+  Ctrl+P, from anywhere in the window, since Space in a list is selection in every file manager.
 
 ## 7. Open questions
 
@@ -346,3 +377,6 @@ single-threaded-apartment thread of its own (AX-7.5).
   the ways round, the windows out and back, the operations, the entry's menu with the rename box, the clipboard, Ctrl+I
   inside the menu, the Windows dialogs and menu, the player (MP3, MP4, the speeds with the pitch kept), the texts and
   the notices. AxFile is no longer unchecked; it stays a first draft in scope (§7).
+- 2026-10-21, after the release, on the branch `axfile`, at the user's ask: the one item of an empty folder (AF-2.2),
+  Ctrl+N for a new window (AF-3.3), the selection with Space and the operations on it (AF-3.7, AF-D9; pause moved to
+  Ctrl+P). Not yet checked with NVDA.

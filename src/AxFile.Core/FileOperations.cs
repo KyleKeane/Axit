@@ -74,9 +74,9 @@ public static class FileOperations
         return target;
     }
 
-    /// <summary>Sends the file or folder to the Recycle Bin (AF-4.3), so that it can come back. Null when it succeeded, the reason otherwise.</summary>
-    public static Task<string?> DeleteToRecycleBinAsync(string path) =>
-        RunShellOperationAsync(FO_DELETE, [path], null, "The deletion");
+    /// <summary>Sends files and folders to the Recycle Bin (AF-4.3), so that they can come back, in one operation. Null when it succeeded, the reason otherwise.</summary>
+    public static Task<string?> DeleteToRecycleBinAsync(IReadOnlyList<string> paths) =>
+        RunShellOperationAsync(FO_DELETE, paths, null, "The deletion");
 
     /// <summary>
     /// Copies, or moves, files and folders into <paramref name="folder"/> (AF-4.8), the shell's way: a name already

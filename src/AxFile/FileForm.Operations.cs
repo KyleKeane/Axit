@@ -10,7 +10,8 @@ namespace AxFile;
 
 /// <summary>
 /// The operations (SPEC.md AF-4), each one announcement or one notice: the folder, the rename in place, the delete,
-/// the path, the clipboard; and the ways out of the window (AF-1.3, AF-3.2, AF-4.7, AF-4.9).
+/// the path, the clipboard, the last three on the selected entries when there are any (AF-3.7); and the ways out of
+/// the window (AF-1.3, AF-3.2, AF-4.7, AF-4.9).
 /// </summary>
 public sealed partial class FileForm
 {
@@ -174,22 +175,37 @@ public sealed partial class FileForm
         _renameBox.Visible = false;
     }
 
-    /// <summary>File operations → Delete… (Delete, AF-4.3): a question, then the shell sends the entry to the Recycle Bin; "Deleted <name>", the next entry selected.</summary>
+    /// <summary>
+    /// File operations → Delete… (Delete, AF-4.3): a question, then the shell sends the selected entries, or the
+    /// current one, to the Recycle Bin in one operation; "Deleted <name>" or "Deleted n items", the entry after them
+    /// selected.
+    /// </summary>
     private void Delete()
     {
-        if (_folder is not { } folder || CurrentEntry() is not { } entry)
+        if (_folder is not { } folder)
         {
             SayNoEntry();
             return;
         }
 
-        var index = _list.SelectedIndex;
-        var next = index + 1 < _entries.Count ? _entries[index + 1].Name : index > 0 ? _entries[index - 1].Name : null;
-        ShowNotice(new Notice($"Delete {entry.Name}?", entry.IsFolder ? "It goes to the Recycle Bin with everything in it." : "It goes to the Recycle Bin.",
+        var targets = Targets();
+        if (targets.Count == 0)
+        {
+            return;
+        }
+
+        var next = NameAfter(targets);
+        var one = targets.Count == 1 ? targets[0] : null;
+        var title = one is null ? $"Delete {targets.Count} items?" : $"Delete {one.Name}?";
+        var text = one is null
+            ? targets.Any(target => target.IsFolder) ? "They go to the Recycle Bin, the folders with everything in them." : "They go to the Recycle Bin."
+            : one.IsFolder ? "It goes to the Recycle Bin with everything in it." : "It goes to the Recycle Bin.";
+        var done = one is null ? $"Deleted {targets.Count} items" : $"Deleted {one.Name}";
+        ShowNotice(new Notice(title, text,
         [
             new OverlayChoice("&Delete", () => Do(async () =>
             {
-                if (await FileOperations.DeleteToRecycleBinAsync(entry.Path) is { } reason)
+                if (await FileOperations.DeleteToRecycleBinAsync(targets.Select(target => target.Path).ToList()) is { } reason)
                 {
                     Failed("Delete failed", reason);
                     return;
@@ -197,26 +213,49 @@ public sealed partial class FileForm
 
                 if (await ShowFolderAsync(folder, next, remember: false))
                 {
-                    Announce($"Deleted {entry.Name}", true);
+                    Announce(done, true);
                 }
             }), IsDefault: true),
             new OverlayChoice("&Cancel", IsCancel: true),
         ]));
     }
 
-    /// <summary>File operations → Copy path (Ctrl+Shift+C, AF-4.4): the entry's full path to the clipboard, "Copied path".</summary>
+    /// <summary>The name to select once <paramref name="gone"/> are deleted: the first entry after the current one that stays, else the last one before it; null when none stays.</summary>
+    private string? NameAfter(List<Entry> gone)
+    {
+        var index = _list.SelectedIndex;
+        for (var i = index + 1; i < _entries.Count; i++)
+        {
+            if (!gone.Contains(_entries[i]))
+            {
+                return _entries[i].Name;
+            }
+        }
+
+        for (var i = Math.Min(index, _entries.Count - 1); i >= 0; i--)
+        {
+            if (!gone.Contains(_entries[i]))
+            {
+                return _entries[i].Name;
+            }
+        }
+
+        return null;
+    }
+
+    /// <summary>File operations → Copy path (Ctrl+Shift+C, AF-4.4): the full path of the entry, or of each selected entry on a line, to the clipboard; "Copied path" or "Copied n paths".</summary>
     private void CopyPath()
     {
-        if (CurrentEntry() is not { } entry)
+        var targets = Targets();
+        if (targets.Count == 0)
         {
-            SayNoEntry();
             return;
         }
 
         try
         {
-            Clipboard.SetText(entry.Path);
-            Announce("Copied path", true);
+            Clipboard.SetText(string.Join("\r\n", targets.Select(target => target.Path)));
+            Announce(targets.Count == 1 ? "Copied path" : $"Copied {targets.Count} paths", true);
         }
         catch (Exception ex) when (ex is ExternalException or InvalidOperationException)
         {
@@ -224,19 +263,21 @@ public sealed partial class FileForm
         }
     }
 
-    // ---- the clipboard (AF-4.8): the entry as a file on it, in File Explorer's formats, and its files pasted into the folder ----
+    // ---- the clipboard (AF-4.8): the entries as files on it, in File Explorer's formats, and its files pasted into the folder ----
 
-    /// <summary>File operations → Cut or Copy (Ctrl+X, Ctrl+C): the entry on the clipboard as a file, marked to move or to copy; "Cut <name>" or "Copied <name>".</summary>
+    /// <summary>File operations → Cut or Copy (Ctrl+X, Ctrl+C): the selected entries, or the current one, on the clipboard as files, marked to move or to copy; "Cut <name>", "Copied n items".</summary>
     private void CopyOrCut(bool cut)
     {
-        if (CurrentEntry() is not { } entry)
+        var targets = Targets();
+        if (targets.Count == 0)
         {
-            SayNoEntry();
             return;
         }
 
+        var files = new StringCollection();
+        files.AddRange(targets.Select(target => target.Path).ToArray());
         var data = new DataObject();
-        data.SetFileDropList(new StringCollection { entry.Path });
+        data.SetFileDropList(files);
         data.SetData(DropEffectFormat, new MemoryStream(BitConverter.GetBytes(cut ? DropEffectMove : DropEffectCopy)));
         try
         {
@@ -248,7 +289,7 @@ public sealed partial class FileForm
             return;
         }
 
-        Announce((cut ? "Cut " : "Copied ") + entry.Name, true);
+        Announce((cut ? "Cut " : "Copied ") + (targets.Count == 1 ? targets[0].Name : $"{targets.Count} items"), true);
     }
 
     /// <summary>

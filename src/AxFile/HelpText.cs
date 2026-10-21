@@ -26,15 +26,16 @@ public static class HelpText
           Ctrl+N: a new AxFile window on this folder
           F5: read the folder again
           Ctrl+Shift+N: a new folder, after its name. F2: rename in place, in a box over the entry with the name before the extension selected; Enter renames, Escape keeps the name. Delete: delete to the Recycle Bin, after a question
-          Ctrl+X, Ctrl+C, Ctrl+V: cut, copy or paste the entry as a file, to and from File Explorer too; a pasted name already in the folder gets a number
-          Ctrl+Shift+C: copy the entry's full path
+          Space: select the entry, or deselect it; it reads "selected" after its name while it is. Ctrl+A: select all. Ctrl+Shift+A: select none. Ctrl+I says how many are selected
+          Ctrl+X, Ctrl+C, Ctrl+V: cut, copy or paste as files, to and from File Explorer too; a pasted name already in the folder gets a number. Cut, Copy, Delete and Copy path act on the selected entries, or on the entry you are on when none is selected
+          Ctrl+Shift+C: copy the entry's full path, or every selected entry's, one per line
           Shift+F10, or the Applications key: the entry's menu: File operations, Open, Open in editor, Open in Axit, Open with Windows, Open with another program, Show in File Explorer, Information, Properties, More from Windows. Ctrl+I inside the menu says the entry without closing it
           Alt+Enter: the entry's Properties, the Windows sheet
           Ctrl+S: nothing to save here; AxFile says so
 
         The player
           Enter on a sound or video file plays it, and the folder's other media files follow in order
-          Space: pause, or resume
+          Ctrl+P: pause, or resume
           Ctrl+Right, Ctrl+Left: 15 seconds forward or back. Ctrl+T: go to a time, 12:40 or 1:02:10 or seconds
           Ctrl+Shift+Right, Ctrl+Shift+Left: the next or the previous file of the folder
           Ctrl+Shift+Period, Ctrl+Shift+Comma: faster or slower by a quarter; Player, Normal speed goes back to 1
