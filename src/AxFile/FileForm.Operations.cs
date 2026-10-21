@@ -341,7 +341,9 @@ public sealed partial class FileForm
 
         Do(async () =>
         {
-            var operation = FileOperations.CopyOrMoveAsync(paths, folder, move);
+            // The names are chosen first: a name already in the folder becomes "name - 2" (AF-4.8).
+            var destinations = await Task.Run(() => FileOperations.Destinations(paths, folder));
+            var operation = FileOperations.CopyOrMoveAsync(paths, destinations, move);
             if (await Task.WhenAny(operation, Task.Delay(1000)) != operation)
             {
                 Announce("Pasting, please wait", true);
@@ -365,7 +367,7 @@ public sealed partial class FileForm
                 }
             }
 
-            var first = Path.GetFileName(paths[0]);
+            var first = Path.GetFileName(destinations[0]);
             if (await ShowFolderAsync(folder, first, remember: false))
             {
                 Announce(paths.Count == 1 ? $"Pasted {first}" : $"Pasted {paths.Count} items", true);

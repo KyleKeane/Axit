@@ -9,8 +9,9 @@
 - AxFile: Folder → Sort by Name, Date or Size, folders first in each, kept as a setting; Ctrl+Shift+F filters the list to the names containing a text, the list named "Dune, 3 of 24 items, filter chap"; Escape in the list clears the filter.
 - AxFile: Ctrl+D adds the folder to Favourites or removes it; Folder → Favourites lists them by number. Backspace at the top of a drive goes to This PC, the list of drives, "Local Disk (C:), drive", with Ctrl+I saying the free space; it said "Top of the drive" before.
 - AxFile: the list is named with its count alone, "24 items", so that NVDA no longer reads the folder's name twice when the window opens; the folder is the title.
+- AxFile: a pasted file or folder whose name is already in the folder is named "notes - 2.md", "notes - 3.md", instead of the shell's "notes - Copy.md" and "notes (2).md"; the zip names follow the same rule.
 - AxFile: Options → General gains Show hidden files and folders and Show files and folders starting with a period, both off; entries starting with a period (`.git`, `.env`) are left out until the second is on. When anything is left out, the list ends with one line saying how much, "Not shown: 3 hidden, 2 starting with a period".
-- AxFile: File operations → Compress to zip puts the entry, or the selected entries, into a new zip file in the folder, and Extract here unpacks a zip file into a new folder named after it; neither writes over anything, a taken name gets a number. Copy path's menu letter is Y, since A is Select all's.
+- AxFile: File operations → Compress to zip puts the entry, or the selected entries, into a new zip file in the folder, and Extract here unpacks a zip file into a new folder named after it; neither writes over anything, a taken name gets a dash and a number. Copy path's menu letter is Y, since A is Select all's.
 
 ## 3.1.0 - 2026-10-21
 

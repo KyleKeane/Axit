@@ -84,24 +84,52 @@ public sealed class FileOperationsTests : IDisposable
     {
         var docs = Path.Combine(_folder, "docs");
         var notes = Path.Combine(_folder, "notes.md");
-        Assert.Null(await FileOperations.CopyOrMoveAsync([notes], docs, move: false));
+        Assert.Null(await CopyOrMoveAsync([notes], docs, move: false));
         Assert.True(File.Exists(Path.Combine(docs, "notes.md")));
         Assert.True(File.Exists(notes));
 
-        // A name already there gets a number: both files stay.
-        Assert.Null(await FileOperations.CopyOrMoveAsync([Path.Combine(docs, "notes.md")], _folder, move: false));
-        Assert.Equal(2, Directory.GetFiles(_folder).Length);
+        // A name already there gets a dash and a number: both files stay.
+        Assert.Null(await CopyOrMoveAsync([Path.Combine(docs, "notes.md")], _folder, move: false));
+        Assert.True(File.Exists(Path.Combine(_folder, "notes - 2.md")));
         Assert.True(File.Exists(notes));
 
         var sub = Path.Combine(_folder, "sub");
         Directory.CreateDirectory(sub);
         File.WriteAllText(Path.Combine(sub, "inner.txt"), "x");
-        Assert.Null(await FileOperations.CopyOrMoveAsync([sub], docs, move: true));
+        Assert.Null(await CopyOrMoveAsync([sub], docs, move: true));
         Assert.False(Directory.Exists(sub));
         Assert.True(File.Exists(Path.Combine(docs, "sub", "inner.txt")));
 
-        var reason = await FileOperations.CopyOrMoveAsync([Path.Combine(_folder, "nope.txt")], docs, move: false);
+        // A folder whose name is taken lands under "name - 2" too.
+        Directory.CreateDirectory(sub);
+        Assert.Null(await CopyOrMoveAsync([sub], docs, move: true));
+        Assert.True(Directory.Exists(Path.Combine(docs, "sub - 2")));
+
+        var reason = await CopyOrMoveAsync([Path.Combine(_folder, "nope.txt")], docs, move: false);
         Assert.NotNull(reason);
+    }
+
+    private static Task<string?> CopyOrMoveAsync(IReadOnlyList<string> sources, string folder, bool move) =>
+        FileOperations.CopyOrMoveAsync(sources, FileOperations.Destinations(sources, folder), move);
+
+    [Fact]
+    public void A_free_name_adds_a_dash_and_a_number_and_destinations_avoid_each_other()
+    {
+        Assert.Equal(Path.Combine(_folder, "new.txt"), FileOperations.FreeName(_folder, "new", ".txt"));
+        Assert.Equal(Path.Combine(_folder, "notes - 2.md"), FileOperations.FreeName(_folder, "notes", ".md"));
+        Assert.Equal(Path.Combine(_folder, "docs - 2"), FileOperations.FreeName(_folder, "docs", string.Empty));
+        Assert.Equal(Path.Combine(_folder, "docs - 3"), FileOperations.FreeName(_folder, "docs", string.Empty, [Path.Combine(_folder, "docs - 2")]));
+
+        var other = Path.Combine(_folder, "docs", "notes.md");
+        File.WriteAllText(other, "x");
+        var elsewhere = Path.Combine(_folder, "docs", "new.txt");
+        File.WriteAllText(elsewhere, "x");
+        Assert.Equal(
+            [Path.Combine(_folder, "notes - 2.md"), Path.Combine(_folder, "new.txt")],
+            FileOperations.Destinations([other, elsewhere], _folder));
+        Assert.Equal(
+            [Path.Combine(_folder, "new.txt"), Path.Combine(_folder, "new - 2.txt")],
+            FileOperations.Destinations([elsewhere, elsewhere], _folder));
     }
 
     [Fact]

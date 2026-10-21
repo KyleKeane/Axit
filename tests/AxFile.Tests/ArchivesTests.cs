@@ -44,7 +44,7 @@ public sealed class ArchivesTests : IDisposable
         var second = Archives.Compress([Path.Combine(_folder, "notes.md")], _folder);
         Assert.Equal(Path.Combine(_folder, "notes.zip"), second);
         var third = Archives.Compress([Path.Combine(_folder, "notes.md")], _folder);
-        Assert.Equal(Path.Combine(_folder, "notes (2).zip"), third);
+        Assert.Equal(Path.Combine(_folder, "notes - 2.zip"), third);
         using var archive = ZipFile.OpenRead(first);
         Assert.Equal(["docs/a.txt", "docs/empty/", "notes.md"], archive.Entries.Select(e => e.FullName).Order());
     }
@@ -54,10 +54,10 @@ public sealed class ArchivesTests : IDisposable
     {
         var zip = Archives.Compress([Path.Combine(_folder, "docs")], _folder);
         var target = Archives.Extract(zip, _folder);
-        Assert.Equal(Path.Combine(_folder, "docs (2)"), target);
+        Assert.Equal(Path.Combine(_folder, "docs - 2"), target);
         Assert.Equal("a", File.ReadAllText(Path.Combine(target, "docs", "a.txt")));
         Assert.True(Directory.Exists(Path.Combine(target, "docs", "empty")));
-        Assert.Equal(Path.Combine(_folder, "docs (3)"), Archives.Extract(zip, _folder));
+        Assert.Equal(Path.Combine(_folder, "docs - 3"), Archives.Extract(zip, _folder));
     }
 
     [Theory]

@@ -203,7 +203,7 @@ windows on the folder of the file or project in hand, and sends back. It works e
   entries (AF-3.7), go on the clipboard as files in File Explorer's own formats (`CF_HDROP` and "Preferred
   DropEffect", move for a cut, copy otherwise), "Cut <name>" or "Copied <name>", "Cut n items" or "Copied n items",
   so that File Explorer can paste them and AxFile can paste what File Explorer cut or copied. Paste copies the clipboard's files into the folder shown, or moves them after a cut, through
-  the shell (`SHFileOperationW`, undo allowed, a number on a name already there rather than a question, nothing
+  the shell (`SHFileOperationW`, undo allowed; the names are chosen first, `FileOperations.Destinations`, a name already there becoming "name - 2", "name - 3", one destination per source with `FOF_MULTIDESTFILES`, rather than a question, nothing
   overwritten; `FileOperations.CopyOrMoveAsync`, tested): "Pasted <name>" or "Pasted n items", the first one selected;
   "Pasting, please wait" when it takes longer than a second; after a move the clipboard is cleared, as File Explorer
   does. "Nothing to paste" without files on the clipboard; "Already in this folder" for a cut entry pasted where it
@@ -234,9 +234,9 @@ windows on the folder of the file or project in hand, and sends back. It works e
 - AF-4.12 **Compress to zip, Extract here** (File operations ▸; asked 2026-10-21), through .NET's own `ZipFile`, no
   package (`Archives` in `AxFile.Core`, tested). **Compress to zip** puts the selected entries, or the current one
   (AF-3.7), into a new zip in the folder shown, named after the one entry without its extension ("notes.zip") or
-  after the folder for several ("Dune.zip"), "name (2).zip" when the name is taken, a folder's contents under its
+  after the folder for several ("Dune.zip"), "name - 2.zip" when the name is taken, a folder's contents under its
   name; "Compressed to <name>", the zip selected; "Compressing, please wait" when it passes a second. **Extract
-  here** on a `.zip` makes a new folder named after it next to it ("Dune", or "Dune (2)" when taken) and extracts
+  here** on a `.zip` makes a new folder named after it next to it ("Dune", or "Dune - 2" when taken) and extracts
   into it, so that nothing is written over; "Extracted to <name>", the folder selected; "Not a zip file" on anything
   else. A failure is "Failed: <reason>" (AF-4.5). Other archive kinds are the shell's (More from Windows…) or an
   installed program's (AF-4.11).
@@ -399,7 +399,7 @@ single-threaded-apartment thread of its own (AX-7.5).
 - **AF-D5 Streamlined operations.** New folder, rename, delete and copy the path were the first four; cut, copy and
   paste came at the user's ask on 2026-10-20, as files on the clipboard in File Explorer's own formats (`CF_HDROP`
   and the preferred drop effect) so that the two exchange them, with the shell doing the copy or the move (undo from
-  File Explorer, a number on a name already there rather than a question, §7). File Explorer stays one key away for
+  File Explorer, a dash and a number on a name already there rather than a question, §7). File Explorer stays one key away for
   the rest (Ctrl+W, Ctrl+Shift+W).
 - **AF-D6 The queue is the folder at the moment of Enter.** A playlist that changed under the listener because the
   window browsed elsewhere would be a surprise; the queue is fixed when play starts and the list is free to roam.
@@ -425,7 +425,7 @@ single-threaded-apartment thread of its own (AX-7.5).
 
 - Remembering the position in a file across windows (an audiobook resumed where it stopped): per file in the
   settings, with a cap; the first candidate for version two.
-- A question on a name collision when pasting (replace, keep both, skip), where the shell now numbers the copy
+- A question on a name collision when pasting (replace, keep both, skip), where AxFile now adds a dash and a number
   (AF-4.8); a paste of many items that names them.
 - Shift+Delete, a permanent delete, after its own question.
 - A "media only" filter of the list (the name filter and the sort orders came 2026-10-21, AF-3.8).
