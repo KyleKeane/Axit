@@ -275,6 +275,17 @@ windows on the folder of the file or project in hand, and sends back. It works e
   folder (a taken name is "Failed: There is already an entry named …", as New folder) and moves the selected entries,
   or the current one (AF-3.7), into it through the shell (AF-4.8, undo allowed, names chosen first); "Moved <name>
   into <folder>" or "Moved n items into <folder>", the new folder selected.
+- AF-4.14 **Undo** (asked 2026-10-21; specified, to be built with the pane, AF-9, whose operation lines are its
+  history). **Ctrl+Z** (Folder → Undo <operation>, named after what it would undo, "Undo rename") takes back the
+  last operation of this window that can be taken back, one step per press, and selects the entry it touched:
+  Rename, renamed back; New folder and New text file, deleted while still empty ("Not undone: notes has files
+  now" otherwise); a paste that moved and Move to new folder, moved back where they were, the new folder removed
+  when it is empty; a paste that copied, Compress to zip and Extract here, the copies, the zip or the extracted
+  folder sent to the Recycle Bin; Delete, brought back from the Recycle Bin, the shell's own undelete on the Recycle
+  Bin's item, the one step that needs the shell again. "Undone: <what>" each time; an entry changed since by anything
+  else (renamed in File Explorer meanwhile), "Not undone: <name> has changed". Eject, Open, the player, Favorites and
+  the settings are not operations and have no undo; there is no redo. The history is this window's, the last twenty
+  operations, gone with the window.
 
 ### AF-5 The player
 
@@ -545,3 +556,5 @@ single-threaded-apartment thread of its own (AX-7.5).
 - 2026-10-21, late: the pane specified at the user's ask (AF-9): a second control under the folder list, one thing at a time, for
   the player's queue with Play folder and Add to queue, the operations' status lines, and a read-only preview of a text file, with
   later uses noted; to be built next, after the user has read it.
+- 2026-10-21, late: Undo specified at the user's ask (AF-4.14), Ctrl+Z over the pane's history of operations, each with its
+  inverse; to be built with the pane. The Shift range (AF-3.7) and the lookalike guard (AF-4.2) were built the same night.
