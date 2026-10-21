@@ -62,7 +62,7 @@ public sealed partial class FileForm
 
     private void PlayFromList(Entry entry)
     {
-        _queue = MediaFiles.Queue(_entries);
+        _queue = MediaFiles.Queue(_shown);
         _queueIndex = _queue.ToList().FindIndex(path => string.Equals(path, entry.Path, StringComparison.OrdinalIgnoreCase));
         if (_queueIndex < 0)
         {

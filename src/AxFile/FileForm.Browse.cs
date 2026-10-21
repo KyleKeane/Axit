@@ -8,7 +8,15 @@ namespace AxFile;
 public sealed partial class FileForm
 {
     private string? _folder;
+
+    /// <summary>Every entry of the folder as read; <see cref="_shown"/> is what the list holds (AF-3.8).</summary>
     private IReadOnlyList<Entry> _entries = [];
+
+    /// <summary>The entries the list shows, in its order: those that pass the filter, sorted as the setting says; the list's indices are into this.</summary>
+    private IReadOnlyList<Entry> _shown = [];
+
+    /// <summary>The filter text (AF-3.8), empty for none; dropped with the folder.</summary>
+    private string _filter = string.Empty;
 
     /// <summary>The paths selected with Space (AF-3.7), kept while the same folder shows; their items read ", selected".</summary>
     private readonly HashSet<string> _selected = new(StringComparer.OrdinalIgnoreCase);
@@ -88,10 +96,12 @@ public sealed partial class FileForm
             return false;
         }
 
-        // AF-3.7: the selection lives in one folder: another folder starts with none, the same one keeps what is still there.
+        // AF-3.7, AF-3.8: the selection and the filter live in one folder: another folder starts with none, the same
+        // one keeps the marks still there and the filter.
         if (!string.Equals(folder, _folder, StringComparison.OrdinalIgnoreCase))
         {
             _selected.Clear();
+            _filter = string.Empty;
         }
         else
         {
@@ -102,7 +112,7 @@ public sealed partial class FileForm
         _entries = entries;
         _folderStamp = Stamp(folder);
         Text = $"{FolderListing.FolderName(folder)} - {AxFileApp.Name}";
-        FillList(select);
+        Rearrange(select);
         if (remember)
         {
             _settings.RememberFolder(folder);
@@ -120,26 +130,95 @@ public sealed partial class FileForm
     /// <summary>The one item of an empty folder (AF-2.2), so that the list is never empty and the reason is read (AX-9.5).</summary>
     private const string EmptyFolderText = "No items in this folder";
 
-    /// <summary>The list's items for the folder, named with the folder and the count; the selection by name, or the first entry.</summary>
+    /// <summary>The one item of a folder whose entries all fail the filter (AF-3.8).</summary>
+    private string NoMatchText => "No names contain " + _filter;
+
+    /// <summary>The shown entries made again from the folder's entries, the order and the filter (AF-3.8), and the list refilled.</summary>
+    private void Rearrange(string? select)
+    {
+        _shown = FolderListing.Arrange(_entries, _settings.SortBy, _filter);
+        FillList(select);
+    }
+
+    /// <summary>The list's items for the shown entries, named with the folder and the count; the selection by name, or the first entry.</summary>
     private void FillList(string? select)
     {
         _list.BeginUpdate();
         _list.Items.Clear();
-        _list.Items.AddRange(_entries.Select(entry => (object)ItemText(entry)).ToArray());
-        if (_entries.Count == 0)
+        _list.Items.AddRange(_shown.Select(entry => (object)ItemText(entry)).ToArray());
+        if (_shown.Count == 0)
         {
-            _list.Items.Add(EmptyFolderText);
+            _list.Items.Add(_filter.Length > 0 ? NoMatchText : EmptyFolderText);
         }
 
         _list.EndUpdate();
-        _list.AccessibleName = FolderListing.ListName(_folder ?? string.Empty, _entries.Count);
+        _list.AccessibleName = FolderListing.ListName(_folder ?? string.Empty, _shown.Count, _entries.Count, _filter);
         var index = select is null ? -1 : IndexOfName(select);
         _list.SelectedIndex = Math.Max(0, index);
     }
 
     /// <summary>The guard of every command on an entry (AF-7): why there is none.</summary>
     private void SayNoEntry() =>
-        Announce(_folder is null ? "No folder" : _entries.Count == 0 ? EmptyFolderText : "Nothing selected", true);
+        Announce(_folder is null ? "No folder" : _entries.Count == 0 ? EmptyFolderText : _shown.Count == 0 ? NoMatchText : "Nothing selected", true);
+
+    // ---- the order and the filter (AF-3.8) ----
+
+    /// <summary>Folder → Sort by → one order: the setting, the checked item, the list made again with the entry kept; "Sorted by date".</summary>
+    private void SetSort(SortBy by)
+    {
+        _settings.SortBy = by;
+        SaveSettings();
+        foreach (var (sortBy, item) in _sortItems)
+        {
+            item.Checked = sortBy == by;
+        }
+
+        Rearrange(CurrentEntry()?.Name);
+        Announce("Sorted by " + FolderListing.SortName(by), true);
+    }
+
+    /// <summary>Folder → Filter… (Ctrl+Shift+F): the notice "Filter" with the field "Name contains"; an empty field clears the filter.</summary>
+    private void ShowFilterNotice()
+    {
+        if (_folder is null)
+        {
+            Announce("No folder", true);
+            return;
+        }
+
+        ShowNotice(new Notice("Filter", "Only the entries whose name contains the text are listed; empty clears the filter.",
+        [
+            new OverlayChoice("&Filter", () => ApplyFilter(Overlay.InputText.Trim()), IsDefault: true),
+            new OverlayChoice("&Cancel", IsCancel: true),
+        ])
+        {
+            Input = new OverlayInput("Name contains:", "Name contains", _filter, string.Empty, Required: false),
+        });
+    }
+
+    /// <summary>The filter set and the list made again, the entry kept when it still shows; the list's name says the count, "Filter cleared" when it is emptied.</summary>
+    private void ApplyFilter(string text)
+    {
+        var had = _filter.Length > 0;
+        _filter = text;
+        Rearrange(CurrentEntry()?.Name);
+        if (text.Length == 0 && had)
+        {
+            Announce("Filter cleared", true);
+        }
+    }
+
+    /// <summary>Escape in the list: the filter cleared; false, the key left alone, when there is none.</summary>
+    private bool ClearFilter()
+    {
+        if (_filter.Length == 0)
+        {
+            return false;
+        }
+
+        ApplyFilter(string.Empty);
+        return true;
+    }
 
     /// <summary>The list item of an entry (AF-2.2): its label, with ", selected" while it is (AF-3.7).</summary>
     private string ItemText(Entry entry) => _selected.Contains(entry.Path) ? entry.Label + ", selected" : entry.Label;
@@ -167,22 +246,22 @@ public sealed partial class FileForm
         Announce(count > (on ? 1 : 0) ? $"{word}, {count} selected" : word, true);
     }
 
-    /// <summary>Ctrl+A in the list, File operations → Select all: every entry, "n selected".</summary>
+    /// <summary>Ctrl+A in the list, File operations → Select all: every entry shown, "n selected".</summary>
     private void SelectAll()
     {
-        if (_entries.Count == 0)
+        if (_shown.Count == 0)
         {
             SayNoEntry();
             return;
         }
 
-        foreach (var entry in _entries)
+        foreach (var entry in _shown)
         {
             _selected.Add(entry.Path);
         }
 
         FillList(CurrentEntry()?.Name);
-        Announce($"{_entries.Count} selected", true);
+        Announce($"{_selected.Count} selected", true);
     }
 
     /// <summary>Ctrl+Shift+A in the list, File operations → Select none: the marks cleared, "None selected".</summary>
@@ -197,8 +276,8 @@ public sealed partial class FileForm
         Announce("None selected", true);
     }
 
-    /// <summary>The selected entries in the list's order; none when nothing is selected.</summary>
-    private List<Entry> SelectedEntries() => _entries.Where(entry => _selected.Contains(entry.Path)).ToList();
+    /// <summary>The selected entries among those shown, in the list's order; none when nothing is selected.</summary>
+    private List<Entry> SelectedEntries() => _shown.Where(entry => _selected.Contains(entry.Path)).ToList();
 
     /// <summary>What an operation acts on (AF-3.7): the selected entries, or the current entry alone when none is selected; empty, and said, when there is no entry.</summary>
     private List<Entry> Targets()
@@ -219,9 +298,9 @@ public sealed partial class FileForm
 
     private int IndexOfName(string name)
     {
-        for (var i = 0; i < _entries.Count; i++)
+        for (var i = 0; i < _shown.Count; i++)
         {
-            if (string.Equals(_entries[i].Name, name, StringComparison.OrdinalIgnoreCase))
+            if (string.Equals(_shown[i].Name, name, StringComparison.OrdinalIgnoreCase))
             {
                 return i;
             }
@@ -230,9 +309,9 @@ public sealed partial class FileForm
         return -1;
     }
 
-    /// <summary>The entry under the selection; null for an empty folder, whose one item is not an entry.</summary>
+    /// <summary>The entry under the selection; null for an empty list, whose one item is not an entry.</summary>
     private Entry? CurrentEntry() =>
-        _list.SelectedIndex is var i && i >= 0 && i < _entries.Count && _list.Items.Count == _entries.Count ? _entries[i] : null;
+        _list.SelectedIndex is var i && i >= 0 && i < _shown.Count && _list.Items.Count == _shown.Count ? _shown[i] : null;
 
     /// <summary>The folder above a folder that is gone, the first one that exists; null when none is.</summary>
     private static string? NearestExisting(string folder)
@@ -401,12 +480,12 @@ public sealed partial class FileForm
             return;
         }
 
-        var count = _entries.Count;
+        var count = _shown.Count;
         var from = Math.Max(0, _list.SelectedIndex);
         for (var step = 1; step <= count; step++)
         {
             var i = ((from + direction * step) % count + count) % count;
-            if (_entries[i].Name.Contains(_findText, StringComparison.OrdinalIgnoreCase))
+            if (_shown[i].Name.Contains(_findText, StringComparison.OrdinalIgnoreCase))
             {
                 _list.SelectedIndex = i;
                 return;

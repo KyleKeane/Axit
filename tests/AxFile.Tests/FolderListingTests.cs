@@ -89,6 +89,38 @@ public sealed class FolderListingTests : IDisposable
         Assert.Equal(OpenWay.Folder, FolderListing.WayOf(new Entry("notes.md", "C:\\x\\notes.md", true, 0, DateTime.Now)));
     }
 
+    [Fact]
+    public void Sort_by_date_and_by_size_keep_folders_first_and_break_ties_by_name()
+    {
+        var when = new DateTime(2026, 10, 18);
+        Entry[] entries =
+        [
+            new("old.txt", "x", false, 500, when.AddDays(-2)),
+            new("new.txt", "x", false, 10, when),
+            new("big.txt", "x", false, 5000, when.AddDays(-1)),
+            new("same.txt", "x", false, 10, when),
+            new("docs", "x", true, 0, when.AddDays(-9)),
+        ];
+        Assert.Equal(["docs", "new.txt", "same.txt", "big.txt", "old.txt"], FolderListing.Sort(entries, SortBy.Date).Select(e => e.Name));
+        Assert.Equal(["docs", "big.txt", "old.txt", "new.txt", "same.txt"], FolderListing.Sort(entries, SortBy.Size).Select(e => e.Name));
+        Assert.Equal(["docs", "big.txt", "new.txt", "old.txt", "same.txt"], FolderListing.Arrange(entries, SortBy.Name, string.Empty).Select(e => e.Name));
+    }
+
+    [Fact]
+    public void The_filter_keeps_the_names_that_contain_the_text_in_any_case()
+    {
+        Entry[] entries =
+        [
+            new("Chapter 1.mp3", "x", false, 0, DateTime.Now),
+            new("notes.md", "x", false, 0, DateTime.Now),
+            new("chap", "x", true, 0, DateTime.Now),
+        ];
+        Assert.Equal(["chap", "Chapter 1.mp3"], FolderListing.Arrange(entries, SortBy.Name, "CHAP").Select(e => e.Name));
+        Assert.Equal(3, FolderListing.Filter(entries, string.Empty).Count);
+        Assert.Empty(FolderListing.Filter(entries, "zzz"));
+        Assert.Equal("date", FolderListing.SortName(SortBy.Date));
+    }
+
     [Theory]
     [InlineData("C:\\Music\\Dune", 24, "Dune, 24 items")]
     [InlineData("C:\\Music\\Dune\\", 1, "Dune, 1 item")]
@@ -97,6 +129,14 @@ public sealed class FolderListingTests : IDisposable
     public void The_list_is_named_with_the_folder_and_the_count(string folder, int count, string expected)
     {
         Assert.Equal(expected, FolderListing.ListName(folder, count));
+    }
+
+    [Fact]
+    public void With_a_filter_the_list_is_named_with_the_match_count_and_the_text()
+    {
+        Assert.Equal("Dune, 3 of 24 items, filter chap", FolderListing.ListName("C:\\Music\\Dune", 3, 24, "chap"));
+        Assert.Equal("Dune, 0 of 24 items, filter zzz", FolderListing.ListName("C:\\Music\\Dune", 0, 24, "zzz"));
+        Assert.Equal("Dune, 24 items", FolderListing.ListName("C:\\Music\\Dune", 24, 24, string.Empty));
     }
 
     [Theory]

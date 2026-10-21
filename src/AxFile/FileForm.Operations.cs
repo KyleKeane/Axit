@@ -224,19 +224,19 @@ public sealed partial class FileForm
     private string? NameAfter(List<Entry> gone)
     {
         var index = _list.SelectedIndex;
-        for (var i = index + 1; i < _entries.Count; i++)
+        for (var i = index + 1; i < _shown.Count; i++)
         {
-            if (!gone.Contains(_entries[i]))
+            if (!gone.Contains(_shown[i]))
             {
-                return _entries[i].Name;
+                return _shown[i].Name;
             }
         }
 
-        for (var i = Math.Min(index, _entries.Count - 1); i >= 0; i--)
+        for (var i = Math.Min(index, _shown.Count - 1); i >= 0; i--)
         {
-            if (!gone.Contains(_entries[i]))
+            if (!gone.Contains(_shown[i]))
             {
-                return _entries[i].Name;
+                return _shown[i].Name;
             }
         }
 

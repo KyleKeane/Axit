@@ -15,6 +15,7 @@ public sealed class FileSettingsTests
         Assert.True(settings.SayEachFile);
         Assert.Equal(1, settings.Speed);
         Assert.Equal(15, settings.SeekSeconds);
+        Assert.Equal(SortBy.Name, settings.SortBy);
         Assert.True(settings.CheckForUpdates);
     }
 
@@ -62,11 +63,13 @@ public sealed class FileSettingsTests
         var path = Path.Combine(Path.GetTempPath(), "axfile-settings-" + Guid.NewGuid().ToString("N") + ".json");
         try
         {
-            var settings = new FileSettings { Speed = 1.5, ShowHidden = true, SayEachFile = false };
+            var settings = new FileSettings { Speed = 1.5, ShowHidden = true, SayEachFile = false, SortBy = SortBy.Date };
             settings.RememberFolder("C:\\a");
             settings.Programs.Add(new UserProgram("tidy", "C:\\tools\\tidy.ps1"));
             settings.Save(path);
+            Assert.Contains("\"sortBy\": \"date\"", File.ReadAllText(path));
             var loaded = FileSettings.Load(path, out _);
+            Assert.Equal(SortBy.Date, loaded.SortBy);
             Assert.Equal(1.5, loaded.Speed);
             Assert.True(loaded.ShowHidden);
             Assert.False(loaded.SayEachFile);

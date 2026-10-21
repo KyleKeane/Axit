@@ -21,6 +21,9 @@ public sealed class FileSettings : WindowSettings
     /// <summary>Hidden and system entries in the list (AF-2.2); off, as in File Explorer.</summary>
     public bool ShowHidden { get; set; }
 
+    /// <summary>The list's order (AF-3.8), kept for the next folder and the next window.</summary>
+    public SortBy SortBy { get; set; } = SortBy.Name;
+
     /// <summary>The one unprompted announcement: the name of the next file when the player moves on (AF-5.4, G5).</summary>
     public bool SayEachFile { get; set; } = true;
 
@@ -80,5 +83,9 @@ public sealed class FileSettings : WindowSettings
 
         Programs ??= [];
         Programs.RemoveAll(program => string.IsNullOrWhiteSpace(program?.Name) || string.IsNullOrWhiteSpace(program?.Path));
+        if (!Enum.IsDefined(SortBy))
+        {
+            SortBy = SortBy.Name;
+        }
     }
 }

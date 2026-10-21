@@ -19,6 +19,7 @@ public sealed partial class FileForm : AxitForm
     private readonly string? _startPath;
     private readonly MenuStrip _menu = new();
     private readonly ToolStripMenuItem _recentItem = new("Open &recent folder");
+    private readonly List<(SortBy By, ToolStripMenuItem Item)> _sortItems = [];
     private readonly ItemMenu _itemMenu;
     private readonly ListBox _list = new();
     private readonly TextBox _renameBox = new();
@@ -47,6 +48,18 @@ public sealed partial class FileForm : AxitForm
         folder.DropDownItems.Add(new ToolStripSeparator());
         folder.DropDownItems.Add(Item("&Up one level", GoUp, AxFileKeys.Up));
         folder.DropDownItems.Add(Item("Re&fresh", () => Do(() => RefreshAsync(announce: true)), AxFileKeys.Refresh));
+        folder.DropDownItems.Add(new ToolStripSeparator());
+        // AF-3.8: the order, one checked item, and the filter.
+        var sort = new ToolStripMenuItem("&Sort by");
+        foreach (var by in Enum.GetValues<SortBy>())
+        {
+            var sortItem = new ToolStripMenuItem("&" + char.ToUpperInvariant(by.ToString()[0]) + by.ToString()[1..], null, (_, _) => SetSort(by)) { Checked = _settings.SortBy == by };
+            _sortItems.Add((by, sortItem));
+            sort.DropDownItems.Add(sortItem);
+        }
+
+        folder.DropDownItems.Add(sort);
+        folder.DropDownItems.Add(Item("Fil&ter...", ShowFilterNotice, AxFileKeys.Filter));
         folder.DropDownItems.Add(new ToolStripSeparator());
         // AF-1.3: the way to the other windows, on the folder shown.
         var showIn = new ToolStripMenuItem("Show current folder &in");
@@ -301,6 +314,9 @@ public sealed partial class FileForm : AxitForm
             case AxFileKeys.Refresh:
                 Do(() => RefreshAsync(announce: true));
                 return true;
+            case AxFileKeys.Filter:
+                ShowFilterNotice();
+                return true;
             case AxFileKeys.OpenFolder:
                 OpenFolderDialog();
                 return true;
@@ -377,6 +393,8 @@ public sealed partial class FileForm : AxitForm
                 case AxFileKeys.SelectNone:
                     SelectNone();
                     return true;
+                case AxFileKeys.ClearFilter:
+                    return ClearFilter();
                 case AxFileKeys.Open:
                     OpenSelected();
                     return true;

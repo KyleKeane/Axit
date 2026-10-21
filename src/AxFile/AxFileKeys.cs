@@ -21,6 +21,12 @@ public static class AxFileKeys
     public const Keys NewWindow = Keys.Control | Keys.N;
 
     public const Keys Refresh = Keys.F5;
+
+    /// <summary>The Filter notice: the list narrowed to the names that contain a text (AF-3.8).</summary>
+    public const Keys Filter = Keys.Control | Keys.Shift | Keys.F;
+
+    /// <summary>In the list: the filter cleared; nothing while there is none.</summary>
+    public const Keys ClearFilter = Keys.Escape;
     public const Keys OpenFolder = Keys.Control | Keys.O;
     public const Keys GoToFolder = Keys.Control | Keys.G;
     public const Keys ShowInExplorer = Keys.Control | Keys.W;
@@ -84,6 +90,8 @@ public static class AxFileKeys
         ("Up one level", UpAlso),
         ("New window", NewWindow),
         ("Refresh", Refresh),
+        ("Filter", Filter),
+        ("Clear the filter (in the list)", ClearFilter),
         ("Open folder", OpenFolder),
         ("Go to folder", GoToFolder),
         ("Show the folder in File Explorer", ShowInExplorer),

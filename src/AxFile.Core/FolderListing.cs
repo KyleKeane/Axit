@@ -26,10 +26,19 @@ public enum OpenWay
     Windows,
 }
 
+/// <summary>The order of the list (AF-3.8): folders first in each; then by name, by date (newest first) or by size (largest first).</summary>
+public enum SortBy
+{
+    Name,
+    Date,
+    Size,
+}
+
 /// <summary>
 /// A folder's entries as the list shows them (SPEC.md AF-2.2): folders first, then files, each group in Windows'
-/// natural order, hidden and system entries left out unless asked for; what Enter does with an entry; the list's
-/// name; the information line; the parent; and the reading of a typed path. Pure apart from the file system reads.
+/// natural order, hidden and system entries left out unless asked for; the sort orders and the filter (AF-3.8);
+/// what Enter does with an entry; the list's name; the information line; the parent; and the reading of a typed
+/// path. Pure apart from the file system reads.
 /// </summary>
 public static class FolderListing
 {
@@ -53,8 +62,30 @@ public static class FolderListing
     }
 
     /// <summary>Folders first, then files, each group in natural order (2 before 10), the way File Explorer sorts by name.</summary>
-    public static IReadOnlyList<Entry> Sort(IEnumerable<Entry> entries) =>
-        entries.OrderByDescending(entry => entry.IsFolder).ThenBy(entry => entry.Name, NaturalOrder.Instance).ToList();
+    public static IReadOnlyList<Entry> Sort(IEnumerable<Entry> entries) => Sort(entries, SortBy.Name);
+
+    /// <summary>Folders first, then files, each group by name, by date newest first, or by size largest first, ties by name (AF-3.8).</summary>
+    public static IReadOnlyList<Entry> Sort(IEnumerable<Entry> entries, SortBy by)
+    {
+        var groups = entries.OrderByDescending(entry => entry.IsFolder);
+        var ordered = by switch
+        {
+            SortBy.Date => groups.ThenByDescending(entry => entry.Modified),
+            SortBy.Size => groups.ThenByDescending(entry => entry.Size),
+            _ => groups,
+        };
+        return ordered.ThenBy(entry => entry.Name, NaturalOrder.Instance).ToList();
+    }
+
+    /// <summary>The entries whose name contains <paramref name="text"/>, any case; all of them for an empty text (AF-3.8).</summary>
+    public static IReadOnlyList<Entry> Filter(IEnumerable<Entry> entries, string text) =>
+        text.Length == 0 ? entries.ToList() : entries.Where(entry => entry.Name.Contains(text, StringComparison.OrdinalIgnoreCase)).ToList();
+
+    /// <summary>The list as shown: the entries that pass the filter, in the chosen order.</summary>
+    public static IReadOnlyList<Entry> Arrange(IEnumerable<Entry> entries, SortBy by, string filter) => Sort(Filter(entries, filter), by);
+
+    /// <summary>"name", "date", "size": the order's word for the announcement and the menu.</summary>
+    public static string SortName(SortBy by) => by.ToString().ToLowerInvariant();
 
     public static OpenWay WayOf(Entry entry) => entry.IsFolder ? OpenWay.Folder : WayOf(entry.Path);
 
@@ -71,14 +102,21 @@ public static class FolderListing
         };
     }
 
-    /// <summary>"Dune, 24 items", "Dune, 1 item", "Dune, empty": the list's accessible name (AF-2.1).</summary>
-    public static string ListName(string folder, int count) =>
-        FolderName(folder) + count switch
+    /// <summary>"Dune, 24 items", "Dune, 1 item", "Dune, empty": the list's accessible name (AF-2.1); with a filter on, "Dune, 3 of 24 items, filter chap" (AF-3.8).</summary>
+    public static string ListName(string folder, int count, int total = -1, string filter = "")
+    {
+        if (filter.Length > 0)
+        {
+            return $"{FolderName(folder)}, {count} of {total} items, filter {filter}";
+        }
+
+        return FolderName(folder) + count switch
         {
             0 => ", empty",
             1 => ", 1 item",
             _ => $", {count} items",
         };
+    }
 
     /// <summary>A folder's name for the title and the list: the last part of the path, or the path itself for a drive's root.</summary>
     public static string FolderName(string folder)

@@ -73,7 +73,8 @@ windows on the folder of the file or project in hand, and sends back. It works e
 ### AF-2 The window
 
 - AF-2.1 From the top: the menu bar; the video area (AF-5.6), shown only while a video plays; the list, named
-  "<folder name>, N items" ("Dune, 24 items"; "Dune, empty" for none); the status bar. The list is the one control; a
+  "<folder name>, N items" ("Dune, 24 items"; "Dune, empty" for none; "Dune, 3 of 24 items, filter chap" under a
+  filter, AF-3.8); the status bar. The list is the one control; a
   notice takes its place while it shows (AX-6.4). Tab has nothing to move to.
 - AF-2.2 Items: a file by its name as it is; a folder as "<name>, folder". Folders first, then files, each group in
   Windows' natural order (`StrCmpLogicalW`, so that `2` comes before `10`). Hidden and system entries are left out
@@ -126,6 +127,17 @@ windows on the folder of the file or project in hand, and sends back. It works e
   current entry. The marks live in one folder: showing another folder drops them, a refresh of the same folder keeps
   those still there, and a renamed or deleted entry loses its mark. A mouse click chooses the current entry as before
   and marks nothing. The marks are text in the items rather than the list box's own multiple selection (AF-D9).
+- AF-3.8 **Sort and filter** (asked 2026-10-21). **Folder → Sort by ▸** Name, Date, Size, one checked: folders first
+  in every order, then by name (the natural order), by date newest first, or by size largest first, ties by name
+  (`FolderListing.Sort`, tested); the entry in hand stays selected; "Sorted by date"; the order is a setting
+  (`sortBy`) and holds for every folder and the next window. **Filter…** (Ctrl+Shift+F; Folder → Filter…): the notice
+  "Filter" with the field "Name contains" holding the filter in force; Filter lists only the entries whose name
+  contains the text, any case, and names the list "Dune, 3 of 24 items, filter chap" so that the count is read with
+  the list; an empty field clears it, "Filter cleared", as does **Escape** in the list while a filter is on (Escape
+  does nothing otherwise). A filter that nothing passes shows the one item "No names contain <text>", and a command on
+  it says the same. The filter lives in the folder: another folder drops it, a refresh keeps it. What the list shows
+  is what the commands see: Select all marks the shown entries, the player's queue is the shown media files (AF-5.3),
+  find moves among the shown entries. Find (AF-3.6) jumps, the filter narrows; both are kept.
 
 ### AF-4 Operations
 
@@ -235,7 +247,8 @@ windows on the folder of the file or project in hand, and sends back. It works e
 ### AF-6 Menus, keys, texts
 
 - AF-6.1 Menus, in the standard order of a first menu (AX-6): **Folder (F):** New window Ctrl+N | Open folder… Ctrl+O |
-  Open recent folder ▸ | Go to folder… Ctrl+G | ─ | Up one level Backspace | Refresh F5 | ─ | Show current folder in ▸ (File Explorer
+  Open recent folder ▸ | Go to folder… Ctrl+G | ─ | Up one level Backspace | Refresh F5 | ─ | Sort by ▸ (Name ✓ |
+  Date | Size) | Filter… Ctrl+Shift+F | ─ | Show current folder in ▸ (File Explorer
   Ctrl+W | AxClaude | AxGit | AxTerminal) | ─ | Exit Alt+F4. **Item (I):** File operations ▸ (Cut Ctrl+X | Copy Ctrl+C |
   Paste Ctrl+V | ─ | Select or deselect Space | Select all Ctrl+A | Select none Ctrl+Shift+A | ─ | New folder…
   Ctrl+Shift+N | Rename F2 | Delete… Delete | Copy path Ctrl+Shift+C) | ─ | Open Enter
@@ -252,14 +265,14 @@ windows on the folder of the file or project in hand, and sends back. It works e
 - AF-6.2 Keys (AX-8). Bundle-wide: F1, the control keys, Ctrl+F, F3, Shift+F3, Ctrl+S ("Nothing to save here"),
   Ctrl+Plus, Ctrl+Minus, Page Up and Page Down (the list's own here), Ctrl+Up and Ctrl+Down with Shift (edit controls
   only; the list leaves them alone), Alt+F4. Window-specific (`AxFileKeys`): Enter, Backspace, Alt+Up, F5, F2, Delete,
-  Ctrl+N, Ctrl+O, Ctrl+G, Ctrl+W, Ctrl+Shift+W, Ctrl+E, Ctrl+I, Ctrl+Shift+N, Ctrl+Shift+C, Space, Ctrl+A,
-  Ctrl+Shift+A, Ctrl+P, Ctrl+Right, Ctrl+Left, Ctrl+Shift+Right, Ctrl+Shift+Left, Ctrl+T, Ctrl+Shift+Period,
-  Ctrl+Shift+Comma, Ctrl+Q, Shift+F10, the Applications key, Alt+Enter, Ctrl+X, Ctrl+C, Ctrl+V. Enter, Backspace,
-  Space, F2, Delete, Ctrl+X, Ctrl+C, Ctrl+V, Ctrl+A, Ctrl+Shift+A, Shift+F10 and the Applications key act only while
-  the list has the focus (in a notice's field or the rename box they are the field's; the two menu keys are the list's
-  own, which shows its context menu itself, so the key switch has no case for them; Ctrl+I has a second handler, the
-  open menu's, AF-4.10). The collision test covers the table and lists the keys other windows use otherwise (Ctrl+N,
-  Ctrl+G, Ctrl+E, Ctrl+T, Ctrl+P, Ctrl+C, Ctrl+Shift+C).
+  Ctrl+N, Ctrl+O, Ctrl+G, Ctrl+W, Ctrl+Shift+W, Ctrl+E, Ctrl+I, Ctrl+Shift+N, Ctrl+Shift+C, Ctrl+Shift+F, Escape,
+  Space, Ctrl+A, Ctrl+Shift+A, Ctrl+P, Ctrl+Right, Ctrl+Left, Ctrl+Shift+Right, Ctrl+Shift+Left, Ctrl+T,
+  Ctrl+Shift+Period, Ctrl+Shift+Comma, Ctrl+Q, Shift+F10, the Applications key, Alt+Enter, Ctrl+X, Ctrl+C, Ctrl+V.
+  Enter, Backspace, Space, Escape, F2, Delete, Ctrl+X, Ctrl+C, Ctrl+V, Ctrl+A, Ctrl+Shift+A, Shift+F10 and the
+  Applications key act only while the list has the focus (in a notice's field or the rename box they are the field's;
+  the two menu keys are the list's own, which shows its context menu itself, so the key switch has no case for them;
+  Ctrl+I has a second handler, the open menu's, AF-4.10). The collision test covers the table and lists the keys other
+  windows use otherwise (Ctrl+N, Ctrl+G, Ctrl+E, Ctrl+T, Ctrl+P, Ctrl+C, Ctrl+Shift+C, Ctrl+Shift+F).
 - AF-6.3 The F1 text (`HelpText.Shortcuts`) names them all; `docs/axfile/user-guide.md` is embedded (Help → User
   guide); About is the bundle's (AX-9.9).
 
@@ -270,12 +283,14 @@ One UI Automation notification each, on the list, or on the notice while one sho
 "Nothing playing", "Playing <name>, m:ss of m:ss, speed n", "Cannot play <name>: <reason>", "Created <name>", "Renamed
 to <name>", "Deleted <name>", "Deleted n items", "Copied path", "Copied n paths", "Cut <name>", "Copied <name>", "Cut n
 items", "Copied n items", "Selected", "Deselected", "Selected, n selected", "Deselected, n selected", "n selected",
-"None selected" (AF-3.7), "Added <name>", "Removed <name>", "Started <name>" (AF-4.11), "Pasted <name>", "Pasted n items",
+"None selected" (AF-3.7), "Sorted by <order>", "Filter cleared" (AF-3.8), "Added <name>", "Removed <name>", "Started
+<name>" (AF-4.11), "Pasted <name>", "Pasted n items",
 "Pasting, please wait" (a paste longer than a second), "Refreshed", "Top of the drive", "Not found: <path>", "No program opens
 .xyz. Ctrl+E opens it as text", "Failed: <message>", "<name>, <size>, modified <date>" (Ctrl+I), "Not found" (find),
 "Nothing to save here", "Text size n", "Windows text size", "Copied diagnostics", "<name>, <size>, modified <date>, n
 selected" (Ctrl+I with marks); and the guards "No folder" (nothing
-listed yet), "No items in this folder" (a command on an empty folder's one item, AF-2.2), "Nothing selected", "Not a file" (Ctrl+E or Open with… on a folder), "Not a sound or video file"
+listed yet), "No items in this folder" (a command on an empty folder's one item, AF-2.2), "No names contain <text>"
+(the same under a filter, AF-3.8), "Nothing selected", "Not a file" (Ctrl+E or Open with… on a folder), "Not a sound or video file"
 (Player → Play on another entry), "Not a time" (Go to time), "Speed n is not supported here", "Name unchanged" (a
 rename to the same name), "Nothing to paste" (no files on the clipboard), "Already in this folder" (a cut entry
 pasted where it is), "Type a name" and the
@@ -284,9 +299,9 @@ other reasons of `FileOperations.CheckName`. A new selection is NVDA's own readi
 ### AF-8 Settings, log, status
 
 - AF-8.1 `%APPDATA%\Axit\axfile.json` (AX-5.3; `FileSettings` on `WindowSettings`): `lastFolder`, `recentFolders`
-  (ten), `showHidden` off, `sayEachFile` on, `speed` 1, `seekSeconds` 15, `programs` (the user's own, each a `name`
-  and a `path`, AF-4.11; an entry without either is dropped), and the window base's font, update check and window
-  fields.
+  (ten), `showHidden` off, `sortBy` name (`name`, `date` or `size`, AF-3.8), `sayEachFile` on, `speed` 1,
+  `seekSeconds` 15, `programs` (the user's own, each a `name` and a `path`, AF-4.11; an entry without either is
+  dropped), and the window base's font, update check and window fields.
 - AF-8.2 The log is `%LOCALAPPDATA%\Axit\logs\axfile.log`: the start, the exit, the errors of the operations and the
   player with Windows' message; no names of files or folders.
 
@@ -375,7 +390,7 @@ single-threaded-apartment thread of its own (AX-7.5).
 - A question on a name collision when pasting (replace, keep both, skip), where the shell now numbers the copy
   (AF-4.8); a paste of many items that names them.
 - Shift+Delete, a permanent delete, after its own question.
-- Sorting by date or size, and a "media only" filter of the list.
+- A "media only" filter of the list (the name filter and the sort orders came 2026-10-21, AF-3.8).
 - Whether a `.m3u` file in the folder should be the queue when there is one.
 
 ## 8. Status
@@ -397,4 +412,5 @@ single-threaded-apartment thread of its own (AX-7.5).
   the notices. AxFile is no longer unchecked; it stays a first draft in scope (§7).
 - 2026-10-21, after the release, on the branch `axfile`, at the user's ask: the one item of an empty folder (AF-2.2),
   Ctrl+N for a new window (AF-3.3), the selection with Space and the operations on it (AF-3.7, AF-D9; pause moved to
-  Ctrl+P), and Open with a custom program ▸, the user's own programs and scripts (AF-4.11). Not yet checked with NVDA.
+  Ctrl+P), Open with a custom program ▸, the user's own programs and scripts (AF-4.11), and, chosen by the user from a
+  list of what a file browser makes easy, Sort by and the filter (AF-3.8). Not yet checked with NVDA.
