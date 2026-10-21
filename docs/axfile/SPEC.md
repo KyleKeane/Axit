@@ -291,8 +291,9 @@ single-threaded-apartment thread of its own (AX-7.5).
   renderer is documented to adjust the pitch at a changed rate and decodes those formats. MFPlay is the plainest way
   in (one function, two interfaces, the events on the creating thread), and `mfplay.dll` ships with Windows 11; its
   documentation calls it superseded by `IMFMediaEngine` and the WinRT `MediaPlayer`, so the Media Engine, the same
-  pipeline with more plumbing, is the fallback should a Windows drop it. The formats that worked on the user's
-  machine are recorded here after the NVDA pass.
+  pipeline with more plumbing, is the fallback should a Windows drop it. The user's NVDA pass of 2026-10-21 (test
+  plan §4) played MP3 chapters and an MP4 video on his machine through this engine, with the voice's pitch kept at
+  1.5 and the other speeds; the other formats of AF-5.1 are not yet heard.
 - **AF-D4 Volume is Windows'.** The keyboard's volume keys change the system volume from any window and are read by
   NVDA; two more keys in the app would duplicate them, and the bundle's Ctrl+Up and Ctrl+Down are the paragraph keys
   (AX-8.2).
@@ -336,3 +337,7 @@ single-threaded-apartment thread of its own (AX-7.5).
   operations ▸ with cut, copy and paste (AF-4.8), the rename in place (AF-4.2), Open in Axit ▸ (AF-4.9), Open with
   Windows and Enter's fallback to the Open with dialog (AF-3.2, AF-4.7), and Ctrl+I inside the open menu (AF-4.10);
   the rename and the clipboard round trip probed off screen; the key inside the menu waits for the NVDA pass.
+- Released as 3.1.0 on 2026-10-21, and the user's NVDA pass of the whole test plan passed the same day: the list and
+  the ways round, the windows out and back, the operations, the entry's menu with the rename box, the clipboard, Ctrl+I
+  inside the menu, the Windows dialogs and menu, the player (MP3, MP4, the speeds with the pitch kept), the texts and
+  the notices. AxFile is no longer unchecked; it stays a first draft in scope (§7).
