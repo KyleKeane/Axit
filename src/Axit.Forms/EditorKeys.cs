@@ -16,6 +16,11 @@ public static class EditorKeys
     /// <summary>File → Show current file in → File Explorer (AD-4.1), the key AxClaude uses for its folder.</summary>
     public const Keys ShowInExplorer = Keys.Control | Keys.W;
 
+    /// <summary>Edit → Undo and Redo over the window's own history (AD-2.5); Ctrl+Shift+Z is Redo as well, as in most editors.</summary>
+    public const Keys Undo = Keys.Control | Keys.Z;
+    public const Keys Redo = Keys.Control | Keys.Y;
+    public const Keys RedoAlso = Keys.Control | Keys.Shift | Keys.Z;
+
     /// <summary>Every key above with its name, for the editor apps' tables, the collision test and the F1 texts.</summary>
     public static readonly IReadOnlyList<(string Name, Keys Key)> All =
     [
@@ -23,6 +28,9 @@ public static class EditorKeys
         ("Open", Open),
         ("Save as", SaveAs),
         ("Show the file in File Explorer", ShowInExplorer),
+        ("Undo", Undo),
+        ("Redo", Redo),
+        ("Redo (also)", RedoAlso),
         ("Go to line", GoToLine),
         ("Word wrap", WordWrap),
     ];

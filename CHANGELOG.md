@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+- AxDown: Undo (Ctrl+Z) and Redo (Ctrl+Y, or Ctrl+Shift+Z), in the Edit menu too, over the window's own history, as far back as the file was opened in it: a run of typing or of deleting is one step, a paste, a cut or a reload from disk one step each; "Undone", "Redone", "Nothing to undo", "Nothing to redo". Saving keeps the history; Open and New end it. The edit field's own one-level undo is replaced.
+- AxJSON: the same Undo and Redo, a Format being one step.
 - AxFile: a new name that only sounds like another entry's, differing by a trailing or doubled space, a different kind of space, an invisible character or an accent written two ways, is refused with "Reads the same as …, which is already here", in Rename, New folder and Move to new folder; Windows would keep both and the list would read one name twice.
 - AxFile: Shift with Down, Up, Home or End selects a run of entries as in File Explorer, from where Shift was first pressed to where you are, each entry reading "selected" as it is reached; what was selected before stays.
 

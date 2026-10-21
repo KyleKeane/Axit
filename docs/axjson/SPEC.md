@@ -85,7 +85,7 @@ otherwise. Native fields mean NVDA reads them by itself, and the caret cannot le
   expected a value, found '}'". The whole text is replaced through the selection, one step for Undo, and the caret is
   put back at its offset.
 - AJ-2.4 (Planned) The caret's path in the document ("permissions › allow › 3") on demand in the status bar.
-- AJ-2.5 **Undo and redo** (specified 2026-10-21 at the user's ask, with AxDown's AD-2.5, to be built): the history of
+- AJ-2.5 **Undo and redo** (specified and built 2026-10-21 at the user's ask, with AxDown's AD-2.5): the history of
   the window's own that the shared shell keeps is AxJSON's as it is AxDown's: Ctrl+Z takes the last step back, Ctrl+Y
   puts it back, a Format is one step (AJ-2.3), and nothing reaches into an earlier file, window or session.
 
@@ -171,4 +171,5 @@ edit control holds it, every input is accepted without an exception, and the rep
   at the user's ask before its NVDA pass; `docs/axjson/nvda-test-plan.md` is the pass to run. 2.10.0: called beta in
   About and the changelog until that pass.
 - 2026-10-21: undo and redo specified (AJ-2.5), the shared shell's history as in AxDown, and the structured mode's changes
-  as steps of it (AJ-3.5); to be built with AxDown's.
+  as steps of it (AJ-3.5); AJ-2.5 built the same day with AxDown's (Ctrl+Z, Ctrl+Y, Edit → Undo and Redo; the NVDA pass,
+  test plan 3.1, is still to run), AJ-3.5 comes with the structured mode.

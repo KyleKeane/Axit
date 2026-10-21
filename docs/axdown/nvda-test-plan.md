@@ -21,12 +21,19 @@ letter), and a `long.md` with headings and lines longer than the window.
 1. In `long.md`, Down Arrow reads one line at a time; Ctrl+Right reads words; NVDA's say-all reads on. Nothing is
    spoken by AxDown on these keys.
 2. Type a sentence; Backspace and Delete behave as in Notepad; Enter makes a line; Tab types a tab (the focus does
-   not leave the editor). Ctrl+Z undoes the last change.
+   not leave the editor). Ctrl+Z: "Undone", the whole sentence is gone in one step; Ctrl+Y: "Redone", it is back.
 3. Page Down moves a screen and reaches the last line; Page Up the first. In a short file both do something.
 3a. In the tutorial file, Ctrl+Down moves to the first line of the next paragraph (a line with text after a blank line), one paragraph per press however many rows it wraps to, a heading with blank lines around it being a paragraph of its own; Ctrl+Up goes to the start of the current paragraph, then to the one before; from the last paragraph Ctrl+Down goes to the end of the file. Ctrl+Shift+Down: NVDA says the text selected; Ctrl+Shift+Up: unselected. The status bar's line number follows.
 4. Ctrl+Shift+W: "Word wrap off"; a long line is now one line; the caret stays on the same character. Again:
    "Word wrap on"; the caret stays.
 5. Ctrl+M, Ctrl+H, Ctrl+I, Ctrl+J insert nothing.
+6. Undo and redo (AD-2.5). Type a word, wait two seconds, type another: Ctrl+Z removes the second word only, Ctrl+Z
+   again the first, a third Ctrl+Z says "Nothing to undo"; Ctrl+Y twice puts both back, a third says "Nothing to
+   redo". Paste a line (Ctrl+V) and type after it: Ctrl+Z takes the typed text, then the pasted line. Hold Backspace
+   over a few words: one Ctrl+Z restores them all, the caret after them. Type, Ctrl+S ("Saved"), Ctrl+Z: the typing
+   is undone past the save and the title has its star again. Edit, Undo and Edit, Redo do the same as the keys.
+   Open another file: Ctrl+Z says "Nothing to undo". Nothing but the announcement is spoken on any of these, and
+   NVDA's arrow keys read the text as restored.
 
 ## 3. Files
 

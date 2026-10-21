@@ -44,7 +44,8 @@ and `broken.json`, the same with the comma after `"opus"` removed and a comma ad
 ## 3. Format (AJ-2.3)
 
 1. In `settings.json`, put everything on one line (join the lines), then Ctrl+Shift+F: "Formatted"; Ctrl+Home and
-   Down Arrow read `{`, then `  "model": "opus",`, two spaces per level, one key per line; Ctrl+Z puts the one line back.
+   Down Arrow read `{`, then `  "model": "opus",`, two spaces per level, one key per line; Ctrl+Z puts the one line back
+   ("Undone"); Ctrl+Y formats it again ("Redone"). AxDown's section 2, step 6 (the history) holds here too.
 2. In `broken.json`, Ctrl+Shift+F: "Formatted, repaired: 1 trailing comma, 1 missing comma"; Ctrl+E then says "No next
    error". Type `'x'` as a value somewhere and Ctrl+Shift+F: "Formatted, repaired: 1 single-quoted string".
 3. Delete a value, leaving `"count": ,`, then Ctrl+Shift+F: "Not valid JSON: line 4, expected a value, found ','"; the

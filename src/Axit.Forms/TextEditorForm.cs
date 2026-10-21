@@ -27,6 +27,19 @@ public sealed class TextEditorForm : AxitForm
     private readonly ToolStripMenuItem _wordWrapItem;
     private readonly System.Windows.Forms.Timer _statusTimer = new() { Interval = 300 };
 
+    // ---- undo and redo (AD-2.5): the window's own history over the text, one step per change ----
+    private readonly EditHistory _history = new();
+
+    /// <summary>A second without a change ends a run of typing, so that the next key starts a step of its own.</summary>
+    private readonly System.Windows.Forms.Timer _runTimer = new() { Interval = 1000 };
+
+    /// <summary>The text as the history last saw it: the before of the next change.</summary>
+    private string _text = string.Empty;
+
+    /// <summary>Where the caret was when a character, Backspace or Delete was typed, until the change it makes is recorded; -1 otherwise.</summary>
+    private int _typedAt = -1;
+    private bool _replaying;
+
     private TextDocument _document = TextDocument.Empty();
     private string? _path;
     private DateTime? _lastWriteTime;
@@ -71,7 +84,8 @@ public sealed class TextEditorForm : AxitForm
         file.DropDownItems.Add(new ToolStripMenuItem("E&xit", null, (_, _) => Close()) { ShortcutKeyDisplayString = "Alt+F4" });
 
         var edit = new ToolStripMenuItem("&Edit");
-        edit.DropDownItems.Add(new ToolStripMenuItem("&Undo", null, (_, _) => _editor.Undo()) { ShortcutKeyDisplayString = "Ctrl+Z" });
+        edit.DropDownItems.Add(Item("&Undo", Undo, EditorKeys.Undo));
+        edit.DropDownItems.Add(Item("&Redo", Redo, EditorKeys.Redo));
         edit.DropDownItems.Add(new ToolStripSeparator());
         edit.DropDownItems.Add(new ToolStripMenuItem("Cu&t", null, (_, _) => _editor.Cut()) { ShortcutKeyDisplayString = "Ctrl+X" });
         edit.DropDownItems.Add(new ToolStripMenuItem("&Copy", null, (_, _) => _editor.Copy()) { ShortcutKeyDisplayString = "Ctrl+C" });
@@ -131,13 +145,23 @@ public sealed class TextEditorForm : AxitForm
         _editor.Dock = DockStyle.Fill;
         _editor.TabIndex = 0;
         _editor.KeyDown += OnEditorKeyDown;
-        _editor.KeyUp += (_, _) => ScheduleStatus();
+        _editor.KeyPress += OnEditorKeyPress;
+        _editor.KeyUp += (_, _) =>
+        {
+            _typedAt = -1;
+            ScheduleStatus();
+        };
         _editor.MouseUp += (_, _) => ScheduleStatus();
         _editor.TextChanged += OnTextChanged;
         _statusTimer.Tick += (_, _) =>
         {
             _statusTimer.Stop();
             UpdateStatus();
+        };
+        _runTimer.Tick += (_, _) =>
+        {
+            _runTimer.Stop();
+            _history.Break();
         };
 
         // ---- the status bar (AD-9): the bundle's pair, no AccessibleName, no Spring ----
@@ -282,6 +306,13 @@ public sealed class TextEditorForm : AxitForm
             case EditorKeys.WordWrap:
                 ToggleWordWrap();
                 return true;
+            case EditorKeys.Undo:
+                Undo();
+                return true;
+            case EditorKeys.Redo:
+            case EditorKeys.RedoAlso:
+                Redo();
+                return true;
         }
 
         foreach (var command in _app.Commands)
@@ -317,12 +348,29 @@ public sealed class TextEditorForm : AxitForm
         {
             // AD-5.1: in an EDIT control these arrive as Backspace, Tab, line feed and Enter characters.
             e.Handled = e.SuppressKeyPress = true;
+            return;
+        }
+
+        if (e.KeyCode == Keys.Delete && !e.Shift)
+        {
+            // Delete, and Ctrl+Delete for a word, come as no character: typed for the history (AD-2.5); Shift+Delete is a cut.
+            _typedAt = _editor.SelectionStart;
+        }
+    }
+
+    /// <summary>A character, Backspace, Enter or Tab about to change the text: where it was typed, for the history's runs (AD-2.5); the control characters of Ctrl+letter are not typing.</summary>
+    private void OnEditorKeyPress(object? sender, KeyPressEventArgs e)
+    {
+        if (e.KeyChar >= ' ' || e.KeyChar is '\b' or '\r' or '\t')
+        {
+            _typedAt = _editor.SelectionStart;
         }
     }
 
     // ---- the document (AD-3) ----
 
-    private void LoadDocument(string? path)
+    /// <summary>The file read into the editor, or an empty document; the history ends with it unless <paramref name="keepHistory"/> (a reload, AD-2.5).</summary>
+    private void LoadDocument(string? path, bool keepHistory = false)
     {
         if (_path is { } old && !string.Equals(old, path, StringComparison.OrdinalIgnoreCase))
         {
@@ -357,6 +405,13 @@ public sealed class TextEditorForm : AxitForm
         _editor.Select(0, 0);
         _editor.ClearUndo();
         _loading = false;
+        _text = _editor.Text;
+        if (!keepHistory)
+        {
+            _history.Clear();
+            _runTimer.Stop();
+        }
+
         _changed = false;
         UpdateTitle();
         UpdateStatus();
@@ -365,6 +420,17 @@ public sealed class TextEditorForm : AxitForm
 
     private void OnTextChanged(object? sender, EventArgs e)
     {
+        if (!_loading && !_replaying)
+        {
+            // AD-2.5: every change the user makes, as the text before and after it; a typed key says where it was typed.
+            var after = _editor.Text;
+            _history.Record(_text, after, _editor.SelectionStart, _typedAt);
+            _text = after;
+            _typedAt = -1;
+            _runTimer.Stop();
+            _runTimer.Start();
+        }
+
         if (!_loading && !_changed)
         {
             _changed = true;
@@ -372,6 +438,46 @@ public sealed class TextEditorForm : AxitForm
         }
 
         ScheduleStatus();
+    }
+
+    // ---- undo and redo (AD-2.5) ----
+
+    private void Undo()
+    {
+        if (_history.Undo() is not { } step)
+        {
+            Announce("Nothing to undo", true);
+            return;
+        }
+
+        Replace(step.Start, step.Inserted.Length, step.Removed);
+        Announce("Undone", true);
+    }
+
+    private void Redo()
+    {
+        if (_history.Redo() is not { } step)
+        {
+            Announce("Nothing to redo", true);
+            return;
+        }
+
+        Replace(step.Start, step.Removed.Length, step.Inserted);
+        Announce("Redone", true);
+    }
+
+    /// <summary>A step applied through the selection, as Format is, so that NVDA hears only the announcement; the caret lands after the text put in, where the change was.</summary>
+    private void Replace(int start, int length, string text)
+    {
+        _replaying = true;
+        _editor.Select(start, length);
+        _editor.SelectedText = text;
+        _replaying = false;
+        _text = _editor.Text;
+        _runTimer.Stop();
+        _editor.Select(start + text.Length, 0);
+        _editor.ScrollToCaret();
+        UpdateStatus();
     }
 
     private void NewDocument() => AskToSave(() => LoadDocument(null));
@@ -499,12 +605,14 @@ public sealed class TextEditorForm : AxitForm
         Reload($"Reloaded, {DocumentName} changed on disk");
     }
 
-    /// <summary>The file read again, the caret back on its line and column, <paramref name="announcement"/> said.</summary>
+    /// <summary>The file read again, the caret back on its line and column, <paramref name="announcement"/> said; one step of the history (AD-2.5).</summary>
     private void Reload(string announcement)
     {
+        var before = _text;
         var (line, column, _) = Position();
-        LoadDocument(_path);
+        LoadDocument(_path, keepHistory: true);
         MoveTo(line, column);
+        _history.Record(before, _text, _editor.SelectionStart, typedAt: -1);
         Announce(announcement, false);
     }
 

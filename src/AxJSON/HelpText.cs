@@ -35,7 +35,8 @@ public static class HelpText
           Arrow keys, Home, End, Ctrl+Home, Ctrl+End, Ctrl+Left, Ctrl+Right: move as in any text
           Page Up, Page Down: one screen up or down, or the first or last line
           Ctrl+Up, Ctrl+Down: the previous or next paragraph (the first line after a blank line)
-          Shift with any of them, or Ctrl+A: select. Ctrl+C, Ctrl+X, Ctrl+V: copy, cut, paste. Ctrl+Z: undo
+          Shift with any of them, or Ctrl+A: select. Ctrl+C, Ctrl+X, Ctrl+V: copy, cut, paste
+          Ctrl+Z: undo the last change, as far back as the file was opened here. Ctrl+Y or Ctrl+Shift+Z: redo
           Enter: a new line. Tab: a tab character
 
         Notices

@@ -46,7 +46,7 @@ Past the last one of a kind you hear "No next key" and the caret stays. The same
 
 ## Format
 
-Edit, Format (Ctrl+Shift+F) writes the file out again with two spaces per level and one key or item per line, keeping the order of the keys and the file's line endings, and says "Formatted". Small mistakes are repaired on the way and named: a comma after the last item, a missing comma between two items, single quotes, a key without quotes, and comments, so "Formatted, repaired: 1 trailing comma, 1 unquoted key". Anything else leaves the file as it is and names the line: "Not valid JSON: line 12, expected a value, found '}'". Format is one step for Undo (Ctrl+Z).
+Edit, Format (Ctrl+Shift+F) writes the file out again with two spaces per level and one key or item per line, keeping the order of the keys and the file's line endings, and says "Formatted". Small mistakes are repaired on the way and named: a comma after the last item, a missing comma between two items, single quotes, a key without quotes, and comments, so "Formatted, repaired: 1 trailing comma, 1 unquoted key". Anything else leaves the file as it is and names the line: "Not valid JSON: line 12, expected a value, found '}'". Format is one step for Undo (Ctrl+Z), and Redo (Ctrl+Y) formats again. The history reaches back to when the file was opened in this window, a run of typing being one step: "Undone", "Redone", "Nothing to undo", "Nothing to redo".
 
 ## Text size and fonts
 
@@ -55,7 +55,7 @@ Ctrl+Plus and Ctrl+Minus make the text larger and smaller, and AxJSON says the n
 ## Menus
 
 - **File**: New, Open, Open recent file, Save, Save as, Show current file in (File Explorer, Ctrl+W; AxGit, a git manager on the repository that holds the file; AxTerminal, a shell in the file's folder; AxFile, the file's folder with the file selected), Exit.
-- **Edit**: Undo, Cut, Copy, Paste, Select all, Format (Ctrl+Shift+F).
+- **Edit**: Undo, Redo, Cut, Copy, Paste, Select all, Format (Ctrl+Shift+F).
 - **Navigate**: Find, Find next, Find previous, Go to line, and the submenus Next and Previous, each with Key, Object, Array, Item and Error.
 - **Options**: Text (Word wrap, Font, Larger text, Smaller text, Windows text size), General (Check for updates at start) and Developer (Open settings file, which opens axjson.json in a new AxJSON window, and Copy diagnostics).
 - **Axit**: the bundle's menu, the same in every Axit window: New window, Recently closed, Open windows, Open windows by type, Close all windows, Check for updates, Update to the newest version while one is known, and About.

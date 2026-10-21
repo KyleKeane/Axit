@@ -30,7 +30,7 @@ dotnet test tests/Axit.Tests/Axit.Tests.csproj     # TextDocumentTests, EditorSe
 - In an EDIT control Ctrl+H, Ctrl+I, Ctrl+J and Ctrl+M arrive as Backspace, Tab, line feed and Enter characters: `OnEditorKeyDown` swallows the unhandled ones (SPEC.md AD-5.1), and a handled one sets `SuppressKeyPress`.
 - Changing `WordWrap` recreates the control's handle and loses the caret; `ToggleWordWrap` saves and restores the selection.
 - `GetLineFromCharIndex` counts wrapped rows while word wrap is on; the line and column of the status bar and Go to line count the file's lines by scanning the text for `\n` (`Position`), 300 ms after the last key so that typing stays cheap.
-- `_editor.Text` copies the whole text on every read; it is read on command and by the status timer, never per keystroke.
+- `_editor.Text` copies the whole text on every read; it is read on command, by the status timer and, since the undo history (SPEC.md AD-2.5, 2026-10-21), once per change in `TextChanged`, accepted for the files the editor holds; nothing else reads it per keystroke.
 - The form's `AccessibleRole` is `Window`: NVDA speaks a window with that role when it opens ("README.md - AxDown window"); without it the window is a nameless pane and only the field is heard (2.1.1).
 - The notice state is the window base's `NoticeOpen`, not the panel's `Visible` (false for every child while the form is not shown); the same flag keeps the window's shortcuts and Alt/F10 off while a notice shows (see `src/AxClaude/CLAUDE.md` for the full story of these behaviours, which every window shares).
 - The notice flow (`ShowNotice`, `CloseNotice`, `Announce`), the fonts, the window's place and the update flow are the window base's, `Axit.Forms/AxitForm` (bundle AX-6.5), since 2.12.0.
