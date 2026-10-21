@@ -5,8 +5,8 @@ namespace AxFile.Core;
 /// <summary>
 /// Everything AxFile remembers between runs (SPEC.md AF-8.1), in <c>%APPDATA%\Axit\axfile.json</c> through the bundle's
 /// <see cref="SettingsFile"/>: the font, the update check and the window's place from <see cref="WindowSettings"/>,
-/// plus the last folder, the recent folders, whether hidden entries show, the player's speed and seek step, and
-/// whether each file is said as it starts. A missing or unreadable file falls back to the defaults.
+/// plus the last folder, the recent folders, whether hidden entries show, the player's speed and seek step, whether
+/// each file is said as it starts, and the user's own programs. A missing or unreadable file falls back to the defaults.
 /// </summary>
 public sealed class FileSettings : WindowSettings
 {
@@ -29,6 +29,9 @@ public sealed class FileSettings : WindowSettings
 
     /// <summary>What Ctrl+Left and Ctrl+Right move by.</summary>
     public int SeekSeconds { get; set; } = 15;
+
+    /// <summary>The user's own programs and scripts of Open with a custom program ▸ (AF-4.11), in the order added.</summary>
+    public List<UserProgram> Programs { get; set; } = [];
 
     public static string DefaultPath => AppPaths.SettingsFile("axfile");
 
@@ -74,5 +77,8 @@ public sealed class FileSettings : WindowSettings
         {
             SeekSeconds = 15;
         }
+
+        Programs ??= [];
+        Programs.RemoveAll(program => string.IsNullOrWhiteSpace(program?.Name) || string.IsNullOrWhiteSpace(program?.Path));
     }
 }

@@ -43,11 +43,12 @@ A name Windows refuses, a file in use or a folder you may not touch gives one li
 
 ## The entry's menu, and what Windows does for you
 
-**Shift+F10**, the Applications key or a right click opens the entry's menu as a context menu; the menu bar's Item menu is the same menu. In order: File operations (the submenu above), Open, Open in editor, Open in Axit, Open with Windows, Open with another program, Show in File Explorer, Information, Properties, and More from Windows. **Ctrl+I** inside the menu says the entry's name, size and date without closing it.
+**Shift+F10**, the Applications key or a right click opens the entry's menu as a context menu; the menu bar's Item menu is the same menu. In order: File operations (the submenu above), Open, Open in editor, Open in Axit, Open with Windows, Open with another program, Open with a custom program, Show in File Explorer, Information, Properties, and More from Windows. **Ctrl+I** inside the menu says the entry's name, size and date without closing it.
 
 - **Open in Axit** lists every app of the bundle: AxDown and AxJSON open the file, AxGit the repository that holds the entry, AxClaude and AxTerminal the folder (the entry's folder, for a file), AxFile a new window on the folder. "Not a file" when an editor is chosen on a folder.
 - **Open with Windows** opens the entry with the program Windows has for it, a folder in File Explorer; when Windows has none it asks which program, in the Windows dialog, as File Explorer does. Enter on a file AxFile has no app for does the same.
 - **Open with another program...** always asks which program, in that dialog, and runs it.
+- **Open with a custom program** is your own list of programs and scripts, "1. Notepad++ (C:\Program Files\Notepad++\notepad++.exe)", and "No programs yet" before you add one. **Add a program** opens the Windows file picker on programs and scripts (`.exe`, `.cmd`, `.bat`, `.ps1`, `.py`; All files for anything else), then asks for the name the menu shows, with the file's name filled in; "Added Notepad++". **Remove a program** lists them; choose one to take it off, "Removed Notepad++". Choosing a program runs it on the entry, or on every selected entry at once, each path an argument, in the entry's folder; "Started Notepad++". A PowerShell script runs through `powershell.exe -File` with the paths after it; a batch file or a Python script runs as Windows runs it. A script of yours that takes files as arguments is a command of AxFile this way.
 - **Properties** (Alt+Enter, as in File Explorer) shows the Properties sheet of the file or the folder.
 - **More from Windows...** shows the full Windows menu for the entry, the one File Explorer shows, with every installed program's entries: Send to, an archiver, a cloud drive. Its first item is selected when it opens; Escape closes it. That menu is Windows' own, so its contents change with what you install; AxFile's own menu does not.
 
@@ -69,7 +70,7 @@ The volume is Windows' own: your keyboard's volume keys work from anywhere. A vi
 ## Menus
 
 - **Folder**: New window (Ctrl+N), Open folder (Ctrl+O), Open recent folder, Go to folder (Ctrl+G), Up one level (Backspace), Refresh (F5), Show current folder in (File Explorer Ctrl+W, AxClaude, AxGit, AxTerminal), Exit.
-- **Item**: File operations (Cut Ctrl+X, Copy Ctrl+C, Paste Ctrl+V, Select or deselect Space, Select all Ctrl+A, Select none Ctrl+Shift+A, New folder Ctrl+Shift+N, Rename F2, Delete, Copy path Ctrl+Shift+C), Open (Enter), Open in editor (Ctrl+E), Open in Axit (every app), Open with Windows, Open with another program, Show in File Explorer (Ctrl+Shift+W), Information (Ctrl+I), Properties (Alt+Enter), More from Windows. The same menu opens on the entry with Shift+F10, the Applications key or a right click; Ctrl+I inside it says the entry.
+- **Item**: File operations (Cut Ctrl+X, Copy Ctrl+C, Paste Ctrl+V, Select or deselect Space, Select all Ctrl+A, Select none Ctrl+Shift+A, New folder Ctrl+Shift+N, Rename F2, Delete, Copy path Ctrl+Shift+C), Open (Enter), Open in editor (Ctrl+E), Open in Axit (every app), Open with Windows, Open with another program, Open with a custom program (your list, Add a program, Remove a program), Show in File Explorer (Ctrl+Shift+W), Information (Ctrl+I), Properties (Alt+Enter), More from Windows. The same menu opens on the entry with Shift+F10, the Applications key or a right click; Ctrl+I inside it says the entry.
 - **Player**: Play (Enter), Pause or resume (Ctrl+P), Next file, Previous file, Forward 15 seconds, Back 15 seconds, Go to time (Ctrl+T), Faster, Slower, Normal speed, Say each file as it starts, What is playing (Ctrl+Q).
 - **Options**: Text (font and size), General (the update check), Developer (the settings file, diagnostics).
 - **Axit**: new windows of every app, the files and folders closed lately, the open windows, updates, About.
@@ -77,7 +78,7 @@ The volume is Windows' own: your keyboard's volume keys work from anywhere. A vi
 
 ## Settings
 
-Everything you change is kept in `%APPDATA%\Axit\axfile.json`: the last folder, the recent folders, the speed, the font and text size, the update check, and two switches with no menu item: `showHidden` (hidden and system entries in the list) and `seekSeconds` (what Ctrl+Left and Ctrl+Right move by, 15). Options, Developer, Open settings file opens it in AxJSON.
+Everything you change is kept in `%APPDATA%\Axit\axfile.json`: the last folder, the recent folders, the speed, the font and text size, the update check, your custom programs (`programs`, a name and a path each), and two switches with no menu item: `showHidden` (hidden and system entries in the list) and `seekSeconds` (what Ctrl+Left and Ctrl+Right move by, 15). Options, Developer, Open settings file opens it in AxJSON.
 
 ## Updates
 

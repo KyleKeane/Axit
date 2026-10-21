@@ -153,8 +153,8 @@ windows on the folder of the file or project in hand, and sends back. It works e
   menu, the same items in the same order, on the selected entry (a right click selects the entry under it first, as
   File Explorer does). It is the window's own menu, fixed, with mnemonics and listed in F1, not the shell's (AF-D8).
   Its shape (AF-6.1): File operations ▸ first, then the ways to open (Open, Open in editor, Open in Axit ▸, Open with
-  Windows, Open with another program…), then Show in File Explorer, Information and Properties, and More from
-  Windows… last. One `ItemMenu` is the list's context menu and another the bar's Item drop-down, both filled by the
+  Windows, Open with another program…, Open with a custom program ▸), then Show in File Explorer, Information and
+  Properties, and More from Windows… last. One `ItemMenu` is the list's context menu and another the bar's Item drop-down, both filled by the
   same method, so that the bar's menu is an exact copy.
 - AF-4.7 **Windows' own ways**, items of the entry's menu, each one of the system's own windows like the folder picker
   (AX-7.2): **Open with Windows** opens the entry with the program Windows has for it (a folder in File Explorer),
@@ -182,6 +182,21 @@ windows on the folder of the file or project in hand, and sends back. It works e
   entry a menu is about can be checked before choosing. WinForms routes the keys of an open menu to the menu, not to
   the window, so `ItemMenu` takes the key itself. The Windows menu (More from Windows…) is Windows' own and does not
   have it.
+- AF-4.11 **Open with a custom program ▸** (asked 2026-10-21): the user's own list of programs and scripts, kept in
+  the settings (`programs`, a name and a path each, AF-8.1), shown as "1. name (path)" (AX-9.5), or "No programs
+  yet" while the list is empty, then ─, **Add a program…** and **Remove a program ▸**. Add a program… opens the
+  Windows file picker on programs and scripts (`.exe`, `.cmd`, `.bat`, `.ps1`, `.py`; every file behind the second
+  filter), then the notice "Add a program" with the field "Name" holding the file's name without its extension and
+  the buttons Add and Cancel; "Added <name>". Remove a program ▸ lists them by name; choosing one takes it off,
+  "Removed <name>". Choosing a program runs it once on the selected entries, or the current one (AF-3.7), every path
+  an argument, in the first entry's folder: a `.ps1` through `powershell.exe -NoProfile -ExecutionPolicy Bypass
+  -File <script>`, since Windows opens a script file in an editor; anything else as the shell starts it
+  (`ShellExecute` with the arguments, so a batch file and a script whose type has a program registered run too);
+  "Started <name>", or "Failed: <reason>" when it cannot start (the file gone, no program for the type). The list is
+  refilled each time the submenu opens, so two windows see each other's additions after a restart only (the settings
+  are the window's, AF-8.1). It is the shape the user-defined shells of AxTerminal are to take (docs/axit/plan.md):
+  a list in the app's settings, added through the file picker and a notice for the name, removed from a submenu.
+  `UserPrograms` in `AxFile.Core` is tested; the menu and the start are the window's.
 
 ### AF-5 The player
 
@@ -225,8 +240,9 @@ windows on the folder of the file or project in hand, and sends back. It works e
   Paste Ctrl+V | ─ | Select or deselect Space | Select all Ctrl+A | Select none Ctrl+Shift+A | ─ | New folder…
   Ctrl+Shift+N | Rename F2 | Delete… Delete | Copy path Ctrl+Shift+C) | ─ | Open Enter
   | Open in editor Ctrl+E | Open in Axit ▸ (AxClaude | AxDown | AxJSON | AxGit | AxTerminal | AxFile) | Open with
-  Windows | Open with another program… | Show in File Explorer Ctrl+Shift+W | Information Ctrl+I | Properties
-  Alt+Enter | ─ | More from Windows…; the same menu is the list's context menu (AF-4.6). **Player (P):** Play Enter | Pause or resume Ctrl+P | Next file Ctrl+Shift+Right | Previous
+  Windows | Open with another program… | Open with a custom program ▸ (1. name (path) … or No programs yet | ─ | Add a
+  program… | Remove a program ▸) | Show in File Explorer Ctrl+Shift+W | Information Ctrl+I | Properties Alt+Enter | ─
+  | More from Windows…; the same menu is the list's context menu (AF-4.6). **Player (P):** Play Enter | Pause or resume Ctrl+P | Next file Ctrl+Shift+Right | Previous
   file Ctrl+Shift+Left | Forward 15 seconds Ctrl+Right | Back 15 seconds Ctrl+Left | Go to time… Ctrl+T | ─ | Faster
   Ctrl+Shift+Period | Slower Ctrl+Shift+Comma | Normal speed | ─ | Say each file as it starts ✓ | What is playing
   Ctrl+Q. **Options (O):** Text ▸ (Font… | Larger text Ctrl+Plus | Smaller text Ctrl+Minus | Windows text size) |
@@ -254,7 +270,7 @@ One UI Automation notification each, on the list, or on the notice while one sho
 "Nothing playing", "Playing <name>, m:ss of m:ss, speed n", "Cannot play <name>: <reason>", "Created <name>", "Renamed
 to <name>", "Deleted <name>", "Deleted n items", "Copied path", "Copied n paths", "Cut <name>", "Copied <name>", "Cut n
 items", "Copied n items", "Selected", "Deselected", "Selected, n selected", "Deselected, n selected", "n selected",
-"None selected" (AF-3.7), "Pasted <name>", "Pasted n items",
+"None selected" (AF-3.7), "Added <name>", "Removed <name>", "Started <name>" (AF-4.11), "Pasted <name>", "Pasted n items",
 "Pasting, please wait" (a paste longer than a second), "Refreshed", "Top of the drive", "Not found: <path>", "No program opens
 .xyz. Ctrl+E opens it as text", "Failed: <message>", "<name>, <size>, modified <date>" (Ctrl+I), "Not found" (find),
 "Nothing to save here", "Text size n", "Windows text size", "Copied diagnostics", "<name>, <size>, modified <date>, n
@@ -268,8 +284,9 @@ other reasons of `FileOperations.CheckName`. A new selection is NVDA's own readi
 ### AF-8 Settings, log, status
 
 - AF-8.1 `%APPDATA%\Axit\axfile.json` (AX-5.3; `FileSettings` on `WindowSettings`): `lastFolder`, `recentFolders`
-  (ten), `showHidden` off, `sayEachFile` on, `speed` 1, `seekSeconds` 15, and the window base's font, update check
-  and window fields.
+  (ten), `showHidden` off, `sayEachFile` on, `speed` 1, `seekSeconds` 15, `programs` (the user's own, each a `name`
+  and a `path`, AF-4.11; an entry without either is dropped), and the window base's font, update check and window
+  fields.
 - AF-8.2 The log is `%LOCALAPPDATA%\Axit\logs\axfile.log`: the start, the exit, the errors of the operations and the
   player with Windows' message; no names of files or folders.
 
@@ -283,7 +300,8 @@ src/AxFile.Core/    class library (net10.0): FolderListing (a folder's entries a
                     MediaPlayer (MFPlay through P/Invoke: open, play, pause, position, length, speed, the started,
                     ended and failed events, a window handle for video; AF-5.2), FileOperations (the name check, new
                     folder, rename, delete to the Recycle Bin, copy and move into a folder, the last three through
-                    SHFileOperationW, the messages), FileSettings;
+                    SHFileOperationW, the messages), UserPrograms and UserProgram (the user's own programs: the
+                    default name, how each kind is started on the entries; AF-4.11), FileSettings;
                     references Axit.Core
 src/AxFile/         class library (net10.0-windows): AxFileApp (Run, Usage), FileForm (the window, on AxitForm, in
                     four partial files: the controls, menus, hooks and keys; Browse; Operations; Player), AxFileKeys,
@@ -379,4 +397,4 @@ single-threaded-apartment thread of its own (AX-7.5).
   the notices. AxFile is no longer unchecked; it stays a first draft in scope (§7).
 - 2026-10-21, after the release, on the branch `axfile`, at the user's ask: the one item of an empty folder (AF-2.2),
   Ctrl+N for a new window (AF-3.3), the selection with Space and the operations on it (AF-3.7, AF-D9; pause moved to
-  Ctrl+P). Not yet checked with NVDA.
+  Ctrl+P), and Open with a custom program ▸, the user's own programs and scripts (AF-4.11). Not yet checked with NVDA.

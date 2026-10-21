@@ -38,7 +38,7 @@ public sealed class FileSettingsTests
     public void Nonsense_in_the_file_falls_back()
     {
         var path = Path.Combine(Path.GetTempPath(), "axfile-settings-" + Guid.NewGuid().ToString("N") + ".json");
-        File.WriteAllText(path, """{ "speed": 9, "seekSeconds": 0, "lastFolder": " ", "recentFolders": ["", "C:\\x"], "fontSize": 500 }""");
+        File.WriteAllText(path, """{ "speed": 9, "seekSeconds": 0, "lastFolder": " ", "recentFolders": ["", "C:\\x"], "fontSize": 500, "programs": [{ "name": "", "path": "C:\\a.exe" }, { "name": "b", "path": "C:\\b.exe" }] }""");
         try
         {
             var settings = FileSettings.Load(path, out var error);
@@ -48,6 +48,7 @@ public sealed class FileSettingsTests
             Assert.Null(settings.LastFolder);
             Assert.Equal(["C:\\x"], settings.RecentFolders);
             Assert.Equal(0, settings.FontSize);
+            Assert.Equal([new UserProgram("b", "C:\\b.exe")], settings.Programs);
         }
         finally
         {
@@ -63,12 +64,14 @@ public sealed class FileSettingsTests
         {
             var settings = new FileSettings { Speed = 1.5, ShowHidden = true, SayEachFile = false };
             settings.RememberFolder("C:\\a");
+            settings.Programs.Add(new UserProgram("tidy", "C:\\tools\\tidy.ps1"));
             settings.Save(path);
             var loaded = FileSettings.Load(path, out _);
             Assert.Equal(1.5, loaded.Speed);
             Assert.True(loaded.ShowHidden);
             Assert.False(loaded.SayEachFile);
             Assert.Equal("C:\\a", loaded.LastFolder);
+            Assert.Equal([new UserProgram("tidy", "C:\\tools\\tidy.ps1")], loaded.Programs);
         }
         finally
         {

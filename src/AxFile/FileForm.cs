@@ -186,6 +186,11 @@ public sealed partial class FileForm : AxitForm
         items.Add(axit);
         items.Add(new ToolStripMenuItem("Open with &Windows", null, (_, _) => OpenSelectedWithWindows()));
         items.Add(new ToolStripMenuItem("Open with another pro&gram...", null, (_, _) => OpenWith()));
+        // AF-4.11: the user's own programs and scripts, refilled from the settings each time the submenu opens.
+        var custom = new ToolStripMenuItem("Open with a c&ustom program");
+        custom.DropDownOpening += (_, _) => FillPrograms(custom);
+        FillPrograms(custom);
+        items.Add(custom);
         items.Add(Item("&Show in File Explorer", ShowItemInExplorer, AxFileKeys.ShowItemInExplorer));
         items.Add(Item("&Information", SayInformation, AxFileKeys.Information));
         items.Add(Item("&Properties", ShowProperties, AxFileKeys.Properties));

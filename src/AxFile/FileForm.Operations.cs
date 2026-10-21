@@ -503,6 +503,107 @@ public sealed partial class FileForm
         }
     }
 
+    // ---- the user's own programs (AF-4.11): a list in the settings, each run on the entries as its arguments ----
+
+    /// <summary>Open with a custom program ▸: "1. name (path)" per program, then Add a program… and Remove a program ▸; one enabled line when there are none (AX-9.5).</summary>
+    private void FillPrograms(ToolStripMenuItem menu)
+    {
+        menu.DropDownItems.Clear();
+        var programs = _settings.Programs;
+        if (programs.Count == 0)
+        {
+            menu.DropDownItems.Add(new ToolStripMenuItem("&No programs yet"));
+        }
+
+        for (var i = 0; i < programs.Count; i++)
+        {
+            var program = programs[i];
+            menu.DropDownItems.Add(new ToolStripMenuItem(AxitWindows.Label(i, $"{program.Name} ({program.Path})"), null, (_, _) => RunProgram(program)));
+        }
+
+        menu.DropDownItems.Add(new ToolStripSeparator());
+        menu.DropDownItems.Add(new ToolStripMenuItem("&Add a program...", null, (_, _) => AddProgram()));
+        var remove = new ToolStripMenuItem("&Remove a program");
+        if (programs.Count == 0)
+        {
+            remove.DropDownItems.Add(new ToolStripMenuItem("&No programs yet"));
+        }
+
+        for (var i = 0; i < programs.Count; i++)
+        {
+            var program = programs[i];
+            remove.DropDownItems.Add(new ToolStripMenuItem(AxitWindows.Label(i, program.Name), null, (_, _) => RemoveProgram(program)));
+        }
+
+        menu.DropDownItems.Add(remove);
+    }
+
+    /// <summary>Open with a custom program ▸ one program: run on the selected entries, or the current one, as its arguments; "Started <name>".</summary>
+    private void RunProgram(UserProgram program)
+    {
+        var targets = Targets();
+        if (targets.Count == 0)
+        {
+            return;
+        }
+
+        try
+        {
+            Process.Start(UserPrograms.StartInfo(program, targets.Select(target => target.Path).ToList()))?.Dispose();
+            Announce($"Started {program.Name}", true);
+        }
+        catch (Exception ex) when (ex is Win32Exception or InvalidOperationException or IOException)
+        {
+            Failed($"{program.Name} failed", ex.Message);
+        }
+    }
+
+    /// <summary>Add a program…: the Windows file picker on programs and scripts, then the notice "Add a program" with the field "Name" holding the file's name; "Added <name>".</summary>
+    private void AddProgram()
+    {
+        using var dialog = new OpenFileDialog
+        {
+            Title = "Choose a program or script",
+            Filter = "Programs and scripts (*.exe;*.cmd;*.bat;*.ps1;*.py)|*.exe;*.cmd;*.bat;*.ps1;*.py|All files (*.*)|*.*",
+            CheckFileExists = true,
+        };
+        var chosen = dialog.ShowDialog(this) == DialogResult.OK ? dialog.FileName : null;
+        _list.Select();
+        if (chosen is null)
+        {
+            return;
+        }
+
+        ShowNotice(new Notice("Add a program", $"The name the menu shows for {chosen}.",
+        [
+            new OverlayChoice("&Add", () =>
+            {
+                var name = Overlay.InputText.Trim();
+                if (name.Length == 0)
+                {
+                    Announce("Type a name", true);
+                    return;
+                }
+
+                _settings.Programs.Add(new UserProgram(name, chosen));
+                SaveSettings();
+                Announce($"Added {name}", true);
+            }, IsDefault: true),
+            new OverlayChoice("&Cancel", IsCancel: true),
+        ])
+        {
+            Input = new OverlayInput("Name:", "Name", UserPrograms.DefaultName(chosen), "Type a name"),
+        });
+    }
+
+    /// <summary>Remove a program ▸ one program: taken off the list; "Removed <name>".</summary>
+    private void RemoveProgram(UserProgram program)
+    {
+        _settings.Programs.Remove(program);
+        SaveSettings();
+        Announce($"Removed {program.Name}", true);
+    }
+
     // ---- Windows' own ways with the entry (AF-4.7): the system's dialogs and menu, like the folder picker (AX-7.2) ----
 
     /// <summary>Item → Open with another program…: the Windows dialog that picks a program for the file, and runs it.</summary>
