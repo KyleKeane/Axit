@@ -12,6 +12,7 @@ public sealed class FileSettingsTests
         Assert.Null(settings.LastFolder);
         Assert.Empty(settings.RecentFolders);
         Assert.False(settings.ShowHidden);
+        Assert.False(settings.ShowDotFiles);
         Assert.True(settings.SayEachFile);
         Assert.Equal(1, settings.Speed);
         Assert.Equal(15, settings.SeekSeconds);

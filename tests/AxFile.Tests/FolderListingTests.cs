@@ -18,6 +18,8 @@ public sealed class FolderListingTests : IDisposable
         var hidden = Path.Combine(_folder, "hidden.txt");
         File.WriteAllText(hidden, "x");
         File.SetAttributes(hidden, FileAttributes.Hidden);
+        Directory.CreateDirectory(Path.Combine(_folder, ".config"));
+        File.WriteAllText(Path.Combine(_folder, ".env"), "x");
     }
 
     public void Dispose()
@@ -32,27 +34,43 @@ public sealed class FolderListingTests : IDisposable
     }
 
     [Fact]
-    public void Folders_first_then_files_in_natural_order_without_hidden_entries()
+    public void Folders_first_then_files_in_natural_order_without_hidden_or_dot_entries_which_are_counted()
     {
-        var entries = FolderListing.Read(_folder, showHidden: false);
+        var listing = FolderListing.Read(_folder, showHidden: false, showDotFiles: false);
+        var entries = listing.Entries;
         Assert.Equal(["a", "b", "2.txt", "10.txt", "Zed.mp3"], entries.Select(e => e.Name));
         Assert.Equal(["a, folder", "b, folder", "2.txt", "10.txt", "Zed.mp3"], entries.Select(e => e.Label));
         Assert.True(entries[0].IsFolder);
         Assert.Equal(3, entries[2].Size);
         Assert.Equal(Path.Combine(_folder, "2.txt"), entries[2].Path);
+        Assert.Equal(1, listing.Hidden);
+        Assert.Equal(2, listing.Dot);
     }
 
     [Fact]
-    public void Hidden_entries_show_when_asked()
+    public void Hidden_entries_and_dot_entries_show_when_asked()
     {
-        var entries = FolderListing.Read(_folder, showHidden: true);
-        Assert.Contains(entries, e => e.Name == "hidden.txt");
+        var hidden = FolderListing.Read(_folder, showHidden: true, showDotFiles: false);
+        Assert.Contains(hidden.Entries, e => e.Name == "hidden.txt");
+        Assert.Equal(0, hidden.Hidden);
+        Assert.Equal(2, hidden.Dot);
+        var dot = FolderListing.Read(_folder, showHidden: false, showDotFiles: true);
+        Assert.Equal([".config", "a", "b", ".env", "2.txt", "10.txt", "Zed.mp3"], dot.Entries.Select(e => e.Name));
+        Assert.Equal(0, dot.Dot);
+    }
+
+    [Fact]
+    public void The_not_shown_line_names_each_kind_that_was_left_out()
+    {
+        Assert.Equal("Not shown: 3 hidden", FolderListing.NotShownText(3, 0));
+        Assert.Equal("Not shown: 2 starting with a period", FolderListing.NotShownText(0, 2));
+        Assert.Equal("Not shown: 3 hidden, 2 starting with a period", FolderListing.NotShownText(3, 2));
     }
 
     [Fact]
     public void A_missing_folder_throws()
     {
-        Assert.ThrowsAny<IOException>(() => FolderListing.Read(Path.Combine(_folder, "nope"), showHidden: false));
+        Assert.ThrowsAny<IOException>(() => FolderListing.Read(Path.Combine(_folder, "nope"), showHidden: false, showDotFiles: false));
     }
 
     [Fact]

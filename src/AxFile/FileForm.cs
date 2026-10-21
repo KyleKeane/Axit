@@ -103,7 +103,18 @@ public sealed partial class FileForm : AxitForm
         // Options, as the other windows' (AX-6): every setting in the submenu for what it is about.
         var options = new ToolStripMenuItem("&Options");
         options.DropDownItems.Add(CreateTextMenu());
-        options.DropDownItems.Add(CreateGeneralMenu());
+        // AF-2.2: what the list leaves out, two switches; the folder is read again on a flip.
+        options.DropDownItems.Add(CreateGeneralMenu(
+            Toggle("Show &hidden files and folders", _settings.ShowHidden, v =>
+            {
+                _settings.ShowHidden = v;
+                Do(() => RefreshAsync(announce: false));
+            }),
+            Toggle("Show files and folders starting with a &period", _settings.ShowDotFiles, v =>
+            {
+                _settings.ShowDotFiles = v;
+                Do(() => RefreshAsync(announce: false));
+            })));
         options.DropDownItems.Add(CreateDeveloperMenu());
 
         var help = CreateHelpMenu(HelpText.UserGuide, "File &resources",

@@ -7,6 +7,9 @@ public sealed record Entry(string Name, string Path, bool IsFolder, long Size, D
     public string Label => IsDrive ? Name + ", drive" : IsFolder ? Name + ", folder" : Name;
 }
 
+/// <summary>A folder as read (AF-2.2): the entries shown, and how many hidden ones and how many starting with a period were left out.</summary>
+public sealed record Listing(IReadOnlyList<Entry> Entries, int Hidden, int Dot);
+
 /// <summary>What Enter does with an entry (AF-3.1, AF-3.2), decided by its kind and its extension.</summary>
 public enum OpenWay
 {
@@ -85,14 +88,27 @@ public static class FolderListing
         return drives;
     }
 
-    /// <summary>The entries of <paramref name="folder"/>, sorted. Throws what the file system throws (a folder gone, access denied).</summary>
-    public static IReadOnlyList<Entry> Read(string folder, bool showHidden)
+    /// <summary>
+    /// The entries of <paramref name="folder"/>, sorted, and how many were left out: the hidden and system ones unless
+    /// <paramref name="showHidden"/>, those whose name starts with a period unless <paramref name="showDotFiles"/>
+    /// (AF-2.2). Throws what the file system throws (a folder gone, access denied).
+    /// </summary>
+    public static Listing Read(string folder, bool showHidden, bool showDotFiles)
     {
         var entries = new List<Entry>();
+        var hidden = 0;
+        var dot = 0;
         foreach (var info in new DirectoryInfo(folder).EnumerateFileSystemInfos())
         {
             if (!showHidden && (info.Attributes & (FileAttributes.Hidden | FileAttributes.System)) != 0)
             {
+                hidden++;
+                continue;
+            }
+
+            if (!showDotFiles && info.Name.StartsWith('.'))
+            {
+                dot++;
                 continue;
             }
 
@@ -101,7 +117,24 @@ public static class FolderListing
             entries.Add(new Entry(info.Name, info.FullName, isFolder, size, info.LastWriteTime));
         }
 
-        return Sort(entries);
+        return new Listing(Sort(entries), hidden, dot);
+    }
+
+    /// <summary>"Not shown: 3 hidden, 2 starting with a period": the list's last line when entries were left out (AF-2.2).</summary>
+    public static string NotShownText(int hidden, int dot)
+    {
+        var parts = new List<string>();
+        if (hidden > 0)
+        {
+            parts.Add($"{hidden} hidden");
+        }
+
+        if (dot > 0)
+        {
+            parts.Add($"{dot} starting with a period");
+        }
+
+        return "Not shown: " + string.Join(", ", parts);
     }
 
     /// <summary>Folders first, then files, each group in natural order (2 before 10), the way File Explorer sorts by name.</summary>

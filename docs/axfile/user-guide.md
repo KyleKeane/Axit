@@ -18,7 +18,7 @@ The window is named after the folder: "Dune - AxFile". The list is named with it
 
 ## The list
 
-The list is the one control. Arrow keys, Home, End, Page Up and Page Down move through the entries; a typed letter jumps to the next name starting with it; nothing is spoken until you ask. Folders come first, then files, each in the order File Explorer uses, so `2` comes before `10`; folders read "docs, folder". Hidden and system entries are left out, as in File Explorer (the setting `showHidden` in the settings file turns them on). An empty folder shows one line, "No items in this folder", so that you hear why the list has nothing in it.
+The list is the one control. Arrow keys, Home, End, Page Up and Page Down move through the entries; a typed letter jumps to the next name starting with it; nothing is spoken until you ask. Folders come first, then files, each in the order File Explorer uses, so `2` comes before `10`; folders read "docs, folder". Hidden and system entries are left out, as in File Explorer, and so are entries whose name starts with a period, such as `.git`; Options, General has a switch for each, Show hidden files and folders and Show files and folders starting with a period. When something was left out, the list ends with one line that says how much, "Not shown: 3 hidden, 2 starting with a period", so you can check without turning them on. An empty folder shows one line, "No items in this folder", so that you hear why the list has nothing in it.
 
 - **Enter** opens the entry: a folder in this list (its first entry selected), a `.md`, `.markdown` or `.txt` file in a new AxDown window, a `.json` file in AxJSON, a sound or video file in the player, and any other file in the program Windows has for it, or, when Windows has none, the Windows dialog that asks which program, as File Explorer does.
 - **Backspace** or Alt+Up goes to the folder above, with the folder you left selected. From the top of a drive it goes to This PC, the list of your drives, "Local Disk (C:), drive", with the drive you left selected; Enter opens a drive, Ctrl+I says its free space, and Backspace at This PC says "Top". This PC is not a folder: making, renaming, pasting or deleting there says "Choose a drive first".
@@ -82,7 +82,7 @@ The volume is Windows' own: your keyboard's volume keys work from anywhere. A vi
 
 ## Settings
 
-Everything you change is kept in `%APPDATA%\Axit\axfile.json`: the last folder, the recent folders, the favourites, the sort order, the speed, the font and text size, the update check, your custom programs (`programs`, a name and a path each), and two switches with no menu item: `showHidden` (hidden and system entries in the list) and `seekSeconds` (what Ctrl+Left and Ctrl+Right move by, 15). Options, Developer, Open settings file opens it in AxJSON.
+Everything you change is kept in `%APPDATA%\Axit\axfile.json`: the last folder, the recent folders, the favourites, the sort order, the speed, the font and text size, the update check, your custom programs (`programs`, a name and a path each), the two switches of Options, General (`showHidden`, `showDotFiles`), and one setting with no menu item: `seekSeconds` (what Ctrl+Left and Ctrl+Right move by, 15). Options, Developer, Open settings file opens it in AxJSON.
 
 ## Updates
 

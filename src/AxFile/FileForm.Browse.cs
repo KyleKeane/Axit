@@ -18,6 +18,10 @@ public sealed partial class FileForm
     /// <summary>The filter text (AF-3.8), empty for none; dropped with the folder.</summary>
     private string _filter = string.Empty;
 
+    /// <summary>How many entries the read left out (AF-2.2): hidden ones, and ones starting with a period; the list's last line says so.</summary>
+    private int _hidden;
+    private int _dot;
+
     /// <summary>The paths selected with Space (AF-3.7), kept while the same folder shows; their items read ", selected".</summary>
     private readonly HashSet<string> _selected = new(StringComparer.OrdinalIgnoreCase);
 
@@ -64,11 +68,11 @@ public sealed partial class FileForm
     private async Task<bool> ShowFolderAsync(string folder, string? select, bool remember)
     {
         var read = ++_reads;
-        IReadOnlyList<Entry> entries;
+        Listing listing;
         try
         {
             // AF-3.10: This PC is the drives, read the same way.
-            entries = await Task.Run(() => FolderListing.IsThisPC(folder) ? FolderListing.Drives() : FolderListing.Read(folder, _settings.ShowHidden));
+            listing = await Task.Run(() => FolderListing.IsThisPC(folder) ? new Listing(FolderListing.Drives(), 0, 0) : FolderListing.Read(folder, _settings.ShowHidden, _settings.ShowDotFiles));
         }
         catch (Exception ex) when (ex is IOException or UnauthorizedAccessException or ArgumentException)
         {
@@ -106,11 +110,13 @@ public sealed partial class FileForm
         }
         else
         {
-            _selected.IntersectWith(entries.Select(entry => entry.Path));
+            _selected.IntersectWith(listing.Entries.Select(entry => entry.Path));
         }
 
         _folder = folder;
-        _entries = entries;
+        _entries = listing.Entries;
+        _hidden = listing.Hidden;
+        _dot = listing.Dot;
         _folderStamp = Stamp(folder);
         Text = $"{FolderListing.FolderName(folder)} - {AxFileApp.Name}";
         Rearrange(select);
@@ -157,15 +163,25 @@ public sealed partial class FileForm
             _list.Items.Add(_filter.Length > 0 ? NoMatchText : EmptyFolderText);
         }
 
+        if (_hidden > 0 || _dot > 0)
+        {
+            // AF-2.2: what the read left out, as the last line, so that the count is there when wanted.
+            _list.Items.Add(FolderListing.NotShownText(_hidden, _dot));
+        }
+
         _list.EndUpdate();
         _list.AccessibleName = FolderListing.ListName(_shown.Count, _entries.Count, _filter);
         var index = select is null ? -1 : IndexOfName(select);
         _list.SelectedIndex = Math.Max(0, index);
     }
 
-    /// <summary>The guard of every command on an entry (AF-7): why there is none.</summary>
-    private void SayNoEntry() =>
-        Announce(_folder is null ? "No folder" : _entries.Count == 0 ? EmptyFolderText : _shown.Count == 0 ? NoMatchText : "Nothing selected", true);
+    /// <summary>The guard of every command on an entry (AF-7): "No folder", the line the selection is on when it is not an entry (the empty folder's, the filter's, the not-shown line), or "Nothing selected".</summary>
+    private void SayNoEntry()
+    {
+        var index = _list.SelectedIndex;
+        var line = index >= _shown.Count && index < _list.Items.Count ? _list.Items[index].ToString() : null;
+        Announce(_folder is null ? "No folder" : line ?? "Nothing selected", true);
+    }
 
     // ---- the order and the filter (AF-3.8) ----
 
@@ -360,9 +376,9 @@ public sealed partial class FileForm
         Announce(added ? "Added to Favourites" : "Removed from Favourites", true);
     }
 
-    /// <summary>The entry under the selection; null for an empty list, whose one item is not an entry.</summary>
+    /// <summary>The entry under the selection; null on the lines after the entries (an empty list's, the not-shown line), which are not entries.</summary>
     private Entry? CurrentEntry() =>
-        _list.SelectedIndex is var i && i >= 0 && i < _shown.Count && _list.Items.Count == _shown.Count ? _shown[i] : null;
+        _list.SelectedIndex is var i && i >= 0 && i < _shown.Count ? _shown[i] : null;
 
     /// <summary>The folder above a folder that is gone, the first one that exists; null when none is.</summary>
     private static string? NearestExisting(string folder)

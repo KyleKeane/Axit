@@ -21,6 +21,9 @@ public sealed class FileSettings : WindowSettings
     /// <summary>Hidden and system entries in the list (AF-2.2); off, as in File Explorer.</summary>
     public bool ShowHidden { get; set; }
 
+    /// <summary>Entries whose name starts with a period (.git, .env) in the list (AF-2.2); off.</summary>
+    public bool ShowDotFiles { get; set; }
+
     /// <summary>The list's order (AF-3.8), kept for the next folder and the next window.</summary>
     public SortBy SortBy { get; set; } = SortBy.Name;
 

@@ -78,11 +78,16 @@ windows on the folder of the file or project in hand, and sends back. It works e
   notice takes its place while it shows (AX-6.4). Tab has nothing to move to.
 - AF-2.2 Items: a file by its name as it is; a folder as "<name>, folder"; a drive of This PC as "<label> (C:), drive"
   (AF-3.10). Folders first, then files, each group in
-  Windows' natural order (`StrCmpLogicalW`, so that `2` comes before `10`). Hidden and system entries are left out
-  (`showHidden` in the settings file turns them on). The list is read on a background task (AX-7.5); a folder of ten
-  thousand entries fills in one update. An empty folder shows one item, "No items in this folder", selected, so that
-  the list is never empty and the reason is read (the bundle's rule for empty lists, AX-9.5); it is not an entry: a
-  command on it says "No items in this folder" (AF-7).
+  Windows' natural order (`StrCmpLogicalW`, so that `2` comes before `10`). Hidden and system entries are left out,
+  and so are entries whose name starts with a period (`.git`, `.env`), each behind a switch in Options → General,
+  **Show hidden files and folders** (`showHidden`) and **Show files and folders starting with a period**
+  (`showDotFiles`), both off; a flip reads the folder again. What was left out is counted, and the list ends with one
+  line that says so, "Not shown: 3 hidden, 2 starting with a period" (one part when one kind; no line when nothing was
+  left out; `FolderListing.NotShownText`, tested), so that the count is there when wanted and never spoken otherwise
+  (asked 2026-10-21). The list is read on a background task (AX-7.5); a folder of ten thousand entries fills in one
+  update. An empty folder shows one item, "No items in this folder", selected, so that the list is never empty and the
+  reason is read (the bundle's rule for empty lists, AX-9.5). Neither that item nor the not-shown line is an entry: a
+  command on either says the line itself (AF-7).
 - AF-2.3 The title is `<folder name> - AxFile`. The status bar's left label: the player's state, `Playing 03 Chapter
   3.mp3 12:52 / 45:30` while it plays (the time moving once a second), `Paused …`, empty otherwise; the right label:
   the folder's full path. No AccessibleName, no Spring (AxClaude §6.2).
@@ -287,7 +292,8 @@ windows on the folder of the file or project in hand, and sends back. It works e
   file Ctrl+Shift+Left | Forward 15 seconds Ctrl+Right | Back 15 seconds Ctrl+Left | Go to time… Ctrl+T | ─ | Faster
   Ctrl+Shift+Period | Slower Ctrl+Shift+Comma | Normal speed | ─ | Say each file as it starts ✓ | What is playing
   Ctrl+Q. **Options (O):** Text ▸ (Font… | Larger text Ctrl+Plus | Smaller text Ctrl+Minus | Windows text size) |
-  General ▸ (Check for updates at start ✓) | Developer ▸ (Open settings file | Copy diagnostics). **Axit (A)**
+  General ▸ (Check for updates at start ✓ | Show hidden files and folders | Show files and folders starting with a
+  period) | Developer ▸ (Open settings file | Copy diagnostics). **Axit (A)**
   (AX-9). **Help (H):** Keyboard shortcuts F1 | User guide | ─ | File resources ▸ (Keyboard shortcuts in Windows, the
   Microsoft page, in the browser). Every item has a mnemonic (AX-7.4).
 - AF-6.2 Keys (AX-8). Bundle-wide: F1, the control keys, Ctrl+F, F3, Shift+F3, Ctrl+S ("Nothing to save here"),
@@ -320,7 +326,7 @@ Favourites" (AF-3.9), "Top" (This PC, AF-3.10), "Added <name>", "Removed <name>"
 "Nothing to save here", "Text size n", "Windows text size", "Copied diagnostics", "<name>, <size>, modified <date>, n
 selected" (Ctrl+I with marks); and the guards "No folder" (nothing
 listed yet), "No items in this folder" (a command on an empty folder's one item, AF-2.2), "No names contain <text>"
-(the same under a filter, AF-3.8), "Nothing selected", "Choose a drive first" (a folder command at This PC, AF-3.10), "Not a file" (Ctrl+E or Open with… on a folder), "Not a zip file" (Extract here, AF-4.12), "Not a sound or video file"
+(the same under a filter, AF-3.8), "Not shown: …" (the same on the list's last line, AF-2.2), "Nothing selected", "Choose a drive first" (a folder command at This PC, AF-3.10), "Not a file" (Ctrl+E or Open with… on a folder), "Not a zip file" (Extract here, AF-4.12), "Not a sound or video file"
 (Player → Play on another entry), "Not a time" (Go to time), "Speed n is not supported here", "Name unchanged" (a
 rename to the same name), "Nothing to paste" (no files on the clipboard), "Already in this folder" (a cut entry
 pasted where it is), "Type a name" and the
@@ -330,7 +336,7 @@ other reasons of `FileOperations.CheckName`. A new selection is NVDA's own readi
 
 - AF-8.1 `%APPDATA%\Axit\axfile.json` (AX-5.3; `FileSettings` on `WindowSettings`): `lastFolder`, `recentFolders`
   (ten), `favourites` (the pinned folders in the order added, AF-3.9; blanks and repeats dropped), `showHidden` off,
-  `sortBy` name (`name`, `date` or `size`, AF-3.8), `sayEachFile` on, `speed` 1,
+  `showDotFiles` off (AF-2.2), `sortBy` name (`name`, `date` or `size`, AF-3.8), `sayEachFile` on, `speed` 1,
   `seekSeconds` 15, `programs` (the user's own, each a `name` and a `path`, AF-4.11; an entry without either is
   dropped), and the window base's font, update check and window fields.
 - AF-8.2 The log is `%LOCALAPPDATA%\Axit\logs\axfile.log`: the start, the exit, the errors of the operations and the
