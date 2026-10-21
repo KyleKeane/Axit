@@ -15,11 +15,7 @@ public sealed record OverlayChoice(string Text, Action? Action = null, bool IsDe
 /// text, and, when <paramref name="Required"/>, what to say when the default button is pressed while the field is
 /// empty (the notice then stays open).
 /// </summary>
-public sealed record OverlayInput(string Label, string AccessibleName, string Initial, string EmptyMessage, bool Required = true)
-{
-    /// <summary>How many leading characters of <see cref="Initial"/> are selected when the notice opens; null selects the whole text (AxFile's Rename selects the name without its extension).</summary>
-    public int? SelectLength { get; init; }
-}
+public sealed record OverlayInput(string Label, string AccessibleName, string Initial, string EmptyMessage, bool Required = true);
 
 /// <summary>A recommended way to start Claude in the New session notice (FR-8.6): the radio button's text and the arguments it stands for.</summary>
 public sealed record OverlayPreset(string Text, IReadOnlyList<string> Arguments);
@@ -314,15 +310,7 @@ public sealed class OverlayPanel : Panel
             _inputLabel.Text = input.Label;
             _input.AccessibleName = input.AccessibleName;
             _input.Text = input.Initial;
-            if (input.SelectLength is { } length)
-            {
-                _input.Select(0, Math.Clamp(length, 0, _input.Text.Length));
-            }
-            else
-            {
-                _input.SelectAll();
-            }
-
+            _input.SelectAll();
             LayoutInput();
         }
         else
