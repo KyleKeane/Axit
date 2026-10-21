@@ -1,5 +1,9 @@
 # Changelog
 
+## Unreleased
+
+- AxClaude: a question of Claude's takes the focus in every case. With Options → Questions → Go to them at once, interrupting speech off, the focus used to move only from the bottom of the window, and from the conversation "Claude asks" was spoken and the question had to be found with Tab; now the focus goes to it a moment later, and NVDA reads it there after what it was reading, nothing interrupted.
+
 ## 3.2.0 - 2026-10-21
 
 - AxFile: the entry's menu is one flat list in File Explorer's order and words: Open, Open with (Windows default, Choose a program, your own programs), Open in Axit (Editor and every app), Cut, Copy, Paste, Rename, Delete, New folder, New text file, Move to new folder, Compress to zip, Extract here, Select all, Select none, Copy path, Show in File Explorer, Information, Properties, Windows menu. The File operations submenu is gone. The menu bar's Item menu is a standard drop-down: it was a hand-made one, which lost its place on the bar when it closed, so that Left and Right after Escape opened the next menus instead of moving along the bar; a test now refuses a hand-made drop-down anywhere in the bundle. Ctrl+I inside the open menu works in the context menu (Shift+F10). Favorites is spelled as Windows spells it.

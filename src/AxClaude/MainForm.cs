@@ -102,6 +102,9 @@ internal sealed partial class MainForm : AxitForm
     /// <summary>D33: the interrupting speech of a question waits this long after the focus moved, so that NVDA's reading of the new control does not cut it off.</summary>
     private const int FocusSettleMs = 300;
 
+    /// <summary>The moment before a question takes the focus from the conversation without the interrupting kind (D33).</summary>
+    private const int QuestionFocusMs = 1000;
+
     /// <summary>Whether the user's answer or key at <paramref name="at"/> came less than <see cref="UserActionMs"/> ago: what follows it is prompted, not a surprise.</summary>
     private static bool UserActed(long at) => Environment.TickCount64 - at < UserActionMs;
 

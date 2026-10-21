@@ -19,11 +19,12 @@ internal sealed partial class MainForm
     /// Shows what Claude waits on in the control area, in place of the message field (D33). <paramref name="show"/>
     /// puts the control there, given whether it takes the focus and whether it holds its answering keys for a moment
     /// (when the user did not cause it, since they may be typing). Such a control also plays the notice chime. With
-    /// Interrupt speech for Claude's questions (the default) it takes the focus wherever it was, and the question
+    /// Go to them at once, interrupting speech (the default) it takes the focus wherever it was, and the question
     /// with the answer the focus is on is spoken as an interrupting notification 300 ms after the focus moved: it cuts off
     /// what NVDA was reading, a reply included, and comes last (raised before the focus, or at once after it, it was
-    /// cut off). Without the option, the focus moves only
-    /// from the bottom of the window, and from the conversation the question is said after what NVDA is reading.
+    /// cut off). Without the option, the focus moves at once from the bottom of the window and after a moment from
+    /// the conversation, and nothing interrupts: NVDA reads the question when the focus reaches it, after what it was
+    /// reading (a focus change alone does not cut NVDA off).
     /// </summary>
     private void ShowInArea(string signature, string name, string text, bool unprompted, Action<bool, bool> show)
     {
@@ -51,9 +52,17 @@ internal sealed partial class MainForm
                 }
             });
         }
-        else if (!focus && unprompted)
+        else if (!focus && !NoticeOpen)
         {
-            Announce($"Claude asks: {name}", false);
+            // From the conversation, without the interrupting kind: the focus goes to the question after a moment,
+            // so that it is not found by Tab, and NVDA reads it there after what it is reading (asked 2026-10-21).
+            Later(QuestionFocusMs, () =>
+            {
+                if (_shownWait == signature && !NoticeOpen && _area.Current is { } current && !current.ContainsFocus)
+                {
+                    current.Focus();
+                }
+            });
         }
     }
 
