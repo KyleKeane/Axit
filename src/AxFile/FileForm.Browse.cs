@@ -158,7 +158,7 @@ public sealed partial class FileForm
         }
 
         _list.EndUpdate();
-        _list.AccessibleName = FolderListing.ListName(_folder ?? string.Empty, _shown.Count, _entries.Count, _filter);
+        _list.AccessibleName = FolderListing.ListName(_shown.Count, _entries.Count, _filter);
         var index = select is null ? -1 : IndexOfName(select);
         _list.SelectedIndex = Math.Max(0, index);
     }

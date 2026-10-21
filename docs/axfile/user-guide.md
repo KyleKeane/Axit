@@ -14,7 +14,7 @@ AxFile is part of Axit. Installing Axit (see the Axit guide in the Axit menu, Ab
 - From AxClaude: Session, Show current folder in, AxFile (Alt+S, I, F). From AxDown or AxJSON: File, Show current file in, AxFile (the file's folder, the file selected). From AxGit: Repository, Show current repository in, AxFile. From AxTerminal: Session, Show current folder in, AxFile. Each opens a new AxFile window.
 - To go back: Alt+A, O lists the open Axit windows, most recent first, so Alt+A, O, 1 is the window you came from. From AxFile, Folder, Show current folder in offers File Explorer (Ctrl+W), AxClaude, AxGit and AxTerminal on the folder you are in.
 
-The window is named after the folder: "Dune - AxFile". The list is named with the folder and its count, "Dune, 24 items", and NVDA reads the entry you are on. The status bar (NVDA+End) has what is playing on the left and the folder's full path on the right.
+The window is named after the folder: "Dune - AxFile". The list is named with its count, "24 items", so that the folder is not read twice, and NVDA reads the entry you are on. The status bar (NVDA+End) has what is playing on the left and the folder's full path on the right.
 
 ## The list
 
@@ -30,7 +30,7 @@ The list is the one control. Arrow keys, Home, End, Page Up and Page Down move t
 - **Ctrl+N** opens a second AxFile window on the same folder, as in File Explorer, so you can go elsewhere in one and paste in the other; Alt+A, O moves between them.
 - **F5** reads the folder again, "Refreshed". Coming back to the window after another program changed the folder does the same silently.
 - **Ctrl+F** finds the next entry whose name contains the text; F3 and Shift+F3 the next and the previous match; "Not found" otherwise.
-- **Ctrl+Shift+F** filters: type part of a name, Enter, and the list holds only the entries whose name contains it, named "Dune, 3 of 24 items, filter chap". The filter stays while you work in the folder and goes when you leave it; Escape in the list clears it, "Filter cleared", as does Ctrl+Shift+F with an empty field. Select all, Enter on a media file (the queue) and the find key all work on what is listed.
+- **Ctrl+Shift+F** filters: type part of a name, Enter, and the list holds only the entries whose name contains it, named "3 of 24 items, filter chap". The filter stays while you work in the folder and goes when you leave it; Escape in the list clears it, "Filter cleared", as does Ctrl+Shift+F with an empty field. Select all, Enter on a media file (the queue) and the find key all work on what is listed.
 - Folder, **Sort by**: Name, Date (newest first) or Size (largest first), folders first in each; "Sorted by date". The order stays for every folder and the next window.
 - **Space** selects the entry you are on, "Selected", and deselects it again, "Deselected"; while it is selected its line reads "notes.md, selected", so arrowing over it tells you. With more than one selected the key adds the count, "Selected, 3 selected". **Ctrl+A** selects every entry, "24 selected"; **Ctrl+Shift+A** deselects them all, "None selected"; Ctrl+I adds "3 selected" to the entry's information. Cut, Copy, Delete and Copy path then act on the selected entries; everything else, Enter, Rename, the ways to open, acts on the entry you are on. Going to another folder clears the selection.
 

@@ -22,7 +22,7 @@ dotnet test tests/AxFile.Tests/AxFile.Tests.csproj
 
 ## Rules
 
-1. Every control gets an `AccessibleName`; the list is named with the folder and its count; nothing speaks on a plain arrow key; a command's result is one announcement (AF-7), on the list, or on the notice while one shows. The player's "Playing <name>" when it moves on by itself is the one unprompted announcement, and a setting.
+1. Every control gets an `AccessibleName`; the list is named with its count alone, the folder being the title (AF-2.1); nothing speaks on a plain arrow key; a command's result is one announcement (AF-7), on the list, or on the notice while one shows. The player's "Playing <name>" when it moves on by itself is the one unprompted announcement, and a setting.
 2. The folder reads and the operations never run on the UI thread: `Task.Run` for the reads, the rename and the new folder, a thread of its own for the shell's delete; the player's events come back on the UI thread through the `BeginInvoke` the window hands `MediaPlayer` at creation.
 3. No second window (bundle AX-7.2): questions and errors are notices; the folder picker and File Explorer are the system's own windows; the video area is a panel inside the window.
 4. Run the `accessibility-review` skill on a change here before committing, and check it with NVDA following the test plan.

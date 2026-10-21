@@ -9,7 +9,7 @@ documents, "SPEC.md" means this file.
 
 ## 1. Summary
 
-One folder in one window: a list of its entries, folders first, named with the folder and its count. Enter does the
+One folder in one window: a list of its entries, folders first, named with its count (the folder is the title). Enter does the
 obvious thing with the selected entry: a folder opens in the list, a Markdown or text file in AxDown, a JSON file in
 AxJSON, a sound or video file plays, anything else opens in the program Windows has for it. Backspace goes up. A few
 operations, each one notice or one announcement: new folder, rename, delete to the Recycle Bin, copy the path, and
@@ -36,7 +36,7 @@ windows on the folder of the file or project in hand, and sends back. It works e
 
 ## 3. Scenarios
 
-1. Start menu, "Axit AxFile": the last folder opens, the list focused; NVDA reads "Dune, 24 items, list, 01 Chapter
+1. Start menu, "Axit AxFile": the last folder opens, the list focused; NVDA reads "24 items, list, 01 Chapter
    1.mp3, 1 of 24". Down twice, Enter: "Playing 03 Chapter 3.mp3". Ctrl+P: "Paused at 12:40". Ctrl+P: "Playing".
    Ctrl+Left: "12:25". Ctrl+Shift+Period: "Speed 1.25". Ctrl+Q: "Playing 03 Chapter 3.mp3, 12:52 of 45:30, speed
    1.25".
@@ -73,7 +73,7 @@ windows on the folder of the file or project in hand, and sends back. It works e
 ### AF-2 The window
 
 - AF-2.1 From the top: the menu bar; the video area (AF-5.6), shown only while a video plays; the list, named
-  "<folder name>, N items" ("Dune, 24 items"; "Dune, empty" for none; "Dune, 3 of 24 items, filter chap" under a
+  with its count alone, "N items" ("24 items"; "1 item"; "Empty" for none; "3 of 24 items, filter chap" under a
   filter, AF-3.8); the status bar. The list is the one control; a
   notice takes its place while it shows (AX-6.4). Tab has nothing to move to.
 - AF-2.2 Items: a file by its name as it is; a folder as "<name>, folder"; a drive of This PC as "<label> (C:), drive"
@@ -133,7 +133,7 @@ windows on the folder of the file or project in hand, and sends back. It works e
   (`FolderListing.Sort`, tested); the entry in hand stays selected; "Sorted by date"; the order is a setting
   (`sortBy`) and holds for every folder and the next window. **Filter…** (Ctrl+Shift+F; Folder → Filter…): the notice
   "Filter" with the field "Name contains" holding the filter in force; Filter lists only the entries whose name
-  contains the text, any case, and names the list "Dune, 3 of 24 items, filter chap" so that the count is read with
+  contains the text, any case, and names the list "3 of 24 items, filter chap" so that the count is read with
   the list; an empty field clears it, "Filter cleared", as does **Escape** in the list while a filter is on (Escape
   does nothing otherwise). A filter that nothing passes shows the one item "No names contain <text>", and a command on
   it says the same. The filter lives in the folder: another folder drops it, a refresh keeps it. What the list shows

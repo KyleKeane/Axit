@@ -122,21 +122,20 @@ public sealed class FolderListingTests : IDisposable
     }
 
     [Theory]
-    [InlineData("C:\\Music\\Dune", 24, "Dune, 24 items")]
-    [InlineData("C:\\Music\\Dune\\", 1, "Dune, 1 item")]
-    [InlineData("C:\\Music\\Dune", 0, "Dune, empty")]
-    [InlineData("C:\\", 3, "C:\\, 3 items")]
-    public void The_list_is_named_with_the_folder_and_the_count(string folder, int count, string expected)
+    [InlineData(24, "24 items")]
+    [InlineData(1, "1 item")]
+    [InlineData(0, "Empty")]
+    public void The_list_is_named_with_the_count_alone(int count, string expected)
     {
-        Assert.Equal(expected, FolderListing.ListName(folder, count));
+        Assert.Equal(expected, FolderListing.ListName(count));
     }
 
     [Fact]
     public void With_a_filter_the_list_is_named_with_the_match_count_and_the_text()
     {
-        Assert.Equal("Dune, 3 of 24 items, filter chap", FolderListing.ListName("C:\\Music\\Dune", 3, 24, "chap"));
-        Assert.Equal("Dune, 0 of 24 items, filter zzz", FolderListing.ListName("C:\\Music\\Dune", 0, 24, "zzz"));
-        Assert.Equal("Dune, 24 items", FolderListing.ListName("C:\\Music\\Dune", 24, 24, string.Empty));
+        Assert.Equal("3 of 24 items, filter chap", FolderListing.ListName(3, 24, "chap"));
+        Assert.Equal("0 of 24 items, filter zzz", FolderListing.ListName(0, 24, "zzz"));
+        Assert.Equal("24 items", FolderListing.ListName(24, 24, string.Empty));
     }
 
     [Theory]
@@ -171,7 +170,6 @@ public sealed class FolderListingTests : IDisposable
         Assert.Contains(" free of ", FolderListing.Information(system));
         Assert.True(FolderListing.IsThisPC(FolderListing.ThisPC));
         Assert.False(FolderListing.IsThisPC("C:\\This PC"));
-        Assert.Equal("This PC, 2 items", FolderListing.ListName(FolderListing.ThisPC, 2));
     }
 
     [Fact]

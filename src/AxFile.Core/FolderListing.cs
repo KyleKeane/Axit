@@ -145,19 +145,19 @@ public static class FolderListing
         };
     }
 
-    /// <summary>"Dune, 24 items", "Dune, 1 item", "Dune, empty": the list's accessible name (AF-2.1); with a filter on, "Dune, 3 of 24 items, filter chap" (AF-3.8).</summary>
-    public static string ListName(string folder, int count, int total = -1, string filter = "")
+    /// <summary>"24 items", "1 item", "Empty": the list's accessible name (AF-2.1), the folder's name being the window's; with a filter on, "3 of 24 items, filter chap" (AF-3.8).</summary>
+    public static string ListName(int count, int total = -1, string filter = "")
     {
         if (filter.Length > 0)
         {
-            return $"{FolderName(folder)}, {count} of {total} items, filter {filter}";
+            return $"{count} of {total} items, filter {filter}";
         }
 
-        return FolderName(folder) + count switch
+        return count switch
         {
-            0 => ", empty",
-            1 => ", 1 item",
-            _ => $", {count} items",
+            0 => "Empty",
+            1 => "1 item",
+            _ => $"{count} items",
         };
     }
 
