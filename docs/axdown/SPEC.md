@@ -80,7 +80,19 @@ UTF-8, UTF-16 and the system code page; files that are not text; files over 32 M
   lands on or the selection change; the app says nothing.
 - AD-2.4 Turning word wrap off and on keeps the caret where it was. (WinForms recreates the control's handle on that
   change and loses the position; the form saves `SelectionStart` and restores it, then scrolls to the caret.)
-- AD-2.5 Undo is the control's own (Ctrl+Z, one level, as in Notepad before Windows 11). Nothing more in version one.
+- AD-2.5 **Undo and redo** (specified 2026-10-21 at the user's ask, to be built; until then the control's own
+  one-level Ctrl+Z). The window keeps a history of its own of every change to the text since the file was opened in
+  it: a run of typing is one step until a pause of a second or the caret leaves the run's end, a deletion the same;
+  a cut, a paste, a Format (AxJSON, AJ-2.3) and a reload from disk (AD-3.6) are one step each. **Ctrl+Z** takes the
+  last step back and **Ctrl+Y** (or Ctrl+Shift+Z) puts it back, in Edit as Undo and Redo; the caret goes to where
+  the change was, and the one announcement is "Undone" or "Redone", "Nothing to undo" or "Nothing to redo" at the
+  ends (`l` then says the line, AD-7). Save does not clear the history, so a save can be undone past; Open, New and
+  the window's close end it: nothing reaches back into an earlier file, window or session, which is the user's
+  rule. The history is pure code, `Axit.Core/EditHistory`, tested: each step holds the changed span's position, the
+  text removed and the text inserted, found from the text before and after a change by the common prefix and
+  suffix; the step is applied back through the selection (`Select` and `SelectedText`, as Format is), so that NVDA
+  hears nothing but the announcement and the control's own undo stays coherent. The history is bounded by the size
+  of its deltas, a few megabytes, the oldest steps dropped first.
 - AD-2.6 The caret never moves except on the user's own command (AX-7.3): a save, a reload or a word wrap change
   leaves it where it was.
 - AD-2.7 The font is the setting's (family, size, bold), the Windows system font when none is set; Ctrl+Plus and
@@ -135,7 +147,8 @@ UTF-8, UTF-16 and the system code page; files that are not text; files over 32 M
   Untitled), AxGit (a new AxGit window on the repository that holds the file, docs/axgit/SPEC.md AG-1.4), AxTerminal
   (a shell in the file's folder, docs/axterminal/SPEC.md AT-1.5) and AxFile (the file's folder listed with the file
   selected, docs/axfile/SPEC.md AF-1.3); then Exit (Alt+F4).
-- AD-4.2 Edit: Undo (Ctrl+Z), Cut, Copy, Paste, Select all (the control's own, listed for discoverability).
+- AD-4.2 Edit: Undo (Ctrl+Z), Redo (Ctrl+Y; the window's own history once AD-2.5 is built), Cut, Copy, Paste, Select
+  all (the control's own, listed for discoverability).
   Navigate (as AxClaude's): Find… (Ctrl+F), Find next (F3), Find previous (Shift+F3), Go to line… (Ctrl+G), then the
   submenus Next and Previous with one item per kind of section 9, made from the key pairs of the table: the kind's
   name with NVDA's letter as the mnemonic ("Heading", "Heading level 1" to "6", "Link", "List", "List item", "Block
@@ -271,7 +284,7 @@ are read and written on the UI thread (a 32 MB file is the ceiling, AD-3.7).
 
 - **AD-D1 The EDIT control, not RichTextBox.** It is the control AxClaude already proved with NVDA; RichEdit reads
   differently, wraps differently and would invite formatting. The known costs (re-wrap near the top of a large text,
-  one-level undo) are accepted for a document editor.
+  one-level undo) are accepted for a document editor; the one-level undo until the history of AD-2.5 is built.
 - **AD-D2 Barebones first.** Version one has what section 4 lists and nothing more, so that the window is simple
   to learn and the code simple to change (AX B-10); the navigation keys come second (section 9); collaborative and
   AI-assisted editing are other apps of the bundle, not features of this one.
@@ -339,3 +352,5 @@ the off-screen probe approach of AxClaude checks layout and keys without disturb
   checked by the user with NVDA (test plan sections 3, 5, 6, 7 and 8).
 - 2.9.1 (2026-10-18): the window moved to `Axit.Forms` as the text editor shell shared with AxJSON (AD-1.4, AX-6.3);
   AxDown is its `EditorApp` record, its Markdown keys and its texts. Nothing changed for the user.
+- 2026-10-21: undo and redo over a history of the window's own specified at the user's ask (AD-2.5), for AxDown and AxJSON
+  alike through the shared shell; to be built next.
