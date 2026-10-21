@@ -45,6 +45,12 @@ public sealed partial class FileForm
                     return;
                 }
 
+                if (Lookalike(name) is { } twin)
+                {
+                    Announce($"Reads the same as {twin}, which is already here", true);
+                    return;
+                }
+
                 Do(async () =>
                 {
                     try
@@ -144,6 +150,12 @@ public sealed partial class FileForm
                     return;
                 }
 
+                if (Lookalike(name) is { } twin)
+                {
+                    Announce($"Reads the same as {twin}, which is already here", true);
+                    return;
+                }
+
                 Do(async () =>
                 {
                     string made;
@@ -232,6 +244,12 @@ public sealed partial class FileForm
             return;
         }
 
+        if (Lookalike(name, entry) is { } twin)
+        {
+            Announce($"Reads the same as {twin}, which is already here", true);
+            return;
+        }
+
         EndRename();
         if (string.Equals(name, entry.Name, StringComparison.Ordinal))
         {
@@ -257,6 +275,13 @@ public sealed partial class FileForm
             }
         });
     }
+
+    /// <summary>
+    /// The entry of the folder whose name reads the same as <paramref name="name"/> without being it (AF-4.2), the
+    /// entry being renamed left out; null when none. Every entry read is compared, the hidden ones too.
+    /// </summary>
+    private string? Lookalike(string name, Entry? self = null) =>
+        FileOperations.Lookalike(name, _entries.Where(entry => entry != self).Select(entry => entry.Name));
 
     /// <summary>The box closed with the name kept; the list's reading of the entry is the feedback.</summary>
     private void CancelRename()

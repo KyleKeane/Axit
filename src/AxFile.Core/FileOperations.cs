@@ -1,4 +1,6 @@
+using System.Globalization;
 using System.Runtime.InteropServices;
+using System.Text;
 
 namespace AxFile.Core;
 
@@ -30,6 +32,50 @@ public static class FileOperations
         }
 
         return null;
+    }
+
+    /// <summary>
+    /// The name among <paramref name="names"/> that reads the same as <paramref name="name"/> without being the same
+    /// name (AF-4.2): the two differ only in case, in a trailing or doubled space, in the kind of space, in an
+    /// invisible character (a zero-width space, a joiner, a mark), or in an accent written as one or two characters.
+    /// Windows keeps both as two files; a screen reader hears one name twice. Null when none does.
+    /// </summary>
+    public static string? Lookalike(string name, IEnumerable<string> names)
+    {
+        var key = ReadingKey(name);
+        return names.FirstOrDefault(other => !string.Equals(other, name.Trim(), StringComparison.OrdinalIgnoreCase) && ReadingKey(other) == key);
+    }
+
+    /// <summary>How a name is heard: composed, upper-cased, every kind of white space one space, invisible characters dropped, trimmed.</summary>
+    private static string ReadingKey(string name)
+    {
+        var composed = name.Normalize(NormalizationForm.FormKC);
+        var text = new StringBuilder(composed.Length);
+        var space = false;
+        foreach (var c in composed)
+        {
+            if (char.IsWhiteSpace(c))
+            {
+                space = true;
+                continue;
+            }
+
+            var category = char.GetUnicodeCategory(c);
+            if (category is UnicodeCategory.Format or UnicodeCategory.Control or UnicodeCategory.NonSpacingMark or UnicodeCategory.EnclosingMark)
+            {
+                continue;
+            }
+
+            if (space && text.Length > 0)
+            {
+                text.Append(' ');
+            }
+
+            space = false;
+            text.Append(char.ToUpperInvariant(c));
+        }
+
+        return text.ToString();
     }
 
     /// <summary>Makes the folder inside <paramref name="folder"/> and returns its path; a name already taken is an error.</summary>

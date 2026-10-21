@@ -189,7 +189,14 @@ windows on the folder of the file or project in hand, and sends back. It works e
   extension; Enter renames, "Renamed to <new name>", the entry selected under its new name; Escape, or leaving the box
   (a click elsewhere, a notice opening), keeps the name with no announcement, the list's reading of the entry being
   the feedback; the same name again, "Name unchanged". A change of case alone is a rename too. The box is a text box
-  that is a child of the list, shown only while a rename runs; the first build (2026-10-19) asked in a notice.
+  that is a child of the list, shown only while a rename runs; the first build (2026-10-19) asked in a notice. A name
+  that **reads the same** as another entry's without being it, differing only in case plus a trailing or doubled
+  space, a different kind of space, an invisible character (a zero-width space, a joiner, a mark) or an accent
+  written as one or two characters, is refused with "Reads the same as <that name>, which is already here" and the
+  box stays (`FileOperations.Lookalike`, tested; the same for New folder…, AF-4.1, and Move to new folder…,
+  AF-4.13): Windows would keep both files, and the list would then read one name twice, which the user met on
+  2026-10-21 and took for a rename onto an existing name. A name that is exactly taken is Windows' own refusal,
+  "Failed: There is already an entry named <name>".
 - AF-4.3 **Delete…** (Delete): the notice "Delete <name>? It goes to the Recycle Bin." (for a folder: "… with
   everything in it.") with the buttons Delete and Cancel; the deletion goes through the shell (`SHFileOperationW` with
   `FOF_ALLOWUNDO`, silent and without the shell's own confirmation), so that the Recycle Bin takes it; "Deleted
@@ -359,7 +366,7 @@ listed yet), "No items in this folder" (a command on an empty folder's one item,
 (the same under a filter, AF-3.8), "Not shown: …" (the same on the list's last line, AF-2.2), "Nothing selected", "Choose a drive first" (a folder command at This PC, AF-3.10), "Not a file" (Ctrl+E or Open with… on a folder), "Not a zip file" (Extract here, AF-4.12), "Not a sound or video file"
 (Player → Play on another entry), "Not a time" (Go to time), "Speed n is not supported here", "Name unchanged" (a
 rename to the same name), "Nothing to paste" (no files on the clipboard), "Already in this folder" (a cut entry
-pasted where it is), "Type a name" and the
+pasted where it is), "Reads the same as <name>, which is already here" (AF-4.2), "Type a name" and the
 other reasons of `FileOperations.CheckName`. A new selection is NVDA's own reading.
 
 ### AF-8 Settings, log, status

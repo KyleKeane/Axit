@@ -56,6 +56,28 @@ public sealed class FileOperationsTests : IDisposable
         Assert.Contains("already", error.Message);
     }
 
+    [Theory]
+    [InlineData("notes.md", "notes.md ")]
+    [InlineData("notes .md", "notes .md")]
+    [InlineData("notes​.md", "notes.md")]
+    [InlineData("café.txt", "café.txt")]
+    [InlineData("my  file.txt", "my file.txt")]
+    [InlineData("NOTES.MD‍", "notes.md")]
+    public void A_name_that_reads_the_same_as_another_is_found(string typed, string existing)
+    {
+        Assert.Equal(existing, FileOperations.Lookalike(typed, ["a.txt", existing, "b.txt"]));
+    }
+
+    [Theory]
+    [InlineData("notes.md", "notes.md")]
+    [InlineData("Notes.md", "notes.md")]
+    [InlineData("notes2.md", "notes.md")]
+    [InlineData("note.md", "notes.md")]
+    public void The_same_name_and_a_different_name_are_no_lookalikes(string typed, string existing)
+    {
+        Assert.Null(FileOperations.Lookalike(typed, ["a.txt", existing]));
+    }
+
     [Fact]
     public void A_new_file_is_empty_and_the_next_one_gets_a_number()
     {
