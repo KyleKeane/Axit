@@ -19,7 +19,8 @@ public sealed partial class FileForm : AxitForm
     private readonly string? _startPath;
     private readonly MenuStrip _menu = new();
     private readonly ToolStripMenuItem _recentItem = new("Open &recent folder");
-    private readonly ToolStripMenuItem _favoritesItem = new("Fa&vourites");
+    private readonly ToolStripMenuItem _favoritesItem = new("Fa&vorites");
+    private readonly ToolStripMenuItem _drivesMenu = new("&Drives");
     private readonly List<(SortBy By, ToolStripMenuItem Item)> _sortItems = [];
     private readonly ItemMenu _itemMenu;
     private readonly ListBox _list = new();
@@ -85,6 +86,11 @@ public sealed partial class FileForm : AxitForm
         _itemMenu = new ItemMenu(SayInformation) { AccessibleName = "Item" };
         FillItemMenu(_itemMenu.Items);
 
+        // Drives (AF-3.11): the drives to go to, This PC, and the drive's own Eject and Properties; refilled when it
+        // opens, since a stick may have come or gone.
+        _drivesMenu.DropDownOpening += (_, _) => FillDrives();
+        FillDrives();
+
         var player = new ToolStripMenuItem("&Player");
         player.DropDownItems.Add(Item("&Play", PlaySelected, AxFileKeys.Open));
         player.DropDownItems.Add(Item("P&ause or resume", PauseResume, AxFileKeys.PauseResume));
@@ -122,7 +128,7 @@ public sealed partial class FileForm : AxitForm
             [("&Keyboard shortcuts in Windows", "https://support.microsoft.com/windows/keyboard-shortcuts-in-windows-dcc61a57-8ff0-cffe-9796-cb9706c75eec")]);
 
         // The bundle's Axit menu (AX-9) sits before Help in every window and ends with the update items and About.
-        _menu.Items.AddRange([folder, item, player, options, CreateAxitMenu(), help]);
+        _menu.Items.AddRange([folder, item, _drivesMenu, player, options, CreateAxitMenu(), help]);
         MainMenuStrip = _menu;
 
         // ---- the list (AF-2.1, AF-2.2): the one control; its own keys stay native (AF-3.6) ----

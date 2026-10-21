@@ -33,6 +33,8 @@ internal static class Shell
     private const int OaifExec = 0x4;
     private const uint CmicMaskUnicode = 0x00004000;
     private const uint CmicMaskPtInvoke = 0x20000000;
+    private const uint GcsVerbW = 0x00000004;
+    private const uint VerbMax = 64;
 
     private static readonly Guid IidIShellFolder = new("000214E6-0000-0000-C000-000000000046");
     private static readonly Guid IidIContextMenu = new("000214E4-0000-0000-C000-000000000046");
@@ -111,6 +113,59 @@ internal static class Shell
         finally
         {
             s_tracking = null;
+            Release(parts);
+        }
+    }
+
+    /// <summary>
+    /// The shell's own Eject for a removable drive or a disc (AF-3.11): the drive's context menu is built and the
+    /// item whose verb is "eject" invoked, as choosing it in File Explorer would; the shell says the rest (safe to
+    /// remove, or in use). The reason when the drive has no Eject or Windows refuses, null otherwise.
+    /// </summary>
+    public static string? Eject(nint owner, string drive)
+    {
+        var built = Build(owner, drive, out var reason);
+        if (built is not { } parts)
+        {
+            return reason;
+        }
+
+        var name = Marshal.AllocHGlobal((int)VerbMax * 2);
+        try
+        {
+            var contextMenu = (IContextMenu)parts.Handler;
+            var count = GetMenuItemCount(parts.Menu);
+            for (var i = 0; i < count; i++)
+            {
+                var id = GetMenuItemID(parts.Menu, i);
+                if (id == uint.MaxValue || id < IdFirst || contextMenu.GetCommandString((nuint)(id - IdFirst), GcsVerbW, 0, name, VerbMax) < 0)
+                {
+                    continue;
+                }
+
+                if (!string.Equals(Marshal.PtrToStringUni(name), "eject", StringComparison.OrdinalIgnoreCase))
+                {
+                    continue;
+                }
+
+                var info = new InvokeInfo
+                {
+                    Size = Marshal.SizeOf<InvokeInfo>(),
+                    Mask = CmicMaskUnicode,
+                    Window = owner,
+                    Verb = (nint)(id - IdFirst),
+                    VerbW = (nint)(id - IdFirst),
+                    Show = SwShowNormal,
+                };
+                var hr = contextMenu.InvokeCommand(ref info);
+                return hr < 0 && hr != ErrorCancelled ? Reason(hr) : null;
+            }
+
+            return "This drive has no Eject";
+        }
+        finally
+        {
+            Marshal.FreeHGlobal(name);
             Release(parts);
         }
     }
@@ -238,6 +293,12 @@ internal static class Shell
 
     [DllImport("user32.dll", ExactSpelling = true)]
     private static extern nint CreatePopupMenu();
+
+    [DllImport("user32.dll", ExactSpelling = true)]
+    private static extern int GetMenuItemCount(nint menu);
+
+    [DllImport("user32.dll", ExactSpelling = true)]
+    private static extern uint GetMenuItemID(nint menu, int position);
 
     [DllImport("user32.dll", ExactSpelling = true)]
     [return: MarshalAs(UnmanagedType.Bool)]

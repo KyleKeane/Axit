@@ -353,6 +353,81 @@ public sealed partial class FileForm
         return false;
     }
 
+    // ---- the Drives menu (AF-3.11) ----
+
+    /// <summary>Drives ▸: the ready drives as "1. Local Disk (C:)", This PC, then Eject and Properties for the drive in hand.</summary>
+    private void FillDrives()
+    {
+        var items = _drivesMenu.DropDownItems;
+        items.Clear();
+        var drives = FolderListing.Drives();
+        for (var i = 0; i < drives.Count; i++)
+        {
+            var drive = drives[i];
+            items.Add(new ToolStripMenuItem(AxitWindows.Label(i, drive.Name), null, (_, _) => Do(() => ShowFolderAsync(drive.Path, null, remember: true))));
+        }
+
+        items.Add(new ToolStripSeparator());
+        items.Add(new ToolStripMenuItem("This &PC", null, (_, _) => Do(() => ShowFolderAsync(FolderListing.ThisPC, CurrentDrive()?.Path, remember: false))));
+        items.Add(new ToolStripSeparator());
+        items.Add(new ToolStripMenuItem("&Eject this drive", null, (_, _) => EjectDrive()));
+        items.Add(new ToolStripMenuItem("Drive p&roperties", null, (_, _) => ShowDriveProperties()));
+    }
+
+    /// <summary>The drive in hand: the entry at This PC, the folder's own drive otherwise; null without a folder.</summary>
+    private Entry? CurrentDrive()
+    {
+        if (_folder is null)
+        {
+            return null;
+        }
+
+        if (FolderListing.IsThisPC(_folder))
+        {
+            return CurrentEntry();
+        }
+
+        var root = Path.GetPathRoot(_folder);
+        return FolderListing.Drives().FirstOrDefault(drive => string.Equals(drive.Path, root, StringComparison.OrdinalIgnoreCase));
+    }
+
+    /// <summary>Drives → Eject this drive: the shell's own Eject for a stick or a disc, "Ejecting <name>", and This PC when the folder was on it; "Failed: …" when the drive has no Eject or Windows refuses.</summary>
+    private void EjectDrive()
+    {
+        if (CurrentDrive() is not { } drive)
+        {
+            Announce(_folder is null ? "No folder" : "Choose a drive first", true);
+            return;
+        }
+
+        if (Shell.Eject(Handle, drive.Path) is { } reason)
+        {
+            Failed("Eject failed", reason);
+            return;
+        }
+
+        Announce($"Ejecting {drive.Name}", true);
+        if (_folder is { } folder && !FolderListing.IsThisPC(folder))
+        {
+            Do(() => ShowFolderAsync(FolderListing.ThisPC, null, remember: false));
+        }
+    }
+
+    /// <summary>Drives → Drive properties: the Windows Properties sheet of the drive in hand, with its space and tools.</summary>
+    private void ShowDriveProperties()
+    {
+        if (CurrentDrive() is not { } drive)
+        {
+            Announce(_folder is null ? "No folder" : "Choose a drive first", true);
+            return;
+        }
+
+        if (Shell.Properties(Handle, drive.Path) is { } reason)
+        {
+            Failed("Properties failed", reason);
+        }
+    }
+
     // ---- favorites (AF-3.9) ----
 
     /// <summary>Folder → Favorites ▸: the pinned folders that still exist as "1. name (path)", or "No favorites yet", then the key's item.</summary>

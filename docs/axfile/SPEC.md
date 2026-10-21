@@ -160,6 +160,16 @@ windows on the folder of the file or project in hand, and sends back. It works e
   Paste, Rename, Delete, Cut, Copy, Ctrl+D, Show current folder in ▸ the other apps); Show current folder in ▸ File
   Explorer opens File Explorer's own This PC. The other items of the entry's menu work on a drive as on a folder
   (Open in Axit ▸, Show in File Explorer, Properties, Windows menu…).
+- AF-3.11 **The Drives menu** (asked 2026-10-21, for moving things to a stick and taking it out): **Drives (D)** on
+  the menu bar lists the ready drives as "1. Local Disk (C:)" (AX-9.5), each opening the drive's root and joining the
+  recent list, then **This PC** (the drives list, AF-3.10, the folder's drive selected), then **Eject this drive**
+  and **Drive properties**, both for the drive in hand: the entry at This PC, or the folder's own drive. Eject is
+  the shell's own: the drive's context menu is built as for Windows menu… (AF-4.7) and its item whose verb is
+  `eject` is invoked (`Shell.Eject`), so a stick, a card or a disc comes out the way File Explorer's Eject does and
+  Windows says the rest (safe to remove, or in use); "Ejecting <name>", and the list goes to This PC when it was on
+  that drive; "Failed: This drive has no Eject" on a fixed disk, "Failed: <reason>" when Windows refuses. Drive
+  properties is the Windows sheet of the drive (space, tools). The menu is refilled each time it opens, since a stick
+  may have come or gone. Without a folder, "No folder".
 
 ### AF-4 Operations
 
@@ -301,7 +311,8 @@ windows on the folder of the file or project in hand, and sends back. It works e
   Copy Ctrl+C | Paste Ctrl+V | ─ | Rename F2 | Delete Delete | ─ | New folder… Ctrl+Shift+N | New text file
   Ctrl+Shift+T | Move to new folder… | Compress to zip | Extract here | ─ | Select all Ctrl+A | Select none
   Ctrl+Shift+A | ─ | Copy path Ctrl+Shift+C | Show in File Explorer Ctrl+Shift+W | Information Ctrl+I | Properties
-  Alt+Enter | ─ | Windows menu…; the same menu is the list's context menu (AF-4.6). **Player (P):** Play Enter | Pause or resume Ctrl+P | Next file Ctrl+Shift+Right | Previous
+  Alt+Enter | ─ | Windows menu…; the same menu is the list's context menu (AF-4.6). **Drives (D):** 1. Local Disk
+  (C:) … | ─ | This PC | ─ | Eject this drive | Drive properties (AF-3.11). **Player (P):** Play Enter | Pause or resume Ctrl+P | Next file Ctrl+Shift+Right | Previous
   file Ctrl+Shift+Left | Forward 15 seconds Ctrl+Right | Back 15 seconds Ctrl+Left | Go to time… Ctrl+T | ─ | Faster
   Ctrl+Shift+Period | Slower Ctrl+Shift+Comma | Normal speed | ─ | Say each file as it starts ✓ | What is playing
   Ctrl+Q. **Options (O):** Text ▸ (Font… | Larger text Ctrl+Plus | Smaller text Ctrl+Minus | Windows text size) |
@@ -333,7 +344,7 @@ One UI Automation notification each, on the list, or on the notice while one sho
 to <name>", "Deleted <name>", "Deleted n items", "Copied path", "Copied n paths", "Cut <name>", "Copied <name>", "Cut n
 items", "Copied n items", "Selected", "Deselected", "Selected, n selected", "Deselected, n selected", "n selected",
 "None selected" (AF-3.7), "Sorted by <order>", "Filter cleared" (AF-3.8), "Added to Favorites", "Removed from
-Favorites" (AF-3.9), "Top" (This PC, AF-3.10), "Added <name>", "Removed <name>", "Started <name>" (AF-4.11),
+Favorites" (AF-3.9), "Top" (This PC, AF-3.10), "Ejecting <name>" (AF-3.11), "Added <name>", "Removed <name>", "Started <name>" (AF-4.11),
 "Compressed to <name>", "Extracted to <name>", "Compressing, please wait", "Extracting, please wait" (AF-4.12), "Pasted
 <name>", "Pasted n items",
 "Pasting, please wait" (a paste longer than a second), "Refreshed", "Not found: <path>", "No program opens
@@ -469,5 +480,5 @@ single-threaded-apartment thread of its own (AX-7.5).
   list of what a file browser makes easy, Sort by and the filter (AF-3.8), Favorites (AF-3.9), This PC (AF-3.10)
   and Compress to zip with Extract here (AF-4.12); then, from one more message: the list named by its count alone
   (AF-2.1), the two switches of Options → General with the not-shown line (AF-2.2), "name - 2" on a pasted or zipped
-  name already there (AF-4.8), New text file into the rename box (AF-4.1) and Move to new folder… (AF-4.13); then the entry's menu reshaped as one flat list in File Explorer's words and the bar's Item menu made a standard drop-down (AF-4.6, AX-6.6), at the user's ask after Left and Right opened the menus. Not
+  name already there (AF-4.8), New text file into the rename box (AF-4.1) and Move to new folder… (AF-4.13); then the entry's menu reshaped as one flat list in File Explorer's words and the bar's Item menu made a standard drop-down (AF-4.6, AX-6.6), at the user's ask after Left and Right opened the menus; and the Drives menu with the shell's Eject (AF-3.11). Not
   yet checked with NVDA.
