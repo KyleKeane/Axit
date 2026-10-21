@@ -76,7 +76,9 @@ windows on the folder of the file or project in hand, and sends back. It works e
 - AF-2.2 Items: a file by its name as it is; a folder as "<name>, folder". Folders first, then files, each group in
   Windows' natural order (`StrCmpLogicalW`, so that `2` comes before `10`). Hidden and system entries are left out
   (`showHidden` in the settings file turns them on). The list is read on a background task (AX-7.5); a folder of ten
-  thousand entries fills in one update.
+  thousand entries fills in one update. An empty folder shows one item, "No items in this folder", selected, so that
+  the list is never empty and the reason is read (the bundle's rule for empty lists, AX-9.5); it is not an entry: a
+  command on it says "No items in this folder" (AF-7).
 - AF-2.3 The title is `<folder name> - AxFile`. The status bar's left label: the player's state, `Playing 03 Chapter
   3.mp3 12:52 / 45:30` while it plays (the time moving once a second), `Paused …`, empty otherwise; the right label:
   the folder's full path. No AccessibleName, no Spring (AxClaude §6.2).
@@ -231,7 +233,7 @@ to <name>", "Deleted <name>", "Copied path", "Cut <name>", "Copied <name>", "Pas
 "Pasting, please wait" (a paste longer than a second), "Refreshed", "Top of the drive", "Not found: <path>", "No program opens
 .xyz. Ctrl+E opens it as text", "Failed: <message>", "<name>, <size>, modified <date>" (Ctrl+I), "Not found" (find),
 "Nothing to save here", "Text size n", "Windows text size", "Copied diagnostics"; and the guards "No folder" (nothing
-listed yet), "Nothing selected" (an empty folder), "Not a file" (Ctrl+E or Open with… on a folder), "Not a sound or video file"
+listed yet), "No items in this folder" (a command on an empty folder's one item, AF-2.2), "Nothing selected", "Not a file" (Ctrl+E or Open with… on a folder), "Not a sound or video file"
 (Player → Play on another entry), "Not a time" (Go to time), "Speed n is not supported here", "Name unchanged" (a
 rename to the same name), "Nothing to paste" (no files on the clipboard), "Already in this folder" (a cut entry
 pasted where it is), "Type a name" and the

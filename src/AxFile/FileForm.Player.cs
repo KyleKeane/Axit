@@ -47,7 +47,7 @@ public sealed partial class FileForm
     {
         if (CurrentEntry() is not { } entry)
         {
-            Announce(_folder is null ? "No folder" : "Nothing selected", true);
+            SayNoEntry();
             return;
         }
 

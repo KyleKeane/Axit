@@ -81,7 +81,7 @@ public sealed partial class FileForm
 
         if (_folder is null || CurrentEntry() is not { } entry)
         {
-            Announce(_folder is null ? "No folder" : "Nothing selected", true);
+            SayNoEntry();
             return;
         }
 
@@ -179,7 +179,7 @@ public sealed partial class FileForm
     {
         if (_folder is not { } folder || CurrentEntry() is not { } entry)
         {
-            Announce(_folder is null ? "No folder" : "Nothing selected", true);
+            SayNoEntry();
             return;
         }
 
@@ -209,7 +209,7 @@ public sealed partial class FileForm
     {
         if (CurrentEntry() is not { } entry)
         {
-            Announce(_folder is null ? "No folder" : "Nothing selected", true);
+            SayNoEntry();
             return;
         }
 
@@ -231,7 +231,7 @@ public sealed partial class FileForm
     {
         if (CurrentEntry() is not { } entry)
         {
-            Announce(_folder is null ? "No folder" : "Nothing selected", true);
+            SayNoEntry();
             return;
         }
 
@@ -355,7 +355,7 @@ public sealed partial class FileForm
     {
         if (CurrentEntry() is not { } entry)
         {
-            Announce(_folder is null ? "No folder" : "Nothing selected", true);
+            SayNoEntry();
             return;
         }
 
@@ -390,7 +390,7 @@ public sealed partial class FileForm
     {
         if (CurrentEntry() is not { } entry)
         {
-            Announce(_folder is null ? "No folder" : "Nothing selected", true);
+            SayNoEntry();
             return;
         }
 
@@ -413,7 +413,7 @@ public sealed partial class FileForm
     {
         if (CurrentEntry() is not { } entry)
         {
-            Announce(_folder is null ? "No folder" : "Nothing selected", true);
+            SayNoEntry();
             return;
         }
 
@@ -432,7 +432,7 @@ public sealed partial class FileForm
     {
         if (CurrentEntry() is not { } entry)
         {
-            Announce(_folder is null ? "No folder" : "Nothing selected", true);
+            SayNoEntry();
             return;
         }
 
@@ -466,7 +466,7 @@ public sealed partial class FileForm
     {
         if (CurrentEntry() is not { } entry)
         {
-            Announce(_folder is null ? "No folder" : "Nothing selected", true);
+            SayNoEntry();
             return;
         }
 
@@ -487,7 +487,7 @@ public sealed partial class FileForm
     {
         if (CurrentEntry() is not { } entry)
         {
-            Announce(_folder is null ? "No folder" : "Nothing selected", true);
+            SayNoEntry();
             return;
         }
 
@@ -502,7 +502,7 @@ public sealed partial class FileForm
     {
         if (CurrentEntry() is not { } entry)
         {
-            Announce(_folder is null ? "No folder" : "Nothing selected", true);
+            SayNoEntry();
             return;
         }
 

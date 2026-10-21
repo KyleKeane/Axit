@@ -1,5 +1,9 @@
 # Changelog
 
+## Unreleased
+
+- AxFile: an empty folder shows one line, "No items in this folder", instead of an empty list; a command on it says the same.
+
 ## 3.1.0 - 2026-10-21
 
 - AxFile: a new app of the bundle, a file manager for one folder with a player, as a first draft (`docs/axfile/SPEC.md`). `Axit.exe file [<folder or file>]`, `axfile`, Start menu entry "Axit AxFile", AxFile under Open with Axit on folders and on files. One list of a folder's entries, folders first in File Explorer's order; Enter opens a folder in the list, a Markdown or text file in AxDown, a JSON file in AxJSON, a sound or video file in the player, and anything else in the program Windows has for it; Backspace goes up; Ctrl+I says the size and the date; Ctrl+G goes to a typed path; Ctrl+F finds by name; F5, and coming back to the window, refresh. New folder (Ctrl+Shift+N), Rename (F2), Delete to the Recycle Bin (Delete) and Copy path (Ctrl+Shift+C), each one notice or one announcement. The player plays the folder's media files in order through Windows' own decoders (Media Foundation): Space pauses, Ctrl+Left and Ctrl+Right seek, Ctrl+Shift+Left and Ctrl+Shift+Right change file, Ctrl+Shift+Comma and Ctrl+Shift+Period change the speed with the pitch kept, Ctrl+T goes to a time, Ctrl+Q says what is playing, and the next file's name is said as it starts (a setting). The other windows' "Show current … in" submenus offer AxFile, and it offers File Explorer, AxClaude, AxGit and AxTerminal back. Not yet checked with NVDA; the player not yet heard.

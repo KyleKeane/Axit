@@ -18,7 +18,7 @@ The window is named after the folder: "Dune - AxFile". The list is named with th
 
 ## The list
 
-The list is the one control. Arrow keys, Home, End, Page Up and Page Down move through the entries; a typed letter jumps to the next name starting with it; nothing is spoken until you ask. Folders come first, then files, each in the order File Explorer uses, so `2` comes before `10`; folders read "docs, folder". Hidden and system entries are left out, as in File Explorer (the setting `showHidden` in the settings file turns them on).
+The list is the one control. Arrow keys, Home, End, Page Up and Page Down move through the entries; a typed letter jumps to the next name starting with it; nothing is spoken until you ask. Folders come first, then files, each in the order File Explorer uses, so `2` comes before `10`; folders read "docs, folder". Hidden and system entries are left out, as in File Explorer (the setting `showHidden` in the settings file turns them on). An empty folder shows one line, "No items in this folder", so that you hear why the list has nothing in it.
 
 - **Enter** opens the entry: a folder in this list (its first entry selected), a `.md`, `.markdown` or `.txt` file in a new AxDown window, a `.json` file in AxJSON, a sound or video file in the player, and any other file in the program Windows has for it, or, when Windows has none, the Windows dialog that asks which program, as File Explorer does.
 - **Backspace** or Alt+Up goes to the folder above, with the folder you left selected. At the top of a drive AxFile says "Top of the drive".

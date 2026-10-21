@@ -104,22 +104,29 @@ public sealed partial class FileForm
         return true;
     }
 
+    /// <summary>The one item of an empty folder (AF-2.2), so that the list is never empty and the reason is read (AX-9.5).</summary>
+    private const string EmptyFolderText = "No items in this folder";
+
     /// <summary>The list's items for the folder, named with the folder and the count; the selection by name, or the first entry.</summary>
     private void FillList(string? select)
     {
         _list.BeginUpdate();
         _list.Items.Clear();
         _list.Items.AddRange(_entries.Select(entry => (object)entry.Label).ToArray());
-        _list.EndUpdate();
-        _list.AccessibleName = FolderListing.ListName(_folder ?? string.Empty, _entries.Count);
         if (_entries.Count == 0)
         {
-            return;
+            _list.Items.Add(EmptyFolderText);
         }
 
+        _list.EndUpdate();
+        _list.AccessibleName = FolderListing.ListName(_folder ?? string.Empty, _entries.Count);
         var index = select is null ? -1 : IndexOfName(select);
         _list.SelectedIndex = Math.Max(0, index);
     }
+
+    /// <summary>The guard of every command on an entry (AF-7): why there is none.</summary>
+    private void SayNoEntry() =>
+        Announce(_folder is null ? "No folder" : _entries.Count == 0 ? EmptyFolderText : "Nothing selected", true);
 
     private int IndexOfName(string name)
     {
@@ -134,6 +141,7 @@ public sealed partial class FileForm
         return -1;
     }
 
+    /// <summary>The entry under the selection; null for an empty folder, whose one item is not an entry.</summary>
     private Entry? CurrentEntry() =>
         _list.SelectedIndex is var i && i >= 0 && i < _entries.Count && _list.Items.Count == _entries.Count ? _entries[i] : null;
 
@@ -170,7 +178,7 @@ public sealed partial class FileForm
     {
         if (CurrentEntry() is not { } entry)
         {
-            Announce(_folder is null ? "No folder" : "Nothing selected", true);
+            SayNoEntry();
             return;
         }
 
@@ -324,7 +332,7 @@ public sealed partial class FileForm
     {
         if (CurrentEntry() is not { } entry)
         {
-            Announce(_folder is null ? "No folder" : "Nothing selected", true);
+            SayNoEntry();
             return;
         }
 
