@@ -11,7 +11,7 @@ Run with NVDA before a release, on a folder with a few subfolders, text files an
 5. Ctrl+I on a file: "<name>, <size>, modified <date time>"; on a folder: "<name>, folder, modified …".
 6. On a `.md` file, Enter: a new AxDown window on it (Alt+A, O goes back). On a `.json` file: AxJSON. On a `.pdf` or similar: the program Windows has for it. On a file of a type nothing opens (make `x.axtest`): "No program opens .axtest. Ctrl+E opens it as text"; Ctrl+E: AxDown on it.
 7. Ctrl+G: the notice "Go to folder" with the field "Path" holding the current folder; type `%USERPROFILE%\Downloads`, Enter: the list is Downloads. Ctrl+G, type a file's full path, Enter: its folder with the file selected. Ctrl+G, type `C:\nope`, Enter: "Not found: C:\nope".
-8. Ctrl+O: the Windows folder picker; choose a folder: the list shows it, the focus back in the list. Folder, Open recent folder: the folders opened by command as "1. name (path)".
+8. Ctrl+O: the Windows folder picker; choose a folder: the list shows it, the focus back in the list. Folder, Open recent folder: the folders opened by command as "1. name (path)". Ctrl+N: a second AxFile window on the same folder, read as the first was; Alt+A, O, 1 goes back to the first.
 9. In File Explorer, add a file to the folder; Alt+Tab back to AxFile: the file is in the list, on the entry you had, nothing spoken. F5: "Refreshed".
 10. Ctrl+F, type part of a name further down, Enter: NVDA reads that entry. F3: the next match, or "Not found". Shift+F3: back.
 11. Ctrl+S: "Nothing to save here". F1: the Keyboard shortcuts notice; Escape closes it.

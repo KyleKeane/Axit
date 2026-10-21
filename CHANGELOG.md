@@ -3,6 +3,7 @@
 ## Unreleased
 
 - AxFile: an empty folder shows one line, "No items in this folder", instead of an empty list; a command on it says the same.
+- AxFile: Ctrl+N (Folder → New window) opens another AxFile window on the same folder, as in File Explorer.
 
 ## 3.1.0 - 2026-10-21
 

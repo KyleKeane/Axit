@@ -23,6 +23,7 @@ public static class HelpText
           Ctrl+E: open the file in AxDown, or AxJSON for a .json file, whatever Enter would do
           Ctrl+Shift+W: show the entry in File Explorer. Ctrl+W: show the folder in File Explorer
           Ctrl+O: open a folder with the Windows folder picker. Ctrl+G: go to a typed path, %USERPROFILE%\Downloads for instance
+          Ctrl+N: a new AxFile window on this folder
           F5: read the folder again
           Ctrl+Shift+N: a new folder, after its name. F2: rename in place, in a box over the entry with the name before the extension selected; Enter renames, Escape keeps the name. Delete: delete to the Recycle Bin, after a question
           Ctrl+X, Ctrl+C, Ctrl+V: cut, copy or paste the entry as a file, to and from File Explorer too; a pasted name already in the folder gets a number

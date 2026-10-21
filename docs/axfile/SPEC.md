@@ -99,7 +99,10 @@ windows on the folder of the file or project in hand, and sends back. It works e
   window closed on; Enter and Backspace browse without joining the list, so that a walk through a tree does not fill
   it. **Go to folder…** (Ctrl+G): the notice "Go to folder" with the field "Path" holding the current folder, which
   takes a path with environment variables (`%USERPROFILE%\Downloads`) and a file's path (its folder, the file
-  selected); "Not found: <path>" when there is no such place.
+  selected); "Not found: <path>" when there is no such place. **New window** (Ctrl+N, File Explorer's key; Folder →
+  New window): another AxFile window on the folder shown, through the bundle's starter (AX-9.2), so that two folders
+  can be worked between; Ctrl+N is the other windows' New session, New document and New branch, and a new window of
+  any app is the Axit menu's (AX-9).
 - AF-3.4 **Refresh** (F5) reads the folder again keeping the selection by name; "Refreshed". Coming back to the window
   after another program changed the folder refreshes it the same way, silently (the list is a view and holds nothing
   unsaved; AxDown AD-3.6 is the editors' rule).
@@ -198,8 +201,8 @@ windows on the folder of the file or project in hand, and sends back. It works e
 
 ### AF-6 Menus, keys, texts
 
-- AF-6.1 Menus, in the standard order of a first menu (AX-6): **Folder (F):** Open folder… Ctrl+O | Open recent folder
-  ▸ | Go to folder… Ctrl+G | ─ | Up one level Backspace | Refresh F5 | ─ | Show current folder in ▸ (File Explorer
+- AF-6.1 Menus, in the standard order of a first menu (AX-6): **Folder (F):** New window Ctrl+N | Open folder… Ctrl+O |
+  Open recent folder ▸ | Go to folder… Ctrl+G | ─ | Up one level Backspace | Refresh F5 | ─ | Show current folder in ▸ (File Explorer
   Ctrl+W | AxClaude | AxGit | AxTerminal) | ─ | Exit Alt+F4. **Item (I):** File operations ▸ (Cut Ctrl+X | Copy Ctrl+C |
   Paste Ctrl+V | ─ | New folder… Ctrl+Shift+N | Rename F2 | Delete… Delete | Copy path Ctrl+Shift+C) | ─ | Open Enter
   | Open in editor Ctrl+E | Open in Axit ▸ (AxClaude | AxDown | AxJSON | AxGit | AxTerminal | AxFile) | Open with
@@ -214,7 +217,7 @@ windows on the folder of the file or project in hand, and sends back. It works e
 - AF-6.2 Keys (AX-8). Bundle-wide: F1, the control keys, Ctrl+F, F3, Shift+F3, Ctrl+S ("Nothing to save here"),
   Ctrl+Plus, Ctrl+Minus, Page Up and Page Down (the list's own here), Ctrl+Up and Ctrl+Down with Shift (edit controls
   only; the list leaves them alone), Alt+F4. Window-specific (`AxFileKeys`): Enter, Backspace, Alt+Up, F5, F2, Delete,
-  Ctrl+O, Ctrl+G, Ctrl+W, Ctrl+Shift+W, Ctrl+E, Ctrl+I, Ctrl+Shift+N, Ctrl+Shift+C, Space, Ctrl+Right, Ctrl+Left,
+  Ctrl+N, Ctrl+O, Ctrl+G, Ctrl+W, Ctrl+Shift+W, Ctrl+E, Ctrl+I, Ctrl+Shift+N, Ctrl+Shift+C, Space, Ctrl+Right, Ctrl+Left,
   Ctrl+Shift+Right, Ctrl+Shift+Left, Ctrl+T, Ctrl+Shift+Period, Ctrl+Shift+Comma, Ctrl+Q, Shift+F10, the Applications
   key, Alt+Enter, Ctrl+X, Ctrl+C, Ctrl+V. Enter, Backspace, Space, F2, Delete, Ctrl+X, Ctrl+C, Ctrl+V, Shift+F10 and
   the Applications key act only while the list has the focus (in a notice's field or the rename box they are the

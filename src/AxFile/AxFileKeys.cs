@@ -16,6 +16,10 @@ public static class AxFileKeys
     public const Keys Up = Keys.Back;
 
     public const Keys UpAlso = Keys.Alt | Keys.Up;
+
+    /// <summary>A new AxFile window on the folder shown, File Explorer's key for it (AF-3.3).</summary>
+    public const Keys NewWindow = Keys.Control | Keys.N;
+
     public const Keys Refresh = Keys.F5;
     public const Keys OpenFolder = Keys.Control | Keys.O;
     public const Keys GoToFolder = Keys.Control | Keys.G;
@@ -69,6 +73,7 @@ public static class AxFileKeys
         ("Open (in the list)", Open),
         ("Up one level (in the list)", Up),
         ("Up one level", UpAlso),
+        ("New window", NewWindow),
         ("Refresh", Refresh),
         ("Open folder", OpenFolder),
         ("Go to folder", GoToFolder),

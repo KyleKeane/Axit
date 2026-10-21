@@ -26,6 +26,7 @@ The list is the one control. Arrow keys, Home, End, Page Up and Page Down move t
 - **Ctrl+E** opens the file in AxDown, or AxJSON for a `.json` file, whatever Enter would do with it.
 - **Ctrl+Shift+W** shows the entry in File Explorer, selected; **Ctrl+W** shows the folder.
 - **Ctrl+O** opens another folder with the Windows folder picker; Folder, Open recent folder lists the last ten you opened this way or from the command line. **Ctrl+G** goes to a typed path: `%USERPROFILE%\Downloads` works, and a file's path selects the file in its folder. "Not found" with the path when there is no such place.
+- **Ctrl+N** opens a second AxFile window on the same folder, as in File Explorer, so you can go elsewhere in one and paste in the other; Alt+A, O moves between them.
 - **F5** reads the folder again, "Refreshed". Coming back to the window after another program changed the folder does the same silently.
 - **Ctrl+F** finds the next entry whose name contains the text; F3 and Shift+F3 the next and the previous match; "Not found" otherwise.
 
@@ -66,7 +67,7 @@ The volume is Windows' own: your keyboard's volume keys work from anywhere. A vi
 
 ## Menus
 
-- **Folder**: Open folder (Ctrl+O), Open recent folder, Go to folder (Ctrl+G), Up one level (Backspace), Refresh (F5), Show current folder in (File Explorer Ctrl+W, AxClaude, AxGit, AxTerminal), Exit.
+- **Folder**: New window (Ctrl+N), Open folder (Ctrl+O), Open recent folder, Go to folder (Ctrl+G), Up one level (Backspace), Refresh (F5), Show current folder in (File Explorer Ctrl+W, AxClaude, AxGit, AxTerminal), Exit.
 - **Item**: File operations (Cut Ctrl+X, Copy Ctrl+C, Paste Ctrl+V, New folder Ctrl+Shift+N, Rename F2, Delete, Copy path Ctrl+Shift+C), Open (Enter), Open in editor (Ctrl+E), Open in Axit (every app), Open with Windows, Open with another program, Show in File Explorer (Ctrl+Shift+W), Information (Ctrl+I), Properties (Alt+Enter), More from Windows. The same menu opens on the entry with Shift+F10, the Applications key or a right click; Ctrl+I inside it says the entry.
 - **Player**: Play (Enter), Pause or resume (Space), Next file, Previous file, Forward 15 seconds, Back 15 seconds, Go to time (Ctrl+T), Faster, Slower, Normal speed, Say each file as it starts, What is playing (Ctrl+Q).
 - **Options**: Text (font and size), General (the update check), Developer (the settings file, diagnostics).

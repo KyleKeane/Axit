@@ -38,6 +38,7 @@ public sealed partial class FileForm : AxitForm
         // Folder is the thing worked on, in the standard order of a first menu (bundle AX-6): Open and the recent
         // folders, the ways around, Show current folder in, Exit.
         var folder = new ToolStripMenuItem("&Folder");
+        folder.DropDownItems.Add(Item("&New window", NewWindow, AxFileKeys.NewWindow));
         folder.DropDownItems.Add(Item("&Open folder...", OpenFolderDialog, AxFileKeys.OpenFolder));
         _recentItem.DropDownOpening += (_, _) => FillRecent();
         FillRecent();
@@ -280,6 +281,9 @@ public sealed partial class FileForm : AxitForm
                 return true;
             case AxFileKeys.UpAlso:
                 GoUp();
+                return true;
+            case AxFileKeys.NewWindow:
+                NewWindow();
                 return true;
             case AxFileKeys.Refresh:
                 Do(() => RefreshAsync(announce: true));

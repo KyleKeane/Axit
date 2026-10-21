@@ -369,6 +369,9 @@ public sealed partial class FileForm
         }
     }
 
+    /// <summary>Folder → New window (Ctrl+N, AF-3.3): another AxFile window on the folder shown, as File Explorer's Ctrl+N; without a folder, one that starts as this one did.</summary>
+    private void NewWindow() => AxitMenu.Start(Dispatch.AxFile, _folder);
+
     /// <summary>Folder → Show current folder in → AxClaude, AxGit, AxTerminal (AF-1.3): a new window of that app on the folder shown.</summary>
     private void OpenIn(string verb)
     {
