@@ -122,6 +122,17 @@ windows on the folder of the file or project in hand, and sends back. It works e
 - AF-4.5 A failure (a name taken, a file in use, access denied) is one announcement, "Failed: <Windows' message>",
   when it is one line, a notice otherwise (AxGit AG-7). Every operation runs on a background task; the list refreshes
   after it.
+- AF-4.6 **The entry's menu** (Shift+F10, the Applications key, a right click): the Item menu as the list's context
+  menu, the same items in the same order, on the selected entry (a right click selects the entry under it first, as
+  File Explorer does). It is the window's own menu, fixed, with mnemonics and listed in F1, not the shell's (AF-D8).
+- AF-4.7 **Windows' own ways**, three items of the Item menu, each one of the system's own windows like the folder
+  picker (AX-7.2): **Open with…** shows the Windows dialog that picks a program for the file and runs it ("Not a
+  file" on a folder); **Properties** (Alt+Enter, File Explorer's key) shows the Windows Properties sheet of a file or
+  a folder; **More from Windows…**, the last item, shows the shell's own context menu for the entry, File Explorer's
+  classic menu with every installed program's entries (`IShellFolder` and `IContextMenu` through P/Invoke, tracked as
+  a native popup the window owns, its first item selected, the shell's submenus such as Send to filled through the
+  window's messages), and runs what is chosen. A refusal by Windows is "Failed: <reason>"; closing the dialog or the
+  menu is not one.
 
 ### AF-5 The player
 
@@ -161,9 +172,10 @@ windows on the folder of the file or project in hand, and sends back. It works e
 
 - AF-6.1 Menus, in the standard order of a first menu (AX-6): **Folder (F):** Open folder… Ctrl+O | Open recent folder
   ▸ | Go to folder… Ctrl+G | ─ | Up one level Backspace | Refresh F5 | ─ | Show current folder in ▸ (File Explorer
-  Ctrl+W | AxClaude | AxGit | AxTerminal) | ─ | Exit Alt+F4. **Item (I):** Open Enter | Open in editor Ctrl+E | Show
-  in File Explorer Ctrl+Shift+W | Information Ctrl+I | ─ | New folder… Ctrl+Shift+N | Rename… F2 | Delete… Delete |
-  Copy path Ctrl+Shift+C. **Player (P):** Play Enter | Pause or resume Space | Next file Ctrl+Shift+Right | Previous
+  Ctrl+W | AxClaude | AxGit | AxTerminal) | ─ | Exit Alt+F4. **Item (I):** Open Enter | Open in editor Ctrl+E | Open
+  with… | Show in File Explorer Ctrl+Shift+W | Information Ctrl+I | Properties Alt+Enter | ─ | New folder…
+  Ctrl+Shift+N | Rename… F2 | Delete… Delete | Copy path Ctrl+Shift+C | ─ | More from Windows…; the same items are
+  the list's context menu (AF-4.6). **Player (P):** Play Enter | Pause or resume Space | Next file Ctrl+Shift+Right | Previous
   file Ctrl+Shift+Left | Forward 15 seconds Ctrl+Right | Back 15 seconds Ctrl+Left | Go to time… Ctrl+T | ─ | Faster
   Ctrl+Shift+Period | Slower Ctrl+Shift+Comma | Normal speed | ─ | Say each file as it starts ✓ | What is playing
   Ctrl+Q. **Options (O):** Text ▸ (Font… | Larger text Ctrl+Plus | Smaller text Ctrl+Minus | Windows text size) |
@@ -174,8 +186,10 @@ windows on the folder of the file or project in hand, and sends back. It works e
   Ctrl+Plus, Ctrl+Minus, Page Up and Page Down (the list's own here), Ctrl+Up and Ctrl+Down with Shift (edit controls
   only; the list leaves them alone), Alt+F4. Window-specific (`AxFileKeys`): Enter, Backspace, Alt+Up, F5, F2, Delete,
   Ctrl+O, Ctrl+G, Ctrl+W, Ctrl+Shift+W, Ctrl+E, Ctrl+I, Ctrl+Shift+N, Ctrl+Shift+C, Space, Ctrl+Right, Ctrl+Left,
-  Ctrl+Shift+Right, Ctrl+Shift+Left, Ctrl+T, Ctrl+Shift+Period, Ctrl+Shift+Comma, Ctrl+Q. Enter, Backspace, Space, F2
-  and Delete act only while the list has the focus (in a notice's field they are the field's). The collision test
+  Ctrl+Shift+Right, Ctrl+Shift+Left, Ctrl+T, Ctrl+Shift+Period, Ctrl+Shift+Comma, Ctrl+Q, Shift+F10, the Applications
+  key, Alt+Enter. Enter, Backspace, Space, F2, Delete, Shift+F10 and the Applications key act only while the list has
+  the focus (in a notice's field they are the field's; the two menu keys are the list's own, which shows its context
+  menu itself, so the key switch has no case for them). The collision test
   covers the table and lists the keys other windows use otherwise (Ctrl+G, Ctrl+E, Ctrl+T, Ctrl+Shift+C).
 - AF-6.3 The F1 text (`HelpText.Shortcuts`) names them all; `docs/axfile/user-guide.md` is embedded (Help → User
   guide); About is the bundle's (AX-9.9).
@@ -188,7 +202,7 @@ One UI Automation notification each, on the list, or on the notice while one sho
 to <name>", "Deleted <name>", "Copied path", "Refreshed", "Top of the drive", "Not found: <path>", "No program opens
 .xyz. Ctrl+E opens it as text", "Failed: <message>", "<name>, <size>, modified <date>" (Ctrl+I), "Not found" (find),
 "Nothing to save here", "Text size n", "Windows text size", "Copied diagnostics"; and the guards "No folder" (nothing
-listed yet), "Nothing selected" (an empty folder), "Not a file" (Ctrl+E on a folder), "Not a sound or video file"
+listed yet), "Nothing selected" (an empty folder), "Not a file" (Ctrl+E or Open with… on a folder), "Not a sound or video file"
 (Player → Play on another entry), "Not a time" (Go to time), "Speed n is not supported here", "Type a name" and the
 other reasons of `FileOperations.CheckName`. A new selection is NVDA's own reading.
 
@@ -213,7 +227,9 @@ src/AxFile.Core/    class library (net10.0): FolderListing (a folder's entries a
                     references Axit.Core
 src/AxFile/         class library (net10.0-windows): AxFileApp (Run, Usage), FileForm (the window, on AxitForm, in
                     four partial files: the controls, menus, hooks and keys; Browse; Operations; Player), AxFileKeys,
-                    HelpText (F1 text, the embedded guide); references AxFile.Core, Axit.Core, Axit.Forms
+                    HelpText (F1 text, the embedded guide), Shell (Windows' own ways with an entry: the Open with
+                    dialog, the Properties sheet, the shell's context menu through IShellFolder and IContextMenu;
+                    AF-4.7); references AxFile.Core, Axit.Core, Axit.Forms
 tests/AxFile.Tests/ FolderListingTests and FileOperationsTests over temporary folders (the Recycle Bin is not
                     exercised), MediaFilesTests (extensions, queue order, time format, speed steps), FileSettingsTests;
                     the player itself is checked by ear
@@ -253,6 +269,13 @@ single-threaded-apartment thread of its own (AX-7.5).
   window browsed elsewhere would be a surprise; the queue is fixed when play starts and the list is free to roam.
 - **AF-D7 Items are names; details on demand.** "report.pdf, 1.2 MB, 2026-10-18" on every arrow key is noise for a
   user who wants the name; Ctrl+I says the rest when asked (AX-7.3).
+- **AF-D8 Our own context menu, Windows' behind one item.** Asked 2026-10-20: the shell's context menu on every entry,
+  or a menu of our own. The shell's menu is built by every installed program's shell extension, loaded into this
+  process: a slow or broken one hangs or crashes the window, and its contents and order change with what is
+  installed and with Windows updates, under the user's fingers. The window's own Item menu is fixed, has mnemonics,
+  is listed in F1 and is covered by the collision test, so it is the context menu (AF-4.6), and the two things people
+  reach for in the shell's menu, Open with and Properties, are items of it (AF-4.7). The whole shell menu stays one
+  explicit item away, More from Windows…, for the rest (Send to, an archiver's entries), chosen knowingly.
 
 ## 7. Open questions
 
@@ -271,3 +294,6 @@ single-threaded-apartment thread of its own (AX-7.5).
   the wiring into the bundle (the dispatcher, the installer's table, the icon, the other windows' submenus), the tests
   of the pure code (77), the guide and the test plan. Not yet checked with NVDA; the player not yet heard by the user;
   the window and the player exercised by an off-screen probe only.
+- 2026-10-20, on the same branch: the entry's menu (AF-4.6) and Windows' own ways, Open with…, Properties and More
+  from Windows… (AF-4.7, AF-D8), at the user's ask. The shell's menu was built for a file by the probe and its items
+  read; showing it, the dialogs and the sheet wait for the NVDA pass (test plan §3).

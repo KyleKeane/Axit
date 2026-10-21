@@ -26,6 +26,8 @@ public static class HelpText
           F5: read the folder again
           Ctrl+Shift+N: a new folder, after its name. F2: rename, after the new name. Delete: delete to the Recycle Bin, after a question
           Ctrl+Shift+C: copy the entry's full path
+          Shift+F10, or the Applications key: the Item menu on the entry, where Open with..., Properties and More from Windows..., the full Windows menu for the entry, also are
+          Alt+Enter: the entry's Properties, the Windows sheet
           Ctrl+S: nothing to save here; AxFile says so
 
         The player

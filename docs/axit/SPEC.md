@@ -320,7 +320,8 @@ These are the rules of `docs/axclaude/SPEC.md` that are not about Claude; app sp
 - AX-7.2 No second window of the app's own: questions, errors and help texts are notices drawn inside the window
   (`OverlayPanel`), never a `Form` or a `MessageBox` once a window exists. A notice's button may open the next notice
   (the update's progress, an error, AxDown's changed-on-disk question after Save), which then stays in view. The
-  Windows folder, file and font pickers are the only separate windows.
+  Windows folder, file and font pickers, and the shell's own dialogs and menu an app hands an entry to (AxFile's Open
+  with, Properties and More from Windows, docs/axfile/SPEC.md AF-4.7), are the only separate windows.
   A notice's text takes the window's own keys for moving by Markdown structure, one `TextJump` pair per kind from the
   window's key table handed to `OverlayPanel.Jumps` and acted on by `TextJumps`, the code AxDown's editor uses for the same
   keys: AxClaude's heading letters (h, Shift+H, 1 to 6), AxDown's

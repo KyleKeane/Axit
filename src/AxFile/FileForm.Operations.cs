@@ -215,6 +215,78 @@ public sealed partial class FileForm
         AxitMenu.Start(verb, entry.Path);
     }
 
+    // ---- Windows' own ways with the entry (AF-4.7): the system's dialogs and menu, like the folder picker (AX-7.2) ----
+
+    /// <summary>Item → Open with…: the Windows dialog that picks a program for the file, and runs it.</summary>
+    private void OpenWith()
+    {
+        if (CurrentEntry() is not { } entry)
+        {
+            Announce(_folder is null ? "No folder" : "Nothing selected", true);
+            return;
+        }
+
+        if (entry.IsFolder)
+        {
+            Announce("Not a file", true);
+            return;
+        }
+
+        if (Shell.OpenWith(Handle, entry.Path) is { } reason)
+        {
+            Failed("Open with failed", reason);
+        }
+    }
+
+    /// <summary>Item → Properties (Alt+Enter): the Windows Properties sheet of the entry, a file or a folder.</summary>
+    private void ShowProperties()
+    {
+        if (CurrentEntry() is not { } entry)
+        {
+            Announce(_folder is null ? "No folder" : "Nothing selected", true);
+            return;
+        }
+
+        if (Shell.Properties(Handle, entry.Path) is { } reason)
+        {
+            Failed("Properties failed", reason);
+        }
+    }
+
+    /// <summary>Item → More from Windows…: the shell's own menu for the entry, under it in the list, once the Item menu has closed.</summary>
+    private void ShowWindowsMenu()
+    {
+        if (CurrentEntry() is not { } entry)
+        {
+            Announce(_folder is null ? "No folder" : "Nothing selected", true);
+            return;
+        }
+
+        var bounds = _list.GetItemRectangle(_list.SelectedIndex);
+        var at = _list.PointToScreen(new Point(bounds.Left, bounds.Bottom));
+        // Posted, so that the Item menu has closed and the list has the focus back before the shell's menu takes over.
+        BeginInvoke(() =>
+        {
+            if (IsDisposed)
+            {
+                return;
+            }
+
+            try
+            {
+                if (Shell.ShowMenu(Handle, entry.Path, at) is { } reason)
+                {
+                    Failed("Windows menu failed", reason);
+                }
+            }
+            catch (Exception ex) when (ex is System.Runtime.InteropServices.COMException or InvalidCastException or System.ComponentModel.Win32Exception)
+            {
+                Log.Error("The Windows menu failed", ex);
+                Failed("Windows menu failed", ex.Message);
+            }
+        });
+    }
+
     /// <summary>Enter on any other file (AF-3.2): the program Windows has for it; when there is none, the way to read it anyway.</summary>
     private void OpenWithWindows(Entry entry)
     {

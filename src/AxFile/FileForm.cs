@@ -19,6 +19,7 @@ public sealed partial class FileForm : AxitForm
     private readonly string? _startPath;
     private readonly MenuStrip _menu = new();
     private readonly ToolStripMenuItem _recentItem = new("Open &recent folder");
+    private readonly ContextMenuStrip _itemMenu = new();
     private readonly ListBox _list = new();
     private readonly Panel _video = new();
     private readonly StatusStrip _status = new();
@@ -55,16 +56,11 @@ public sealed partial class FileForm : AxitForm
         folder.DropDownItems.Add(new ToolStripSeparator());
         folder.DropDownItems.Add(new ToolStripMenuItem("E&xit", null, (_, _) => Close()) { ShortcutKeyDisplayString = "Alt+F4" });
 
+        // Item is the entry's menu; the same items are the list's context menu (AF-4.6), built twice from one method.
         var item = new ToolStripMenuItem("&Item");
-        item.DropDownItems.Add(Item("&Open", OpenSelected, AxFileKeys.Open));
-        item.DropDownItems.Add(Item("Open in &editor", OpenInEditor, AxFileKeys.OpenInEditor));
-        item.DropDownItems.Add(Item("&Show in File Explorer", ShowItemInExplorer, AxFileKeys.ShowItemInExplorer));
-        item.DropDownItems.Add(Item("&Information", SayInformation, AxFileKeys.Information));
-        item.DropDownItems.Add(new ToolStripSeparator());
-        item.DropDownItems.Add(Item("&New folder...", NewFolder, AxFileKeys.NewFolder));
-        item.DropDownItems.Add(Item("&Rename...", Rename, AxFileKeys.Rename));
-        item.DropDownItems.Add(Item("&Delete...", Delete, AxFileKeys.Delete));
-        item.DropDownItems.Add(Item("&Copy path", CopyPath, AxFileKeys.CopyPath));
+        FillItemMenu(item.DropDownItems);
+        FillItemMenu(_itemMenu.Items);
+        _itemMenu.AccessibleName = "Item";
 
         var player = new ToolStripMenuItem("&Player");
         player.DropDownItems.Add(Item("&Play", PlaySelected, AxFileKeys.Open));
@@ -101,6 +97,17 @@ public sealed partial class FileForm : AxitForm
         _list.TabIndex = 0;
         _list.AccessibleName = "No folder";
         _list.DoubleClick += (_, _) => OpenSelected();
+        // AF-4.6: Shift+F10, the Applications key and a right click open the Item menu as the list's context menu,
+        // the list's own way (the keys are in the table for the collision test and F1, not in the key switch); a
+        // right click first selects the entry under it, as File Explorer does.
+        _list.ContextMenuStrip = _itemMenu;
+        _list.MouseDown += (_, e) =>
+        {
+            if (e.Button == MouseButtons.Right && _list.IndexFromPoint(e.Location) is var index && index >= 0)
+            {
+                _list.SelectedIndex = index;
+            }
+        };
 
         // ---- the video area (AF-5.6): a plain surface at the top, shown while a video plays, never focused ----
         _video.Dock = DockStyle.Top;
@@ -133,6 +140,25 @@ public sealed partial class FileForm : AxitForm
         {
             ShowNotice(Notice.Plain("Settings", $"The settings file could not be read, so the defaults are used.\n{settingsError}") with { Unprompted = true });
         }
+    }
+
+    /// <summary>The Item menu's items (AF-6.1), for the menu bar and again for the list's context menu (AF-4.6).</summary>
+    private void FillItemMenu(ToolStripItemCollection items)
+    {
+        items.Add(Item("&Open", OpenSelected, AxFileKeys.Open));
+        items.Add(Item("Open in &editor", OpenInEditor, AxFileKeys.OpenInEditor));
+        items.Add(new ToolStripMenuItem("Open &with...", null, (_, _) => OpenWith()));
+        items.Add(Item("&Show in File Explorer", ShowItemInExplorer, AxFileKeys.ShowItemInExplorer));
+        items.Add(Item("&Information", SayInformation, AxFileKeys.Information));
+        items.Add(Item("&Properties", ShowProperties, AxFileKeys.Properties));
+        items.Add(new ToolStripSeparator());
+        items.Add(Item("&New folder...", NewFolder, AxFileKeys.NewFolder));
+        items.Add(Item("&Rename...", Rename, AxFileKeys.Rename));
+        items.Add(Item("&Delete...", Delete, AxFileKeys.Delete));
+        items.Add(Item("&Copy path", CopyPath, AxFileKeys.CopyPath));
+        items.Add(new ToolStripSeparator());
+        // AF-4.7: the shell's own menu, behind one item of ours (AF-D8).
+        items.Add(new ToolStripMenuItem("&More from Windows...", null, (_, _) => ShowWindowsMenu()));
     }
 
     // ---- what the window base asks for ----
@@ -190,6 +216,17 @@ public sealed partial class FileForm : AxitForm
         base.OnFormClosing(e);
     }
 
+    protected override void WndProc(ref Message m)
+    {
+        // AF-4.7: while Windows' own menu for an entry shows, the shell fills its submenus through the owner's messages.
+        if (Shell.ForwardMenuMessage(ref m))
+        {
+            return;
+        }
+
+        base.WndProc(ref m);
+    }
+
     // ---- keys (AF-6.2): every key comes from BundleKeys or AxFileKeys, and is handled here only ----
 
     protected override bool ProcessWindowKey(Keys keyData)
@@ -232,6 +269,9 @@ public sealed partial class FileForm : AxitForm
                 return true;
             case AxFileKeys.Information:
                 SayInformation();
+                return true;
+            case AxFileKeys.Properties:
+                ShowProperties();
                 return true;
             case AxFileKeys.NewFolder:
                 NewFolder();

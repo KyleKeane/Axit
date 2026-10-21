@@ -31,6 +31,9 @@ Run with NVDA before a release, on a folder with a few subfolders, text files an
 3. Delete on Notes: the notice "Delete Notes?" with "It goes to the Recycle Bin with everything in it." and the buttons Delete and Cancel; Escape: nothing happens; Delete, Enter: "Deleted Notes", the focus on the next entry. Open the Recycle Bin in File Explorer: Notes is there.
 4. Ctrl+Shift+C on a file: "Copied path"; paste somewhere: the full path.
 5. Ctrl+Shift+N with the name of an existing entry: "Failed: There is already an entry named …". F2 with `a?b`: "A name cannot contain …".
+6. Shift+F10 on a file: the Item menu opens as a context menu and NVDA reads its first item, "Open Enter"; Down through it: Open in editor, Open with, Show in File Explorer, Information, Properties Alt+Enter, New folder, Rename, Delete, Copy path, More from Windows; Escape closes it and the focus is back on the entry. The Applications key does the same. Alt+I: the same items in the menu bar.
+7. Alt+Enter on a file: the Windows Properties sheet, read by NVDA as any dialog, with the file's name in its title; Escape closes it and the focus is back on the entry in AxFile. Alt+Enter on a folder: the folder's sheet. Shift+F10, W on a `.txt` file: the Windows "How do you want to open this file?" dialog; Escape closes it. Shift+F10, W on a folder: "Not a file".
+8. Shift+F10, M on a file: the Windows menu for it, its first item read at once; Down through it, Right into Send to and back; Escape closes it and the focus is back on the entry, nothing done. Again, and choose Open: the file opens as it would from File Explorer.
 
 ## 4. The player (AF-5)
 

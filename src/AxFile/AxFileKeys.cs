@@ -3,8 +3,8 @@ namespace AxFile;
 /// <summary>
 /// AxFile's window-specific keys (SPEC.md AF-6.2; bundle AX-8). A key is changed here and nowhere else: the menu
 /// items, the key switch in <c>FileForm.ProcessWindowKey</c> and the F1 text read this table. The bundle-wide keys
-/// (F1, the control keys, find, Ctrl+S, text size) are <c>Axit.Forms.BundleKeys</c>. Enter, Backspace, Space, F2
-/// and Delete act in the list only; in a notice's field they are the field's own.
+/// (F1, the control keys, find, Ctrl+S, text size) are <c>Axit.Forms.BundleKeys</c>. Enter, Backspace, Space, F2,
+/// Delete, Shift+F10 and the Applications key act in the list only; in a notice's field they are the field's own.
 /// </summary>
 public static class AxFileKeys
 {
@@ -31,6 +31,15 @@ public static class AxFileKeys
     public const Keys Delete = Keys.Delete;
 
     public const Keys CopyPath = Keys.Control | Keys.Shift | Keys.C;
+
+    /// <summary>In the list: the Item menu on the entry, as the list's own context menu (AF-4.6); the list shows it itself, so the key switch has no case for it.</summary>
+    public const Keys ContextMenu = Keys.Shift | Keys.F10;
+
+    /// <summary>In the list: the same, from the Applications key.</summary>
+    public const Keys ContextMenuAlso = Keys.Apps;
+
+    /// <summary>The Windows Properties sheet of the entry, File Explorer's key for it (AF-4.7).</summary>
+    public const Keys Properties = Keys.Alt | Keys.Return;
 
     /// <summary>In the list: the player pauses or resumes.</summary>
     public const Keys PauseResume = Keys.Space;
@@ -61,6 +70,9 @@ public static class AxFileKeys
         ("Rename (in the list)", Rename),
         ("Delete (in the list)", Delete),
         ("Copy path", CopyPath),
+        ("Item menu (in the list)", ContextMenu),
+        ("Item menu (in the list)", ContextMenuAlso),
+        ("Properties", Properties),
         ("Pause or resume (in the list)", PauseResume),
         ("Forward", Forward),
         ("Back", Back),

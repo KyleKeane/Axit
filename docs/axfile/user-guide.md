@@ -38,6 +38,14 @@ The list is the one control. Arrow keys, Home, End, Page Up and Page Down move t
 
 A name Windows refuses, a file in use or a folder you may not touch gives one line, "Failed: Access denied". Copying and moving files are not in this version; File Explorer is one key away (Ctrl+W).
 
+## The entry's menu, and what Windows does for you
+
+**Shift+F10**, the Applications key or a right click opens the Item menu on the entry as a context menu, with the same items as the menu bar's Item menu: Open, Open in editor, Open with, Show in File Explorer, Information, Properties, the four operations, and More from Windows. Three of them hand the entry to Windows, each in a window of Windows' own, as the folder picker is:
+
+- **Open with...** asks which program should open the file, in the Windows dialog, and runs it.
+- **Properties** (Alt+Enter, as in File Explorer) shows the Properties sheet of the file or the folder.
+- **More from Windows...** shows the full Windows menu for the entry, the one File Explorer shows, with every installed program's entries: Send to, an archiver, a cloud drive. Its first item is selected when it opens; Escape closes it. That menu is Windows' own, so its contents change with what you install; AxFile's own menu does not.
+
 ## The player
 
 Enter on a sound or video file plays it, "Playing 03 Chapter 3.mp3", and when it ends the next media file of the same folder plays, to the end of the folder: "End of folder" with the done chime. The queue is the folder as it was when you pressed Enter, so you can browse elsewhere in the window, or leave it in the background, while it plays; the keys work from the list in any folder.
@@ -56,7 +64,7 @@ The volume is Windows' own: your keyboard's volume keys work from anywhere. A vi
 ## Menus
 
 - **Folder**: Open folder (Ctrl+O), Open recent folder, Go to folder (Ctrl+G), Up one level (Backspace), Refresh (F5), Show current folder in (File Explorer Ctrl+W, AxClaude, AxGit, AxTerminal), Exit.
-- **Item**: Open (Enter), Open in editor (Ctrl+E), Show in File Explorer (Ctrl+Shift+W), Information (Ctrl+I), New folder (Ctrl+Shift+N), Rename (F2), Delete (Delete), Copy path (Ctrl+Shift+C).
+- **Item**: Open (Enter), Open in editor (Ctrl+E), Open with, Show in File Explorer (Ctrl+Shift+W), Information (Ctrl+I), Properties (Alt+Enter), New folder (Ctrl+Shift+N), Rename (F2), Delete (Delete), Copy path (Ctrl+Shift+C), More from Windows. The same menu opens on the entry with Shift+F10, the Applications key or a right click.
 - **Player**: Play (Enter), Pause or resume (Space), Next file, Previous file, Forward 15 seconds, Back 15 seconds, Go to time (Ctrl+T), Faster, Slower, Normal speed, Say each file as it starts, What is playing (Ctrl+Q).
 - **Options**: Text (font and size), General (the update check), Developer (the settings file, diagnostics).
 - **Axit**: new windows of every app, the files and folders closed lately, the open windows, updates, About.
