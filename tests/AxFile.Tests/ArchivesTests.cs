@@ -60,6 +60,31 @@ public sealed class ArchivesTests : IDisposable
         Assert.Equal(Path.Combine(_folder, "docs - 3"), Archives.Extract(zip, _folder));
     }
 
+    [Fact]
+    public void Both_count_their_files_as_they_go()
+    {
+        var counts = new List<(int Done, int Total)>();
+        var zip = Archives.Compress([Path.Combine(_folder, "docs"), Path.Combine(_folder, "notes.md")], _folder, (done, total) => counts.Add((done, total)));
+        Assert.Equal([(1, 2), (2, 2)], counts);
+
+        counts.Clear();
+        Archives.Extract(zip, _folder, (done, total) => counts.Add((done, total)));
+        Assert.Equal([(1, 2), (2, 2)], counts);
+    }
+
+    [Fact]
+    public void An_entry_that_would_land_outside_the_folder_is_refused()
+    {
+        var zip = Path.Combine(_folder, "bad.zip");
+        using (var archive = ZipFile.Open(zip, ZipArchiveMode.Create))
+        {
+            archive.CreateEntry("../escaped.txt");
+        }
+
+        Assert.Throws<IOException>(() => Archives.Extract(zip, _folder));
+        Assert.False(File.Exists(Path.Combine(Path.GetDirectoryName(_folder)!, "escaped.txt")));
+    }
+
     [Theory]
     [InlineData("a.zip", true)]
     [InlineData("A.ZIP", true)]

@@ -86,6 +86,12 @@ public static class AxFileKeys
     /// <summary>The player pauses or resumes, from anywhere in the window (AF-5.4); Space is the selection's since 2026-10-21.</summary>
     public const Keys PauseResume = Keys.Control | Keys.P;
 
+    /// <summary>In the list: the folder's media files replace the queue and play from the first (AF-9.2).</summary>
+    public const Keys PlayFolder = Keys.Control | Keys.Return;
+
+    /// <summary>In the list: the entry, or the marked entries, appended to the queue (AF-9.2).</summary>
+    public const Keys AddToQueue = Keys.Control | Keys.Shift | Keys.Q;
+
     public const Keys Forward = Keys.Control | Keys.Right;
     public const Keys Back = Keys.Control | Keys.Left;
     public const Keys NextFile = Keys.Control | Keys.Shift | Keys.Right;
@@ -98,14 +104,14 @@ public static class AxFileKeys
     /// <summary>Every key of the window with its name, for the collision test and the F1 text.</summary>
     public static readonly IReadOnlyList<(string Name, Keys Key)> All =
     [
-        ("Open (in the list)", Open),
+        ("Open (in the list); play the file (in the queue)", Open),
         ("Up one level (in the list)", Up),
         ("Up one level", UpAlso),
         ("New window", NewWindow),
         ("Refresh", Refresh),
         ("Add to or remove from Favorites", Favorite),
         ("Filter", Filter),
-        ("Clear the filter (in the list)", ClearFilter),
+        ("Clear the filter (in the list); back to the list (in the queue)", ClearFilter),
         ("Open folder", OpenFolder),
         ("Go to folder", GoToFolder),
         ("Show the folder in File Explorer", ShowInExplorer),
@@ -115,7 +121,7 @@ public static class AxFileKeys
         ("New folder", NewFolder),
         ("New text file", NewFile),
         ("Rename (in the list)", Rename),
-        ("Delete (in the list)", Delete),
+        ("Delete (in the list); take the line out (in the queue)", Delete),
         ("Copy path", CopyPath),
         ("Cut (in the list)", Cut),
         ("Copy (in the list)", Copy),
@@ -131,6 +137,8 @@ public static class AxFileKeys
         ("Item menu (in the list)", ContextMenuAlso),
         ("Properties", Properties),
         ("Pause or resume", PauseResume),
+        ("Play folder (in the list)", PlayFolder),
+        ("Add to queue (in the list)", AddToQueue),
         ("Forward", Forward),
         ("Back", Back),
         ("Next file", NextFile),

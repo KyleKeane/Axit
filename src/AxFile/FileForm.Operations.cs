@@ -171,12 +171,16 @@ public sealed partial class FileForm
 
                     var sources = targets.Select(target => target.Path).ToList();
                     var destinations = await Task.Run(() => FileOperations.Destinations(sources, made));
+                    // AF-9.3: the operation's line in the pane, replaced when it ends.
+                    var token = Report(-1, $"Moving {what} into {name}");
                     if (await FileOperations.CopyOrMoveAsync(sources, destinations, move: true) is { } reason)
                     {
+                        Report(token, "Failed: " + reason);
                         Failed("Move failed", reason);
                         return;
                     }
 
+                    Report(token, $"Moved {what} into {name}");
                     if (await ShowFolderAsync(folder, name, remember: false))
                     {
                         Announce($"Moved {what} into {name}", true);
@@ -335,10 +339,22 @@ public sealed partial class FileForm
         [
             new OverlayChoice("&Delete", () => Do(async () =>
             {
+                // AF-9.3: a delete of several has a line in the pane; one entry goes too fast to watch.
+                var token = one is null ? Report(-1, $"Deleting {targets.Count} items") : -1;
                 if (await FileOperations.DeleteToRecycleBinAsync(targets.Select(target => target.Path).ToList()) is { } reason)
                 {
+                    if (token >= 0)
+                    {
+                        Report(token, "Failed: " + reason);
+                    }
+
                     Failed("Delete failed", reason);
                     return;
+                }
+
+                if (token >= 0)
+                {
+                    Report(token, done);
                 }
 
                 if (await ShowFolderAsync(folder, next, remember: false))
@@ -474,6 +490,9 @@ public sealed partial class FileForm
         {
             // The names are chosen first: a name already in the folder becomes "name - 2" (AF-4.8).
             var destinations = await Task.Run(() => FileOperations.Destinations(paths, folder));
+            var what = paths.Count == 1 ? Path.GetFileName(destinations[0]) : $"{paths.Count} items";
+            // AF-9.3: the operation's line in the pane; the shell gives no count, so the line waits until it ends.
+            var token = Report(-1, (move ? "Moving " : "Copying ") + what);
             var operation = FileOperations.CopyOrMoveAsync(paths, destinations, move);
             if (await Task.WhenAny(operation, Task.Delay(1000)) != operation)
             {
@@ -482,9 +501,12 @@ public sealed partial class FileForm
 
             if (await operation is { } reason)
             {
+                Report(token, "Failed: " + reason);
                 Failed("Paste failed", reason);
                 return;
             }
+
+            Report(token, "Pasted " + what);
 
             if (move)
             {
@@ -668,7 +690,8 @@ public sealed partial class FileForm
             return;
         }
 
-        RunArchiveWork(folder, "Compressing", "Compress failed", () => Archives.Compress(targets.Select(target => target.Path).ToList(), folder), "Compressed to");
+        var sources = targets.Select(target => target.Path).ToList();
+        RunArchiveWork(folder, "Compressing", "Compress failed", progress => Archives.Compress(sources, folder, progress), "Compressed to");
     }
 
     /// <summary>File operations → Extract here: the zip's contents into a new folder named after it, next to it; "Extracted to <name>", the folder selected; "Not a zip file" on anything else.</summary>
@@ -691,13 +714,30 @@ public sealed partial class FileForm
             return;
         }
 
-        RunArchiveWork(folder, "Extracting", "Extract failed", () => Archives.Extract(entry.Path, folder), "Extracted to");
+        RunArchiveWork(folder, "Extracting", "Extract failed", progress => Archives.Extract(entry.Path, folder, progress), "Extracted to");
     }
 
-    /// <summary>Runs a zip operation on a task, says "<doing>, please wait" when it passes a second, then shows the folder with the result selected and says "<done> <name>".</summary>
-    private void RunArchiveWork(string folder, string doing, string failTitle, Func<string> work, string done) => Do(async () =>
+    /// <summary>
+    /// Runs a zip operation on a task with its count in the pane's line, "Compressing, 40 of 120 files" (AF-9.3,
+    /// at most a few times a second), says "<doing>, please wait" when it passes a second, then shows the folder
+    /// with the result selected and says "<done> <name>", the line saying the same.
+    /// </summary>
+    private void RunArchiveWork(string folder, string doing, string failTitle, Func<Action<int, int>, string> work, string done) => Do(async () =>
     {
-        var task = Task.Run(work);
+        var token = Report(-1, doing);
+        var reported = Environment.TickCount64;
+        var task = Task.Run(() => work((count, total) =>
+        {
+            var now = Environment.TickCount64;
+            if (count == total || now - reported >= 250)
+            {
+                reported = now;
+                if (!IsDisposed)
+                {
+                    BeginInvoke(() => Report(token, $"{doing}, {count} of {total} files"));
+                }
+            }
+        }));
         if (await Task.WhenAny(task, Task.Delay(1000)) != task)
         {
             Announce($"{doing}, please wait", true);
@@ -710,11 +750,13 @@ public sealed partial class FileForm
         }
         catch (Exception ex) when (ex is IOException or UnauthorizedAccessException or InvalidDataException or NotSupportedException)
         {
+            Report(token, "Failed: " + FileOperations.Message(ex));
             Failed(failTitle, FileOperations.Message(ex));
             return;
         }
 
         var name = Path.GetFileName(result);
+        Report(token, $"{done} {name}");
         if (await ShowFolderAsync(folder, name, remember: false))
         {
             Announce($"{done} {name}", true);

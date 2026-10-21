@@ -5,21 +5,20 @@ using Axit.Forms;
 namespace AxFile;
 
 /// <summary>
-/// The player (SPEC.md AF-5): the folder's media files as the queue from the moment of Enter (AF-D6), the transport
-/// keys, the speed, the status bar's clock, the video area, and the announcements (AF-7). The engine is
-/// <see cref="MediaPlayer"/>; its events arrive on this thread.
+/// The player (SPEC.md AF-5): the folder's media files as the queue from the moment of Enter (AF-D6; the queue
+/// itself, and the pane that shows it, are in <c>FileForm.Pane.cs</c>, AF-9.2), the transport keys, the speed, the
+/// status bar's clock, the video area, and the announcements (AF-7). The engine is <see cref="MediaPlayer"/>; its
+/// events arrive on this thread.
 /// </summary>
 public sealed partial class FileForm
 {
     private readonly System.Windows.Forms.Timer _clock = new() { Interval = 1000 };
     private MediaPlayer? _player;
-    private IReadOnlyList<string> _queue = [];
-    private int _queueIndex = -1;
 
     /// <summary>How the file now opening was asked for: by the user (said, interrupting), by the queue (said when the setting says, not interrupting), or not said.</summary>
     private bool _prompted;
 
-    private string? PlayingName => _queueIndex >= 0 && _queueIndex < _queue.Count ? Path.GetFileName(_queue[_queueIndex]) : null;
+    private string? PlayingName => _queue.PlayingName;
 
     /// <summary>The engine, made on first use with the video area's handle and the remembered speed.</summary>
     private MediaPlayer Player()
@@ -62,25 +61,33 @@ public sealed partial class FileForm
 
     private void PlayFromList(Entry entry)
     {
-        _queue = MediaFiles.Queue(_shown);
-        _queueIndex = _queue.ToList().FindIndex(path => string.Equals(path, entry.Path, StringComparison.OrdinalIgnoreCase));
-        if (_queueIndex < 0)
+        var paths = MediaFiles.Queue(_shown);
+        var index = paths.ToList().FindIndex(path => string.Equals(path, entry.Path, StringComparison.OrdinalIgnoreCase));
+        if (index < 0)
         {
-            _queue = [entry.Path];
-            _queueIndex = 0;
+            paths = [entry.Path];
+            index = 0;
         }
 
+        _queue.Set(paths, index);
+        ShowPane();
+        FillPane();
         PlayCurrent(prompted: true);
     }
 
     /// <summary>Opens the file at the queue's index; a file that cannot be opened is said and the next one is tried (AF-5.1).</summary>
     private void PlayCurrent(bool prompted)
     {
+        if (_queue.PlayingPath is not { } path)
+        {
+            return;
+        }
+
         _prompted = prompted;
         var name = PlayingName ?? string.Empty;
         try
         {
-            Player().Play(_queue[_queueIndex]);
+            Player().Play(path);
         }
         catch (Exception ex) when (ex is IOException or InvalidOperationException or System.Runtime.InteropServices.COMException)
         {
@@ -98,6 +105,7 @@ public sealed partial class FileForm
         FitVideo();
         _clock.Start();
         UpdateStatusBar();
+        FillPane();
         if (_prompted)
         {
             Announce($"Playing {PlayingName}", true);
@@ -121,19 +129,25 @@ public sealed partial class FileForm
 
     private void MoveOn()
     {
-        if (_queueIndex + 1 < _queue.Count)
+        if (_queue.MoveOn())
         {
-            _queueIndex++;
             PlayCurrent(prompted: false);
             return;
         }
 
+        StopPlayback();
+        Sounds.Done();
+        Announce("End of folder", false);
+    }
+
+    /// <summary>Playing stopped (the end of the queue, Clear queue, the playing file taken out of the queue): the clock, the engine, the video area, the status bar and the pane's mark.</summary>
+    private void StopPlayback()
+    {
         _clock.Stop();
         _player?.Stop();
         FitVideo();
         UpdateStatusBar();
-        Sounds.Done();
-        Announce("End of folder", false);
+        FillPane();
     }
 
     /// <summary>Ctrl+P, Player → Pause or resume (AF-5.4), from anywhere in the window.</summary>
@@ -188,7 +202,7 @@ public sealed partial class FileForm
             return;
         }
 
-        var index = _queueIndex + direction;
+        var index = _queue.Playing + direction;
         if (index < 0)
         {
             Announce("First file", true);
@@ -201,7 +215,7 @@ public sealed partial class FileForm
             return;
         }
 
-        _queueIndex = index;
+        _queue.Select(index);
         PlayCurrent(prompted: true);
     }
 

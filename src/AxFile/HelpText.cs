@@ -39,12 +39,19 @@ public static class HelpText
 
         The player
           Enter on a sound or video file plays it, and the folder's other media files follow in order
+          Ctrl+Enter: play the folder's sound and video files from the first. Ctrl+Shift+Q: add the entry, or the selected entries, a folder's media files included, to the queue
           Ctrl+P: pause, or resume
           Ctrl+Right, Ctrl+Left: 15 seconds forward or back. Ctrl+T: go to a time, 12:40 or 1:02:10 or seconds
           Ctrl+Shift+Right, Ctrl+Shift+Left: the next or the previous file of the folder
           Ctrl+Shift+Period, Ctrl+Shift+Comma: faster or slower by a quarter; Player, Normal speed goes back to 1
           Ctrl+Q: what is playing, where it is, and the speed
           The volume is Windows' own: your keyboard's volume keys
+
+        The queue
+          A list under the folder list, shown once something plays or an operation reports; Tab, Ctrl+Tab or F6 moves between the list and it, Escape goes back to the list
+          The files in order, the one playing marked "(playing)"; under them the operations' lines: "Copying 3 items", then "Copied 3 items"
+          Enter: play this file. Delete: take the line out. Ctrl+I: the file's place, "3 of 12", and its position while it plays. Ctrl+Q: what is playing
+          Player, Clear queue: the queue and the lines emptied and the player stopped. Player, Show queue: the queue, with the focus in it
 
         Notices
           AxFile's questions, errors and help texts appear inside the window, in place of the list.

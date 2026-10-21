@@ -59,6 +59,16 @@ Run with NVDA before a release, on a folder with a few subfolders, text files an
 9. Enter on a file Windows cannot decode (an `.opus` without the Store codec): "Cannot play <name>: …" and the next file plays.
 10. Alt+Tab to another program while a file plays, let it end: whether "Playing <next>" is heard from the background; the sound carries on either way. Alt+F4 on AxFile: the sound stops.
 
+## 6. The queue pane (AF-9)
+
+1. Start AxFile on a folder without media: Tab, F6, Ctrl+Tab do nothing audible, the focus stays in the list (no pane yet). In a chapters folder, Enter on the second MP3: "Playing <second>", the focus stays in the list; Tab: NVDA reads "Queue list" and the item, the second file reading "<name> (playing)"; Up: the first file, plain; the files are the folder's in order. Escape: back on the entry in the folder list. F6 and Ctrl+Tab do the same as Tab; Shift+Tab goes back.
+2. In the queue, Enter on the first file: "Playing <first>", the mark moves (Down then Up reads "(playing)" on it). Delete on the third file: "Removed <third>"; the list is one shorter. Delete on the one playing: "Removed <name>" and the next file plays ("Playing <next>" only if Say each file is on). Ctrl+I on a file: "<name>, 2 of 11"; on the playing one: "…, playing, 0:12 of 45:30". Ctrl+Q: "Playing <name>, …" as from the list.
+3. In the folder list, Ctrl+Enter: "Playing <first>", the queue is the whole folder again. Backspace to the folder above, Space on two folders with media and Ctrl+Shift+Q: "Added 24 to the queue"; Tab: the queue has the first folder's files, then the 24, the one playing still marked; nothing changed in the sound. Ctrl+Shift+Q on a text file: "No sound or video files to add". Ctrl+Enter in a folder without media: "No sound or video files here".
+4. Player, Clear queue: "Queue cleared", the sound stops, the queue reads "Queue is empty"; Ctrl+Q: "Nothing playing". Player, Show queue: the focus goes into the queue, on "Queue is empty"; Enter there reads it again; Escape back.
+5. Status lines: copy a folder of some size with Ctrl+C and Ctrl+V: "Pasted <name>" as before, and the queue's last line reads "Copied <name>" (Tab, End). Space on two files, Shift+F10, Z (Compress to zip): the last line ends as "Compressed to <name>.zip", and during a long compress it reads "Compressing, 40 of 120 files" when you arrow onto it. Delete on two selected entries: the line "Deleted 2 items". A failed operation: the line "Failed: …". Player, Clear queue clears the lines too.
+6. F1 while in the queue, Escape: the focus is back in the queue, not the list. Alt+F4 while something plays: the sound stops, as before.
+7. Nothing is spoken on its own when a status line is added or replaced or the mark moves while you are in the folder list; in the queue, the item under you is read again only when it is the one that changed.
+
 ## 5. Text, notices, the Axit menu (AF-6)
 
 1. Ctrl+Plus: "Text size 13" (or the next size); Ctrl+Minus back. Options, Text, Windows text size: "Windows text size".

@@ -70,6 +70,17 @@ Enter on a sound or video file plays it, "Playing 03 Chapter 3.mp3", and when it
 - Player, Say each file as it starts (on by default) is the one thing AxFile says on its own: the next file's name when it moves on.
 - Enter on another media file switches to it. Closing the window stops the player; there is no Stop key, Ctrl+P pauses.
 
+## The queue
+
+Under the folder list a second list, "Queue", appears the first time something plays or a file operation has something to report, and stays. Tab, Ctrl+Tab or F6 moves between the folder list and it; Escape in the queue goes back to the list. The queue holds the files that play in order, the one playing marked "(playing)".
+
+- **Ctrl+Enter** (Player, Play folder) plays the folder's sound and video files from the first, replacing the queue.
+- **Ctrl+Shift+Q** (Player, Add to queue) adds the entry, or the selected entries, to the end of the queue: a sound or video file itself, a folder's media files in order; "Added 12 to the queue". Nothing starts playing by itself.
+- In the queue, Enter plays that file, Delete takes it out ("Removed 03 Chapter 3.mp3"; the one playing goes on to the next), Ctrl+I says its place, "03 Chapter 3.mp3, 3 of 12", and the position while it plays, and Ctrl+Q says what is playing, as everywhere.
+- Player, Clear queue empties it and stops the player, "Queue cleared"; Player, Show queue puts you in the queue.
+
+Under the files, the queue lists what the longer file operations are doing: "Copying 3 items", then "Copied 3 items" or "Failed: …"; "Compressing, 40 of 120 files" as a zip is made or unpacked. The lines are there to read again or to watch a slow operation; the last twenty stay, and Clear queue clears them too.
+
 The volume is Windows' own: your keyboard's volume keys work from anywhere. A video's picture is drawn in an area at the top of the window while it plays; the keys are the same. The formats are whatever Windows decodes: MP3, WAV, WMA, M4A and M4B, AAC and FLAC are built in; OGG, Opus and some video formats need the free codec extensions from the Microsoft Store. A file Windows cannot play is said, "Cannot play clip.ogg: this kind of file is not supported", and the player moves to the next.
 
 ## Menus
@@ -77,7 +88,7 @@ The volume is Windows' own: your keyboard's volume keys work from anywhere. A vi
 - **Folder**: New window (Ctrl+N), Open folder (Ctrl+O), Open recent folder, Favorites (your pinned folders, Add or remove this folder Ctrl+D), Go to folder (Ctrl+G), Up one level (Backspace), Refresh (F5), Sort by (Name, Date, Size), Filter (Ctrl+Shift+F), Show current folder in (File Explorer Ctrl+W, AxClaude, AxGit, AxTerminal), Exit.
 - **Item**: Open (Enter), Open with (Windows default, Choose a program, your own programs with Add a program and Remove a program), Open in Axit (Editor Ctrl+E and every app), Cut Ctrl+X, Copy Ctrl+C, Paste Ctrl+V, Rename F2, Delete, New folder Ctrl+Shift+N, New text file Ctrl+Shift+T, Move to new folder, Compress to zip, Extract here, Select all Ctrl+A, Select none Ctrl+Shift+A, Copy path Ctrl+Shift+C, Show in File Explorer Ctrl+Shift+W, Information Ctrl+I, Properties Alt+Enter, Windows menu. The same menu opens on the entry with Shift+F10, the Applications key or a right click; Ctrl+I inside the context menu says the entry.
 - **Drives**: the drives by number, This PC, Eject this drive, Drive properties.
-- **Player**: Play (Enter), Pause or resume (Ctrl+P), Next file, Previous file, Forward 15 seconds, Back 15 seconds, Go to time (Ctrl+T), Faster, Slower, Normal speed, Say each file as it starts, What is playing (Ctrl+Q).
+- **Player**: Play (Enter), Play folder (Ctrl+Enter), Add to queue (Ctrl+Shift+Q), Clear queue, Show queue, Pause or resume (Ctrl+P), Next file, Previous file, Forward 15 seconds, Back 15 seconds, Go to time (Ctrl+T), Faster, Slower, Normal speed, Say each file as it starts, What is playing (Ctrl+Q).
 - **Options**: Text (font and size), General (the update check, hidden files, files starting with a period), Developer (the settings file, diagnostics).
 - **Axit**: new windows of every app, the files and folders closed lately, the open windows, updates, About.
 - **Help**: Keyboard shortcuts (F1), this guide, File resources.

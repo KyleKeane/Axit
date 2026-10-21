@@ -334,7 +334,8 @@ windows on the folder of the file or project in hand, and sends back. It works e
   Ctrl+Shift+T | Move to new folder… | Compress to zip | Extract here | ─ | Select all Ctrl+A | Select none
   Ctrl+Shift+A | ─ | Copy path Ctrl+Shift+C | Show in File Explorer Ctrl+Shift+W | Information Ctrl+I | Properties
   Alt+Enter | ─ | Windows menu…; the same menu is the list's context menu (AF-4.6). **Drives (D):** 1. Local Disk
-  (C:) … | ─ | This PC | ─ | Eject this drive | Drive properties (AF-3.11). **Player (P):** Play Enter | Pause or resume Ctrl+P | Next file Ctrl+Shift+Right | Previous
+  (C:) … | ─ | This PC | ─ | Eject this drive | Drive properties (AF-3.11). **Player (P):** Play Enter | Play folder
+  Ctrl+Enter | Add to queue Ctrl+Shift+Q | Clear queue | Show queue (AF-9.2) | ─ | Pause or resume Ctrl+P | Next file Ctrl+Shift+Right | Previous
   file Ctrl+Shift+Left | Forward 15 seconds Ctrl+Right | Back 15 seconds Ctrl+Left | Go to time… Ctrl+T | ─ | Faster
   Ctrl+Shift+Period | Slower Ctrl+Shift+Comma | Normal speed | ─ | Say each file as it starts ✓ | What is playing
   Ctrl+Q. **Options (O):** Text ▸ (Font… | Larger text Ctrl+Plus | Smaller text Ctrl+Minus | Windows text size) |
@@ -342,15 +343,16 @@ windows on the folder of the file or project in hand, and sends back. It works e
   period) | Developer ▸ (Open settings file | Copy diagnostics). **Axit (A)**
   (AX-9). **Help (H):** Keyboard shortcuts F1 | User guide | ─ | File resources ▸ (Keyboard shortcuts in Windows, the
   Microsoft page, in the browser). Every item has a mnemonic (AX-7.4).
-- AF-6.2 Keys (AX-8). Bundle-wide: F1, the control keys, Ctrl+F, F3, Shift+F3, Ctrl+S ("Nothing to save here"),
+- AF-6.2 Keys (AX-8). Bundle-wide: F1, the control keys (Tab, Shift+Tab, Ctrl+Tab, Ctrl+Shift+Tab and F6, between
+  the list and the pane, AF-9.1), Ctrl+F, F3, Shift+F3, Ctrl+S ("Nothing to save here"),
   Ctrl+Plus, Ctrl+Minus, Page Up and Page Down (the list's own here), Ctrl+Up and Ctrl+Down with Shift (edit controls
   only; the list leaves them alone), Alt+F4. Window-specific (`AxFileKeys`): Enter, Backspace, Alt+Up, F5, F2, Delete,
   Ctrl+N, Ctrl+O, Ctrl+G, Ctrl+D, Ctrl+W, Ctrl+Shift+W, Ctrl+E, Ctrl+I, Ctrl+Shift+N, Ctrl+Shift+T, Ctrl+Shift+C,
   Ctrl+Shift+F, Escape, Shift+Up, Shift+Down, Shift+Home, Shift+End,
-  Space, Ctrl+A, Ctrl+Shift+A, Ctrl+P, Ctrl+Right, Ctrl+Left, Ctrl+Shift+Right, Ctrl+Shift+Left, Ctrl+T,
+  Space, Ctrl+A, Ctrl+Shift+A, Ctrl+P, Ctrl+Enter, Ctrl+Shift+Q (AF-9.2), Ctrl+Right, Ctrl+Left, Ctrl+Shift+Right, Ctrl+Shift+Left, Ctrl+T,
   Ctrl+Shift+Period, Ctrl+Shift+Comma, Ctrl+Q, Shift+F10, the Applications key, Alt+Enter, Ctrl+X, Ctrl+C, Ctrl+V.
-  Enter, Backspace, Space, Escape, F2, Delete, Ctrl+X, Ctrl+C, Ctrl+V, Ctrl+A, Ctrl+Shift+A, the Shift arrows, Shift+F10 and the
-  Applications key act only while the list has the focus (in a notice's field or the rename box they are the field's;
+  Enter, Backspace, Space, Escape, F2, Delete, Ctrl+X, Ctrl+C, Ctrl+V, Ctrl+A, Ctrl+Shift+A, Ctrl+Enter, Ctrl+Shift+Q, the Shift arrows, Shift+F10 and the
+  Applications key act only while the list has the focus (in the pane, Enter, Delete, Escape and Ctrl+I act on its line, AF-9.6; in a notice's field or the rename box they are the field's;
   the two menu keys are the list's own, which shows its context menu itself, so the key switch has no case for them;
   Ctrl+I has a second handler, the open menu's, AF-4.10). The collision test covers the table and lists the keys other
   windows use otherwise (Ctrl+N, Ctrl+G, Ctrl+E, Ctrl+T, Ctrl+P, Ctrl+C, Ctrl+Shift+C, Ctrl+Shift+F).
@@ -369,7 +371,9 @@ items", "Copied n items", "Selected", "Deselected", "Selected, n selected", "Des
 Favorites" (AF-3.9), "Top" (This PC, AF-3.10), "Ejecting <name>" (AF-3.11), "Added <name>", "Removed <name>", "Started <name>" (AF-4.11),
 "Compressed to <name>", "Extracted to <name>", "Compressing, please wait", "Extracting, please wait" (AF-4.12), "Pasted
 <name>", "Pasted n items",
-"Pasting, please wait" (a paste longer than a second), "Refreshed", "Not found: <path>", "No program opens
+"Pasting, please wait" (a paste longer than a second), "Added n to the queue", "Queue cleared", "Removed <name>" (a
+queue line), "<name>, n of m" and "<name>, n of m, playing, m:ss of m:ss" (Ctrl+I in the queue), "No sound or video
+files here", "No sound or video files to add" (AF-9.2), "Refreshed", "Not found: <path>", "No program opens
 .xyz. Ctrl+E opens it as text", "Failed: <message>", "<name>, <size>, modified <date>" (Ctrl+I), "Not found" (find),
 "Nothing to save here", "Text size n", "Windows text size", "Copied diagnostics", "<name>, <size>, modified <date>, n
 selected" (Ctrl+I with marks); and the guards "No folder" (nothing
@@ -390,7 +394,7 @@ other reasons of `FileOperations.CheckName`. A new selection is NVDA's own readi
 - AF-8.2 The log is `%LOCALAPPDATA%\Axit\logs\axfile.log`: the start, the exit, the errors of the operations and the
   player with Windows' message; no names of files or folders.
 
-### AF-9 The pane (specified 2026-10-21, not yet built)
+### AF-9 The pane (specified 2026-10-21; the queue and the status lines built the same day, the preview to come)
 
 - AF-9.1 **What it is.** A second control under the folder list, holding one thing at a time and named after it:
   the player's queue, the operations' status, or a file's text to read. It appears when it first has something to
@@ -407,20 +411,24 @@ other reasons of `FileOperations.CheckName`. A new selection is NVDA's own readi
   Enter on a media file keeps today's meaning, the folder's files from that one (AF-5.3). **Add to queue** (Player
   → Add to queue, Ctrl+Shift+Q in the folder list) appends the entry, the marked entries (AF-3.7), or a folder's
   media files in the list's order, "Added 12 to the queue"; nothing starts playing if nothing was. **Clear queue**
-  (Player → Clear queue) empties it and stops, "Queue cleared". In the queue: **Enter** plays that item, **Delete**
-  takes it out ("Removed <name>"; the one playing goes on to the next), **Ctrl+I** says its place and length, "3 of
-  12, 45:30", **Ctrl+Q** what is playing. Ctrl+Shift+Right and Ctrl+Shift+Left move through the queue as now
+  (Player → Clear queue) empties it and stops, "Queue cleared"; **Show queue** (Player → Show queue) shows the pane
+  with the queue in it and puts the focus there. In the queue: **Enter** plays that item (a status line is read
+  again), **Delete** takes the line out ("Removed <name>"; the one playing goes on to the next, or stops at the end;
+  a status line goes the same way), **Ctrl+I** says its name and place, "03 Chapter 3.mp3, 3 of 12", with the
+  position while it is the one playing ("…, playing, 12:52 of 45:30"; another file's length would need opening it,
+  a later step), **Ctrl+Q** what is playing. Ctrl+Shift+Right and Ctrl+Shift+Left move through the queue as now
   (AF-5.4). The queue is kept across folders (AF-D6) and goes with the window; keeping it for the next start is an
-  open question with the resume position (§7). Reordering by key is left out of the first version.
+  open question with the resume position (§7). Reordering by key is left out of the first version. "No sound or
+  video files here" (Play folder on a folder without any), "No sound or video files to add" (Add to queue the same).
 - AF-9.3 **The operations' status.** The same list: an operation that runs on a task (a paste, a move to a new
   folder, a compress, an extract, a delete of several) adds a line under the queue's items when it starts, "Copying 3
   items", and replaces it when it ends, "Copied 3 items" or "Failed: <reason>"; the announcements of AF-7 stay as
   they are, the pane is where they can be read again and a slow operation watched. A compress and an extract count
-  their files, "Compressing, 40 of 120 files"; a paste through the shell has no count to give (`SHFileOperationW` is
-  silent) and shows "Copying, please wait" until it ends; a count for it needs the shell's newer file operation
-  interface with its progress sink, a later step. The last twenty lines stay; Clear queue clears them too; nothing
-  of this is kept across windows or starts.
-- AF-9.4 **A file to read.** **Preview** (Item → Preview, Ctrl+Shift+P on a text file: the types AxDown and AxJSON
+  their files, "Compressing, 40 of 120 files" (a few times a second at most); a paste through the shell has no
+  count to give (`SHFileOperationW` is silent) and shows "Copying 3 items" or "Moving 3 items" until it ends; a
+  count for it needs the shell's newer file operation interface with its progress sink, a later step. The last
+  twenty lines stay; Clear queue clears them too; nothing of this is kept across windows or starts.
+- AF-9.4 **A file to read** (not yet built). **Preview** (Item → Preview, Ctrl+Shift+P on a text file: the types AxDown and AxJSON
   open, and any file whose first bytes are text, up to 1 MB) shows the file's text in the pane as a read-only text
   named "<name>, preview", the focus on its first line, and the player's list comes back with the next queue
   command or Player → Show queue. The text has what every read-only text of the bundle has (AX-7.2): Ctrl+F, F3 and
@@ -558,3 +566,7 @@ single-threaded-apartment thread of its own (AX-7.5).
   later uses noted; to be built next, after the user has read it.
 - 2026-10-21, late: Undo specified at the user's ask (AF-4.14), Ctrl+Z over the pane's history of operations, each with its
   inverse; to be built with the pane. The Shift range (AF-3.7) and the lookalike guard (AF-4.2) were built the same night.
+- 2026-10-21, late: the pane built (AF-9.1 to AF-9.3): the queue list under the folder list (`PlayQueue` in
+  `AxFile.Core`, tested; `FileForm.Pane.cs`), Play folder, Add to queue, Clear queue, Show queue, the queue's own
+  keys, the operations' status lines with the zip counts; the preview (AF-9.4) and Undo (AF-4.14) are next; none of
+  it checked with NVDA yet (test plan section 6).

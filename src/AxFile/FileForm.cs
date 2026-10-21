@@ -93,6 +93,12 @@ public sealed partial class FileForm : AxitForm
 
         var player = new ToolStripMenuItem("&Player");
         player.DropDownItems.Add(Item("&Play", PlaySelected, AxFileKeys.Open));
+        // AF-9.2: the queue in the pane under the list.
+        player.DropDownItems.Add(Item("Play fol&der", PlayFolder, AxFileKeys.PlayFolder));
+        player.DropDownItems.Add(Item("Add to &queue", AddToQueue, AxFileKeys.AddToQueue));
+        player.DropDownItems.Add(new ToolStripMenuItem("&Clear queue", null, (_, _) => ClearQueue()));
+        player.DropDownItems.Add(new ToolStripMenuItem("Show q&ueue", null, (_, _) => ShowQueue()));
+        player.DropDownItems.Add(new ToolStripSeparator());
         player.DropDownItems.Add(Item("P&ause or resume", PauseResume, AxFileKeys.PauseResume));
         player.DropDownItems.Add(Item("&Next file", () => MoveInQueue(1), AxFileKeys.NextFile));
         player.DropDownItems.Add(Item("Pre&vious file", () => MoveInQueue(-1), AxFileKeys.PreviousFile));
@@ -168,17 +174,28 @@ public sealed partial class FileForm : AxitForm
         _video.Resize += (_, _) => _player?.UpdateVideo();
         _video.Paint += (_, _) => _player?.UpdateVideo();
 
+        // ---- the pane (AF-9): the queue list under the folder list, hidden until it has something to show ----
+        SetUpPane();
+
         // ---- the status bar (AF-2.3): the bundle's pair, no AccessibleName, no Spring ----
         (_stateLabel, _pathLabel) = StatusLayout.Pair(_status);
         _clock.Tick += (_, _) => UpdateStatusBar();
 
-        SizeChanged += (_, _) => FitVideo();
+        SizeChanged += (_, _) =>
+        {
+            FitVideo();
+            if (_pane.Visible)
+            {
+                FitPane();
+            }
+        };
         // AF-3.4: coming back to the window reads the folder again when another program changed it.
         Activated += (_, _) => Do(RefreshIfChangedAsync);
 
         // Docked from the last control to the first: the menu takes the top, the status bar the bottom, the video
-        // area the strip under the menu while it shows, and the list (or the notice over it) what is left.
-        Controls.AddRange([Overlay, _list, _video, _status, _menu]);
+        // area the strip under the menu while it shows, the pane the strip above the status bar while it shows, and
+        // the list (or the notice over it) what is left.
+        Controls.AddRange([Overlay, _list, _pane, _video, _status, _menu]);
 
         ApplyTextFont();
         RestoreWindow();
@@ -246,21 +263,36 @@ public sealed partial class FileForm : AxitForm
     {
         CancelRename();
         _list.Visible = false;
+        _pane.Visible = false;
         _video.Visible = false;
     }
 
     protected override void ShowAfterNotice()
     {
         _list.Visible = true;
+        if (_paneShown)
+        {
+            FitPane();
+            _pane.Visible = true;
+        }
+
         FitVideo();
     }
 
     protected override Control FocusTarget => _list;
 
+    /// <summary>A notice opened from the pane gives the focus back to the pane (AF-9.1).</summary>
+    protected override Control? FocusToKeep() => _pane.Focused ? _pane : null;
+
     protected override void ApplyFont(Font font)
     {
         _list.Font = font;
         _renameBox.Font = font;
+        _pane.Font = font;
+        if (_pane.Visible)
+        {
+            FitPane();
+        }
     }
 
     protected override IReadOnlyList<string> RestartArguments() => _folder is null ? [Dispatch.AxFile] : [Dispatch.AxFile, _folder];
@@ -315,6 +347,14 @@ public sealed partial class FileForm : AxitForm
     {
         switch (keyData)
         {
+            case Keys.Tab:
+            case Keys.Shift | Keys.Tab:
+            case BundleKeys.NextControl:
+            case BundleKeys.PreviousControl:
+            case BundleKeys.NextControlAlso:
+                // Two places at most, the folder list and the pane (AF-9.1): every one of these keys moves between them.
+                SwitchPane();
+                return true;
             case BundleKeys.Find:
                 ShowFindNotice();
                 return true;
@@ -362,7 +402,15 @@ public sealed partial class FileForm : AxitForm
                 OpenInEditor();
                 return true;
             case AxFileKeys.Information:
-                SayInformation();
+                if (_pane.Focused)
+                {
+                    SayPaneInformation();
+                }
+                else
+                {
+                    SayInformation();
+                }
+
                 return true;
             case AxFileKeys.Properties:
                 ShowProperties();
@@ -402,11 +450,36 @@ public sealed partial class FileForm : AxitForm
                 return true;
         }
 
+        if (_pane.Focused)
+        {
+            // In the queue (AF-9.6): Enter plays the line's file, Delete takes it out, Escape goes back to the list.
+            switch (keyData)
+            {
+                case AxFileKeys.Open:
+                    PlayPaneItem();
+                    return true;
+                case AxFileKeys.Delete:
+                    RemovePaneItem();
+                    return true;
+                case AxFileKeys.ClearFilter:
+                    _list.Focus();
+                    return true;
+            }
+
+            return false;
+        }
+
         if (_list.Focused)
         {
             // Enter, Backspace, Space, F2, Delete, the clipboard keys and the selection keys act in the list only (AF-6.2).
             switch (keyData)
             {
+                case AxFileKeys.PlayFolder:
+                    PlayFolder();
+                    return true;
+                case AxFileKeys.AddToQueue:
+                    AddToQueue();
+                    return true;
                 case AxFileKeys.Cut:
                     CopyOrCut(cut: true);
                     return true;
