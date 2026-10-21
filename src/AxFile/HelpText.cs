@@ -18,8 +18,9 @@ public static class HelpText
         The list
           Arrow keys, Home, End, Page Up, Page Down: move through the entries; a typed letter jumps to the next name starting with it
           Enter: open the entry: a folder in this list, a Markdown or text file in AxDown, a JSON file in AxJSON, a sound or video file in the player, anything else in the program Windows has for it, or the Windows dialog that picks one when there is none
-          Backspace, or Alt+Up: the folder above, with the folder you left selected
-          Ctrl+I: say the entry's size and date
+          Backspace, or Alt+Up: the folder above, with the folder you left selected; from a drive's top, This PC with the drives
+          Ctrl+D: add this folder to Favourites, or remove it; Folder, Favourites lists them by number
+          Ctrl+I: say the entry's size and date; for a drive, the free space
           Ctrl+E: open the file in AxDown, or AxJSON for a .json file, whatever Enter would do
           Ctrl+Shift+W: show the entry in File Explorer. Ctrl+W: show the folder in File Explorer
           Ctrl+O: open a folder with the Windows folder picker. Ctrl+G: go to a typed path, %USERPROFILE%\Downloads for instance

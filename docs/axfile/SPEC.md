@@ -76,7 +76,8 @@ windows on the folder of the file or project in hand, and sends back. It works e
   "<folder name>, N items" ("Dune, 24 items"; "Dune, empty" for none; "Dune, 3 of 24 items, filter chap" under a
   filter, AF-3.8); the status bar. The list is the one control; a
   notice takes its place while it shows (AX-6.4). Tab has nothing to move to.
-- AF-2.2 Items: a file by its name as it is; a folder as "<name>, folder". Folders first, then files, each group in
+- AF-2.2 Items: a file by its name as it is; a folder as "<name>, folder"; a drive of This PC as "<label> (C:), drive"
+  (AF-3.10). Folders first, then files, each group in
   Windows' natural order (`StrCmpLogicalW`, so that `2` comes before `10`). Hidden and system entries are left out
   (`showHidden` in the settings file turns them on). The list is read on a background task (AX-7.5); a folder of ten
   thousand entries fills in one update. An empty folder shows one item, "No items in this folder", selected, so that
@@ -91,8 +92,8 @@ windows on the folder of the file or project in hand, and sends back. It works e
 ### AF-3 Browsing
 
 - AF-3.1 **Enter** on a folder opens it in the list with its first entry selected. **Backspace** and Alt+Up go to the
-  parent with the folder just left selected; at a drive's root, "Top of the drive". NVDA speaks the new selection; the
-  app adds nothing.
+  parent with the folder just left selected; at a drive's root, to This PC with that drive selected (AF-3.10), and at
+  This PC, "Top". NVDA speaks the new selection; the app adds nothing.
 - AF-3.2 **Enter** on a file: `.md`, `.markdown` and `.txt` open in AxDown and `.json` in AxJSON, each a new window of
   that app; a media file plays (AF-5); any other file opens with the program Windows has for it (`ShellExecute`, as
   Enter in File Explorer); when Windows has none, the Windows dialog that picks a program, as File Explorer shows it
@@ -138,6 +139,22 @@ windows on the folder of the file or project in hand, and sends back. It works e
   it says the same. The filter lives in the folder: another folder drops it, a refresh keeps it. What the list shows
   is what the commands see: Select all marks the shown entries, the player's queue is the shown media files (AF-5.3),
   find moves among the shown entries. Find (AF-3.6) jumps, the filter narrows; both are kept.
+- AF-3.9 **Favourites** (asked 2026-10-21). **Ctrl+D** (Folder → Favourites ▸ → Add or remove this folder) pins the
+  folder shown, "Added to Favourites", or unpins it when it is one, "Removed from Favourites"; the browsers' bookmark
+  key. **Folder → Favourites ▸** lists them as "1. name (path)" (AX-9.5) in the order they were added, those that
+  still exist, or "No favourites yet", with the key's item under a separator; choosing one shows the folder and it
+  joins the recent list. The favourites are a setting (`favourites`, AF-8.1), so every window and the next start
+  have them.
+- AF-3.10 **This PC** (asked 2026-10-21): the level above the drives. Backspace or Alt+Up at a drive's root shows it,
+  the drive just left selected; its entries are the ready drives in letter order, "Local Disk (C:), drive" (the
+  volume's label, or the kind's name, Local Disk, Removable Disk, CD Drive, Network Drive, when it has none;
+  `FolderListing.Drives`, tested), each a folder entry marked as a drive; Enter opens the drive's root; Ctrl+I says
+  "Local Disk (C:), 120 GB free of 476 GB"; the title and the list are named "This PC"; Backspace there, "Top". It
+  is not a folder: the last folder, the recent list and the Recently closed list keep the folder before it, the sort
+  order leaves the letter order alone, and the commands that need a folder say "Choose a drive first" (New folder,
+  Paste, Rename, Delete, Cut, Copy, Ctrl+D, Show current folder in ▸ the other apps); Show current folder in ▸ File
+  Explorer opens File Explorer's own This PC. The other items of the entry's menu work on a drive as on a folder
+  (Open in Axit ▸, Show in File Explorer, Properties, More from Windows…).
 
 ### AF-4 Operations
 
@@ -247,7 +264,8 @@ windows on the folder of the file or project in hand, and sends back. It works e
 ### AF-6 Menus, keys, texts
 
 - AF-6.1 Menus, in the standard order of a first menu (AX-6): **Folder (F):** New window Ctrl+N | Open folder… Ctrl+O |
-  Open recent folder ▸ | Go to folder… Ctrl+G | ─ | Up one level Backspace | Refresh F5 | ─ | Sort by ▸ (Name ✓ |
+  Open recent folder ▸ | Favourites ▸ (1. name (path) … or No favourites yet | ─ | Add or remove this folder Ctrl+D) |
+  Go to folder… Ctrl+G | ─ | Up one level Backspace | Refresh F5 | ─ | Sort by ▸ (Name ✓ |
   Date | Size) | Filter… Ctrl+Shift+F | ─ | Show current folder in ▸ (File Explorer
   Ctrl+W | AxClaude | AxGit | AxTerminal) | ─ | Exit Alt+F4. **Item (I):** File operations ▸ (Cut Ctrl+X | Copy Ctrl+C |
   Paste Ctrl+V | ─ | Select or deselect Space | Select all Ctrl+A | Select none Ctrl+Shift+A | ─ | New folder…
@@ -265,7 +283,7 @@ windows on the folder of the file or project in hand, and sends back. It works e
 - AF-6.2 Keys (AX-8). Bundle-wide: F1, the control keys, Ctrl+F, F3, Shift+F3, Ctrl+S ("Nothing to save here"),
   Ctrl+Plus, Ctrl+Minus, Page Up and Page Down (the list's own here), Ctrl+Up and Ctrl+Down with Shift (edit controls
   only; the list leaves them alone), Alt+F4. Window-specific (`AxFileKeys`): Enter, Backspace, Alt+Up, F5, F2, Delete,
-  Ctrl+N, Ctrl+O, Ctrl+G, Ctrl+W, Ctrl+Shift+W, Ctrl+E, Ctrl+I, Ctrl+Shift+N, Ctrl+Shift+C, Ctrl+Shift+F, Escape,
+  Ctrl+N, Ctrl+O, Ctrl+G, Ctrl+D, Ctrl+W, Ctrl+Shift+W, Ctrl+E, Ctrl+I, Ctrl+Shift+N, Ctrl+Shift+C, Ctrl+Shift+F, Escape,
   Space, Ctrl+A, Ctrl+Shift+A, Ctrl+P, Ctrl+Right, Ctrl+Left, Ctrl+Shift+Right, Ctrl+Shift+Left, Ctrl+T,
   Ctrl+Shift+Period, Ctrl+Shift+Comma, Ctrl+Q, Shift+F10, the Applications key, Alt+Enter, Ctrl+X, Ctrl+C, Ctrl+V.
   Enter, Backspace, Space, Escape, F2, Delete, Ctrl+X, Ctrl+C, Ctrl+V, Ctrl+A, Ctrl+Shift+A, Shift+F10 and the
@@ -283,14 +301,15 @@ One UI Automation notification each, on the list, or on the notice while one sho
 "Nothing playing", "Playing <name>, m:ss of m:ss, speed n", "Cannot play <name>: <reason>", "Created <name>", "Renamed
 to <name>", "Deleted <name>", "Deleted n items", "Copied path", "Copied n paths", "Cut <name>", "Copied <name>", "Cut n
 items", "Copied n items", "Selected", "Deselected", "Selected, n selected", "Deselected, n selected", "n selected",
-"None selected" (AF-3.7), "Sorted by <order>", "Filter cleared" (AF-3.8), "Added <name>", "Removed <name>", "Started
-<name>" (AF-4.11), "Pasted <name>", "Pasted n items",
-"Pasting, please wait" (a paste longer than a second), "Refreshed", "Top of the drive", "Not found: <path>", "No program opens
+"None selected" (AF-3.7), "Sorted by <order>", "Filter cleared" (AF-3.8), "Added to Favourites", "Removed from
+Favourites" (AF-3.9), "Top" (This PC, AF-3.10), "Added <name>", "Removed <name>", "Started <name>" (AF-4.11), "Pasted
+<name>", "Pasted n items",
+"Pasting, please wait" (a paste longer than a second), "Refreshed", "Not found: <path>", "No program opens
 .xyz. Ctrl+E opens it as text", "Failed: <message>", "<name>, <size>, modified <date>" (Ctrl+I), "Not found" (find),
 "Nothing to save here", "Text size n", "Windows text size", "Copied diagnostics", "<name>, <size>, modified <date>, n
 selected" (Ctrl+I with marks); and the guards "No folder" (nothing
 listed yet), "No items in this folder" (a command on an empty folder's one item, AF-2.2), "No names contain <text>"
-(the same under a filter, AF-3.8), "Nothing selected", "Not a file" (Ctrl+E or Open with… on a folder), "Not a sound or video file"
+(the same under a filter, AF-3.8), "Nothing selected", "Choose a drive first" (a folder command at This PC, AF-3.10), "Not a file" (Ctrl+E or Open with… on a folder), "Not a sound or video file"
 (Player → Play on another entry), "Not a time" (Go to time), "Speed n is not supported here", "Name unchanged" (a
 rename to the same name), "Nothing to paste" (no files on the clipboard), "Already in this folder" (a cut entry
 pasted where it is), "Type a name" and the
@@ -299,7 +318,8 @@ other reasons of `FileOperations.CheckName`. A new selection is NVDA's own readi
 ### AF-8 Settings, log, status
 
 - AF-8.1 `%APPDATA%\Axit\axfile.json` (AX-5.3; `FileSettings` on `WindowSettings`): `lastFolder`, `recentFolders`
-  (ten), `showHidden` off, `sortBy` name (`name`, `date` or `size`, AF-3.8), `sayEachFile` on, `speed` 1,
+  (ten), `favourites` (the pinned folders in the order added, AF-3.9; blanks and repeats dropped), `showHidden` off,
+  `sortBy` name (`name`, `date` or `size`, AF-3.8), `sayEachFile` on, `speed` 1,
   `seekSeconds` 15, `programs` (the user's own, each a `name` and a `path`, AF-4.11; an entry without either is
   dropped), and the window base's font, update check and window fields.
 - AF-8.2 The log is `%LOCALAPPDATA%\Axit\logs\axfile.log`: the start, the exit, the errors of the operations and the
@@ -310,7 +330,7 @@ other reasons of `FileOperations.CheckName`. A new selection is NVDA's own readi
 ```
 src/AxFile.Core/    class library (net10.0): FolderListing (a folder's entries as records, folders first in natural
                     order, hidden left out; what Enter does with an entry, by its extension; the list's name, the
-                    information line, the parent, a typed path), NaturalOrder (StrCmpLogicalW), MediaFiles (the
+                    information line, the parent, a typed path, the drives of This PC), NaturalOrder (StrCmpLogicalW), MediaFiles (the
                     extensions, the queue from a listing, the time format and the typed time, the speed steps),
                     MediaPlayer (MFPlay through P/Invoke: open, play, pause, position, length, speed, the started,
                     ended and failed events, a window handle for video; AF-5.2), FileOperations (the name check, new
@@ -413,4 +433,5 @@ single-threaded-apartment thread of its own (AX-7.5).
 - 2026-10-21, after the release, on the branch `axfile`, at the user's ask: the one item of an empty folder (AF-2.2),
   Ctrl+N for a new window (AF-3.3), the selection with Space and the operations on it (AF-3.7, AF-D9; pause moved to
   Ctrl+P), Open with a custom program ▸, the user's own programs and scripts (AF-4.11), and, chosen by the user from a
-  list of what a file browser makes easy, Sort by and the filter (AF-3.8). Not yet checked with NVDA.
+  list of what a file browser makes easy, Sort by and the filter (AF-3.8), Favourites (AF-3.9) and This PC
+  (AF-3.10). Not yet checked with NVDA.

@@ -24,6 +24,9 @@ public sealed class FileSettings : WindowSettings
     /// <summary>The list's order (AF-3.8), kept for the next folder and the next window.</summary>
     public SortBy SortBy { get; set; } = SortBy.Name;
 
+    /// <summary>The folders the user pinned with Ctrl+D (AF-3.9), in the order added, for Folder → Favourites.</summary>
+    public List<string> Favourites { get; set; } = [];
+
     /// <summary>The one unprompted announcement: the name of the next file when the player moves on (AF-5.4, G5).</summary>
     public bool SayEachFile { get; set; } = true;
 
@@ -87,5 +90,25 @@ public sealed class FileSettings : WindowSettings
         {
             SortBy = SortBy.Name;
         }
+
+        Favourites ??= [];
+        Favourites.RemoveAll(string.IsNullOrWhiteSpace);
+        Favourites = Favourites.Distinct(StringComparer.OrdinalIgnoreCase).ToList();
+    }
+
+    /// <summary>Whether the folder is a favourite (AF-3.9).</summary>
+    public bool IsFavourite(string folder) => Favourites.Any(f => string.Equals(f, folder, StringComparison.OrdinalIgnoreCase));
+
+    /// <summary>Adds the folder to the favourites, or removes it when it is one; true when it was added.</summary>
+    public bool ToggleFavourite(string folder)
+    {
+        if (IsFavourite(folder))
+        {
+            Favourites.RemoveAll(f => string.Equals(f, folder, StringComparison.OrdinalIgnoreCase));
+            return false;
+        }
+
+        Favourites.Add(folder);
+        return true;
     }
 }

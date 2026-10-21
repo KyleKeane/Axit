@@ -28,9 +28,8 @@ public sealed partial class FileForm
     /// <summary>File operations → New folder… (Ctrl+Shift+N, AF-4.1): the name in a notice, the folder made and selected, "Created <name>".</summary>
     private void NewFolder()
     {
-        if (_folder is not { } folder)
+        if (NoFolderHere() || _folder is not { } folder)
         {
-            Announce("No folder", true);
             return;
         }
 
@@ -75,12 +74,12 @@ public sealed partial class FileForm
     /// <summary>File operations → Rename (F2): the box over the entry with its name, the part before the extension selected.</summary>
     private void Rename()
     {
-        if (_renaming is not null)
+        if (_renaming is not null || NoFolderHere())
         {
             return;
         }
 
-        if (_folder is null || CurrentEntry() is not { } entry)
+        if (CurrentEntry() is not { } entry)
         {
             SayNoEntry();
             return;
@@ -182,9 +181,8 @@ public sealed partial class FileForm
     /// </summary>
     private void Delete()
     {
-        if (_folder is not { } folder)
+        if (NoFolderHere() || _folder is not { } folder)
         {
-            SayNoEntry();
             return;
         }
 
@@ -268,6 +266,11 @@ public sealed partial class FileForm
     /// <summary>File operations → Cut or Copy (Ctrl+X, Ctrl+C): the selected entries, or the current one, on the clipboard as files, marked to move or to copy; "Cut <name>", "Copied n items".</summary>
     private void CopyOrCut(bool cut)
     {
+        if (NoFolderHere())
+        {
+            return;
+        }
+
         var targets = Targets();
         if (targets.Count == 0)
         {
@@ -298,9 +301,8 @@ public sealed partial class FileForm
     /// </summary>
     private void Paste()
     {
-        if (_folder is not { } folder)
+        if (NoFolderHere() || _folder is not { } folder)
         {
-            Announce("No folder", true);
             return;
         }
 
@@ -379,12 +381,26 @@ public sealed partial class FileForm
 
     // ---- the ways out (AF-1.3, AF-3.2, AF-4.9) ----
 
-    /// <summary>Folder → Show current folder in → File Explorer (Ctrl+W): the folder opened in File Explorer, one of the system's own windows.</summary>
+    /// <summary>Folder → Show current folder in → File Explorer (Ctrl+W): the folder opened in File Explorer, one of the system's own windows; This PC as File Explorer's own This PC.</summary>
     private void ShowFolderInExplorer()
     {
         if (_folder is null)
         {
             Announce("No folder", true);
+            return;
+        }
+
+        if (FolderListing.IsThisPC(_folder))
+        {
+            try
+            {
+                Process.Start(new ProcessStartInfo("explorer.exe", "shell:MyComputerFolder") { UseShellExecute = false })?.Dispose();
+            }
+            catch (Exception ex) when (ex is Win32Exception or InvalidOperationException)
+            {
+                Fail("File Explorer could not be started: " + ex.Message);
+            }
+
             return;
         }
 
@@ -416,13 +432,12 @@ public sealed partial class FileForm
     /// <summary>Folder → Show current folder in → AxClaude, AxGit, AxTerminal (AF-1.3): a new window of that app on the folder shown.</summary>
     private void OpenIn(string verb)
     {
-        if (_folder is null)
+        if (NoFolderHere() || _folder is not { } folder)
         {
-            Announce("No folder", true);
             return;
         }
 
-        AxitMenu.Start(verb, _folder);
+        AxitMenu.Start(verb, folder);
     }
 
     /// <summary>

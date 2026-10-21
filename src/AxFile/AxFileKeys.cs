@@ -22,6 +22,9 @@ public static class AxFileKeys
 
     public const Keys Refresh = Keys.F5;
 
+    /// <summary>The folder shown added to Favourites, or removed from them (AF-3.9); the browsers' bookmark key.</summary>
+    public const Keys Favourite = Keys.Control | Keys.D;
+
     /// <summary>The Filter notice: the list narrowed to the names that contain a text (AF-3.8).</summary>
     public const Keys Filter = Keys.Control | Keys.Shift | Keys.F;
 
@@ -90,6 +93,7 @@ public static class AxFileKeys
         ("Up one level", UpAlso),
         ("New window", NewWindow),
         ("Refresh", Refresh),
+        ("Add to or remove from Favourites", Favourite),
         ("Filter", Filter),
         ("Clear the filter (in the list)", ClearFilter),
         ("Open folder", OpenFolder),

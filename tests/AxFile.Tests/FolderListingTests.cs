@@ -160,6 +160,21 @@ public sealed class FolderListingTests : IDisposable
     }
 
     [Fact]
+    public void This_PC_lists_the_ready_drives_as_drive_entries_with_their_free_space()
+    {
+        var drives = FolderListing.Drives();
+        var systemRoot = Path.GetPathRoot(Environment.SystemDirectory)!;
+        var system = Assert.Single(drives, d => string.Equals(d.Path, systemRoot, StringComparison.OrdinalIgnoreCase));
+        Assert.True(system.IsDrive);
+        Assert.True(system.IsFolder);
+        Assert.EndsWith($"({systemRoot.TrimEnd('\\')}), drive", system.Label);
+        Assert.Contains(" free of ", FolderListing.Information(system));
+        Assert.True(FolderListing.IsThisPC(FolderListing.ThisPC));
+        Assert.False(FolderListing.IsThisPC("C:\\This PC"));
+        Assert.Equal("This PC, 2 items", FolderListing.ListName(FolderListing.ThisPC, 2));
+    }
+
+    [Fact]
     public void The_parent_stops_at_the_drive()
     {
         Assert.Equal("C:\\a", FolderListing.Parent("C:\\a\\b"));

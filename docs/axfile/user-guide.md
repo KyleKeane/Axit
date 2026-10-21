@@ -21,7 +21,8 @@ The window is named after the folder: "Dune - AxFile". The list is named with th
 The list is the one control. Arrow keys, Home, End, Page Up and Page Down move through the entries; a typed letter jumps to the next name starting with it; nothing is spoken until you ask. Folders come first, then files, each in the order File Explorer uses, so `2` comes before `10`; folders read "docs, folder". Hidden and system entries are left out, as in File Explorer (the setting `showHidden` in the settings file turns them on). An empty folder shows one line, "No items in this folder", so that you hear why the list has nothing in it.
 
 - **Enter** opens the entry: a folder in this list (its first entry selected), a `.md`, `.markdown` or `.txt` file in a new AxDown window, a `.json` file in AxJSON, a sound or video file in the player, and any other file in the program Windows has for it, or, when Windows has none, the Windows dialog that asks which program, as File Explorer does.
-- **Backspace** or Alt+Up goes to the folder above, with the folder you left selected. At the top of a drive AxFile says "Top of the drive".
+- **Backspace** or Alt+Up goes to the folder above, with the folder you left selected. From the top of a drive it goes to This PC, the list of your drives, "Local Disk (C:), drive", with the drive you left selected; Enter opens a drive, Ctrl+I says its free space, and Backspace at This PC says "Top". This PC is not a folder: making, renaming, pasting or deleting there says "Choose a drive first".
+- **Ctrl+D** adds the folder to your Favourites, "Added to Favourites", and removes it again when it is one. Folder, Favourites lists them by number, "1. Dune (C:\Music\Dune)", so Alt+F, V, 1 is the first favourite.
 - **Ctrl+I** says the entry's size and date: "report.pdf, 1.2 MB, modified 2026-10-18 14:02".
 - **Ctrl+E** opens the file in AxDown, or AxJSON for a `.json` file, whatever Enter would do with it.
 - **Ctrl+Shift+W** shows the entry in File Explorer, selected; **Ctrl+W** shows the folder.
@@ -71,7 +72,7 @@ The volume is Windows' own: your keyboard's volume keys work from anywhere. A vi
 
 ## Menus
 
-- **Folder**: New window (Ctrl+N), Open folder (Ctrl+O), Open recent folder, Go to folder (Ctrl+G), Up one level (Backspace), Refresh (F5), Sort by (Name, Date, Size), Filter (Ctrl+Shift+F), Show current folder in (File Explorer Ctrl+W, AxClaude, AxGit, AxTerminal), Exit.
+- **Folder**: New window (Ctrl+N), Open folder (Ctrl+O), Open recent folder, Favourites (your pinned folders, Add or remove this folder Ctrl+D), Go to folder (Ctrl+G), Up one level (Backspace), Refresh (F5), Sort by (Name, Date, Size), Filter (Ctrl+Shift+F), Show current folder in (File Explorer Ctrl+W, AxClaude, AxGit, AxTerminal), Exit.
 - **Item**: File operations (Cut Ctrl+X, Copy Ctrl+C, Paste Ctrl+V, Select or deselect Space, Select all Ctrl+A, Select none Ctrl+Shift+A, New folder Ctrl+Shift+N, Rename F2, Delete, Copy path Ctrl+Shift+C), Open (Enter), Open in editor (Ctrl+E), Open in Axit (every app), Open with Windows, Open with another program, Open with a custom program (your list, Add a program, Remove a program), Show in File Explorer (Ctrl+Shift+W), Information (Ctrl+I), Properties (Alt+Enter), More from Windows. The same menu opens on the entry with Shift+F10, the Applications key or a right click; Ctrl+I inside it says the entry.
 - **Player**: Play (Enter), Pause or resume (Ctrl+P), Next file, Previous file, Forward 15 seconds, Back 15 seconds, Go to time (Ctrl+T), Faster, Slower, Normal speed, Say each file as it starts, What is playing (Ctrl+Q).
 - **Options**: Text (font and size), General (the update check), Developer (the settings file, diagnostics).
@@ -80,7 +81,7 @@ The volume is Windows' own: your keyboard's volume keys work from anywhere. A vi
 
 ## Settings
 
-Everything you change is kept in `%APPDATA%\Axit\axfile.json`: the last folder, the recent folders, the sort order, the speed, the font and text size, the update check, your custom programs (`programs`, a name and a path each), and two switches with no menu item: `showHidden` (hidden and system entries in the list) and `seekSeconds` (what Ctrl+Left and Ctrl+Right move by, 15). Options, Developer, Open settings file opens it in AxJSON.
+Everything you change is kept in `%APPDATA%\Axit\axfile.json`: the last folder, the recent folders, the favourites, the sort order, the speed, the font and text size, the update check, your custom programs (`programs`, a name and a path each), and two switches with no menu item: `showHidden` (hidden and system entries in the list) and `seekSeconds` (what Ctrl+Left and Ctrl+Right move by, 15). Options, Developer, Open settings file opens it in AxJSON.
 
 ## Updates
 

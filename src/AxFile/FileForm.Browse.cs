@@ -67,7 +67,8 @@ public sealed partial class FileForm
         IReadOnlyList<Entry> entries;
         try
         {
-            entries = await Task.Run(() => FolderListing.Read(folder, _settings.ShowHidden));
+            // AF-3.10: This PC is the drives, read the same way.
+            entries = await Task.Run(() => FolderListing.IsThisPC(folder) ? FolderListing.Drives() : FolderListing.Read(folder, _settings.ShowHidden));
         }
         catch (Exception ex) when (ex is IOException or UnauthorizedAccessException or ArgumentException)
         {
@@ -113,7 +114,11 @@ public sealed partial class FileForm
         _folderStamp = Stamp(folder);
         Text = $"{FolderListing.FolderName(folder)} - {AxFileApp.Name}";
         Rearrange(select);
-        if (remember)
+        if (FolderListing.IsThisPC(folder))
+        {
+            // Not a folder to come back to: the last folder and the recent list keep the one before.
+        }
+        else if (remember)
         {
             _settings.RememberFolder(folder);
             SaveSettings();
@@ -136,7 +141,8 @@ public sealed partial class FileForm
     /// <summary>The shown entries made again from the folder's entries, the order and the filter (AF-3.8), and the list refilled.</summary>
     private void Rearrange(string? select)
     {
-        _shown = FolderListing.Arrange(_entries, _settings.SortBy, _filter);
+        // The drives of This PC stay in letter order (AF-3.10).
+        _shown = FolderListing.IsThisPC(_folder) ? FolderListing.Filter(_entries, _filter) : FolderListing.Arrange(_entries, _settings.SortBy, _filter);
         FillList(select);
     }
 
@@ -296,17 +302,62 @@ public sealed partial class FileForm
         return targets;
     }
 
+    /// <summary>The shown entry with that name, or that path (a drive of This PC is selected by its root); -1 when none.</summary>
     private int IndexOfName(string name)
     {
         for (var i = 0; i < _shown.Count; i++)
         {
-            if (string.Equals(_shown[i].Name, name, StringComparison.OrdinalIgnoreCase))
+            if (string.Equals(_shown[i].Name, name, StringComparison.OrdinalIgnoreCase) || string.Equals(_shown[i].Path, name, StringComparison.OrdinalIgnoreCase))
             {
                 return i;
             }
         }
 
         return -1;
+    }
+
+    /// <summary>
+    /// Whether a command that needs a real folder has none: "No folder" before any is shown, "Choose a drive first"
+    /// at This PC (AF-3.10), each said; false when there is one.
+    /// </summary>
+    private bool NoFolderHere()
+    {
+        if (_folder is null)
+        {
+            Announce("No folder", true);
+            return true;
+        }
+
+        if (FolderListing.IsThisPC(_folder))
+        {
+            Announce("Choose a drive first", true);
+            return true;
+        }
+
+        return false;
+    }
+
+    // ---- favourites (AF-3.9) ----
+
+    /// <summary>Folder → Favourites ▸: the pinned folders that still exist as "1. name (path)", or "No favourites yet", then the key's item.</summary>
+    private void FillFavourites()
+    {
+        RecentMenu.Fill(_favouritesItem, _settings.Favourites, Directory.Exists, RecentMenu.FolderName, "&No favourites yet", target => Do(() => ShowFolderAsync(target, null, remember: true)));
+        _favouritesItem.DropDownItems.Add(new ToolStripSeparator());
+        _favouritesItem.DropDownItems.Add(Item("&Add or remove this folder", ToggleFavourite, AxFileKeys.Favourite));
+    }
+
+    /// <summary>Ctrl+D: the folder shown pinned, "Added to Favourites", or unpinned again, "Removed from Favourites".</summary>
+    private void ToggleFavourite()
+    {
+        if (NoFolderHere() || _folder is not { } folder)
+        {
+            return;
+        }
+
+        var added = _settings.ToggleFavourite(folder);
+        SaveSettings();
+        Announce(added ? "Added to Favourites" : "Removed from Favourites", true);
     }
 
     /// <summary>The entry under the selection; null for an empty list, whose one item is not an entry.</summary>
@@ -370,7 +421,7 @@ public sealed partial class FileForm
         }
     }
 
-    /// <summary>Backspace, Alt+Up, Folder → Up one level: the parent with the folder just left selected; "Top of the drive" at a root.</summary>
+    /// <summary>Backspace, Alt+Up, Folder → Up one level: the parent with the folder just left selected; This PC with the drive selected from a drive's root (AF-3.10); "Top" at This PC.</summary>
     private void GoUp()
     {
         if (_folder is null)
@@ -379,13 +430,20 @@ public sealed partial class FileForm
             return;
         }
 
-        if (FolderListing.Parent(_folder) is not { } parent)
+        if (FolderListing.IsThisPC(_folder))
         {
-            Announce("Top of the drive", true);
+            Announce("Top", true);
             return;
         }
 
-        var left = FolderListing.FolderName(_folder);
+        var from = _folder;
+        if (FolderListing.Parent(from) is not { } parent)
+        {
+            Do(() => ShowFolderAsync(FolderListing.ThisPC, from, remember: false));
+            return;
+        }
+
+        var left = FolderListing.FolderName(from);
         Do(() => ShowFolderAsync(parent, left, remember: false));
     }
 

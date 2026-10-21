@@ -1,10 +1,10 @@
 namespace AxFile.Core;
 
-/// <summary>One entry of a folder (SPEC.md AF-2.2): its name, its full path, whether it is a folder, its size in bytes (0 for a folder) and when it was last written.</summary>
-public sealed record Entry(string Name, string Path, bool IsFolder, long Size, DateTime Modified)
+/// <summary>One entry of a folder (SPEC.md AF-2.2): its name, its full path, whether it is a folder, its size in bytes (0 for a folder) and when it was last written; a drive of This PC is a folder entry marked as a drive (AF-3.10).</summary>
+public sealed record Entry(string Name, string Path, bool IsFolder, long Size, DateTime Modified, bool IsDrive = false)
 {
-    /// <summary>The list item: a file by its name as it is, a folder as "name, folder".</summary>
-    public string Label => IsFolder ? Name + ", folder" : Name;
+    /// <summary>The list item: a file by its name as it is, a folder as "name, folder", a drive as "Local Disk (C:), drive".</summary>
+    public string Label => IsDrive ? Name + ", drive" : IsFolder ? Name + ", folder" : Name;
 }
 
 /// <summary>What Enter does with an entry (AF-3.1, AF-3.2), decided by its kind and its extension.</summary>
@@ -42,6 +42,49 @@ public enum SortBy
 /// </summary>
 public static class FolderListing
 {
+    /// <summary>The level above the drives' roots (AF-3.10), shown in the title and the list's name; not a path.</summary>
+    public const string ThisPC = "This PC";
+
+    public static bool IsThisPC(string? folder) => string.Equals(folder, ThisPC, StringComparison.Ordinal);
+
+    /// <summary>The ready drives as the entries of This PC (AF-3.10), in letter order: "Local Disk (C:)", the volume's label or the kind's name, each a folder entry marked as a drive.</summary>
+    public static IReadOnlyList<Entry> Drives()
+    {
+        var drives = new List<Entry>();
+        foreach (var drive in DriveInfo.GetDrives())
+        {
+            string label;
+            try
+            {
+                if (!drive.IsReady)
+                {
+                    continue;
+                }
+
+                label = drive.VolumeLabel;
+            }
+            catch (Exception ex) when (ex is IOException or UnauthorizedAccessException)
+            {
+                continue;
+            }
+
+            if (label.Length == 0)
+            {
+                label = drive.DriveType switch
+                {
+                    DriveType.Removable => "Removable Disk",
+                    DriveType.CDRom => "CD Drive",
+                    DriveType.Network => "Network Drive",
+                    _ => "Local Disk",
+                };
+            }
+
+            drives.Add(new Entry($"{label} ({drive.Name.TrimEnd('\\')})", drive.Name, IsFolder: true, Size: 0, Modified: DateTime.MinValue, IsDrive: true));
+        }
+
+        return drives;
+    }
+
     /// <summary>The entries of <paramref name="folder"/>, sorted. Throws what the file system throws (a folder gone, access denied).</summary>
     public static IReadOnlyList<Entry> Read(string folder, bool showHidden)
     {
@@ -125,9 +168,24 @@ public static class FolderListing
         return name.Length == 0 ? folder : name;
     }
 
-    /// <summary>"report.pdf, 1.2 MB, modified 2026-10-18 14:02" or "docs, folder, modified 2026-10-18 14:02" (AF-2.4).</summary>
-    public static string Information(Entry entry) =>
-        $"{entry.Name}, {(entry.IsFolder ? "folder" : FormatSize(entry.Size))}, modified {entry.Modified:yyyy-MM-dd HH:mm}";
+    /// <summary>"report.pdf, 1.2 MB, modified 2026-10-18 14:02" or "docs, folder, modified 2026-10-18 14:02" (AF-2.4); a drive: "Local Disk (C:), 120 GB free of 476 GB".</summary>
+    public static string Information(Entry entry)
+    {
+        if (entry.IsDrive)
+        {
+            try
+            {
+                var drive = new DriveInfo(entry.Path);
+                return $"{entry.Name}, {FormatSize(drive.AvailableFreeSpace)} free of {FormatSize(drive.TotalSize)}";
+            }
+            catch (Exception ex) when (ex is IOException or UnauthorizedAccessException or ArgumentException)
+            {
+                return entry.Name + ", drive";
+            }
+        }
+
+        return $"{entry.Name}, {(entry.IsFolder ? "folder" : FormatSize(entry.Size))}, modified {entry.Modified:yyyy-MM-dd HH:mm}";
+    }
 
     /// <summary>"512 bytes", "12 KB", "1.2 MB", "3.5 GB".</summary>
     public static string FormatSize(long bytes)

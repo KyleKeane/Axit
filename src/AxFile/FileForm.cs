@@ -19,6 +19,7 @@ public sealed partial class FileForm : AxitForm
     private readonly string? _startPath;
     private readonly MenuStrip _menu = new();
     private readonly ToolStripMenuItem _recentItem = new("Open &recent folder");
+    private readonly ToolStripMenuItem _favouritesItem = new("Fa&vourites");
     private readonly List<(SortBy By, ToolStripMenuItem Item)> _sortItems = [];
     private readonly ItemMenu _itemMenu;
     private readonly ListBox _list = new();
@@ -28,8 +29,9 @@ public sealed partial class FileForm : AxitForm
     private readonly ToolStripStatusLabel _stateLabel;
     private readonly ToolStripStatusLabel _pathLabel;
 
-    public FileForm(string? path, FileSettings settings, string? settingsError)
-        : base(AxFileApp.Name, settings, FileSettings.DefaultPath)
+    /// <param name="settingsPath">Where the settings are saved; the app's own file unless a probe says otherwise, so that a probe never writes the user's.</param>
+    public FileForm(string? path, FileSettings settings, string? settingsError, string? settingsPath = null)
+        : base(AxFileApp.Name, settings, settingsPath ?? FileSettings.DefaultPath)
     {
         _settings = settings;
         _startPath = path;
@@ -44,6 +46,10 @@ public sealed partial class FileForm : AxitForm
         _recentItem.DropDownOpening += (_, _) => FillRecent();
         FillRecent();
         folder.DropDownItems.Add(_recentItem);
+        // AF-3.9: the pinned folders, refilled when the submenu opens, with the key's item under them.
+        _favouritesItem.DropDownOpening += (_, _) => FillFavourites();
+        FillFavourites();
+        folder.DropDownItems.Add(_favouritesItem);
         folder.DropDownItems.Add(Item("&Go to folder...", GoToFolder, AxFileKeys.GoToFolder));
         folder.DropDownItems.Add(new ToolStripSeparator());
         folder.DropDownItems.Add(Item("&Up one level", GoUp, AxFileKeys.Up));
@@ -260,7 +266,7 @@ public sealed partial class FileForm : AxitForm
 
     protected override void OnFormClosing(FormClosingEventArgs e)
     {
-        if (_folder is { } closing)
+        if (_folder is { } closing && !FolderListing.IsThisPC(closing))
         {
             // AX-9.4: the folder joins the bundle's Recently closed list; AF-8.1: it is the last folder.
             RecentlyClosed.Remember(AxFileApp.Name, closing);
@@ -316,6 +322,9 @@ public sealed partial class FileForm : AxitForm
                 return true;
             case AxFileKeys.Filter:
                 ShowFilterNotice();
+                return true;
+            case AxFileKeys.Favourite:
+                ToggleFavourite();
                 return true;
             case AxFileKeys.OpenFolder:
                 OpenFolderDialog();
