@@ -190,7 +190,11 @@ public sealed partial class FileForm : AxitForm
         // Posted, so that the menu has closed and the list has the focus back before the box takes it.
         operations.DropDownItems.Add(Item("&Rename", () => BeginInvoke(Rename), AxFileKeys.Rename));
         operations.DropDownItems.Add(Item("&Delete...", Delete, AxFileKeys.Delete));
-        operations.DropDownItems.Add(Item("Copy p&ath", CopyPath, AxFileKeys.CopyPath));
+        operations.DropDownItems.Add(Item("Cop&y path", CopyPath, AxFileKeys.CopyPath));
+        operations.DropDownItems.Add(new ToolStripSeparator());
+        // AF-4.12: zip files, through .NET's own ZipFile.
+        operations.DropDownItems.Add(new ToolStripMenuItem("Compress to &zip", null, (_, _) => Compress()));
+        operations.DropDownItems.Add(new ToolStripMenuItem("E&xtract here", null, (_, _) => Extract()));
         items.Add(operations);
         items.Add(new ToolStripSeparator());
         // The ways to open the entry: AxFile's own verb, the editors, every app of the bundle (AF-4.9), Windows (AF-4.7).

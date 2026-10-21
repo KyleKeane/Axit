@@ -8,6 +8,7 @@
 - AxFile: Open with a custom program, in the entry's menu: your own list of programs and scripts. Add a program picks one with the Windows file picker and asks for its name; choosing it runs it on the entry, or on every selected entry at once, each path an argument (a PowerShell script through powershell.exe -File, anything else as Windows runs it); Remove a program takes one off. The list is in the settings file as `programs`.
 - AxFile: Folder → Sort by Name, Date or Size, folders first in each, kept as a setting; Ctrl+Shift+F filters the list to the names containing a text, the list named "Dune, 3 of 24 items, filter chap"; Escape in the list clears the filter.
 - AxFile: Ctrl+D adds the folder to Favourites or removes it; Folder → Favourites lists them by number. Backspace at the top of a drive goes to This PC, the list of drives, "Local Disk (C:), drive", with Ctrl+I saying the free space; it said "Top of the drive" before.
+- AxFile: File operations → Compress to zip puts the entry, or the selected entries, into a new zip file in the folder, and Extract here unpacks a zip file into a new folder named after it; neither writes over anything, a taken name gets a number. Copy path's menu letter is Y, since A is Select all's.
 
 ## 3.1.0 - 2026-10-21
 

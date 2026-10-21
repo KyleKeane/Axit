@@ -226,6 +226,15 @@ windows on the folder of the file or project in hand, and sends back. It works e
   are the window's, AF-8.1). It is the shape the user-defined shells of AxTerminal are to take (docs/axit/plan.md):
   a list in the app's settings, added through the file picker and a notice for the name, removed from a submenu.
   `UserPrograms` in `AxFile.Core` is tested; the menu and the start are the window's.
+- AF-4.12 **Compress to zip, Extract here** (File operations ▸; asked 2026-10-21), through .NET's own `ZipFile`, no
+  package (`Archives` in `AxFile.Core`, tested). **Compress to zip** puts the selected entries, or the current one
+  (AF-3.7), into a new zip in the folder shown, named after the one entry without its extension ("notes.zip") or
+  after the folder for several ("Dune.zip"), "name (2).zip" when the name is taken, a folder's contents under its
+  name; "Compressed to <name>", the zip selected; "Compressing, please wait" when it passes a second. **Extract
+  here** on a `.zip` makes a new folder named after it next to it ("Dune", or "Dune (2)" when taken) and extracts
+  into it, so that nothing is written over; "Extracted to <name>", the folder selected; "Not a zip file" on anything
+  else. A failure is "Failed: <reason>" (AF-4.5). Other archive kinds are the shell's (More from Windows…) or an
+  installed program's (AF-4.11).
 
 ### AF-5 The player
 
@@ -269,7 +278,8 @@ windows on the folder of the file or project in hand, and sends back. It works e
   Date | Size) | Filter… Ctrl+Shift+F | ─ | Show current folder in ▸ (File Explorer
   Ctrl+W | AxClaude | AxGit | AxTerminal) | ─ | Exit Alt+F4. **Item (I):** File operations ▸ (Cut Ctrl+X | Copy Ctrl+C |
   Paste Ctrl+V | ─ | Select or deselect Space | Select all Ctrl+A | Select none Ctrl+Shift+A | ─ | New folder…
-  Ctrl+Shift+N | Rename F2 | Delete… Delete | Copy path Ctrl+Shift+C) | ─ | Open Enter
+  Ctrl+Shift+N | Rename F2 | Delete… Delete | Copy path Ctrl+Shift+C | ─ | Compress to zip | Extract here) | ─ | Open
+  Enter
   | Open in editor Ctrl+E | Open in Axit ▸ (AxClaude | AxDown | AxJSON | AxGit | AxTerminal | AxFile) | Open with
   Windows | Open with another program… | Open with a custom program ▸ (1. name (path) … or No programs yet | ─ | Add a
   program… | Remove a program ▸) | Show in File Explorer Ctrl+Shift+W | Information Ctrl+I | Properties Alt+Enter | ─
@@ -302,14 +312,15 @@ One UI Automation notification each, on the list, or on the notice while one sho
 to <name>", "Deleted <name>", "Deleted n items", "Copied path", "Copied n paths", "Cut <name>", "Copied <name>", "Cut n
 items", "Copied n items", "Selected", "Deselected", "Selected, n selected", "Deselected, n selected", "n selected",
 "None selected" (AF-3.7), "Sorted by <order>", "Filter cleared" (AF-3.8), "Added to Favourites", "Removed from
-Favourites" (AF-3.9), "Top" (This PC, AF-3.10), "Added <name>", "Removed <name>", "Started <name>" (AF-4.11), "Pasted
+Favourites" (AF-3.9), "Top" (This PC, AF-3.10), "Added <name>", "Removed <name>", "Started <name>" (AF-4.11),
+"Compressed to <name>", "Extracted to <name>", "Compressing, please wait", "Extracting, please wait" (AF-4.12), "Pasted
 <name>", "Pasted n items",
 "Pasting, please wait" (a paste longer than a second), "Refreshed", "Not found: <path>", "No program opens
 .xyz. Ctrl+E opens it as text", "Failed: <message>", "<name>, <size>, modified <date>" (Ctrl+I), "Not found" (find),
 "Nothing to save here", "Text size n", "Windows text size", "Copied diagnostics", "<name>, <size>, modified <date>, n
 selected" (Ctrl+I with marks); and the guards "No folder" (nothing
 listed yet), "No items in this folder" (a command on an empty folder's one item, AF-2.2), "No names contain <text>"
-(the same under a filter, AF-3.8), "Nothing selected", "Choose a drive first" (a folder command at This PC, AF-3.10), "Not a file" (Ctrl+E or Open with… on a folder), "Not a sound or video file"
+(the same under a filter, AF-3.8), "Nothing selected", "Choose a drive first" (a folder command at This PC, AF-3.10), "Not a file" (Ctrl+E or Open with… on a folder), "Not a zip file" (Extract here, AF-4.12), "Not a sound or video file"
 (Player → Play on another entry), "Not a time" (Go to time), "Speed n is not supported here", "Name unchanged" (a
 rename to the same name), "Nothing to paste" (no files on the clipboard), "Already in this folder" (a cut entry
 pasted where it is), "Type a name" and the
@@ -336,7 +347,8 @@ src/AxFile.Core/    class library (net10.0): FolderListing (a folder's entries a
                     ended and failed events, a window handle for video; AF-5.2), FileOperations (the name check, new
                     folder, rename, delete to the Recycle Bin, copy and move into a folder, the last three through
                     SHFileOperationW, the messages), UserPrograms and UserProgram (the user's own programs: the
-                    default name, how each kind is started on the entries; AF-4.11), FileSettings;
+                    default name, how each kind is started on the entries; AF-4.11), Archives (a zip from entries, a
+                    zip into a new folder, free names; AF-4.12), FileSettings;
                     references Axit.Core
 src/AxFile/         class library (net10.0-windows): AxFileApp (Run, Usage), FileForm (the window, on AxitForm, in
                     four partial files: the controls, menus, hooks and keys; Browse; Operations; Player), AxFileKeys,
@@ -433,5 +445,5 @@ single-threaded-apartment thread of its own (AX-7.5).
 - 2026-10-21, after the release, on the branch `axfile`, at the user's ask: the one item of an empty folder (AF-2.2),
   Ctrl+N for a new window (AF-3.3), the selection with Space and the operations on it (AF-3.7, AF-D9; pause moved to
   Ctrl+P), Open with a custom program ▸, the user's own programs and scripts (AF-4.11), and, chosen by the user from a
-  list of what a file browser makes easy, Sort by and the filter (AF-3.8), Favourites (AF-3.9) and This PC
-  (AF-3.10). Not yet checked with NVDA.
+  list of what a file browser makes easy, Sort by and the filter (AF-3.8), Favourites (AF-3.9), This PC (AF-3.10)
+  and Compress to zip with Extract here (AF-4.12). Not yet checked with NVDA.

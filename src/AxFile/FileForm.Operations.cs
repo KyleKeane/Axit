@@ -1,6 +1,7 @@
 using System.Collections.Specialized;
 using System.ComponentModel;
 using System.Diagnostics;
+using System.IO.Compression;
 using System.Runtime.InteropServices;
 using AxFile.Core;
 using Axit.Core;
@@ -517,6 +518,75 @@ public sealed partial class FileForm
             Failed("Open failed", ex.Message);
         }
     }
+
+    // ---- zip files (AF-4.12): the entries into a new zip, a zip into a new folder, nothing written over ----
+
+    /// <summary>File operations → Compress to zip: the selected entries, or the current one, into a new zip in the folder; "Compressed to <name>", the zip selected; "Compressing, please wait" after a second.</summary>
+    private void Compress()
+    {
+        if (NoFolderHere() || _folder is not { } folder)
+        {
+            return;
+        }
+
+        var targets = Targets();
+        if (targets.Count == 0)
+        {
+            return;
+        }
+
+        RunArchiveWork(folder, "Compressing", "Compress failed", () => Archives.Compress(targets.Select(target => target.Path).ToList(), folder), "Compressed to");
+    }
+
+    /// <summary>File operations → Extract here: the zip's contents into a new folder named after it, next to it; "Extracted to <name>", the folder selected; "Not a zip file" on anything else.</summary>
+    private void Extract()
+    {
+        if (NoFolderHere() || _folder is not { } folder)
+        {
+            return;
+        }
+
+        if (CurrentEntry() is not { } entry)
+        {
+            SayNoEntry();
+            return;
+        }
+
+        if (entry.IsFolder || !Archives.IsZip(entry.Path))
+        {
+            Announce("Not a zip file", true);
+            return;
+        }
+
+        RunArchiveWork(folder, "Extracting", "Extract failed", () => Archives.Extract(entry.Path, folder), "Extracted to");
+    }
+
+    /// <summary>Runs a zip operation on a task, says "<doing>, please wait" when it passes a second, then shows the folder with the result selected and says "<done> <name>".</summary>
+    private void RunArchiveWork(string folder, string doing, string failTitle, Func<string> work, string done) => Do(async () =>
+    {
+        var task = Task.Run(work);
+        if (await Task.WhenAny(task, Task.Delay(1000)) != task)
+        {
+            Announce($"{doing}, please wait", true);
+        }
+
+        string result;
+        try
+        {
+            result = await task;
+        }
+        catch (Exception ex) when (ex is IOException or UnauthorizedAccessException or InvalidDataException or NotSupportedException)
+        {
+            Failed(failTitle, FileOperations.Message(ex));
+            return;
+        }
+
+        var name = Path.GetFileName(result);
+        if (await ShowFolderAsync(folder, name, remember: false))
+        {
+            Announce($"{done} {name}", true);
+        }
+    });
 
     // ---- the user's own programs (AF-4.11): a list in the settings, each run on the entries as its arguments ----
 
