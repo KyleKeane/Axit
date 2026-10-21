@@ -71,6 +71,15 @@ the restart by the app itself (2.3.0).
   every arrow. What is spoken stays on demand: `l` for the line number, the jump keys with their announcements, and
   Options → Text → Markers in the text (AxClaude FR-4.6a, built 2026-10-19) for the `#` markers. The spoken-but-
   invisible variant would need a rich edit control and is not planned.
+- **User-defined shells and programs, one shape** (2026-10-21). AxFile's Open with a custom program ▸ (AxFile
+  AF-4.11) is the user's own list of programs and scripts: a list in the app's settings with a name and a path each,
+  Add through the Windows file picker and a notice for the name, Remove from a submenu, the entries handed to the
+  program as its arguments. AxTerminal's user-defined shells, still to come, take the same shape in its own settings:
+  a name and a command line each, next to the one custom command line it has now.
+- **Custom keys to scripts** (the user's thought, 2026-10-21, kept for later rather than built): a key the user binds
+  to one of their own programs or scripts, so that one shortcut runs it on the entry or the folder in hand, with the
+  key table and the collision test knowing the binding. The custom programs list above is what such keys would point
+  at; what is open is where a user's bindings live (the settings file, a submenu) and how they show in F1.
 
 ## Later apps (recorded 2026-10-18)
 
