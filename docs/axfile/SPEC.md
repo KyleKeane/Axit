@@ -90,7 +90,8 @@ windows on the folder of the file or project in hand, and sends back. It works e
   app adds nothing.
 - AF-3.2 **Enter** on a file: `.md`, `.markdown` and `.txt` open in AxDown and `.json` in AxJSON, each a new window of
   that app; a media file plays (AF-5); any other file opens with the program Windows has for it (`ShellExecute`, as
-  Enter in File Explorer); when Windows has none, "No program opens .xyz. Ctrl+E opens it as text".
+  Enter in File Explorer); when Windows has none, the Windows dialog that picks a program, as File Explorer shows it
+  (AF-4.7).
 - AF-3.3 **Open folder…** (Ctrl+O): the Windows folder picker. **Open recent folder ▸**: the last ten folders opened
   by command, "1. name (path)" (AX-9.5): the start, Open folder, Go to folder, a recent item, and the folder the
   window closed on; Enter and Backspace browse without joining the list, so that a walk through a tree does not fill
@@ -111,9 +112,12 @@ windows on the folder of the file or project in hand, and sends back. It works e
 
 - AF-4.1 **New folder…** (Ctrl+Shift+N): the notice "New folder" with the field "Name" and the buttons Create and
   Cancel; Create makes it in the current folder, selects it and says "Created <name>".
-- AF-4.2 **Rename…** (F2): the notice "Rename <name>" with the field "New name" holding the name, the part before the
-  extension selected (the whole name for a folder; the notice field's `SelectLength`, added to `Axit.Forms` for this),
-  and the buttons Rename and Cancel; "Renamed to <new name>". A change of case alone is a rename too.
+- AF-4.2 **Rename** (F2): in place, as in File Explorer: a box ("New name") opens over the entry holding its name, the
+  part before the extension selected (the whole name for a folder), so that typing replaces the name and keeps the
+  extension; Enter renames, "Renamed to <new name>", the entry selected under its new name; Escape, or leaving the box
+  (a click elsewhere, a notice opening), keeps the name with no announcement, the list's reading of the entry being
+  the feedback; the same name again, "Name unchanged". A change of case alone is a rename too. The box is a text box
+  that is a child of the list, shown only while a rename runs; the first build (2026-10-19) asked in a notice.
 - AF-4.3 **Delete…** (Delete): the notice "Delete <name>? It goes to the Recycle Bin." (for a folder: "… with
   everything in it.") with the buttons Delete and Cancel; the deletion goes through the shell (`SHFileOperationW` with
   `FOF_ALLOWUNDO`, silent and without the shell's own confirmation), so that the Recycle Bin takes it; "Deleted
@@ -125,14 +129,36 @@ windows on the folder of the file or project in hand, and sends back. It works e
 - AF-4.6 **The entry's menu** (Shift+F10, the Applications key, a right click): the Item menu as the list's context
   menu, the same items in the same order, on the selected entry (a right click selects the entry under it first, as
   File Explorer does). It is the window's own menu, fixed, with mnemonics and listed in F1, not the shell's (AF-D8).
-- AF-4.7 **Windows' own ways**, three items of the Item menu, each one of the system's own windows like the folder
-  picker (AX-7.2): **Open with…** shows the Windows dialog that picks a program for the file and runs it ("Not a
-  file" on a folder); **Properties** (Alt+Enter, File Explorer's key) shows the Windows Properties sheet of a file or
-  a folder; **More from Windows…**, the last item, shows the shell's own context menu for the entry, File Explorer's
-  classic menu with every installed program's entries (`IShellFolder` and `IContextMenu` through P/Invoke, tracked as
-  a native popup the window owns, its first item selected, the shell's submenus such as Send to filled through the
-  window's messages), and runs what is chosen. A refusal by Windows is "Failed: <reason>"; closing the dialog or the
-  menu is not one.
+  Its shape (AF-6.1): File operations ▸ first, then the ways to open (Open, Open in editor, Open in Axit ▸, Open with
+  Windows, Open with another program…), then Show in File Explorer, Information and Properties, and More from
+  Windows… last. One `ItemMenu` is the list's context menu and another the bar's Item drop-down, both filled by the
+  same method, so that the bar's menu is an exact copy.
+- AF-4.7 **Windows' own ways**, items of the entry's menu, each one of the system's own windows like the folder picker
+  (AX-7.2): **Open with Windows** opens the entry with the program Windows has for it (a folder in File Explorer),
+  or, when Windows has none, the Windows dialog that picks a program and runs it, as File Explorer does on Enter;
+  **Open with another program…** shows that dialog always ("Not a file" on a folder); **Properties** (Alt+Enter, File
+  Explorer's key) shows the Windows Properties sheet of a file or a folder; **More from Windows…**, the last item,
+  shows the shell's own context menu for the entry, File Explorer's classic menu with every installed program's
+  entries (`IShellFolder` and `IContextMenu` through P/Invoke, tracked as a native popup the window owns, its first
+  item selected, the shell's submenus such as Send to filled through the window's messages), and runs what is chosen.
+  A refusal by Windows is "Failed: <reason>"; closing the dialog or the menu is not one.
+- AF-4.8 **Cut, Copy, Paste** (Ctrl+X, Ctrl+C, Ctrl+V, in the list; File operations ▸): the entry goes on the
+  clipboard as a file in File Explorer's own formats (`CF_HDROP` and "Preferred DropEffect", move for a cut, copy
+  otherwise), "Cut <name>" or "Copied <name>", so that File Explorer can paste it and AxFile can paste what File
+  Explorer cut or copied. Paste copies the clipboard's files into the folder shown, or moves them after a cut, through
+  the shell (`SHFileOperationW`, undo allowed, a number on a name already there rather than a question, nothing
+  overwritten; `FileOperations.CopyOrMoveAsync`, tested): "Pasted <name>" or "Pasted n items", the first one selected;
+  "Pasting, please wait" when it takes longer than a second; after a move the clipboard is cleared, as File Explorer
+  does. "Nothing to paste" without files on the clipboard; "Already in this folder" for a cut entry pasted where it
+  is.
+- AF-4.9 **Open in Axit ▸**: one item per app of the bundle, from `Dispatch.Apps`, a new window of that app on the
+  entry: AxDown and AxJSON on the file ("Not a file" on a folder), AxGit on the repository that holds the entry, AxFile
+  on the folder (or the file in its folder), AxClaude and AxTerminal on the folder, or on the entry's folder for a
+  file. Open in editor (Ctrl+E) stays the quick way to the right editor.
+- AF-4.10 **Ctrl+I inside the open menu** says the entry's information (AF-7) without closing the menu, so that the
+  entry a menu is about can be checked before choosing. WinForms routes the keys of an open menu to the menu, not to
+  the window, so `ItemMenu` takes the key itself. The Windows menu (More from Windows…) is Windows' own and does not
+  have it.
 
 ### AF-5 The player
 
@@ -172,10 +198,11 @@ windows on the folder of the file or project in hand, and sends back. It works e
 
 - AF-6.1 Menus, in the standard order of a first menu (AX-6): **Folder (F):** Open folder… Ctrl+O | Open recent folder
   ▸ | Go to folder… Ctrl+G | ─ | Up one level Backspace | Refresh F5 | ─ | Show current folder in ▸ (File Explorer
-  Ctrl+W | AxClaude | AxGit | AxTerminal) | ─ | Exit Alt+F4. **Item (I):** Open Enter | Open in editor Ctrl+E | Open
-  with… | Show in File Explorer Ctrl+Shift+W | Information Ctrl+I | Properties Alt+Enter | ─ | New folder…
-  Ctrl+Shift+N | Rename… F2 | Delete… Delete | Copy path Ctrl+Shift+C | ─ | More from Windows…; the same items are
-  the list's context menu (AF-4.6). **Player (P):** Play Enter | Pause or resume Space | Next file Ctrl+Shift+Right | Previous
+  Ctrl+W | AxClaude | AxGit | AxTerminal) | ─ | Exit Alt+F4. **Item (I):** File operations ▸ (Cut Ctrl+X | Copy Ctrl+C |
+  Paste Ctrl+V | ─ | New folder… Ctrl+Shift+N | Rename F2 | Delete… Delete | Copy path Ctrl+Shift+C) | ─ | Open Enter
+  | Open in editor Ctrl+E | Open in Axit ▸ (AxClaude | AxDown | AxJSON | AxGit | AxTerminal | AxFile) | Open with
+  Windows | Open with another program… | Show in File Explorer Ctrl+Shift+W | Information Ctrl+I | Properties
+  Alt+Enter | ─ | More from Windows…; the same menu is the list's context menu (AF-4.6). **Player (P):** Play Enter | Pause or resume Space | Next file Ctrl+Shift+Right | Previous
   file Ctrl+Shift+Left | Forward 15 seconds Ctrl+Right | Back 15 seconds Ctrl+Left | Go to time… Ctrl+T | ─ | Faster
   Ctrl+Shift+Period | Slower Ctrl+Shift+Comma | Normal speed | ─ | Say each file as it starts ✓ | What is playing
   Ctrl+Q. **Options (O):** Text ▸ (Font… | Larger text Ctrl+Plus | Smaller text Ctrl+Minus | Windows text size) |
@@ -187,10 +214,11 @@ windows on the folder of the file or project in hand, and sends back. It works e
   only; the list leaves them alone), Alt+F4. Window-specific (`AxFileKeys`): Enter, Backspace, Alt+Up, F5, F2, Delete,
   Ctrl+O, Ctrl+G, Ctrl+W, Ctrl+Shift+W, Ctrl+E, Ctrl+I, Ctrl+Shift+N, Ctrl+Shift+C, Space, Ctrl+Right, Ctrl+Left,
   Ctrl+Shift+Right, Ctrl+Shift+Left, Ctrl+T, Ctrl+Shift+Period, Ctrl+Shift+Comma, Ctrl+Q, Shift+F10, the Applications
-  key, Alt+Enter. Enter, Backspace, Space, F2, Delete, Shift+F10 and the Applications key act only while the list has
-  the focus (in a notice's field they are the field's; the two menu keys are the list's own, which shows its context
-  menu itself, so the key switch has no case for them). The collision test
-  covers the table and lists the keys other windows use otherwise (Ctrl+G, Ctrl+E, Ctrl+T, Ctrl+Shift+C).
+  key, Alt+Enter, Ctrl+X, Ctrl+C, Ctrl+V. Enter, Backspace, Space, F2, Delete, Ctrl+X, Ctrl+C, Ctrl+V, Shift+F10 and
+  the Applications key act only while the list has the focus (in a notice's field or the rename box they are the
+  field's; the two menu keys are the list's own, which shows its context menu itself, so the key switch has no case
+  for them; Ctrl+I has a second handler, the open menu's, AF-4.10). The collision test covers the table and lists the
+  keys other windows use otherwise (Ctrl+G, Ctrl+E, Ctrl+T, Ctrl+C, Ctrl+Shift+C).
 - AF-6.3 The F1 text (`HelpText.Shortcuts`) names them all; `docs/axfile/user-guide.md` is embedded (Help → User
   guide); About is the bundle's (AX-9.9).
 
@@ -199,11 +227,14 @@ windows on the folder of the file or project in hand, and sends back. It works e
 One UI Automation notification each, on the list, or on the notice while one shows (AX-7.3): "Playing <name>",
 "Paused at m:ss", "Playing" (resumed), "m:ss" after a seek or Go to time, "Speed n", "First file", "End of folder",
 "Nothing playing", "Playing <name>, m:ss of m:ss, speed n", "Cannot play <name>: <reason>", "Created <name>", "Renamed
-to <name>", "Deleted <name>", "Copied path", "Refreshed", "Top of the drive", "Not found: <path>", "No program opens
+to <name>", "Deleted <name>", "Copied path", "Cut <name>", "Copied <name>", "Pasted <name>", "Pasted n items",
+"Pasting, please wait" (a paste longer than a second), "Refreshed", "Top of the drive", "Not found: <path>", "No program opens
 .xyz. Ctrl+E opens it as text", "Failed: <message>", "<name>, <size>, modified <date>" (Ctrl+I), "Not found" (find),
 "Nothing to save here", "Text size n", "Windows text size", "Copied diagnostics"; and the guards "No folder" (nothing
 listed yet), "Nothing selected" (an empty folder), "Not a file" (Ctrl+E or Open with… on a folder), "Not a sound or video file"
-(Player → Play on another entry), "Not a time" (Go to time), "Speed n is not supported here", "Type a name" and the
+(Player → Play on another entry), "Not a time" (Go to time), "Speed n is not supported here", "Name unchanged" (a
+rename to the same name), "Nothing to paste" (no files on the clipboard), "Already in this folder" (a cut entry
+pasted where it is), "Type a name" and the
 other reasons of `FileOperations.CheckName`. A new selection is NVDA's own reading.
 
 ### AF-8 Settings, log, status
@@ -223,13 +254,15 @@ src/AxFile.Core/    class library (net10.0): FolderListing (a folder's entries a
                     extensions, the queue from a listing, the time format and the typed time, the speed steps),
                     MediaPlayer (MFPlay through P/Invoke: open, play, pause, position, length, speed, the started,
                     ended and failed events, a window handle for video; AF-5.2), FileOperations (the name check, new
-                    folder, rename, delete to the Recycle Bin through SHFileOperationW, the messages), FileSettings;
+                    folder, rename, delete to the Recycle Bin, copy and move into a folder, the last three through
+                    SHFileOperationW, the messages), FileSettings;
                     references Axit.Core
 src/AxFile/         class library (net10.0-windows): AxFileApp (Run, Usage), FileForm (the window, on AxitForm, in
                     four partial files: the controls, menus, hooks and keys; Browse; Operations; Player), AxFileKeys,
-                    HelpText (F1 text, the embedded guide), Shell (Windows' own ways with an entry: the Open with
-                    dialog, the Properties sheet, the shell's context menu through IShellFolder and IContextMenu;
-                    AF-4.7); references AxFile.Core, Axit.Core, Axit.Forms
+                    HelpText (F1 text, the embedded guide), ItemMenu (the entry's menu, a context menu that takes
+                    the Information key while open; AF-4.6, AF-4.10), Shell (Windows' own ways with an entry: the
+                    Open with dialog, the Properties sheet, the shell's context menu through IShellFolder and
+                    IContextMenu; AF-4.7); references AxFile.Core, Axit.Core, Axit.Forms
 tests/AxFile.Tests/ FolderListingTests and FileOperationsTests over temporary folders (the Recycle Bin is not
                     exercised), MediaFilesTests (extensions, queue order, time format, speed steps), FileSettingsTests;
                     the player itself is checked by ear
@@ -263,8 +296,11 @@ single-threaded-apartment thread of its own (AX-7.5).
 - **AF-D4 Volume is Windows'.** The keyboard's volume keys change the system volume from any window and are read by
   NVDA; two more keys in the app would duplicate them, and the bundle's Ctrl+Up and Ctrl+Down are the paragraph keys
   (AX-8.2).
-- **AF-D5 Streamlined operations.** New folder, rename, delete and copy the path are the daily four; copy, move and
-  paste wait for the ask (§7), and File Explorer is one key away for the rest (Ctrl+W, Ctrl+Shift+W).
+- **AF-D5 Streamlined operations.** New folder, rename, delete and copy the path were the first four; cut, copy and
+  paste came at the user's ask on 2026-10-20, as files on the clipboard in File Explorer's own formats (`CF_HDROP`
+  and the preferred drop effect) so that the two exchange them, with the shell doing the copy or the move (undo from
+  File Explorer, a number on a name already there rather than a question, §7). File Explorer stays one key away for
+  the rest (Ctrl+W, Ctrl+Shift+W).
 - **AF-D6 The queue is the folder at the moment of Enter.** A playlist that changed under the listener because the
   window browsed elsewhere would be a surprise; the queue is fixed when play starts and the list is free to roam.
 - **AF-D7 Items are names; details on demand.** "report.pdf, 1.2 MB, 2026-10-18" on every arrow key is noise for a
@@ -281,8 +317,8 @@ single-threaded-apartment thread of its own (AX-7.5).
 
 - Remembering the position in a file across windows (an audiobook resumed where it stopped): per file in the
   settings, with a cap; the first candidate for version two.
-- Copy, cut and paste of entries as files on the clipboard (`CF_HDROP`), so that File Explorer and AxFile exchange
-  them; a copy within the window.
+- A question on a name collision when pasting (replace, keep both, skip), where the shell now numbers the copy
+  (AF-4.8); a paste of many items that names them.
 - Shift+Delete, a permanent delete, after its own question.
 - Sorting by date or size, and a "media only" filter of the list.
 - Whether a `.m3u` file in the folder should be the queue when there is one.
@@ -296,4 +332,7 @@ single-threaded-apartment thread of its own (AX-7.5).
   the window and the player exercised by an off-screen probe only.
 - 2026-10-20, on the same branch: the entry's menu (AF-4.6) and Windows' own ways, Open with…, Properties and More
   from Windows… (AF-4.7, AF-D8), at the user's ask. The shell's menu was built for a file by the probe and its items
-  read; showing it, the dialogs and the sheet wait for the NVDA pass (test plan §3).
+  read; showing it, the dialogs and the sheet wait for the NVDA pass (test plan §3). Then, the same day and ask: File
+  operations ▸ with cut, copy and paste (AF-4.8), the rename in place (AF-4.2), Open in Axit ▸ (AF-4.9), Open with
+  Windows and Enter's fallback to the Open with dialog (AF-3.2, AF-4.7), and Ctrl+I inside the open menu (AF-4.10);
+  the rename and the clipboard round trip probed off screen; the key inside the menu waits for the NVDA pass.

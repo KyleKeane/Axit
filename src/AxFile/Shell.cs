@@ -15,11 +15,11 @@ namespace AxFile;
 internal static class Shell
 {
     private const int ErrorCancelled = unchecked((int)0x800704C7);
-    private const uint Cmfnormal = 0;
+    private const uint CmfNormal = 0;
     private const uint IdFirst = 1;
     private const uint IdLast = 0x7FFF;
     private const uint TpmReturnCmd = 0x0100;
-    private const int SwShownormal = 1;
+    private const int SwShowNormal = 1;
     private const int WmKeyDown = 0x0100;
     private const int WmInitMenuPopup = 0x0117;
     private const int WmMenuChar = 0x0120;
@@ -27,7 +27,7 @@ internal static class Shell
     private const int WmDrawItem = 0x002B;
     private const int VkDown = 0x28;
     private const uint SeeMaskInvokeIdList = 0x0000000C;
-    private const uint SeeMaskFlagnoUi = 0x00000400;
+    private const uint SeeMaskFlagNoUi = 0x00000400;
     private const int OaifAllowRegistration = 0x1;
     private const int OaifRegisterExt = 0x2;
     private const int OaifExec = 0x4;
@@ -54,11 +54,11 @@ internal static class Shell
         var info = new ShellExecuteInfo
         {
             Size = Marshal.SizeOf<ShellExecuteInfo>(),
-            Mask = SeeMaskInvokeIdList | SeeMaskFlagnoUi,
+            Mask = SeeMaskInvokeIdList | SeeMaskFlagNoUi,
             Window = owner,
             Verb = "properties",
             File = path,
-            Show = SwShownormal,
+            Show = SwShowNormal,
         };
         if (ShellExecuteExW(ref info))
         {
@@ -101,7 +101,7 @@ internal static class Shell
                 Window = owner,
                 Verb = (nint)(id - IdFirst),
                 VerbW = (nint)(id - IdFirst),
-                Show = SwShownormal,
+                Show = SwShowNormal,
                 X = at.X,
                 Y = at.Y,
             };
@@ -116,7 +116,7 @@ internal static class Shell
     }
 
     /// <summary>
-    /// The owner window's messages while the shell's menu tracks: the shell fills a submenu on WM_InITMEnUPOPUP and
+    /// The owner window's messages while the shell's menu tracks: the shell fills a submenu on WM_INITMENUPOPUP and
     /// draws its own items on the two item messages; true when the shell took the message, with the result set.
     /// </summary>
     public static bool ForwardMenuMessage(ref Message m)
@@ -144,7 +144,7 @@ internal static class Shell
     private static Parts? Build(nint owner, string path, out string? reason)
     {
         reason = null;
-        var hr = SHParseDisplayname(path, 0, out var pidl, 0, out _);
+        var hr = SHParseDisplayName(path, 0, out var pidl, 0, out _);
         if (hr < 0 || pidl == 0)
         {
             reason = Reason(hr);
@@ -171,7 +171,7 @@ internal static class Shell
             }
 
             menu = CreatePopupMenu();
-            hr = contextMenu.QueryContextMenu(menu, 0, IdFirst, IdLast, Cmfnormal);
+            hr = contextMenu.QueryContextMenu(menu, 0, IdFirst, IdLast, CmfNormal);
             if (hr < 0)
             {
                 reason = Reason(hr);
@@ -224,7 +224,7 @@ internal static class Shell
     // ---- the shell's functions ----
 
     [DllImport("shell32.dll", CharSet = CharSet.Unicode, ExactSpelling = true)]
-    private static extern int SHParseDisplayname(string name, nint bindContext, out nint pidl, uint attributesIn, out uint attributesOut);
+    private static extern int SHParseDisplayName(string name, nint bindContext, out nint pidl, uint attributesIn, out uint attributesOut);
 
     [DllImport("shell32.dll", ExactSpelling = true)]
     private static extern int SHBindToParent(nint pidl, in Guid riid, out IShellFolder folder, out nint child);
@@ -294,7 +294,7 @@ internal static class Shell
         public nint Process;
     }
 
-    /// <summary>CMInVOKECOMMAnDInFOEX: the verb by its offset in both the narrow and the wide field, the window, the point.</summary>
+    /// <summary>CMINVOKECOMMANDINFOEX: the verb by its offset in both the narrow and the wide field, the window, the point.</summary>
     [StructLayout(LayoutKind.Sequential)]
     private struct InvokeInfo
     {
@@ -324,7 +324,7 @@ internal static class Shell
     private interface IShellFolder
     {
         [PreserveSig]
-        int ParseDisplayname(nint owner, nint bindContext, [MarshalAs(UnmanagedType.LPWStr)] string name, nint eaten, out nint pidl, nint attributes);
+        int ParseDisplayName(nint owner, nint bindContext, [MarshalAs(UnmanagedType.LPWStr)] string name, nint eaten, out nint pidl, nint attributes);
 
         [PreserveSig]
         int EnumObjects(nint owner, uint flags, out nint enumerator);
@@ -349,10 +349,10 @@ internal static class Shell
         int GetUIObjectOf(nint owner, uint count, [MarshalAs(UnmanagedType.LPArray)] nint[] pidls, in Guid riid, nint reserved, [MarshalAs(UnmanagedType.IUnknown)] out object result);
 
         [PreserveSig]
-        int GetDisplaynameOf(nint pidl, uint flags, nint name);
+        int GetDisplayNameOf(nint pidl, uint flags, nint name);
 
         [PreserveSig]
-        int SetnameOf(nint owner, nint pidl, [MarshalAs(UnmanagedType.LPWStr)] string name, uint flags, out nint newPidl);
+        int SetNameOf(nint owner, nint pidl, [MarshalAs(UnmanagedType.LPWStr)] string name, uint flags, out nint newPidl);
     }
 
     [ComImport]

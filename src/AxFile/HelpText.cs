@@ -17,16 +17,17 @@ public static class HelpText
 
         The list
           Arrow keys, Home, End, Page Up, Page Down: move through the entries; a typed letter jumps to the next name starting with it
-          Enter: open the entry: a folder in this list, a Markdown or text file in AxDown, a JSON file in AxJSON, a sound or video file in the player, anything else in the program Windows has for it
+          Enter: open the entry: a folder in this list, a Markdown or text file in AxDown, a JSON file in AxJSON, a sound or video file in the player, anything else in the program Windows has for it, or the Windows dialog that picks one when there is none
           Backspace, or Alt+Up: the folder above, with the folder you left selected
           Ctrl+I: say the entry's size and date
           Ctrl+E: open the file in AxDown, or AxJSON for a .json file, whatever Enter would do
           Ctrl+Shift+W: show the entry in File Explorer. Ctrl+W: show the folder in File Explorer
           Ctrl+O: open a folder with the Windows folder picker. Ctrl+G: go to a typed path, %USERPROFILE%\Downloads for instance
           F5: read the folder again
-          Ctrl+Shift+N: a new folder, after its name. F2: rename, after the new name. Delete: delete to the Recycle Bin, after a question
+          Ctrl+Shift+N: a new folder, after its name. F2: rename in place, in a box over the entry with the name before the extension selected; Enter renames, Escape keeps the name. Delete: delete to the Recycle Bin, after a question
+          Ctrl+X, Ctrl+C, Ctrl+V: cut, copy or paste the entry as a file, to and from File Explorer too; a pasted name already in the folder gets a number
           Ctrl+Shift+C: copy the entry's full path
-          Shift+F10, or the Applications key: the Item menu on the entry, where Open with..., Properties and More from Windows..., the full Windows menu for the entry, also are
+          Shift+F10, or the Applications key: the entry's menu: File operations, Open, Open in editor, Open in Axit, Open with Windows, Open with another program, Show in File Explorer, Information, Properties, More from Windows. Ctrl+I inside the menu says the entry without closing it
           Alt+Enter: the entry's Properties, the Windows sheet
           Ctrl+S: nothing to save here; AxFile says so
 

@@ -40,7 +40,7 @@ Specifications are the source of truth: `docs/axit/SPEC.md` for the bundle (laun
 ## Environment gotchas (bundle-wide)
 
 - A running app locks its `bin` folder. Build somewhere else to check a change (`dotnet build <project> -o <scratch dir>`) and ask the user to restart the app for a real run. Dialogs and menus can be checked off screen from a small probe project that references the scratch build; never activate windows or send keys while the user is working.
-- The Bash tool mangles backslashes inside heredocs: use the Write tool for source files.
+- The Bash tool mangles backslashes inside heredocs: use the Write tool for source files. A PowerShell one-liner sent through the Bash tool loses its backticks to command substitution; `-replace` is case-insensitive, so a mangled pattern once turned every capital N of a file into n. Run PowerShell through the PowerShell tool.
 - Windows PowerShell 5.1: `$PSScriptRoot` is empty while parameter defaults are evaluated, and a function that returns a byte array unrolls it unless written `return , $bytes`.
 
 ## Manual verification

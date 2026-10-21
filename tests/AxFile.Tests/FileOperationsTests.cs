@@ -80,6 +80,31 @@ public sealed class FileOperationsTests : IDisposable
     }
 
     [Fact]
+    public async Task Files_and_folders_are_copied_and_moved_into_a_folder_by_the_shell()
+    {
+        var docs = Path.Combine(_folder, "docs");
+        var notes = Path.Combine(_folder, "notes.md");
+        Assert.Null(await FileOperations.CopyOrMoveAsync([notes], docs, move: false));
+        Assert.True(File.Exists(Path.Combine(docs, "notes.md")));
+        Assert.True(File.Exists(notes));
+
+        // A name already there gets a number: both files stay.
+        Assert.Null(await FileOperations.CopyOrMoveAsync([Path.Combine(docs, "notes.md")], _folder, move: false));
+        Assert.Equal(2, Directory.GetFiles(_folder).Length);
+        Assert.True(File.Exists(notes));
+
+        var sub = Path.Combine(_folder, "sub");
+        Directory.CreateDirectory(sub);
+        File.WriteAllText(Path.Combine(sub, "inner.txt"), "x");
+        Assert.Null(await FileOperations.CopyOrMoveAsync([sub], docs, move: true));
+        Assert.False(Directory.Exists(sub));
+        Assert.True(File.Exists(Path.Combine(docs, "sub", "inner.txt")));
+
+        var reason = await FileOperations.CopyOrMoveAsync([Path.Combine(_folder, "nope.txt")], docs, move: false);
+        Assert.NotNull(reason);
+    }
+
+    [Fact]
     public void Messages_are_one_line()
     {
         Assert.Equal("Access denied", FileOperations.Message(new UnauthorizedAccessException("x")));

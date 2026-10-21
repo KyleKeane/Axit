@@ -20,7 +20,7 @@ The window is named after the folder: "Dune - AxFile". The list is named with th
 
 The list is the one control. Arrow keys, Home, End, Page Up and Page Down move through the entries; a typed letter jumps to the next name starting with it; nothing is spoken until you ask. Folders come first, then files, each in the order File Explorer uses, so `2` comes before `10`; folders read "docs, folder". Hidden and system entries are left out, as in File Explorer (the setting `showHidden` in the settings file turns them on).
 
-- **Enter** opens the entry: a folder in this list (its first entry selected), a `.md`, `.markdown` or `.txt` file in a new AxDown window, a `.json` file in AxJSON, a sound or video file in the player, and any other file in the program Windows has for it. When Windows has none, AxFile says "No program opens .xyz. Ctrl+E opens it as text".
+- **Enter** opens the entry: a folder in this list (its first entry selected), a `.md`, `.markdown` or `.txt` file in a new AxDown window, a `.json` file in AxJSON, a sound or video file in the player, and any other file in the program Windows has for it, or, when Windows has none, the Windows dialog that asks which program, as File Explorer does.
 - **Backspace** or Alt+Up goes to the folder above, with the folder you left selected. At the top of a drive AxFile says "Top of the drive".
 - **Ctrl+I** says the entry's size and date: "report.pdf, 1.2 MB, modified 2026-10-18 14:02".
 - **Ctrl+E** opens the file in AxDown, or AxJSON for a `.json` file, whatever Enter would do with it.
@@ -29,20 +29,23 @@ The list is the one control. Arrow keys, Home, End, Page Up and Page Down move t
 - **F5** reads the folder again, "Refreshed". Coming back to the window after another program changed the folder does the same silently.
 - **Ctrl+F** finds the next entry whose name contains the text; F3 and Shift+F3 the next and the previous match; "Not found" otherwise.
 
-## The four operations
+## File operations
 
 - **Ctrl+Shift+N**, New folder: a notice asks for the name; Enter makes it in the current folder, selects it and says "Created notes".
-- **F2**, Rename: a notice shows the name with the part before the extension selected; type the new name, Enter: "Renamed to Notes".
+- **F2**, Rename: a box opens over the entry with its name, the part before the extension selected, so typing replaces the name and keeps the extension; Enter renames, "Renamed to Notes", and Escape keeps the old name. Leaving the box keeps it too.
 - **Delete**: a notice asks "Delete notes? It goes to the Recycle Bin." (with everything in it, for a folder); Enter deletes, Escape keeps it. "Deleted notes", and you are on the next entry. The Recycle Bin can bring it back; AxFile has no permanent delete.
+- **Ctrl+X** and **Ctrl+C** put the entry on the clipboard as a file, "Cut notes.md" or "Copied notes.md"; **Ctrl+V** pastes the clipboard's files into the folder shown, "Pasted notes.md" or "Pasted 3 items", moving them after a cut and copying them otherwise. File Explorer sees the same clipboard, so you can cut in AxFile and paste in File Explorer, and back. A name already in the folder gets a number; nothing is overwritten. A paste that takes more than a second says "Pasting, please wait" first. Pasting a cut entry into its own folder says "Already in this folder".
 - **Ctrl+Shift+C** copies the entry's full path, "Copied path".
 
-A name Windows refuses, a file in use or a folder you may not touch gives one line, "Failed: Access denied". Copying and moving files are not in this version; File Explorer is one key away (Ctrl+W).
+A name Windows refuses, a file in use or a folder you may not touch gives one line, "Failed: Access denied". All of these are in the File operations submenu, the first item of the entry's menu.
 
 ## The entry's menu, and what Windows does for you
 
-**Shift+F10**, the Applications key or a right click opens the Item menu on the entry as a context menu, with the same items as the menu bar's Item menu: Open, Open in editor, Open with, Show in File Explorer, Information, Properties, the four operations, and More from Windows. Three of them hand the entry to Windows, each in a window of Windows' own, as the folder picker is:
+**Shift+F10**, the Applications key or a right click opens the entry's menu as a context menu; the menu bar's Item menu is the same menu. In order: File operations (the submenu above), Open, Open in editor, Open in Axit, Open with Windows, Open with another program, Show in File Explorer, Information, Properties, and More from Windows. **Ctrl+I** inside the menu says the entry's name, size and date without closing it.
 
-- **Open with...** asks which program should open the file, in the Windows dialog, and runs it.
+- **Open in Axit** lists every app of the bundle: AxDown and AxJSON open the file, AxGit the repository that holds the entry, AxClaude and AxTerminal the folder (the entry's folder, for a file), AxFile a new window on the folder. "Not a file" when an editor is chosen on a folder.
+- **Open with Windows** opens the entry with the program Windows has for it, a folder in File Explorer; when Windows has none it asks which program, in the Windows dialog, as File Explorer does. Enter on a file AxFile has no app for does the same.
+- **Open with another program...** always asks which program, in that dialog, and runs it.
 - **Properties** (Alt+Enter, as in File Explorer) shows the Properties sheet of the file or the folder.
 - **More from Windows...** shows the full Windows menu for the entry, the one File Explorer shows, with every installed program's entries: Send to, an archiver, a cloud drive. Its first item is selected when it opens; Escape closes it. That menu is Windows' own, so its contents change with what you install; AxFile's own menu does not.
 
@@ -64,7 +67,7 @@ The volume is Windows' own: your keyboard's volume keys work from anywhere. A vi
 ## Menus
 
 - **Folder**: Open folder (Ctrl+O), Open recent folder, Go to folder (Ctrl+G), Up one level (Backspace), Refresh (F5), Show current folder in (File Explorer Ctrl+W, AxClaude, AxGit, AxTerminal), Exit.
-- **Item**: Open (Enter), Open in editor (Ctrl+E), Open with, Show in File Explorer (Ctrl+Shift+W), Information (Ctrl+I), Properties (Alt+Enter), New folder (Ctrl+Shift+N), Rename (F2), Delete (Delete), Copy path (Ctrl+Shift+C), More from Windows. The same menu opens on the entry with Shift+F10, the Applications key or a right click.
+- **Item**: File operations (Cut Ctrl+X, Copy Ctrl+C, Paste Ctrl+V, New folder Ctrl+Shift+N, Rename F2, Delete, Copy path Ctrl+Shift+C), Open (Enter), Open in editor (Ctrl+E), Open in Axit (every app), Open with Windows, Open with another program, Show in File Explorer (Ctrl+Shift+W), Information (Ctrl+I), Properties (Alt+Enter), More from Windows. The same menu opens on the entry with Shift+F10, the Applications key or a right click; Ctrl+I inside it says the entry.
 - **Player**: Play (Enter), Pause or resume (Space), Next file, Previous file, Forward 15 seconds, Back 15 seconds, Go to time (Ctrl+T), Faster, Slower, Normal speed, Say each file as it starts, What is playing (Ctrl+Q).
 - **Options**: Text (font and size), General (the update check), Developer (the settings file, diagnostics).
 - **Axit**: new windows of every app, the files and folders closed lately, the open windows, updates, About.

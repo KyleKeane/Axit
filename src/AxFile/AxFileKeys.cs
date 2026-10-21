@@ -4,7 +4,8 @@ namespace AxFile;
 /// AxFile's window-specific keys (SPEC.md AF-6.2; bundle AX-8). A key is changed here and nowhere else: the menu
 /// items, the key switch in <c>FileForm.ProcessWindowKey</c> and the F1 text read this table. The bundle-wide keys
 /// (F1, the control keys, find, Ctrl+S, text size) are <c>Axit.Forms.BundleKeys</c>. Enter, Backspace, Space, F2,
-/// Delete, Shift+F10 and the Applications key act in the list only; in a notice's field they are the field's own.
+/// Delete, Ctrl+X, Ctrl+C, Ctrl+V, Shift+F10 and the Applications key act in the list only; in a notice's field or
+/// the rename box they are the field's own.
 /// </summary>
 public static class AxFileKeys
 {
@@ -24,13 +25,22 @@ public static class AxFileKeys
     public const Keys Information = Keys.Control | Keys.I;
     public const Keys NewFolder = Keys.Control | Keys.Shift | Keys.N;
 
-    /// <summary>In the list: the Rename notice.</summary>
+    /// <summary>In the list: the rename in place, a box over the entry (AF-4.2).</summary>
     public const Keys Rename = Keys.F2;
 
     /// <summary>In the list: the Delete question.</summary>
     public const Keys Delete = Keys.Delete;
 
     public const Keys CopyPath = Keys.Control | Keys.Shift | Keys.C;
+
+    /// <summary>In the list: the entry on the clipboard as a file, to move (AF-4.8).</summary>
+    public const Keys Cut = Keys.Control | Keys.X;
+
+    /// <summary>In the list: the entry on the clipboard as a file, to copy.</summary>
+    public const Keys Copy = Keys.Control | Keys.C;
+
+    /// <summary>In the list: the clipboard's files copied or moved into the folder shown.</summary>
+    public const Keys Paste = Keys.Control | Keys.V;
 
     /// <summary>In the list: the Item menu on the entry, as the list's own context menu (AF-4.6); the list shows it itself, so the key switch has no case for it.</summary>
     public const Keys ContextMenu = Keys.Shift | Keys.F10;
@@ -70,6 +80,9 @@ public static class AxFileKeys
         ("Rename (in the list)", Rename),
         ("Delete (in the list)", Delete),
         ("Copy path", CopyPath),
+        ("Cut (in the list)", Cut),
+        ("Copy (in the list)", Copy),
+        ("Paste (in the list)", Paste),
         ("Item menu (in the list)", ContextMenu),
         ("Item menu (in the list)", ContextMenuAlso),
         ("Properties", Properties),

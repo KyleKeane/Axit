@@ -19,8 +19,9 @@ public sealed partial class FileForm : AxitForm
     private readonly string? _startPath;
     private readonly MenuStrip _menu = new();
     private readonly ToolStripMenuItem _recentItem = new("Open &recent folder");
-    private readonly ContextMenuStrip _itemMenu = new();
+    private readonly ItemMenu _itemMenu;
     private readonly ListBox _list = new();
+    private readonly TextBox _renameBox = new();
     private readonly Panel _video = new();
     private readonly StatusStrip _status = new();
     private readonly ToolStripStatusLabel _stateLabel;
@@ -56,11 +57,12 @@ public sealed partial class FileForm : AxitForm
         folder.DropDownItems.Add(new ToolStripSeparator());
         folder.DropDownItems.Add(new ToolStripMenuItem("E&xit", null, (_, _) => Close()) { ShortcutKeyDisplayString = "Alt+F4" });
 
-        // Item is the entry's menu; the same items are the list's context menu (AF-4.6), built twice from one method.
-        var item = new ToolStripMenuItem("&Item");
+        // Item is the entry's menu (AF-4.6): one ItemMenu as the bar's drop-down and one as the list's context menu,
+        // filled the same way, so that the two are one menu.
+        var item = new ToolStripMenuItem("&Item") { DropDown = new ItemMenu(SayInformation) };
         FillItemMenu(item.DropDownItems);
+        _itemMenu = new ItemMenu(SayInformation) { AccessibleName = "Item" };
         FillItemMenu(_itemMenu.Items);
-        _itemMenu.AccessibleName = "Item";
 
         var player = new ToolStripMenuItem("&Player");
         player.DropDownItems.Add(Item("&Play", PlaySelected, AxFileKeys.Open));
@@ -109,6 +111,14 @@ public sealed partial class FileForm : AxitForm
             }
         };
 
+        // ---- the rename box (AF-4.2): a child of the list, placed over the entry while a rename runs, hidden otherwise ----
+        _renameBox.Visible = false;
+        _renameBox.AccessibleName = "New name";
+        _renameBox.BorderStyle = BorderStyle.FixedSingle;
+        _renameBox.KeyDown += OnRenameKey;
+        _renameBox.Leave += (_, _) => CancelRename();
+        _list.Controls.Add(_renameBox);
+
         // ---- the video area (AF-5.6): a plain surface at the top, shown while a video plays, never focused ----
         _video.Dock = DockStyle.Top;
         _video.Height = 0;
@@ -142,20 +152,37 @@ public sealed partial class FileForm : AxitForm
         }
     }
 
-    /// <summary>The Item menu's items (AF-6.1), for the menu bar and again for the list's context menu (AF-4.6).</summary>
+    /// <summary>The entry's menu (AF-6.1), filled for the menu bar and again for the list's context menu (AF-4.6).</summary>
     private void FillItemMenu(ToolStripItemCollection items)
     {
+        // AF-4.8, AF-4.1 to AF-4.4: the operations first, in one submenu.
+        var operations = new ToolStripMenuItem("&File operations");
+        operations.DropDownItems.Add(Item("Cu&t", () => CopyOrCut(cut: true), AxFileKeys.Cut));
+        operations.DropDownItems.Add(Item("&Copy", () => CopyOrCut(cut: false), AxFileKeys.Copy));
+        operations.DropDownItems.Add(Item("&Paste", Paste, AxFileKeys.Paste));
+        operations.DropDownItems.Add(new ToolStripSeparator());
+        operations.DropDownItems.Add(Item("&New folder...", NewFolder, AxFileKeys.NewFolder));
+        // Posted, so that the menu has closed and the list has the focus back before the box takes it.
+        operations.DropDownItems.Add(Item("&Rename", () => BeginInvoke(Rename), AxFileKeys.Rename));
+        operations.DropDownItems.Add(Item("&Delete...", Delete, AxFileKeys.Delete));
+        operations.DropDownItems.Add(Item("Copy p&ath", CopyPath, AxFileKeys.CopyPath));
+        items.Add(operations);
+        items.Add(new ToolStripSeparator());
+        // The ways to open the entry: AxFile's own verb, the editors, every app of the bundle (AF-4.9), Windows (AF-4.7).
         items.Add(Item("&Open", OpenSelected, AxFileKeys.Open));
         items.Add(Item("Open in &editor", OpenInEditor, AxFileKeys.OpenInEditor));
-        items.Add(new ToolStripMenuItem("Open &with...", null, (_, _) => OpenWith()));
+        var axit = new ToolStripMenuItem("Open in &Axit");
+        foreach (var app in Dispatch.Apps)
+        {
+            axit.DropDownItems.Add(new ToolStripMenuItem("Ax&" + app.Name[2..], null, (_, _) => OpenInAxit(app.Verb)));
+        }
+
+        items.Add(axit);
+        items.Add(new ToolStripMenuItem("Open with &Windows", null, (_, _) => OpenSelectedWithWindows()));
+        items.Add(new ToolStripMenuItem("Open with another pro&gram...", null, (_, _) => OpenWith()));
         items.Add(Item("&Show in File Explorer", ShowItemInExplorer, AxFileKeys.ShowItemInExplorer));
         items.Add(Item("&Information", SayInformation, AxFileKeys.Information));
         items.Add(Item("&Properties", ShowProperties, AxFileKeys.Properties));
-        items.Add(new ToolStripSeparator());
-        items.Add(Item("&New folder...", NewFolder, AxFileKeys.NewFolder));
-        items.Add(Item("&Rename...", Rename, AxFileKeys.Rename));
-        items.Add(Item("&Delete...", Delete, AxFileKeys.Delete));
-        items.Add(Item("&Copy path", CopyPath, AxFileKeys.CopyPath));
         items.Add(new ToolStripSeparator());
         // AF-4.7: the shell's own menu, behind one item of ours (AF-D8).
         items.Add(new ToolStripMenuItem("&More from Windows...", null, (_, _) => ShowWindowsMenu()));
@@ -167,6 +194,7 @@ public sealed partial class FileForm : AxitForm
 
     protected override void HideForNotice()
     {
+        CancelRename();
         _list.Visible = false;
         _video.Visible = false;
     }
@@ -179,7 +207,11 @@ public sealed partial class FileForm : AxitForm
 
     protected override Control FocusTarget => _list;
 
-    protected override void ApplyFont(Font font) => _list.Font = font;
+    protected override void ApplyFont(Font font)
+    {
+        _list.Font = font;
+        _renameBox.Font = font;
+    }
 
     protected override IReadOnlyList<string> RestartArguments() => _folder is null ? [Dispatch.AxFile] : [Dispatch.AxFile, _folder];
 
@@ -307,9 +339,18 @@ public sealed partial class FileForm : AxitForm
 
         if (_list.Focused)
         {
-            // Enter, Backspace, Space, F2 and Delete act in the list only (AF-6.2).
+            // Enter, Backspace, Space, F2, Delete and the clipboard keys act in the list only (AF-6.2).
             switch (keyData)
             {
+                case AxFileKeys.Cut:
+                    CopyOrCut(cut: true);
+                    return true;
+                case AxFileKeys.Copy:
+                    CopyOrCut(cut: false);
+                    return true;
+                case AxFileKeys.Paste:
+                    Paste();
+                    return true;
                 case AxFileKeys.Open:
                     OpenSelected();
                     return true;
