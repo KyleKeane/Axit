@@ -54,8 +54,9 @@ internal sealed partial class MainForm
         }
         else if (!focus && !NoticeOpen)
         {
-            // From the conversation, without the interrupting kind: the focus goes to the question after a moment,
-            // so that it is not found by Tab, and NVDA reads it there after what it is reading (asked 2026-10-21).
+            // From the conversation, without the interrupting kind, or within three seconds of the user's own answer:
+            // the focus goes to the question after a moment, so that it is not found by Tab, and NVDA reads it there
+            // after what it is reading (asked 2026-10-21; the three-second case was found by the off-screen replay).
             Later(QuestionFocusMs, () =>
             {
                 if (_shownWait == signature && !NoticeOpen && _area.Current is { } current && !current.ContainsFocus)

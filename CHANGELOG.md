@@ -2,7 +2,7 @@
 
 ## Unreleased
 
-- AxClaude: a question of Claude's takes the focus in every case. With Options → Questions → Go to them at once, interrupting speech off, the focus used to move only from the bottom of the window, and from the conversation "Claude asks" was spoken and the question had to be found with Tab; now the focus goes to it a moment later, and NVDA reads it there after what it was reading, nothing interrupted.
+- AxClaude: a question of Claude's takes the focus in every case. A question that came within three seconds of your own answer or Escape while you had gone to the conversation took no focus and was not spoken, so it had to be found with Tab; the same when Options → Questions → Go to them at once, interrupting speech is off. Now the focus goes to the question a moment later in both cases, and NVDA reads it there after what it was reading, nothing interrupted.
 
 ## 3.2.0 - 2026-10-21
 
