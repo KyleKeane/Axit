@@ -29,7 +29,7 @@ public static class HelpText
           Ctrl+Shift+F: filter the list to the names containing a text; Escape in the list clears the filter. Folder, Sort by: name, date or size
           Ctrl+Shift+N: a new folder, after its name. Ctrl+Shift+T: a new empty text file, with the rename box open on it and its whole name selected: type the name with its extension, Enter. Move to new folder, in the entry's menu: a new folder here, after its name, with the entry, or the selected entries, moved into it
           F2: rename in place, in a box over the entry with the name before the extension selected; Enter renames, Escape keeps the name. Delete: delete to the Recycle Bin, after a question
-          Space: select the entry, or deselect it; it reads "selected" after its name while it is. Ctrl+A: select all. Ctrl+Shift+A: select none. Ctrl+I says how many are selected
+          Space: select the entry, or deselect it; it reads "selected" after its name while it is. Shift+Down, Shift+Up, Shift+Home, Shift+End: select from where you started to there, as in File Explorer, keeping what was selected before. Ctrl+A: select all. Ctrl+Shift+A: select none. Ctrl+I says how many are selected
           Ctrl+X, Ctrl+C, Ctrl+V: cut, copy or paste as files, to and from File Explorer too; a pasted name already in the folder gets a number. Cut, Copy, Delete and Copy path act on the selected entries, or on the entry you are on when none is selected
           Ctrl+Shift+C: copy the entry's full path, or every selected entry's, one per line
           In the entry's menu without a key: Move to new folder, Compress to zip, Extract here, Open with (Windows default, Choose a program, your own programs), Windows menu

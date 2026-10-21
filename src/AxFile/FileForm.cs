@@ -425,6 +425,18 @@ public sealed partial class FileForm : AxitForm
                 case AxFileKeys.SelectNone:
                     SelectNone();
                     return true;
+                case AxFileKeys.SelectDown:
+                    ExtendSelection(_list.SelectedIndex + 1);
+                    return true;
+                case AxFileKeys.SelectUp:
+                    ExtendSelection(_list.SelectedIndex - 1);
+                    return true;
+                case AxFileKeys.SelectToStart:
+                    ExtendSelection(0);
+                    return true;
+                case AxFileKeys.SelectToEnd:
+                    ExtendSelection(int.MaxValue);
+                    return true;
                 case AxFileKeys.ClearFilter:
                     return ClearFilter();
                 case AxFileKeys.Open:

@@ -126,8 +126,12 @@ windows on the folder of the file or project in hand, and sends back. It works e
   current entry, or unmarks it again: its item reads "<name>, selected" while it is marked ("notes.md, selected";
   "docs, folder, selected"), so that an arrow key onto it says so and nothing is said on the others; the key answers
   "Selected" or "Deselected", with ", n selected" when more than that one is marked ("Selected, 3 selected";
-  "Deselected, 2 selected"). **Ctrl+A** marks every entry, "n selected"; **Ctrl+Shift+A** unmarks them all, "None
-  selected"; Select all and Select none are in the Item menu, Space is a key alone. Ctrl+I adds ", n selected" to the entry's information while any are
+  "Deselected, 2 selected"). **Shift+Down**, **Shift+Up**, **Shift+Home** and **Shift+End** (asked 2026-10-21, "the
+  Shift multiselect File Explorer has") move the current entry and mark every entry from where the range began to
+  there: the range begins where the first Shift key finds the current entry, moving back with Shift shrinks it, and
+  the marks made before it stay; an arrow without Shift ends it, and the next Shift key begins a new one. Each entry
+  passed reads ", selected" by itself and the keys say nothing more. **Ctrl+A** marks every entry, "n selected";
+  **Ctrl+Shift+A** unmarks them all, "None selected"; Select all and Select none are in the Item menu, Space is a key alone. Ctrl+I adds ", n selected" to the entry's information while any are
   marked (AF-2.4). Cut, Copy, Delete and Copy path act on the marked entries when there are any, and on the current
   entry alone otherwise (AF-4.3, AF-4.4, AF-4.8); Enter, Rename, the ways to open and the Windows items stay on the
   current entry. The marks live in one folder: showing another folder drops them, a refresh of the same folder keeps
@@ -324,10 +328,10 @@ windows on the folder of the file or project in hand, and sends back. It works e
   Ctrl+Plus, Ctrl+Minus, Page Up and Page Down (the list's own here), Ctrl+Up and Ctrl+Down with Shift (edit controls
   only; the list leaves them alone), Alt+F4. Window-specific (`AxFileKeys`): Enter, Backspace, Alt+Up, F5, F2, Delete,
   Ctrl+N, Ctrl+O, Ctrl+G, Ctrl+D, Ctrl+W, Ctrl+Shift+W, Ctrl+E, Ctrl+I, Ctrl+Shift+N, Ctrl+Shift+T, Ctrl+Shift+C,
-  Ctrl+Shift+F, Escape,
+  Ctrl+Shift+F, Escape, Shift+Up, Shift+Down, Shift+Home, Shift+End,
   Space, Ctrl+A, Ctrl+Shift+A, Ctrl+P, Ctrl+Right, Ctrl+Left, Ctrl+Shift+Right, Ctrl+Shift+Left, Ctrl+T,
   Ctrl+Shift+Period, Ctrl+Shift+Comma, Ctrl+Q, Shift+F10, the Applications key, Alt+Enter, Ctrl+X, Ctrl+C, Ctrl+V.
-  Enter, Backspace, Space, Escape, F2, Delete, Ctrl+X, Ctrl+C, Ctrl+V, Ctrl+A, Ctrl+Shift+A, Shift+F10 and the
+  Enter, Backspace, Space, Escape, F2, Delete, Ctrl+X, Ctrl+C, Ctrl+V, Ctrl+A, Ctrl+Shift+A, the Shift arrows, Shift+F10 and the
   Applications key act only while the list has the focus (in a notice's field or the rename box they are the field's;
   the two menu keys are the list's own, which shows its context menu itself, so the key switch has no case for them;
   Ctrl+I has a second handler, the open menu's, AF-4.10). The collision test covers the table and lists the keys other

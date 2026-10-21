@@ -25,6 +25,11 @@ public sealed partial class FileForm
     /// <summary>The paths selected with Space (AF-3.7), kept while the same folder shows; their items read ", selected".</summary>
     private readonly HashSet<string> _selected = new(StringComparer.OrdinalIgnoreCase);
 
+    /// <summary>Where a Shift range began (AF-3.7), where it has reached, and the marks there were before it; the anchor is null while no range is being made.</summary>
+    private int? _anchor;
+    private int _anchorEnd = -1;
+    private HashSet<string> _anchorBase = new(StringComparer.OrdinalIgnoreCase);
+
     /// <summary>The folder's last write time at the last read, so that coming back to the window knows whether to read again (AF-3.4).</summary>
     private DateTime _folderStamp;
 
@@ -106,6 +111,7 @@ public sealed partial class FileForm
         if (!string.Equals(folder, _folder, StringComparison.OrdinalIgnoreCase))
         {
             _selected.Clear();
+            _anchor = null;
             _filter = string.Empty;
         }
         else
@@ -262,6 +268,7 @@ public sealed partial class FileForm
             _selected.Remove(entry.Path);
         }
 
+        _anchor = null;
         _list.Items[_list.SelectedIndex] = ItemText(entry);
         var count = _selected.Count;
         var word = on ? "Selected" : "Deselected";
@@ -282,13 +289,15 @@ public sealed partial class FileForm
             _selected.Add(entry.Path);
         }
 
+        _anchor = null;
         FillList(CurrentEntry()?.Name);
         Announce($"{_selected.Count} selected", true);
     }
 
-    /// <summary>Ctrl+Shift+A in the list, File operations → Select none: the marks cleared, "None selected".</summary>
+    /// <summary>Ctrl+Shift+A in the list, Item → Select none: the marks cleared, "None selected".</summary>
     private void SelectNone()
     {
+        _anchor = null;
         if (_selected.Count > 0)
         {
             _selected.Clear();
@@ -296,6 +305,39 @@ public sealed partial class FileForm
         }
 
         Announce("None selected", true);
+    }
+
+    /// <summary>
+    /// Shift with Up, Down, Home or End in the list (AF-3.7): the current entry moves to <paramref name="target"/>
+    /// and every entry between where the range began and there is marked, as in File Explorer; a range begins where
+    /// the first Shift key finds the current entry and keeps the marks made before it, and moving back shrinks it.
+    /// Each entry passed reads ", selected" on its own; nothing else is said.
+    /// </summary>
+    private void ExtendSelection(int target)
+    {
+        if (_shown.Count == 0)
+        {
+            SayNoEntry();
+            return;
+        }
+
+        var current = Math.Max(0, _list.SelectedIndex);
+        if (_anchor is null || current != _anchorEnd)
+        {
+            _anchor = current;
+            _anchorBase = new HashSet<string>(_selected, StringComparer.OrdinalIgnoreCase);
+        }
+
+        target = Math.Clamp(target, 0, _shown.Count - 1);
+        _anchorEnd = target;
+        _selected.Clear();
+        _selected.UnionWith(_anchorBase);
+        for (var i = Math.Min(_anchor.Value, target); i <= Math.Max(_anchor.Value, target); i++)
+        {
+            _selected.Add(_shown[i].Path);
+        }
+
+        FillList(_shown[target].Name);
     }
 
     /// <summary>The selected entries among those shown, in the list's order; none when nothing is selected.</summary>

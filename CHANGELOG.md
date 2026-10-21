@@ -1,5 +1,9 @@
 # Changelog
 
+## Unreleased
+
+- AxFile: Shift with Down, Up, Home or End selects a run of entries as in File Explorer, from where Shift was first pressed to where you are, each entry reading "selected" as it is reached; what was selected before stays.
+
 ## 3.2.1 - 2026-10-21
 
 - AxClaude: a question of Claude's takes the focus in every case. A question that came within three seconds of your own answer or Escape while you had gone to the conversation took no focus and was not spoken, so it had to be found with Tab; the same when Options → Questions → Go to them at once, interrupting speech is off. Now the focus goes to the question a moment later in both cases, and NVDA reads it there after what it was reading, nothing interrupted.

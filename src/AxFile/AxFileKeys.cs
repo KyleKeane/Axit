@@ -67,6 +67,13 @@ public static class AxFileKeys
     /// <summary>In the list: no entry selected.</summary>
     public const Keys SelectNone = Keys.Control | Keys.Shift | Keys.A;
 
+    /// <summary>In the list: the range from where it began to the next entry selected, as File Explorer's Shift+Down (AF-3.7).</summary>
+    public const Keys SelectDown = Keys.Shift | Keys.Down;
+
+    public const Keys SelectUp = Keys.Shift | Keys.Up;
+    public const Keys SelectToStart = Keys.Shift | Keys.Home;
+    public const Keys SelectToEnd = Keys.Shift | Keys.End;
+
     /// <summary>In the list: the Item menu on the entry, as the list's own context menu (AF-4.6); the list shows it itself, so the key switch has no case for it.</summary>
     public const Keys ContextMenu = Keys.Shift | Keys.F10;
 
@@ -116,6 +123,10 @@ public static class AxFileKeys
         ("Select or deselect (in the list)", Select),
         ("Select all (in the list)", SelectAll),
         ("Select none (in the list)", SelectNone),
+        ("Select to the next entry (in the list)", SelectDown),
+        ("Select to the previous entry (in the list)", SelectUp),
+        ("Select to the first entry (in the list)", SelectToStart),
+        ("Select to the last entry (in the list)", SelectToEnd),
         ("Item menu (in the list)", ContextMenu),
         ("Item menu (in the list)", ContextMenuAlso),
         ("Properties", Properties),
