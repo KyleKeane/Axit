@@ -34,4 +34,29 @@ public static class EditorKeys
         ("Go to line", GoToLine),
         ("Word wrap", WordWrap),
     ];
+
+    // The viewer's keys (a read-only editor app, AxPreview, docs/axpreview/SPEC.md AP-3.2): the shell handles them in
+    // read-only mode only, and the viewer's table includes Viewer instead of All.
+
+    /// <summary>File → Reload: the file read again, the caret kept (AP-2.4).</summary>
+    public const Keys Reload = Keys.F5;
+
+    /// <summary>File → Edit in AxDown or AxJSON: the file in its editor, a new window (AP-1.4).</summary>
+    public const Keys Edit = Keys.Control | Keys.E;
+
+    /// <summary>In the text: the line said, "Line 12 of 40" (AP-2.3); a plain letter, which a read-only text has no use for.</summary>
+    public const Keys LineNumber = Keys.L;
+
+    /// <summary>The viewer's keys with their names: the shell's keys that apply without editing (Ctrl+N is a new window there), and its own.</summary>
+    public static readonly IReadOnlyList<(string Name, Keys Key)> Viewer =
+    [
+        ("New window", NewDocument),
+        ("Open", Open),
+        ("Reload", Reload),
+        ("Edit in the editor", Edit),
+        ("Show the file in File Explorer", ShowInExplorer),
+        ("Go to line", GoToLine),
+        ("Word wrap", WordWrap),
+        ("Line number", LineNumber),
+    ];
 }

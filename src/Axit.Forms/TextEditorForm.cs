@@ -25,6 +25,9 @@ public sealed class TextEditorForm : AxitForm
     private readonly ToolStripStatusLabel _positionLabel;
     private readonly ControlArea _area = new();
     private readonly ToolStripMenuItem _wordWrapItem;
+
+    /// <summary>The viewer's File → Edit in AxDown or AxJSON, named after the file's kind; null in an editor.</summary>
+    private readonly ToolStripMenuItem? _editItem;
     private readonly System.Windows.Forms.Timer _statusTimer = new() { Interval = 300 };
 
     // ---- undo and redo (AD-2.5): the window's own history over the text, one step per change ----
@@ -61,15 +64,35 @@ public sealed class TextEditorForm : AxitForm
         // recent files, then Save and Save as where every Windows program has them, then the extras, then Exit.
         // AxClaude's Session menu has the same order with the Save slot empty and its export before Exit.
         var file = new ToolStripMenuItem("&File");
-        file.DropDownItems.Add(Item("&New", NewDocument, EditorKeys.NewDocument));
+        if (_app.ReadOnly)
+        {
+            // The viewer (docs/axpreview/SPEC.md AP-3.1): nothing is written, so New is a new window and the Save slot holds Reload and the way to the editor.
+            file.DropDownItems.Add(Item("&New window", NewWindow, EditorKeys.NewDocument));
+        }
+        else
+        {
+            file.DropDownItems.Add(Item("&New", NewDocument, EditorKeys.NewDocument));
+        }
+
         file.DropDownItems.Add(Item("&Open...", OpenFile, EditorKeys.Open));
         _recentFilesItem.DropDownOpening += (_, _) => FillRecentFiles();
         FillRecentFiles();
         file.DropDownItems.Add(_recentFilesItem);
         file.DropDownItems.Add(new ToolStripSeparator());
-        file.DropDownItems.Add(Item("&Save", () => Save(), BundleKeys.Save));
-        file.DropDownItems.Add(Item("Save &as...", () => SaveAs(), EditorKeys.SaveAs));
-        file.DropDownItems.Add(new ToolStripSeparator());
+        if (_app.ReadOnly)
+        {
+            file.DropDownItems.Add(Item("&Reload", ReloadCommand, EditorKeys.Reload));
+            file.DropDownItems.Add(new ToolStripSeparator());
+            _editItem = Item("&Edit in AxDown", OpenInEditor, EditorKeys.Edit);
+            file.DropDownItems.Add(_editItem);
+        }
+        else
+        {
+            file.DropDownItems.Add(Item("&Save", () => Save(), BundleKeys.Save));
+            file.DropDownItems.Add(Item("Save &as...", () => SaveAs(), EditorKeys.SaveAs));
+            file.DropDownItems.Add(new ToolStripSeparator());
+        }
+
         // Show current file in ▸ File Explorer and the other apps' windows on the file or its folder (AD-4.1).
         var showIn = new ToolStripMenuItem("Show current file &in");
         showIn.DropDownItems.Add(Item("File &Explorer", ShowInExplorer, EditorKeys.ShowInExplorer));
@@ -83,21 +106,26 @@ public sealed class TextEditorForm : AxitForm
         file.DropDownItems.Add(new ToolStripSeparator());
         file.DropDownItems.Add(new ToolStripMenuItem("E&xit", null, (_, _) => Close()) { ShortcutKeyDisplayString = "Alt+F4" });
 
-        var edit = new ToolStripMenuItem("&Edit");
-        edit.DropDownItems.Add(Item("&Undo", Undo, EditorKeys.Undo));
-        edit.DropDownItems.Add(Item("&Redo", Redo, EditorKeys.Redo));
-        edit.DropDownItems.Add(new ToolStripSeparator());
-        edit.DropDownItems.Add(new ToolStripMenuItem("Cu&t", null, (_, _) => _editor.Cut()) { ShortcutKeyDisplayString = "Ctrl+X" });
-        edit.DropDownItems.Add(new ToolStripMenuItem("&Copy", null, (_, _) => _editor.Copy()) { ShortcutKeyDisplayString = "Ctrl+C" });
-        edit.DropDownItems.Add(new ToolStripMenuItem("&Paste", null, (_, _) => _editor.Paste()) { ShortcutKeyDisplayString = "Ctrl+V" });
-        edit.DropDownItems.Add(new ToolStripMenuItem("Select &all", null, (_, _) => _editor.SelectAll()) { ShortcutKeyDisplayString = "Ctrl+A" });
-        if (_app.Commands.Count > 0)
+        // No Edit menu in the viewer (AP-3.1): the control's own Ctrl+A and Ctrl+C still work there.
+        ToolStripMenuItem? edit = null;
+        if (!_app.ReadOnly)
         {
-            // The app's own commands on the whole text (AJ-2.3), after the control's own.
+            edit = new ToolStripMenuItem("&Edit");
+            edit.DropDownItems.Add(Item("&Undo", Undo, EditorKeys.Undo));
+            edit.DropDownItems.Add(Item("&Redo", Redo, EditorKeys.Redo));
             edit.DropDownItems.Add(new ToolStripSeparator());
-            foreach (var command in _app.Commands)
+            edit.DropDownItems.Add(new ToolStripMenuItem("Cu&t", null, (_, _) => _editor.Cut()) { ShortcutKeyDisplayString = "Ctrl+X" });
+            edit.DropDownItems.Add(new ToolStripMenuItem("&Copy", null, (_, _) => _editor.Copy()) { ShortcutKeyDisplayString = "Ctrl+C" });
+            edit.DropDownItems.Add(new ToolStripMenuItem("&Paste", null, (_, _) => _editor.Paste()) { ShortcutKeyDisplayString = "Ctrl+V" });
+            edit.DropDownItems.Add(new ToolStripMenuItem("Select &all", null, (_, _) => _editor.SelectAll()) { ShortcutKeyDisplayString = "Ctrl+A" });
+            if (_app.Commands.Count > 0)
             {
-                edit.DropDownItems.Add(Item(command.Label, () => RunCommand(command), command.Key));
+                // The app's own commands on the whole text (AJ-2.3), after the control's own.
+                edit.DropDownItems.Add(new ToolStripSeparator());
+                foreach (var command in _app.Commands)
+                {
+                    edit.DropDownItems.Add(Item(command.Label, () => RunCommand(command), command.Key));
+                }
             }
         }
 
@@ -131,13 +159,22 @@ public sealed class TextEditorForm : AxitForm
         var help = CreateHelpMenu(_app.UserGuide, _app.ResourcesLabel, _app.Resources);
 
         // The bundle's Axit menu (AX-9) sits before Help in every window and ends with the update items and About.
-        _menu.Items.AddRange([file, edit, navigate, options, CreateAxitMenu(), help]);
+        _menu.Items.AddRange(edit is null ? [file, navigate, options, CreateAxitMenu(), help] : [file, edit, navigate, options, CreateAxitMenu(), help]);
         MainMenuStrip = _menu;
 
         // ---- the editor (AD-2) ----
         _editor.Multiline = true;
-        _editor.AcceptsTab = true;
+        // In the viewer Tab moves to the Go to line field while it shows; a read-only text has no tab character to type.
+        _editor.AcceptsTab = !_app.ReadOnly;
         _editor.AcceptsReturn = true;
+        if (_app.ReadOnly)
+        {
+            // A read-only edit control paints itself in the control colour unless told otherwise (AP-2.1).
+            _editor.ReadOnly = true;
+            _editor.BackColor = SystemColors.Window;
+            _editor.ForeColor = SystemColors.WindowText;
+        }
+
         _editor.WordWrap = _settings.WordWrap;
         _editor.ScrollBars = _settings.WordWrap ? ScrollBars.Vertical : ScrollBars.Both;
         _editor.HideSelection = false;
@@ -218,8 +255,9 @@ public sealed class TextEditorForm : AxitForm
 
     protected override IReadOnlyList<string> RestartArguments() => _path is null ? [_app.Verb] : [_app.Verb, _path];
 
-    protected override string UpdateRestartText =>
-        $"closes {_app.Name} (asking first when there are unsaved changes), installs it and starts it again on the same file";
+    protected override string UpdateRestartText => _app.ReadOnly
+        ? $"closes {_app.Name}, installs it and starts it again on the same file"
+        : $"closes {_app.Name} (asking first when there are unsaved changes), installs it and starts it again on the same file";
 
     protected override IEnumerable<string> DiagnosticsLines => [$"File: {_path ?? "(none)"} ({_document.EncodingName}, {_document.LineEndingName})"];
 
@@ -264,10 +302,64 @@ public sealed class TextEditorForm : AxitForm
         base.OnFormClosing(e);
     }
 
+    /// <summary>AP-1.2, AP-1.3: in the viewer, a start with a file while this window is open hands it here; the message is answered at once and the file loaded after, so that the starting process never waits on a read.</summary>
+    protected override void WndProc(ref Message m)
+    {
+        if (_app.ReadOnly && AppMessage.Receive(ref m) is { } message)
+        {
+            m.Result = 1;
+            if (message.Verb == AppMessage.Open && message.Paths.Count > 0)
+            {
+                var path = message.Paths[0];
+                BeginInvoke(() =>
+                {
+                    if (!IsDisposed)
+                    {
+                        LoadDocument(path);
+                    }
+                });
+            }
+
+            return;
+        }
+
+        base.WndProc(ref m);
+    }
+
     // ---- keys (AD-5): every key comes from BundleKeys, EditorKeys or the app's table, and is handled here only ----
 
     protected override bool ProcessWindowKey(Keys keyData)
     {
+        if (_app.ReadOnly)
+        {
+            // The viewer (AP-3.2): the shell's keys that write do nothing, Ctrl+N is a new window, and the viewer's own keys come first.
+            switch (keyData)
+            {
+                case BundleKeys.Save:
+                    Announce("Nothing to save here", true);
+                    return true;
+                case EditorKeys.NewDocument:
+                    NewWindow();
+                    return true;
+                case EditorKeys.Reload:
+                    ReloadCommand();
+                    return true;
+                case EditorKeys.Edit:
+                    OpenInEditor();
+                    return true;
+                case EditorKeys.LineNumber when _editor.Focused:
+                    // A plain letter: taken in the text only, so that the Go to line field still accepts it.
+                    var (line, _, lines) = Position();
+                    Announce($"Line {line} of {lines}", true);
+                    return true;
+                case EditorKeys.SaveAs:
+                case EditorKeys.Undo:
+                case EditorKeys.Redo:
+                case EditorKeys.RedoAlso:
+                    return false;
+            }
+        }
+
         switch (keyData)
         {
             case BundleKeys.NextControl:
@@ -369,9 +461,22 @@ public sealed class TextEditorForm : AxitForm
 
     // ---- the document (AD-3) ----
 
-    /// <summary>The file read into the editor, or an empty document; the history ends with it unless <paramref name="keepHistory"/> (a reload, AD-2.5).</summary>
+    /// <summary>The file read into the editor, or an empty document; the history ends with it unless <paramref name="keepHistory"/> (a reload, AD-2.5). A file the app refuses (the viewer's AP-2.2) is a notice, and the window keeps what it had.</summary>
     private void LoadDocument(string? path, bool keepHistory = false)
     {
+        if (_app.Refuse is { } refuse && path is not null && File.Exists(path) && refuse(path) is { } refusal)
+        {
+            if (Text.Length == 0)
+            {
+                // The first load, refused: the window still needs its title and status.
+                UpdateTitle();
+                UpdateStatus();
+            }
+
+            ShowNotice(refusal with { Unprompted = true });
+            return;
+        }
+
         if (_path is { } old && !string.Equals(old, path, StringComparison.OrdinalIgnoreCase))
         {
             // AX-9.4: the file left behind joins the bundle's Recently closed list.
@@ -481,6 +586,36 @@ public sealed class TextEditorForm : AxitForm
     }
 
     private void NewDocument() => AskToSave(() => LoadDocument(null));
+
+    /// <summary>The viewer's File → New window (Ctrl+N): another window of the app, empty, through the bundle's starter (AX-9); <c>--new</c> keeps it from handing over to this one.</summary>
+    private void NewWindow() => AxitMenu.StartWith(_app.Verb, ["--new"]);
+
+    /// <summary>The viewer's File → Reload (F5, AP-2.4): the file read again, the caret kept on its line and column, "Reloaded".</summary>
+    private void ReloadCommand()
+    {
+        if (_path is null)
+        {
+            Announce("No file yet", true);
+            return;
+        }
+
+        Reload("Reloaded");
+    }
+
+    /// <summary>The viewer's File → Edit in AxDown or AxJSON (Ctrl+E, AP-1.4): the file in its editor by its kind, a new editor window.</summary>
+    private void OpenInEditor()
+    {
+        if (_path is null)
+        {
+            Announce("No file yet", true);
+            return;
+        }
+
+        AxitMenu.Start(EditorVerb(_path), _path);
+    }
+
+    /// <summary>The editor for a file: AxJSON for .json, AxDown for anything else (docs/axfile/SPEC.md AF-1.3).</summary>
+    private static string EditorVerb(string path) => Path.GetExtension(path).Equals(".json", StringComparison.OrdinalIgnoreCase) ? Dispatch.AxJSON : Dispatch.AxDown;
 
     /// <summary>File → Open recent file (AD-4.1): the last ten files opened or saved under a name, from the settings; one that no longer exists is left out.</summary>
     private void FillRecentFiles() =>
@@ -802,6 +937,11 @@ public sealed class TextEditorForm : AxitForm
     {
         Text = (_changed ? "*" : string.Empty) + DocumentName + " - " + _app.Name;
         _editor.AccessibleName = DocumentName;
+        if (_editItem is not null)
+        {
+            // The viewer's way to the editor is named after the file's kind (AP-1.4).
+            _editItem.Text = _path is { } path && EditorVerb(path) == Dispatch.AxJSON ? "&Edit in AxJSON" : "&Edit in AxDown";
+        }
     }
 
     private void ScheduleStatus()

@@ -104,9 +104,9 @@ rather than a new one (AP-1.2). It works entirely offline (bundle G6).
 
 ### AP-3 Menus, keys, texts
 
-- AP-3.1 Menus (AX-6): **File (F):** Open… Ctrl+O | Open recent ▸ | ─ | Reload F5 | ─ | Edit in AxDown Ctrl+E (or
-  Edit in AxJSON, by the file) | Show current file in ▸ (File Explorer Ctrl+W | AxFile | AxGit | AxTerminal) | ─ |
-  Exit Alt+F4. **Navigate (N):** Find… Ctrl+F | Find next F3 | Find previous Shift+F3 | Go to line… Ctrl+G | ─ |
+- AP-3.1 Menus (AX-6): **File (F):** New window Ctrl+N | Open… Ctrl+O | Open recent ▸ | ─ | Reload F5 | ─ | Edit in
+  AxDown Ctrl+E (or Edit in AxJSON, by the file) | Show current file in ▸ (File Explorer Ctrl+W | AxGit | AxTerminal |
+  AxFile, the editors' order) | ─ | Exit Alt+F4. No Edit menu: the control's own Ctrl+A and Ctrl+C work as they do. **Navigate (N):** Find… Ctrl+F | Find next F3 | Find previous Shift+F3 | Go to line… Ctrl+G | ─ |
   Next ▸ | Previous ▸ (Heading, Heading level 1 to 6, Link, List, List item, Block quote, Table). **Options (O):**
   Text ▸ (Word wrap Ctrl+Shift+W | ─ | Font… | Larger text | Smaller text | Windows text size) | General ▸ (Check for
   updates at start ✓) | Developer ▸ (Open settings file | Copy diagnostics). **Axit (A)** (AX-9). **Help (H):**
@@ -132,8 +132,8 @@ text file", the size limit, Keyboard shortcuts, User guide, About, the update no
 
 ### AP-5 Settings, status bar, title, log
 
-- AP-5.1 `%APPDATA%\Axit\axpreview.json` (AX-5.3; `PreviewSettings` on `WindowSettings`): `wordWrap` on,
-  `recentFiles` (ten), and the window base's font, update check and window fields.
+- AP-5.1 `%APPDATA%\Axit\axpreview.json` (AX-5.3; the editors' `EditorSettings`, since the viewer is the editor shell,
+  AP-D4): `wordWrap` on, `recentFiles` (ten), and the window base's font, update check and window fields.
 - AP-5.2 The status bar: the file's name on the left; "Line n, Column m · encoding · line ending" on the right, 300 ms
   after the last key (AxDown AD-9). The title: "<name> - AxPreview", "Untitled - AxPreview" with no file.
 - AP-5.3 The log is `%LOCALAPPDATA%\Axit\logs\axpreview.log`: the start, the exit, the files that could not be read
@@ -181,9 +181,10 @@ Whether `PreviewForm` is better an `EditorApp` with a read-only flag is decided 
 - **AP-D3 Text first, whole.** The pane cut a file at a megabyte because it sat under a list; the viewer takes what
   the editors take, 32 MB, and the EDIT control copes as AxDown's does. Other kinds come when there is a way to read
   them that NVDA reads well (§9).
-- **AP-D4 Shared with the editors, not copied.** The viewer is the editor shell without editing; the build decides
-  whether `TextEditorForm` grows a read-only mode (an `EditorApp` field) or `PreviewForm` is its own small window on
-  the shared pieces, and takes the smaller change (B-10). Either way nothing is copied.
+- **AP-D4 Shared with the editors, not copied.** The viewer is the editor shell without editing; the build (2026-10-22)
+  gave `TextEditorForm` a read-only mode, two fields on `EditorApp` (`ReadOnly`, `Refuse`), rather than a second
+  window on the shared pieces: the smaller change (B-10), and the editors' reload on activation, Go to line, status
+  bar, word wrap, recent files, find and jumps come for nothing. Nothing is copied; AxDown and AxJSON are unchanged.
 - **AP-D5 The hand-over is a window message** (AxMedia's AM-D4), the same shared piece.
 
 ## 8. Testing
@@ -202,5 +203,9 @@ Whether `PreviewForm` is better an `EditorApp` with a read-only flag is decided 
 
 ## 10. Status
 
-- 2026-10-22: specified at the user's ask, with the inventory of the split in `docs/axit/axfile-split.md`; not
-  built.
+- 2026-10-22: specified at the user's ask, with the inventory of the split in `docs/axit/axfile-split.md`.
+- 2026-10-22, later the same day, on the branch `split`: built as the editor shell's read-only mode (AP-D4), with
+  `TextSniff` in `AxPreview.Core` (tested), the keys, the texts, the guide, the test plan and the wiring (the
+  dispatcher, the installer's block with Open with for the text kinds, the icon, `run-axpreview.ps1`); a file alone
+  on the command line still goes to its editor (AP-1.1). Not yet checked with NVDA; AxFile hands over in the next
+  step of the inventory and keeps its preview pane until then.

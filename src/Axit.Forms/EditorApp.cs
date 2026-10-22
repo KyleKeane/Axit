@@ -16,6 +16,8 @@ namespace Axit.Forms;
 /// <param name="ResourcesLabel">The Help submenu of pages about the file format, "Markdown &amp;resources".</param>
 /// <param name="Resources">Its items: a label with a mnemonic and the page it opens in the browser.</param>
 /// <param name="Commands">The app's own commands on the whole text, at the end of the Edit menu: AxJSON's Format.</param>
+/// <param name="ReadOnly">A viewer (AxPreview, docs/axpreview/SPEC.md AP-D4): the text is read-only, there is no Edit menu, no Save and no history; the File menu has Reload and Edit in the editor instead; the window keeps one instance and takes a file handed over by a start (<see cref="AppMessage"/>).</param>
+/// <param name="Refuse">For a viewer: the notice for a file that is not opened (not text, too large), or null when it opens; the window then keeps what it had (AP-2.2).</param>
 public sealed record EditorApp(
     string Name,
     string Verb,
@@ -27,7 +29,9 @@ public sealed record EditorApp(
     IReadOnlyList<TextJump> Jumps,
     string ResourcesLabel,
     IReadOnlyList<(string Label, string Url)> Resources,
-    IReadOnlyList<EditorCommand> Commands);
+    IReadOnlyList<EditorCommand> Commands,
+    bool ReadOnly = false,
+    Func<string, Notice?>? Refuse = null);
 
 /// <summary>A command of an editor app on the whole text (AJ-2.3): its menu label with a mnemonic, its key from the app's table, and the function that rewrites the text.</summary>
 public sealed record EditorCommand(string Label, Keys Key, Func<string, Rewrite> Run);

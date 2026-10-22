@@ -9,11 +9,12 @@
     - a Start menu entry per app, "Axit AxClaude", "Axit AxDown" and so on (type axit in the Start menu to list them),
     - one submenu in File Explorer's right-click menu, "Open with Axit", on folders (and on a folder's background) and
       on files, listing the apps that open what was right-clicked: AxClaude, AxGit, AxTerminal and AxFile on folders,
-      AxDown and AxFile on every file, AxJSON on .json files, AxMedia on sound and video files; and AxDown under
-      Windows' own "Open with" for .md, .markdown and .txt, AxJSON for .json, AxMedia for the sound and video kinds,
-      so that the user can make an app the default program for a kind in Settings, Default apps,
-    - the console commands axclaude, axdown, axjson, axgit, axterminal, axfile, axmedia and axit (a folder opens
-      AxClaude, a file AxDown, a .json file AxJSON, a sound or video file AxMedia): one-line shims in
+      AxDown, AxFile and AxPreview on every file, AxJSON on .json files, AxMedia on sound and video files; and AxDown
+      under Windows' own "Open with" for .md, .markdown and .txt, AxJSON for .json, AxMedia for the sound and video
+      kinds, AxPreview for .txt, .md, .markdown, .log and .json, so that the user can make an app the default program
+      for a kind in Settings, Default apps,
+    - the console commands axclaude, axdown, axjson, axgit, axterminal, axfile, axmedia, axpreview and axit (a folder
+      opens AxClaude, a file AxDown, a .json file AxJSON, a sound or video file AxMedia): one-line shims in
       %USERPROFILE%\.local\bin, the folder that Claude Code's installer already puts on PATH.
   It also lists Axit in Settings, Apps (Add or remove programs), whose Uninstall runs install.cmd -Uninstall.
   -Uninstall removes all of that. The settings in %APPDATA%\Axit and the logs in %LOCALAPPDATA%\Axit stay.
@@ -101,7 +102,8 @@ $apps = @(
     @{ Name = 'AxGit'; Verb = 'git'; Description = 'AxGit, a git manager for one repository'; Icon = (Join-Path $target 'AxGit.ico'); Opens = 'folders' },
     @{ Name = 'AxTerminal'; Verb = 'terminal'; Description = 'AxTerminal, a shell as a transcript'; Icon = (Join-Path $target 'AxTerminal.ico'); Opens = 'folders' },
     @{ Name = 'AxFile'; Verb = 'file'; Description = 'AxFile, a file manager for one folder, with a player'; Icon = (Join-Path $target 'AxFile.ico'); Opens = 'folders', 'files' },
-    @{ Name = 'AxMedia'; Verb = 'media'; Description = 'AxMedia, a player for sound and video files'; Icon = (Join-Path $target 'AxMedia.ico'); Opens = 'files'; Types = $mediaTypes; OpenWith = $mediaTypes; TypeName = 'Media file (AxMedia)' }
+    @{ Name = 'AxMedia'; Verb = 'media'; Description = 'AxMedia, a player for sound and video files'; Icon = (Join-Path $target 'AxMedia.ico'); Opens = 'files'; Types = $mediaTypes; OpenWith = $mediaTypes; TypeName = 'Media file (AxMedia)' },
+    @{ Name = 'AxPreview'; Verb = 'preview'; Description = 'AxPreview, a read-only viewer for text files'; Icon = (Join-Path $target 'AxPreview.ico'); Opens = 'files'; OpenWith = '.txt', '.md', '.markdown', '.log', '.json'; TypeName = 'Text file (AxPreview)' }
 )
 # The places that follow from the name.
 foreach ($app in $apps) {

@@ -20,6 +20,7 @@ public sealed class KeyTests
             ["AxTerminal"] = AxTerminal.AxTerminalKeys.All,
             ["AxFile"] = AxFile.AxFileKeys.All,
             ["AxMedia"] = AxMedia.AxMediaKeys.All,
+            ["AxPreview"] = AxPreview.AxPreviewKeys.All,
         };
 
     [Fact]
@@ -74,6 +75,7 @@ public sealed class KeyTests
             ["AxTerminal"] = AxTerminal.HelpText.Shortcuts,
             ["AxFile"] = AxFile.HelpText.Shortcuts,
             ["AxMedia"] = AxMedia.HelpText.Shortcuts,
+            ["AxPreview"] = AxPreview.HelpText.Shortcuts,
         };
         var missing = new List<string>();
         foreach (var (window, keys) in Windows)

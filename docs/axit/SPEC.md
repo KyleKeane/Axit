@@ -63,12 +63,17 @@ allow it, see B-9).
   player AxFile carried until the split (`docs/axit/axfile-split.md`); a start with paths hands them to the open
   AxMedia window (`AppMessage`). Specification `docs/axmedia/SPEC.md`, guide `docs/axmedia/user-guide.md`, test plan
   `docs/axmedia/nvda-test-plan.md`.
+- **AxPreview** (2026-10-22): `Axit.exe preview [<file>] [--new]`, Start entry `Axit AxPreview`, Open with Axit on
+  every file and Open with for `.txt`, `.md`, `.markdown`, `.log`, `.json`, command `axpreview`. A read-only viewer for
+  one text file: the text editor shell in its read-only mode, with AxDown's navigation keys; a start with a file
+  hands it to the open AxPreview window. Specification `docs/axpreview/SPEC.md`, guide `docs/axpreview/user-guide.md`,
+  test plan `docs/axpreview/nvda-test-plan.md`.
 
 ## 4. Functional requirements
 
 ### AX-1 Launch and dispatch
 
-- AX-1.1 The first argument may be a verb naming an app: `claude`, `down`, `json`, `git`, `terminal`, `file`, `media`. The rest of the arguments go to that app
+- AX-1.1 The first argument may be a verb naming an app: `claude`, `down`, `json`, `git`, `terminal`, `file`, `media`, `preview`. The rest of the arguments go to that app
   unchanged, so `Axit.exe claude C:\src --record x.vt` is what `AxClaude.exe C:\src --record x.vt` was.
 - AX-1.2 Without a verb, a first argument that is an existing folder goes to AxClaude and an existing file to AxDown,
   or to AxJSON when its extension is `.json`, or to AxMedia when it is a sound or video file (`MediaFiles.IsMedia`),
@@ -80,7 +85,7 @@ allow it, see B-9).
   usage text.
 - AX-1.5 The dispatch is pure code in `Axit.Core` (`Dispatch`): arguments in, app name and arguments out. It is unit
   tested and has no knowledge of the apps beyond their names.
-- AX-1.6 Each process sets a Windows application id before its window opens (`Axit.AxClaude`, `Axit.AxDown`, `Axit.AxJSON`, `Axit.AxGit`, `Axit.AxTerminal`, `Axit.AxFile`, `Axit.AxMedia`), so the
+- AX-1.6 Each process sets a Windows application id before its window opens (`Axit.AxClaude`, `Axit.AxDown`, `Axit.AxJSON`, `Axit.AxGit`, `Axit.AxTerminal`, `Axit.AxFile`, `Axit.AxMedia`, `Axit.AxPreview`), so the
   taskbar shows the apps apart and Win+number keys reach the right one.
 - AX-1.7 An app is a class library with one entry point, `static void Run(string[] args)` on a class named
   `<App>App`, plus a `Usage` text. `Axit`'s `Program` only dispatches; the entry point is one call into
@@ -116,11 +121,12 @@ allow it, see B-9).
   | AxTerminal | yes | | |
   | AxFile | yes | every file (its folder, the file selected) | |
   | AxMedia | | the sound and video kinds (`MediaFiles.Extensions`, listed again in the block) | the same kinds (`Axit.AxMedia`) |
+  | AxPreview | | every file | `.txt`, `.md`, `.markdown`, `.log`, `.json` (`Axit.AxPreview`) |
 
   On Windows 11 the submenu is in the full menu (Shift+F10, or Show more options), as every program's own entries
   are. Up to 2.13.0 each app had an entry of its own (`Open in AxClaude` and the like); the installer removes them.
 - AX-2.4 Console commands: `axit.cmd` and one `<app>.cmd` per app (`axclaude.cmd`, `axdown.cmd`, `axjson.cmd`,
-  `axgit.cmd`, `axterminal.cmd`, `axfile.cmd`, `axmedia.cmd`) in `%USERPROFILE%\.local\bin`, one line each, passing their arguments to `Axit.exe`
+  `axgit.cmd`, `axterminal.cmd`, `axfile.cmd`, `axmedia.cmd`, `axpreview.cmd`) in `%USERPROFILE%\.local\bin`, one line each, passing their arguments to `Axit.exe`
   and `Axit.exe <verb>`. They work from cmd and from PowerShell.
 - AX-2.5 Settings, Apps lists one entry, `Axit`, with the version, the publisher and an Uninstall that runs
   `install.cmd -Uninstall`.
@@ -210,9 +216,11 @@ allow it, see B-9).
   and the text editor shell: `TextEditorForm` (the window every text editor app is: the file, the menus, find, go to
   line, the status bar, the notices, the fonts, the update flow; AxDown's `EditorForm` until AxJSON, the second
   editor), `EditorApp` (what differs between the editor apps, as data: name, verb, settings file, file types, F1 text,
-  guide, the `TextJump` pairs of its outline, its resources pages and its commands on the text), `EditorKeys` (the
-  shell's keys, the same in every editor window) and `EditorHost` (the entry point every editor app's `Run` is one
-  call into); `AppHost` (every app's entry point, AX-1.7); and `AxitForm`, the window base (AX-6.5).
+  guide, the `TextJump` pairs of its outline, its resources pages and its commands on the text; `ReadOnly` and
+  `Refuse` make the shell a viewer, AxPreview, docs/axpreview/SPEC.md AP-D4, 2026-10-22: no Edit menu, no Save and
+  no history, Reload and Edit in the editor in the File menu, `l` for the line, the hand-over of a file received),
+  `EditorKeys` (the shell's keys, the same in every editor window, and `Viewer`, the read-only set) and `EditorHost`
+  (the entry point every editor app's `Run` is one call into); `AppHost` (every app's entry point, AX-1.7); and `AxitForm`, the window base (AX-6.5).
 - AX-6.3 A piece moves into a shared project only when a second app needs it, in a commit of its own, with the
   accessibility review; it moves unchanged where possible (B-3).
 - AX-6.4 The notices and the question area are the bundle's one way of asking the user something, so that every
@@ -253,7 +261,7 @@ allow it, see B-9).
   Ctrl+Shift+Down the selection grown to there, as in Word (`EditParagraphs`; the EDIT control's own keys scroll a
   row and leave the caret where it is, as Notepad's do, which a screen reader, reading at the caret after the key,
   reports as the same text again); Alt+F4 exit; Alt and F10 the menu. Everything else is window-specific.
-- AX-8.3 Window-specific keys are defined once per window, in one table (`AxClaudeKeys`, `AxDownKeys`, `AxJSONKeys`, `AxGitKeys`, `AxTerminalKeys`, `AxFileKeys`, `AxMediaKeys`), as constants
+- AX-8.3 Window-specific keys are defined once per window, in one table (`AxClaudeKeys`, `AxDownKeys`, `AxJSONKeys`, `AxGitKeys`, `AxTerminalKeys`, `AxFileKeys`, `AxMediaKeys`, `AxPreviewKeys`), as constants
   with names that say what the key does. Changing a key is a change to that one line: the menu item and the key
   handler read the table, and the F1 text names the same keys and is changed with it. Single-letter quick keys
   (AxClaude's `h`, `i`, `o`) are in the table too. The text editor shell's keys (`Axit.Forms/EditorKeys`: Ctrl+N new,
@@ -379,7 +387,10 @@ src/AxFile.Core/     class library (net10.0): FolderListing, FileOperations, Arc
 src/AxMedia/         class library (net10.0-windows): AxMediaApp, MediaForm, AxMediaKeys, HelpText (AxMedia's window)
 src/AxMedia.Core/    class library (net10.0): MediaPlayer, PlayQueue, MediaFolder, MediaSettings (AxMedia's pure code
                      and its one seam to Windows' media stack); MediaFiles and NaturalOrder are Axit.Core's
-tests/Axit.Tests, tests/AxClaude.Tests, tests/AxJSON.Tests, tests/AxGit.Tests, tests/AxTerminal.Tests, tests/AxFile.Tests, tests/AxMedia.Tests
+src/AxPreview/       class library (net10.0-windows): AxPreviewApp (its EditorApp, read-only), AxPreviewKeys, HelpText;
+                     the window is the shell's
+src/AxPreview.Core/  class library (net10.0): TextSniff (whether a file reads as text; AxPreview's pure code)
+tests/Axit.Tests, tests/AxClaude.Tests, tests/AxJSON.Tests, tests/AxGit.Tests, tests/AxTerminal.Tests, tests/AxFile.Tests, tests/AxMedia.Tests, tests/AxPreview.Tests
 ```
 
 References point one way: `Axit` references every app; an app's window project references its own `.Core`,
