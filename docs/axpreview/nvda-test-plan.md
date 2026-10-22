@@ -1,5 +1,7 @@
 # AxPreview NVDA test plan
 
+The files for this plan are in `manual_tests/axpreview`, made and reset by `.\manual_tests\prepare.ps1 axpreview`; its `_main.md` says which folder or file each section uses.
+
 Run with NVDA before a release, on a folder with `README.md` (headings, links, a list), `plain.txt`, `app.log`, a `.json` file, an `.exe` or `.mp3`, and a file over 32 MB, after `run-axpreview.ps1 C:\path\to\README.md` (or `.\run.ps1 -App preview <file>`) and from AxFile on the same folder. Every step says what NVDA should read; a step that reads differently is a defect. The specification is `docs/axpreview/SPEC.md` (AP-n.m).
 
 ## 1. Start and the text (AP-1, AP-2)

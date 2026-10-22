@@ -1,5 +1,7 @@
 # AxDown NVDA test plan
 
+The files for this plan are in `manual_tests/axdown`, made and reset by `.\manual_tests\prepare.ps1 axdown`; its `_main.md` says which folder or file each section uses.
+
 Manual checks with NVDA running, against `docs/axdown/SPEC.md`. Run the sections a change touches before a release;
 run all of them before a release that changes the window. Prepare a folder with `plain.txt` (UTF-8, no
 mark, CRLF), `bom.md` (UTF-8 with a mark, LF), `wide.txt` (UTF-16 LE), `ansi.txt` (Windows-1252 with an accented

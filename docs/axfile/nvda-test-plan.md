@@ -1,5 +1,7 @@
 # AxFile NVDA test plan
 
+The files for this plan are in `manual_tests/axfile`, made and reset by `.\manual_tests\prepare.ps1 axfile`; its `_main.md` says which folder or file each section uses.
+
 Run with NVDA before a release, on a folder with a few subfolders, text files and sound files (a folder of MP3 chapters, and one `.json` and one `.md`), after `run-axfile.ps1 C:\path\to\folder` (or `.\run.ps1 -App file <folder>`). Every step says what NVDA should read; a step that reads differently is a defect. The specification is `docs/axfile/SPEC.md` (AF-n.m). The player's and the viewer's own checks are `docs/axmedia/nvda-test-plan.md` and `docs/axpreview/nvda-test-plan.md`; section 4 here covers the hand-overs from AxFile.
 
 ## 1. Start and the list (AF-1, AF-2, AF-3)

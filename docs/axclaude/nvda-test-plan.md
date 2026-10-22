@@ -1,5 +1,7 @@
 # NVDA manual test plan
 
+The files for this plan are in `manual_tests/axclaude`, made and reset by `.\manual_tests\prepare.ps1 axclaude`; its `_main.md` says which folder or file each section uses.
+
 Start NVDA before the app. Use the default NVDA settings unless a step says otherwise. Note the app build, the Claude Code version (`claude --version`) and the NVDA version at the top of each run.
 
 Each step says what to do and what NVDA must say or do. A step fails if NVDA says nothing, says the wrong thing, or the caret ends up somewhere else.

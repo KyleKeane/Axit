@@ -1,0 +1,8 @@
+# Everything here is made by prepare.ps1 and changed by the tests; only the instructions and the script are kept.
+/*
+!/.gitignore
+!/prepare.ps1
+!/_main.md
+!/*/
+/*/*
+!/*/_main.md

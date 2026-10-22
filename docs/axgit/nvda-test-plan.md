@@ -1,5 +1,7 @@
 # AxGit NVDA test plan
 
+The files for this plan are in `manual_tests/axgit`, made and reset by `.\manual_tests\prepare.ps1 axgit`; its `_main.md` says which folder or file each section uses.
+
 Run with NVDA before a release, on a repository with a remote (the Axit repository itself does), after `run-axgit.ps1 C:\path\to\repo` (or `.\run.ps1 -App git <repo>`). Make a scratch change first: edit a file, create a new one. Every step says what NVDA should read; a step that reads differently is a defect. The specification is `docs/axgit/SPEC.md` (AG-n.m).
 
 ## 1. Start (AG-1, AG-2)

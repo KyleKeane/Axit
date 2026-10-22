@@ -1,5 +1,7 @@
 # AxTerminal NVDA test plan
 
+The files for this plan are in `manual_tests/axterminal`, made and reset by `.\manual_tests\prepare.ps1 axterminal`; its `_main.md` says which folder or file each section uses.
+
 Manual checks with NVDA running, before a release that changes AxTerminal (`docs/axterminal/SPEC.md`). Each line is what to do and what must be heard.
 
 ## 1. Start (AT-1, AT-2)

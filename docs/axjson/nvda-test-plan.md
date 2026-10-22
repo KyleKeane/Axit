@@ -1,5 +1,7 @@
 # AxJSON NVDA test plan
 
+The files for this plan are in `manual_tests/axjson`, made and reset by `.\manual_tests\prepare.ps1 axjson`; its `_main.md` says which folder or file each section uses.
+
 Manual checks with NVDA running, against `docs/axjson/SPEC.md`. AxJSON is the editor shell AxDown is, so
 `docs/axdown/nvda-test-plan.md` sections 1 to 7 (start, reading and writing, files, find and go to line, text size,
 menus, updates) apply as they are, with "AxJSON" for "AxDown" and `settings.json` for the files; run them once on
