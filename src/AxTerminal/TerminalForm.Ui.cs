@@ -20,7 +20,7 @@ internal sealed partial class TerminalForm
         // export, Exit.
         var session = new ToolStripMenuItem("&Session");
         session.DropDownItems.Add(Item("&New session...", NewSession, AxTerminalKeys.NewSession));
-        _recentFoldersItem.DropDownOpening += (_, _) => FillRecentFolders();
+        CommandPalette.FilledOnOpening(_recentFoldersItem).DropDownOpening += (_, _) => FillRecentFolders();
         FillRecentFolders();
         session.DropDownItems.Add(_recentFoldersItem);
         // AT-1.6: the shell changed in place, the current one checked when the submenu opens.

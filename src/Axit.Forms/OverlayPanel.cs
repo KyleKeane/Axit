@@ -14,9 +14,11 @@ public sealed record OverlayChoice(string Text, Action? Action = null, bool IsDe
 /// A text field on a notice (Find): its label, its accessible name, the initial
 /// text, and, when <paramref name="Required"/>, what to say when the default button is pressed while the field is
 /// empty (the notice then stays open). <paramref name="KeyHook"/>, when given, is asked about each key in the field
-/// first and takes it by returning true (AxFile's path completion on Down, Up and Right).
+/// first and takes it by returning true (AxFile's path completion on Down, Up and Right). <paramref name="Changed"/> is
+/// called on each change of the text, and <paramref name="ListName"/>, when given, shows a list under the field that
+/// never takes the focus, filled by the window with <see cref="OverlayPanel.SetMatches"/> (the command palette, AX-10).
 /// </summary>
-public sealed record OverlayInput(string Label, string AccessibleName, string Initial, string EmptyMessage, bool Required = true, Func<Keys, bool>? KeyHook = null);
+public sealed record OverlayInput(string Label, string AccessibleName, string Initial, string EmptyMessage, bool Required = true, Func<Keys, bool>? KeyHook = null, Action? Changed = null, string? ListName = null);
 
 /// <summary>A recommended way to start Claude in the New session notice (FR-8.6): the radio button's text and the arguments it stands for.</summary>
 public sealed record OverlayPreset(string Text, IReadOnlyList<string> Arguments);
@@ -102,6 +104,7 @@ public sealed class OverlayPanel : Panel
     private readonly List<RadioButton> _presets = [];
     private readonly FlowLayoutPanel _buttons = new();
     private readonly ProgressBar _progress = new();
+    private readonly ListBox _matches = new();
     private OverlayInput? _inputSpec;
     private OverlaySession? _sessionSpec;
     private long _holdUntil;
@@ -145,6 +148,15 @@ public sealed class OverlayPanel : Panel
         _inputRow.Controls.Add(_input);
         _inputRow.SizeChanged += (_, _) => LayoutInput();
         _input.KeyDown += OnInputKeyDown;
+        _input.TextChanged += (_, _) => _inputSpec?.Changed?.Invoke();
+
+        // The matches under the field (OverlayInput.ListName): for the eyes and NVDA's object navigation, never the
+        // focus, as AxStart's list (AS-D2); the field's keys move the selection.
+        _matches.Dock = DockStyle.Fill;
+        _matches.IntegralHeight = false;
+        _matches.TabStop = false;
+        _matches.Visible = false;
+        _matches.GotFocus += (_, _) => _input.Focus();
 
         // The New session controls (FR-8.6), top to bottom under the text: the Choose folder button, the presets
         // in a named group (arrow keys move between them, Tab lands on the selected one), the Custom field.
@@ -219,7 +231,7 @@ public sealed class OverlayPanel : Panel
         // the progress bar the strip above them, the title the top, the field the strip under the title, then the
         // text takes what is left, or, in a New session notice, a strip of a few lines with the session controls
         // filling the rest under it.
-        Controls.AddRange([_session, _text, _inputRow, _title, _progress, _buttons]);
+        Controls.AddRange([_matches, _session, _text, _inputRow, _title, _progress, _buttons]);
     }
 
     /// <summary>A button was pressed. The window closes the notice (unless the choice stays open) and runs its action.</summary>
@@ -252,6 +264,26 @@ public sealed class OverlayPanel : Panel
         _input.Select(text.Length, 0);
     }
 
+    /// <summary>The list under the field (OverlayInput.ListName) filled anew, named "Commands, 3", the first line selected.</summary>
+    public void SetMatches(IReadOnlyList<string> lines, string name)
+    {
+        _matches.BeginUpdate();
+        _matches.Items.Clear();
+        _matches.Items.AddRange(lines.Select(line => (object)line).ToArray());
+        _matches.EndUpdate();
+        _matches.AccessibleName = name;
+        _matches.SelectedIndex = lines.Count > 0 ? 0 : -1;
+    }
+
+    /// <summary>The selected line of the list under the field.</summary>
+    public int MatchIndex => _matches.SelectedIndex;
+
+    /// <summary>Selects a line of the list under the field.</summary>
+    public void SelectMatch(int index) => _matches.SelectedIndex = index;
+
+    /// <summary>The lines the list shows at once, for Page Up and Page Down.</summary>
+    public int MatchPage => Math.Max(1, _matches.ClientSize.Height / Math.Max(1, _matches.ItemHeight));
+
     /// <summary>The folder shown in the New session notice; null while none is chosen.</summary>
     public string? SessionFolder => _sessionFolder;
 
@@ -272,6 +304,7 @@ public sealed class OverlayPanel : Panel
     public void SetTextFont(Font font)
     {
         _text.Font = font;
+        _matches.Font = font;
         if (_sessionSpec is not null)
         {
             _text.Height = TextStripHeight();
@@ -304,11 +337,20 @@ public sealed class OverlayPanel : Panel
             _text.Height = TextStripHeight();
             FillSession(session);
         }
+        else if (input?.ListName is not null)
+        {
+            // The key line in a strip under the field, the list filling the rest.
+            _text.Dock = DockStyle.Top;
+            _text.Height = _text.Font.Height * 2 + 10;
+        }
         else
         {
             _text.Dock = DockStyle.Fill;
         }
 
+        _matches.Visible = input?.ListName is not null;
+        _matches.AccessibleName = input?.ListName ?? string.Empty;
+        _matches.Items.Clear();
         SetText();
         _progress.Visible = notice.Progress;
         if (notice.Progress)

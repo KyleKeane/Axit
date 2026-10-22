@@ -44,16 +44,16 @@ public sealed partial class FileForm : AxitForm
         var folder = new ToolStripMenuItem("&Folder");
         folder.DropDownItems.Add(Item("&New window", NewWindow, AxFileKeys.NewWindow));
         folder.DropDownItems.Add(Item("&Open folder...", OpenFolderDialog, AxFileKeys.OpenFolder));
-        _recentItem.DropDownOpening += (_, _) => FillRecent();
+        CommandPalette.FilledOnOpening(_recentItem).DropDownOpening += (_, _) => FillRecent();
         FillRecent();
         folder.DropDownItems.Add(_recentItem);
         // AF-3.9: the pinned folders, refilled when the submenu opens, with the key's item under them.
-        _favoritesItem.DropDownOpening += (_, _) => FillFavorites();
+        CommandPalette.FilledOnOpening(_favoritesItem).DropDownOpening += (_, _) => FillFavorites();
         FillFavorites();
         folder.DropDownItems.Add(_favoritesItem);
         // Drives (AF-3.11): the drives to go to, This PC, and the drive's own Eject and Properties; refilled when it
         // opens, since a stick may have come or gone. A submenu here since 2026-10-22, freeing Alt+D for Go to folder.
-        _drivesMenu.DropDownOpening += (_, _) => FillDrives();
+        CommandPalette.FilledOnOpening(_drivesMenu).DropDownOpening += (_, _) => FillDrives();
         FillDrives();
         folder.DropDownItems.Add(_drivesMenu);
         folder.DropDownItems.Add(Item("&Go to folder...", GoToFolder, AxFileKeys.GoToFolder));
@@ -202,7 +202,7 @@ public sealed partial class FileForm : AxitForm
     {
         items.Add(Item("&Open", OpenSelected, AxFileKeys.Open));
         var openWith = new ToolStripMenuItem("Open &with");
-        openWith.DropDownOpening += (_, _) => FillOpenWith(openWith);
+        CommandPalette.FilledOnOpening(openWith).DropDownOpening += (_, _) => FillOpenWith(openWith);
         FillOpenWith(openWith);
         items.Add(openWith);
         var axit = new ToolStripMenuItem("Open in &Axit");

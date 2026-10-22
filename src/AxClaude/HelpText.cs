@@ -28,6 +28,7 @@ public static class HelpText
           Ctrl+Q: read Claude's question or screen again while it waits at the bottom, all its lines and the answer the focus is on, without moving
           Ctrl+Plus, Ctrl+Minus: bigger or smaller text
           F1: this list
+          Ctrl+Shift+P: the command palette: type part of a command's name, Down and Up through the matches, Enter runs it
           Alt+A: the Axit menu: a new AxClaude or AxDown window, the files and folders closed lately, the open Axit windows, most recent first (Alt+A, O, 1 is the one you were in last) and by type, Close all windows, Check for updates, and About
           Alt+F4: close AxClaude (asks first while Claude is working)
 

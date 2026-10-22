@@ -96,6 +96,14 @@ letter), and a `long.md` with headings and lines longer than the window.
 5. Options, General, Check for updates at start: read as checked; Enter unchecks it. Options, Developer, Copy diagnostics: "Copied diagnostics"; Options, Developer, Open settings file: a new AxJSON
    window on `axdown.json`. Help, Markdown resources, Markdown basics: the browser opens commonmark.org; GitHub
    Flavored Markdown opens its page.
+6. The command palette (bundle AX-10), with the caret in the middle of a line. Ctrl+Shift+P: "Command palette",
+   the field "Search commands"; Down: "Undo, Edit, Ctrl+Z, 2 of …" or the like, each Down the next command with its
+   menu and key, Up back; Ctrl+Home at the first match plays the low note and says nothing. Type `wrap`: after a
+   moment "Word wrap, …, 1 of 1"; Enter: the palette closes, NVDA is back in the editor at the same place, and
+   "Word wrap, checked" (or "not checked") is said; Options shows the item changed. Ctrl+Shift+P, type `xyz`:
+   "No commands match xyz"; Enter says it again and the palette stays; Escape: back in the editor, nothing run.
+   Ctrl+Shift+P, `save as`, Enter: the Save as picker opens. Help, Command palette opens it too. Recent files and the
+   Axit menu's window lists are not in it; Alt+A, New window, AxDown is ("AxDown, Axit, New window").
 
 ## 7. Updates and uninstall
 

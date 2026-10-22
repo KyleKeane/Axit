@@ -25,6 +25,11 @@ public abstract class AxitForm : Form
     private string _latestState = "not checked yet";
     private ReleaseInfo? _update;
     private bool _updateBusy;
+    private IReadOnlyList<PaletteEntry> _paletteAll = [];
+    private IReadOnlyList<PaletteEntry> _paletteShown = [];
+
+    /// <summary>The pause after typing in the palette before its first match is said (AX-10.4, AxStart's 300 ms).</summary>
+    private readonly System.Windows.Forms.Timer _paletteSpeak = new() { Interval = 300 };
 
     /// <summary>After Update and restart: how the installed new version is started when this window closes; null when nothing is to start.</summary>
     private string[]? _restartArguments;
@@ -41,6 +46,7 @@ public abstract class AxitForm : Form
         Size = new Size(900, 600);
         StartPosition = FormStartPosition.WindowsDefaultLocation;
         Overlay.Chosen += OnNoticeChoice;
+        _paletteSpeak.Tick += (_, _) => SayFirstPaletteMatch();
         _checkItem.Click += (_, _) => CheckForUpdates(manual: true);
         _updateItem.Click += (_, _) =>
         {
@@ -117,6 +123,9 @@ public abstract class AxitForm : Form
     /// <summary>The window's own lines of Copy diagnostics, after the version line.</summary>
     protected virtual IEnumerable<string> DiagnosticsLines => [];
 
+    /// <summary>The window's own entries of the command palette, after the menus' commands (AX-10.5): AxFile's folder entries; none by default.</summary>
+    protected virtual IEnumerable<PaletteEntry> PaletteEntries() => [];
+
     /// <summary>The window's own keys, from its table; true when the key was handled. Called when no notice shows and after the common keys.</summary>
     protected virtual bool ProcessWindowKey(Keys keyData) => false;
 
@@ -190,6 +199,7 @@ public abstract class AxitForm : Form
     protected ToolStripMenuItem CreateHelpMenu(Func<string> userGuide, string resourcesLabel, IEnumerable<(string Label, string Url)> pages)
     {
         var help = new ToolStripMenuItem("&Help");
+        help.DropDownItems.Add(Item("Command &palette...", ShowCommandPalette, BundleKeys.CommandPalette));
         help.DropDownItems.Add(Item("&Keyboard shortcuts", () => ShowNotice(Notice.Plain("Keyboard shortcuts", Shortcuts)), BundleKeys.Shortcuts));
         help.DropDownItems.Add(new ToolStripMenuItem("User &guide", null, (_, _) => ShowNotice(Notice.Plain("User guide", userGuide()))));
         help.DropDownItems.Add(new ToolStripSeparator());
@@ -285,6 +295,12 @@ public abstract class AxitForm : Form
             return base.ProcessCmdKey(ref msg, keyData);
         }
 
+        if (keyData == BundleKeys.CommandPalette)
+        {
+            ShowCommandPalette();
+            return true;
+        }
+
         return ProcessWindowKey(keyData) || base.ProcessCmdKey(ref msg, keyData);
     }
 
@@ -301,6 +317,7 @@ public abstract class AxitForm : Form
     /// </summary>
     protected void ShowNotice(Notice notice)
     {
+        _paletteSpeak.Stop();
         if (notice.Unprompted && NoticeChime)
         {
             Sounds.Notice();
@@ -347,6 +364,7 @@ public abstract class AxitForm : Form
             return;
         }
 
+        _paletteSpeak.Stop();
         var focusBefore = _focusBeforeNotice;
         NoticeOpen = false;
         ShowAfterNotice();
@@ -510,6 +528,126 @@ public abstract class AxitForm : Form
     private static Font SystemTextFont() => SystemFonts.MessageBoxFont ?? DefaultFont;
 
     /// <summary>The text font from the settings: the Windows font unless a family, a size or bold is set.</summary>
+    // ---- the command palette (AX-10): the window's menu commands by name, in a notice ----
+
+    /// <summary>
+    /// The palette as a notice: one field, the matches under it, Enter runs the selected one with the focus back
+    /// where it was, Escape closes (AX-10.1, AX-10.4). The entries are read from the menu bar now, before the notice
+    /// disables it, so that what the palette offers is what the menus offer at this moment.
+    /// </summary>
+    protected void ShowCommandPalette()
+    {
+        if (NoticeOpen)
+        {
+            return;
+        }
+
+        var before = FocusedControl();
+        _paletteAll = [.. CommandPalette.Commands(MainMenuStrip, text => Announce(text, true)), .. PaletteEntries()];
+        _paletteShown = _paletteAll;
+        ShowNotice(new Notice("Command palette", string.Empty,
+        [
+            new OverlayChoice("&Run", RunPaletteEntry, IsDefault: true, StaysOpen: true),
+            new OverlayChoice("&Close", IsCancel: true),
+        ])
+        {
+            Input = new OverlayInput("&Search commands:", "Search commands", string.Empty, string.Empty, Required: false,
+                KeyHook: OnPaletteKey, Changed: OnPaletteTyped, ListName: "Commands"),
+        });
+        // The control the user was in gets the focus back, unless the window keeps a place of its own.
+        _focusBeforeNotice ??= before;
+        FillPalette();
+    }
+
+    /// <summary>The innermost control with the focus, outside the notice.</summary>
+    private Control? FocusedControl()
+    {
+        var control = ActiveControl;
+        while (control is ContainerControl { ActiveControl: { } inner })
+        {
+            control = inner;
+        }
+
+        return control is null || Overlay.Contains(control) ? null : control;
+    }
+
+    private void OnPaletteTyped()
+    {
+        _paletteSpeak.Stop();
+        FillPalette();
+        if (Overlay.InputText.Trim().Length > 0)
+        {
+            _paletteSpeak.Start();
+        }
+    }
+
+    private void FillPalette()
+    {
+        _paletteShown = Palette.Find(_paletteAll, Overlay.InputText);
+        var lines = _paletteShown.Count > 0 ? _paletteShown.Select(entry => entry.Text).ToList() : [Palette.NoMatch(Overlay.InputText)];
+        Overlay.SetMatches(lines, $"Commands, {_paletteShown.Count}");
+    }
+
+    /// <summary>The first match and the count after the typing paused, or that nothing matches (AX-10.4).</summary>
+    private void SayFirstPaletteMatch()
+    {
+        _paletteSpeak.Stop();
+        if (!NoticeOpen || Overlay.InputText.Trim().Length == 0)
+        {
+            return;
+        }
+
+        Announce(_paletteShown.Count > 0 ? Palette.Spoken(_paletteShown[0], 0, _paletteShown.Count) : Palette.NoMatch(Overlay.InputText), true);
+    }
+
+    /// <summary>Down, Up, Page Down, Page Up, Ctrl+Home and Ctrl+End in the field move through the matches (AX-10.4).</summary>
+    private bool OnPaletteKey(Keys key)
+    {
+        var index = Overlay.MatchIndex;
+        int? target = key switch
+        {
+            CommandPalette.NextMatch => index + 1,
+            CommandPalette.PreviousMatch => index - 1,
+            BundleKeys.PageDown => index + Overlay.MatchPage,
+            BundleKeys.PageUp => index - Overlay.MatchPage,
+            CommandPalette.FirstMatch => 0,
+            CommandPalette.LastMatch => _paletteShown.Count - 1,
+            _ => null,
+        };
+        if (target is not { } wanted)
+        {
+            return false;
+        }
+
+        _paletteSpeak.Stop();
+        wanted = Math.Clamp(wanted, 0, Math.Max(0, _paletteShown.Count - 1));
+        if (_paletteShown.Count == 0 || wanted == index)
+        {
+            Sounds.Edge();
+            return true;
+        }
+
+        Overlay.SelectMatch(wanted);
+        Announce(Palette.Spoken(_paletteShown[wanted], wanted, _paletteShown.Count), true);
+        return true;
+    }
+
+    /// <summary>Enter: the palette closes, the focus goes back, and then the entry runs where the user was (AX-10.4).</summary>
+    private void RunPaletteEntry()
+    {
+        _paletteSpeak.Stop();
+        var index = Overlay.MatchIndex;
+        if (index < 0 || index >= _paletteShown.Count)
+        {
+            Announce(Palette.NoMatch(Overlay.InputText), true);
+            return;
+        }
+
+        var entry = _paletteShown[index];
+        CloseNotice(null);
+        BeginInvoke(entry.Run);
+    }
+
     protected Font TextFont()
     {
         var system = SystemTextFont();

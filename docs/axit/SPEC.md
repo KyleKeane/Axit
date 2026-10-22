@@ -372,17 +372,20 @@ name, so that a command is reached without knowing its menu or its key, and its 
   Options, Text, Ctrl+Plus", "Word wrap, Edit, Ctrl+Shift+W, checked". The name is the item's text without its
   mnemonic ampersand and its trailing dots. Left out: separators, items that only open a submenu, disabled items, and
   the lists a menu fills only as it opens (Open recent, Open windows, Recently closed), whose state the palette would
-  have to guess. The palette reads the menus and keeps no list of its own: a command added to a menu is in the palette.
+  have to guess; a window marks such a submenu where it attaches its filling (`CommandPalette.FilledOnOpening`). The
+  palette reads the menus and keeps no list of its own: a command added to a menu is in the palette.
 - AX-10.3 **Matching** is AxStart's (AS-2.2), moved to `Axit.Core` on this second use: the typed text, trimmed, case
-  and accents ignored, against the name and path together; an entry matches when it holds every typed word (`text
-  larger` finds "Larger text, Options, Text"). The order: a name that starts with the first word, then a name with a
+  and accents ignored, against the entry's whole line; an entry matches when its line holds every typed word (`text
+  larger` finds "Larger text, Options, Text"). The order: a line that starts with the first word, then a line with a
   word that starts with it, then any other match; within each, menu order. An empty field lists every entry.
 - AX-10.4 **The keys in the field** are AxStart's (AS-3.2, AS-3.3): typing refills the list and selects the first
   match, and 300 ms after the last change one notification says it and the count, "Save as, File, Ctrl+Shift+S, 1 of
   3", or "No commands match xyz"; Down and Up, Page Down and Page Up, Ctrl+Home and Ctrl+End move the selection and
   say it, the edge earcon at an end; the field's editing keys stay its own. **Enter** closes the palette, gives the
   focus back to the control that had it, and then runs the selected entry as a click on its menu item would, so that
-  the command acts where the user was. **Escape** closes the palette with the focus back and nothing run.
+  the command acts where the user was; a checked setting run this way says its new state, "Word wrap, not checked",
+  since no menu shows it. Enter with nothing matching says "No commands match …" and the palette stays. **Escape**
+  closes the palette with the focus back and nothing run.
 - AX-10.5 **A window's own entries.** A window may add entries after the commands through one hook of the window base,
   each a name and an action. AxFile adds the folder's entries, "notes.md, file", "docs, folder", and Enter on one acts
   as Enter on it in the folder list (docs/axfile/SPEC.md). Other windows add none.

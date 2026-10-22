@@ -10,6 +10,7 @@ public static class HelpText
     public const string Shortcuts = """
         In every window of Axit
           F1: this list
+          Ctrl+Shift+P: the command palette: type part of a command's name, Down and Up through the matches, Enter runs it
           Ctrl+F: find a file whose name contains the text. F3 and Shift+F3: the next or the previous match
           Ctrl+Plus, Ctrl+Minus: bigger or smaller text
           Alt: the menu. Alt+F4: close AxMedia

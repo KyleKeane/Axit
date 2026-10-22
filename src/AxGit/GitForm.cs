@@ -65,7 +65,7 @@ public sealed partial class GitForm : AxitForm
         // repositories, then the slot the editors have Save in (Refresh here), then the extras, then Exit.
         var repository = new ToolStripMenuItem("&Repository");
         repository.DropDownItems.Add(Item("&Open repository...", OpenRepositoryDialog, AxGitKeys.OpenRepository));
-        _recentItem.DropDownOpening += (_, _) => FillRecent();
+        CommandPalette.FilledOnOpening(_recentItem).DropDownOpening += (_, _) => FillRecent();
         FillRecent();
         repository.DropDownItems.Add(_recentItem);
         repository.DropDownItems.Add(new ToolStripSeparator());

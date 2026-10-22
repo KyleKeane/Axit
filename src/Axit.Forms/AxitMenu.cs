@@ -50,10 +50,11 @@ public sealed class AxitMenu : ToolStripMenuItem
         about.DropDownItems.Add(new ToolStripMenuItem("Axit on Git&Hub", null, (_, _) => OpenUrl(UpdateCheck.RepositoryPage)));
 
         DropDownItems.Add(newWindow);
-        DropDownItems.Add(_recentlyClosed);
+        // The lists made as the menu opens; the command palette leaves them out (AX-10.2).
+        DropDownItems.Add(CommandPalette.FilledOnOpening(_recentlyClosed));
         DropDownItems.Add(new ToolStripSeparator());
-        DropDownItems.Add(_openWindows);
-        DropDownItems.Add(byType);
+        DropDownItems.Add(CommandPalette.FilledOnOpening(_openWindows));
+        DropDownItems.Add(CommandPalette.FilledOnOpening(byType));
         DropDownItems.Add(new ToolStripMenuItem("&Close all windows", null, (_, _) => CloseAll()));
         DropDownItems.Add(new ToolStripSeparator());
         DropDownItems.Add(checkForUpdates);

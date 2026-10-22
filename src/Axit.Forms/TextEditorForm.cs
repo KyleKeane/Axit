@@ -75,7 +75,7 @@ public sealed class TextEditorForm : AxitForm
         }
 
         file.DropDownItems.Add(Item("&Open...", OpenFile, EditorKeys.Open));
-        _recentFilesItem.DropDownOpening += (_, _) => FillRecentFiles();
+        CommandPalette.FilledOnOpening(_recentFilesItem).DropDownOpening += (_, _) => FillRecentFiles();
         FillRecentFiles();
         file.DropDownItems.Add(_recentFilesItem);
         file.DropDownItems.Add(new ToolStripSeparator());

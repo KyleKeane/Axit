@@ -10,6 +10,9 @@ public static class BundleKeys
 {
     public const Keys Shortcuts = Keys.F1;
 
+    /// <summary>The command palette (AX-10): every command of the window's menus by name.</summary>
+    public const Keys CommandPalette = Keys.Control | Keys.Shift | Keys.P;
+
     public const Keys NextControl = Keys.Control | Keys.Tab;
     public const Keys PreviousControl = Keys.Control | Keys.Shift | Keys.Tab;
     public const Keys NextControlAlso = Keys.F6;
@@ -46,6 +49,7 @@ public static class BundleKeys
         ("Select to the paragraph above", SelectParagraphUp),
         ("Select to the paragraph below", SelectParagraphDown),
         ("Keyboard shortcuts", Shortcuts),
+        ("Command palette", CommandPalette),
         ("Next control", NextControl),
         ("Previous control", PreviousControl),
         ("Next control (F6)", NextControlAlso),

@@ -10,6 +10,7 @@ public static class HelpText
     public const string Shortcuts = """
         In every window of Axit
           F1: this list
+          Ctrl+Shift+P: the command palette: type part of a command's name, Down and Up through the matches, Enter runs it
           Ctrl+Plus, Ctrl+Minus: bigger or smaller text
           Alt: the menu. Alt+F4: hide AxStart (AxStart, Quit AxStart ends it)
           Alt+A: the Axit menu: a new window of any app, the open Axit windows, Check for updates, and About

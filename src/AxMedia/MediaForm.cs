@@ -51,7 +51,7 @@ public sealed class MediaForm : AxitForm
         queue.DropDownItems.Add(Item("&New window", NewWindow, AxMediaKeys.NewWindow));
         queue.DropDownItems.Add(Item("&Open files...", OpenFiles, AxMediaKeys.OpenFiles));
         queue.DropDownItems.Add(Item("Open &folder...", OpenFolder, AxMediaKeys.OpenFolder));
-        _recentItem.DropDownOpening += (_, _) => FillRecent();
+        CommandPalette.FilledOnOpening(_recentItem).DropDownOpening += (_, _) => FillRecent();
         FillRecent();
         queue.DropDownItems.Add(_recentItem);
         queue.DropDownItems.Add(new ToolStripSeparator());

@@ -1,5 +1,10 @@
 # Changelog
 
+## Unreleased
+
+- Axit: a command palette in every window. Ctrl+Shift+P, or Help, Command palette, opens one search field over a list of every command in the window's menus, each read with its menu and its key, "Save as, File, Ctrl+Shift+S". Typing narrows the list to the commands holding every typed word, and after a short pause the first match is said with the count; Down and Up, Page Down and Page Up, Ctrl+Home and Ctrl+End move through the matches while the caret stays in the field. Enter runs the command where you were, Escape closes. The recent lists and the window lists of the menus are left out.
+- AxGit: Push is Ctrl+Shift+H; Ctrl+Shift+P is the command palette's in every window.
+
 ## 3.4.0
 
 - AxClaude: the conversation no longer flickers while Claude runs a command. Claude Code's timer under a running command, "(4s · timeout 3m)", on a row of its own, was taken for conversation and rewritten every second, which moved the caret and made NVDA redraw its highlight once a second. It is interface now, like the spinner.

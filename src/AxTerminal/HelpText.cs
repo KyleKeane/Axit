@@ -27,6 +27,7 @@ public static class HelpText
           Ctrl+Space: background music while a command runs, on or off, and says which
           Ctrl+Plus, Ctrl+Minus: bigger or smaller text
           F1: this list
+          Ctrl+Shift+P: the command palette: type part of a command's name, Down and Up through the matches, Enter runs it
           Alt+A: the Axit menu: a new window of any Axit app, the files and folders closed lately, the open Axit windows, most recent first (Alt+A, O, 1 is the one you were in last) and by type, Close all windows, Check for updates, and About
           Alt+F4: close AxTerminal (asks first while a command runs)
 

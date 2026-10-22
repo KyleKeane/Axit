@@ -19,7 +19,7 @@ internal sealed partial class MainForm
         var session = new ToolStripMenuItem("&Session");
         session.DropDownItems.Add(new ToolStripMenuItem("&New session...", null, (_, _) => NewSession()) { ShortcutKeys = AxClaudeKeys.NewSession });
         session.DropDownItems.Add(new ToolStripMenuItem("&Open folder...", null, (_, _) => OpenFolder()));
-        _recentFoldersItem.DropDownOpening += (_, _) => FillRecentFolders();
+        CommandPalette.FilledOnOpening(_recentFoldersItem).DropDownOpening += (_, _) => FillRecentFolders();
         FillRecentFolders();
         session.DropDownItems.Add(_recentFoldersItem);
         // The standard order of a File menu (bundle AX-6): the editors have Save and Save as here; AxClaude has none.
