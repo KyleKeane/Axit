@@ -134,6 +134,8 @@ public sealed partial class FileForm : AxitForm
         _list.TabIndex = 0;
         _list.AccessibleName = "No folder";
         _list.DoubleClick += (_, _) => OpenSelected();
+        // AF-3.6: File Explorer's type-ahead, several letters into one prefix, in place of the list's one-letter jump.
+        _list.KeyPress += OnListKeyPress;
         // AF-4.6: Shift+F10, the Applications key and a right click open the Item menu as the list's context menu,
         // the list's own way (the keys are in the table for the collision test and F1, not in the key switch); a
         // right click first selects the entry under it, as File Explorer does.

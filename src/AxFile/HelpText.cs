@@ -17,7 +17,7 @@ public static class HelpText
           Alt+A: the Axit menu: a new window of any app, the files and folders closed lately, the open Axit windows, most recent first (Alt+A, O, 1 is the one you were in last) and by type, Close all windows, Check for updates, and About
 
         The folder list
-          Arrow keys, Home, End, Page Up, Page Down: move through the entries; a typed letter jumps to the next name starting with it. Up or Home at the first entry says "First item" and the entry again; Down or End at the last says "Last item"
+          Arrow keys, Home, End, Page Up, Page Down: move through the entries. Type the start of a name, "cha", letters within a second of each other, to jump to the first name starting with it, as in File Explorer; the same letter again goes to the next name starting with it. Up or Home at the first entry says "First item" and the entry again; Down or End at the last says "Last item"
           Enter: open the entry: a folder in this list, a file in the program Windows has for it (the one you made its default: AxDown, AxMedia, AxPreview or any other), or the Windows dialog that picks one when there is none. A folder you go into, or up to, is announced with its name, its count and the entry you land on: "docs, 5 items, plan.md"
           Shift+Enter: read a file in AxPreview; a folder opens in a new AxFile window
           Ctrl+E: open the file in AxDown, or AxJSON for a .json file

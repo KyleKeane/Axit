@@ -138,8 +138,13 @@ folder of the file or project in hand, and sends back. It works entirely offline
   unsaved; AxDown AD-3.6 is the editors' rule).
 - AF-3.5 A folder that is gone when it is asked for (deleted, an unplugged drive) gives the notice "Folder not found"
   naming it, and the list shows the nearest parent that exists.
-- AF-3.6 The list's own keys stay native: arrows, Home, End, Page Up and Page Down, a typed letter to the next name
-  starting with it; but at the ends, where the key moves nothing, the window says so rather than nothing (asked
+- AF-3.6 The list's own keys stay native: arrows, Home, End, Page Up and Page Down. **Typing a name** jumps to it as
+  in File Explorer (asked 2026-10-22): letters typed within a second of each other build one prefix, "cha", and the
+  first entry whose name starts with it is selected, searched from the entry in hand and round the end, NVDA reading
+  it; a new prefix begins after a second's pause and is searched from the next entry on; the same letter typed again
+  cycles through the names starting with it; "No names start with <prefix>" when none does. The list box's own
+  one-letter jump gives way to this (`OnListKeyPress`); Space is the selection's key (AF-3.7), so a name is typed up
+  to its first space. At the ends, where a key moves nothing, the window says so rather than nothing (asked
   2026-10-22): Up or Home at the first entry, "First item, <entry>", Down or End at the last, "Last item, <entry>", in
   the folder list and the Actions list alike (`AxFileKeys.FirstItem`, `LastItem` and their seconds; the keys are the
   list's own everywhere else). **Find** (Ctrl+F, the bundle's Find notice with the field "Name contains") selects the first entry
@@ -401,7 +406,8 @@ and the started process finds its open window and hands the paths over with the 
 ### AF-7 Announcements
 
 One UI Automation notification each, on the list that has the focus, or on the notice while one shows (AX-7.3):
-"<folder>, <N items>, <entry>" (a change of folder, AF-3.1), "First item, <entry>", "Last item, <entry>" (AF-3.6),
+"<folder>, <N items>, <entry>" (a change of folder, AF-3.1), "First item, <entry>", "Last item, <entry>", "No names
+start with <prefix>" (AF-3.6),
 "<N of M items, filter text>, <entry>" (AF-3.8), "Created <name>", "Moved <what> into <name>" (AF-4.13), "Renamed to <name>", "Deleted <name>", "Deleted n items",
 "Copied path", "Copied n paths", "Cut <name>", "Copied <name>", "Cut n items", "Copied n items", "Selected",
 "Deselected", "Selected, n selected", "Deselected, n selected", "n selected", "None selected" (AF-3.7), "Sorted by
@@ -581,4 +587,5 @@ AF-D4 (the volume) and AF-D6 (the queue fixed at Enter) went to AxMedia with the
   nothing (renaming twice in a row works, test `A_folder_is_renamed_twice_in_a_row_and_a_current_directory_says_in_use`).
 - 2026-10-22, later: a change of folder announced with the folder's name, count and entry (AF-3.1), "First item" and
   "Last item" at the ends of either list (AF-3.6), the filter's name and entry said (AF-3.8), at the user's ask: the
-  entry alone did not tell the folder landed in from the folder under the focus, and silence at an end told nothing.
+  entry alone did not tell the folder landed in from the folder under the focus, and silence at an end told nothing;
+  then File Explorer's type-ahead, several letters into one prefix (AF-3.6), at the user's ask.

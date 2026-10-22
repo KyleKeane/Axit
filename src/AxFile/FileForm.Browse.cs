@@ -36,6 +36,11 @@ public sealed partial class FileForm
     /// <summary>The number of the latest read: a slow read of a folder left behind is dropped when it arrives.</summary>
     private int _reads;
 
+    /// <summary>Type-ahead (AF-3.6): the letters typed within a second of each other, gathered into one prefix as File Explorer gathers them, and when the last came.</summary>
+    private string _typed = string.Empty;
+    private long _typedAt;
+    private const int TypeAheadMs = 1000;
+
     /// <summary>The start (AF-1.1): the path given, or the last folder, or the user's profile folder; a file selects itself in its folder.</summary>
     private async Task StartAsync(string? path)
     {
@@ -164,6 +169,52 @@ public sealed partial class FileForm
     }
 
     /// <summary>
+    /// Letters typed in the folder list (AF-3.6), as File Explorer takes them: typed within a second of each other
+    /// they build one prefix, "cha", and the first entry whose name starts with it is selected, searched from the
+    /// entry in hand and round the end; a new prefix starts after a second's pause and is searched from the next
+    /// entry on, and the same letter typed again cycles through the names starting with it. "No names start with
+    /// <prefix>" when none does. The list's own one-letter jump gives way to this. NVDA reads the entry selected.
+    /// </summary>
+    private void OnListKeyPress(object? sender, KeyPressEventArgs e)
+    {
+        if (char.IsControl(e.KeyChar) || _shown.Count == 0)
+        {
+            // Enter, Escape, Backspace and the Ctrl letters are keys of their own (ProcessWindowKey), not type-ahead.
+            return;
+        }
+
+        e.Handled = true;
+        var now = Environment.TickCount64;
+        var letter = e.KeyChar.ToString();
+        var current = Math.Max(0, Math.Min(_list.SelectedIndex, _shown.Count - 1));
+        int from;
+        if (now - _typedAt > TypeAheadMs || _typed.Length == 0 || _typed.All(c => char.ToUpperInvariant(c) == char.ToUpperInvariant(e.KeyChar)))
+        {
+            // A new prefix, or the same letter again: the next entry starting with it.
+            _typed = letter;
+            from = current + 1;
+        }
+        else
+        {
+            _typed += letter;
+            from = current;
+        }
+
+        _typedAt = now;
+        for (var step = 0; step < _shown.Count; step++)
+        {
+            var i = (from + step) % _shown.Count;
+            if (_shown[i].Name.StartsWith(_typed, StringComparison.OrdinalIgnoreCase))
+            {
+                _list.SelectedIndex = i;
+                return;
+            }
+        }
+
+        Announce($"No names start with {_typed}", true);
+    }
+
+    /// <summary>
     /// Up or Home at the first entry, Down or End at the last (AF-3.6), in either list: the key moves nothing, so
     /// "First item, <name>" or "Last item, <name>" is said instead of silence; false when the key moves.
     /// </summary>
@@ -206,6 +257,8 @@ public sealed partial class FileForm
     /// <summary>The list's items for the shown entries, named with the folder and the count; the selection by name, or the first entry.</summary>
     private void FillList(string? select)
     {
+        // A new list starts the type-ahead afresh (AF-3.6).
+        _typed = string.Empty;
         _list.BeginUpdate();
         _list.Items.Clear();
         _list.Items.AddRange(_shown.Select(entry => (object)ItemText(entry)).ToArray());
