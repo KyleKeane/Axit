@@ -269,14 +269,18 @@ public static class FileOperations
         _ => exception.Message.Replace("\r\n", " ").Replace('\n', ' ').Trim(),
     };
 
-    private static Task<string?> RunShellOperationAsync(uint function, IReadOnlyList<string> sources, IReadOnlyList<string>? destinations, string what)
+    private static Task<string?> RunShellOperationAsync(uint function, IReadOnlyList<string> sources, IReadOnlyList<string>? destinations, string what) =>
+        OnShellThreadAsync(() => RunShellOperation(function, sources, destinations, what));
+
+    /// <summary>Runs shell work that wants a single-threaded apartment on a thread of its own, off the window's thread: the reason it gives back, or null.</summary>
+    public static Task<string?> OnShellThreadAsync(Func<string?> work)
     {
         var done = new TaskCompletionSource<string?>();
         var thread = new Thread(() =>
         {
             try
             {
-                done.SetResult(RunShellOperation(function, sources, destinations, what));
+                done.SetResult(work());
             }
             catch (Exception ex)
             {

@@ -51,7 +51,11 @@ public sealed partial class FileForm
                 return;
             }
 
-            var reason = operation.Kind == OperationKind.Delete ? Shell.Undelete(Handle, operation.Before) : await FileOperations.UndoAsync(operation);
+            // The Restore walks the whole Recycle Bin, so it runs on a shell thread of its own, as the other shell operations do.
+            var owner = Handle;
+            var reason = operation.Kind == OperationKind.Delete
+                ? await FileOperations.OnShellThreadAsync(() => Shell.Undelete(owner, operation.Before))
+                : await FileOperations.UndoAsync(operation);
             if (reason is not null)
             {
                 Failed("Undo failed", reason);
