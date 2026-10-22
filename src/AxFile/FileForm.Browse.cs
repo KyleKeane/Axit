@@ -842,6 +842,30 @@ public sealed partial class FileForm
         Do(() => ShowFolderAsync(parent, left, remember: false));
     }
 
+    /// <summary>Right Arrow in the list (AF-3.1, AF-D12): a folder or a drive opened, as Enter; the edge earcon on a file or a line that is not an entry, so that an arrow key never starts a program.</summary>
+    private void IntoFolder()
+    {
+        if (CurrentEntry() is { IsFolder: true } entry)
+        {
+            Do(() => ShowFolderAsync(entry.Path, null, remember: false));
+            return;
+        }
+
+        Sounds.Edge();
+    }
+
+    /// <summary>Left Arrow in the list (AF-3.1, AF-D12): up one level, as Backspace; the edge earcon at This PC.</summary>
+    private void OutOfFolder()
+    {
+        if (FolderListing.IsThisPC(_folder))
+        {
+            Sounds.Edge();
+            return;
+        }
+
+        GoUp();
+    }
+
     /// <summary>Folder → Open folder… (Ctrl+O): the Windows folder picker, one of the system's own windows.</summary>
     private void OpenFolderDialog()
     {
@@ -863,9 +887,87 @@ public sealed partial class FileForm
     private void FillRecent() =>
         RecentMenu.Fill(_recentItem, _settings.RecentFolders, Directory.Exists, RecentMenu.FolderName, "&No recent folders", target => Do(() => ShowFolderAsync(target, null, remember: true)));
 
-    /// <summary>Folder → Go to folder… (Ctrl+G): a typed path, environment variables allowed, a file's path selecting the file (AF-3.3).</summary>
-    private void GoToFolder() =>
-        ShowNotice(new Notice("Go to folder", "A folder's path, or a file's to select it in its folder. %USERPROFILE%\\Downloads and the other variables work.",
+    // ---- completion in the Go to folder field (AF-3.3, AF-D12) ----
+
+    /// <summary>The completions of the text last completed from, in the list's order.</summary>
+    private IReadOnlyList<Completion> _completions = [];
+
+    /// <summary>The completion the field holds; -1 before the first.</summary>
+    private int _completionAt = -1;
+
+    /// <summary>The text the last completion put in the field: while the field still holds it, Down and Up move among the same completions; anything typed starts afresh.</summary>
+    private string? _completed;
+
+    /// <summary>Counts the folder reads, so that a slow read that comes back after a newer one is dropped.</summary>
+    private int _completionReads;
+
+    /// <summary>The Go to folder field's keys: Down and Up the next and the previous completion, Right at the end of a completed folder its first entry.</summary>
+    private bool OnPathKey(Keys key)
+    {
+        switch (key)
+        {
+            case AxFileKeys.CompleteNext:
+                Do(() => CompleteAsync(1));
+                return true;
+            case AxFileKeys.CompletePrevious:
+                Do(() => CompleteAsync(-1));
+                return true;
+            case AxFileKeys.IntoFolder when _completed is { } done && done.EndsWith('\\') && Overlay.InputText == done && Overlay.InputCaret == done.Length:
+                // The folder's own entries next: the text is now what the completion starts from.
+                _completed = null;
+                Do(() => CompleteAsync(1));
+                return true;
+        }
+
+        return false;
+    }
+
+    /// <summary>
+    /// The next or the previous completion in the field, "Documents, folder, 2 of 5"; the folder the text names is read
+    /// on a task when the text is new; the edge earcon past either end or when no name starts with the text.
+    /// </summary>
+    private async Task CompleteAsync(int step)
+    {
+        var typed = Overlay.InputText;
+        if (typed != _completed)
+        {
+            var (folder, start) = PathCompletion.Split(typed, _folder);
+            var read = ++_completionReads;
+            var (hidden, dot) = (_settings.ShowHidden, _settings.ShowDotFiles);
+            var found = await Task.Run(() => PathCompletion.Candidates(folder, start, hidden, dot));
+            if (read != _completionReads || !NoticeOpen || Overlay.InputText != typed)
+            {
+                return;
+            }
+
+            _completions = found;
+            _completionAt = step > 0 ? -1 : found.Count;
+        }
+
+        var next = _completionAt + step;
+        if (next < 0 || next >= _completions.Count)
+        {
+            Sounds.Edge();
+            return;
+        }
+
+        _completionAt = next;
+        var completion = _completions[next];
+        _completed = completion.Text;
+        Overlay.SetInputText(completion.Text);
+        Announce(PathCompletion.Spoken(completion, next, _completions.Count), true);
+    }
+
+    /// <summary>The field's first text: the folder shown with a backslash at its end, so that the first Down completes among its own entries; empty at This PC.</summary>
+    private string PathToComplete() =>
+        _folder is null || FolderListing.IsThisPC(_folder) ? string.Empty : _folder.EndsWith('\\') ? _folder : _folder + "\\";
+
+    /// <summary>Folder → Go to folder… (Ctrl+G): a typed path, environment variables allowed, a file's path selecting the file, with completion on Down and Up (AF-3.3).</summary>
+    private void GoToFolder()
+    {
+        _completed = null;
+        _completions = [];
+        ShowNotice(new Notice("Go to folder", "A folder's path, or a file's to select it in its folder. %USERPROFILE%\\Downloads and the other variables work. Down and Up complete the path from what is typed; Right goes into a completed folder.",
         [
             new OverlayChoice("&Go", () =>
             {
@@ -881,8 +983,9 @@ public sealed partial class FileForm
             new OverlayChoice("&Cancel", IsCancel: true),
         ])
         {
-            Input = new OverlayInput("Path:", "Path", _folder ?? string.Empty, "Type a path"),
+            Input = new OverlayInput("Path:", "Path", PathToComplete(), "Type a path", KeyHook: OnPathKey),
         });
+    }
 
     /// <summary>Folder → Refresh (F5): the folder read again, the selection kept by name (AF-3.4).</summary>
     private async Task RefreshAsync(bool announce)

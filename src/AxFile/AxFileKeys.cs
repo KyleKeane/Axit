@@ -95,13 +95,25 @@ public static class AxFileKeys
     /// <summary>The newest operation of this window taken back (AF-4.14); in the Actions list, the line under the selection (AF-9.3).</summary>
     public const Keys Undo = Keys.Control | Keys.Z;
 
-    /// <summary>In either list, at the first entry: the edge earcon (AF-3.6, `AtEdge`); the list's own key everywhere else.</summary>
+    /// <summary>In either list, at the first entry: the edge earcon (AF-3.6, `AtEdge`); the list's own key everywhere else. In the Go to folder field: the previous completion (AF-3.3).</summary>
     public const Keys FirstItem = Keys.Up;
+
+    /// <summary>The Go to folder field's previous completion (AF-3.3): the same key as <see cref="FirstItem"/>, in the field.</summary>
+    public const Keys CompletePrevious = FirstItem;
 
     public const Keys FirstItemAlso = Keys.Home;
 
-    /// <summary>In either list, at the last entry: the edge earcon; the list's own key everywhere else.</summary>
+    /// <summary>In either list, at the last entry: the edge earcon; the list's own key everywhere else. In the Go to folder field: the next completion (AF-3.3).</summary>
     public const Keys LastItem = Keys.Down;
+
+    /// <summary>The Go to folder field's next completion (AF-3.3): the same key as <see cref="LastItem"/>, in the field.</summary>
+    public const Keys CompleteNext = LastItem;
+
+    /// <summary>In the folder list: into the folder or drive, as Enter, the edge earcon on a file (AF-3.1, AF-D12). In the Go to folder field, at the end of a completed folder: its first entry.</summary>
+    public const Keys IntoFolder = Keys.Right;
+
+    /// <summary>In the folder list: up one level, as Backspace, the edge earcon at This PC (AF-3.1, AF-D12).</summary>
+    public const Keys OutOfFolder = Keys.Left;
 
     public const Keys LastItemAlso = Keys.End;
 
@@ -149,9 +161,11 @@ public static class AxFileKeys
         ("Item menu (in the folder list)", ContextMenuAlso),
         ("Properties", Properties),
         ("Undo the newest operation, or the action under the selection (in the Actions list)", Undo),
-        ("The edge earcon at the first entry (in a list)", FirstItem),
+        ("The edge earcon at the first entry (in a list); the previous completion (in the Go to folder field)", FirstItem),
         ("The edge earcon at the first entry (in a list)", FirstItemAlso),
-        ("The edge earcon at the last entry (in a list)", LastItem),
+        ("The edge earcon at the last entry (in a list); the next completion (in the Go to folder field)", LastItem),
+        ("Into the folder (in the folder list); into the completed folder (in the Go to folder field)", IntoFolder),
+        ("Up one level (in the folder list)", OutOfFolder),
         ("The edge earcon at the last entry (in a list)", LastItemAlso),
         ("Play the folder in AxMedia (in the folder list)", PlayFolder),
         ("Add to AxMedia's queue (in the folder list)", AddToQueue),

@@ -13,9 +13,10 @@ public sealed record OverlayChoice(string Text, Action? Action = null, bool IsDe
 /// <summary>
 /// A text field on a notice (Find): its label, its accessible name, the initial
 /// text, and, when <paramref name="Required"/>, what to say when the default button is pressed while the field is
-/// empty (the notice then stays open).
+/// empty (the notice then stays open). <paramref name="KeyHook"/>, when given, is asked about each key in the field
+/// first and takes it by returning true (AxFile's path completion on Down, Up and Right).
 /// </summary>
-public sealed record OverlayInput(string Label, string AccessibleName, string Initial, string EmptyMessage, bool Required = true);
+public sealed record OverlayInput(string Label, string AccessibleName, string Initial, string EmptyMessage, bool Required = true, Func<Keys, bool>? KeyHook = null);
 
 /// <summary>A recommended way to start Claude in the New session notice (FR-8.6): the radio button's text and the arguments it stands for.</summary>
 public sealed record OverlayPreset(string Text, IReadOnlyList<string> Arguments);
@@ -143,6 +144,7 @@ public sealed class OverlayPanel : Panel
         _inputRow.Controls.Add(_inputLabel);
         _inputRow.Controls.Add(_input);
         _inputRow.SizeChanged += (_, _) => LayoutInput();
+        _input.KeyDown += OnInputKeyDown;
 
         // The New session controls (FR-8.6), top to bottom under the text: the Choose folder button, the presets
         // in a named group (arrow keys move between them, Tab lands on the selected one), the Custom field.
@@ -239,6 +241,16 @@ public sealed class OverlayPanel : Panel
 
     /// <summary>The text field's current text.</summary>
     public string InputText => _input.Text;
+
+    /// <summary>Where the caret is in the text field.</summary>
+    public int InputCaret => _input.SelectionStart;
+
+    /// <summary>The text field's text replaced, the caret after it: a completion the window chose.</summary>
+    public void SetInputText(string text)
+    {
+        _input.Text = text;
+        _input.Select(text.Length, 0);
+    }
 
     /// <summary>The folder shown in the New session notice; null while none is chosen.</summary>
     public string? SessionFolder => _sessionFolder;
@@ -490,6 +502,15 @@ public sealed class OverlayPanel : Panel
     private void OnTextKeyDown(object? sender, KeyEventArgs e)
     {
         if (TextJumps.Handle(_text, Jumps, e.KeyData, Announce))
+        {
+            e.Handled = e.SuppressKeyPress = true;
+        }
+    }
+
+    /// <summary>A key in the field that the window asked for (<see cref="OverlayInput.KeyHook"/>), such as AxFile's path completion.</summary>
+    private void OnInputKeyDown(object? sender, KeyEventArgs e)
+    {
+        if (_inputSpec?.KeyHook is { } hook && hook(e.KeyData))
         {
             e.Handled = e.SuppressKeyPress = true;
         }

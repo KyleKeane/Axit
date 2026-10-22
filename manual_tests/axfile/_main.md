@@ -12,6 +12,8 @@ Test plan section 1, steps 1 to 5, and step 13's arrow parts.
 - `level-1-enter-me`, `level-2-enter-me`, `level-3-enter-me`: Enter three times reaches `you-reached-the-bottom.txt`; Backspace three times comes back, each time on the folder you left, saying "folder, count, entry".
 - `empty-folder-no-items`: Enter says "No items in this folder".
 - Up at the first entry and Down at the last: the low note.
+- Right on `level-1-enter-me` goes into it, as Enter; Left comes back up, as Backspace; Right on a file plays the low note and opens nothing. Left all the way up reaches This PC (test plan 1.4b).
+- Ctrl+G, then in the Path field Down and Up complete names from what you typed, Right goes into a completed folder (test plan 1.7). Try it with this folder's path and `a`: apple, apricot, avocado.
 
 ## hidden-and-period-entries
 

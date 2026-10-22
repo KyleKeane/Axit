@@ -112,7 +112,9 @@ folder of the file or project in hand, and sends back. It works entirely offline
 
 - AF-3.1 **Enter** on a folder opens it in the list with its first entry selected. **Backspace** and Alt+Up go to the
   parent with the folder just left selected; at a drive's root, to This PC with that drive selected (AF-3.10), and at
-  This PC, "Top". Every change of folder (Enter, Backspace, Go to folder, Open folder, a recent folder or a favorite,
+  This PC, "Top". **Right Arrow** on a folder or a drive opens it, as Enter; **Left Arrow** goes up, as Backspace
+  (asked 2026-10-22: the keys of a tree on the flat list, AF-D12). Right never opens a file: on a file, or on a line
+  that is not an entry, it sounds the edge earcon (AF-3.6), as Left does at This PC. Every change of folder (Enter, Backspace, Go to folder, Open folder, a recent folder or a favorite,
   a drive, This PC, Enter on a line of the Actions list) is announced as the folder's name, the list's count and the
   entry landed on, "docs, 5 items, plan.md" ("This PC, 3 items, Local Disk (C:), drive"; "temp, No items in this
   folder"), through one notification that cuts short NVDA's own reading of the new entry (asked 2026-10-22: the entry
@@ -127,9 +129,16 @@ folder of the file or project in hand, and sends back. It works entirely offline
 - AF-3.3 **Open folder…** (Ctrl+O): the Windows folder picker. **Open recent folder ▸**: the last ten folders opened
   by command, "1. name (path)" (AX-9.5): the start, Open folder, Go to folder, a recent item, and the folder the
   window closed on; Enter and Backspace browse without joining the list, so that a walk through a tree does not fill
-  it. **Go to folder…** (Ctrl+G): the notice "Go to folder" with the field "Path" holding the current folder, which
+  it. **Go to folder…** (Ctrl+G): the notice "Go to folder" with the field "Path" holding the current folder with a backslash at its end (empty at This PC), which
   takes a path with environment variables (`%USERPROFILE%\Downloads`) and a file's path (its folder, the file
-  selected); "Not found: <path>" when there is no such place. **New window** (Ctrl+N, File Explorer's key; Folder →
+  selected); "Not found: <path>" when there is no such place. In the field, **Down Arrow** and **Up Arrow** complete the
+  path (asked 2026-10-22, AF-D12): the text up to its last backslash is a folder (with environment variables; a
+  name without one is in the folder shown; an empty field is the drives), the rest the start of a name; the entries
+  of that folder whose names start with it, folders first in natural order and hidden or period-named ones as the
+  list shows them, replace the text one per press, a folder with a backslash at its end, each said as "Documents, folder, 2 of 5" or "notes.md, 3 of 5"; past either end, or when no name
+  starts with the text, the edge earcon. **Right Arrow** at the end of a completed folder lists its own entries, the first one taken, as Right in the
+  list goes into a folder. What is typed in between is what the next Down completes. The folder is
+  read on a task (`PathCompletion` in the pure code, tested). **New window** (Ctrl+N, File Explorer's key; Folder →
   New window): another AxFile window on the folder shown, through the bundle's starter (AX-9.2), so that two folders
   can be worked between; Ctrl+N is the other windows' New session, New document and New branch, and a new window of
   any app is the Axit menu's (AX-9).
@@ -401,10 +410,10 @@ and the started process finds its open window and hands the paths over with the 
 - AF-6.2 Keys (AX-8). Bundle-wide: F1, the control keys (Tab, Shift+Tab, Ctrl+Tab, Ctrl+Shift+Tab and F6, between
   the folder list and the Actions list, AF-9.1), Ctrl+F, F3, Shift+F3, Ctrl+S ("Nothing to save here"), Ctrl+Plus,
   Ctrl+Minus, Page Up and Page Down (the list's own here), Alt+F4. Window-specific (`AxFileKeys`): Enter,
-  Shift+Enter, Backspace, Alt+Up, F5, F2, Delete, Ctrl+N, Ctrl+O, Ctrl+G, Ctrl+D, Ctrl+W, Ctrl+Shift+W, Ctrl+E,
+  Shift+Enter, Backspace, Alt+Up, Left, Right, F5, F2, Delete, Ctrl+N, Ctrl+O, Ctrl+G, Ctrl+D, Ctrl+W, Ctrl+Shift+W, Ctrl+E,
   Ctrl+I, Ctrl+Shift+N, Ctrl+Shift+T, Ctrl+Shift+C, Ctrl+Shift+F, Escape, Shift+Up, Shift+Down, Shift+Home,
   Shift+End, Space, Shift+Space, Ctrl+A, Ctrl+Shift+A, Ctrl+Enter, Ctrl+Shift+Q (AF-5), Shift+F10, the Applications key,
-  Alt+Enter, Ctrl+Z (AF-4.14), Ctrl+X, Ctrl+C, Ctrl+V. Enter, Shift+Enter, Backspace, Space, Escape, F2, Delete,
+  Alt+Enter, Ctrl+Z (AF-4.14), Ctrl+X, Ctrl+C, Ctrl+V. Enter, Shift+Enter, Backspace, Left, Right, Space, Escape, F2, Delete,
   Ctrl+X, Ctrl+C, Ctrl+V, Ctrl+A, Ctrl+Shift+A, Shift+Space, Ctrl+Enter, Ctrl+Shift+Q, the Shift arrows, Shift+F10 and the
   Applications key act only while the folder list has the focus (in the Actions list, Enter, Escape, Ctrl+Z and Ctrl+I
   act on its line, AF-9.3; in a notice's field or the rename box they are the field's; the two menu keys are the
@@ -588,6 +597,13 @@ and AxPreview.Core since the split; `MediaFiles` and `NaturalOrder` moved to `Ax
   like any other and Enter, Ctrl+Z and Ctrl+I answer with its name. The marks' changes are in the list, at the user's
   ask, but outside Ctrl+Z in the folder list (AF-4.14): a selection undone by the key meant for a paste would surprise.
 
+- **AF-D12 No tree; the tree's keys on the list, and completion in Go to folder.** Asked 2026-10-22: a tree to drive
+  through folders and drives, or an AxOpen app with a tree and typing. A tree (always, or as a pane beside the list as
+  File Explorer has it) adds a control to lose one's place in, and its one gain of its own, selecting across folders,
+  is rare. The flat list takes the tree's Left and Right instead, and typing a path gets completion where a path is
+  typed, the Go to folder field. No separate app: the other windows reach AxFile through Show current folder in; if
+  an editor wants a quick-open, the completion moves to the shared pieces on its second use.
+
 AF-D4 (the volume) and AF-D6 (the queue fixed at Enter) went to AxMedia with the player (AM-D6, AM-D2).
 
 ## 7. Open questions
@@ -637,3 +653,5 @@ AF-D4 (the volume) and AF-D6 (the queue fixed at Enter) went to AxMedia with the
   AF-D10), the changes of the marks as lines of the Actions list, taken back on their line (AF-9.2, AF-9.3), and the
   list in three sections under header lines, the running operations first (AF-9.2, AF-D11), at the user's ask;
   specified first, built the same day. Not yet checked with NVDA (test plan 3.7b, 6.8, 6.9).
+- 2026-10-22, later: Escape deselects (AF-3.7); Left and Right as a tree's keys and completion in the Go to folder
+  field (AF-3.1, AF-3.3, AF-D12), at the user's ask. Not yet checked with NVDA (test plan 1.4b, 1.7).

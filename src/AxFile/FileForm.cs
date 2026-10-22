@@ -496,6 +496,12 @@ public sealed partial class FileForm : AxitForm
                 case AxFileKeys.Up:
                     GoUp();
                     return true;
+                case AxFileKeys.IntoFolder:
+                    IntoFolder();
+                    return true;
+                case AxFileKeys.OutOfFolder:
+                    OutOfFolder();
+                    return true;
                 case AxFileKeys.Rename:
                     Rename();
                     return true;
