@@ -594,4 +594,52 @@ single-threaded-apartment thread of its own (AX-7.5).
   Bin's item (`Shell.Undelete`, checked on this machine); not yet checked with NVDA (test plan 3.14).
 - 2026-10-21, late: the preview built (AF-9.4): Item → Preview, Ctrl+Shift+P, a read-only text in the pane with
   the bundle's reading keys and three of AxDown's Markdown jumps; `Preview` in `AxFile.Core`, tested; not yet checked
-  with NVDA (test plan 6.8).
+  with NVDA (test plan 6.8). Released in 3.2.2 with the rest of the night's work.
+- 2026-10-22: the split decided and specified (section 9; `docs/axit/axfile-split.md`): the player becomes AxMedia,
+  the preview becomes AxPreview, the pane becomes the Actions list; sections 1 to 8 describe the code as it is until
+  the build rewrites them.
+
+## 9. The planned shape (decided 2026-10-22, not yet built)
+
+The user's direction: AxFile focuses on file operations and management only; playing is AxMedia's
+(`docs/axmedia/SPEC.md`), viewing and previewing are AxPreview's (`docs/axpreview/SPEC.md`), each an app of its own
+with a tight hand-over from here. This section is what AF-1, AF-2, AF-3.2, AF-5, AF-6, AF-7, AF-8, AF-9 and the
+decisions become on the build; the inventory of every change and the order of the commits is
+`docs/axit/axfile-split.md`. Until the build, the sections above are the truth about the code.
+
+- AF-9.1 (planned) **What changes for the user.** Enter on a sound or video file opens it in AxMedia, which plays it
+  with the folder's media files after it; Enter on a text file opens it in AxPreview to read (assumed; to confirm:
+  the editors stay one key away, Ctrl+E), Enter on a folder opens it here, Enter on anything else opens the program
+  Windows has for it. Play folder in AxMedia (Ctrl+Enter) and Add to AxMedia's queue (Ctrl+Shift+Q) hand the folder
+  or the marked entries over; Preview (Ctrl+Shift+P) hands any file to AxPreview. The hand-over goes to the AxMedia
+  or AxPreview window already open, else starts one (AM-1.2, AP-1.2); a play and an open take the focus there, an
+  add does not: "Added 12 to AxMedia's queue" is said here. The Player menu, the player's keys (Ctrl+P, Ctrl+Left,
+  Ctrl+Right, Ctrl+Shift+Left, Ctrl+Shift+Right, Ctrl+T, Ctrl+Shift+Period, Ctrl+Shift+Comma, Ctrl+Q), the video
+  area, the queue and the preview leave this window; the settings `speed`, `seekSeconds` and `sayEachFile` leave
+  `axfile.json`.
+- AF-9.2 (planned) **The Actions list.** The pane under the folder list holds one list, "Actions", shown the first
+  time an operation runs and kept for the window's life (AX-9.5: "No actions yet" as its one line until then is not
+  needed, since it appears with the first); Tab, Shift+Tab, Ctrl+Tab, Ctrl+Shift+Tab and F6 move between the folder
+  list and it, Escape goes back to the folder list; a third of the window at most. Every file operation of this
+  window is one line, in time order, newest last, the last fifty kept, gone with the window: "Renamed notes.md to
+  todo.md", "Created temp", "Created New file.txt", "Moved 3 items into bundle", "Copied 3 items", "Moved 2 items",
+  "Compressed to docs.zip", "Extracted to docs - 2", "Deleted 2 items". A running operation reads what it is doing,
+  "Copying 3 items", "Compressing, 40 of 120 files" (a few times a second at most), and its line is replaced when it
+  ends; a failure, "Failed: <reason>"; a line that was undone, "Renamed notes.md to todo.md, undone"; one that could
+  not be undone when asked, "…, not undone: notes.md has changed". When a line is added while the focus is in the
+  folder list, it is the selected line of the Actions list, so that Tab lands on it; nothing is spoken for it (the
+  operation's own announcement, AF-7, is what is heard).
+- AF-9.3 (planned) **Undo on a line.** Ctrl+Z anywhere in the window takes back the newest line that can be taken
+  back (AF-4.14 as built, with the checks and the texts there); Ctrl+Z on a line of the Actions list takes back that
+  line, whatever its place, with the same checks ("Not undone: … has changed" when a later action touched the entry;
+  the line says so afterwards). Enter on a line reads it again; Ctrl+I says its number and time, "3 of 12, 21:04";
+  Delete does nothing (an action is a record, not an entry). There is no redo.
+- AF-9.4 (planned) **The hand-over** is the bundle's window message, `Axit.Forms/AppMessage` (AM-1.3): the window
+  of the app found by its title through the Axit menu's window list, `WM_COPYDATA` with a verb and the paths; the
+  receiving app acts, the sending one says nothing but the add's count. Nothing of it is on the network (G6).
+- AF-9.5 (planned) **What AxFile is then.** One folder in one window: the list of its entries, the operations (new
+  folder, new text file, rename, delete, cut, copy, paste, move to new folder, compress, extract, copy path), the
+  marks, the sort and the filter, Favorites, This PC and the drives, the ways to the other apps on an entry or the
+  folder, Undo with the Actions list, and the entry's menu with Windows' own items behind it. The summary (§1), the
+  goals (G3 and G5 go; G4 holds), the scenarios 1 and 2, the architecture block, AF-D2 (superseded by AM-D1), AF-D3,
+  AF-D4 and AF-D6 (moved to AxMedia) and AF-D9's last sentence are rewritten to this on the build.
