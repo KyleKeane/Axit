@@ -2,6 +2,7 @@
 
 ## Unreleased
 
+- AxClaude: the conversation no longer flickers while Claude runs a command. Claude Code's timer under a running command, "(4s · timeout 3m)", on a row of its own, was taken for conversation and rewritten every second, which moved the caret and made NVDA redraw its highlight once a second. It is interface now, like the spinner.
 - AxFile: Right and Left on the menu bar move between the menus again; with a folder selected in the list, Right opened that folder instead. The fix is in the window base, so no window's own keys act while its menu bar has the keyboard.
 - Axit: a development build started from the repository no longer offers the latest release when it starts; Check for updates in the Axit menu still asks.
 - Axit: `test.ps1` runs every test project in Release, as GitHub Actions does; `release.ps1` and `run.ps1 -Test` use it, so that a test that only fails in Release stops the release here rather than in the workflow, as it did 3.3.0.

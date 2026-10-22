@@ -10,6 +10,11 @@ public static partial class LineClassifier
     [GeneratedRegex(@"^(\S+)…(\s+\(.*\))?$")]
     private static partial Regex SpinnerRegex();
 
+    // The same timer on a row of its own under a running Bash tool, "(4s · timeout 3m)", redrawn every second; as a
+    // conversation row it moved the caret and NVDA's highlight once a second while a command ran (2026-10-22).
+    [GeneratedRegex(@"^\s*\((?:\d+[hms] ?)+ · timeout [\dhms ]+\)$")]
+    private static partial Regex ToolTimerRegex();
+
     // A running subagent, one row each above the spinner, redrawn every second with its time and token count
     // (§4.4 item 21): "◯  general-purpose Checking callers 2m 15s · ↓ 1.2k tokens".
     [GeneratedRegex(@"^\s*◯\s+.*\d+[hms](?: \d+[ms])?(?: · [↓↑] [\d.]+[kM]? tokens)?$")]
@@ -77,7 +82,7 @@ public static partial class LineClassifier
         ModeLineRegex().IsMatch(text) || SpinnerRegex().IsMatch(text) || TipRegex().IsMatch(text)
         || NotepadHintRegex().IsMatch(text) || EffortHintRegex().IsMatch(text) || BackgroundHintRegex().IsMatch(text)
         || QueuedHintRegex().IsMatch(text) || AnnouncementRowRegex().IsMatch(text) || AgentRowRegex().IsMatch(text)
-        || BranchRowRegex().IsMatch(text) || FeedbackCardHintRegex().IsMatch(text);
+        || BranchRowRegex().IsMatch(text) || FeedbackCardHintRegex().IsMatch(text) || ToolTimerRegex().IsMatch(text);
 
     /// <summary>The key-hint row of the feedback card, <c>1 to review · 2 to send · 0 to dismiss</c> (D33).</summary>
     public static bool IsFeedbackCardHint(string text) => FeedbackCardHintRegex().IsMatch(text);

@@ -120,6 +120,12 @@ public class FeedbackCardTests
         Assert.False(LineClassifier.IsChrome("● main and more"));
         Assert.True(LineClassifier.IsChrome("   ◯  general-purpose Checking callers 2m 15s · ↓ 1.2k tokens"));
 
+        // The running command's timer on a row of its own, redrawn every second (2026-10-22): interface, not conversation.
+        Assert.True(LineClassifier.IsChrome("(4s · timeout 3m)"));
+        Assert.True(LineClassifier.IsChrome("  (1m 12s · timeout 10m)"));
+        Assert.False(LineClassifier.IsChrome("(4s · timeout 3m) and then it failed"));
+        Assert.False(LineClassifier.IsChrome("(see the timeout section)"));
+
         // While Claude works with an agent running, the rows above the prompt are the spinner, the mode line, the
         // branch and the agent: all chrome, so the mode line is read and Claude counts as working.
         var model = new SessionModel(240, 50);
