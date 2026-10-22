@@ -64,12 +64,12 @@ the restart by the app itself (2.3.0).
   not yet written, has to settle what the database holds and where it lives, how the service reaches Claude (Claude
   Code as AxClaude runs it, or the API), what the service may change in a window and how the user sees and undoes
   it, and the one switch that turns every network use off.
-- **A command palette in every window** (the user's ask, 2026-10-21, to try soon; kept to one paragraph until it is
-  built, at the user's word: "let us not imagine too many things before we need them"): one key opens a field with a
-  list under it; typing narrows the list to the window's actions by name, each with its key named as a reminder when
-  it has one, and in AxFile to the folder's files and folders as well, one plain list for Up and Down; Enter runs the
-  action or opens the entry. The shape is AxClaude's control area, one field and one list; it belongs in the window
-  base, fed by each window's menus, next to the AI service above as the second thing every app gets for free.
+- **A command palette in every window** (the user's ask, 2026-10-21; specified 2026-10-22 as bundle SPEC AX-10,
+  Ctrl+Shift+P at the user's choice, built on the branch `palette`): one key opens a field with a list under it;
+  typing narrows the list to the window's menu commands by name, each with its key named as a reminder, and in AxFile
+  to the folder's entries as well; Enter runs the command or opens the entry. It is the window base's, fed by each
+  window's menus, with AxStart's matching shared; next to the AI service above, the second thing every app gets for
+  free.
 - **A gutter for the transcript views** (the user's idea, 2026-10-19, agreed as a later bundle feature): two narrow
   columns to the left of a transcript, the line number and the jump letter of the line's kind (`i`, `o`, `h2`), for
   sighted helpers, drawn next to the view and never spoken, since in an edit control what is in the text is what NVDA

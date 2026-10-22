@@ -279,7 +279,7 @@ allow it, see B-9).
   starting at the first line or at a line with text directly after a blank line, and Ctrl+Shift+Up and
   Ctrl+Shift+Down the selection grown to there, as in Word (`EditParagraphs`; the EDIT control's own keys scroll a
   row and leave the caret where it is, as Notepad's do, which a screen reader, reading at the caret after the key,
-  reports as the same text again); Alt+F4 exit; Alt and F10 the menu. Everything else is window-specific.
+  reports as the same text again); Ctrl+Shift+P the command palette (AX-10); Alt+F4 exit; Alt and F10 the menu. Everything else is window-specific.
 - AX-8.3 Window-specific keys are defined once per window, in one table (`AxClaudeKeys`, `AxDownKeys`, `AxJSONKeys`, `AxGitKeys`, `AxTerminalKeys`, `AxFileKeys`, `AxMediaKeys`, `AxPreviewKeys`, `AxStartKeys`), as constants
   with names that say what the key does. Changing a key is a change to that one line: the menu item and the key
   handler read the table, and the F1 text names the same keys and is changed with it. Single-letter quick keys
@@ -355,6 +355,40 @@ allow it, see B-9).
   bar, which hands the ones it does not use up to the window's `ProcessCmdKey`; the window base gives a key that
   comes from a `ToolStrip` to the menu alone, never to the window's own keys (AxFile's Right opened the entry in the
   list instead of moving along the bar, 2026-10-22).
+
+### AX-10 The command palette
+
+The user's ask of 2026-10-21, specified 2026-10-22: one key in every window finds any of the window's commands by
+name, so that a command is reached without knowing its menu or its key, and its key is learnt on the way.
+
+- AX-10.1 **Ctrl+Shift+P** (`BundleKeys.CommandPalette`, AX-8.2) in any window opens the palette as a notice of the
+  window (AX-6.4, AX-7.2), titled "Command palette": one field named "Search commands" with the caret in it, and
+  under it a list of the matches named "Commands, n" that never takes the focus, AxStart's shape (docs/axstart/SPEC.md
+  AS-3.1, AS-D2). Help → Command palette… (first in Help) opens it too, so that it is found from the menus. While
+  another notice shows, or in menu mode (AX-6.6), the key does nothing.
+- AX-10.2 **The entries** are the window's menu bar as it stands when the palette opens, the Axit menu and Help
+  included: every enabled item that does something when chosen, in menu order. An entry reads its name, then its menu
+  path, then its key when it has one, then "checked" for a checked item: "Save as, File, Ctrl+Shift+S", "Larger text,
+  Options, Text, Ctrl+Plus", "Word wrap, Edit, Ctrl+Shift+W, checked". The name is the item's text without its
+  mnemonic ampersand and its trailing dots. Left out: separators, items that only open a submenu, disabled items, and
+  the lists a menu fills only as it opens (Open recent, Open windows, Recently closed), whose state the palette would
+  have to guess. The palette reads the menus and keeps no list of its own: a command added to a menu is in the palette.
+- AX-10.3 **Matching** is AxStart's (AS-2.2), moved to `Axit.Core` on this second use: the typed text, trimmed, case
+  and accents ignored, against the name and path together; an entry matches when it holds every typed word (`text
+  larger` finds "Larger text, Options, Text"). The order: a name that starts with the first word, then a name with a
+  word that starts with it, then any other match; within each, menu order. An empty field lists every entry.
+- AX-10.4 **The keys in the field** are AxStart's (AS-3.2, AS-3.3): typing refills the list and selects the first
+  match, and 300 ms after the last change one notification says it and the count, "Save as, File, Ctrl+Shift+S, 1 of
+  3", or "No commands match xyz"; Down and Up, Page Down and Page Up, Ctrl+Home and Ctrl+End move the selection and
+  say it, the edge earcon at an end; the field's editing keys stay its own. **Enter** closes the palette, gives the
+  focus back to the control that had it, and then runs the selected entry as a click on its menu item would, so that
+  the command acts where the user was. **Escape** closes the palette with the focus back and nothing run.
+- AX-10.5 **A window's own entries.** A window may add entries after the commands through one hook of the window base,
+  each a name and an action. AxFile adds the folder's entries, "notes.md, file", "docs, folder", and Enter on one acts
+  as Enter on it in the folder list (docs/axfile/SPEC.md). Other windows add none.
+- AX-10.6 The palette is the window base's (`AxitForm`, AX-6.5) with the matching in `Axit.Core` (unit tested); no app
+  writes code for it beyond AX-10.5. Every window's F1 text names Ctrl+Shift+P. AxGit's Push, which held
+  Ctrl+Shift+P, moved to Ctrl+Shift+H (docs/axgit/SPEC.md AG-5.4).
 
 ### AX-7 Accessibility rules every app follows
 
