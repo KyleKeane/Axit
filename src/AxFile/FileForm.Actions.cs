@@ -6,7 +6,8 @@ namespace AxFile;
 
 /// <summary>
 /// The Actions list (SPEC.md AF-9): a second list under the folder list, always there, with every file operation of
-/// this window as one line, "No actions yet" until the first. Tab, Shift+Tab, Ctrl+Tab, Ctrl+Shift+Tab and F6 move
+/// this window and every change of its marks as one line, in three sections under header lines, the running
+/// operations first, then the operations, then the selection; "No actions yet" until the first. Tab, Shift+Tab, Ctrl+Tab, Ctrl+Shift+Tab and F6 move
 /// between the folder list and it, Escape in it goes back; Enter on a line goes where the action left things, Ctrl+Z
 /// on a line takes that one back, Ctrl+I says its number and time. The lines are <see cref="ActionLog"/>; the
 /// operations themselves (Operations) begin and end them. Also here: the hand-overs to AxMedia, Play folder and Add
@@ -33,25 +34,23 @@ public sealed partial class FileForm
     private void FitPane() => _pane.Height = Math.Max(_pane.ItemHeight * 3 + 4, ClientSize.Height / 3);
 
     /// <summary>
-    /// The list's lines made again from the log (AF-9.2), "No actions yet" while it is empty: each line changed in
-    /// place while the count is the same, so that nothing but the changed line moves under NVDA (a running line under
-    /// the focus is left until it ends, since rewriting the selected item re-selects it, which NVDA may read again,
-    /// four times a second for a zip's count); the whole list otherwise. The newest line is selected while the focus
-    /// is in the folder list, so that Tab lands on it; while the focus is here the line the user is on stays selected
-    /// (<paramref name="keep"/>, taken before the log changed, since the oldest line falls off at the limit and every
-    /// index shifts). The status bar follows.
+    /// The list's lines made again from the log (AF-9.2): the sections under their headers, "No actions yet" while the
+    /// log is empty. Each line is changed in place while the count is the same, so that nothing but the changed line
+    /// moves under NVDA (the running line the user is on is left until it ends, since rewriting the selected item
+    /// re-selects it, which NVDA may read again, four times a second for a zip's count); the whole list otherwise. The
+    /// newest line is selected while the focus is in the folder list, so that Tab lands on it; while the focus is here
+    /// the line the user is on stays selected (<paramref name="keep"/>, taken before the log changed, since lines move
+    /// between the sections and fall off at the limits). The status bar follows.
     /// </summary>
     private void FillPane(ActionEntry? keep)
     {
         IReadOnlyList<string> lines = _actions.Count == 0 ? [NoActionsText] : _actions.Lines();
-        var entries = _actions.Entries;
+        var kept = keep is null ? -1 : _actions.IndexOf(keep);
         if (lines.Count == _pane.Items.Count)
         {
             for (var i = 0; i < lines.Count; i++)
             {
-                // A running line under the focus keeps its first text (AF-9.2), except the "No actions yet" line it replaces.
-                if (_pane.Focused && i == _pane.SelectedIndex && i < entries.Count && entries[i].State == ActionState.Running
-                    && !string.Equals(_pane.Items[i].ToString(), NoActionsText, StringComparison.Ordinal))
+                if (i == kept && keep!.State == ActionState.Running)
                 {
                     continue;
                 }
@@ -70,8 +69,10 @@ public sealed partial class FileForm
             _pane.EndUpdate();
         }
 
-        var kept = keep is null ? -1 : _actions.IndexOf(keep);
-        var index = kept >= 0 ? kept : _pane.Focused ? Math.Clamp(_pane.SelectedIndex, 0, lines.Count - 1) : lines.Count - 1;
+        var index = kept >= 0 ? kept
+            : _pane.Focused ? Math.Clamp(_pane.SelectedIndex, 0, lines.Count - 1)
+            : _actions.Latest is { } latest ? Math.Max(0, _actions.IndexOf(latest))
+            : 0;
         if (_pane.SelectedIndex != index)
         {
             _pane.SelectedIndex = index;
@@ -148,16 +149,18 @@ public sealed partial class FileForm
 
     // ---- the list's own keys (AF-9.3): Enter, Ctrl+Z and Ctrl+I on the line, Escape back to the folder list ----
 
-    /// <summary>The line under the selection; null on "No actions yet".</summary>
-    private ActionEntry? SelectedAction() =>
-        _pane.SelectedIndex is var i && i >= 0 && i < _actions.Count ? _actions.Entries[i] : null;
+    /// <summary>The line under the selection; null on a header line and on "No actions yet".</summary>
+    private ActionEntry? SelectedAction() => _actions.EntryAt(_pane.SelectedIndex);
+
+    /// <summary>A header line or "No actions yet", said again by Enter, Ctrl+Z and Ctrl+I (AF-9.3).</summary>
+    private void SayPaneLine() => Announce(_pane.SelectedItem?.ToString() ?? NoActionsText, true);
 
     /// <summary>Enter in the Actions list: the folder list shows where the action left things, the entry it made or moved selected, and takes the focus; a running line says it is still running; the empty line is read again.</summary>
     private void GoToAction()
     {
         if (SelectedAction() is not { } entry)
         {
-            Announce(NoActionsText, true);
+            SayPaneLine();
             return;
         }
 
@@ -189,7 +192,7 @@ public sealed partial class FileForm
     {
         if (SelectedAction() is not { } entry)
         {
-            Announce(NoActionsText, true);
+            SayPaneLine();
             return;
         }
 
@@ -208,11 +211,11 @@ public sealed partial class FileForm
         UndoAction(entry);
     }
 
-    /// <summary>Ctrl+I in the Actions list: the line's number and time, "3 of 12, 21:04".</summary>
+    /// <summary>Ctrl+I in the Actions list: the line's section, number and time, "Operations, 3 of 12, 21:04"; a header line says its name.</summary>
     private void SayActionInformation()
     {
         var index = _pane.SelectedIndex;
-        Announce(index >= 0 && index < _actions.Count ? _actions.Information(index) : NoActionsText, true);
+        Announce(_actions.Count > 0 && index >= 0 ? _actions.Information(index) : NoActionsText, true);
     }
 
     // ---- the hand-overs to AxMedia (AF-5): AxFile starts the app on the paths and says nothing but the add's count ----

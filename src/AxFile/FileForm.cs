@@ -524,10 +524,10 @@ public sealed partial class FileForm : AxitForm
         }
     }
 
-    /// <summary>The status bar (AF-2.3): the newest action's line on the left, the folder's full path on the right.</summary>
+    /// <summary>The status bar (AF-2.3): the newest file operation's line on the left (never a selection line), the folder's full path on the right.</summary>
     private void UpdateStatusBar()
     {
-        _stateLabel.Text = _actions.Latest?.Line ?? string.Empty;
+        _stateLabel.Text = _actions.LatestOperation?.Line ?? string.Empty;
         _pathLabel.Text = _folder ?? string.Empty;
         StatusLayout.Fit(_status, _stateLabel, _pathLabel);
     }
