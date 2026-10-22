@@ -173,4 +173,4 @@ edit control holds it, every input is accepted without an exception, and the rep
 - 2026-10-21: undo and redo specified (AJ-2.5), the shared shell's history as in AxDown, and the structured mode's changes
   as steps of it (AJ-3.5); AJ-2.5 built the same day with AxDown's (Ctrl+Z, Ctrl+Y, Edit → Undo and Redo; the NVDA pass,
   test plan 3.1, is still to run), AJ-3.5 comes with the structured mode.
-- 2026-10-22: released in 3.3.0. The whole NVDA test plan marked passed at the user's word, no step reported failing; the record by step is `docs/axit/nvda-test-record.md`.
+- 2026-10-22: released in 3.3.1 (3.3.0 tagged, not published). The whole NVDA test plan marked passed at the user's word, no step reported failing; the record by step is `docs/axit/nvda-test-record.md`.

@@ -382,4 +382,4 @@ its notes record what moved.
   the two recorded sessions (Windows PowerShell 5.1 and cmd, `tests/fixtures/shell-*`), the window, the wiring. AT-1
   to AT-8 as described above, the git exclude left out (AT-4.7). Not yet heard under NVDA:
   `docs/axterminal/nvda-test-plan.md` is to run before a release names it more than a first draft.
-- 2026-10-22: released in 3.3.0. The whole NVDA test plan marked passed at the user's word, no step reported failing; the record by step is `docs/axit/nvda-test-record.md`.
+- 2026-10-22: released in 3.3.1 (3.3.0 tagged, not published). The whole NVDA test plan marked passed at the user's word, no step reported failing; the record by step is `docs/axit/nvda-test-record.md`.

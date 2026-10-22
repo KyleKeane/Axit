@@ -6,9 +6,9 @@ What was checked with NVDA, against which version, and with what result. When a 
 
 Add a section under this one, above the earlier passes, so that the newest comes first: the date, the version, the commit tested, who ran it and how the result was given. Under it, one table per app with a line per section of its plan: the steps run and the result, Passed, Failed (with what was heard) or Not run. A step that fails gets a line of its own with what NVDA said and what it should have said, and the bug's fix names the step. When a plan gains or loses steps, the next pass lists them as the plan has them then.
 
-## 2026-10-22, Axit 3.3.0
+## 2026-10-22, Axit 3.3.1
 
-- Commit: the `split` branch at its merge into `main` for the 3.3.0 release.
+- Commit: the `split` branch at its merge into `main` (8504ede), released as 3.3.1; 3.3.0 was tagged from it but not published (a test the Release build refused, fixed in 2b91f7a, no change to the apps).
 - Run by the user, with NVDA. The user asked for every step of every plan to be marked as tested, and will report anything that comes up; no step was reported failing. The results below are that word, not a step-by-step log.
 - In it, among the rest: the split of AxFile into AxFile, AxMedia and AxPreview; the Actions list with its sections and selection lines; Shift+Space and the Selection menu; Escape deselecting; Left and Right in the folder list; completion in Go to folder; the Drives submenu and Alt+D; AxDown's and AxJSON's undo and redo from 3.2.2.
 
