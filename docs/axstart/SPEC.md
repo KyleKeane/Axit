@@ -151,7 +151,9 @@ taskbar. It works entirely offline (bundle G6).
   location for <name>", "Hotkey <key>", "<key> is taken by another program", "Text size n". The notices: Hotkey…, the
   hotkey taken at start, Keyboard shortcuts, User guide, About, the update notice.
 - AS-5.5 The log is `%LOCALAPPDATA%\Axit\logs\axstart.log`: the start, the hotkey registered or refused, the count of
-  programs read, a start that failed with Windows' message; no program names (they can say what the user runs).
+  programs read, a start that failed with Windows' message, each showing and each hiding with its reason (Escape, the
+  hotkey, a program started, or the process that came to the front, by its program file's name: the one name logged,
+  for a hide nobody asked for, 2026-10-22); never the names of the programs started.
 
 ## 5. User interface
 

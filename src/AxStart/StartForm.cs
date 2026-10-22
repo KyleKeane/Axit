@@ -256,6 +256,7 @@ public sealed class StartForm : AxitForm
             }
             else if (Visible && ContainsFocus)
             {
+                Log.Info("Hidden: the hotkey");
                 HideLauncher();
             }
             else
@@ -321,6 +322,7 @@ public sealed class StartForm : AxitForm
                 return true;
             case AxStartKeys.Hide:
                 // AS-3.4: hidden at once, whatever the field holds (asked 2026-10-22); the next showing starts empty.
+                Log.Info("Hidden: Escape");
                 HideLauncher();
                 return true;
         }
@@ -354,6 +356,7 @@ public sealed class StartForm : AxitForm
         var width = Math.Max(MinimumSize.Width, area.Width / 4);
         var height = Math.Max(MinimumSize.Height, Height - ClientSize.Height + _menu.Height + _field.Height + _list.ItemHeight * 12 + _status.Height + 4);
         Bounds = new Rectangle(area.Left + (area.Width - width) / 2, area.Top + (area.Height - height) / 2, width, height);
+        Log.Info("Shown");
         Show();
         AxitMenu.Activate(Handle);
         if (!NoticeOpen)
@@ -402,7 +405,22 @@ public sealed class StartForm : AxitForm
         GetWindowThreadProcessId(GetForegroundWindow(), out var owner);
         if (owner != (uint)Environment.ProcessId)
         {
+            // Which process took the front, by its program name only, for the case of a hide nobody asked for.
+            Log.Info($"Hidden: {ProcessName(owner)} came to the front");
             HideLauncher(giveFocusBack: false);
+        }
+    }
+
+    private static string ProcessName(uint processId)
+    {
+        try
+        {
+            using var process = System.Diagnostics.Process.GetProcessById((int)processId);
+            return process.ProcessName;
+        }
+        catch (ArgumentException)
+        {
+            return "a program that has ended";
         }
     }
 
@@ -524,6 +542,7 @@ public sealed class StartForm : AxitForm
         // Hidden first, so that the program comes up in front; the focus is not handed back, or the program, started
         // by a process no longer in front, would open behind.
         var before = _before;
+        Log.Info("Hidden: a program started");
         HideLauncher(giveFocusBack: false);
         if (AppsFolder.Start(entry, administrator) is { } error)
         {
