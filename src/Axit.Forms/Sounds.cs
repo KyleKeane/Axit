@@ -186,6 +186,10 @@ public static class Sounds
     private static readonly Sound QuestionChime = new(WaveTone.Notes(0.35, (659.25, 70), (0, 40), (659.25, 110)));
     private static readonly Sound NoticeChime = new(WaveTone.Notes(0.35, (1046.5, 45), (1318.5, 45), (1046.5, 45), (1318.5, 110)));
 
+    // A3 alone, short and low: the edge, nothing there (a list's first or last entry under Up or Down, a typed name no
+    // entry starts with; AxFile AF-3.6). An earcon where a sentence would be noise, asked 2026-10-22.
+    private static readonly Sound EdgeTick = new(WaveTone.Notes(0.35, (220, 60)));
+
     // G5, C6 up to a held E6, and once more: longer and louder than the chimes, so that Claude finishing or asking is
     // heard from another window, where the done chime was missed (AxClaude FR-7.3).
     private static readonly Sound AlertChime = new(WaveTone.Notes(0.6, (783.99, 100), (1046.5, 100), (1318.5, 300), (0, 200), (783.99, 100), (1046.5, 100), (1318.5, 500)));
@@ -199,7 +203,7 @@ public static class Sounds
         174.61, 220.00, 261.63, 349.23,
         196.00, 246.94, 293.66, 392.00), loops: true);
 
-    private static readonly Device Chimes = new("sounds", LineTick, ToolTick, ReadyChime, SentChime, RespondingChime, DoneChime, QuestionChime, NoticeChime, AlertChime);
+    private static readonly Device Chimes = new("sounds", LineTick, ToolTick, ReadyChime, SentChime, RespondingChime, DoneChime, QuestionChime, NoticeChime, EdgeTick, AlertChime);
     private static readonly Device Music = new("working music", WorkingMusic);
 
     /// <summary>A tiny typewriter-like tick: a line from Claude arrived.</summary>
@@ -225,6 +229,9 @@ public static class Sounds
 
     /// <summary>A quick high trill: the answer notice opened and waits for an answer.</summary>
     public static void Notice() => Chimes.Play(NoticeChime, replace: true);
+
+    /// <summary>One short low note: the edge, nothing there (a key that moves nothing, a typed name no entry starts with).</summary>
+    public static void Edge() => Chimes.Play(EdgeTick, replace: true);
 
     /// <summary>A longer, louder call, three rising notes to a held one and again: Claude is done or asks while the window is in the background.</summary>
     public static void Alert() => Chimes.Play(AlertChime, replace: true);

@@ -5,26 +5,25 @@ using Axit.Forms;
 namespace AxFile;
 
 /// <summary>
-/// The Actions list (SPEC.md AF-9): a second list under the folder list with every file operation of this window as
-/// one line, shown the first time an operation runs and kept for the window's life. Tab, Shift+Tab, Ctrl+Tab,
-/// Ctrl+Shift+Tab and F6 move between the folder list and it, Escape in it goes back; Enter on a line goes where the
-/// action left things, Ctrl+Z on a line takes that one back, Ctrl+I says its number and time. The lines are
-/// <see cref="ActionLog"/>; the operations themselves (Operations) begin and end them. Also here: the hand-overs to
-/// AxMedia, Play folder and Add to queue (AF-5).
+/// The Actions list (SPEC.md AF-9): a second list under the folder list, always there, with every file operation of
+/// this window as one line, "No actions yet" until the first. Tab, Shift+Tab, Ctrl+Tab, Ctrl+Shift+Tab and F6 move
+/// between the folder list and it, Escape in it goes back; Enter on a line goes where the action left things, Ctrl+Z
+/// on a line takes that one back, Ctrl+I says its number and time. The lines are <see cref="ActionLog"/>; the
+/// operations themselves (Operations) begin and end them. Also here: the hand-overs to AxMedia, Play folder and Add
+/// to queue (AF-5).
 /// </summary>
 public sealed partial class FileForm
 {
+    /// <summary>The one line of the Actions list before the first operation (AF-9.1), so that the list is never empty (AX-9.5).</summary>
+    private const string NoActionsText = "No actions yet";
+
     private readonly ListBox _pane = new();
     private readonly ActionLog _actions = new();
-
-    /// <summary>Whether the Actions list has been shown (AF-9.1): once it has, it stays, hidden only while a notice shows.</summary>
-    private bool _paneShown;
 
     private void SetUpActions()
     {
         _pane.IntegralHeight = false;
         _pane.Dock = DockStyle.Bottom;
-        _pane.Visible = false;
         _pane.TabIndex = 1;
         _pane.AccessibleName = "Actions";
         _pane.DoubleClick += (_, _) => GoToAction();
@@ -33,34 +32,26 @@ public sealed partial class FileForm
     /// <summary>The Actions list takes a third of the window at most (AF-9.1), and three lines at least.</summary>
     private void FitPane() => _pane.Height = Math.Max(_pane.ItemHeight * 3 + 4, ClientSize.Height / 3);
 
-    /// <summary>The Actions list shown the first time a line is there for it; nothing is said for it (the operation's own announcement is what is heard).</summary>
-    private void ShowPane()
-    {
-        _paneShown = true;
-        if (!NoticeOpen && !_pane.Visible)
-        {
-            FitPane();
-            _pane.Visible = true;
-        }
-    }
-
     /// <summary>
-    /// The list's lines made again from the log (AF-9.2): each line changed in place while the count is the same, so
-    /// that nothing but the changed line moves under NVDA (a running line under the focus is left until it ends, since
-    /// rewriting the selected item re-selects it, which NVDA may read again, four times a second for a zip's count);
-    /// the whole list otherwise. The newest line is selected while the focus is in the folder list, so that Tab lands
-    /// on it; while the focus is here the line the user is on stays selected (<paramref name="keep"/>, taken before
-    /// the log changed, since the oldest line falls off at the limit and every index shifts). The status bar follows.
+    /// The list's lines made again from the log (AF-9.2), "No actions yet" while it is empty: each line changed in
+    /// place while the count is the same, so that nothing but the changed line moves under NVDA (a running line under
+    /// the focus is left until it ends, since rewriting the selected item re-selects it, which NVDA may read again,
+    /// four times a second for a zip's count); the whole list otherwise. The newest line is selected while the focus
+    /// is in the folder list, so that Tab lands on it; while the focus is here the line the user is on stays selected
+    /// (<paramref name="keep"/>, taken before the log changed, since the oldest line falls off at the limit and every
+    /// index shifts). The status bar follows.
     /// </summary>
     private void FillPane(ActionEntry? keep)
     {
-        var lines = _actions.Lines();
+        IReadOnlyList<string> lines = _actions.Count == 0 ? [NoActionsText] : _actions.Lines();
         var entries = _actions.Entries;
         if (lines.Count == _pane.Items.Count)
         {
             for (var i = 0; i < lines.Count; i++)
             {
-                if (_pane.Focused && i == _pane.SelectedIndex && entries[i].State == ActionState.Running)
+                // A running line under the focus keeps its first text (AF-9.2), except the "No actions yet" line it replaces.
+                if (_pane.Focused && i == _pane.SelectedIndex && i < entries.Count && entries[i].State == ActionState.Running
+                    && !string.Equals(_pane.Items[i].ToString(), NoActionsText, StringComparison.Ordinal))
                 {
                     continue;
                 }
@@ -79,14 +70,11 @@ public sealed partial class FileForm
             _pane.EndUpdate();
         }
 
-        if (lines.Count > 0)
+        var kept = keep is null ? -1 : _actions.IndexOf(keep);
+        var index = kept >= 0 ? kept : _pane.Focused ? Math.Clamp(_pane.SelectedIndex, 0, lines.Count - 1) : lines.Count - 1;
+        if (_pane.SelectedIndex != index)
         {
-            var kept = keep is null ? -1 : _actions.IndexOf(keep);
-            var index = kept >= 0 ? kept : _pane.Focused ? Math.Clamp(_pane.SelectedIndex, 0, lines.Count - 1) : lines.Count - 1;
-            if (_pane.SelectedIndex != index)
-            {
-                _pane.SelectedIndex = index;
-            }
+            _pane.SelectedIndex = index;
         }
 
         UpdateStatusBar();
@@ -95,10 +83,10 @@ public sealed partial class FileForm
     /// <summary>The line the user is on while the Actions list has the focus, taken before the log changes; null otherwise.</summary>
     private ActionEntry? Keep() => _pane.Focused ? SelectedAction() : null;
 
-    /// <summary>Tab, Shift+Tab, Ctrl+Tab, Ctrl+Shift+Tab and F6 (AX-8.2): between the folder list and the Actions list; the folder list alone while no Actions list shows.</summary>
+    /// <summary>Tab, Shift+Tab, Ctrl+Tab, Ctrl+Shift+Tab and F6 (AX-8.2): between the folder list and the Actions list, the two controls of the window.</summary>
     private void SwitchPane()
     {
-        if (_pane.Visible && _list.Focused)
+        if (_list.Focused)
         {
             _pane.Focus();
         }
@@ -108,27 +96,16 @@ public sealed partial class FileForm
         }
     }
 
-    /// <summary>Folder → Actions: the Actions list with the focus in it, or "No actions yet" (AF-9.1).</summary>
-    private void ShowActions()
-    {
-        if (_actions.Count == 0)
-        {
-            Announce("No actions yet", true);
-            return;
-        }
-
-        ShowPane();
-        _pane.Focus();
-    }
+    /// <summary>Folder → Actions: the focus in the Actions list (AF-9.1).</summary>
+    private void ShowActions() => _pane.Focus();
 
     // ---- the lines (AF-9.2): what the operations call ----
 
-    /// <summary>A running operation's line, "Copying 3 items", in the folder shown; the list appears with it.</summary>
+    /// <summary>A running operation's line, "Copying 3 items", in the folder shown.</summary>
     private ActionEntry Begin(string text)
     {
         var keep = Keep();
         var entry = _actions.Begin(text, _folder ?? string.Empty);
-        ShowPane();
         FillPane(keep);
         return entry;
     }
@@ -150,7 +127,7 @@ public sealed partial class FileForm
     }
 
     /// <summary>The operation failed: "Failed: <reason>" in the list, and the failure said as every failure is (AF-4.5).</summary>
-    private void Fail(ActionEntry entry, string title, string reason)
+    private void FailAction(ActionEntry entry, string title, string reason)
     {
         var keep = Keep();
         _actions.Fail(entry, reason);
@@ -163,7 +140,6 @@ public sealed partial class FileForm
     {
         var keep = Keep();
         _actions.Add(text, operation);
-        ShowPane();
         FillPane(keep);
     }
 
@@ -172,15 +148,16 @@ public sealed partial class FileForm
 
     // ---- the list's own keys (AF-9.3): Enter, Ctrl+Z and Ctrl+I on the line, Escape back to the folder list ----
 
+    /// <summary>The line under the selection; null on "No actions yet".</summary>
     private ActionEntry? SelectedAction() =>
         _pane.SelectedIndex is var i && i >= 0 && i < _actions.Count ? _actions.Entries[i] : null;
 
-    /// <summary>Enter in the Actions list: the folder list shows where the action left things, the entry it made or moved selected, and takes the focus; a running line says it is still running.</summary>
+    /// <summary>Enter in the Actions list: the folder list shows where the action left things, the entry it made or moved selected, and takes the focus; a running line says it is still running; the empty line is read again.</summary>
     private void GoToAction()
     {
         if (SelectedAction() is not { } entry)
         {
-            Announce("No actions yet", true);
+            Announce(NoActionsText, true);
             return;
         }
 
@@ -212,7 +189,7 @@ public sealed partial class FileForm
     {
         if (SelectedAction() is not { } entry)
         {
-            Announce("No actions yet", true);
+            Announce(NoActionsText, true);
             return;
         }
 
@@ -235,7 +212,7 @@ public sealed partial class FileForm
     private void SayActionInformation()
     {
         var index = _pane.SelectedIndex;
-        Announce(index >= 0 && index < _actions.Count ? _actions.Information(index) : "No actions yet", true);
+        Announce(index >= 0 && index < _actions.Count ? _actions.Information(index) : NoActionsText, true);
     }
 
     // ---- the hand-overs to AxMedia (AF-5): AxFile starts the app on the paths and says nothing but the add's count ----

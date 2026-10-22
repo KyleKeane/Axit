@@ -5,8 +5,8 @@ using Axit.Forms;
 namespace AxFile;
 
 /// <summary>
-/// AxFile's window (SPEC.md AF-2): a menu bar, one list with a folder's entries, the Actions list under it once an
-/// operation has run, and a status bar with the newest action and the folder's path. Enter is the verb (G2): a
+/// AxFile's window (SPEC.md AF-2): a menu bar, one list with a folder's entries, the Actions list always under it ("No
+/// actions yet" until the first operation), and a status bar with the newest action and the folder's path. Enter is the verb (G2): a
 /// folder opens in the list, a file in the program Windows has for it; Shift+Enter reads a file in AxPreview. The
 /// folder reads and the operations run on background tasks. The notices, the fonts, the window's place, the update
 /// flow and the announcements are the bundle's window base (<see cref="AxitForm"/>). The window is in four files:
@@ -156,29 +156,24 @@ public sealed partial class FileForm : AxitForm
         _renameBox.Leave += (_, _) => CancelRename();
         _list.Controls.Add(_renameBox);
 
-        // ---- the Actions list (AF-9): under the folder list, hidden until the first operation ----
+        // ---- the Actions list (AF-9): always under the folder list, "No actions yet" until the first operation ----
         SetUpActions();
 
         // ---- the status bar (AF-2.3): the bundle's pair, no AccessibleName, no Spring ----
         (_stateLabel, _pathLabel) = StatusLayout.Pair(_status);
 
-        SizeChanged += (_, _) =>
-        {
-            if (_pane.Visible)
-            {
-                FitPane();
-            }
-        };
+        SizeChanged += (_, _) => FitPane();
         // AF-3.4: coming back to the window reads the folder again when another program changed it.
         Activated += (_, _) => Do(RefreshIfChangedAsync);
 
         // Docked from the last control to the first: the menu takes the top, the status bar the bottom, the Actions
-        // list the strip above the status bar while it shows, and the folder list (or the notice over it) what is left.
+        // list the strip above the status bar, and the folder list (or the notice over both) what is left.
         Controls.AddRange([Overlay, _list, _pane, _status, _menu]);
 
         ApplyTextFont();
         RestoreWindow();
-        UpdateStatusBar();
+        FitPane();
+        FillPane(null);
 
         if (settingsError is not null)
         {
@@ -249,11 +244,8 @@ public sealed partial class FileForm : AxitForm
     protected override void ShowAfterNotice()
     {
         _list.Visible = true;
-        if (_paneShown)
-        {
-            FitPane();
-            _pane.Visible = true;
-        }
+        FitPane();
+        _pane.Visible = true;
     }
 
     protected override Control FocusTarget => _list;
@@ -269,10 +261,7 @@ public sealed partial class FileForm : AxitForm
         _list.Font = font;
         _renameBox.Font = font;
         _pane.Font = font;
-        if (_paneShown)
-        {
-            FitPane();
-        }
+        FitPane();
     }
 
     protected override IReadOnlyList<string> RestartArguments() => _folder is null ? [Dispatch.AxFile] : [Dispatch.AxFile, _folder];
@@ -419,9 +408,9 @@ public sealed partial class FileForm : AxitForm
                 return true;
         }
 
-        if ((_list.Focused || _pane.Focused) && SayBoundary(keyData))
+        if ((_list.Focused || _pane.Focused) && AtEdge(keyData))
         {
-            // Up or Home at the first entry, Down or End at the last (AF-3.6): said, since the key moves nothing.
+            // Up or Home at the first entry, Down or End at the last (AF-3.6): the edge earcon, since the key moves nothing.
             return true;
         }
 

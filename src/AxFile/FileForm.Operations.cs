@@ -282,7 +282,7 @@ public sealed partial class FileForm
 
                     if (reason is not null)
                     {
-                        Fail(action, "Move failed", reason);
+                        FailAction(action, "Move failed", reason);
                         return;
                     }
 
@@ -450,7 +450,7 @@ public sealed partial class FileForm
                 var action = Begin(one is null ? $"Deleting {targets.Count} items" : $"Deleting {one.Name}");
                 if (await FileOperations.DeleteToRecycleBinAsync(targets.Select(target => target.Path).ToList()) is { } reason)
                 {
-                    Fail(action, "Delete failed", reason);
+                    FailAction(action, "Delete failed", reason);
                     return;
                 }
 
@@ -629,7 +629,7 @@ public sealed partial class FileForm
 
             if (reason is not null)
             {
-                Fail(action, "Paste failed", reason);
+                FailAction(action, "Paste failed", reason);
                 return;
             }
 
@@ -876,7 +876,7 @@ public sealed partial class FileForm
         }
         catch (Exception ex) when (ex is IOException or UnauthorizedAccessException or InvalidDataException or NotSupportedException)
         {
-            Fail(action, failTitle, FileOperations.Message(ex));
+            FailAction(action, failTitle, FileOperations.Message(ex));
             return;
         }
 

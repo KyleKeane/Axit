@@ -92,12 +92,12 @@ public static class AxFileKeys
     /// <summary>The newest operation of this window taken back (AF-4.14); in the Actions list, the line under the selection (AF-9.3).</summary>
     public const Keys Undo = Keys.Control | Keys.Z;
 
-    /// <summary>In either list, at the first entry: "First item, <name>" (AF-3.6); the list's own key everywhere else.</summary>
+    /// <summary>In either list, at the first entry: the edge earcon (AF-3.6, `AtEdge`); the list's own key everywhere else.</summary>
     public const Keys FirstItem = Keys.Up;
 
     public const Keys FirstItemAlso = Keys.Home;
 
-    /// <summary>In either list, at the last entry: "Last item, <name>"; the list's own key everywhere else.</summary>
+    /// <summary>In either list, at the last entry: the edge earcon; the list's own key everywhere else.</summary>
     public const Keys LastItem = Keys.Down;
 
     public const Keys LastItemAlso = Keys.End;
@@ -145,10 +145,10 @@ public static class AxFileKeys
         ("Item menu (in the folder list)", ContextMenuAlso),
         ("Properties", Properties),
         ("Undo the newest operation, or the action under the selection (in the Actions list)", Undo),
-        ("First item, said at the first entry (in a list)", FirstItem),
-        ("First item, said at the first entry (in a list)", FirstItemAlso),
-        ("Last item, said at the last entry (in a list)", LastItem),
-        ("Last item, said at the last entry (in a list)", LastItemAlso),
+        ("The edge earcon at the first entry (in a list)", FirstItem),
+        ("The edge earcon at the first entry (in a list)", FirstItemAlso),
+        ("The edge earcon at the last entry (in a list)", LastItem),
+        ("The edge earcon at the last entry (in a list)", LastItemAlso),
         ("Play the folder in AxMedia (in the folder list)", PlayFolder),
         ("Add to AxMedia's queue (in the folder list)", AddToQueue),
     ];

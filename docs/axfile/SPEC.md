@@ -41,7 +41,7 @@ folder of the file or project in hand, and sends back. It works entirely offline
 ## 3. Scenarios
 
 1. Start menu, "Axit AxFile": the last folder opens, the list focused; NVDA reads "24 items, list, 01 Chapter
-   1.mp3, 1 of 24". Up: "First item, 01 Chapter 1.mp3". Down twice, Enter: the file opens in the program Windows has
+   1.mp3, 1 of 24". Up: one short low note, nothing moves. Down twice, Enter: the file opens in the program Windows has
    for `.mp3`, AxMedia when the user has made it so, with the folder's other chapters after it. Backspace: "Music, 8
    items, Dune, folder".
 2. In AxClaude on a project, Alt+S, I, F: AxFile opens on the project folder. Down to `docs`, Enter: "docs, 5 items,
@@ -87,9 +87,9 @@ folder of the file or project in hand, and sends back. It works entirely offline
 ### AF-2 The window
 
 - AF-2.1 From the top: the menu bar; the folder list, named with its count alone, "N items" ("24 items"; "1 item";
-  "Empty" for none; "3 of 24 items, filter chap" under a filter, AF-3.8); the Actions list under it once an
-  operation has run (AF-9); the status bar. A notice takes the place of both lists while it shows (AX-6.4). Tab,
-  Shift+Tab, Ctrl+Tab, Ctrl+Shift+Tab and F6 move between the two lists (AX-8.2) and do nothing while there is one.
+  "Empty" for none; "3 of 24 items, filter chap" under a filter, AF-3.8); the Actions list under it, always (AF-9);
+  the status bar. A notice takes the place of both lists while it shows (AX-6.4). Tab, Shift+Tab, Ctrl+Tab,
+  Ctrl+Shift+Tab and F6 move between the two lists (AX-8.2), the window's two controls.
 - AF-2.2 Items: a file by its name as it is; a folder as "<name>, folder"; a drive of This PC as "<label> (C:), drive"
   (AF-3.10). Folders first, then files, each group in
   Windows' natural order (`StrCmpLogicalW`, so that `2` comes before `10`). Hidden and system entries are left out,
@@ -142,13 +142,13 @@ folder of the file or project in hand, and sends back. It works entirely offline
   in File Explorer (asked 2026-10-22): letters typed within a second of each other build one prefix, "cha", and the
   first entry whose name starts with it is selected, searched from the entry in hand and round the end, NVDA reading
   it; a new prefix begins after a second's pause and is searched from the next entry on; the same letter typed again
-  cycles through the names starting with it; "No names start with <prefix>" when none does. The list box's own
+  cycles through the names starting with it; the edge earcon when no name starts with it. The list box's own
   one-letter jump gives way to this (`OnListKeyPress`); Space is the selection's key (AF-3.7), so a name is typed up
-  to its first space. At the ends, where a key moves nothing, the window says so rather than nothing (asked
-  2026-10-22): Up or Home at the first entry, "First item, <entry>", Down or End at the last, "Last item, <entry>", in
-  the folder list and the Actions list alike (`AxFileKeys.FirstItem`, `LastItem` and their seconds; the keys are the
-  list's own everywhere else). **Find** (Ctrl+F, the bundle's Find notice with the field "Name contains") selects the first entry
-  after the current one whose name contains the text, wrapping round the end once, "Not found" otherwise; F3 and
+  to its first space. At the ends, where a key moves nothing, the window sounds the **edge earcon** rather than
+  nothing (asked 2026-10-22, an earcon rather than words, since "First item" and the entry again were noise): one
+  short low note (`Sounds.Edge`, A3 for 60 ms) on Up or Home at the first entry and Down or End at the last, in the
+  folder list and the Actions list alike (`AxFileKeys.FirstItem`, `LastItem` and their seconds; the keys are the
+  list's own everywhere else, `AtEdge`). **Find** (Ctrl+F, the bundle's Find notice with the field "Name contains") selects the first entry
   Shift+F3 the next and the previous. NVDA reads the selected entry; the app adds nothing.
 - AF-3.7 **Selection** (asked 2026-10-21). The list stays a single-selection list box, where the arrow keys choose
   the current entry (AF-3.6); the selection the operations act on is a set of marks on top of it. **Space** marks the
@@ -406,9 +406,8 @@ and the started process finds its open window and hands the paths over with the 
 ### AF-7 Announcements
 
 One UI Automation notification each, on the list that has the focus, or on the notice while one shows (AX-7.3):
-"<folder>, <N items>, <entry>" (a change of folder, AF-3.1), "First item, <entry>", "Last item, <entry>", "No names
-start with <prefix>" (AF-3.6),
-"<N of M items, filter text>, <entry>" (AF-3.8), "Created <name>", "Moved <what> into <name>" (AF-4.13), "Renamed to <name>", "Deleted <name>", "Deleted n items",
+"<folder>, <N items>, <entry>" (a change of folder, AF-3.1), "<N of M items, filter text>, <entry>" (AF-3.8), "Created
+<name>", "Moved <what> into <name>" (AF-4.13), "Renamed to <name>", "Deleted <name>", "Deleted n items",
 "Copied path", "Copied n paths", "Cut <name>", "Copied <name>", "Cut n items", "Copied n items", "Selected",
 "Deselected", "Selected, n selected", "Deselected, n selected", "n selected", "None selected" (AF-3.7), "Sorted by
 <order>", "Filter cleared" (AF-3.8), "Added to Favorites", "Removed from Favorites" (AF-3.9), "Top" (This PC,
@@ -428,7 +427,8 @@ listed yet), "No items in this folder" (a command on an empty folder's one item,
 a zip file" (Extract here, AF-4.12), "Name unchanged" (a rename to the same name), "Nothing to paste" (no files on the
 clipboard), "Already in this folder" (a cut entry pasted where it is), "Already pasting" (a cut still on its way,
 AF-4.5), "Reads the same as <name>, which is already here" (AF-4.2), "Type a name" and the other reasons of `FileOperations.CheckName`. A new selection is NVDA's own
-reading.
+reading. One earcon, the edge (`Sounds.Edge`, one short low note): a key that moves nothing at either end of a list,
+and a typed name no entry starts with (AF-3.6).
 
 ### AF-8 Settings, log, status
 
@@ -444,11 +444,11 @@ reading.
 ### AF-9 The Actions list
 
 - AF-9.1 **What it is.** A second list under the folder list, "Actions", with every file operation of this window as
-  one line, so that what was done can be read again, taken back and walked back to. It appears the first time an
-  operation runs and stays for the window's life (hidden only while a notice shows); a third of the window at most;
-  **Tab**, **Shift+Tab**, **Ctrl+Tab**, **Ctrl+Shift+Tab** and **F6** move between the folder list and it (AX-8.2),
-  **Escape** in it goes back to the folder list, Folder → **Actions** puts the focus in it ("No actions yet" before the
-  first operation). One list, not tabs: NVDA reads a list and its place in it, and the two lists are reached with the
+  one line, so that what was done can be read again, taken back and walked back to. It is there from the first
+  moment, with the one line "No actions yet" until the first operation (AX-9.5; asked 2026-10-22: a pane that appears
+  later leaves Tab and Shift+Tab with nowhere to go), hidden only while a notice shows; a third of the window at
+  most; **Tab**, **Shift+Tab**, **Ctrl+Tab**, **Ctrl+Shift+Tab** and **F6** move between the folder list and it
+  (AX-8.2), **Escape** in it goes back to the folder list, Folder → **Actions** puts the focus in it. One list, not tabs: NVDA reads a list and its place in it, and the two lists are reached with the
   keys every Axit window uses for its controls (AF-D1). Each command's result is one announcement on the list that has
   the focus (AF-7); nothing is spoken on an arrow key (AF-D7). The newest line is the status bar's left text (AF-2.3).
 - AF-9.2 **The lines.** In time order, newest last, the last fifty kept, gone with the window: "Renamed notes.md to
@@ -471,7 +471,8 @@ reading.
   with AF-4.14's checks and texts; a line that cannot be says why: "Still running", "Already undone", "Not undone:
   <reason>" again, or "Nothing to undo here" (a failed line, or one older than the twenty undoable). Ctrl+Z in the
   folder list takes the newest undoable line (AF-4.14). **Ctrl+I** says the line's number and time, "3 of 12, 21:04".
-  Delete does nothing (an action is a record, not an entry). There is no redo.
+  On "No actions yet", Enter, Ctrl+Z and Ctrl+I say the line. Delete does nothing (an action is a record, not an
+  entry). There is no redo.
 - AF-9.4 **Later uses**, noted so that the shape allows them: the matches of a search through a folder's tree, a
   folder's summary on Ctrl+I over a folder (its counts and size, which take a walk of the tree). None is in the
   first build.
@@ -589,3 +590,7 @@ AF-D4 (the volume) and AF-D6 (the queue fixed at Enter) went to AxMedia with the
   "Last item" at the ends of either list (AF-3.6), the filter's name and entry said (AF-3.8), at the user's ask: the
   entry alone did not tell the folder landed in from the folder under the focus, and silence at an end told nothing;
   then File Explorer's type-ahead, several letters into one prefix (AF-3.6), at the user's ask.
+- 2026-10-22, later: the edge earcon in place of "First item", "Last item" and "No names start with" (AF-3.6, the
+  bundle's `Sounds.Edge`), the Actions list there from the start with "No actions yet" (AF-9.1), so that Tab and
+  Shift+Tab always have the second control, and a pass over the F1 text, the guide and the notes to put every feature
+  in one place each, at the user's ask ("I have lost track of all the features").

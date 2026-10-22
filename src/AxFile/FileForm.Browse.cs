@@ -172,8 +172,8 @@ public sealed partial class FileForm
     /// Letters typed in the folder list (AF-3.6), as File Explorer takes them: typed within a second of each other
     /// they build one prefix, "cha", and the first entry whose name starts with it is selected, searched from the
     /// entry in hand and round the end; a new prefix starts after a second's pause and is searched from the next
-    /// entry on, and the same letter typed again cycles through the names starting with it. "No names start with
-    /// <prefix>" when none does. The list's own one-letter jump gives way to this. NVDA reads the entry selected.
+    /// entry on, and the same letter typed again cycles through the names starting with it. The edge earcon when no
+    /// name starts with it. The list's own one-letter jump gives way to this. NVDA reads the entry selected.
     /// </summary>
     private void OnListKeyPress(object? sender, KeyPressEventArgs e)
     {
@@ -211,14 +211,15 @@ public sealed partial class FileForm
             }
         }
 
-        Announce($"No names start with {_typed}", true);
+        // No name starts with it: the edge earcon, not a sentence (AF-3.6).
+        Sounds.Edge();
     }
 
     /// <summary>
-    /// Up or Home at the first entry, Down or End at the last (AF-3.6), in either list: the key moves nothing, so
-    /// "First item, <name>" or "Last item, <name>" is said instead of silence; false when the key moves.
+    /// Up or Home at the first entry, Down or End at the last (AF-3.6), in either list: the key moves nothing, so the
+    /// edge earcon sounds instead of silence; false when the key moves and stays the list's own.
     /// </summary>
-    private bool SayBoundary(Keys key)
+    private bool AtEdge(Keys key)
     {
         var list = _pane.Focused ? _pane : _list;
         var index = list.SelectedIndex;
@@ -234,7 +235,7 @@ public sealed partial class FileForm
             return false;
         }
 
-        Announce((first ? "First item, " : "Last item, ") + list.Items[index], true);
+        Sounds.Edge();
         return true;
     }
 

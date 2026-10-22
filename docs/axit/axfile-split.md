@@ -91,7 +91,7 @@ Shift+Enter in AxFile as its own key (`docs/axpreview/SPEC.md` AP-D2, `docs/axfi
 
 ## 6. The Actions list (AxFile's pane after the split; `docs/axfile/SPEC.md` section 9)
 
-- One list under the folder list, "Actions", shown the first time an operation runs and kept; Tab, Ctrl+Tab and F6
+- One list under the folder list, "Actions", always there ("No actions yet" until the first operation, since 2026-10-22 late); Tab, Ctrl+Tab and F6
   move between the two, Escape goes back; the newest line is selected when a line is added while the focus is in the
   folder list, so that Tab lands on it.
 - Every file operation is one line, in time order, newest last, the last fifty kept, gone with the window: "Renamed
