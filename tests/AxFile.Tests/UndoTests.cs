@@ -128,7 +128,7 @@ public sealed class UndoTests : IDisposable
     [Fact]
     public void A_recycle_bin_record_gives_the_original_path_and_the_time()
     {
-        var path = @"C:\Users\someone\Documents\notes.md";
+        var path = @"D:\Documents\notes.md";
         var chars = Encoding.Unicode.GetBytes(path + "\0");
         var bytes = new byte[24 + 4 + chars.Length];
         BitConverter.GetBytes(2L).CopyTo(bytes, 0);

@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased
+## 3.2.2 - 2026-10-21
 
 - AxDown: Undo (Ctrl+Z) and Redo (Ctrl+Y, or Ctrl+Shift+Z), in the Edit menu too, over the window's own history, as far back as the file was opened in it: a run of typing or of deleting is one step, a paste, a cut or a reload from disk one step each; "Undone", "Redone", "Nothing to undo", "Nothing to redo". Saving keeps the history; Open and New end it. The edit field's own one-level undo is replaced.
 - AxJSON: the same Undo and Redo, a Format being one step.
