@@ -1,8 +1,8 @@
-using AxFile.Core;
+using Axit.Core;
 
-namespace AxFile.Tests;
+namespace Axit.Tests;
 
-/// <summary>The player's rules that need no engine (docs/axfile/SPEC.md AF-5.1, AF-5.3, AF-5.4, AF-5.7).</summary>
+/// <summary>The rules of sound and video files that need no engine (docs/axmedia/SPEC.md AM-4.1, AM-4.3, AM-4.5).</summary>
 public sealed class MediaFilesTests
 {
     [Theory]
@@ -27,21 +27,6 @@ public sealed class MediaFilesTests
         Assert.Equal(10, MediaFiles.SoundExtensions.Count);
         Assert.Equal(7, MediaFiles.VideoExtensions.Count);
         Assert.Equal(17, MediaFiles.Extensions.Count);
-    }
-
-    [Fact]
-    public void The_queue_is_the_folders_media_files_in_order()
-    {
-        var now = DateTime.Now;
-        IReadOnlyList<Entry> entries =
-        [
-            new Entry("sub", "C:\\d\\sub", true, 0, now),
-            new Entry("01.mp3", "C:\\d\\01.mp3", false, 1, now),
-            new Entry("cover.jpg", "C:\\d\\cover.jpg", false, 1, now),
-            new Entry("02.mp3", "C:\\d\\02.mp3", false, 1, now),
-            new Entry("03.m4b", "C:\\d\\03.m4b", false, 1, now),
-        ];
-        Assert.Equal(["C:\\d\\01.mp3", "C:\\d\\02.mp3", "C:\\d\\03.m4b"], MediaFiles.Queue(entries));
     }
 
     [Theory]

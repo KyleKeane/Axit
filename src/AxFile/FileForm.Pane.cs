@@ -149,7 +149,7 @@ public sealed partial class FileForm
             return;
         }
 
-        var paths = MediaFiles.Queue(_shown);
+        var paths = MediaPaths(_shown);
         if (paths.Count == 0)
         {
             Announce("No sound or video files here", true);
@@ -207,7 +207,7 @@ public sealed partial class FileForm
 
             try
             {
-                paths.AddRange(MediaFiles.Queue(FolderListing.Read(target.Path, _settings.ShowHidden, _settings.ShowDotFiles).Entries));
+                paths.AddRange(MediaPaths(FolderListing.Read(target.Path, _settings.ShowHidden, _settings.ShowDotFiles).Entries));
             }
             catch (Exception ex) when (ex is IOException or UnauthorizedAccessException)
             {

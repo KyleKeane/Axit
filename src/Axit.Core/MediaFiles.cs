@@ -1,8 +1,10 @@
-namespace AxFile.Core;
+namespace Axit.Core;
 
 /// <summary>
-/// The rules of the player that need no engine (SPEC.md AF-5): which files are media, the queue a folder makes, the
-/// time format, the time a user types, and the speed steps. Tested in <c>tests/AxFile.Tests</c>.
+/// The rules of sound and video files that need no engine (docs/axmedia/SPEC.md AM-4.1, AM-4.3, AM-4.5): which
+/// files are media, the time format, the time a user types, and the speed steps. AxMedia plays them and AxFile asks
+/// which entries are media (docs/axfile/SPEC.md section 9), which is why they are the bundle's (AX-6.3; from
+/// AxFile.Core, 2026-10-22). Tested in <c>tests/Axit.Tests</c>.
 /// </summary>
 public static class MediaFiles
 {
@@ -16,7 +18,7 @@ public static class MediaFiles
         ".mp4", ".m4v", ".mov", ".avi", ".wmv", ".mkv", ".webm",
     };
 
-    /// <summary>Every extension the player takes (AF-5.1); whether Windows decodes one is its decoders' business.</summary>
+    /// <summary>Every extension the player takes (AM-4.1); whether Windows decodes one is its decoders' business.</summary>
     public static readonly IReadOnlySet<string> Extensions = new HashSet<string>(SoundExtensions.Concat(VideoExtensions), StringComparer.OrdinalIgnoreCase);
 
     public const double MinSpeed = 0.5;
@@ -25,11 +27,7 @@ public static class MediaFiles
 
     public static bool IsMedia(string path) => Extensions.Contains(Path.GetExtension(path));
 
-    /// <summary>The folder as a playlist (AF-5.3, AF-D6): the paths of its media files in the list's order.</summary>
-    public static IReadOnlyList<string> Queue(IEnumerable<Entry> entries) =>
-        entries.Where(entry => !entry.IsFolder && IsMedia(entry.Path)).Select(entry => entry.Path).ToList();
-
-    /// <summary>"12:40" under an hour, "1:02:10" over (AF-5.7); never negative.</summary>
+    /// <summary>"12:40" under an hour, "1:02:10" over (AM-4.5); never negative.</summary>
     public static string FormatTime(TimeSpan time)
     {
         var total = (long)Math.Max(0, Math.Floor(time.TotalSeconds));
@@ -39,7 +37,7 @@ public static class MediaFiles
         return hours > 0 ? $"{hours}:{minutes:00}:{seconds:00}" : $"{minutes}:{seconds:00}";
     }
 
-    /// <summary>What Go to time takes (AF-5.4): "12:40", "1:02:10", or "750" for seconds; null for anything else.</summary>
+    /// <summary>What Go to time takes (AM-4.3): "12:40", "1:02:10", or "750" for seconds; null for anything else.</summary>
     public static TimeSpan? ParseTime(string text)
     {
         var parts = text.Trim().Split(':');
@@ -65,7 +63,7 @@ public static class MediaFiles
             : TimeSpan.FromSeconds(numbers[0] * 3600 + numbers[1] * 60 + numbers[2]);
     }
 
-    /// <summary>One step faster, by 0.25 up to 3 (AF-5.4).</summary>
+    /// <summary>One step faster, by 0.25 up to 3 (AM-4.3).</summary>
     public static double Faster(double speed) => Math.Min(MaxSpeed, SanitizeSpeed(speed) + SpeedStep);
 
     /// <summary>One step slower, by 0.25 down to 0.5.</summary>
@@ -83,6 +81,6 @@ public static class MediaFiles
         return Math.Clamp(onGrid, MinSpeed, MaxSpeed);
     }
 
-    /// <summary>"Speed 1.25", "Speed 1": the announcement (AF-7).</summary>
+    /// <summary>"Speed 1.25", "Speed 1": the announcement (AM-6).</summary>
     public static string SpeedText(double speed) => "Speed " + speed.ToString("0.##", System.Globalization.CultureInfo.InvariantCulture);
 }

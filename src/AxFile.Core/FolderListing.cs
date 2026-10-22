@@ -1,3 +1,5 @@
+using Axit.Core;
+
 namespace AxFile.Core;
 
 /// <summary>One entry of a folder (SPEC.md AF-2.2): its name, its full path, whether it is a folder, its size in bytes (0 for a folder) and when it was last written; a drive of This PC is a folder entry marked as a drive (AF-3.10).</summary>
@@ -22,7 +24,7 @@ public enum OpenWay
     /// <summary>.json: a new AxJSON window.</summary>
     AxJSON,
 
-    /// <summary>A sound or video file (<see cref="MediaFiles"/>): the player.</summary>
+    /// <summary>A sound or video file (<see cref="Axit.Core.MediaFiles"/>): the player.</summary>
     Play,
 
     /// <summary>Anything else: the program Windows has for it.</summary>

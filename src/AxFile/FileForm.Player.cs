@@ -59,10 +59,14 @@ public sealed partial class FileForm
         PlayFromList(entry);
     }
 
+    /// <summary>The folder as a playlist (AF-5.3, AF-D6): the paths of its media files in the list's order.</summary>
+    private static List<string> MediaPaths(IEnumerable<Entry> entries) =>
+        entries.Where(entry => !entry.IsFolder && MediaFiles.IsMedia(entry.Path)).Select(entry => entry.Path).ToList();
+
     private void PlayFromList(Entry entry)
     {
-        var paths = MediaFiles.Queue(_shown);
-        var index = paths.ToList().FindIndex(path => string.Equals(path, entry.Path, StringComparison.OrdinalIgnoreCase));
+        var paths = MediaPaths(_shown);
+        var index = paths.FindIndex(path => string.Equals(path, entry.Path, StringComparison.OrdinalIgnoreCase));
         if (index < 0)
         {
             paths = [entry.Path];
