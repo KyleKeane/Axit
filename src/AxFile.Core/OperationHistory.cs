@@ -46,6 +46,14 @@ public sealed record Operation(OperationKind Kind, IReadOnlyList<string> Before,
     /// <summary>The entry to select afterwards: the one put back; null when the undo removed what it made.</summary>
     public string? Select => PutsBack ? Path.GetFileName(Before[0]) : null;
 
+    /// <summary>Where the operation left things (the Actions list's Enter, AF-9.3): the folder of what it made or moved into, or of what it deleted.</summary>
+    public string ResultFolder => Kind == OperationKind.Delete
+        ? Path.GetDirectoryName(Before[0]) ?? Before[0]
+        : Path.GetDirectoryName(MadeFolder ?? After[0]) ?? After[0];
+
+    /// <summary>The entry to select there: what it made, the folder it moved into, or the first entry it copied or moved; null for a delete.</summary>
+    public string? Result => Kind == OperationKind.Delete ? null : Path.GetFileName(MadeFolder ?? After[0]);
+
     /// <summary>"notes.md" or "3 items".</summary>
     public string What => Paths.Count == 1 ? Path.GetFileName(Paths[0]) : $"{Paths.Count} items";
 
