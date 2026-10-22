@@ -32,6 +32,7 @@ public sealed class StartForm : AxitForm
     private IReadOnlyList<ProgramEntry> _programs = [];
     private IReadOnlyList<ProgramEntry> _matches = [];
     private Hotkey? _registered;
+    private nint _before;
     private Hotkey? _captured;
     private bool _capturing;
     private bool _startHidden = true;
@@ -342,7 +343,14 @@ public sealed class StartForm : AxitForm
             _field.Clear();
         }
 
-        var area = Screen.FromHandle(GetForegroundWindow()).WorkingArea;
+        var before = GetForegroundWindow();
+        if (!Visible && before != Handle)
+        {
+            // AS-3.4: the window the focus goes back to when AxStart hides without starting anything.
+            _before = before;
+        }
+
+        var area = Screen.FromHandle(before).WorkingArea;
         var width = Math.Max(MinimumSize.Width, area.Width / 4);
         var height = Math.Max(MinimumSize.Height, Height - ClientSize.Height + _menu.Height + _field.Height + _list.ItemHeight * 12 + _status.Height + 4);
         Bounds = new Rectangle(area.Left + (area.Width - width) / 2, area.Top + (area.Height - height) / 2, width, height);
@@ -357,8 +365,14 @@ public sealed class StartForm : AxitForm
         Do(() => RefreshAsync(announce: false));
     }
 
-    /// <summary>The window hidden; Windows gives the focus back to the window that had it before.</summary>
-    private void HideLauncher()
+    /// <summary>
+    /// The window hidden, and the window that was in front before the hotkey brought to the front again (AS-3.4):
+    /// left to itself, Windows activated one of this process's own hidden windows, and NVDA went on showing the program
+    /// from before while the keys went nowhere. Not when a program was started, or another took the focus itself.
+    /// </summary>
+    private void HideLauncher() => HideLauncher(giveFocusBack: true);
+
+    private void HideLauncher(bool giveFocusBack)
     {
         _speak.Stop();
         if (NoticeOpen)
@@ -368,6 +382,13 @@ public sealed class StartForm : AxitForm
 
         _capturing = false;
         Hide();
+        if (giveFocusBack && _before != 0 && IsWindow(_before))
+        {
+            // This process was in front a moment ago, so Windows lets it hand the foreground on.
+            SetForegroundWindow(_before);
+        }
+
+        _before = 0;
     }
 
     private void HideIfAnotherProgramIsInFront()
@@ -381,7 +402,7 @@ public sealed class StartForm : AxitForm
         GetWindowThreadProcessId(GetForegroundWindow(), out var owner);
         if (owner != (uint)Environment.ProcessId)
         {
-            HideLauncher();
+            HideLauncher(giveFocusBack: false);
         }
     }
 
@@ -500,17 +521,35 @@ public sealed class StartForm : AxitForm
             return;
         }
 
-        // Hidden first, so that the program comes up in front of the window that had the focus.
-        HideLauncher();
+        // Hidden first, so that the program comes up in front; the focus is not handed back, or the program, started
+        // by a process no longer in front, would open behind.
+        var before = _before;
+        HideLauncher(giveFocusBack: false);
         if (AppsFolder.Start(entry, administrator) is { } error)
         {
             ShowLauncher(keepText: true);
+            _before = before;
             Announce(error, true);
             return;
         }
 
         _settings.Started(entry.Name);
         SaveSettings();
+        Do(() => GiveFocusBackIfNothingTookItAsync(before));
+    }
+
+    /// <summary>
+    /// After a start (AS-3.4): when nothing has come to the front within three seconds (a program without a window, a
+    /// declined administrator prompt), the window from before gets the focus back rather than this hidden process.
+    /// </summary>
+    private async Task GiveFocusBackIfNothingTookItAsync(nint before)
+    {
+        await Task.Delay(3000);
+        GetWindowThreadProcessId(GetForegroundWindow(), out var owner);
+        if (!Visible && owner == (uint)Environment.ProcessId && before != 0 && IsWindow(before))
+        {
+            SetForegroundWindow(before);
+        }
     }
 
     private void OpenFileLocation()
@@ -527,8 +566,10 @@ public sealed class StartForm : AxitForm
             return;
         }
 
-        HideLauncher();
+        var before = _before;
+        HideLauncher(giveFocusBack: false);
         AxitMenu.Start(Dispatch.AxFile, target);
+        Do(() => GiveFocusBackIfNothingTookItAsync(before));
     }
 
     private void SayInformation()
@@ -668,6 +709,12 @@ public sealed class StartForm : AxitForm
 
     [DllImport("user32.dll")]
     private static extern nint GetForegroundWindow();
+
+    [DllImport("user32.dll")]
+    private static extern bool SetForegroundWindow(nint hWnd);
+
+    [DllImport("user32.dll")]
+    private static extern bool IsWindow(nint hWnd);
 
     [DllImport("user32.dll")]
     private static extern uint GetWindowThreadProcessId(nint hWnd, out uint processId);

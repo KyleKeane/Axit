@@ -30,5 +30,6 @@ dotnet build Axit.sln
 ## Gotchas already learned
 
 - The hidden window is not in the Axit menu's window list (`AxitMenu.OpenWindows` takes visible windows only), which is why the hand-over needs `AppMessage.SendTo` and `FindRunning`.
+- Hiding a window does not give the focus back by itself: Windows activated one of this process's own hidden windows, NVDA went on showing the program from before, and typing went nowhere (the user, 2026-10-22). `ShowLauncher` keeps the foreground window in `_before` and `HideLauncher` calls `SetForegroundWindow` on it, allowed because this process is still in front at that moment; after a start the program takes the front itself, and `GiveFocusBackIfNothingTookItAsync` covers the case where nothing does.
 - `Move` is a `Control` member (an event's raiser); the method that moves the selection is `SelectMatch`.
 - The installer tells AxStart's process from the other apps' by its command line (`Axit.exe start`), through `Win32_Process`, and stops it before it changes anything (AS-1.5).

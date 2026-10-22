@@ -108,7 +108,11 @@ taskbar. It works entirely offline (bundle G6).
   app".
 - AS-3.4 **Escape** hides the window at once, whatever the field holds (the user's ask, 2026-10-22: it first cleared
   a field with text and hid only an empty one); Alt+F4 hides it the same way; Backspace and Ctrl+A clear the text. Hiding gives the focus back to the
-  window that had it before the hotkey (Windows does this when the window hides). The text is empty each time the
+  window that had it before the hotkey: AxStart remembers it when it shows and brings it to the front as it hides
+  (left to Windows, the focus went to one of AxStart's own hidden windows while NVDA still showed the program from
+  before, and typing went nowhere; 2026-10-22). After a start the program comes up in front by itself; if nothing has
+  taken the focus three seconds later (a program without a window, a declined administrator prompt), the window from
+  before gets it back. When the focus went to another program (AS-3.5), it stays there. The text is empty each time the
   window shows; the selection starts on the first match.
 - AS-3.5 The window hides by itself when it loses the focus to another program (Alt+Tab, a click elsewhere), as the
   Start menu does; a notice of its own (Hotkey…, Keyboard shortcuts, About) keeps it.
