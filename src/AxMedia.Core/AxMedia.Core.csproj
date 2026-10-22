@@ -1,0 +1,14 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <!-- AxMedia's pure code (docs/axmedia/SPEC.md §6): the player seam over Windows' media stack, the queue, a folder's
+       media files, the settings; no window. -->
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <RootNamespace>AxMedia.Core</RootNamespace>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Axit.Core\Axit.Core.csproj" />
+  </ItemGroup>
+
+</Project>
