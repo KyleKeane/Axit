@@ -166,7 +166,9 @@ allow it, see B-9).
   with `-NoPush`, which pushes nothing and may run offline), runs
   the tests, sets `<Version>`, commits `Release <version>`, tags `v<version>` and pushes. `.github/workflows/release.yml` checks the
   tag against the version, tests, runs `publish.ps1 -NoInstall` and creates the GitHub release `Axit <version>` with
-  `Axit-<version>-win-x64.zip` and `install.cmd` attached and the CHANGELOG section as notes.
+  `Axit-<version>-win-x64.zip` and `install.cmd` attached and the CHANGELOG section as notes, as a draft that is
+  published once the files are up (since 2026-10-21: the update check reads the latest published release, and one
+  made while the zip was still uploading had a window download a half-written zip, "The installer failed").
 - AX-4.2 `publish.ps1` publishes `src/Axit` self-contained, single file, into `publish\win-x64` with `install.cmd`,
   `install.ps1`, `LICENSE` and `docs/axit/README.md` as `README.md`, and zips it.
 - AX-4.3 One `CHANGELOG.md`; every bullet starts with the app it concerns (`AxClaude:`, `AxDown:`, `Axit:` for the

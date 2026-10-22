@@ -53,6 +53,9 @@ jobs:
         shell: pwsh
         run: .\tools\release-notes.ps1 -Version $env:VERSION | Set-Content -Path notes.md -Encoding utf8
 
+      # The release is made as a draft and published only once its files are up: the apps' update check reads the
+      # latest published release (AX-3), and a window that checked while the zip was still uploading downloaded a
+      # half-written file and reported "The installer failed" (2026-10-21).
       - name: Create the GitHub release
         shell: pwsh
         env:
@@ -63,5 +66,7 @@ jobs:
           if ($LASTEXITCODE -eq 0) {
             gh release upload $env:TAG $zip install.cmd --clobber
           } else {
-            gh release create $env:TAG $zip install.cmd --title "Axit $env:VERSION" --notes-file notes.md
+            gh release create $env:TAG $zip install.cmd --title "Axit $env:VERSION" --notes-file notes.md --draft
+            if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+            gh release edit $env:TAG --draft=false
           }
