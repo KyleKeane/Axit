@@ -1,0 +1,7 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\src\AxStart.Core\AxStart.Core.csproj" />
+  </ItemGroup>
+
+</Project>
