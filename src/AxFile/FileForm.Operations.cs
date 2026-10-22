@@ -105,7 +105,8 @@ public sealed partial class FileForm
 
                 _actions.Undone(entry);
                 RefreshPane();
-                if (await ShowFolderAsync(operation.Folder, operation.Select ?? CurrentEntry()?.Name, remember: false))
+                // The undo's own words are what is heard, the folder's name among them when it is another (AF-4.14).
+                if (await ShowFolderAsync(operation.Folder, operation.Select ?? CurrentEntry()?.Name, remember: false, announce: false))
                 {
                     Announce(operation.DoneText, true);
                 }

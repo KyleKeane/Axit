@@ -22,7 +22,7 @@ dotnet test tests/AxFile.Tests/AxFile.Tests.csproj
 
 ## Rules
 
-1. Every control gets an `AccessibleName`; the folder list is named with its count alone, the folder being the title (AF-2.1); the Actions list is "Actions"; nothing speaks on a plain arrow key; a command's result is one announcement (AF-7), on the list that has the focus, or on the notice while one shows. Nothing is spoken for a line of the Actions list arriving or changing.
+1. Every control gets an `AccessibleName`; the folder list is named with its count alone, the folder being the title (AF-2.1); the Actions list is "Actions"; nothing speaks on a plain arrow key that moves, and Up or Down at an end says "First item" or "Last item" with the entry (AF-3.6, `SayBoundary`); a change of folder says the folder, its count and the entry (AF-3.1, `FolderAnnouncement`, which cuts short NVDA's own reading of the new selection); a command's result is one announcement (AF-7), on the list that has the focus, or on the notice while one shows. Nothing is spoken for a line of the Actions list arriving or changing.
 2. The folder reads and the operations never run on the UI thread: `Task.Run` for the reads, the rename and the new folder, a thread of its own for the shell's delete, copy, move and Restore.
 3. No second window (bundle AX-7.2): questions and errors are notices; the folder picker, File Explorer and the shell's own dialogs and menu are the system's own windows. Playing and reading are other apps' windows, started with the paths (AF-D2).
 4. Run the `accessibility-review` skill on a change here before committing, and check it with NVDA following the test plan.

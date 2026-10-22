@@ -17,8 +17,8 @@ public static class HelpText
           Alt+A: the Axit menu: a new window of any app, the files and folders closed lately, the open Axit windows, most recent first (Alt+A, O, 1 is the one you were in last) and by type, Close all windows, Check for updates, and About
 
         The folder list
-          Arrow keys, Home, End, Page Up, Page Down: move through the entries; a typed letter jumps to the next name starting with it
-          Enter: open the entry: a folder in this list, a file in the program Windows has for it (the one you made its default: AxDown, AxMedia, AxPreview or any other), or the Windows dialog that picks one when there is none
+          Arrow keys, Home, End, Page Up, Page Down: move through the entries; a typed letter jumps to the next name starting with it. Up or Home at the first entry says "First item" and the entry again; Down or End at the last says "Last item"
+          Enter: open the entry: a folder in this list, a file in the program Windows has for it (the one you made its default: AxDown, AxMedia, AxPreview or any other), or the Windows dialog that picks one when there is none. A folder you go into, or up to, is announced with its name, its count and the entry you land on: "docs, 5 items, plan.md"
           Shift+Enter: read a file in AxPreview; a folder opens in a new AxFile window
           Ctrl+E: open the file in AxDown, or AxJSON for a .json file
           Ctrl+Enter: play the folder's sound and video files in AxMedia. Ctrl+Shift+Q: add the entry, or the selected entries, a folder's media files included, to AxMedia's queue, staying here
@@ -29,7 +29,7 @@ public static class HelpText
           Ctrl+O: open a folder with the Windows folder picker. Ctrl+G: go to a typed path, %USERPROFILE%\Downloads for instance
           Ctrl+N: a new AxFile window on this folder
           F5: read the folder again
-          Ctrl+Shift+F: filter the list to the names containing a text; Escape in the list clears the filter. Folder, Sort by: name, date or size
+          Ctrl+Shift+F: filter the list to the names containing a text, "3 of 24 items, filter chap" and the entry; Escape in the list clears the filter. Folder, Sort by: name, date or size
           Space: select the entry, or deselect it; it reads "selected" after its name while it is. Shift+Down, Shift+Up, Shift+Home, Shift+End: select from where you started to there, as in File Explorer, keeping what was selected before. Ctrl+A: select all. Ctrl+Shift+A: deselect all; both in the Select menu with the Space toggle. Ctrl+I says how many are selected
           Shift+F10, or the Applications key: the entry's menu, one list in File Explorer's order: Open, Open with, Open in Axit, Preview, Play folder in AxMedia, Add to AxMedia's queue, Cut, Copy, Paste, Rename, Delete, New folder, New text file, Move to new folder, Compress to zip, Extract here, Copy path, Show in File Explorer, Information, Properties, Windows menu. Ctrl+I inside this menu says the entry without closing it
           Alt+Enter: the entry's Properties, the Windows sheet

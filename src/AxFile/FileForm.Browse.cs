@@ -59,18 +59,22 @@ public sealed partial class FileForm
         }
 
         folder ??= _settings.LastFolder is { } last && Directory.Exists(last) ? last : Environment.GetFolderPath(Environment.SpecialFolder.UserProfile);
-        await ShowFolderAsync(folder, select, remember: true);
+        // NVDA reads the window, the list and its entry as the window opens; nothing is added (AF-3.1).
+        await ShowFolderAsync(folder, select, remember: true, announce: false);
     }
 
     /// <summary>
     /// Shows a folder (AF-2.2): read on a background task, the list refilled with <paramref name="select"/> selected
     /// by name (or the first entry), the title and the status bar following. A folder that is gone gives the "Folder
     /// not found" notice and the nearest parent that exists (AF-3.5); any other failure is one announcement and the
-    /// list stays. With <paramref name="remember"/> the folder joins the recent list (AF-3.3).
+    /// list stays. With <paramref name="remember"/> the folder joins the recent list (AF-3.3). Another folder than the
+    /// one shown is announced with its count and the entry landed on, "docs, 5 items, plan.md" (AF-3.1), unless
+    /// <paramref name="announce"/> is off: the start, which NVDA reads itself, and an undo, which says what it undid.
     /// </summary>
-    private async Task<bool> ShowFolderAsync(string folder, string? select, bool remember)
+    private async Task<bool> ShowFolderAsync(string folder, string? select, bool remember, bool announce = true)
     {
         var read = ++_reads;
+        var changed = !string.Equals(folder, _folder, StringComparison.OrdinalIgnoreCase);
         Listing listing;
         try
         {
@@ -139,6 +143,47 @@ public sealed partial class FileForm
         }
 
         UpdateStatusBar();
+        if (announce && changed)
+        {
+            Announce(FolderAnnouncement(), true);
+        }
+
+        return true;
+    }
+
+    /// <summary>
+    /// What a change of folder says (AF-3.1): the folder's name, the list's count and the entry landed on, "docs, 5
+    /// items, plan.md"; "temp, No items in this folder" for an empty one. NVDA alone would read the new entry only,
+    /// which does not tell the folder landed in from the folder under the focus.
+    /// </summary>
+    private string FolderAnnouncement()
+    {
+        var name = FolderListing.IsThisPC(_folder) ? FolderListing.ThisPC : FolderListing.FolderName(_folder ?? string.Empty);
+        var item = _list.SelectedItem?.ToString() ?? string.Empty;
+        return _shown.Count == 0 ? $"{name}, {item}" : $"{name}, {_list.AccessibleName}, {item}";
+    }
+
+    /// <summary>
+    /// Up or Home at the first entry, Down or End at the last (AF-3.6), in either list: the key moves nothing, so
+    /// "First item, <name>" or "Last item, <name>" is said instead of silence; false when the key moves.
+    /// </summary>
+    private bool SayBoundary(Keys key)
+    {
+        var list = _pane.Focused ? _pane : _list;
+        var index = list.SelectedIndex;
+        if (index < 0 || list.Items.Count == 0)
+        {
+            return false;
+        }
+
+        var first = key is Keys.Up or Keys.Home && index == 0;
+        var last = key is Keys.Down or Keys.End && index == list.Items.Count - 1;
+        if (!first && !last)
+        {
+            return false;
+        }
+
+        Announce((first ? "First item, " : "Last item, ") + list.Items[index], true);
         return true;
     }
 
@@ -224,16 +269,23 @@ public sealed partial class FileForm
         });
     }
 
-    /// <summary>The filter set and the list made again, the entry kept when it still shows; the list's name says the count, "Filter cleared" when it is emptied.</summary>
+    /// <summary>The filter set and the list made again, the entry kept when it still shows; the list's new name and the entry are said, "3 of 24 items, filter chap, Chapter 1.mp3", or "Filter cleared" when it is emptied.</summary>
     private void ApplyFilter(string text)
     {
         var had = _filter.Length > 0;
         _filter = text;
         Rearrange(CurrentEntry()?.Name);
-        if (text.Length == 0 && had)
+        if (text.Length == 0)
         {
-            Announce("Filter cleared", true);
+            if (had)
+            {
+                Announce("Filter cleared", true);
+            }
+
+            return;
         }
+
+        Announce($"{_list.AccessibleName}, {_list.SelectedItem}", true);
     }
 
     /// <summary>Escape in the list: the filter cleared; false, the key left alone, when there is none.</summary>

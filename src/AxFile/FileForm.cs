@@ -417,6 +417,12 @@ public sealed partial class FileForm : AxitForm
                 return true;
         }
 
+        if ((_list.Focused || _pane.Focused) && SayBoundary(keyData))
+        {
+            // Up or Home at the first entry, Down or End at the last (AF-3.6): said, since the key moves nothing.
+            return true;
+        }
+
         if (_pane.Focused)
         {
             // In the Actions list (AF-9.3): Enter goes where the action left things, Escape goes back to the folder list.

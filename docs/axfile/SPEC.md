@@ -31,8 +31,9 @@ folder of the file or project in hand, and sends back. It works entirely offline
   reading is AxPreview's, editing is the editors'; AxFile hands over and says nothing more than it has to (AF-D2).
 - **G4 Streamlined.** The plan's worry on record: a file tree's behaviour is endless. The operations are the ones
   named here and no more (AF-D5).
-- **G5 Nothing spoken unprompted** (AX-7.3). A command's result is one announcement; the Actions list is where the
-  rest can be read when wanted.
+- **G5 Nothing spoken unprompted** (AX-7.3), and nothing answered with silence: a command's result is one short
+  announcement, a change of folder names the folder, a key that moves nothing says so (AF-3.1, AF-3.6); the Actions
+  list is where the rest can be read when wanted.
 - **Non-goals.** A tree or a second folder pane; drag and drop; a properties dialog of our own; search across folders;
   file type associations of our own (Windows' own, AF-D2); a player, a viewer or an editor inside the window (the
   other apps'); a permanent delete (§7).
@@ -40,11 +41,12 @@ folder of the file or project in hand, and sends back. It works entirely offline
 ## 3. Scenarios
 
 1. Start menu, "Axit AxFile": the last folder opens, the list focused; NVDA reads "24 items, list, 01 Chapter
-   1.mp3, 1 of 24". Down twice, Enter: the file opens in the program Windows has for `.mp3`, AxMedia when the user
-   has made it so, with the folder's other chapters after it. Backspace: the folder above.
-2. In AxClaude on a project, Alt+S, I, F: AxFile opens on the project folder. Down to `docs`, Enter: the list is the
-   `docs` folder; Shift+Enter on `plan.md`: AxPreview shows it to read; Ctrl+E on it: AxDown opens it to edit.
-   Backspace: back in the project with `docs` selected.
+   1.mp3, 1 of 24". Up: "First item, 01 Chapter 1.mp3". Down twice, Enter: the file opens in the program Windows has
+   for `.mp3`, AxMedia when the user has made it so, with the folder's other chapters after it. Backspace: "Music, 8
+   items, Dune, folder".
+2. In AxClaude on a project, Alt+S, I, F: AxFile opens on the project folder. Down to `docs`, Enter: "docs, 5 items,
+   plan.md"; Shift+Enter on `plan.md`: AxPreview shows it to read; Ctrl+E on it: AxDown opens it to edit. Backspace:
+   "myproject, 12 items, docs, folder".
 3. Ctrl+Shift+N, type `notes`, Enter: "Created notes", the folder selected. F2 on it, type `Notes`, Enter: "Renamed to
    Notes". Delete: "Delete Notes? It goes to the Recycle Bin with everything in it.", Enter: "Deleted Notes". Tab:
    "Actions, list, Deleted Notes, 3 of 3"; Ctrl+Z: "Undone: Notes restored", the folder list on Notes; Tab: the line
@@ -110,7 +112,12 @@ folder of the file or project in hand, and sends back. It works entirely offline
 
 - AF-3.1 **Enter** on a folder opens it in the list with its first entry selected. **Backspace** and Alt+Up go to the
   parent with the folder just left selected; at a drive's root, to This PC with that drive selected (AF-3.10), and at
-  This PC, "Top". NVDA speaks the new selection; the app adds nothing.
+  This PC, "Top". Every change of folder (Enter, Backspace, Go to folder, Open folder, a recent folder or a favorite,
+  a drive, This PC, Enter on a line of the Actions list) is announced as the folder's name, the list's count and the
+  entry landed on, "docs, 5 items, plan.md" ("This PC, 3 items, Local Disk (C:), drive"; "temp, No items in this
+  folder"), through one notification that cuts short NVDA's own reading of the new entry (asked 2026-10-22: the entry
+  alone did not tell the folder landed in from the folder under the focus; the first build left it to NVDA). The
+  start is NVDA's own reading of the window, the list and its entry, and an undo says what it undid instead (AF-4.14).
 - AF-3.2 **Enter** on a file opens it with the program the user has made its default in Windows (`ShellExecute`, as
   Enter in File Explorer; AF-D2); when Windows has none, the Windows dialog that picks a program, as File Explorer
   shows it (AF-4.7). The Axit apps register as programs for their kinds when Axit is installed (AX-2.3), so that
@@ -132,7 +139,10 @@ folder of the file or project in hand, and sends back. It works entirely offline
 - AF-3.5 A folder that is gone when it is asked for (deleted, an unplugged drive) gives the notice "Folder not found"
   naming it, and the list shows the nearest parent that exists.
 - AF-3.6 The list's own keys stay native: arrows, Home, End, Page Up and Page Down, a typed letter to the next name
-  starting with it. **Find** (Ctrl+F, the bundle's Find notice with the field "Name contains") selects the first entry
+  starting with it; but at the ends, where the key moves nothing, the window says so rather than nothing (asked
+  2026-10-22): Up or Home at the first entry, "First item, <entry>", Down or End at the last, "Last item, <entry>", in
+  the folder list and the Actions list alike (`AxFileKeys.FirstItem`, `LastItem` and their seconds; the keys are the
+  list's own everywhere else). **Find** (Ctrl+F, the bundle's Find notice with the field "Name contains") selects the first entry
   after the current one whose name contains the text, wrapping round the end once, "Not found" otherwise; F3 and
   Shift+F3 the next and the previous. NVDA reads the selected entry; the app adds nothing.
 - AF-3.7 **Selection** (asked 2026-10-21). The list stays a single-selection list box, where the arrow keys choose
@@ -160,9 +170,9 @@ folder of the file or project in hand, and sends back. It works entirely offline
   (`FolderListing.Sort`, tested); the entry in hand stays selected; "Sorted by date"; the order is a setting
   (`sortBy`) and holds for every folder and the next window. **Filter…** (Ctrl+Shift+F; Folder → Filter…): the notice
   "Filter" with the field "Name contains" holding the filter in force; Filter lists only the entries whose name
-  contains the text, any case, and names the list "3 of 24 items, filter chap" so that the count is read with
-  the list; an empty field clears it, "Filter cleared", as does **Escape** in the list while a filter is on (Escape
-  does nothing otherwise). A filter that nothing passes shows the one item "No names contain <text>", and a command on
+  contains the text, any case, names the list "3 of 24 items, filter chap" so that the count is read with the list,
+  and says the name and the entry at once, "3 of 24 items, filter chap, Chapter 1.mp3"; an empty field clears it,
+  "Filter cleared", as does **Escape** in the list while a filter is on (Escape does nothing otherwise). A filter that nothing passes shows the one item "No names contain <text>", and a command on
   it says the same. The filter lives in the folder: another folder drops it, a refresh keeps it. What the list shows
   is what the commands see: Select all marks the shown entries, find moves among the shown entries. Find (AF-3.6)
   jumps, the filter narrows; both are kept. Play folder (AF-5.1) hands the folder itself to AxMedia, filter or not.
@@ -391,7 +401,8 @@ and the started process finds its open window and hands the paths over with the 
 ### AF-7 Announcements
 
 One UI Automation notification each, on the list that has the focus, or on the notice while one shows (AX-7.3):
-"Created <name>", "Moved <what> into <name>" (AF-4.13), "Renamed to <name>", "Deleted <name>", "Deleted n items",
+"<folder>, <N items>, <entry>" (a change of folder, AF-3.1), "First item, <entry>", "Last item, <entry>" (AF-3.6),
+"<N of M items, filter text>, <entry>" (AF-3.8), "Created <name>", "Moved <what> into <name>" (AF-4.13), "Renamed to <name>", "Deleted <name>", "Deleted n items",
 "Copied path", "Copied n paths", "Cut <name>", "Copied <name>", "Cut n items", "Copied n items", "Selected",
 "Deselected", "Selected, n selected", "Deselected, n selected", "n selected", "None selected" (AF-3.7), "Sorted by
 <order>", "Filter cleared" (AF-3.8), "Added to Favorites", "Removed from Favorites" (AF-3.9), "Top" (This PC,
@@ -568,3 +579,6 @@ AF-D4 (the volume) and AF-D6 (the queue fixed at Enter) went to AxMedia with the
   after the user found a folder renamed once could not be renamed again: verified by experiment that a process whose
   current directory the folder is (a terminal or an app started in it) is what refuses, and that AxFile itself holds
   nothing (renaming twice in a row works, test `A_folder_is_renamed_twice_in_a_row_and_a_current_directory_says_in_use`).
+- 2026-10-22, later: a change of folder announced with the folder's name, count and entry (AF-3.1), "First item" and
+  "Last item" at the ends of either list (AF-3.6), the filter's name and entry said (AF-3.8), at the user's ask: the
+  entry alone did not tell the folder landed in from the folder under the focus, and silence at an end told nothing.
