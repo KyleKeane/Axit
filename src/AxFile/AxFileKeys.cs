@@ -36,6 +36,9 @@ public static class AxFileKeys
     public const Keys Clear = Keys.Escape;
     public const Keys OpenFolder = Keys.Control | Keys.O;
     public const Keys GoToFolder = Keys.Control | Keys.G;
+
+    /// <summary>Go to folder too, File Explorer's key for its address bar (AF-3.3; the Drives menu's mnemonic until 2026-10-22).</summary>
+    public const Keys GoToFolderAlso = Keys.Alt | Keys.D;
     public const Keys ShowInExplorer = Keys.Control | Keys.W;
     public const Keys ShowItemInExplorer = Keys.Control | Keys.Shift | Keys.W;
     public const Keys OpenInEditor = Keys.Control | Keys.E;
@@ -137,6 +140,7 @@ public static class AxFileKeys
         ("Clear the selection, or else the filter (in the folder list); back to the folder list (in the Actions list)", Clear),
         ("Open folder", OpenFolder),
         ("Go to folder", GoToFolder),
+        ("Go to folder, File Explorer's address bar key", GoToFolderAlso),
         ("Show the folder in File Explorer", ShowInExplorer),
         ("Show the entry in File Explorer", ShowItemInExplorer),
         ("Open the file in its editor", OpenInEditor),

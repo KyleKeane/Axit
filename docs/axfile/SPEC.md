@@ -129,7 +129,7 @@ folder of the file or project in hand, and sends back. It works entirely offline
 - AF-3.3 **Open folder…** (Ctrl+O): the Windows folder picker. **Open recent folder ▸**: the last ten folders opened
   by command, "1. name (path)" (AX-9.5): the start, Open folder, Go to folder, a recent item, and the folder the
   window closed on; Enter and Backspace browse without joining the list, so that a walk through a tree does not fill
-  it. **Go to folder…** (Ctrl+G): the notice "Go to folder" with the field "Path" holding the current folder with a backslash at its end (empty at This PC), which
+  it. **Go to folder…** (Ctrl+G, or Alt+D, File Explorer's key for its address bar): the notice "Go to folder" with the field "Path" holding the current folder with a backslash at its end (empty at This PC), which
   takes a path with environment variables (`%USERPROFILE%\Downloads`) and a file's path (its folder, the file
   selected); "Not found: <path>" when there is no such place. In the field, **Down Arrow** and **Up Arrow** complete the
   path (asked 2026-10-22, AF-D12): the text up to its last backslash is a folder (with environment variables; a
@@ -214,8 +214,9 @@ folder of the file or project in hand, and sends back. It works entirely offline
   Paste, Rename, Delete, Cut, Copy, Ctrl+D, Play folder, Add to queue, Show current folder in ▸ the other apps); Show
   current folder in ▸ File Explorer opens File Explorer's own This PC. The other items of the entry's menu work on a
   drive as on a folder (Open in Axit ▸, Show in File Explorer, Properties, Windows menu…).
-- AF-3.11 **The Drives menu** (asked 2026-10-21, for moving things to a stick and taking it out): **Drives (D)** on
-  the menu bar lists the ready drives as "1. Local Disk (C:)" (AX-9.5), each opening the drive's root and joining the
+- AF-3.11 **The Drives menu** (asked 2026-10-21, for moving things to a stick and taking it out): **Folder → Drives ▸**
+  (its own menu on Alt+D until 2026-10-22, when it became a submenu at the user's ask and Alt+D went to Go to folder,
+  AF-3.3) lists the ready drives as "1. Local Disk (C:)" (AX-9.5), each opening the drive's root and joining the
   recent list, then **This PC** (the drives list, AF-3.10, the folder's drive selected), then **Eject this drive**
   and **Drive properties**, both for the drive in hand: the entry at This PC, or the folder's own drive. Eject is
   the shell's own: the drive's context menu is built as for Windows menu… (AF-4.7) and its item whose verb is
@@ -389,7 +390,8 @@ and the started process finds its open window and hands the paths over with the 
 
 - AF-6.1 Menus, in the standard order of a first menu (AX-6): **Folder (F):** New window Ctrl+N | Open folder… Ctrl+O |
   Open recent folder ▸ | Favorites ▸ (1. name (path) … or No favorites yet | ─ | Add or remove this folder Ctrl+D) |
-  Go to folder… Ctrl+G | ─ | Up one level Backspace | Refresh F5 | Undo <operation> Ctrl+Z (AF-4.14) | Actions
+  Drives ▸ (1. Local Disk (C:) … | ─ | This PC | ─ | Eject this drive | Drive properties; AF-3.11) | Go to folder…
+  Ctrl+G | ─ | Up one level Backspace | Refresh F5 | Undo <operation> Ctrl+Z (AF-4.14) | Actions
   (AF-9.1) | ─ | Sort by ▸ (Name ✓ | Date | Size) | Filter… Ctrl+Shift+F | ─ | Show current folder in ▸ (File Explorer
   Ctrl+W | AxClaude | AxGit | AxTerminal) | ─ | Exit Alt+F4. **Item (I):** Open Enter | Open with ▸ (Windows default |
   Choose a program… | ─ | 1. name (path) … or No programs of your own yet | Add a program… | Remove a program ▸) |
@@ -401,8 +403,7 @@ and the started process finds its open window and hands the paths over with the 
   context menu (AF-4.6). **Selection (S):** Select all Ctrl+A | Deselect all Ctrl+Shift+A | Select or deselect this
   entry Space | Select to here Shift+Space | ─ | Cut Ctrl+X | Copy Ctrl+C | Delete Delete | ─ | Move to new folder… |
   Compress to zip | Add to AxMedia's queue Ctrl+Shift+Q | Copy path Ctrl+Shift+C (AF-3.7; the operations on the marks
-  alone). **Drives (D):** 1. Local Disk (C:) … | ─ | This PC | ─ | Eject this drive | Drive properties
-  (AF-3.11). **Options (O):** Text ▸ (Font… | Larger text Ctrl+Plus | Smaller text Ctrl+Minus | Windows text size) |
+  alone). **Options (O):** Text ▸ (Font… | Larger text Ctrl+Plus | Smaller text Ctrl+Minus | Windows text size) |
   General ▸ (Check for updates at start ✓ | Show hidden files and folders | Show files and folders starting with a
   period) | Developer ▸ (Open settings file | Copy diagnostics). **Axit (A)** (AX-9). **Help (H):** Keyboard
   shortcuts F1 | User guide | ─ | File resources ▸ (Keyboard shortcuts in Windows, the Microsoft page, in the
@@ -410,7 +411,7 @@ and the started process finds its open window and hands the paths over with the 
 - AF-6.2 Keys (AX-8). Bundle-wide: F1, the control keys (Tab, Shift+Tab, Ctrl+Tab, Ctrl+Shift+Tab and F6, between
   the folder list and the Actions list, AF-9.1), Ctrl+F, F3, Shift+F3, Ctrl+S ("Nothing to save here"), Ctrl+Plus,
   Ctrl+Minus, Page Up and Page Down (the list's own here), Alt+F4. Window-specific (`AxFileKeys`): Enter,
-  Shift+Enter, Backspace, Alt+Up, Left, Right, F5, F2, Delete, Ctrl+N, Ctrl+O, Ctrl+G, Ctrl+D, Ctrl+W, Ctrl+Shift+W, Ctrl+E,
+  Shift+Enter, Backspace, Alt+Up, Left, Right, F5, F2, Delete, Ctrl+N, Ctrl+O, Ctrl+G, Alt+D, Ctrl+D, Ctrl+W, Ctrl+Shift+W, Ctrl+E,
   Ctrl+I, Ctrl+Shift+N, Ctrl+Shift+T, Ctrl+Shift+C, Ctrl+Shift+F, Escape, Shift+Up, Shift+Down, Shift+Home,
   Shift+End, Space, Shift+Space, Ctrl+A, Ctrl+Shift+A, Ctrl+Enter, Ctrl+Shift+Q (AF-5), Shift+F10, the Applications key,
   Alt+Enter, Ctrl+Z (AF-4.14), Ctrl+X, Ctrl+C, Ctrl+V. Enter, Shift+Enter, Backspace, Left, Right, Space, Escape, F2, Delete,
@@ -654,4 +655,5 @@ AF-D4 (the volume) and AF-D6 (the queue fixed at Enter) went to AxMedia with the
   list in three sections under header lines, the running operations first (AF-9.2, AF-D11), at the user's ask;
   specified first, built the same day. Not yet checked with NVDA (test plan 3.7b, 6.8, 6.9).
 - 2026-10-22, later: Escape deselects (AF-3.7); Left and Right as a tree's keys and completion in the Go to folder
-  field (AF-3.1, AF-3.3, AF-D12), at the user's ask. Not yet checked with NVDA (test plan 1.4b, 1.7).
+  field (AF-3.1, AF-3.3, AF-D12), at the user's ask; then the Drives menu as a submenu of Folder and Alt+D for Go to
+  folder (AF-3.11, AF-6.1). Not yet checked with NVDA (test plan 1.4b, 1.7, 1.12a, 3.7a).

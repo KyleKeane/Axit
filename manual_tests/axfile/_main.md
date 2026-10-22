@@ -86,6 +86,6 @@ Section 4, and AxMedia's and AxPreview's hand-over sections.
 
 ## Not in a folder
 
-- Section 1, step 4's This PC and drives, step 12a's Drives menu: start anywhere and Backspace up to This PC. A USB stick is needed for Eject.
+- Section 1, step 4's This PC and drives, step 12a's Drives submenu (Folder, Drives): start anywhere and Backspace up to This PC. A USB stick is needed for Eject.
 - Section 2, from the other windows: open AxClaude, AxDown, AxGit or AxTerminal on any folder here.
 - Section 5: any folder.

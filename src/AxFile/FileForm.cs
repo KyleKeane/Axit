@@ -20,7 +20,7 @@ public sealed partial class FileForm : AxitForm
     private readonly MenuStrip _menu = new();
     private readonly ToolStripMenuItem _recentItem = new("Open &recent folder");
     private readonly ToolStripMenuItem _favoritesItem = new("Fa&vorites");
-    private readonly ToolStripMenuItem _drivesMenu = new("&Drives");
+    private readonly ToolStripMenuItem _drivesMenu = new("Driv&es");
     private readonly List<(SortBy By, ToolStripMenuItem Item)> _sortItems = [];
     private readonly ItemMenu _itemMenu;
     private readonly ListBox _list = new();
@@ -51,6 +51,11 @@ public sealed partial class FileForm : AxitForm
         _favoritesItem.DropDownOpening += (_, _) => FillFavorites();
         FillFavorites();
         folder.DropDownItems.Add(_favoritesItem);
+        // Drives (AF-3.11): the drives to go to, This PC, and the drive's own Eject and Properties; refilled when it
+        // opens, since a stick may have come or gone. A submenu here since 2026-10-22, freeing Alt+D for Go to folder.
+        _drivesMenu.DropDownOpening += (_, _) => FillDrives();
+        FillDrives();
+        folder.DropDownItems.Add(_drivesMenu);
         folder.DropDownItems.Add(Item("&Go to folder...", GoToFolder, AxFileKeys.GoToFolder));
         folder.DropDownItems.Add(new ToolStripSeparator());
         folder.DropDownItems.Add(Item("&Up one level", GoUp, AxFileKeys.Up));
@@ -110,11 +115,6 @@ public sealed partial class FileForm : AxitForm
         select.DropDownItems.Add(Item("Add to AxMedia's &queue", () => OnMarks(AddToQueue), AxFileKeys.AddToQueue));
         select.DropDownItems.Add(Item("Copy &paths", () => OnMarks(CopyPath), AxFileKeys.CopyPath));
 
-        // Drives (AF-3.11): the drives to go to, This PC, and the drive's own Eject and Properties; refilled when it
-        // opens, since a stick may have come or gone.
-        _drivesMenu.DropDownOpening += (_, _) => FillDrives();
-        FillDrives();
-
         // Options, as the other windows' (AX-6): every setting in the submenu for what it is about.
         var options = new ToolStripMenuItem("&Options");
         options.DropDownItems.Add(CreateTextMenu());
@@ -136,7 +136,7 @@ public sealed partial class FileForm : AxitForm
             [("&Keyboard shortcuts in Windows", "https://support.microsoft.com/windows/keyboard-shortcuts-in-windows-dcc61a57-8ff0-cffe-9796-cb9706c75eec")]);
 
         // The bundle's Axit menu (AX-9) sits before Help in every window and ends with the update items and About.
-        _menu.Items.AddRange([folder, item, select, _drivesMenu, options, CreateAxitMenu(), help]);
+        _menu.Items.AddRange([folder, item, select, options, CreateAxitMenu(), help]);
         MainMenuStrip = _menu;
 
         // ---- the list (AF-2.1, AF-2.2): the main control; its own keys stay native (AF-3.6) ----
@@ -365,6 +365,7 @@ public sealed partial class FileForm : AxitForm
                 OpenFolderDialog();
                 return true;
             case AxFileKeys.GoToFolder:
+            case AxFileKeys.GoToFolderAlso:
                 GoToFolder();
                 return true;
             case AxFileKeys.ShowInExplorer:

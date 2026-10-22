@@ -20,10 +20,10 @@ public static class HelpText
           Arrow keys, Home, End, Page Up, Page Down: through the entries. At the first or the last entry, a key that cannot move plays one short low note
           Type the start of a name, the letters within a second of each other: the first name starting with it, as in File Explorer; the same letter again, the next such name; the low note when no name starts with it
           Enter or Right Arrow on a folder: into it; Right on a file plays the low note and never opens it. Backspace, Left Arrow or Alt+Up: the folder above, the one you left selected; from a drive's top, This PC with the drives. Each says the folder, its count and the entry you land on: "docs, 5 items, plan.md"
-          Ctrl+G: go to a typed path, %USERPROFILE%\Downloads for instance; in its field, Down and Up complete the path from what you typed, "Documents, folder, 2 of 5", and Right at the end of a completed folder goes into it. Ctrl+O: the Windows folder picker. Folder, Open recent folder and Folder, Favorites: by number. Ctrl+D: add this folder to Favorites, or remove it
+          Ctrl+G or Alt+D: go to a typed path, %USERPROFILE%\Downloads for instance; in its field, Down and Up complete the path from what you typed, "Documents, folder, 2 of 5", and Right at the end of a completed folder goes into it. Ctrl+O: the Windows folder picker. Folder, Open recent folder and Folder, Favorites: by number. Ctrl+D: add this folder to Favorites, or remove it
           Ctrl+N: a new AxFile window on this folder. F5: read the folder again
           Ctrl+Shift+F: filter the list to the names containing a text, "3 of 24 items, filter chap"; Escape in the list clears it once nothing is selected. Folder, Sort by: name, date or size
-          Alt+D: the Drives menu: the drives by number, This PC, Eject this drive, Drive properties
+          Folder, Drives: the drives by number, This PC, Eject this drive, Drive properties
 
         Opening
           Enter on a file: the program Windows has for it (the one you made its default: AxDown, AxMedia, AxPreview or any other), or the Windows dialog that picks one when there is none
