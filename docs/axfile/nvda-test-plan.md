@@ -66,6 +66,10 @@ Run with NVDA before a release, on a folder with a few subfolders, text files an
 3. Alt+A: the Axit menu with New window (AxFile among the apps), Recently closed (the folder of a closed AxFile window), Open windows, Open windows by type, Close all windows, Check for updates, About. About, Version: "Axit <version>".
 4. Options, Developer, Copy diagnostics: "Copied diagnostics"; paste somewhere: the versions, the folder, the count of actions and the log's end.
 5. Close the window and start AxFile without a folder: it opens on the same folder (the last one).
+6. The command palette (AF-3.12, bundle AX-10). Ctrl+Shift+P, type the start of a folder's name: after a moment "<name>,
+   folder, 1 of …"; Enter: the palette closes and the folder opens, "<name>, n items, <entry>". Ctrl+Shift+P, a file's
+   name, Enter: it opens in its program, as Enter in the list. Ctrl+Shift+P, `refresh`: "Refresh, Folder, F5, 1 of 1"
+   before the entries; Enter refreshes. From the Actions list, Ctrl+Shift+P, Escape: back on the same Actions line.
 
 ## 6. The Actions list (AF-9)
 

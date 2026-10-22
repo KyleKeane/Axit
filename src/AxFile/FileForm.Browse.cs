@@ -783,6 +783,29 @@ public sealed partial class FileForm
         }
     }
 
+    /// <summary>
+    /// The shown entries in the command palette, after the commands (AF-3.12, bundle AX-10.5): Enter on one selects
+    /// it in the folder list and opens it as Enter there does.
+    /// </summary>
+    protected override IEnumerable<PaletteEntry> PaletteEntries()
+    {
+        var kind = FolderListing.IsThisPC(_folder) ? "drive" : null;
+        return _shown.Select(entry => new PaletteEntry($"{entry.Name}, {kind ?? (entry.IsFolder ? "folder" : "file")}", () =>
+        {
+            var index = IndexOfName(entry.Path);
+            if (index < 0)
+            {
+                // The folder changed between the palette's opening and Enter.
+                SayNoEntry();
+                return;
+            }
+
+            _list.Select();
+            _list.SelectedIndex = index;
+            OpenSelected();
+        }));
+    }
+
     // ---- browsing (AF-3.1) ----
 
     /// <summary>Enter in the list (G2): a folder opens here, a file in the program the user has made its default in Windows, as in File Explorer (AF-3.2, AF-D2).</summary>

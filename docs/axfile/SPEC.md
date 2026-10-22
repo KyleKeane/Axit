@@ -225,6 +225,10 @@ folder of the file or project in hand, and sends back. It works entirely offline
   that drive; "Failed: This drive has no Eject" on a fixed disk, "Failed: <reason>" when Windows refuses. Drive
   properties is the Windows sheet of the drive (space, tools). The menu is refilled each time it opens, since a stick
   may have come or gone. Without a folder, "No folder".
+- AF-3.12 **The command palette** (bundle AX-10, 2026-10-22): after the window's commands, the entries the folder list
+  shows (the filter and the order applied), each "notes.md, file", "docs, folder" or, at This PC, "Local Disk (C:),
+  drive". Enter on one selects it in the folder list and opens it as Enter there does (AF-3.2): a folder or drive
+  here, a file in its program. The marks are not changed.
 
 ### AF-4 Operations
 
