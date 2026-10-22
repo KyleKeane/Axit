@@ -26,7 +26,7 @@ public static class HelpText
           Ctrl+I: the match, its kind and where its program file is
           Ctrl+O: the program file's folder in AxFile, the file selected
           F5: read the list of programs again
-          Escape: clear the field; Escape in an empty field hides AxStart and returns you where you were
+          Escape: hide AxStart at once and return where you were; the field is empty the next time
 
         Notices
           AxStart's questions, errors and help texts appear inside the window, in place of the field.

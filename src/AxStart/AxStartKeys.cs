@@ -27,7 +27,7 @@ public static class AxStartKeys
     /// <summary>The Applications folder read again.</summary>
     public const Keys Refresh = Keys.F5;
 
-    /// <summary>The field cleared, or with nothing in it the window hidden.</summary>
+    /// <summary>The window hidden at once, whatever the field holds.</summary>
     public const Keys Hide = Keys.Escape;
 
     /// <summary>Every key of the window with its name, for the collision test and the F1 text.</summary>
@@ -42,6 +42,6 @@ public static class AxStartKeys
         ("Open file location", OpenFileLocation),
         ("Information", Information),
         ("Refresh programs", Refresh),
-        ("Clear or hide", Hide),
+        ("Hide", Hide),
     ];
 }

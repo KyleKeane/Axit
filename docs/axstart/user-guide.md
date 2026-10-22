@@ -25,7 +25,7 @@ How matching works: every word you type must be in the name, in any order, with 
 - **Ctrl+I** says the match, its kind and where its program file is: "Notepad++, desktop program, C:\Program Files\Notepad++\notepad++.exe" or "Calculator, Store app".
 - **Ctrl+O** opens the program file's folder in AxFile, with the file selected.
 - **F5** reads the list of programs again. AxStart also reads it each time it comes up, so a program installed a moment ago is there.
-- **Escape** clears the field. Escape in an empty field hides AxStart and puts you back where you were. **Alt+F4** hides it too, and so does switching to another program.
+- **Escape** hides AxStart at once and puts you back where you were, whatever you had typed; the field is empty the next time. **Alt+F4** hides it too, and so does switching to another program.
 - Pressing the hotkey while AxStart shows hides it again.
 
 ## Options

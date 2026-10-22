@@ -106,8 +106,8 @@ taskbar. It works entirely offline (bundle G6).
   clipboard keys and the field's own undo stay the field's. Enter starts (AS-2.3); Ctrl+I says the selected match and
   its kind and place, "Notepad++, desktop program, C:\Program Files\Notepad++\notepad++.exe" or "Calculator, Store
   app".
-- AS-3.4 **Escape** with text in the field clears it ("Cleared" is not said: NVDA reads the empty field); Escape with
-  an empty field hides the window; Alt+F4 hides it whatever the field holds. Hiding gives the focus back to the
+- AS-3.4 **Escape** hides the window at once, whatever the field holds (the user's ask, 2026-10-22: it first cleared
+  a field with text and hid only an empty one); Alt+F4 hides it the same way; Backspace and Ctrl+A clear the text. Hiding gives the focus back to the
   window that had it before the hotkey (Windows does this when the window hides). The text is empty each time the
   window shows; the selection starts on the first match.
 - AS-3.5 The window hides by itself when it loses the focus to another program (Alt+Tab, a click elsewhere), as the
@@ -206,7 +206,7 @@ AxStart before it changes anything, starts it hidden afterwards, and its removal
 - `tests/AxStart.Tests`: the matching and its order over a fixed list of names (starts, word starts, words in any
   order, accents, the start counts, an empty text), the hotkey text both ways and the refused keys, the settings.
 - `docs/axstart/nvda-test-plan.md`: the hotkey from AxClaude, File Explorer and the desktop; typing, Up and Down with
-  the caret kept, Backspace, the edge; Enter on a desktop program and a Store app; Ctrl+Shift+Enter; Escape twice and
+  the caret kept, Backspace, the edge; Enter on a desktop program and a Store app; Ctrl+Shift+Enter; Escape with text and
   the focus given back; Alt+Tab away; Hotkey… with a free key and a taken one; a program installed while AxStart
   runs; Start with Windows across a sign-out; the update in place.
 

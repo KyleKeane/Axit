@@ -9,7 +9,7 @@ namespace AxStart;
 /// AxStart's window (SPEC.md AS-3): a menu bar, one search field with the caret always in it, the list of matches
 /// under it that never takes the focus (AS-D2), and a status bar. The process runs from sign-in with the window
 /// hidden (AS-D3); the hotkey, registered on this window (AS-4), shows it in front with the field empty, and Enter,
-/// Escape in an empty field, Alt+F4 and the focus going to another program hide it again. Only Quit AxStart ends
+/// Escape, Alt+F4 and the focus going to another program hide it again. Only Quit AxStart ends
 /// the process. The notices, the fonts, the update flow and the announcements are the bundle's window base
 /// (<see cref="AxitForm"/>).
 /// </summary>
@@ -319,16 +319,8 @@ public sealed class StartForm : AxitForm
                 Do(() => RefreshAsync(announce: true));
                 return true;
             case AxStartKeys.Hide:
-                if (_field.TextLength > 0)
-                {
-                    // AS-3.4: NVDA reads the emptied field; nothing of ours is said.
-                    _field.Clear();
-                }
-                else
-                {
-                    HideLauncher();
-                }
-
+                // AS-3.4: hidden at once, whatever the field holds (asked 2026-10-22); the next showing starts empty.
+                HideLauncher();
                 return true;
         }
 
