@@ -29,42 +29,61 @@ public sealed partial class FileForm
     /// <summary>The operations of this window that can be taken back (AF-4.14), newest last; each operation pushes itself when it has succeeded.</summary>
     private readonly OperationHistory _history = new();
 
+    /// <summary>Whether an undo is on its way: a second Ctrl+Z says so rather than racing it.</summary>
+    private bool _undoing;
+
     /// <summary>
     /// Folder → Undo <operation> (Ctrl+Z, AF-4.14): the last operation of this window taken back, one per press, and
     /// the entry it touched selected in its folder: "Undone: …"; "Not undone: <name> has changed" when something
     /// else moved the entry since, "Nothing to undo" at the end. A delete comes back through the shell's own
-    /// Restore on the Recycle Bin's item; the other kinds are the file operations' inverses.
+    /// Restore on the Recycle Bin's item; the other kinds are the file operations' inverses. An undo that fails
+    /// (a zip open elsewhere) leaves the operation in the history to try again.
     /// </summary>
     private void Undo()
     {
+        if (_undoing)
+        {
+            Announce("Undo is still running", true);
+            return;
+        }
+
         if (_history.Pop() is not { } operation)
         {
             Announce("Nothing to undo", true);
             return;
         }
 
+        _undoing = true;
         Do(async () =>
         {
-            if (await Task.Run(() => FileOperations.CheckUndo(operation)) is { } problem)
+            try
             {
-                Announce(problem, true);
-                return;
-            }
+                if (await Task.Run(() => FileOperations.CheckUndo(operation)) is { } problem)
+                {
+                    Announce(problem, true);
+                    return;
+                }
 
-            // The Restore walks the whole Recycle Bin, so it runs on a shell thread of its own, as the other shell operations do.
-            var owner = Handle;
-            var reason = operation.Kind == OperationKind.Delete
-                ? await FileOperations.OnShellThreadAsync(() => Shell.Undelete(owner, operation.Before))
-                : await FileOperations.UndoAsync(operation);
-            if (reason is not null)
-            {
-                Failed("Undo failed", reason);
-                return;
-            }
+                // The Restore walks the whole Recycle Bin, so it runs on a shell thread of its own, as the other shell operations do.
+                var owner = Handle;
+                var reason = operation.Kind == OperationKind.Delete
+                    ? await FileOperations.OnShellThreadAsync(() => Shell.Undelete(owner, operation.Before))
+                    : await FileOperations.UndoAsync(operation);
+                if (reason is not null)
+                {
+                    _history.Push(operation);
+                    Failed("Undo failed", reason);
+                    return;
+                }
 
-            if (await ShowFolderAsync(operation.Folder, operation.Select ?? CurrentEntry()?.Name, remember: false))
+                if (await ShowFolderAsync(operation.Folder, operation.Select ?? CurrentEntry()?.Name, remember: false))
+                {
+                    Announce(operation.DoneText, true);
+                }
+            }
+            finally
             {
-                Announce(operation.DoneText, true);
+                _undoing = false;
             }
         });
     }

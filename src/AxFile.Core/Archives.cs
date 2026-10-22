@@ -84,19 +84,18 @@ public static class Archives
         var target = FileOperations.FreeName(folder, stem.Length == 0 ? "archive" : stem, string.Empty);
         using var archive = ZipFile.OpenRead(zip);
         var root = System.IO.Path.GetFullPath(target + System.IO.Path.DirectorySeparatorChar);
-        var files = archive.Entries.Where(entry => !entry.FullName.EndsWith('/')).ToList();
-        var total = files.Count;
+        var total = archive.Entries.Count(entry => !IsFolderEntry(entry));
         var done = 0;
         Directory.CreateDirectory(target);
         foreach (var entry in archive.Entries)
         {
-            var destination = System.IO.Path.GetFullPath(System.IO.Path.Combine(target, entry.FullName));
+            var destination = System.IO.Path.GetFullPath(System.IO.Path.Combine(target, entry.FullName.Replace('/', System.IO.Path.DirectorySeparatorChar)));
             if (!destination.StartsWith(root, StringComparison.OrdinalIgnoreCase))
             {
                 throw new IOException($"{entry.FullName} would land outside the folder");
             }
 
-            if (entry.FullName.EndsWith('/'))
+            if (IsFolderEntry(entry))
             {
                 Directory.CreateDirectory(destination);
                 continue;
@@ -109,4 +108,7 @@ public static class Archives
 
         return target;
     }
+
+    /// <summary>A folder entry ends in a slash; older Windows tools wrote a backslash.</summary>
+    private static bool IsFolderEntry(ZipArchiveEntry entry) => entry.FullName.EndsWith('/') || entry.FullName.EndsWith('\\');
 }

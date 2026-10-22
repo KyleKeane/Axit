@@ -153,6 +153,8 @@ public sealed partial class FileForm
     /// <summary>The shown entries made again from the folder's entries, the order and the filter (AF-3.8), and the list refilled.</summary>
     private void Rearrange(string? select)
     {
+        // A Shift range is indices into the shown entries: a new order or filter, or a read, ends it (AF-3.7).
+        _anchor = null;
         // The drives of This PC stay in letter order (AF-3.10).
         _shown = FolderListing.IsThisPC(_folder) ? FolderListing.Filter(_entries, _filter) : FolderListing.Arrange(_entries, _settings.SortBy, _filter);
         FillList(select);
@@ -315,13 +317,14 @@ public sealed partial class FileForm
     /// </summary>
     private void ExtendSelection(int target)
     {
-        if (_shown.Count == 0)
+        var current = _list.SelectedIndex;
+        if (current < 0 || current >= _shown.Count)
         {
+            // No entry, or one of the lines after the entries (the empty folder's, the not-shown line).
             SayNoEntry();
             return;
         }
 
-        var current = Math.Max(0, _list.SelectedIndex);
         if (_anchor is null || current != _anchorEnd)
         {
             _anchor = current;
@@ -330,6 +333,7 @@ public sealed partial class FileForm
 
         target = Math.Clamp(target, 0, _shown.Count - 1);
         _anchorEnd = target;
+        var before = new HashSet<string>(_selected, StringComparer.OrdinalIgnoreCase);
         _selected.Clear();
         _selected.UnionWith(_anchorBase);
         for (var i = Math.Min(_anchor.Value, target); i <= Math.Max(_anchor.Value, target); i++)
@@ -337,7 +341,16 @@ public sealed partial class FileForm
             _selected.Add(_shown[i].Path);
         }
 
-        FillList(_shown[target].Name);
+        // Only the items whose mark changed are rewritten, so that the list is not rebuilt under NVDA on every key.
+        for (var i = 0; i < _shown.Count; i++)
+        {
+            if (before.Contains(_shown[i].Path) != _selected.Contains(_shown[i].Path))
+            {
+                _list.Items[i] = ItemText(_shown[i]);
+            }
+        }
+
+        _list.SelectedIndex = target;
     }
 
     /// <summary>The selected entries among those shown, in the list's order; none when nothing is selected.</summary>

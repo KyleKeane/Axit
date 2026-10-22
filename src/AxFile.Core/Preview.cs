@@ -27,7 +27,38 @@ public static class Preview
             return null;
         }
 
+        if (length > Limit)
+        {
+            bytes = WithoutCutSequence(bytes);
+        }
+
         return new PreviewText(TextDocument.FromBytes(bytes).Text, length > Limit);
+    }
+
+    /// <summary>
+    /// The cut's last bytes without a UTF-8 sequence the cut split (a lead byte whose continuation bytes are beyond
+    /// it), which the editors' strict decoding would take for a file that is not UTF-8 at all.
+    /// </summary>
+    public static byte[] WithoutCutSequence(byte[] bytes)
+    {
+        var end = bytes.Length;
+        for (var i = bytes.Length - 1; i >= 0 && i >= bytes.Length - 4; i--)
+        {
+            if ((bytes[i] & 0xC0) == 0x80)
+            {
+                continue;
+            }
+
+            var needed = (bytes[i] & 0xE0) == 0xC0 ? 2 : (bytes[i] & 0xF0) == 0xE0 ? 3 : (bytes[i] & 0xF8) == 0xF0 ? 4 : 1;
+            if (bytes.Length - i < needed)
+            {
+                end = i;
+            }
+
+            break;
+        }
+
+        return end == bytes.Length ? bytes : bytes[..end];
     }
 
     /// <summary>

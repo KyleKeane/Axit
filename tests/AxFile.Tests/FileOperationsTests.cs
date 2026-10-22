@@ -68,6 +68,15 @@ public sealed class FileOperationsTests : IDisposable
         Assert.Equal(existing, FileOperations.Lookalike(typed, ["a.txt", existing, "b.txt"]));
     }
 
+    [Fact]
+    public void A_name_with_a_lone_surrogate_is_compared_as_it_is()
+    {
+        var odd = "odd\uD800.txt";
+        Assert.Null(FileOperations.Lookalike("other.txt", [odd]));
+        Assert.Null(FileOperations.Lookalike(odd, [odd]));
+        Assert.Equal(odd, FileOperations.Lookalike(odd + "​", [odd]));
+    }
+
     [Theory]
     [InlineData("notes.md", "notes.md")]
     [InlineData("Notes.md", "notes.md")]

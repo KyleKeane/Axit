@@ -197,7 +197,7 @@ public sealed partial class FileForm : AxitForm
         SizeChanged += (_, _) =>
         {
             FitVideo();
-            if (_pane.Visible)
+            if (PaneControl.Visible)
             {
                 FitPane();
             }
@@ -242,7 +242,7 @@ public sealed partial class FileForm : AxitForm
 
         items.Add(axit);
         // AF-9.4: the file's text in the pane.
-        items.Add(Item("Preview &here", ShowPreview, AxFileKeys.Preview));
+        items.Add(Item("Pr&eview", ShowPreview, AxFileKeys.Preview));
         items.Add(new ToolStripSeparator());
         items.Add(Item("Cu&t", () => CopyOrCut(cut: true), AxFileKeys.Cut));
         items.Add(Item("&Copy", () => CopyOrCut(cut: false), AxFileKeys.Copy));
@@ -455,6 +455,12 @@ public sealed partial class FileForm : AxitForm
                 ShowProperties();
                 return true;
             case AxFileKeys.Undo:
+                if (_renameBox.Focused)
+                {
+                    // The rename box's own undo of the typing (AF-6.2).
+                    return false;
+                }
+
                 Undo();
                 return true;
             case AxFileKeys.NewFolder:

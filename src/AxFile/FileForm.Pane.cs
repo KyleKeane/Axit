@@ -313,7 +313,7 @@ public sealed partial class FileForm
     // ---- a file to read (AF-9.4) ----
 
     /// <summary>
-    /// Item → Preview here (Ctrl+Shift+P in the list): the file's text in the pane as a read-only text named
+    /// Item → Preview (Ctrl+Shift+P in the list): the file's text in the pane as a read-only text named
     /// "<name>, preview", the focus on its first line; a file over a megabyte shows its first megabyte and says so in
     /// the name; "Not a text file" for anything else, "Not a file" on a folder. The folder list keeps its place, so
     /// Escape returns to the entry.

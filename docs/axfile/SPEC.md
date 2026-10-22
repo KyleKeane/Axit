@@ -129,8 +129,10 @@ windows on the folder of the file or project in hand, and sends back. It works e
   "Deselected, 2 selected"). **Shift+Down**, **Shift+Up**, **Shift+Home** and **Shift+End** (asked 2026-10-21, "the
   Shift multiselect File Explorer has") move the current entry and mark every entry from where the range began to
   there: the range begins where the first Shift key finds the current entry, moving back with Shift shrinks it, and
-  the marks made before it stay; an arrow without Shift ends it, and the next Shift key begins a new one. Each entry
-  passed reads ", selected" by itself and the keys say nothing more. **Ctrl+A** marks every entry, "n selected";
+  the marks made before it stay; an arrow without Shift ends it, as does a change of the list's order or filter or
+  a read of the folder, and the next Shift key begins a new one. Each entry passed reads ", selected" by itself and
+  the keys say nothing more (only the items whose mark changed are rewritten); on a line after the entries (an
+  empty folder's, the not-shown line) the keys say that line. **Ctrl+A** marks every entry, "n selected";
   **Ctrl+Shift+A** unmarks them all, "None selected"; the **Select** menu of the bar holds Select all, Deselect all and the Space toggle, "Select or deselect this entry" (asked 2026-10-21; they were in the Item menu as Select all and Select none, which is one entry's menu). Ctrl+I adds ", n selected" to the entry's information while any are
   marked (AF-2.4). Cut, Copy, Delete and Copy path act on the marked entries when there are any, and on the current
   entry alone otherwise (AF-4.3, AF-4.4, AF-4.8); Enter, Rename, the ways to open and the Windows items stay on the
@@ -288,8 +290,10 @@ windows on the folder of the file or project in hand, and sends back. It works e
   "Undone: moved back", "Undone: <what> sent to the Recycle Bin", "Undone: <what> restored"); an entry changed since
   by anything else (renamed in File Explorer meanwhile), "Not undone: <name> has changed", "Not undone: <name> has
   files now" / "has content now" (a new folder or file filled meanwhile), "Not undone: <name> is already here" (the
-  place it would go back to is taken), and the operation is dropped from the history either way; a failure of the
-  undo itself is "Failed: <reason>" (AF-4.5). Eject, Open, the player, Favorites and the settings are not operations
+  place it would go back to is taken; a rename that changed only the case is not "already here"), and the
+  operation is dropped from the history either way; a failure of the undo itself is "Failed: <reason>" (AF-4.5)
+  and the operation stays to try again (a zip open in another program, closed and Ctrl+Z again); a second Ctrl+Z
+  while one runs says "Undo is still running"; in the rename box Ctrl+Z is the box's own (AF-6.2). Eject, Open, the player, Favorites and the settings are not operations
   and have no undo; there is no redo. The history is this window's, the last twenty operations, gone with the
   window. The history and each operation's inverse are `OperationHistory`, `Operation` and `FileOperations.CheckUndo`
   and `UndoAsync` in `AxFile.Core`, tested over a temporary folder; the Recycle Bin's records are `RecycleBin`, tested
@@ -337,7 +341,7 @@ windows on the folder of the file or project in hand, and sends back. It works e
   Date | Size) | Filter… Ctrl+Shift+F | ─ | Show current folder in ▸ (File Explorer
   Ctrl+W | AxClaude | AxGit | AxTerminal) | ─ | Exit Alt+F4. **Item (I):** Open Enter | Open with ▸ (Windows default |
   Choose a program… | ─ | 1. name (path) … or No programs of your own yet | Add a program… | Remove a program ▸) |
-  Open in Axit ▸ (Editor Ctrl+E | ─ | AxClaude | AxDown | AxJSON | AxGit | AxTerminal | AxFile) | Preview here
+  Open in Axit ▸ (Editor Ctrl+E | ─ | AxClaude | AxDown | AxJSON | AxGit | AxTerminal | AxFile) | Preview
   Ctrl+Shift+P (AF-9.4) | ─ | Cut Ctrl+X |
   Copy Ctrl+C | Paste Ctrl+V | ─ | Rename F2 | Delete Delete | ─ | New folder… Ctrl+Shift+N | New text file
   Ctrl+Shift+T | Move to new folder… | Compress to zip | Extract here | ─ | Copy path Ctrl+Shift+C | Show in File
@@ -383,7 +387,7 @@ Favorites" (AF-3.9), "Top" (This PC, AF-3.10), "Ejecting <name>" (AF-3.11), "Add
 <name>", "Pasted n items",
 "Pasting, please wait" (a paste longer than a second), "Added n to the queue", "Queue cleared", "Removed <name>" (a
 queue line), "<name>, n of m" and "<name>, n of m, playing, m:ss of m:ss" (Ctrl+I in the queue), "No sound or video
-files here", "No sound or video files to add" (AF-9.2), "Not a text file", "Line n of m", "<kind>, …" and "No next <kind>" / "No previous <kind>" (the preview, AF-9.4), "Undone: …", "Not undone: …", "Nothing to undo" (AF-4.14), "Refreshed", "Not found: <path>", "No program opens
+files here", "No sound or video files to add" (AF-9.2), "Not a text file", "Line n of m", "<kind>, …" and "No next <kind>" / "No previous <kind>" (the preview, AF-9.4), "Undone: …", "Not undone: …", "Nothing to undo", "Undo is still running" (AF-4.14), "Refreshed", "Not found: <path>", "No program opens
 .xyz. Ctrl+E opens it as text", "Failed: <message>", "<name>, <size>, modified <date>" (Ctrl+I), "Not found" (find),
 "Nothing to save here", "Text size n", "Windows text size", "Copied diagnostics", "<name>, <size>, modified <date>, n
 selected" (Ctrl+I with marks); and the guards "No folder" (nothing
@@ -438,7 +442,7 @@ other reasons of `FileOperations.CheckName`. A new selection is NVDA's own readi
   count to give (`SHFileOperationW` is silent) and shows "Copying 3 items" or "Moving 3 items" until it ends; a
   count for it needs the shell's newer file operation interface with its progress sink, a later step. The last
   twenty lines stay; Clear queue clears them too; nothing of this is kept across windows or starts.
-- AF-9.4 **A file to read.** **Preview** (Item → Preview here, Ctrl+Shift+P on a text file: the types AxDown and AxJSON
+- AF-9.4 **A file to read.** **Preview** (Item → Preview, Ctrl+Shift+P on a text file: the types AxDown and AxJSON
   open, and any file whose first bytes are text, up to 1 MB) shows the file's text in the pane as a read-only text
   named "<name>, preview", the focus on its first line, and the player's list comes back with the next queue
   command or Player → Show queue (a status line arriving meanwhile leaves the preview in place). The text has what
@@ -450,8 +454,8 @@ other reasons of `FileOperations.CheckName`. A new selection is NVDA's own readi
   there: Ctrl+E opens the file in its editor as before. A file that is not text ("text": the editors' kinds by
   extension, an empty file, a UTF-16 mark, or no zero byte and few control characters in the first eight
   kilobytes; `Preview` in `AxFile.Core`, tested), "Not a text file"; one over the limit shows its first 1 MB and
-  says so in its name (", first megabyte"). The folder list keeps the focus's place, so Escape returns to the
-  entry. The menu item is "Preview here", since every letter of "Preview" is another item's mnemonic in the Item menu.
+  says so in its name (", first megabyte"); a file cut inside a multi-byte character loses that character rather
+  than its encoding. The folder list keeps the focus's place, so Escape returns to the entry.
 - AF-9.5 **Later uses**, noted so that the pane's shape allows them, each a list or a text named after itself: the
   matches of a search through a folder's tree, "Search results, 12", Enter going to the file (a find across folders
   does not exist today); a folder's summary on Ctrl+I over a folder, its counts and size, which take a walk of the
@@ -588,6 +592,6 @@ single-threaded-apartment thread of its own (AX-7.5).
 - 2026-10-21, late: Undo built (AF-4.14): Ctrl+Z and Folder → Undo <operation> over the window's last twenty operations,
   each with its inverse in `AxFile.Core` (tested) and a delete restored through the shell's Restore on the Recycle
   Bin's item (`Shell.Undelete`, checked on this machine); not yet checked with NVDA (test plan 3.14).
-- 2026-10-21, late: the preview built (AF-9.4): Item → Preview here, Ctrl+Shift+P, a read-only text in the pane with
+- 2026-10-21, late: the preview built (AF-9.4): Item → Preview, Ctrl+Shift+P, a read-only text in the pane with
   the bundle's reading keys and three of AxDown's Markdown jumps; `Preview` in `AxFile.Core`, tested; not yet checked
   with NVDA (test plan 6.8).

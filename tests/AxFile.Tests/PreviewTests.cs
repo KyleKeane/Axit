@@ -65,4 +65,26 @@ public sealed class PreviewTests : IDisposable
         Assert.True(text.Cut);
         Assert.Equal(Preview.Limit, text.Text.Length);
     }
+
+    [Fact]
+    public void A_cut_inside_a_multibyte_character_keeps_the_text_utf8()
+    {
+        // "é" is two bytes; the cut falls between them when every line is an odd length.
+        var line = Encoding.UTF8.GetBytes("café\n");
+        var bytes = new byte[Preview.Limit + 7];
+        for (var i = 0; i < bytes.Length; i++)
+        {
+            bytes[i] = line[i % line.Length];
+        }
+
+        Assert.Equal((byte)0xC3, bytes[Preview.Limit - 1]);
+        var text = Preview.Read(Write("accents.log", bytes))!;
+        Assert.True(text.Cut);
+        Assert.EndsWith("caf", text.Text);
+        Assert.Contains("café", text.Text);
+        Assert.DoesNotContain("Ã", text.Text);
+
+        Assert.Equal([0x61], Preview.WithoutCutSequence([0x61, 0xE2, 0x82]));
+        Assert.Equal([0x61, 0xC3, 0xA9], Preview.WithoutCutSequence([0x61, 0xC3, 0xA9]));
+    }
 }

@@ -3,6 +3,7 @@
 ## Unreleased
 
 - AxFile: a Select menu in the menu bar, after Item: Select all (Ctrl+A), Deselect all (Ctrl+Shift+A) and Select or deselect this entry (Space). Select all and Select none have left the Item menu, which is one entry's menu.
+- AxFile: fixes from a review of the code. Shift with an arrow on the "Not shown" line said nothing useful and could crash the window; it now reads the line. The Shift range rewrites only the entries whose mark changed instead of the whole list, and ends when the order, the filter or the folder's contents change. A rename that changed only the case of a name can be undone. Ctrl+Z in the rename box undoes the typing there, as before the undo came. A second Ctrl+Z while an undo runs says "Undo is still running", and an undo that fails leaves the operation to try again. A preview cut inside an accented character keeps its encoding. A zip whose folder entries end in a backslash extracts. The preview follows the window's size. The Preview item is "Preview" with the mnemonic E, which no longer clashes with Copy path's H. A name holding a lone surrogate no longer breaks the name checks.
 
 ## 3.2.2 - 2026-10-21
 

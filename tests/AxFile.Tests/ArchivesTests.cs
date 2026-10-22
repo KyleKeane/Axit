@@ -73,6 +73,22 @@ public sealed class ArchivesTests : IDisposable
     }
 
     [Fact]
+    public void A_folder_entry_written_with_a_backslash_is_a_folder()
+    {
+        var zip = Path.Combine(_folder, "old.zip");
+        using (var archive = ZipFile.Open(zip, ZipArchiveMode.Create))
+        {
+            archive.CreateEntry("docs\\");
+            using var writer = new StreamWriter(archive.CreateEntry("docs\\a.txt").Open());
+            writer.Write("a");
+        }
+
+        var target = Archives.Extract(zip, _folder);
+        Assert.Equal(Path.Combine(_folder, "old"), target);
+        Assert.Equal("a", File.ReadAllText(Path.Combine(target, "docs", "a.txt")));
+    }
+
+    [Fact]
     public void An_entry_that_would_land_outside_the_folder_is_refused()
     {
         var zip = Path.Combine(_folder, "bad.zip");

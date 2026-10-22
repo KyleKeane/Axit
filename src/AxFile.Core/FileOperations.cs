@@ -49,7 +49,17 @@ public static class FileOperations
     /// <summary>How a name is heard: composed, upper-cased, every kind of white space one space, invisible characters dropped, trimmed.</summary>
     private static string ReadingKey(string name)
     {
-        var composed = name.Normalize(NormalizationForm.FormKC);
+        string composed;
+        try
+        {
+            composed = name.Normalize(NormalizationForm.FormKC);
+        }
+        catch (ArgumentException)
+        {
+            // A name with a lone surrogate, which NTFS allows, cannot be normalized: compared as it is.
+            composed = name;
+        }
+
         var text = new StringBuilder(composed.Length);
         var space = false;
         foreach (var c in composed)
@@ -195,10 +205,17 @@ public static class FileOperations
 
         switch (operation.Kind)
         {
+            case OperationKind.NewFolder when !Directory.Exists(operation.After[0]):
+            case OperationKind.NewFile when !File.Exists(operation.After[0]):
+                // A folder where the file was, or a file where the folder was: not what the operation made.
+                return $"Not undone: {Path.GetFileName(operation.After[0])} has changed";
             case OperationKind.NewFolder when Directory.EnumerateFileSystemEntries(operation.After[0]).Any():
                 return $"Not undone: {Path.GetFileName(operation.After[0])} has files now";
             case OperationKind.NewFile when new FileInfo(operation.After[0]).Length > 0:
                 return $"Not undone: {Path.GetFileName(operation.After[0])} has content now";
+            case OperationKind.Rename when string.Equals(operation.Before[0], operation.After[0], StringComparison.OrdinalIgnoreCase):
+                // A change of case only: the old name is the same file, not a taken place.
+                break;
             case OperationKind.Rename or OperationKind.Move or OperationKind.Delete:
                 foreach (var path in operation.Before)
                 {

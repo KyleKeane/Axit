@@ -118,6 +118,28 @@ public sealed class UndoTests : IDisposable
     }
 
     [Fact]
+    public async Task A_change_of_case_only_is_renamed_back()
+    {
+        var renamed = FileOperations.Rename(In("notes.md"), "Notes.md");
+        var operation = new Operation(OperationKind.Rename, [In("notes.md")], [renamed]);
+        Assert.Null(FileOperations.CheckUndo(operation));
+        Assert.Null(await FileOperations.UndoAsync(operation));
+        Assert.Equal(["docs", "notes.md"], Directory.EnumerateFileSystemEntries(_folder).Select(Path.GetFileName).Order());
+    }
+
+    [Fact]
+    public void A_folder_where_the_new_file_was_is_a_change()
+    {
+        var file = new Operation(OperationKind.NewFile, [], [FileOperations.CreateFile(_folder)]);
+        File.Delete(file.After[0]);
+        Directory.CreateDirectory(file.After[0]);
+        Assert.Equal("Not undone: New file.txt has changed", FileOperations.CheckUndo(file));
+        var folder = new Operation(OperationKind.NewFolder, [], [In("made")]);
+        File.WriteAllText(In("made"), "x");
+        Assert.Equal("Not undone: made has changed", FileOperations.CheckUndo(folder));
+    }
+
+    [Fact]
     public void A_copy_whose_copies_are_gone_and_a_delete_whose_entry_is_back_are_not_undone()
     {
         Assert.Equal("Not undone: gone.txt has changed", FileOperations.CheckUndo(new Operation(OperationKind.Copy, [In("notes.md")], [In("gone.txt")])));
