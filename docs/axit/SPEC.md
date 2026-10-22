@@ -344,7 +344,10 @@ allow it, see B-9).
   drop-down has its owner item cleared when it closes, after which the bar no longer leaves auto-expansion on Escape,
   and Left and Right open the neighbours' menus instead of moving along the bar (AxFile, 2026-10-21). `MenuTests` in
   `tests/Axit.Tests` scans the sources for the construct. A key that must work inside an open menu goes in a context
-  menu subclass (AxFile's `ItemMenu`), which has no owner item.
+  menu subclass (AxFile's `ItemMenu`), which has no owner item. In menu mode WinForms routes the keys to the menu
+  bar, which hands the ones it does not use up to the window's `ProcessCmdKey`; the window base gives a key that
+  comes from a `ToolStrip` to the menu alone, never to the window's own keys (AxFile's Right opened the entry in the
+  list instead of moving along the bar, 2026-10-22).
 
 ### AX-7 Accessibility rules every app follows
 

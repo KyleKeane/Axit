@@ -277,6 +277,14 @@ public abstract class AxitForm : Form
             return true;
         }
 
+        // In menu mode (Alt, a menu's name selected on the bar) WinForms routes the keys to the menu bar, whose
+        // ProcessCmdKey hands them up to the window: they are the menu's (AX-6.6), or Right in AxFile's list opened
+        // the entry instead of moving to the next menu (2026-10-22).
+        if (FromHandle(msg.HWnd) is ToolStrip)
+        {
+            return base.ProcessCmdKey(ref msg, keyData);
+        }
+
         return ProcessWindowKey(keyData) || base.ProcessCmdKey(ref msg, keyData);
     }
 

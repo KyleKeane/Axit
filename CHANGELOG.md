@@ -2,6 +2,7 @@
 
 ## Unreleased
 
+- AxFile: Right and Left on the menu bar move between the menus again; with a folder selected in the list, Right opened that folder instead. The fix is in the window base, so no window's own keys act while its menu bar has the keyboard.
 - Axit: `test.ps1` runs every test project in Release, as GitHub Actions does; `release.ps1` and `run.ps1 -Test` use it, so that a test that only fails in Release stops the release here rather than in the workflow, as it did 3.3.0.
 - Axit: the Build workflow tests every branch, not only `main`. The repository has a new README naming all eight apps, CONTRIBUTING and SECURITY pages, issue forms that ask for the app, the versions and the test plan step, a pull request checklist, and Dependabot for the workflow actions and the test packages.
 
