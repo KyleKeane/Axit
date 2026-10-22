@@ -155,7 +155,7 @@ public static class AxFileKeys
         ("Paste (in the list)", Paste),
         ("Select or deselect (in the list)", Select),
         ("Select all (in the list)", SelectAll),
-        ("Select none (in the list)", SelectNone),
+        ("Deselect all (in the list)", SelectNone),
         ("Select to the next entry (in the list)", SelectDown),
         ("Select to the previous entry (in the list)", SelectUp),
         ("Select to the first entry (in the list)", SelectToStart),

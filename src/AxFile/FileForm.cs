@@ -91,6 +91,14 @@ public sealed partial class FileForm : AxitForm
         _itemMenu = new ItemMenu(SayInformation) { AccessibleName = "Item" };
         FillItemMenu(_itemMenu.Items);
 
+        // Select (AF-3.7): the marks on the list's entries, which the operations act on; the menu of the whole list
+        // rather than of one entry, so it sits beside Item (asked 2026-10-21).
+        var select = new ToolStripMenuItem("&Select");
+        select.DropDownItems.Add(Item("Select &all", SelectAll, AxFileKeys.SelectAll));
+        select.DropDownItems.Add(Item("&Deselect all", SelectNone, AxFileKeys.SelectNone));
+        select.DropDownItems.Add(new ToolStripSeparator());
+        select.DropDownItems.Add(Item("Select or deselect this &entry", ToggleSelection, AxFileKeys.Select));
+
         // Drives (AF-3.11): the drives to go to, This PC, and the drive's own Eject and Properties; refilled when it
         // opens, since a stick may have come or gone.
         _drivesMenu.DropDownOpening += (_, _) => FillDrives();
@@ -139,7 +147,7 @@ public sealed partial class FileForm : AxitForm
             [("&Keyboard shortcuts in Windows", "https://support.microsoft.com/windows/keyboard-shortcuts-in-windows-dcc61a57-8ff0-cffe-9796-cb9706c75eec")]);
 
         // The bundle's Axit menu (AX-9) sits before Help in every window and ends with the update items and About.
-        _menu.Items.AddRange([folder, item, _drivesMenu, player, options, CreateAxitMenu(), help]);
+        _menu.Items.AddRange([folder, item, select, _drivesMenu, player, options, CreateAxitMenu(), help]);
         MainMenuStrip = _menu;
 
         // ---- the list (AF-2.1, AF-2.2): the one control; its own keys stay native (AF-3.6) ----
@@ -249,9 +257,6 @@ public sealed partial class FileForm : AxitForm
         items.Add(new ToolStripMenuItem("Mo&ve to new folder...", null, (_, _) => MoveIntoNewFolder()));
         items.Add(new ToolStripMenuItem("Compress to &zip", null, (_, _) => Compress()));
         items.Add(new ToolStripMenuItem("E&xtract here", null, (_, _) => Extract()));
-        items.Add(new ToolStripSeparator());
-        items.Add(Item("&Select all", SelectAll, AxFileKeys.SelectAll));
-        items.Add(Item("Select non&e", SelectNone, AxFileKeys.SelectNone));
         items.Add(new ToolStripSeparator());
         items.Add(Item("Copy pat&h", CopyPath, AxFileKeys.CopyPath));
         items.Add(Item("Show in File Exp&lorer", ShowItemInExplorer, AxFileKeys.ShowItemInExplorer));

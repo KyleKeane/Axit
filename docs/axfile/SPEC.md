@@ -131,7 +131,7 @@ windows on the folder of the file or project in hand, and sends back. It works e
   there: the range begins where the first Shift key finds the current entry, moving back with Shift shrinks it, and
   the marks made before it stay; an arrow without Shift ends it, and the next Shift key begins a new one. Each entry
   passed reads ", selected" by itself and the keys say nothing more. **Ctrl+A** marks every entry, "n selected";
-  **Ctrl+Shift+A** unmarks them all, "None selected"; Select all and Select none are in the Item menu, Space is a key alone. Ctrl+I adds ", n selected" to the entry's information while any are
+  **Ctrl+Shift+A** unmarks them all, "None selected"; the **Select** menu of the bar holds Select all, Deselect all and the Space toggle, "Select or deselect this entry" (asked 2026-10-21; they were in the Item menu as Select all and Select none, which is one entry's menu). Ctrl+I adds ", n selected" to the entry's information while any are
   marked (AF-2.4). Cut, Copy, Delete and Copy path act on the marked entries when there are any, and on the current
   entry alone otherwise (AF-4.3, AF-4.4, AF-4.8); Enter, Rename, the ways to open and the Windows items stay on the
   current entry. The marks live in one folder: showing another folder drops them, a refresh of the same folder keeps
@@ -340,9 +340,10 @@ windows on the folder of the file or project in hand, and sends back. It works e
   Open in Axit ▸ (Editor Ctrl+E | ─ | AxClaude | AxDown | AxJSON | AxGit | AxTerminal | AxFile) | Preview here
   Ctrl+Shift+P (AF-9.4) | ─ | Cut Ctrl+X |
   Copy Ctrl+C | Paste Ctrl+V | ─ | Rename F2 | Delete Delete | ─ | New folder… Ctrl+Shift+N | New text file
-  Ctrl+Shift+T | Move to new folder… | Compress to zip | Extract here | ─ | Select all Ctrl+A | Select none
-  Ctrl+Shift+A | ─ | Copy path Ctrl+Shift+C | Show in File Explorer Ctrl+Shift+W | Information Ctrl+I | Properties
-  Alt+Enter | ─ | Windows menu…; the same menu is the list's context menu (AF-4.6). **Drives (D):** 1. Local Disk
+  Ctrl+Shift+T | Move to new folder… | Compress to zip | Extract here | ─ | Copy path Ctrl+Shift+C | Show in File
+  Explorer Ctrl+Shift+W | Information Ctrl+I | Properties
+  Alt+Enter | ─ | Windows menu…; the same menu is the list's context menu (AF-4.6). **Select (S):** Select all
+  Ctrl+A | Deselect all Ctrl+Shift+A | ─ | Select or deselect this entry Space (AF-3.7). **Drives (D):** 1. Local Disk
   (C:) … | ─ | This PC | ─ | Eject this drive | Drive properties (AF-3.11). **Player (P):** Play Enter | Play folder
   Ctrl+Enter | Add to queue Ctrl+Shift+Q | Clear queue | Show queue (AF-9.2) | ─ | Pause or resume Ctrl+P | Next file Ctrl+Shift+Right | Previous
   file Ctrl+Shift+Left | Forward 15 seconds Ctrl+Right | Back 15 seconds Ctrl+Left | Go to time… Ctrl+T | ─ | Faster

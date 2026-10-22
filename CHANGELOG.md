@@ -1,5 +1,9 @@
 # Changelog
 
+## Unreleased
+
+- AxFile: a Select menu in the menu bar, after Item: Select all (Ctrl+A), Deselect all (Ctrl+Shift+A) and Select or deselect this entry (Space). Select all and Select none have left the Item menu, which is one entry's menu.
+
 ## 3.2.2 - 2026-10-21
 
 - AxDown: Undo (Ctrl+Z) and Redo (Ctrl+Y, or Ctrl+Shift+Z), in the Edit menu too, over the window's own history, as far back as the file was opened in it: a run of typing or of deleting is one step, a paste, a cut or a reload from disk one step each; "Undone", "Redone", "Nothing to undo", "Nothing to redo". Saving keeps the history; Open and New end it. The edit field's own one-level undo is replaced.
