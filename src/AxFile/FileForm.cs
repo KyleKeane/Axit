@@ -29,6 +29,7 @@ public sealed partial class FileForm : AxitForm
     private readonly StatusStrip _status = new();
     private readonly ToolStripStatusLabel _stateLabel;
     private readonly ToolStripStatusLabel _pathLabel;
+    private readonly ToolStripMenuItem _undoItem;
 
     /// <param name="settingsPath">Where the settings are saved; the app's own file unless a probe says otherwise, so that a probe never writes the user's.</param>
     public FileForm(string? path, FileSettings settings, string? settingsError, string? settingsPath = null)
@@ -55,6 +56,10 @@ public sealed partial class FileForm : AxitForm
         folder.DropDownItems.Add(new ToolStripSeparator());
         folder.DropDownItems.Add(Item("&Up one level", GoUp, AxFileKeys.Up));
         folder.DropDownItems.Add(Item("Re&fresh", () => Do(() => RefreshAsync(announce: true)), AxFileKeys.Refresh));
+        // AF-4.14: named after what it would undo each time the menu opens, "Undo rename".
+        _undoItem = Item(_history.MenuText, Undo, AxFileKeys.Undo);
+        folder.DropDownOpening += (_, _) => _undoItem.Text = _history.MenuText;
+        folder.DropDownItems.Add(_undoItem);
         folder.DropDownItems.Add(new ToolStripSeparator());
         // AF-3.8: the order, one checked item, and the filter.
         var sort = new ToolStripMenuItem("&Sort by");
@@ -414,6 +419,9 @@ public sealed partial class FileForm : AxitForm
                 return true;
             case AxFileKeys.Properties:
                 ShowProperties();
+                return true;
+            case AxFileKeys.Undo:
+                Undo();
                 return true;
             case AxFileKeys.NewFolder:
                 NewFolder();

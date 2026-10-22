@@ -26,6 +26,45 @@ public sealed partial class FileForm
     /// <summary>The entry being renamed in place (AF-4.2) while the box over it shows; null otherwise.</summary>
     private Entry? _renaming;
 
+    /// <summary>The operations of this window that can be taken back (AF-4.14), newest last; each operation pushes itself when it has succeeded.</summary>
+    private readonly OperationHistory _history = new();
+
+    /// <summary>
+    /// Folder → Undo <operation> (Ctrl+Z, AF-4.14): the last operation of this window taken back, one per press, and
+    /// the entry it touched selected in its folder: "Undone: …"; "Not undone: <name> has changed" when something
+    /// else moved the entry since, "Nothing to undo" at the end. A delete comes back through the shell's own
+    /// Restore on the Recycle Bin's item; the other kinds are the file operations' inverses.
+    /// </summary>
+    private void Undo()
+    {
+        if (_history.Pop() is not { } operation)
+        {
+            Announce("Nothing to undo", true);
+            return;
+        }
+
+        Do(async () =>
+        {
+            if (await Task.Run(() => FileOperations.CheckUndo(operation)) is { } problem)
+            {
+                Announce(problem, true);
+                return;
+            }
+
+            var reason = operation.Kind == OperationKind.Delete ? Shell.Undelete(Handle, operation.Before) : await FileOperations.UndoAsync(operation);
+            if (reason is not null)
+            {
+                Failed("Undo failed", reason);
+                return;
+            }
+
+            if (await ShowFolderAsync(operation.Folder, operation.Select ?? CurrentEntry()?.Name, remember: false))
+            {
+                Announce(operation.DoneText, true);
+            }
+        });
+    }
+
     /// <summary>File operations → New folder… (Ctrl+Shift+N, AF-4.1): the name in a notice, the folder made and selected, "Created <name>".</summary>
     private void NewFolder()
     {
@@ -55,7 +94,8 @@ public sealed partial class FileForm
                 {
                     try
                     {
-                        await Task.Run(() => FileOperations.CreateFolder(folder, name));
+                        var made = await Task.Run(() => FileOperations.CreateFolder(folder, name));
+                        _history.Push(new Operation(OperationKind.NewFolder, [], [made]));
                     }
                     catch (Exception ex) when (ex is IOException or UnauthorizedAccessException)
                     {
@@ -103,6 +143,7 @@ public sealed partial class FileForm
                 return;
             }
 
+            _history.Push(new Operation(OperationKind.NewFile, [], [path]));
             var name = Path.GetFileName(path);
             if (!await ShowFolderAsync(folder, name, remember: false))
             {
@@ -181,6 +222,7 @@ public sealed partial class FileForm
                     }
 
                     Report(token, $"Moved {what} into {name}");
+                    _history.Push(new Operation(OperationKind.Move, sources, destinations, made));
                     if (await ShowFolderAsync(folder, name, remember: false))
                     {
                         Announce($"Moved {what} into {name}", true);
@@ -265,7 +307,8 @@ public sealed partial class FileForm
         {
             try
             {
-                await Task.Run(() => FileOperations.Rename(entry.Path, name));
+                var renamed = await Task.Run(() => FileOperations.Rename(entry.Path, name));
+                _history.Push(new Operation(OperationKind.Rename, [entry.Path], [renamed]));
             }
             catch (Exception ex) when (ex is IOException or UnauthorizedAccessException)
             {
@@ -357,6 +400,7 @@ public sealed partial class FileForm
                     Report(token, done);
                 }
 
+                _history.Push(new Operation(OperationKind.Delete, targets.Select(target => target.Path).ToList(), []));
                 if (await ShowFolderAsync(folder, next, remember: false))
                 {
                     Announce(done, true);
@@ -507,6 +551,7 @@ public sealed partial class FileForm
             }
 
             Report(token, "Pasted " + what);
+            _history.Push(new Operation(move ? OperationKind.Move : OperationKind.Copy, paths, destinations));
 
             if (move)
             {
@@ -691,7 +736,7 @@ public sealed partial class FileForm
         }
 
         var sources = targets.Select(target => target.Path).ToList();
-        RunArchiveWork(folder, "Compressing", "Compress failed", progress => Archives.Compress(sources, folder, progress), "Compressed to");
+        RunArchiveWork(folder, "Compressing", "Compress failed", progress => Archives.Compress(sources, folder, progress), "Compressed to", OperationKind.Compress);
     }
 
     /// <summary>File operations → Extract here: the zip's contents into a new folder named after it, next to it; "Extracted to <name>", the folder selected; "Not a zip file" on anything else.</summary>
@@ -714,7 +759,7 @@ public sealed partial class FileForm
             return;
         }
 
-        RunArchiveWork(folder, "Extracting", "Extract failed", progress => Archives.Extract(entry.Path, folder, progress), "Extracted to");
+        RunArchiveWork(folder, "Extracting", "Extract failed", progress => Archives.Extract(entry.Path, folder, progress), "Extracted to", OperationKind.Extract);
     }
 
     /// <summary>
@@ -722,7 +767,7 @@ public sealed partial class FileForm
     /// at most a few times a second), says "<doing>, please wait" when it passes a second, then shows the folder
     /// with the result selected and says "<done> <name>", the line saying the same.
     /// </summary>
-    private void RunArchiveWork(string folder, string doing, string failTitle, Func<Action<int, int>, string> work, string done) => Do(async () =>
+    private void RunArchiveWork(string folder, string doing, string failTitle, Func<Action<int, int>, string> work, string done, OperationKind kind) => Do(async () =>
     {
         var token = Report(-1, doing);
         var reported = Environment.TickCount64;
@@ -757,6 +802,7 @@ public sealed partial class FileForm
 
         var name = Path.GetFileName(result);
         Report(token, $"{done} {name}");
+        _history.Push(new Operation(kind, [], [result]));
         if (await ShowFolderAsync(folder, name, remember: false))
         {
             Announce($"{done} {name}", true);

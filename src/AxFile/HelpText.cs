@@ -35,6 +35,7 @@ public static class HelpText
           In the entry's menu without a key: Move to new folder, Compress to zip, Extract here, Open with (Windows default, Choose a program, your own programs), Windows menu
           Shift+F10, or the Applications key: the entry's menu, one list in File Explorer's order: Open, Open with, Open in Axit, Cut, Copy, Paste, Rename, Delete, New folder, New text file, Move to new folder, Compress to zip, Extract here, Select all, Select none, Copy path, Show in File Explorer, Information, Properties, Windows menu. Ctrl+I inside this menu says the entry without closing it
           Alt+Enter: the entry's Properties, the Windows sheet
+          Ctrl+Z: undo the last file operation of this window, one per press, the last twenty: a rename renamed back, a new folder or file removed while still empty, a move moved back, a paste's copies, a zip or an extracted folder sent to the Recycle Bin, a delete restored from it; "Undone: …", or "Not undone: …" when the entry has changed since. Folder, Undo names what it would undo
           Ctrl+S: nothing to save here; AxFile says so
 
         The player

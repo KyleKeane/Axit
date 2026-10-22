@@ -83,6 +83,9 @@ public static class AxFileKeys
     /// <summary>The Windows Properties sheet of the entry, File Explorer's key for it (AF-4.7).</summary>
     public const Keys Properties = Keys.Alt | Keys.Return;
 
+    /// <summary>The last operation of this window taken back (AF-4.14).</summary>
+    public const Keys Undo = Keys.Control | Keys.Z;
+
     /// <summary>The player pauses or resumes, from anywhere in the window (AF-5.4); Space is the selection's since 2026-10-21.</summary>
     public const Keys PauseResume = Keys.Control | Keys.P;
 
@@ -136,6 +139,7 @@ public static class AxFileKeys
         ("Item menu (in the list)", ContextMenu),
         ("Item menu (in the list)", ContextMenuAlso),
         ("Properties", Properties),
+        ("Undo the last operation", Undo),
         ("Pause or resume", PauseResume),
         ("Play folder (in the list)", PlayFolder),
         ("Add to queue (in the list)", AddToQueue),

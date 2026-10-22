@@ -275,17 +275,25 @@ windows on the folder of the file or project in hand, and sends back. It works e
   folder (a taken name is "Failed: There is already an entry named …", as New folder) and moves the selected entries,
   or the current one (AF-3.7), into it through the shell (AF-4.8, undo allowed, names chosen first); "Moved <name>
   into <folder>" or "Moved n items into <folder>", the new folder selected.
-- AF-4.14 **Undo** (asked 2026-10-21; specified, to be built with the pane, AF-9, whose operation lines are its
-  history). **Ctrl+Z** (Folder → Undo <operation>, named after what it would undo, "Undo rename") takes back the
+- AF-4.14 **Undo** (asked 2026-10-21; specified and built the same night, after the pane, AF-9, whose operation
+  lines show the same operations). **Ctrl+Z** (Folder → Undo <operation>, named after what it would undo, "Undo rename") takes back the
   last operation of this window that can be taken back, one step per press, and selects the entry it touched:
   Rename, renamed back; New folder and New text file, deleted while still empty ("Not undone: notes has files
   now" otherwise); a paste that moved and Move to new folder, moved back where they were, the new folder removed
   when it is empty; a paste that copied, Compress to zip and Extract here, the copies, the zip or the extracted
   folder sent to the Recycle Bin; Delete, brought back from the Recycle Bin, the shell's own undelete on the Recycle
-  Bin's item, the one step that needs the shell again. "Undone: <what>" each time; an entry changed since by anything
-  else (renamed in File Explorer meanwhile), "Not undone: <name> has changed". Eject, Open, the player, Favorites and
-  the settings are not operations and have no undo; there is no redo. The history is this window's, the last twenty
-  operations, gone with the window.
+  Bin's item, the one step that needs the shell again (the bin's items are matched by the original path their
+  `$I` record holds, the latest deletion of each, and restored in one Restore command; "Not in the Recycle Bin any
+  more" when none is there). "Undone: <what>" each time ("Undone: renamed back to <name>", "Undone: <name> removed",
+  "Undone: moved back", "Undone: <what> sent to the Recycle Bin", "Undone: <what> restored"); an entry changed since
+  by anything else (renamed in File Explorer meanwhile), "Not undone: <name> has changed", "Not undone: <name> has
+  files now" / "has content now" (a new folder or file filled meanwhile), "Not undone: <name> is already here" (the
+  place it would go back to is taken), and the operation is dropped from the history either way; a failure of the
+  undo itself is "Failed: <reason>" (AF-4.5). Eject, Open, the player, Favorites and the settings are not operations
+  and have no undo; there is no redo. The history is this window's, the last twenty operations, gone with the
+  window. The history and each operation's inverse are `OperationHistory`, `Operation` and `FileOperations.CheckUndo`
+  and `UndoAsync` in `AxFile.Core`, tested over a temporary folder; the Recycle Bin's records are `RecycleBin`, tested
+  on synthetic records; the Restore itself is `Shell.Undelete`, checked by a console run on this machine.
 
 ### AF-5 The player
 
@@ -325,7 +333,7 @@ windows on the folder of the file or project in hand, and sends back. It works e
 
 - AF-6.1 Menus, in the standard order of a first menu (AX-6): **Folder (F):** New window Ctrl+N | Open folder… Ctrl+O |
   Open recent folder ▸ | Favorites ▸ (1. name (path) … or No favorites yet | ─ | Add or remove this folder Ctrl+D) |
-  Go to folder… Ctrl+G | ─ | Up one level Backspace | Refresh F5 | ─ | Sort by ▸ (Name ✓ |
+  Go to folder… Ctrl+G | ─ | Up one level Backspace | Refresh F5 | Undo <operation> Ctrl+Z (AF-4.14) | ─ | Sort by ▸ (Name ✓ |
   Date | Size) | Filter… Ctrl+Shift+F | ─ | Show current folder in ▸ (File Explorer
   Ctrl+W | AxClaude | AxGit | AxTerminal) | ─ | Exit Alt+F4. **Item (I):** Open Enter | Open with ▸ (Windows default |
   Choose a program… | ─ | 1. name (path) … or No programs of your own yet | Add a program… | Remove a program ▸) |
@@ -350,7 +358,7 @@ windows on the folder of the file or project in hand, and sends back. It works e
   Ctrl+N, Ctrl+O, Ctrl+G, Ctrl+D, Ctrl+W, Ctrl+Shift+W, Ctrl+E, Ctrl+I, Ctrl+Shift+N, Ctrl+Shift+T, Ctrl+Shift+C,
   Ctrl+Shift+F, Escape, Shift+Up, Shift+Down, Shift+Home, Shift+End,
   Space, Ctrl+A, Ctrl+Shift+A, Ctrl+P, Ctrl+Enter, Ctrl+Shift+Q (AF-9.2), Ctrl+Right, Ctrl+Left, Ctrl+Shift+Right, Ctrl+Shift+Left, Ctrl+T,
-  Ctrl+Shift+Period, Ctrl+Shift+Comma, Ctrl+Q, Shift+F10, the Applications key, Alt+Enter, Ctrl+X, Ctrl+C, Ctrl+V.
+  Ctrl+Shift+Period, Ctrl+Shift+Comma, Ctrl+Q, Shift+F10, the Applications key, Alt+Enter, Ctrl+Z (AF-4.14), Ctrl+X, Ctrl+C, Ctrl+V.
   Enter, Backspace, Space, Escape, F2, Delete, Ctrl+X, Ctrl+C, Ctrl+V, Ctrl+A, Ctrl+Shift+A, Ctrl+Enter, Ctrl+Shift+Q, the Shift arrows, Shift+F10 and the
   Applications key act only while the list has the focus (in the pane, Enter, Delete, Escape and Ctrl+I act on its line, AF-9.6; in a notice's field or the rename box they are the field's;
   the two menu keys are the list's own, which shows its context menu itself, so the key switch has no case for them;
@@ -373,7 +381,7 @@ Favorites" (AF-3.9), "Top" (This PC, AF-3.10), "Ejecting <name>" (AF-3.11), "Add
 <name>", "Pasted n items",
 "Pasting, please wait" (a paste longer than a second), "Added n to the queue", "Queue cleared", "Removed <name>" (a
 queue line), "<name>, n of m" and "<name>, n of m, playing, m:ss of m:ss" (Ctrl+I in the queue), "No sound or video
-files here", "No sound or video files to add" (AF-9.2), "Refreshed", "Not found: <path>", "No program opens
+files here", "No sound or video files to add" (AF-9.2), "Undone: …", "Not undone: …", "Nothing to undo" (AF-4.14), "Refreshed", "Not found: <path>", "No program opens
 .xyz. Ctrl+E opens it as text", "Failed: <message>", "<name>, <size>, modified <date>" (Ctrl+I), "Not found" (find),
 "Nothing to save here", "Text size n", "Windows text size", "Copied diagnostics", "<name>, <size>, modified <date>, n
 selected" (Ctrl+I with marks); and the guards "No folder" (nothing
@@ -568,5 +576,8 @@ single-threaded-apartment thread of its own (AX-7.5).
   inverse; to be built with the pane. The Shift range (AF-3.7) and the lookalike guard (AF-4.2) were built the same night.
 - 2026-10-21, late: the pane built (AF-9.1 to AF-9.3): the queue list under the folder list (`PlayQueue` in
   `AxFile.Core`, tested; `FileForm.Pane.cs`), Play folder, Add to queue, Clear queue, Show queue, the queue's own
-  keys, the operations' status lines with the zip counts; the preview (AF-9.4) and Undo (AF-4.14) are next; none of
-  it checked with NVDA yet (test plan section 6).
+  keys, the operations' status lines with the zip counts; the preview (AF-9.4) is next; none of it checked with NVDA
+  yet (test plan section 6).
+- 2026-10-21, late: Undo built (AF-4.14): Ctrl+Z and Folder → Undo <operation> over the window's last twenty operations,
+  each with its inverse in `AxFile.Core` (tested) and a delete restored through the shell's Restore on the Recycle
+  Bin's item (`Shell.Undelete`, checked on this machine); not yet checked with NVDA (test plan 3.14).

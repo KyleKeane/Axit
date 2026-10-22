@@ -178,6 +178,89 @@ public static class FileOperations
         RunShellOperationAsync(move ? FO_MOVE : FO_COPY, sources, destinations, move ? "The move" : "The copy");
 
     /// <summary>One line for the user from what the file system threw.</summary>
+    /// <summary>
+    /// Why an operation cannot be taken back now (AF-4.14), or null when it can: an entry it made or moved is gone or
+    /// renamed since ("Not undone: <name> has changed"), a new folder or file has been filled meanwhile, or the place
+    /// an entry would go back to is taken.
+    /// </summary>
+    public static string? CheckUndo(Operation operation)
+    {
+        foreach (var path in operation.After)
+        {
+            if (!Exists(path))
+            {
+                return $"Not undone: {Path.GetFileName(path)} has changed";
+            }
+        }
+
+        switch (operation.Kind)
+        {
+            case OperationKind.NewFolder when Directory.EnumerateFileSystemEntries(operation.After[0]).Any():
+                return $"Not undone: {Path.GetFileName(operation.After[0])} has files now";
+            case OperationKind.NewFile when new FileInfo(operation.After[0]).Length > 0:
+                return $"Not undone: {Path.GetFileName(operation.After[0])} has content now";
+            case OperationKind.Rename or OperationKind.Move or OperationKind.Delete:
+                foreach (var path in operation.Before)
+                {
+                    if (Exists(path))
+                    {
+                        return $"Not undone: {Path.GetFileName(path)} is already here";
+                    }
+                }
+
+                break;
+        }
+
+        return null;
+    }
+
+    private static bool Exists(string path) => File.Exists(path) || Directory.Exists(path);
+
+    /// <summary>
+    /// The operation taken back (AF-4.14): a rename renamed back; a new folder or file, still empty, deleted; a move
+    /// moved back, the folder it made removed when empty again; a paste that copied, a compress and an extract sent
+    /// to the Recycle Bin. A delete is the shell's own Restore on the Recycle Bin's item, which the window does. The
+    /// reason when it fails, null when done.
+    /// </summary>
+    public static async Task<string?> UndoAsync(Operation operation)
+    {
+        try
+        {
+            switch (operation.Kind)
+            {
+                case OperationKind.Rename:
+                    await Task.Run(() => Rename(operation.After[0], Path.GetFileName(operation.Before[0])));
+                    return null;
+                case OperationKind.NewFolder:
+                    await Task.Run(() => Directory.Delete(operation.After[0]));
+                    return null;
+                case OperationKind.NewFile:
+                    await Task.Run(() => File.Delete(operation.After[0]));
+                    return null;
+                case OperationKind.Move:
+                    if (await CopyOrMoveAsync(operation.After, operation.Before, move: true) is { } reason)
+                    {
+                        return reason;
+                    }
+
+                    if (operation.MadeFolder is { } made && Directory.Exists(made) && !Directory.EnumerateFileSystemEntries(made).Any())
+                    {
+                        await Task.Run(() => Directory.Delete(made));
+                    }
+
+                    return null;
+                case OperationKind.Copy or OperationKind.Compress or OperationKind.Extract:
+                    return await DeleteToRecycleBinAsync(operation.After);
+                default:
+                    return "A delete is undone through the Recycle Bin";
+            }
+        }
+        catch (Exception ex) when (ex is IOException or UnauthorizedAccessException)
+        {
+            return Message(ex);
+        }
+    }
+
     public static string Message(Exception exception) => exception switch
     {
         UnauthorizedAccessException => "Access denied",

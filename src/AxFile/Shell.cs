@@ -39,6 +39,17 @@ internal static class Shell
     private static readonly Guid IidIShellFolder = new("000214E6-0000-0000-C000-000000000046");
     private static readonly Guid IidIContextMenu = new("000214E4-0000-0000-C000-000000000046");
 
+    /// <summary>FOLDERID_RecycleBinFolder, the Recycle Bin as a shell folder (AF-4.14).</summary>
+    private static readonly Guid FolderIdRecycleBin = new("B7534046-3ECB-4C18-BE4E-64CD4CB7D6AC");
+    private const uint ShcontfFolders = 0x20;
+    private const uint ShcontfNonFolders = 0x40;
+    private const uint ShcontfIncludeHidden = 0x80;
+    private const uint ShgdnForParsing = 0x8000;
+
+    /// <summary>A STRRET: a type, padding, and a union of a pointer, an offset and 260 narrow characters; 272 bytes covers it on either bitness.</summary>
+    private const int StrRetSize = 272;
+    private const uint PathMax = 1024;
+
     /// <summary>The shell's menu being tracked, for <see cref="ForwardMenuMessage"/>; null otherwise.</summary>
     private static object? s_tracking;
 
@@ -130,44 +141,189 @@ internal static class Shell
             return reason;
         }
 
-        var name = Marshal.AllocHGlobal((int)VerbMax * 2);
         try
         {
             var contextMenu = (IContextMenu)parts.Handler;
-            var count = GetMenuItemCount(parts.Menu);
+            return FindVerb(contextMenu, parts.Menu, "eject") is { } id ? Invoke(contextMenu, owner, id) : "This drive has no Eject";
+        }
+        finally
+        {
+            Release(parts);
+        }
+    }
+
+    /// <summary>
+    /// The shell's own Restore (AF-4.14) for entries this window sent to the Recycle Bin: the bin's items whose
+    /// record says they came from one of <paramref name="paths"/> (the latest deletion of each) are restored in one
+    /// command, as Restore in the Recycle Bin would, each to where it was. The reason when none is there or Windows
+    /// refuses, null otherwise.
+    /// </summary>
+    public static string? Undelete(nint owner, IReadOnlyList<string> paths)
+    {
+        var wanted = new HashSet<string>(paths, StringComparer.OrdinalIgnoreCase);
+        var hr = SHGetKnownFolderIDList(in FolderIdRecycleBin, 0, 0, out var binPidl);
+        if (hr < 0 || binPidl == 0)
+        {
+            return Reason(hr);
+        }
+
+        IShellFolder? desktop = null;
+        IShellFolder? bin = null;
+        IEnumIDList? items = null;
+        object? handler = null;
+        nint menu = 0;
+        var latest = new Dictionary<string, (nint Pidl, long Time)>(StringComparer.OrdinalIgnoreCase);
+        var strret = Marshal.AllocHGlobal(StrRetSize);
+        var buffer = Marshal.AllocHGlobal((int)PathMax * 2);
+        try
+        {
+            hr = SHGetDesktopFolder(out desktop);
+            if (hr < 0 || desktop is null)
+            {
+                return Reason(hr);
+            }
+
+            hr = desktop.BindToObject(binPidl, 0, in IidIShellFolder, out var binPointer);
+            if (hr < 0 || binPointer == 0)
+            {
+                return Reason(hr);
+            }
+
+            bin = (IShellFolder)Marshal.GetObjectForIUnknown(binPointer);
+            Marshal.Release(binPointer);
+            hr = bin.EnumObjects(owner, ShcontfFolders | ShcontfNonFolders | ShcontfIncludeHidden, out var enumerator);
+            if (hr < 0 || enumerator == 0)
+            {
+                return Reason(hr);
+            }
+
+            items = (IEnumIDList)Marshal.GetObjectForIUnknown(enumerator);
+            Marshal.Release(enumerator);
+            while (items.Next(1, out var pidl, out var fetched) == 0 && fetched == 1)
+            {
+                var kept = false;
+                if (bin.GetDisplayNameOf(pidl, ShgdnForParsing, strret) >= 0 && StrRetToBufW(strret, pidl, buffer, PathMax) >= 0
+                    && Marshal.PtrToStringUni(buffer) is { } recycled && AxFile.Core.RecycleBin.ReadRecord(recycled) is { } record
+                    && wanted.Contains(record.OriginalPath)
+                    && (!latest.TryGetValue(record.OriginalPath, out var have) || record.DeletedAt > have.Time))
+                {
+                    if (have.Pidl != 0)
+                    {
+                        Marshal.FreeCoTaskMem(have.Pidl);
+                    }
+
+                    latest[record.OriginalPath] = (pidl, record.DeletedAt);
+                    kept = true;
+                }
+
+                if (!kept)
+                {
+                    Marshal.FreeCoTaskMem(pidl);
+                }
+            }
+
+            if (latest.Count == 0)
+            {
+                return "Not in the Recycle Bin any more";
+            }
+
+            var found = latest.Values.Select(item => item.Pidl).ToArray();
+            hr = bin.GetUIObjectOf(owner, (uint)found.Length, found, in IidIContextMenu, 0, out handler);
+            if (hr < 0 || handler is not IContextMenu contextMenu)
+            {
+                return Reason(hr);
+            }
+
+            menu = CreatePopupMenu();
+            hr = contextMenu.QueryContextMenu(menu, 0, IdFirst, IdLast, CmfNormal);
+            if (hr < 0)
+            {
+                return Reason(hr);
+            }
+
+            return FindVerb(contextMenu, menu, "undelete") is { } id ? Invoke(contextMenu, owner, id) : "Windows offers no Restore for it";
+        }
+        finally
+        {
+            if (menu != 0)
+            {
+                DestroyMenu(menu);
+            }
+
+            if (handler is not null)
+            {
+                Marshal.FinalReleaseComObject(handler);
+            }
+
+            foreach (var item in latest.Values)
+            {
+                Marshal.FreeCoTaskMem(item.Pidl);
+            }
+
+            if (items is not null)
+            {
+                Marshal.FinalReleaseComObject(items);
+            }
+
+            if (bin is not null)
+            {
+                Marshal.FinalReleaseComObject(bin);
+            }
+
+            if (desktop is not null)
+            {
+                Marshal.FinalReleaseComObject(desktop);
+            }
+
+            Marshal.FreeCoTaskMem(binPidl);
+            Marshal.FreeHGlobal(strret);
+            Marshal.FreeHGlobal(buffer);
+        }
+    }
+
+    /// <summary>The id of the menu's item whose verb is <paramref name="verb"/> ("eject", "undelete"), or null when the menu has none.</summary>
+    private static uint? FindVerb(IContextMenu contextMenu, nint menu, string verb)
+    {
+        var name = Marshal.AllocHGlobal((int)VerbMax * 2);
+        try
+        {
+            var count = GetMenuItemCount(menu);
             for (var i = 0; i < count; i++)
             {
-                var id = GetMenuItemID(parts.Menu, i);
+                var id = GetMenuItemID(menu, i);
                 if (id == uint.MaxValue || id < IdFirst || contextMenu.GetCommandString((nuint)(id - IdFirst), GcsVerbW, 0, name, VerbMax) < 0)
                 {
                     continue;
                 }
 
-                if (!string.Equals(Marshal.PtrToStringUni(name), "eject", StringComparison.OrdinalIgnoreCase))
+                if (string.Equals(Marshal.PtrToStringUni(name), verb, StringComparison.OrdinalIgnoreCase))
                 {
-                    continue;
+                    return id;
                 }
-
-                var info = new InvokeInfo
-                {
-                    Size = Marshal.SizeOf<InvokeInfo>(),
-                    Mask = CmicMaskUnicode,
-                    Window = owner,
-                    Verb = (nint)(id - IdFirst),
-                    VerbW = (nint)(id - IdFirst),
-                    Show = SwShowNormal,
-                };
-                var hr = contextMenu.InvokeCommand(ref info);
-                return hr < 0 && hr != ErrorCancelled ? Reason(hr) : null;
             }
 
-            return "This drive has no Eject";
+            return null;
         }
         finally
         {
             Marshal.FreeHGlobal(name);
-            Release(parts);
         }
+    }
+
+    /// <summary>The menu item with that id invoked without a point; the reason when Windows refuses, null otherwise.</summary>
+    private static string? Invoke(IContextMenu contextMenu, nint owner, uint id)
+    {
+        var info = new InvokeInfo
+        {
+            Size = Marshal.SizeOf<InvokeInfo>(),
+            Mask = CmicMaskUnicode,
+            Window = owner,
+            Verb = (nint)(id - IdFirst),
+            VerbW = (nint)(id - IdFirst),
+            Show = SwShowNormal,
+        };
+        var hr = contextMenu.InvokeCommand(ref info);
+        return hr < 0 && hr != ErrorCancelled ? Reason(hr) : null;
     }
 
     /// <summary>
@@ -286,6 +442,15 @@ internal static class Shell
 
     [DllImport("shell32.dll", CharSet = CharSet.Unicode, ExactSpelling = true)]
     private static extern int SHOpenWithDialog(nint owner, in OpenAsInfo info);
+
+    [DllImport("shell32.dll", ExactSpelling = true)]
+    private static extern int SHGetDesktopFolder(out IShellFolder folder);
+
+    [DllImport("shell32.dll", ExactSpelling = true)]
+    private static extern int SHGetKnownFolderIDList(in Guid folderId, uint flags, nint token, out nint pidl);
+
+    [DllImport("shlwapi.dll", ExactSpelling = true)]
+    private static extern int StrRetToBufW(nint strret, nint pidl, nint buffer, uint max);
 
     [DllImport("shell32.dll", CharSet = CharSet.Unicode, ExactSpelling = true, SetLastError = true)]
     [return: MarshalAs(UnmanagedType.Bool)]
@@ -414,6 +579,24 @@ internal static class Shell
 
         [PreserveSig]
         int SetNameOf(nint owner, nint pidl, [MarshalAs(UnmanagedType.LPWStr)] string name, uint flags, out nint newPidl);
+    }
+
+    [ComImport]
+    [Guid("000214F2-0000-0000-C000-000000000046")]
+    [InterfaceType(ComInterfaceType.InterfaceIsIUnknown)]
+    private interface IEnumIDList
+    {
+        [PreserveSig]
+        int Next(uint count, out nint pidl, out uint fetched);
+
+        [PreserveSig]
+        int Skip(uint count);
+
+        [PreserveSig]
+        int Reset();
+
+        [PreserveSig]
+        int Clone(out nint clone);
     }
 
     [ComImport]
