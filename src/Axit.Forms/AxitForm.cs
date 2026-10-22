@@ -206,7 +206,7 @@ public abstract class AxitForm : Form
     protected override void OnShown(EventArgs e)
     {
         base.OnShown(e);
-        if (Settings.CheckForUpdates)
+        if (Settings.CheckForUpdates && !BundleInfo.IsDevelopmentBuild)
         {
             CheckForUpdates(manual: false);
         }

@@ -152,7 +152,8 @@ allow it, see B-9).
 - AX-3.1 One version for the bundle, `<Version>` in `src/Axit/Axit.csproj`. A newer GitHub release is offered as
   AxClaude does (`docs/axclaude/SPEC.md` FR-1.10, D25): asked once at startup when the setting is on, a notice with
   the release notes and four buttons: Update and restart (Enter), Update and close, Open release page, Later
-  (Escape). Every window's Axit menu ends with Check for updates (Axit <version>), always, naming the version in use
+  (Escape). A development build (Debug, as `run.ps1` makes it) does not ask at startup, since its version is whatever
+  the working tree said when it was last built; Check for updates still asks. Every window's Axit menu ends with Check for updates (Axit <version>), always, naming the version in use
   and asking GitHub again every time, Update to Axit <version> below it while a newer release is known, and About, the
   bundle's About in sections (AX-9.9, `Axit.Core/BundleAbout`), the same in every window. Every text of the update
   flow names Axit, never an app: the version is the bundle's.
