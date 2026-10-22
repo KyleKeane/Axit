@@ -208,7 +208,7 @@ public sealed class FileOperationsTests : IDisposable
     }
 
     [Fact]
-    public void Two_compresses_of_the_same_entry_take_different_names()
+    public async Task Two_compresses_of_the_same_entry_take_different_names()
     {
         var notes = Path.Combine(_folder, "notes.md");
         var started = new ManualResetEventSlim();
@@ -222,9 +222,10 @@ public sealed class FileOperationsTests : IDisposable
         started.Wait();
         var second = Archives.Compress([notes], _folder);
         release.Set();
-        Assert.Equal(Path.Combine(_folder, "notes.zip"), first.Result);
+        var firstZip = await first;
+        Assert.Equal(Path.Combine(_folder, "notes.zip"), firstZip);
         Assert.Equal(Path.Combine(_folder, "notes - 2.zip"), second);
-        Assert.True(new FileInfo(first.Result).Length > 0);
+        Assert.True(new FileInfo(firstZip).Length > 0);
         Assert.True(new FileInfo(second).Length > 0);
     }
 
