@@ -16,7 +16,7 @@ Accessible Windows apps for screen reader users, built for and tested with NVDA,
 - **AxFile**: a file manager for one folder, with an Actions list of every operation that Ctrl+Z can take back, selection, zip files, favourites and the drives.
 - **AxMedia**: a player for sound and video files with one queue, speed with the pitch kept, and seeking by key.
 - **AxPreview**: a read-only viewer for one text file, with the editors' navigation keys.
-- **AxStart**: a program launcher. One key from anywhere, Ctrl+Alt+Space unless you choose another, brings up a search field over the Start menu's programs; Down and Up move through the matches while the caret stays in the field. Not yet released.
+- **AxStart**: a program launcher. One key from anywhere, Windows+Alt+Space unless you choose another, brings up a search field over the Start menu's programs; Down and Up move through the matches while the caret stays in the field. Not yet released.
 
 The apps reach each other: AxFile hands a file to AxMedia or AxPreview, every window can show its folder in the others, and the Axit menu in every window lists the open windows and starts any app.
 

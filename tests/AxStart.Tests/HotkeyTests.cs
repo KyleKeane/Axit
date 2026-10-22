@@ -6,14 +6,14 @@ namespace AxStart.Tests;
 public sealed class HotkeyTests
 {
     [Fact]
-    public void The_default_is_ctrl_alt_space()
+    public void The_default_is_windows_alt_space()
     {
-        Assert.Equal("Ctrl+Alt+Space", Hotkey.Default.ToString());
+        Assert.Equal("Windows+Alt+Space", Hotkey.Default.ToString());
     }
 
     [Theory]
-    [InlineData("Ctrl+Alt+Space")]
     [InlineData("Windows+Alt+Space")]
+    [InlineData("Ctrl+Alt+Space")]
     [InlineData("Ctrl+Shift+F12")]
     [InlineData("Ctrl+Windows+Alt+Shift+Page Down")]
     [InlineData("Alt+A")]
@@ -57,21 +57,21 @@ public sealed class HotkeyTests
             var path = Path.Combine(folder, "axstart.json");
             var settings = StartSettings.Load(path, out var error);
             Assert.Null(error);
-            Assert.Equal("Ctrl+Alt+Space", settings.Hotkey);
+            Assert.Equal("Windows+Alt+Space", settings.Hotkey);
             Assert.True(settings.StartWithWindows);
             Assert.True(settings.SayFirstMatch);
 
-            settings.Hotkey = "Windows+Alt+Space";
+            settings.Hotkey = "Ctrl+Alt+K";
             settings.Started("Notepad");
             settings.Started("notepad");
             settings.Save(path);
             var back = StartSettings.Load(path, out _);
-            Assert.Equal(new Hotkey(Hotkey.Windows | Hotkey.Alt, 0x20), back.Key);
+            Assert.Equal(new Hotkey(Hotkey.Control | Hotkey.Alt, 0x4B), back.Key);
             Assert.Equal(2, back.Starts["NOTEPAD"]);
 
             File.WriteAllText(path, """{ "hotkey": "Shift+A", "starts": { "Notepad": 2, "notepad": 1, "": 4, "Calculator": -3 } }""");
             var mended = StartSettings.Load(path, out _);
-            Assert.Equal("Ctrl+Alt+Space", mended.Hotkey);
+            Assert.Equal("Windows+Alt+Space", mended.Hotkey);
             Assert.Equal(3, mended.Starts["Notepad"]);
             Assert.Single(mended.Starts);
         }

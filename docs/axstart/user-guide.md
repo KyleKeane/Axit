@@ -1,16 +1,16 @@
-﻿# AxStart user guide
+# AxStart user guide
 
 AxStart is a program launcher, made for screen reader users: one key from anywhere brings up a search field, you type part of a program's name, Down and Up move through the programs that match while the caret stays in the field, and Enter starts the one you are on. The programs are the ones the Start menu has, the desktop programs and the Store apps (Settings, Calculator) alike. There are no web results, no files and no suggestions.
 
 ## Install and start
 
-AxStart is part of Axit. Installing Axit (see the Axit guide in the Axit menu, About) starts AxStart in the background and makes it start again each time you sign in to Windows. It has no window and no taskbar button until you press its hotkey, **Ctrl+Alt+Space**.
+AxStart is part of Axit. Installing Axit (see the Axit guide in the Axit menu, About) starts AxStart in the background and makes it start again each time you sign in to Windows. It has no window and no taskbar button until you press its hotkey, **Windows+Alt+Space**.
 
 You can also start it from the Start menu, `Axit AxStart`, or the console, `axstart`: the search field comes up, and AxStart keeps running afterwards. Starting it again while it runs just brings up the field.
 
 ## Finding and starting a program
 
-1. Press **Ctrl+Alt+Space** from any program. NVDA says "AxStart window, Search programs, edit".
+1. Press **Windows+Alt+Space** from any program. NVDA says "AxStart window, Search programs, edit".
 2. Type part of the name, for example `calc`. After a short pause AxStart says the first match and how many there are: "Calculator, 1 of 2". "No programs match xyz" when nothing does.
 3. **Down** and **Up** move to the next and the previous match, each said with its place: "Notepad++, 2 of 3". **Page Down** and **Page Up** move a page of matches, **Ctrl+Home** and **Ctrl+End** to the first and the last. At either end a low note sounds and nothing moves.
 4. **Enter** starts the match you are on. AxStart goes away and the program comes up in front.
@@ -30,7 +30,7 @@ How matching works: every word you type must be in the name, in any order, with 
 
 ## Options
 
-- **Options, Hotkey**: press the key you want to bring AxStart up, with Ctrl, Alt or the Windows key in it, then Enter. "Hotkey Windows+Alt+Space" when it is set; "Windows+Alt+Space is taken by another program" when another program holds it, and the old key stays. If the hotkey is taken when AxStart starts, AxStart shows itself once with a notice saying so, so that you can choose another.
+- **Options, Hotkey**: press the key you want to bring AxStart up, with Ctrl, Alt or the Windows key in it, then Enter. "Hotkey Ctrl+Alt+K" when it is set; "Ctrl+Alt+K is taken by another program" when another program holds it, and the old key stays. If the hotkey is taken when AxStart starts, AxStart shows itself once with a notice saying so, so that you can choose another.
 - **Options, General, Start with Windows** (on): AxStart starts in the background when you sign in.
 - **Options, General, Say the first match while typing** (on): turn it off and AxStart says nothing while you type; Ctrl+I says the match on demand.
 - **Options, Text**: the font and its size, as in every Axit window.

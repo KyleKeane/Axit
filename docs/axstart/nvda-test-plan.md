@@ -8,12 +8,12 @@ Before starting: install the build (`publish.ps1`), or quit any running AxStart 
 
 ## 1. Bringing it up and putting it away
 
-1. In AxClaude, press Ctrl+Alt+Space: NVDA says "AxStart window, Search programs, edit" and nothing else.
+1. In AxClaude, press Windows+Alt+Space: NVDA says "AxStart window, Search programs, edit" and nothing else.
 2. Escape: AxStart is gone and AxClaude has the focus again, on the line it was on.
-3. From File Explorer, then from the desktop (Windows+D): Ctrl+Alt+Space brings the field up each time, in front.
-4. Ctrl+Alt+Space while the field shows: it hides.
+3. From File Explorer, then from the desktop (Windows+D): Windows+Alt+Space brings the field up each time, in front.
+4. Windows+Alt+Space while the field shows: it hides.
 5. Bring it up, Alt+Tab to another program: AxStart hides itself.
-6. Bring it up, Alt+F4: it hides; Ctrl+Alt+Space brings it back (the process still runs).
+6. Bring it up, Alt+F4: it hides; Windows+Alt+Space brings it back (the process still runs).
 7. Start menu, `Axit AxStart`, while AxStart runs: the field comes up; no second AxStart starts (Task Manager shows one `Axit.exe start`).
 
 ## 2. Typing and moving
@@ -40,17 +40,17 @@ Before starting: install the build (`publish.ps1`), or quit any running AxStart 
 
 ## 4. The hotkey
 
-1. Options, Hotkey: the notice says the key in use; the field says "Ctrl+Alt+Space".
+1. Options, Hotkey: the notice says the key in use; the field says "Windows+Alt+Space".
 2. Press A alone: "Use Ctrl, Alt or the Windows key with it". Press Shift+A: the same.
-3. Press Windows+Alt+Space: the field says it and NVDA reads it. Enter: "Hotkey Windows+Alt+Space".
-4. Hide; Windows+Alt+Space brings AxStart up; Ctrl+Alt+Space no longer does.
+3. Press Ctrl+Alt+K: the field says it and NVDA reads it. Enter: "Hotkey Ctrl+Alt+K".
+4. Hide; Ctrl+Alt+K brings AxStart up; Windows+Alt+Space no longer does.
 5. Options, Hotkey, a key another program holds (if one is known), Enter: "<key> is taken by another program"; the old key still works.
-6. Options, Hotkey, Escape: the key in use is unchanged. Set it back to Ctrl+Alt+Space.
+6. Options, Hotkey, Escape: the key in use is unchanged. Set it back to Windows+Alt+Space.
 
 ## 5. Sign-in and update
 
-1. Options, General, Start with Windows is checked; sign out and in: Ctrl+Alt+Space works without starting anything.
+1. Options, General, Start with Windows is checked; sign out and in: Windows+Alt+Space works without starting anything.
 2. Uncheck it, sign out and in: the hotkey does nothing until AxStart is started from the Start menu. Check it again.
 3. Options, General, Say the first match while typing off: typing says nothing; Ctrl+I says the match. On again.
-4. An update in place from another Axit window: afterwards Ctrl+Alt+Space still works (AxStart was stopped and started again hidden).
+4. An update in place from another Axit window: afterwards Windows+Alt+Space still works (AxStart was stopped and started again hidden).
 5. AxStart, Quit AxStart: the hotkey does nothing until AxStart is started again.

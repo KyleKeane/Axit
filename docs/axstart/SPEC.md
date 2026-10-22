@@ -9,7 +9,7 @@ number and not repeated. In AxStart's code and documents, "SPEC.md" means this f
 
 ## 1. Summary
 
-One key from anywhere, Ctrl+Alt+Space unless the user chose another (AS-4.1), brings up a small window with one search
+One key from anywhere, Windows+Alt+Space unless the user chose another (AS-4.1), brings up a small window with one search
 field. Typing narrows the list of installed programs to the names that match; Up and Down move through the matches
 while the caret stays in the field, so that typing and Backspace go on working; Enter starts the program and the window
 goes away. The programs are the ones the Start menu has: the desktop programs and the Store apps (Settings, Calculator)
@@ -30,17 +30,17 @@ taskbar. It works entirely offline (bundle G6).
 
 ## 3. Scenarios
 
-1. In AxClaude, Ctrl+Alt+Space: "AxStart window, Search programs, edit, blank". `calc`: NVDA echoes the letters, and
+1. In AxClaude, Windows+Alt+Space: "AxStart window, Search programs, edit, blank". `calc`: NVDA echoes the letters, and
    after the typing pauses, "Calculator, 1 of 2". Enter: Calculator starts and is in front; AxStart is gone.
-2. Ctrl+Alt+Space, `note`: "Notepad, 1 of 3". Down: "Notepad++, 2 of 3". Down: "OneNote, 3 of 3". Down: the edge
+2. Windows+Alt+Space, `note`: "Notepad, 1 of 3". Down: "Notepad++, 2 of 3". Down: "OneNote, 3 of 3". Down: the edge
    earcon (AX-7, `Sounds.Edge`). Backspace twice: "Notepad, 1 of 9" after the pause, the selection back on the first.
-3. Ctrl+Alt+Space, `xyz`: "No programs match xyz". Escape: AxStart is gone and the program from before has the focus
+3. Windows+Alt+Space, `xyz`: "No programs match xyz". Escape: AxStart is gone and the program from before has the focus
    again, its own place kept.
-4. Ctrl+Alt+Space, `power`, Down to "Windows PowerShell", Ctrl+Shift+Enter: Windows asks for administrator rights
+4. Windows+Alt+Space, `power`, Down to "Windows PowerShell", Ctrl+Shift+Enter: Windows asks for administrator rights
    (its own prompt) and PowerShell starts elevated.
-5. Options → Hotkey…: "Press the new key"; the user presses Windows+Alt+Space: the field says "Windows+Alt+Space";
-   Enter: "Hotkey Windows+Alt+Space". From then on that key brings AxStart up and Ctrl+Alt+Space is free again.
-6. A program installed a minute ago: Ctrl+Alt+Space, its name: it is there, since the list is read again on each
+5. Options → Hotkey…: "Press the new key"; the user presses Ctrl+Alt+K: the field says "Ctrl+Alt+K";
+   Enter: "Hotkey Ctrl+Alt+K". From then on that key brings AxStart up and Windows+Alt+Space is free again.
+6. A program installed a minute ago: Windows+Alt+Space, its name: it is there, since the list is read again on each
    showing, in the background (AS-2.1).
 
 ## 4. Functional requirements
@@ -115,21 +115,21 @@ taskbar. It works entirely offline (bundle G6).
 
 ### AS-4 The hotkey
 
-- AS-4.1 One system-wide key, `RegisterHotKey` on the background process's own window, Ctrl+Alt+Space unless the
+- AS-4.1 One system-wide key, `RegisterHotKey` on the background process's own window, Windows+Alt+Space unless the
   user set another. Pressed while AxStart is hidden, it shows the window in front with the focus in the field (the
   process that receives a hotkey may take the foreground); pressed while the window shows, it hides it.
 - AS-4.2 **Options → Hotkey…**: a notice "Hotkey" with one field, "Press the new key", that takes the next key
-  pressed with its modifiers and shows it as a menu would ("Windows+Alt+Space"); a key without Ctrl, Alt or the
+  pressed with its modifiers and shows it as a menu would ("Ctrl+Alt+K"); a key without Ctrl, Alt or the
   Windows key, or Escape, Enter or Tab alone, is not taken ("Use Ctrl, Alt or the Windows key with it"). Enter
-  saves: the old key unregistered, the new one registered, "Hotkey Windows+Alt+Space"; a key another program holds
-  says "Windows+Alt+Space is taken by another program" and the old key stays. Escape keeps the old key.
+  saves: the old key unregistered, the new one registered, "Hotkey Ctrl+Alt+K"; a key another program holds
+  says "Ctrl+Alt+K is taken by another program" and the old key stays. Escape keeps the old key.
 - AS-4.3 A hotkey that cannot be registered at start (another program took it) shows the window once with the
-  notice "The hotkey Ctrl+Alt+Space is taken by another program. Options, Hotkey, to choose another.", so that the
+  notice "The hotkey Windows+Alt+Space is taken by another program. Options, Hotkey, to choose another.", so that the
   user is never left with a launcher that cannot be reached.
 
 ### AS-5 Settings, menus, keys, texts
 
-- AS-5.1 `%APPDATA%\Axit\axstart.json` (AX-5.3): `hotkey` (the key as text, "Ctrl+Alt+Space"), `startWithWindows`
+- AS-5.1 `%APPDATA%\Axit\axstart.json` (AX-5.3): `hotkey` (the key as text, "Windows+Alt+Space"), `startWithWindows`
   (on), `sayFirstMatch` (on), `starts` (each program's display name and how often AxStart started it, for the order),
   and the window base's font, update check and window fields (the place is not used: the window is centred).
 - AS-5.2 Menus (AX-6): **AxStart (S):** Start Enter | Start as administrator Ctrl+Shift+Enter | Open file location
@@ -190,8 +190,9 @@ AxStart before it changes anything, starts it hidden afterwards, and its removal
 - **AS-D3 A background process with a hidden window.** A global hotkey needs a process that runs: `RegisterHotKey`
   on the window of a process started at sign-in, the window hidden until the key. No tray icon and no taskbar button:
   the hotkey and the Start menu entry are the ways in, Quit AxStart the way out.
-- **AS-D4 The hotkey is the user's.** Asked 2026-10-22: a setting chosen in the app, Ctrl+Alt+Space at first (free in
-  Windows and in NVDA's default keys).
+- **AS-D4 The hotkey is the user's.** Asked 2026-10-22: a setting chosen in the app, Windows+Alt+Space at first. The first
+  default, Ctrl+Alt+Space, was taken on the user's first try: Windows Magnifier holds it (a preview of the whole desktop)
+  while it runs, so the default moved the same day, at the user's choice.
 - **AS-D6 The Run key, not a Startup shortcut.** One registry value that AxStart writes and removes itself as the
   setting flips, plain .NET (`Microsoft.Win32.Registry`), in the place Task Manager's Startup apps lists; a shortcut
   would need the shell's link interfaces for the same effect.
