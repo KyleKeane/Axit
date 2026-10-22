@@ -7,6 +7,7 @@ using Axit.Core;
 using AxJSON;
 using AxMedia;
 using AxPreview;
+using AxStart;
 using AxTerminal;
 
 namespace Axit;
@@ -66,6 +67,10 @@ internal static class Program
             case Dispatch.AxPreview:
                 SetAppId("Axit.AxPreview");
                 AxPreviewApp.Run(launch.Arguments);
+                break;
+            case Dispatch.AxStart:
+                SetAppId("Axit.AxStart");
+                AxStartApp.Run(launch.Arguments);
                 break;
             default:
                 // --help or --version for the bundle itself (AX-1.4).

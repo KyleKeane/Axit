@@ -18,6 +18,7 @@
     <ProjectReference Include="..\..\src\AxFile\AxFile.csproj" />
     <ProjectReference Include="..\..\src\AxMedia\AxMedia.csproj" />
     <ProjectReference Include="..\..\src\AxPreview\AxPreview.csproj" />
+    <ProjectReference Include="..\..\src\AxStart\AxStart.csproj" />
   </ItemGroup>
 
 </Project>

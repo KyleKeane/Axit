@@ -30,6 +30,9 @@ public static class AppMessage
     /// <summary>AxPreview: the one file shown.</summary>
     public const string Open = "open";
 
+    /// <summary>AxStart: the hidden window shown with the focus in its field (docs/axstart/SPEC.md AS-1.2); no paths.</summary>
+    public const string Show = "show";
+
     private const int WM_COPYDATA = 0x004A;
     private const uint SMTO_NORMAL = 0x0000;
     private const uint SMTO_ABORTIFHUNG = 0x0002;
@@ -74,7 +77,15 @@ public static class AppMessage
             return false;
         }
 
-        var target = windows[0].Handle;
+        return SendTo(windows[0].Handle, appName, verb, paths);
+    }
+
+    /// <summary>
+    /// Hands the verb and the paths to one window found by the caller: AxStart's, which is hidden and so not in the
+    /// Axit menu's list (docs/axstart/SPEC.md AS-1.2). True when the window took them.
+    /// </summary>
+    public static bool SendTo(nint target, string appName, string verb, IReadOnlyList<string> paths)
+    {
         if (TakesFocus(verb))
         {
             // The window brings itself to the front once it has applied the paths; this process, started by the

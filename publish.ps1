@@ -47,6 +47,7 @@ Copy-Item (Join-Path $root 'src\Axit\AxTerminal.ico') $out -Force
 Copy-Item (Join-Path $root 'src\Axit\AxFile.ico') $out -Force
 Copy-Item (Join-Path $root 'src\Axit\AxMedia.ico') $out -Force
 Copy-Item (Join-Path $root 'src\Axit\AxPreview.ico') $out -Force
+Copy-Item (Join-Path $root 'src\Axit\AxStart.ico') $out -Force
 Copy-Item (Join-Path $root 'install.ps1') $out -Force
 Copy-Item (Join-Path $root 'install.cmd') $out -Force
 Copy-Item (Join-Path $root 'LICENSE') $out -Force

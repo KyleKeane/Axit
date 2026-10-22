@@ -137,4 +137,5 @@ if ($Out) {
     Write-Icon (Join-Path $iconFolder 'AxFile.ico') 'Af' @(90, 50, 130)
     Write-Icon (Join-Path $iconFolder 'AxMedia.ico') 'Am' @(20, 100, 110)
     Write-Icon (Join-Path $iconFolder 'AxPreview.ico') 'Ap' @(70, 70, 140)
+    Write-Icon (Join-Path $iconFolder 'AxStart.ico') 'As' @(150, 90, 20)
 }

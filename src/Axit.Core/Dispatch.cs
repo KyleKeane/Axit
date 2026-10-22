@@ -25,15 +25,16 @@ public static class Dispatch
     public const string AxFile = "file";
     public const string AxMedia = "media";
     public const string AxPreview = "preview";
+    public const string AxStart = "start";
 
     /// <summary>Not an app: the executable answers <c>--help</c> and <c>--version</c>, or reports <see cref="Launch.Error"/>.</summary>
     public const string Bundle = "axit";
 
     /// <summary>The apps, in the order the Axit menu lists them (AX-9).</summary>
-    public static readonly IReadOnlyList<App> Apps = [new("AxClaude", AxClaude), new("AxDown", AxDown), new("AxJSON", AxJSON), new("AxGit", AxGit), new("AxTerminal", AxTerminal), new("AxFile", AxFile), new("AxMedia", AxMedia), new("AxPreview", AxPreview)];
+    public static readonly IReadOnlyList<App> Apps = [new("AxClaude", AxClaude), new("AxDown", AxDown), new("AxJSON", AxJSON), new("AxGit", AxGit), new("AxTerminal", AxTerminal), new("AxFile", AxFile), new("AxMedia", AxMedia), new("AxPreview", AxPreview), new("AxStart", AxStart)];
 
     public const string Usage = """
-        Usage: Axit [claude|down|json|git|terminal|file|media|preview] [arguments]
+        Usage: Axit [claude|down|json|git|terminal|file|media|preview|start] [arguments]
 
           Axit claude [<folder>] ...  AxClaude, the front end for Claude Code (Axit claude --help lists its options)
           Axit down [<file>]          AxDown, the text editor
@@ -43,12 +44,13 @@ public static class Dispatch
           Axit file [<folder or file>] AxFile, the file manager, on the folder (a file selected in its folder)
           Axit media [<file or folder>...] [--add]  AxMedia, the player: the file with its folder's sound and video files after it, or a folder's; --add appends to the open window's queue
           Axit preview [<file>]       AxPreview, the read-only viewer, on the file (the open AxPreview window takes it)
+          Axit start [--hidden]       AxStart, the program launcher: its search field, or with --hidden running until its hotkey
           Axit <folder>               the same as Axit claude <folder>
           Axit <file>                 the same as Axit down <file>, Axit json <file> for a .json file, or Axit media <file> for a sound or video file
           Axit                        AxClaude on the current folder
           --help, --version           this text, or the version
 
-        The installed console commands axit, axclaude, axdown, axjson, axgit, axterminal, axfile, axmedia and axpreview stand for Axit, Axit claude, Axit down, Axit json, Axit git, Axit terminal, Axit file, Axit media and Axit preview.
+        The installed console commands axit, axclaude, axdown, axjson, axgit, axterminal, axfile, axmedia, axpreview and axstart stand for Axit, Axit claude, Axit down, Axit json, Axit git, Axit terminal, Axit file, Axit media, Axit preview and Axit start.
         """;
 
     public static Launch Decide(string[] args)
@@ -97,6 +99,11 @@ public static class Dispatch
         if (string.Equals(first, AxPreview, StringComparison.OrdinalIgnoreCase))
         {
             return new Launch(AxPreview, args[1..]);
+        }
+
+        if (string.Equals(first, AxStart, StringComparison.OrdinalIgnoreCase))
+        {
+            return new Launch(AxStart, args[1..]);
         }
 
         if (first is "--help" or "-h" or "-?" or "/?" or "--version")

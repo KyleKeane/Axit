@@ -53,14 +53,17 @@ taskbar. It works entirely offline (bundle G6).
 - AS-1.2 **One AxStart.** A start while AxStart runs hands over to the running one, which shows its window, and ends
   (the bundle's `AppMessage`, `docs/axmedia/SPEC.md` AM-1.3, with a new verb `show`); with `--hidden` it ends without
   showing anything.
-- AS-1.3 **Start with Windows** (Options → General, a setting, on by default): a shortcut `Axit AxStart.lnk` to
-  `Axit.exe start --hidden` in the user's Startup folder, made or removed when the setting flips and checked at each
-  start; the installer starts AxStart hidden after an install or an update (AX-2.3), and its uninstall removes the
-  shortcut.
+- AS-1.3 **Start with Windows** (Options → General, a setting, on by default): the value `Axit AxStart` under the
+  user's Run key (`HKCU\Software\Microsoft\Windows\CurrentVersion\Run`), `"<installed Axit.exe>" start --hidden`,
+  written or removed when the setting flips and checked at each start; only the installed program writes it, naming
+  itself, so a development build never puts itself, or an older installed copy that does not know `start`, into the
+  sign-in. The installer stops AxStart before an install or a removal
+  and starts it hidden after an install or an update unless the setting is off (AX-2.3); the removal deletes the
+  value.
 - AS-1.4 **Quit AxStart** (AxStart menu) ends the process and frees the hotkey until the next sign-in or start. Alt+F4
   and Escape only hide the window (AS-3.4); Close all windows (AX-9.8) hides it too.
-- AS-1.5 An update in place (AX-3.2) replaces the program file while AxStart runs: the background process ends when
-  the installer asks the bundle's processes to close, and the installer starts it again hidden (AS-1.3).
+- AS-1.5 An update in place (AX-3.2) replaces the program file while AxStart runs: the installer stops the background
+  process (told by its verb, `start`, on its command line) and starts the new version hidden (AS-1.3).
 
 ### AS-2 The programs
 
@@ -74,7 +77,8 @@ taskbar. It works entirely offline (bundle G6).
 - AS-2.2 **Matching**, in `AxStart.Core` and tested: the typed text, trimmed, against each name, ignoring case and
   accents; a name matches when it contains every word of the text (`win power` matches "Windows PowerShell"). The
   order: a name that starts with the text first, then one whose word starts with it, then any other match; within
-  each, the programs started from AxStart more often first, then by name in File Explorer's order
+  each (placed by the text's first word, so that `win power` sits with the names starting with `win`), the programs
+  started from AxStart more often first, then by name in File Explorer's order
   (`Axit.Core/NaturalOrder`). An empty field matches every program, the most started first.
 - AS-2.3 **Starting** (Enter): the selected match, or the first when the selection was never moved, through the shell
   (`ShellExecuteEx` on `shell:AppsFolder\<parsing name>`), so that a packaged app starts as the Start menu starts it;
@@ -90,7 +94,8 @@ taskbar. It works entirely offline (bundle G6).
 - AS-3.1 One field named "Search programs" with the caret in it, and under it a list of the matches named "Programs,
   n" that never takes the focus (Tab and the mouse leave the focus in the field; AS-D2); the list is there for the
   eyes and for NVDA's object navigation. A status bar with "n programs" on the left. The window is small, centred on
-  the screen with the focus, top-most while shown, without a taskbar button, and its title is "AxStart".
+  the screen with the focus, top-most while shown, without a taskbar button, and its title is "AxStart". Before the first read of the programs
+  has come back the list's one line is "Reading the programs".
 - AS-3.2 **Typing** refills the list with the matches of the new text and selects the first; 300 ms after the last
   change, one notification says the first match and the count, "Calculator, 1 of 2", or "No programs match xyz";
   with an empty field nothing is said. Options → General → Say the first match while typing (on) turns this off, and
@@ -153,21 +158,24 @@ the screen's width and twelve lines of the list high.
 ## 6. Architecture
 
 ```
-src/AxStart.Core/    class library (net10.0): Program (display name, parsing name, kind, target), ProgramMatch (the
-                     matching and the order of AS-2.2), HotkeyText (a key as text and back, and the rule of AS-4.2),
-                     StartSettings; references Axit.Core
+src/AxStart.Core/    class library (net10.0): ProgramEntry (display name, parsing name, kind, target, from what the
+                     shell gives), ProgramMatch (the matching and the order of AS-2.2), Hotkey (a key as text and
+                     back, and the rule of AS-4.2), StartSettings; references Axit.Core
 src/AxStart/         class library (net10.0-windows): AxStartApp (Run, Usage, the one-instance hand-over), StartForm
                      (the window, on AxitForm: the field with its KeyDown hook, the list, the menus, the keys, the
                      hotkey through RegisterHotKey, the hiding), AppsFolder (the shell's Applications folder read
-                     through IShellItem and IEnumShellItems, and the start through ShellExecuteEx), StartupShortcut
-                     (the Startup folder's shortcut through IShellLinkW), AxStartKeys, HelpText; references
+                     through IShellItem and IEnumShellItems, and the start through the shell), StartupEntry (the
+                     Run key's value), AxStartKeys, HelpText; references
                      AxStart.Core, Axit.Core, Axit.Forms
-tests/AxStart.Tests/ ProgramMatchTests, HotkeyTextTests, StartSettingsTests
+tests/AxStart.Tests/ ProgramMatchTests (the order, the words, accents, the kinds), HotkeyTests (the text both ways,
+                     the refusals, the settings)
 docs/axstart/        this spec, user-guide.md (embedded), nvda-test-plan.md
 ```
 
-`Axit.Forms/AppMessage` gains the verb `show`. The installer gains the Startup shortcut and the start after an
-install, and its uninstall and the update stop the background process first.
+`Axit.Forms/AppMessage` gains the verb `show` and `SendTo`, a hand-over to a window the caller found: AxStart's is
+hidden, so the Axit menu's list of visible windows does not have it, and the starting process finds it by its title
+and program (`StartForm.FindRunning`), one AxStart being held by the mutex `Local\Axit.AxStart`. The installer stops
+AxStart before it changes anything, starts it hidden afterwards, and its removal deletes the Run value.
 
 ## 7. Design decisions
 
@@ -184,6 +192,9 @@ install, and its uninstall and the update stop the background process first.
   the hotkey and the Start menu entry are the ways in, Quit AxStart the way out.
 - **AS-D4 The hotkey is the user's.** Asked 2026-10-22: a setting chosen in the app, Ctrl+Alt+Space at first (free in
   Windows and in NVDA's default keys).
+- **AS-D6 The Run key, not a Startup shortcut.** One registry value that AxStart writes and removes itself as the
+  setting flips, plain .NET (`Microsoft.Win32.Registry`), in the place Task Manager's Startup apps lists; a shortcut
+  would need the shell's link interfaces for the same effect.
 - **AS-D5 The name.** AxStart, chosen 2026-10-22 over AxLaunch and AxRun: a stand-in for the Start menu's search.
 
 ## 8. Testing
@@ -204,4 +215,8 @@ install, and its uninstall and the update stop the background process first.
 
 ## 10. Status
 
-- 2026-10-22: specified at the user's ask on the branch `axstart`; not built.
+- 2026-10-22: specified at the user's ask on the branch `axstart`.
+- 2026-10-22, the same day, on `axstart`: built from the spec at the user's word ("Build it now"): the pure code with
+  its tests, the window, the Applications folder read (99 programs on the development machine, desktop programs,
+  Store apps and the shell's own ids, through an off-screen probe without a window), the wiring, the installer and
+  the documents. Not yet checked with NVDA.

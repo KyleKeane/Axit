@@ -13,7 +13,9 @@
       under Windows' own "Open with" for .md, .markdown and .txt, AxJSON for .json, AxMedia for the sound and video
       kinds, AxPreview for .txt, .md, .markdown, .log and .json, so that the user can make an app the default program
       for a kind in Settings, Default apps,
-    - the console commands axclaude, axdown, axjson, axgit, axterminal, axfile, axmedia, axpreview and axit (a folder
+    - AxStart, the program launcher, running in the background from sign-in (a value under the user's Run key that AxStart
+      writes itself): it is stopped before an install or a removal, and started again, hidden, after an install,
+    - the console commands axclaude, axdown, axjson, axgit, axterminal, axfile, axmedia, axpreview, axstart and axit (a folder
       opens AxClaude, a file AxDown, a .json file AxJSON, a sound or video file AxMedia): one-line shims in
       %USERPROFILE%\.local\bin, the folder that Claude Code's installer already puts on PATH.
   It also lists Axit in Settings, Apps (Add or remove programs), whose Uninstall runs install.cmd -Uninstall.
@@ -103,6 +105,7 @@ $apps = @(
     @{ Name = 'AxTerminal'; Verb = 'terminal'; Description = 'AxTerminal, a shell as a transcript'; Icon = (Join-Path $target 'AxTerminal.ico'); Opens = 'folders' },
     @{ Name = 'AxFile'; Verb = 'file'; Description = 'AxFile, a file manager for one folder'; Icon = (Join-Path $target 'AxFile.ico'); Opens = 'folders', 'files' },
     @{ Name = 'AxMedia'; Verb = 'media'; Description = 'AxMedia, a player for sound and video files'; Icon = (Join-Path $target 'AxMedia.ico'); Opens = 'files'; Types = $mediaTypes; OpenWith = $mediaTypes; TypeName = 'Media file (AxMedia)' },
+    @{ Name = 'AxStart'; Verb = 'start'; Description = 'AxStart, a program launcher behind a hotkey'; Icon = (Join-Path $target 'AxStart.ico') },
     @{ Name = 'AxPreview'; Verb = 'preview'; Description = 'AxPreview, a read-only viewer for text files'; Icon = (Join-Path $target 'AxPreview.ico'); Opens = 'files'; OpenWith = '.txt', '.md', '.markdown', '.log', '.json'; TypeName = 'Text file (AxPreview)' }
 )
 # The places that follow from the name.
@@ -142,6 +145,29 @@ function Get-Version([string]$path) {
     (Get-Item $path).VersionInfo.FileVersion -replace '^(\d+\.\d+\.\d+).*', '$1'
 }
 
+# AxStart runs in the background from sign-in (docs/axstart/SPEC.md AS-1.3, AS-1.5): it is the one app that would
+# always be running here, so it is stopped before anything is changed and started again, hidden, afterwards. Its
+# process is told by its verb; it holds nothing unsaved.
+$runKey = 'HKCU:\Software\Microsoft\Windows\CurrentVersion\Run'
+function Stop-AxStart {
+    $running = @(Get-CimInstance Win32_Process -Filter "Name = 'Axit.exe'" -ErrorAction SilentlyContinue |
+        Where-Object { $_.CommandLine -match '^"?[^"]*\\Axit[^"\\]*\.exe"?\s+start(\s|$)' })
+    foreach ($process in $running) {
+        try { Stop-Process -Id $process.ProcessId -Force -ErrorAction Stop; Wait-Process -Id $process.ProcessId -Timeout 10 -ErrorAction SilentlyContinue } catch { }
+    }
+    if ($running) { Say "Stopped AxStart, the launcher, for the installation" }
+}
+
+function Start-AxStart {
+    # Not when the user turned Start with Windows off in AxStart's settings.
+    $settingsFile = Join-Path $env:APPDATA 'Axit\axstart.json'
+    if (Test-Path -LiteralPath $settingsFile) {
+        try { if ((Get-Content -LiteralPath $settingsFile -Raw | ConvertFrom-Json).startWithWindows -eq $false) { return } } catch { }
+    }
+    Start-Process -FilePath $exe -ArgumentList @('start', '--hidden') -WorkingDirectory $target
+    Say "AxStart, the launcher, runs in the background: Ctrl+Alt+Space, or the hotkey you chose, brings up its search field"
+}
+
 function Test-Running {
     [bool](Get-Process -Name Axit, AxClaude -ErrorAction SilentlyContinue | Where-Object { $_.Path -eq $exe -or $_.Path -eq $oldExe })
 }
@@ -162,6 +188,9 @@ function Remove-Installation {
     foreach ($item in $places) {
         if (Test-Path -LiteralPath $item) { Remove-Item -LiteralPath $item -Recurse -Force }
     }
+    if ((Test-Path -LiteralPath $runKey) -and (Get-ItemProperty -LiteralPath $runKey).PSObject.Properties['Axit AxStart']) {
+        Remove-ItemProperty -LiteralPath $runKey -Name 'Axit AxStart'
+    }
     foreach ($app in ($apps | Where-Object { $_.OpenWith })) {
         foreach ($extension in $app.OpenWith) {
             $openWith = "$classes\$extension\OpenWithProgids"
@@ -174,6 +203,7 @@ function Remove-Installation {
 
 if ($Uninstall) {
     # A running app holds its folder: then nothing is removed, so the Apps entry and install.cmd stay to try again.
+    Stop-AxStart
     if (Test-Running) {
         Say "Axit is still running, so nothing was removed. Close it and uninstall again."
         exit 1
@@ -190,6 +220,7 @@ if (-not (Test-Path -LiteralPath $sourceExe)) {
     exit 1
 }
 
+Stop-AxStart
 $sameFolder = [string]::Equals((Resolve-Path $source).Path.TrimEnd('\'), $target.TrimEnd('\'), [StringComparison]::OrdinalIgnoreCase)
 if (-not $sameFolder) {
     # A previous installation, of Axit or of AxClaude 1.x, is removed completely first, so nothing of it stays
@@ -342,6 +373,8 @@ Say "Console: $(($names | ForEach-Object { $_.ToLower() }) -join ', '), each tak
 if (-not (($env:Path -split ';') -contains $bin)) {
     Say "Note: $bin is not on PATH in this console. Open a new console, or add it, before using the commands."
 }
+
+Start-AxStart
 
 if ($Start) {
     $arguments = @('claude', "`"$Start`"")

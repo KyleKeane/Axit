@@ -1,0 +1,38 @@
+using System.Reflection;
+using Axit.Core;
+
+namespace AxStart;
+
+/// <summary>The texts AxStart shows as notices: the keyboard shortcuts (F1) and the user guide; About is the bundle's (<c>Axit.Core.BundleAbout</c>).</summary>
+public static class HelpText
+{
+    /// <summary>The F1 text (SPEC.md AS-5.3). Bundle-wide keys first, then AxStart's own.</summary>
+    public const string Shortcuts = """
+        In every window of Axit
+          F1: this list
+          Ctrl+Plus, Ctrl+Minus: bigger or smaller text
+          Alt: the menu. Alt+F4: hide AxStart (AxStart, Quit AxStart ends it)
+          Alt+A: the Axit menu: a new window of any app, the open Axit windows, Check for updates, and About
+
+        Bringing AxStart up
+          The hotkey, Ctrl+Alt+Space unless you chose another in Options, Hotkey: from any program, the search field
+          The same hotkey while AxStart shows hides it again
+
+        In the search field (the caret stays here: type and delete at any time)
+          Type part of a program's name; after a short pause the first match is said, "Calculator, 1 of 2"
+          Down, Up: the next or the previous match, said with its place. Page Down, Page Up: a page of matches
+          Ctrl+Home, Ctrl+End: the first or the last match
+          Enter: start the match. Ctrl+Shift+Enter: start it as administrator (Windows asks first)
+          Ctrl+I: the match, its kind and where its program file is
+          Ctrl+O: the program file's folder in AxFile, the file selected
+          F5: read the list of programs again
+          Escape: clear the field; Escape in an empty field hides AxStart and returns you where you were
+
+        Notices
+          AxStart's questions, errors and help texts appear inside the window, in place of the field.
+          Tab moves between the text, a field and the buttons. Enter chooses the main button. Escape closes the notice.
+        """;
+
+    /// <summary>docs/axstart/user-guide.md, embedded by AxStart.csproj.</summary>
+    public static string UserGuide() => EmbeddedText.Read(Assembly.GetExecutingAssembly(), "UserGuide.md", "docs/axstart/user-guide.md");
+}

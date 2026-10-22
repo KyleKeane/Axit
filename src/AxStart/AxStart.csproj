@@ -1,0 +1,23 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <!-- AxStart's window side, as a class library inside Axit.exe (docs/axit/SPEC.md AX-1.7): the window, the shell's
+       Applications folder, the sign-in start, its key table and its texts; the pure code is AxStart.Core. -->
+  <PropertyGroup>
+    <TargetFramework>net10.0-windows</TargetFramework>
+    <UseWindowsForms>true</UseWindowsForms>
+    <RootNamespace>AxStart</RootNamespace>
+    <AssemblyName>AxStart</AssemblyName>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\AxStart.Core\AxStart.Core.csproj" />
+    <ProjectReference Include="..\Axit.Core\Axit.Core.csproj" />
+    <ProjectReference Include="..\Axit.Forms\Axit.Forms.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <!-- Help, User guide shows this file. -->
+    <EmbeddedResource Include="..\..\docs\axstart\user-guide.md" LogicalName="UserGuide.md" />
+  </ItemGroup>
+
+</Project>

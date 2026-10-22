@@ -55,6 +55,12 @@ public sealed class DispatchTests
         Assert.Equal(["notes.md", "--new"], launch.Arguments);
         Assert.Contains(Dispatch.Apps, app => app.Verb == Dispatch.AxPreview && app.Name == "AxPreview");
         Assert.Contains("Axit preview", Dispatch.Usage);
+        // AxStart, the launcher, takes no path (docs/axstart/SPEC.md AS-1.1).
+        launch = Dispatch.Decide(["start", "--hidden"]);
+        Assert.Equal(Dispatch.AxStart, launch.App);
+        Assert.Equal(["--hidden"], launch.Arguments);
+        Assert.Contains(Dispatch.Apps, app => app.Verb == Dispatch.AxStart && app.Name == "AxStart");
+        Assert.Contains("Axit start", Dispatch.Usage);
     }
 
     /// <summary>AX-1.2: a sound or video file alone on the command line starts AxMedia, as a double click in File Explorer would once it is the default.</summary>
@@ -150,7 +156,7 @@ public sealed class DispatchTests
         Assert.Equal(Dispatch.AxJSON, Dispatch.Decide(["json", "x.json"]).App);
         Assert.Equal(["x.json"], Dispatch.Decide(["JSON", "x.json"]).Arguments);
         Assert.Contains("Axit json", Dispatch.Usage);
-        Assert.Equal(["AxClaude", "AxDown", "AxJSON", "AxGit", "AxTerminal", "AxFile", "AxMedia", "AxPreview"], Dispatch.Apps.Select(a => a.Name));
+        Assert.Equal(["AxClaude", "AxDown", "AxJSON", "AxGit", "AxTerminal", "AxFile", "AxMedia", "AxPreview", "AxStart"], Dispatch.Apps.Select(a => a.Name));
     }
 
     [Fact]

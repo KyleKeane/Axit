@@ -33,6 +33,7 @@
     <ProjectReference Include="..\AxFile\AxFile.csproj" />
     <ProjectReference Include="..\AxMedia\AxMedia.csproj" />
     <ProjectReference Include="..\AxPreview\AxPreview.csproj" />
+    <ProjectReference Include="..\AxStart\AxStart.csproj" />
     <ProjectReference Include="..\Axit.Core\Axit.Core.csproj" />
   </ItemGroup>
 
