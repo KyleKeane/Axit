@@ -102,8 +102,8 @@ folder of the file or project in hand, and sends back. It works entirely offline
   update. An empty folder shows one item, "No items in this folder", selected, so that the list is never empty and the
   reason is read (the bundle's rule for empty lists, AX-9.5). Neither that item nor the not-shown line is an entry: a
   command on either says the line itself (AF-7).
-- AF-2.3 The title is `<folder name> - AxFile`. The status bar's left label: the newest line of the Actions list
-  ("Copied 3 items", "Compressing, 40 of 120 files"), empty before the first operation; the right label: the folder's
+- AF-2.3 The title is `<folder name> - AxFile`. The status bar's left label: the newest file operation's line in the Actions list
+  ("Copied 3 items", "Compressing, 40 of 120 files"; never a selection line, AF-9.2), empty before the first operation; the right label: the folder's
   full path. No AccessibleName, no Spring (AxClaude §6.2).
 - AF-2.4 **Information** (Ctrl+I; Item → Information): the selected entry on demand, "report.pdf, 1.2 MB, modified
   2026-10-18 14:02" or "docs, folder, modified 2026-10-18 14:02"; the items themselves stay names (AF-D7).
@@ -161,12 +161,20 @@ folder of the file or project in hand, and sends back. It works entirely offline
   the marks made before it stay; an arrow without Shift ends it, as does a change of the list's order or filter or
   a read of the folder, and the next Shift key begins a new one. Each entry passed reads ", selected" by itself and
   the keys say nothing more (only the items whose mark changed are rewritten); on a line after the entries (an
-  empty folder's, the not-shown line) the keys say that line. **Ctrl+A** marks every entry, "n selected";
-  **Ctrl+Shift+A** unmarks them all, "None selected"; the **Select** menu of the bar holds Select all, Deselect all
-  and the Space toggle, "Select or deselect this entry". Ctrl+I adds ", n selected" to the entry's information while
+  empty folder's, the not-shown line) the keys say that line. **Shift+Space** (asked 2026-10-22) marks every entry
+  from the nearest marked entry to the current one, above or below, the one above when both are as near, "Selected, n
+  selected"; with nothing marked it marks the current entry, as Space does. **Ctrl+A** marks every entry, "n selected";
+  **Ctrl+Shift+A** unmarks them all, "None selected". Ctrl+I adds ", n selected" to the entry's information while
   any are marked (AF-2.4). Cut, Copy, Delete, Copy path, Move to new folder, Compress to zip and Add to AxMedia's queue
   act on the marked entries when there are any, and on the current entry alone otherwise (AF-4.3, AF-4.4, AF-4.8,
-  AF-5.2); Enter, Rename, the ways to open and the Windows items stay on the current entry. The marks live in one
+  AF-5.2; kept 2026-10-22 over File Explorer's right-click rule, AF-D10); Enter, Rename, the ways to open and the
+  Windows items stay on the current entry. The **Selection** menu of the bar (S) is the marks from anywhere, whatever
+  entry is current: Select all, Deselect all, Select or deselect this entry, Select to here (Shift+Space), then the
+  operations that take the marked entries, Cut, Copy, Delete, Move to new folder…, Compress to zip, Add to AxMedia's
+  queue, Copy path; its operations never fall back to the current entry: "None selected" when nothing is marked (asked
+  2026-10-22: one menu for the entry, Item, one for the marks, Selection, one for the folder, Folder, so that the
+  target is the menu's name and no mode is needed). Every change of the marks is a line of the Actions list's
+  Selection section, which Ctrl+Z on the line takes back (AF-9.2, AF-9.3). The marks live in one
   folder: showing another folder drops them, a refresh of the same folder keeps those still there, and a renamed or
   deleted entry loses its mark. A mouse click chooses the current entry as before and marks nothing. The marks are
   text in the items rather than the list box's own multiple selection (AF-D9).
@@ -327,8 +335,9 @@ Every operation here is one line of the Actions list (AF-9) as well as its annou
   or the current one (AF-3.7), into it through the shell (AF-4.8, undo allowed, names chosen first); "Moved <name>
   into <folder>" or "Moved n items into <folder>", the new folder selected.
 - AF-4.14 **Undo** (asked 2026-10-21). **Ctrl+Z** (Folder → Undo <operation>, named after what it would undo, "Undo
-  rename") takes back the newest line of the Actions list that can be taken back (AF-9.3), one per press, and selects
-  the entry it touched: Rename, renamed back; New folder and New text file, deleted while still empty ("Not undone:
+  rename") takes back the newest file operation of the Actions list that can be taken back (AF-9.3; never a change of the
+  marks, which is taken back on its own line only, decided 2026-10-22, so that Ctrl+Z after a paste does not unmark
+  an entry instead), one per press, and selects the entry it touched: Rename, renamed back; New folder and New text file, deleted while still empty ("Not undone:
   notes has files now" otherwise); a paste that moved and Move to new folder, moved back where they were, the new
   folder removed when it is empty; a paste that copied, Compress to zip and Extract here, the copies, the zip or the
   extracted folder sent to the Recycle Bin; Delete, brought back from the Recycle Bin, the shell's own undelete on the
@@ -380,8 +389,10 @@ and the started process finds its open window and hands the paths over with the 
   Copy Ctrl+C | Paste Ctrl+V | ─ | Rename F2 | Delete Delete | ─ | New folder… Ctrl+Shift+N | New text file
   Ctrl+Shift+T | Move to new folder… | Compress to zip | Extract here | ─ | Copy path Ctrl+Shift+C | Show in File
   Explorer Ctrl+Shift+W | Information Ctrl+I | Properties Alt+Enter | ─ | Windows menu…; the same menu is the list's
-  context menu (AF-4.6). **Select (S):** Select all Ctrl+A | Deselect all Ctrl+Shift+A | ─ | Select or deselect this
-  entry Space (AF-3.7). **Drives (D):** 1. Local Disk (C:) … | ─ | This PC | ─ | Eject this drive | Drive properties
+  context menu (AF-4.6). **Selection (S):** Select all Ctrl+A | Deselect all Ctrl+Shift+A | Select or deselect this
+  entry Space | Select to here Shift+Space | ─ | Cut Ctrl+X | Copy Ctrl+C | Delete Delete | ─ | Move to new folder… |
+  Compress to zip | Add to AxMedia's queue Ctrl+Shift+Q | Copy path Ctrl+Shift+C (AF-3.7; the operations on the marks
+  alone). **Drives (D):** 1. Local Disk (C:) … | ─ | This PC | ─ | Eject this drive | Drive properties
   (AF-3.11). **Options (O):** Text ▸ (Font… | Larger text Ctrl+Plus | Smaller text Ctrl+Minus | Windows text size) |
   General ▸ (Check for updates at start ✓ | Show hidden files and folders | Show files and folders starting with a
   period) | Developer ▸ (Open settings file | Copy diagnostics). **Axit (A)** (AX-9). **Help (H):** Keyboard
@@ -392,9 +403,9 @@ and the started process finds its open window and hands the paths over with the 
   Ctrl+Minus, Page Up and Page Down (the list's own here), Alt+F4. Window-specific (`AxFileKeys`): Enter,
   Shift+Enter, Backspace, Alt+Up, F5, F2, Delete, Ctrl+N, Ctrl+O, Ctrl+G, Ctrl+D, Ctrl+W, Ctrl+Shift+W, Ctrl+E,
   Ctrl+I, Ctrl+Shift+N, Ctrl+Shift+T, Ctrl+Shift+C, Ctrl+Shift+F, Escape, Shift+Up, Shift+Down, Shift+Home,
-  Shift+End, Space, Ctrl+A, Ctrl+Shift+A, Ctrl+Enter, Ctrl+Shift+Q (AF-5), Shift+F10, the Applications key,
+  Shift+End, Space, Shift+Space, Ctrl+A, Ctrl+Shift+A, Ctrl+Enter, Ctrl+Shift+Q (AF-5), Shift+F10, the Applications key,
   Alt+Enter, Ctrl+Z (AF-4.14), Ctrl+X, Ctrl+C, Ctrl+V. Enter, Shift+Enter, Backspace, Space, Escape, F2, Delete,
-  Ctrl+X, Ctrl+C, Ctrl+V, Ctrl+A, Ctrl+Shift+A, Ctrl+Enter, Ctrl+Shift+Q, the Shift arrows, Shift+F10 and the
+  Ctrl+X, Ctrl+C, Ctrl+V, Ctrl+A, Ctrl+Shift+A, Shift+Space, Ctrl+Enter, Ctrl+Shift+Q, the Shift arrows, Shift+F10 and the
   Applications key act only while the folder list has the focus (in the Actions list, Enter, Escape, Ctrl+Z and Ctrl+I
   act on its line, AF-9.3; in a notice's field or the rename box they are the field's; the two menu keys are the
   list's own, which shows its context menu itself, so the key switch has no case for them; Ctrl+I has a second
@@ -415,7 +426,8 @@ AF-3.10), "Ejecting <name>" (AF-3.11), "Added <name>", "Removed <name>", "Starte
 <name>", "Extracted to <name>", "Compressing, please wait", "Extracting, please wait" (AF-4.12), "Pasted <name>",
 "Pasted n items", "Pasting, please wait" (a paste longer than a second), "Added n to AxMedia's queue", "No sound or
 video files here", "No sound or video files to add" (AF-5), "Undone: …", "Not undone: …", "Nothing to undo", "Undo is
-still running" (AF-4.14), "No actions yet", "Still running", "Already undone", "Nothing to undo here", "n of m, hh:mm",
+still running" (AF-4.14), "Undone: n selected", "Undone: none selected" (a selection line, AF-9.3), "No actions yet",
+"Still running", "Already undone", "Nothing to undo here", "<section>, n of m, hh:mm", "Running", "Operations", "Selection" (a header line),
 "Folder not found" (the Actions list, AF-9.3), "Refreshed", "Not found: <path>", "Failed: <message>", "<name>, <size>,
 modified <date>" (Ctrl+I), "Not found" (find), "Nothing to save here", "Text size n", "Windows text size", "Copied
 diagnostics", "<name>, <size>, modified <date>, n selected" (Ctrl+I with marks), "Failed: In use by another program: a
@@ -443,15 +455,25 @@ and a typed name no entry starts with (AF-3.6).
 
 ### AF-9 The Actions list
 
-- AF-9.1 **What it is.** A second list under the folder list, "Actions", with every file operation of this window as
-  one line, so that what was done can be read again, taken back and walked back to. It is there from the first
+- AF-9.1 **What it is.** A second list under the folder list, "Actions", with every file operation of this window and
+  every change of its marks (AF-3.7) as one line, in three sections (AF-9.2), so that what was done can be read again,
+  taken back and walked back to. It is there from the first
   moment, with the one line "No actions yet" until the first operation (AX-9.5; asked 2026-10-22: a pane that appears
   later leaves Tab and Shift+Tab with nowhere to go), hidden only while a notice shows; a third of the window at
   most; **Tab**, **Shift+Tab**, **Ctrl+Tab**, **Ctrl+Shift+Tab** and **F6** move between the folder list and it
   (AX-8.2), **Escape** in it goes back to the folder list, Folder → **Actions** puts the focus in it. One list, not tabs: NVDA reads a list and its place in it, and the two lists are reached with the
   keys every Axit window uses for its controls (AF-D1). Each command's result is one announcement on the list that has
   the focus (AF-7); nothing is spoken on an arrow key (AF-D7). The newest line is the status bar's left text (AF-2.3).
-- AF-9.2 **The lines.** In time order, newest last, the last fifty kept, gone with the window: "Renamed notes.md to
+- AF-9.2 **The lines.** Three sections, each a header line ("Running", "Operations", "Selection") over its lines, a
+  section present only while it has lines (asked 2026-10-22; AF-D11): **Running**, the operations under way, pinned at
+  the top so that what is going on is one Tab and Home away; **Operations**, the file operations done, failed or undone;
+  **Selection**, the changes of the marks: "Selected notes.md", "Deselected notes.md", "Selected 5 items" (a Shift range
+  or Shift+Space, one line for the whole range, rewritten as it grows or shrinks, counting the entries from its start
+  to its end), "Selected all, 24 items", "Deselected all, 3 items" (the count unmarked; no line when nothing changed),
+  each taking back the marks as they were before it (AF-9.3); the marks live in one folder (AF-3.7), so the section
+  empties with a change of folder, and keeps its last twenty lines. Within a section the lines are in time order,
+  newest last; "No actions yet" is the one line while all three are empty. The operations' lines, the last fifty kept,
+  gone with the window: "Renamed notes.md to
   todo.md", "Created temp", "Created New file.txt", "Moved 3 items into bundle", "Copied 3 items", "Moved 2 items",
   "Compressed to docs.zip", "Extracted to docs - 2", "Deleted notes.md", "Deleted 2 items". A running operation reads
   what it is doing, "Copying 3 items", "Deleting 2 items", "Compressing, 40 of 120 files" (a few times a second at
@@ -463,15 +485,19 @@ and a typed name no entry starts with (AF-3.6).
   rewritten, a running line under the focus being left until it ends, so that a zip's count is not reselected under
   NVDA four times a second. Nothing is spoken for a line (the operation's own
   announcement, AF-7, is what is heard). Cut, Copy, Copy path, Open, the hand-overs and Favorites change nothing on
-  disk and have no line.
+  disk and have no line. The status bar shows the newest operation's line, never a selection's (AF-2.3).
 - AF-9.3 **On a line.** **Enter** goes where the action left things: the folder list shows the folder and selects the
   entry the action made, renamed or moved (the new folder for a move into one, the first entry for a paste; the folder
   alone for a delete), and takes the focus; once the line is undone, where the undo put things back; "Still running"
   on a running line, "Folder not found" when the place is gone. **Ctrl+Z** takes that line back, whatever its place,
   with AF-4.14's checks and texts; a line that cannot be says why: "Still running", "Already undone", "Not undone:
   <reason>" again, or "Nothing to undo here" (a failed line, or one older than the twenty undoable). Ctrl+Z in the
-  folder list takes the newest undoable line (AF-4.14). **Ctrl+I** says the line's number and time, "3 of 12, 21:04".
-  On "No actions yet", Enter, Ctrl+Z and Ctrl+I say the line. Delete does nothing (an action is a record, not an
+  folder list takes the newest undoable operation (AF-4.14), never a selection line. On a selection line, Ctrl+Z puts
+  the marks back as they were before it, in the folder shown (the section empties with another folder, so the line is
+  always of this one; entries gone since are skipped), "Undone: 3 selected" or "Undone: none selected", the line reading
+  ", undone"; Enter on it is the folder list on the entry it marked, or where the user was. **Ctrl+I** says the line's
+  section, number in it and time, "Operations, 3 of 12, 21:04". On a header line and on "No actions yet", Enter, Ctrl+Z
+  and Ctrl+I say the line. Delete does nothing (an action is a record, not an
   entry). There is no redo.
 - AF-9.4 **Later uses**, noted so that the shape allows them: the matches of a search through a folder's tree, a
   folder's summary on Ctrl+I over a folder (its counts and size, which take a walk of the tree). None is in the
@@ -548,6 +574,19 @@ and AxPreview.Core since the split; `MediaFiles` and `NaturalOrder` moved to `Ax
   known. The marks are kept by the window and written into the items (", selected"), which NVDA reads as part of
   the name, so that the single-selection list the NVDA pass covered stays as it was and the feedback is one
   announcement of the app's own; a sighted helper sees the word.
+- **AF-D10 The marks win; three menus name three targets.** Asked 2026-10-22, "how do you recommend we manage" the
+  target of a key when some entries are marked and the current one is not, without File Explorer's modes. Offered: the
+  entry you hear decides (a marked current entry takes the whole selection, an unmarked one itself alone, File
+  Explorer's right-click rule, audible on every arrow key since the item says ", selected"); the marks win when there
+  are any (the rule since 2026-10-21); the keys on the current entry only, the marks through the menu. The user chose
+  to keep the marks winning, and the menus carry the rest: Item is the entry, Selection is the marks (its operations
+  say "None selected" rather than fall back), Folder is the folder. The decision is recorded so that the first rule
+  is not proposed again.
+- **AF-D11 Sections as header lines in one list.** Asked 2026-10-22: the running operations pinned at the top, the
+  operations next, the changes of the marks last. Three list boxes would be three Tab stops and a plain list cannot
+  mark a group; so one list with a header line over each section that has lines, a header being an item NVDA reads
+  like any other and Enter, Ctrl+Z and Ctrl+I answer with its name. The marks' changes are in the list, at the user's
+  ask, but outside Ctrl+Z in the folder list (AF-4.14): a selection undone by the key meant for a paste would surprise.
 
 AF-D4 (the volume) and AF-D6 (the queue fixed at Enter) went to AxMedia with the player (AM-D6, AM-D2).
 
@@ -594,3 +633,7 @@ AF-D4 (the volume) and AF-D6 (the queue fixed at Enter) went to AxMedia with the
   bundle's `Sounds.Edge`), the Actions list there from the start with "No actions yet" (AF-9.1), so that Tab and
   Shift+Tab always have the second control, and a pass over the F1 text, the guide and the notes to put every feature
   in one place each, at the user's ask ("I have lost track of all the features").
+- 2026-10-22, later: Shift+Space (AF-3.7), the Selection menu with the operations on the marks (AF-3.7, AF-6.1,
+  AF-D10), the changes of the marks as lines of the Actions list, taken back on their line (AF-9.2, AF-9.3), and the
+  list in three sections under header lines, the running operations first (AF-9.2, AF-D11), at the user's ask;
+  specified first, built after.
