@@ -121,8 +121,8 @@ library dependency (B-10: `git.exe` and the file system through the APIs already
   (AF-D2), until 2026-10-22, when the user split it out as an app of its own with one queue, together with
   **AxPreview**, a read-only viewer for one file, so that AxFile is file operations and management only; the
   specifications are `docs/axmedia/SPEC.md` and `docs/axpreview/SPEC.md`, the inventory of the split
-  `docs/axit/axfile-split.md`, and AxFile's pane becomes its Actions list (`docs/axfile/SPEC.md` section 9). As
-  first built, the player was:
+  `docs/axit/axfile-split.md`, and AxFile's pane becomes its Actions list (`docs/axfile/SPEC.md` AF-9); all three
+  built the same day on the branch `split`, awaiting the user's NVDA passes. As first built, the player was:
   Enter on a sound or video file plays it and the folder's media files follow in order; pause, seek, next, previous,
   speed, go to time, what is playing on Ctrl+Q; Windows' own decoders through one P/Invoke seam (MCI or MFPlay, chosen
   by the first build), the keyboard's own volume keys. The worry on record stands: the scope stays small; copy and

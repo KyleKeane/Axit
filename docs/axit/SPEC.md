@@ -509,3 +509,9 @@ docs/axdown/            SPEC.md, user-guide.md (embedded by src/AxDown), nvda-te
   editor shell, AxGit and AxClaude's `MainForm` on it. Heard under NVDA by the user: the notices in AxClaude and
   AxDown on the base, AxGit's start, views, diff, staging and notices, and the way to and from it; AxGit's commit,
   discard, switch and remote commands await their pass.
+- Unreleased (2026-10-22), developed on `split`: the split of AxFile (`docs/axit/axfile-split.md`): AxMedia, the
+  player with one queue, and AxPreview, the viewer as the editor shell's read-only mode, as apps of their own with a
+  hand-over from a starting process to the open window (`Axit.Forms/AppMessage`, AX-6.2); AxFile lean, Enter the
+  user's default program, the pane its Actions list; `MediaFiles`, `NaturalOrder` and the find in a list shared
+  (AX-6.3); the dispatcher's media rule (AX-1.2) and the installer's Open with registrations for both apps (AX-2.3).
+  Not yet checked with NVDA.
