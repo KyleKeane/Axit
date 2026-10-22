@@ -71,7 +71,7 @@ public sealed partial class FileForm
                 {
                     // "Not undone: …": the line keeps the reason without the prefix.
                     _actions.NotUndone(entry, problem.StartsWith("Not undone: ", StringComparison.Ordinal) ? problem["Not undone: ".Length..] : problem);
-                    FillPane();
+                    RefreshPane();
                     Announce(problem, true);
                     return;
                 }
@@ -81,6 +81,15 @@ public sealed partial class FileForm
                 var reason = operation.Kind == OperationKind.Delete
                     ? await FileOperations.OnShellThreadAsync(() => Shell.Undelete(owner, operation.Before))
                     : await FileOperations.UndoAsync(operation);
+                if (reason == Shell.NotInRecycleBin)
+                {
+                    // Emptied meanwhile: a retry can never succeed, so the line says so and Ctrl+Z moves on (AF-4.14).
+                    _actions.NotUndone(entry, reason);
+                    RefreshPane();
+                    Announce("Not undone: " + reason, true);
+                    return;
+                }
+
                 if (reason is not null)
                 {
                     Failed("Undo failed", reason);
@@ -88,7 +97,7 @@ public sealed partial class FileForm
                 }
 
                 _actions.Undone(entry);
-                FillPane();
+                RefreshPane();
                 if (await ShowFolderAsync(operation.Folder, operation.Select ?? CurrentEntry()?.Name, remember: false))
                 {
                     Announce(operation.DoneText, true);
@@ -101,7 +110,7 @@ public sealed partial class FileForm
         });
     }
 
-    /// <summary>File operations → New folder… (Ctrl+Shift+N, AF-4.1): the name in a notice, the folder made and selected, "Created <name>".</summary>
+    /// <summary>Item → New folder… (Ctrl+Shift+N, AF-4.1): the name in a notice, the folder made and selected, "Created <name>".</summary>
     private void NewFolder()
     {
         if (NoFolderHere() || _folder is not { } folder)
@@ -155,7 +164,7 @@ public sealed partial class FileForm
     // ---- the rename in place (AF-4.2): a box over the entry, Enter renames, Escape or leaving the box keeps the name ----
 
     /// <summary>
-    /// File operations → New text file (Ctrl+Shift+T, AF-4.1): an empty "New file.txt" made and selected, and the
+    /// Item → New text file (Ctrl+Shift+T, AF-4.1): an empty "New file.txt" made and selected, and the
     /// rename box opened on it with the whole name selected, so that the name typed, extension included, replaces
     /// it; "Created <name>" when the box cannot open (the file hidden by the filter, the focus elsewhere).
     /// </summary>
@@ -270,7 +279,7 @@ public sealed partial class FileForm
         });
     }
 
-    /// <summary>File operations → Rename (F2): the box over the entry with its name, the part before the extension selected; the whole name for a folder, or when asked (a new file, AF-4.1).</summary>
+    /// <summary>Item → Rename (F2): the box over the entry with its name, the part before the extension selected; the whole name for a folder, or when asked (a new file, AF-4.1).</summary>
     private void Rename(bool wholeName = false)
     {
         if (_renaming is not null || NoFolderHere())
@@ -388,7 +397,7 @@ public sealed partial class FileForm
     }
 
     /// <summary>
-    /// File operations → Delete… (Delete, AF-4.3): a question, then the shell sends the selected entries, or the
+    /// Item → Delete… (Delete, AF-4.3): a question, then the shell sends the selected entries, or the
     /// current one, to the Recycle Bin in one operation; "Deleted <name>" or "Deleted n items", the entry after them
     /// selected.
     /// </summary>
@@ -457,7 +466,7 @@ public sealed partial class FileForm
         return null;
     }
 
-    /// <summary>File operations → Copy path (Ctrl+Shift+C, AF-4.4): the full path of the entry, or of each selected entry on a line, to the clipboard; "Copied path" or "Copied n paths".</summary>
+    /// <summary>Item → Copy path (Ctrl+Shift+C, AF-4.4): the full path of the entry, or of each selected entry on a line, to the clipboard; "Copied path" or "Copied n paths".</summary>
     private void CopyPath()
     {
         var targets = Targets();
@@ -479,7 +488,7 @@ public sealed partial class FileForm
 
     // ---- the clipboard (AF-4.8): the entries as files on it, in File Explorer's formats, and its files pasted into the folder ----
 
-    /// <summary>File operations → Cut or Copy (Ctrl+X, Ctrl+C): the selected entries, or the current one, on the clipboard as files, marked to move or to copy; "Cut <name>", "Copied n items".</summary>
+    /// <summary>Item → Cut or Copy (Ctrl+X, Ctrl+C): the selected entries, or the current one, on the clipboard as files, marked to move or to copy; "Cut <name>", "Copied n items".</summary>
     private void CopyOrCut(bool cut)
     {
         if (NoFolderHere())
@@ -512,7 +521,7 @@ public sealed partial class FileForm
     }
 
     /// <summary>
-    /// File operations → Paste (Ctrl+V): the clipboard's files copied, or moved after a cut, into the folder shown
+    /// Item → Paste (Ctrl+V): the clipboard's files copied, or moved after a cut, into the folder shown
     /// by the shell; "Pasted <name>" or "Pasted n items", with "Pasting, please wait" when it takes longer than a second.
     /// </summary>
     private void Paste()
@@ -708,7 +717,7 @@ public sealed partial class FileForm
         AxitMenu.Start(FolderListing.EditorOf(entry.Path), entry.Path);
     }
 
-    /// <summary>Item → Open with Windows (AF-4.7): the program Windows has for the entry, a folder in File Explorer, or the dialog that picks one.</summary>
+    /// <summary>Item → Open with → Windows default (AF-4.7): the program Windows has for the entry, a folder in File Explorer, or the dialog that picks one.</summary>
     private void OpenSelectedWithWindows()
     {
         if (CurrentEntry() is not { } entry)
@@ -742,7 +751,7 @@ public sealed partial class FileForm
 
     // ---- zip files (AF-4.12): the entries into a new zip, a zip into a new folder, nothing written over ----
 
-    /// <summary>File operations → Compress to zip: the selected entries, or the current one, into a new zip in the folder; "Compressed to <name>", the zip selected; "Compressing, please wait" after a second.</summary>
+    /// <summary>Item → Compress to zip: the selected entries, or the current one, into a new zip in the folder; "Compressed to <name>", the zip selected; "Compressing, please wait" after a second.</summary>
     private void Compress()
     {
         if (NoFolderHere() || _folder is not { } folder)
@@ -760,7 +769,7 @@ public sealed partial class FileForm
         RunArchiveWork(folder, "Compressing", "Compress failed", progress => Archives.Compress(sources, folder, progress), "Compressed to", OperationKind.Compress);
     }
 
-    /// <summary>File operations → Extract here: the zip's contents into a new folder named after it, next to it; "Extracted to <name>", the folder selected; "Not a zip file" on anything else.</summary>
+    /// <summary>Item → Extract here: the zip's contents into a new folder named after it, next to it; "Extracted to <name>", the folder selected; "Not a zip file" on anything else.</summary>
     private void Extract()
     {
         if (NoFolderHere() || _folder is not { } folder)
@@ -936,7 +945,7 @@ public sealed partial class FileForm
 
     // ---- Windows' own ways with the entry (AF-4.7): the system's dialogs and menu, like the folder picker (AX-7.2) ----
 
-    /// <summary>Item → Open with another program…: the Windows dialog that picks a program for the file, and runs it.</summary>
+    /// <summary>Item → Open with → Choose a program…: the Windows dialog that picks a program for the file, and runs it.</summary>
     private void OpenWith()
     {
         if (CurrentEntry() is not { } entry)
@@ -972,7 +981,7 @@ public sealed partial class FileForm
         }
     }
 
-    /// <summary>Item → More from Windows…: the shell's own menu for the entry, under it in the list, once the Item menu has closed.</summary>
+    /// <summary>Item → Windows menu…: the shell's own menu for the entry, under it in the list, once the Item menu has closed.</summary>
     private void ShowWindowsMenu()
     {
         if (CurrentEntry() is not { } entry)

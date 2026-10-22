@@ -46,17 +46,25 @@ public sealed partial class FileForm
 
     /// <summary>
     /// The list's lines made again from the log (AF-9.2): each line changed in place while the count is the same, so
-    /// that the selection stays where it is and nothing but the changed line moves under NVDA; the whole list
-    /// otherwise, with the newest line selected while the focus is in the folder list, so that Tab lands on it, and
-    /// the selection kept by index while the focus is here. The status bar follows.
+    /// that nothing but the changed line moves under NVDA (a running line under the focus is left until it ends, since
+    /// rewriting the selected item re-selects it, which NVDA may read again, four times a second for a zip's count);
+    /// the whole list otherwise. The newest line is selected while the focus is in the folder list, so that Tab lands
+    /// on it; while the focus is here the line the user is on stays selected (<paramref name="keep"/>, taken before
+    /// the log changed, since the oldest line falls off at the limit and every index shifts). The status bar follows.
     /// </summary>
-    private void FillPane()
+    private void FillPane(ActionEntry? keep)
     {
         var lines = _actions.Lines();
+        var entries = _actions.Entries;
         if (lines.Count == _pane.Items.Count)
         {
             for (var i = 0; i < lines.Count; i++)
             {
+                if (_pane.Focused && i == _pane.SelectedIndex && entries[i].State == ActionState.Running)
+                {
+                    continue;
+                }
+
                 if (!string.Equals(_pane.Items[i].ToString(), lines[i], StringComparison.Ordinal))
                 {
                     _pane.Items[i] = lines[i];
@@ -65,19 +73,27 @@ public sealed partial class FileForm
         }
         else
         {
-            var index = _pane.Focused ? _pane.SelectedIndex : lines.Count - 1;
             _pane.BeginUpdate();
             _pane.Items.Clear();
             _pane.Items.AddRange(lines.Cast<object>().ToArray());
             _pane.EndUpdate();
-            if (lines.Count > 0)
+        }
+
+        if (lines.Count > 0)
+        {
+            var kept = keep is null ? -1 : _actions.IndexOf(keep);
+            var index = kept >= 0 ? kept : _pane.Focused ? Math.Clamp(_pane.SelectedIndex, 0, lines.Count - 1) : lines.Count - 1;
+            if (_pane.SelectedIndex != index)
             {
-                _pane.SelectedIndex = Math.Clamp(index, 0, lines.Count - 1);
+                _pane.SelectedIndex = index;
             }
         }
 
         UpdateStatusBar();
     }
+
+    /// <summary>The line the user is on while the Actions list has the focus, taken before the log changes; null otherwise.</summary>
+    private ActionEntry? Keep() => _pane.Focused ? SelectedAction() : null;
 
     /// <summary>Tab, Shift+Tab, Ctrl+Tab, Ctrl+Shift+Tab and F6 (AX-8.2): between the folder list and the Actions list; the folder list alone while no Actions list shows.</summary>
     private void SwitchPane()
@@ -110,41 +126,49 @@ public sealed partial class FileForm
     /// <summary>A running operation's line, "Copying 3 items", in the folder shown; the list appears with it.</summary>
     private ActionEntry Begin(string text)
     {
+        var keep = Keep();
         var entry = _actions.Begin(text, _folder ?? string.Empty);
         ShowPane();
-        FillPane();
+        FillPane(keep);
         return entry;
     }
 
     /// <summary>A running line's count, "Compressing, 40 of 120 files".</summary>
     private void Progress(ActionEntry entry, string text)
     {
+        var keep = Keep();
         _actions.Progress(entry, text);
-        FillPane();
+        FillPane(keep);
     }
 
     /// <summary>The operation done: its line says what it did and, with an operation, can be undone and leads to its result.</summary>
     private void End(ActionEntry entry, string text, Operation? operation)
     {
+        var keep = Keep();
         _actions.End(entry, text, operation);
-        FillPane();
+        FillPane(keep);
     }
 
     /// <summary>The operation failed: "Failed: <reason>" in the list, and the failure said as every failure is (AF-4.5).</summary>
     private void Fail(ActionEntry entry, string title, string reason)
     {
+        var keep = Keep();
         _actions.Fail(entry, reason);
-        FillPane();
+        FillPane(keep);
         Failed(title, reason);
     }
 
     /// <summary>An operation that ran at once (a rename, a new folder): its line, done.</summary>
     private void Record(string text, Operation operation)
     {
+        var keep = Keep();
         _actions.Add(text, operation);
         ShowPane();
-        FillPane();
+        FillPane(keep);
     }
+
+    /// <summary>A line's state changed by an undo (undone, or refused): the list made again with the user's line kept.</summary>
+    private void RefreshPane() => FillPane(Keep());
 
     // ---- the list's own keys (AF-9.3): Enter, Ctrl+Z and Ctrl+I on the line, Escape back to the folder list ----
 
@@ -167,12 +191,13 @@ public sealed partial class FileForm
         }
 
         var (folder, select) = entry.Location;
-        if (folder.Length == 0 || !Directory.Exists(folder))
+        if (folder.Length == 0)
         {
             Announce("Folder not found", true);
             return;
         }
 
+        // A folder that is gone is ShowFolderAsync's "Folder not found" notice and the nearest parent (AF-3.5).
         Do(async () =>
         {
             if (await ShowFolderAsync(folder, select, remember: false))

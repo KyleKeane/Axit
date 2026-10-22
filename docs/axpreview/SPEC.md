@@ -87,7 +87,9 @@ rather than a new one (AP-1.2). It works entirely offline (bundle G6).
   `Preview.IsText`, moved) up to 32 MB (AxDown AD-3.1's limit), decoded as the editors decode (`TextDocument`: the
   mark, the code page, the line endings). Anything else: the notice "Not a text file" ("tool.exe is not a text file.
   AxFile's Enter opens it in the program Windows has for it."), the window keeping what it had; a file over the limit:
-  "<name> is n MB. AxPreview opens files up to 32 MB."
+  the notice "Too large", "<name> is n MB. AxPreview opens files up to 32 MB." A reload (AP-2.4) of a file that has
+  become one of these shows the same notice and keeps the text it had. A file handed over while a notice shows
+  closes the notice first, so that the window read on activation is the file's.
 - AP-2.3 **Navigation**, the window-specific keys of `AxPreviewKeys` (AX-8), AxDown's letters (AxDown §9): Ctrl+H
   heading, Ctrl+1 to Ctrl+6 a heading of that level, Ctrl+K link, Ctrl+L list, Ctrl+I list item, Ctrl+Q block quote,
   Ctrl+T table, each the next one and with Shift the previous one, through the bundle's `TextJumps` over
@@ -127,8 +129,8 @@ line") and its first line; nothing of AxPreview's own. Afterwards, one UI Automa
 or on the notice while one shows (AX-7.3): "Line n of m" (`l`, and after Go to line; "Not a line number"), "Install,
 heading level 2" and the other elements, "No next <kind>" / "No previous <kind>", "Not found", "Reloaded",
 "Reloaded, <name> changed on disk", "Word wrap on" / "Word wrap off", "Nothing to save here", "No file yet" (Ctrl+E,
-Ctrl+W and the ways out on Untitled), "Text size n", "Windows text size", "Copied diagnostics". The notices: "Not a
-text file", the size limit, Keyboard shortcuts, User guide, About, the update notice.
+Ctrl+W, F5 and the ways out on Untitled), "Text size n", "Windows text size", "Copied diagnostics". The notices: "Not a
+text file", "Too large", Keyboard shortcuts, User guide, About, the update notice.
 
 ### AP-5 Settings, status bar, title, log
 

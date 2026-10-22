@@ -227,7 +227,7 @@ events are posted back to it (AX-7.5).
   order, hidden files left out, so that the hand-over is a path, not a list.
 - **AM-D3 Play takes the focus, Add does not.** Opening a media file in AxMedia is opening it in its app, as opening a
   Markdown file in AxDown is; the keys are then where the sound is. Add to queue is a background act, answered in
-  AxFile. Enter in AxFile itself is Windows' default program (the user's decision of 2026-10-22, `docs/axpreview/SPEC.md`
+  AxFile; a window that an add opens, when none was open, shows without activation and stays behind. Enter in AxFile itself is Windows' default program (the user's decision of 2026-10-22, `docs/axpreview/SPEC.md`
   AP-D2): AxMedia gets Enter when the user has made it the default for the kind, as in File Explorer.
 - **AM-D4 The hand-over is a window message, sent by the app to itself.** A second AxMedia process started with
   paths finds the open window and hands them over with `WM_COPYDATA`, Win32 of the plainest kind, synchronous and

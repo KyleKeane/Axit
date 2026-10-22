@@ -256,6 +256,9 @@ public sealed partial class FileForm : AxitForm
 
     protected override Control FocusTarget => _list;
 
+    /// <summary>An announcement is raised on the list that has the focus (AF-7): the Actions list while it does, the folder list otherwise.</summary>
+    protected override Control AnnounceSource => _pane.Focused ? _pane : _list;
+
     /// <summary>A notice opened from the Actions list gives the focus back to it (AF-9.1).</summary>
     protected override Control? FocusToKeep() => _pane.Focused ? _pane : null;
 

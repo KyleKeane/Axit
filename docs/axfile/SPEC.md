@@ -307,9 +307,9 @@ Every operation here is one line of the Actions list (AF-9) as well as its annou
   undone" afterwards; an entry changed since by anything else (renamed in File Explorer meanwhile), "Not undone:
   <name> has changed", "Not undone: <name> has files now" / "has content now" (a new folder or file filled
   meanwhile), "Not undone: <name> is already here" (the place it would go back to is taken; a rename that changed
-  only the case is not "already here"), the line saying so and dropped from what Undo takes next; a failure of the
-  undo itself is "Failed: <reason>" (AF-4.5) and the line stays to try again (a zip open in another program, closed
-  and Ctrl+Z again); a second Ctrl+Z while one runs says "Undo is still running"; in the rename box Ctrl+Z is the
+  only the case is not "already here"), the line saying so and dropped from what Undo takes next, as is a delete
+  whose entries are "Not in the Recycle Bin any more" (emptied meanwhile); a failure of the undo itself is "Failed:
+  <reason>" (AF-4.5) and the line stays to try again (a zip open in another program, closed and Ctrl+Z again); a second Ctrl+Z while one runs says "Undo is still running"; in the rename box Ctrl+Z is the
   box's own (AF-6.2). Eject, Open, the hand-overs, Favorites and the settings are not operations and have no undo;
   there is no redo. The last twenty operations of this window can be undone, gone with the window. The lines and the
   operations are `ActionLog`, `Operation` and `FileOperations.CheckUndo` and `UndoAsync` in `AxFile.Core`, tested
@@ -328,7 +328,8 @@ and the started process finds its open window and hands the paths over with the 
 - AF-5.2 **Add to AxMedia's queue** (Ctrl+Shift+Q in the list; the Item menu): the entry, or the marked entries
   (AF-3.7), to the end of AxMedia's queue, a folder as its media files, with `--add`; the focus stays here and AxFile
   says "Added n to AxMedia's queue", n being its own count of the media files among the entries (a folder read on a
-  task, the hidden ones as the settings say); "No sound or video files to add" when the count is none.
+  task, the hidden ones as the settings say); "No sound or video files to add" when the count is none. With no AxMedia
+  window open, one opens behind this window, without taking the focus (AM-D3), holding the queue for later.
 - AF-5.3 **Preview** (Shift+Enter in the list; the Item menu): the file read in AxPreview, the window in front; a
   folder in a new AxFile window (AF-3.2). AxPreview says "Not a text file" itself for a file that is none.
 - AF-5.4 **Enter** on a sound or video file is Windows' default program (AF-3.2): AxMedia when the user has made it
@@ -421,8 +422,10 @@ reading.
   most; a paste through the shell has no count to give), and its line is replaced when it ends; a failure, "Failed:
   <reason>"; a line that was undone, "Renamed notes.md to todo.md, undone"; one that could not be undone when asked,
   "…, not undone: notes.md has changed". When a line is added while the focus is in the folder list, it is the
-  selected line of the Actions list, so that Tab lands on it; while the focus is in the Actions list the selection
-  stays where it is and only the changed line is rewritten. Nothing is spoken for a line (the operation's own
+  selected line of the Actions list, so that Tab lands on it; while the focus is in the Actions list the line the user
+  is on stays selected (by line, not by place, since at fifty the oldest falls off) and only the changed line is
+  rewritten, a running line under the focus being left until it ends, so that a zip's count is not reselected under
+  NVDA four times a second. Nothing is spoken for a line (the operation's own
   announcement, AF-7, is what is heard). Cut, Copy, Copy path, Open, the hand-overs and Favorites change nothing on
   disk and have no line.
 - AF-9.3 **On a line.** **Enter** goes where the action left things: the folder list shows the folder and selects the

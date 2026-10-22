@@ -152,6 +152,9 @@ internal static class Shell
         }
     }
 
+    /// <summary>The answer of <see cref="Undelete"/> when none of the paths is in the Recycle Bin any more (emptied, or restored by hand): not a failure to retry (AF-4.14).</summary>
+    public const string NotInRecycleBin = "Not in the Recycle Bin any more";
+
     /// <summary>
     /// The shell's own Restore (AF-4.14) for entries this window sent to the Recycle Bin: the bin's items whose
     /// record says they came from one of <paramref name="paths"/> (the latest deletion of each) are restored in one
@@ -224,7 +227,7 @@ internal static class Shell
 
             if (latest.Count == 0)
             {
-                return "Not in the Recycle Bin any more";
+                return NotInRecycleBin;
             }
 
             var found = latest.Values.Select(item => item.Pidl).ToArray();

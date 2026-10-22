@@ -140,6 +140,9 @@ public sealed class MediaForm : AxitForm
 
     // ---- what the window base asks for ----
 
+    /// <summary>A window opened by an add (AxFile's Ctrl+Shift+Q with no AxMedia open) stays behind: the user asked to add, not to come here (AM-D3).</summary>
+    protected override bool ShowWithoutActivation => _start is { Verb: AppMessage.Add };
+
     protected override string Shortcuts => HelpText.Shortcuts;
 
     protected override void HideForNotice()

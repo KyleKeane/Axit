@@ -81,7 +81,7 @@ public sealed class TextEditorForm : AxitForm
         file.DropDownItems.Add(new ToolStripSeparator());
         if (_app.ReadOnly)
         {
-            file.DropDownItems.Add(Item("&Reload", ReloadCommand, EditorKeys.Reload));
+            file.DropDownItems.Add(Item("Re&load", ReloadCommand, EditorKeys.Reload));
             file.DropDownItems.Add(new ToolStripSeparator());
             _editItem = Item("&Edit in AxDown", OpenInEditor, EditorKeys.Edit);
             file.DropDownItems.Add(_editItem);
@@ -315,6 +315,8 @@ public sealed class TextEditorForm : AxitForm
                 {
                     if (!IsDisposed)
                     {
+                        // A notice left from before (a refused file) would be what NVDA reads on activation.
+                        CloseNotice(null);
                         LoadDocument(path);
                         // The starting process let this one come to the front (AppMessage); the user asked to read.
                         AxitMenu.Activate(Handle);
@@ -463,20 +465,16 @@ public sealed class TextEditorForm : AxitForm
 
     // ---- the document (AD-3) ----
 
-    /// <summary>The file read into the editor, or an empty document; the history ends with it unless <paramref name="keepHistory"/> (a reload, AD-2.5). A file the app refuses (the viewer's AP-2.2) is a notice, and the window keeps what it had.</summary>
-    private void LoadDocument(string? path, bool keepHistory = false)
+    /// <summary>The file read into the editor, or an empty document; the history ends with it unless <paramref name="keepHistory"/> (a reload, AD-2.5). A file the app refuses (the viewer's AP-2.2) is a notice, the window keeps what it had, and the answer is false.</summary>
+    private bool LoadDocument(string? path, bool keepHistory = false)
     {
         if (_app.Refuse is { } refuse && path is not null && File.Exists(path) && refuse(path) is { } refusal)
         {
-            if (Text.Length == 0)
-            {
-                // The first load, refused: the window still needs its title and status.
-                UpdateTitle();
-                UpdateStatus();
-            }
-
+            // The window keeps what it had; on the first load that is Untitled, which still needs its title and status.
+            UpdateTitle();
+            UpdateStatus();
             ShowNotice(refusal with { Unprompted = true });
-            return;
+            return false;
         }
 
         if (_path is { } old && !string.Equals(old, path, StringComparison.OrdinalIgnoreCase))
@@ -523,6 +521,7 @@ public sealed class TextEditorForm : AxitForm
         UpdateTitle();
         UpdateStatus();
         Log.Info(path is null ? "New document" : $"Opened {path}: {_document.EncodingName}, {_document.LineEndingName}");
+        return true;
     }
 
     private void OnTextChanged(object? sender, EventArgs e)
@@ -747,7 +746,12 @@ public sealed class TextEditorForm : AxitForm
     {
         var before = _text;
         var (line, column, _) = Position();
-        LoadDocument(_path, keepHistory: true);
+        if (!LoadDocument(_path, keepHistory: true))
+        {
+            // The viewer refused what the file has become (AP-2.2): the notice says so, and the text stays.
+            return;
+        }
+
         MoveTo(line, column);
         _history.Record(before, _text, _editor.SelectionStart, typedAt: -1);
         Announce(announcement, false);

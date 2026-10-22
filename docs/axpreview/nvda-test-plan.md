@@ -20,7 +20,7 @@ Run with NVDA before a release, on a folder with `README.md` (headings, links, a
 ## 2. The hand-over (AP-1.2, AP-1.3)
 
 1. With an AxPreview window open on README.md, in AxFile on the folder, Shift+Enter on `plain.txt`: the AxPreview window comes to the front showing `plain.txt`, NVDA reads its title and the text; no second window (Alt+A, O lists one AxPreview). Shift+F10, E (Preview) on `app.log`: the same.
-2. Shift+Enter on the `.exe` in AxFile: the AxPreview window comes to the front with the notice "Not a text file" and keeps `app.log`; Escape.
+2. Shift+Enter on the `.exe` in AxFile: the AxPreview window comes to the front with the notice "Not a text file" and keeps `app.log`. Without closing it, back in AxFile, Shift+Enter on `plain.txt`: the notice is gone and the window shows `plain.txt`, NVDA reading its title and text.
 3. Shift+Enter on a folder in AxFile: a new AxFile window on that folder, not AxPreview.
 4. Close the AxPreview window; Shift+Enter on `README.md` in AxFile: a new AxPreview window opens on it.
 5. In File Explorer, right-click `README.md`, Open with Axit, AxPreview: the open window takes it. Make AxPreview the default for `.log` (Settings, Apps, Default apps, or Open with, Always): Enter on `app.log` in AxFile and a double click in File Explorer open AxPreview. Set the default back if wanted.
