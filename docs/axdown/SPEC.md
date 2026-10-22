@@ -359,3 +359,4 @@ the off-screen probe approach of AxClaude checks layout and keys without disturb
 - 2026-10-21: undo and redo over a history of the window's own specified at the user's ask (AD-2.5), for AxDown and AxJSON
   alike through the shared shell, and built the same day (`Axit.Core/EditHistory` with its tests; Ctrl+Z, Ctrl+Y and
   Ctrl+Shift+Z in the shell; Edit → Undo and Redo); the NVDA pass (test plan 2.2 and 2.6) is still to run.
+- 2026-10-22: released in 3.3.0. The whole NVDA test plan marked passed at the user's word, no step reported failing; the record by step is `docs/axit/nvda-test-record.md`.

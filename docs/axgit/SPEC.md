@@ -237,3 +237,4 @@ have been the third copy of them.
   AxDown, and the way back through the Axit menu; `docs/axgit/nvda-test-plan.md` sections 3.5 to 4.5 (commit,
   discard, branches, fetch, pull, push) are still to run. The window moved onto the bundle's window base the same
   day (AX-6.5).
+- 2026-10-22: released in 3.3.0. The whole NVDA test plan marked passed at the user's word, no step reported failing; the record by step is `docs/axit/nvda-test-record.md`.

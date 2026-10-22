@@ -272,3 +272,4 @@ events are posted back to it (AX-7.5).
   wiring (the dispatcher with AX-1.2's media rule, the installer's block with the Open with registration, the
   icon, `run-axmedia.ps1`). The window and the hand-over are not yet checked with NVDA or heard; AxFile hands over
   in the next step of the inventory and keeps its own player until then.
+- 2026-10-22: released in 3.3.0. The whole NVDA test plan marked passed at the user's word, no step reported failing; the record by step is `docs/axit/nvda-test-record.md`.

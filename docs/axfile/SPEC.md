@@ -657,3 +657,4 @@ AF-D4 (the volume) and AF-D6 (the queue fixed at Enter) went to AxMedia with the
 - 2026-10-22, later: Escape deselects (AF-3.7); Left and Right as a tree's keys and completion in the Go to folder
   field (AF-3.1, AF-3.3, AF-D12), at the user's ask; then the Drives menu as a submenu of Folder and Alt+D for Go to
   folder (AF-3.11, AF-6.1). Not yet checked with NVDA (test plan 1.4b, 1.7, 1.12a, 3.7a).
+- 2026-10-22: released in 3.3.0. The whole NVDA test plan marked passed at the user's word, no step reported failing; the record by step is `docs/axit/nvda-test-record.md`.

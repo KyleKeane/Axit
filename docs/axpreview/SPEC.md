@@ -211,3 +211,4 @@ Whether `PreviewForm` is better an `EditorApp` with a read-only flag is decided 
   dispatcher, the installer's block with Open with for the text kinds, the icon, `run-axpreview.ps1`); a file alone
   on the command line still goes to its editor (AP-1.1). Not yet checked with NVDA; AxFile hands over in the next
   step of the inventory and keeps its preview pane until then.
+- 2026-10-22: released in 3.3.0. The whole NVDA test plan marked passed at the user's word, no step reported failing; the record by step is `docs/axit/nvda-test-record.md`.
