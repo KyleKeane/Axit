@@ -112,7 +112,11 @@ taskbar. It works entirely offline (bundle G6).
   (left to Windows, the focus went to one of AxStart's own hidden windows while NVDA still showed the program from
   before, and typing went nowhere; 2026-10-22). After a start the program comes up in front by itself; if nothing has
   taken the focus three seconds later (a program without a window, a declined administrator prompt), the window from
-  before gets it back. When the focus went to another program (AS-3.5), it stays there. The text is empty each time the
+  before gets it back. When the focus went to another program (AS-3.5), it stays there.
+  The hidden window never holds the keyboard: Windows activated it when AxStart started hidden (from the installer, at
+  sign-in, from a console), and everything typed went into a window nobody could see, while NVDA still showed the
+  program in front (the user's lost typing of 2026-10-22). An activation while hidden hands the front back at once,
+  to the window being left, or the one in front when AxStart started. The text is empty each time the
   window shows; the selection starts on the first match.
 - AS-3.5 The window hides by itself when it loses the focus to another program (Alt+Tab, a click elsewhere), as the
   Start menu does; a notice of its own (Hotkey…, Keyboard shortcuts, About) keeps it.

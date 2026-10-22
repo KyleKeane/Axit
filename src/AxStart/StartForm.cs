@@ -16,6 +16,10 @@ namespace AxStart;
 public sealed class StartForm : AxitForm
 {
     private const int WM_HOTKEY = 0x0312;
+    private const int WM_ACTIVATE = 0x0006;
+
+    /// <summary>The window in front when this process started, for an activation of the hidden window that names no other.</summary>
+    private readonly nint _startedOver = GetForegroundWindow();
     private const int HotkeyId = 1;
     private const int MOD_NOREPEAT = 0x4000;
 
@@ -247,6 +251,22 @@ public sealed class StartForm : AxitForm
 
     protected override void WndProc(ref Message m)
     {
+        if (m.Msg == WM_ACTIVATE && (m.WParam & 0xFFFF) != 0 && !IsWindowVisible(Handle))
+        {
+            // AS-3.4: the hidden window must never hold the keyboard. Windows activated it when AxStart started hidden
+            // and when it hid, and the user's typing went into a window nobody could see (2026-10-22): the window
+            // being left gets the front back, or the one that was in front when this process started.
+            var back = m.LParam != 0 ? m.LParam : _before != 0 ? _before : _startedOver;
+            Log.Info("Activated while hidden; the front given back");
+            BeginInvoke(() =>
+            {
+                if (!IsWindowVisible(Handle) && back != 0 && IsWindow(back))
+                {
+                    SetForegroundWindow(back);
+                }
+            });
+        }
+
         if (m.Msg == WM_HOTKEY && m.WParam == HotkeyId)
         {
             if (_capturing)
@@ -734,6 +754,9 @@ public sealed class StartForm : AxitForm
 
     [DllImport("user32.dll")]
     private static extern bool IsWindow(nint hWnd);
+
+    [DllImport("user32.dll")]
+    private static extern bool IsWindowVisible(nint hWnd);
 
     [DllImport("user32.dll")]
     private static extern uint GetWindowThreadProcessId(nint hWnd, out uint processId);
