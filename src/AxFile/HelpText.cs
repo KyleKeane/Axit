@@ -54,6 +54,12 @@ public static class HelpText
           Enter: play this file. Delete: take the line out. Ctrl+I: the file's place, "3 of 12", and its position while it plays. Ctrl+Q: what is playing
           Player, Clear queue: the queue and the lines emptied and the player stopped. Player, Show queue: the queue, with the focus in it
 
+        The preview
+          Ctrl+Shift+P on a text file: its text in the pane, read-only, "<name>, preview", the focus on its first line; a file over a megabyte shows its first megabyte; "Not a text file" otherwise
+          Arrow keys, Page Up, Page Down, Ctrl+Up, Ctrl+Down: read it as any text. Ctrl+F, F3, Shift+F3: find in it. Ctrl+A, Ctrl+C: select and copy. l: the line number
+          Ctrl+H, Ctrl+K, Ctrl+L: the next heading, link or list of a Markdown file; Ctrl+Shift+H, Ctrl+Shift+K, Ctrl+Shift+L: the previous one
+          Escape: back to the entry in the folder list. Player, Show queue, or any queue command, brings the queue back in place of the preview
+
         Notices
           AxFile's questions, errors and help texts appear inside the window, in place of the list.
           Tab moves between the text, a field and the buttons. Enter chooses the main button. Escape closes the notice.

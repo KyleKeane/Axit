@@ -200,7 +200,7 @@ public sealed partial class FileForm : AxitForm
         // Docked from the last control to the first: the menu takes the top, the status bar the bottom, the video
         // area the strip under the menu while it shows, the pane the strip above the status bar while it shows, and
         // the list (or the notice over it) what is left.
-        Controls.AddRange([Overlay, _list, _pane, _video, _status, _menu]);
+        Controls.AddRange([Overlay, _list, _pane, _preview, _video, _status, _menu]);
 
         ApplyTextFont();
         RestoreWindow();
@@ -233,6 +233,8 @@ public sealed partial class FileForm : AxitForm
         }
 
         items.Add(axit);
+        // AF-9.4: the file's text in the pane.
+        items.Add(Item("Preview &here", ShowPreview, AxFileKeys.Preview));
         items.Add(new ToolStripSeparator());
         items.Add(Item("Cu&t", () => CopyOrCut(cut: true), AxFileKeys.Cut));
         items.Add(Item("&Copy", () => CopyOrCut(cut: false), AxFileKeys.Copy));
@@ -269,6 +271,7 @@ public sealed partial class FileForm : AxitForm
         CancelRename();
         _list.Visible = false;
         _pane.Visible = false;
+        _preview.Visible = false;
         _video.Visible = false;
     }
 
@@ -278,7 +281,7 @@ public sealed partial class FileForm : AxitForm
         if (_paneShown)
         {
             FitPane();
-            _pane.Visible = true;
+            PaneControl.Visible = true;
         }
 
         FitVideo();
@@ -287,14 +290,15 @@ public sealed partial class FileForm : AxitForm
     protected override Control FocusTarget => _list;
 
     /// <summary>A notice opened from the pane gives the focus back to the pane (AF-9.1).</summary>
-    protected override Control? FocusToKeep() => _pane.Focused ? _pane : null;
+    protected override Control? FocusToKeep() => _pane.Focused ? _pane : _preview.Focused ? _preview : null;
 
     protected override void ApplyFont(Font font)
     {
         _list.Font = font;
         _renameBox.Font = font;
         _pane.Font = font;
-        if (_pane.Visible)
+        _preview.Font = font;
+        if (_paneShown)
         {
             FitPane();
         }
@@ -361,13 +365,38 @@ public sealed partial class FileForm : AxitForm
                 SwitchPane();
                 return true;
             case BundleKeys.Find:
-                ShowFindNotice();
+                // In the preview, the bundle's find in a text (AX-7.2); in the list, the entry whose name contains the text.
+                if (_preview.Focused)
+                {
+                    ShowFind(_preview);
+                }
+                else
+                {
+                    ShowFindNotice();
+                }
+
                 return true;
             case BundleKeys.FindNext:
-                FindInList(1);
+                if (_preview.Focused)
+                {
+                    FindNext(_preview, 1);
+                }
+                else
+                {
+                    FindInList(1);
+                }
+
                 return true;
             case BundleKeys.FindPrevious:
-                FindInList(-1);
+                if (_preview.Focused)
+                {
+                    FindNext(_preview, -1);
+                }
+                else
+                {
+                    FindInList(-1);
+                }
+
                 return true;
             case BundleKeys.Save:
                 // The bundle's save key, with nothing here to save (AF-6.2).
@@ -458,6 +487,18 @@ public sealed partial class FileForm : AxitForm
                 return true;
         }
 
+        if (_preview.Focused)
+        {
+            // In the preview (AF-9.4): Escape goes back to the list; the rest is the text's own and its KeyDown handler's.
+            if (keyData == AxFileKeys.ClearFilter)
+            {
+                _list.Focus();
+                return true;
+            }
+
+            return false;
+        }
+
         if (_pane.Focused)
         {
             // In the queue (AF-9.6): Enter plays the line's file, Delete takes it out, Escape goes back to the list.
@@ -487,6 +528,9 @@ public sealed partial class FileForm : AxitForm
                     return true;
                 case AxFileKeys.AddToQueue:
                     AddToQueue();
+                    return true;
+                case AxFileKeys.Preview:
+                    ShowPreview();
                     return true;
                 case AxFileKeys.Cut:
                     CopyOrCut(cut: true);

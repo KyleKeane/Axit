@@ -1,22 +1,28 @@
 using AxFile.Core;
 using Axit.Core;
+using Axit.Forms;
 
 namespace AxFile;
 
 /// <summary>
 /// The pane (SPEC.md AF-9): a second control under the folder list, one thing at a time and named after it: the
-/// player's queue with the operations' status lines under it (a list). It appears when it first has something to
-/// show and stays for the window's life; Tab, Shift+Tab, Ctrl+Tab, Ctrl+Shift+Tab and F6 move between the folder
-/// list and it, Escape in it goes back to the list. Each command's result is one announcement on the control that
-/// has the focus; nothing is spoken on an arrow key (AF-D7).
+/// player's queue with the operations' status lines under it (a list, AF-9.2, AF-9.3), or a file's text to read (a
+/// read-only text, AF-9.4). It appears when it first has something to show and stays for the window's life; Tab,
+/// Shift+Tab, Ctrl+Tab, Ctrl+Shift+Tab and F6 move between the folder list and it, Escape in it goes back to the
+/// list. Each command's result is one announcement on the control that has the focus; nothing is spoken on an arrow
+/// key (AF-D7).
 /// </summary>
 public sealed partial class FileForm
 {
     private readonly ListBox _pane = new();
+    private readonly TextBox _preview = new();
     private readonly PlayQueue _queue = new();
 
     /// <summary>Whether the pane has been shown (AF-9.1): once it has, it stays, hidden only while a notice shows.</summary>
     private bool _paneShown;
+
+    /// <summary>Whether the pane holds a file's text now rather than the queue (AF-9.4).</summary>
+    private bool _previewing;
 
     private void SetUpPane()
     {
@@ -27,20 +33,65 @@ public sealed partial class FileForm
         _pane.AccessibleName = "Queue";
         _pane.Items.Add(PlayQueue.EmptyText);
         _pane.DoubleClick += (_, _) => PlayPaneItem();
+
+        // AF-9.4: a read-only text with what every read-only text of the bundle has (AX-7.2): the page and paragraph
+        // keys, the Markdown jumps of the window's table, l for the line; Ctrl+A and Ctrl+C are the control's own.
+        _preview.Multiline = true;
+        _preview.ReadOnly = true;
+        _preview.WordWrap = true;
+        _preview.ScrollBars = ScrollBars.Vertical;
+        _preview.HideSelection = false;
+        _preview.MaxLength = 0;
+        _preview.BackColor = SystemColors.Window;
+        _preview.ForeColor = SystemColors.WindowText;
+        _preview.Dock = DockStyle.Bottom;
+        _preview.Visible = false;
+        _preview.TabIndex = 1;
+        _preview.AccessibleName = "Preview";
+        _preview.KeyDown += EditKeys.Handle;
+        _preview.KeyDown += OnPreviewKeyDown;
     }
 
-    /// <summary>The pane takes a third of the window at most (AF-9.1), and three lines at least.</summary>
-    private void FitPane() => _pane.Height = Math.Max(_pane.ItemHeight * 3 + 4, ClientSize.Height / 3);
+    /// <summary>The control the pane shows now: the queue list, or the preview while a file's text is there.</summary>
+    private Control PaneControl => _previewing ? _preview : _pane;
 
-    /// <summary>The pane shown with the queue list in it, the first time something is there for it; the focus stays where it is.</summary>
+    /// <summary>The pane takes a third of the window at most (AF-9.1), and three lines at least.</summary>
+    private void FitPane()
+    {
+        var height = Math.Max(_pane.ItemHeight * 3 + 4, ClientSize.Height / 3);
+        _pane.Height = height;
+        _preview.Height = height;
+    }
+
+    /// <summary>The pane shown with the queue list in it the first time something is there for it; a preview being read is left in place (the list comes back with the next queue command).</summary>
     private void ShowPane()
     {
         _paneShown = true;
-        if (!NoticeOpen && !_pane.Visible)
+        if (!NoticeOpen && !_previewing && !_pane.Visible)
         {
             FitPane();
             _pane.Visible = true;
         }
+    }
+
+    /// <summary>The queue list brought back in place of a preview (AF-9.4), the focus with it when the preview had it; the pane shown.</summary>
+    private void ShowQueueList()
+    {
+        if (_previewing)
+        {
+            var had = _preview.Focused;
+            _previewing = false;
+            FitPane();
+            _pane.Visible = !NoticeOpen;
+            _preview.Visible = false;
+            _preview.Clear();
+            if (had)
+            {
+                _pane.Focus();
+            }
+        }
+
+        ShowPane();
     }
 
     /// <summary>
@@ -77,9 +128,10 @@ public sealed partial class FileForm
     /// <summary>Tab, Shift+Tab, Ctrl+Tab, Ctrl+Shift+Tab and F6 (AX-8.2): between the folder list and the pane; the list alone while no pane shows.</summary>
     private void SwitchPane()
     {
-        if (_pane.Visible && _list.Focused)
+        var pane = PaneControl;
+        if (pane.Visible && _list.Focused)
         {
-            _pane.Focus();
+            pane.Focus();
         }
         else
         {
@@ -105,7 +157,7 @@ public sealed partial class FileForm
         }
 
         _queue.Set(paths, 0);
-        ShowPane();
+        ShowQueueList();
         FillPane();
         PlayCurrent(prompted: true);
     }
@@ -131,7 +183,7 @@ public sealed partial class FileForm
         {
             var paths = await Task.Run(() => MediaOf(targets));
             var added = _queue.Add(paths);
-            ShowPane();
+            ShowQueueList();
             FillPane();
             Announce(added == 0 ? "No sound or video files to add" : $"Added {added} to the queue", true);
         });
@@ -171,7 +223,7 @@ public sealed partial class FileForm
     {
         _queue.Clear();
         StopPlayback();
-        ShowPane();
+        ShowQueueList();
         FillPane();
         Announce("Queue cleared", true);
     }
@@ -179,7 +231,7 @@ public sealed partial class FileForm
     /// <summary>Player → Show queue: the pane with the queue list, the focus in it.</summary>
     private void ShowQueue()
     {
-        ShowPane();
+        ShowQueueList();
         FillPane();
         _pane.Focus();
     }
@@ -256,5 +308,101 @@ public sealed partial class FileForm
         ShowPane();
         FillPane();
         return token;
+    }
+
+    // ---- a file to read (AF-9.4) ----
+
+    /// <summary>
+    /// Item → Preview here (Ctrl+Shift+P in the list): the file's text in the pane as a read-only text named
+    /// "<name>, preview", the focus on its first line; a file over a megabyte shows its first megabyte and says so in
+    /// the name; "Not a text file" for anything else, "Not a file" on a folder. The folder list keeps its place, so
+    /// Escape returns to the entry.
+    /// </summary>
+    private void ShowPreview()
+    {
+        if (CurrentEntry() is not { } entry)
+        {
+            SayNoEntry();
+            return;
+        }
+
+        if (entry.IsFolder)
+        {
+            Announce("Not a file", true);
+            return;
+        }
+
+        Do(async () =>
+        {
+            PreviewText? text;
+            try
+            {
+                text = await Task.Run(() => Preview.Read(entry.Path));
+            }
+            catch (Exception ex) when (ex is IOException or UnauthorizedAccessException)
+            {
+                Failed("Preview failed", FileOperations.Message(ex));
+                return;
+            }
+
+            if (text is null)
+            {
+                Announce("Not a text file", true);
+                return;
+            }
+
+            _previewing = true;
+            _paneShown = true;
+            _preview.AccessibleName = $"{entry.Name}, preview" + (text.Cut ? ", first megabyte" : string.Empty);
+            _preview.Text = text.Text;
+            _preview.Select(0, 0);
+            FitPane();
+            _pane.Visible = false;
+            _preview.Visible = !NoticeOpen;
+            _preview.Focus();
+        });
+    }
+
+    /// <summary>The preview's own keys: the Markdown jumps of the table (AF-9.4) and l for the line, "Line 12 of 40".</summary>
+    private void OnPreviewKeyDown(object? sender, KeyEventArgs e)
+    {
+        if (e.Handled)
+        {
+            return;
+        }
+
+        if (e.KeyData == AxFileKeys.LineNumber)
+        {
+            e.Handled = e.SuppressKeyPress = true;
+            Announce(PreviewLine(), true);
+            return;
+        }
+
+        if (TextJumps.Handle(_preview, AxFileKeys.PreviewJumps, e.KeyData, Announce))
+        {
+            e.Handled = e.SuppressKeyPress = true;
+        }
+    }
+
+    /// <summary>"Line 12 of 40": the caret's line of the preview's text and the number of lines.</summary>
+    private string PreviewLine()
+    {
+        var text = _preview.Text;
+        var caret = Math.Min(_preview.SelectionStart, text.Length);
+        var line = 1;
+        var lines = 1;
+        for (var i = 0; i < text.Length; i++)
+        {
+            if (text[i] == '\n')
+            {
+                lines++;
+                if (i < caret)
+                {
+                    line++;
+                }
+            }
+        }
+
+        return $"Line {line} of {lines}";
     }
 }

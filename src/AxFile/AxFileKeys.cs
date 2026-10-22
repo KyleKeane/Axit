@@ -1,3 +1,6 @@
+using Axit.Core;
+using Axit.Forms;
+
 namespace AxFile;
 
 /// <summary>
@@ -95,6 +98,27 @@ public static class AxFileKeys
     /// <summary>In the list: the entry, or the marked entries, appended to the queue (AF-9.2).</summary>
     public const Keys AddToQueue = Keys.Control | Keys.Shift | Keys.Q;
 
+    /// <summary>In the list: the file's text in the pane (AF-9.4).</summary>
+    public const Keys Preview = Keys.Control | Keys.Shift | Keys.P;
+
+    // In the preview (AF-9.4): the Markdown jumps the window's letters allow (AxDown's list item, block quote and
+    // table keys are Information, What is playing and Go to time here), and l for the line.
+    public const Keys NextHeading = Keys.Control | Keys.H;
+    public const Keys PreviousHeading = Keys.Control | Keys.Shift | Keys.H;
+    public const Keys NextLink = Keys.Control | Keys.K;
+    public const Keys PreviousLink = Keys.Control | Keys.Shift | Keys.K;
+    public const Keys NextList = Keys.Control | Keys.L;
+    public const Keys PreviousList = Keys.Control | Keys.Shift | Keys.L;
+    public const Keys LineNumber = Keys.L;
+
+    /// <summary>The preview's key pairs for the shared jumps (<c>Axit.Forms.TextJumps</c>), from the keys above.</summary>
+    public static readonly IReadOnlyList<TextJump> PreviewJumps =
+    [
+        TextJump.Markdown(NextHeading, PreviousHeading, ElementKind.Heading),
+        TextJump.Markdown(NextLink, PreviousLink, ElementKind.Link),
+        TextJump.Markdown(NextList, PreviousList, ElementKind.List),
+    ];
+
     public const Keys Forward = Keys.Control | Keys.Right;
     public const Keys Back = Keys.Control | Keys.Left;
     public const Keys NextFile = Keys.Control | Keys.Shift | Keys.Right;
@@ -143,6 +167,14 @@ public static class AxFileKeys
         ("Pause or resume", PauseResume),
         ("Play folder (in the list)", PlayFolder),
         ("Add to queue (in the list)", AddToQueue),
+        ("Preview (in the list)", Preview),
+        ("Next heading (in the preview)", NextHeading),
+        ("Previous heading (in the preview)", PreviousHeading),
+        ("Next link (in the preview)", NextLink),
+        ("Previous link (in the preview)", PreviousLink),
+        ("Next list (in the preview)", NextList),
+        ("Previous list (in the preview)", PreviousList),
+        ("Line number (in the preview)", LineNumber),
         ("Forward", Forward),
         ("Back", Back),
         ("Next file", NextFile),

@@ -337,7 +337,8 @@ windows on the folder of the file or project in hand, and sends back. It works e
   Date | Size) | Filter… Ctrl+Shift+F | ─ | Show current folder in ▸ (File Explorer
   Ctrl+W | AxClaude | AxGit | AxTerminal) | ─ | Exit Alt+F4. **Item (I):** Open Enter | Open with ▸ (Windows default |
   Choose a program… | ─ | 1. name (path) … or No programs of your own yet | Add a program… | Remove a program ▸) |
-  Open in Axit ▸ (Editor Ctrl+E | ─ | AxClaude | AxDown | AxJSON | AxGit | AxTerminal | AxFile) | ─ | Cut Ctrl+X |
+  Open in Axit ▸ (Editor Ctrl+E | ─ | AxClaude | AxDown | AxJSON | AxGit | AxTerminal | AxFile) | Preview here
+  Ctrl+Shift+P (AF-9.4) | ─ | Cut Ctrl+X |
   Copy Ctrl+C | Paste Ctrl+V | ─ | Rename F2 | Delete Delete | ─ | New folder… Ctrl+Shift+N | New text file
   Ctrl+Shift+T | Move to new folder… | Compress to zip | Extract here | ─ | Select all Ctrl+A | Select none
   Ctrl+Shift+A | ─ | Copy path Ctrl+Shift+C | Show in File Explorer Ctrl+Shift+W | Information Ctrl+I | Properties
@@ -357,7 +358,7 @@ windows on the folder of the file or project in hand, and sends back. It works e
   only; the list leaves them alone), Alt+F4. Window-specific (`AxFileKeys`): Enter, Backspace, Alt+Up, F5, F2, Delete,
   Ctrl+N, Ctrl+O, Ctrl+G, Ctrl+D, Ctrl+W, Ctrl+Shift+W, Ctrl+E, Ctrl+I, Ctrl+Shift+N, Ctrl+Shift+T, Ctrl+Shift+C,
   Ctrl+Shift+F, Escape, Shift+Up, Shift+Down, Shift+Home, Shift+End,
-  Space, Ctrl+A, Ctrl+Shift+A, Ctrl+P, Ctrl+Enter, Ctrl+Shift+Q (AF-9.2), Ctrl+Right, Ctrl+Left, Ctrl+Shift+Right, Ctrl+Shift+Left, Ctrl+T,
+  Space, Ctrl+A, Ctrl+Shift+A, Ctrl+P, Ctrl+Enter, Ctrl+Shift+Q (AF-9.2), Ctrl+Shift+P and, in the preview, Ctrl+H, Ctrl+K, Ctrl+L with Shift and l (AF-9.4), Ctrl+Right, Ctrl+Left, Ctrl+Shift+Right, Ctrl+Shift+Left, Ctrl+T,
   Ctrl+Shift+Period, Ctrl+Shift+Comma, Ctrl+Q, Shift+F10, the Applications key, Alt+Enter, Ctrl+Z (AF-4.14), Ctrl+X, Ctrl+C, Ctrl+V.
   Enter, Backspace, Space, Escape, F2, Delete, Ctrl+X, Ctrl+C, Ctrl+V, Ctrl+A, Ctrl+Shift+A, Ctrl+Enter, Ctrl+Shift+Q, the Shift arrows, Shift+F10 and the
   Applications key act only while the list has the focus (in the pane, Enter, Delete, Escape and Ctrl+I act on its line, AF-9.6; in a notice's field or the rename box they are the field's;
@@ -381,7 +382,7 @@ Favorites" (AF-3.9), "Top" (This PC, AF-3.10), "Ejecting <name>" (AF-3.11), "Add
 <name>", "Pasted n items",
 "Pasting, please wait" (a paste longer than a second), "Added n to the queue", "Queue cleared", "Removed <name>" (a
 queue line), "<name>, n of m" and "<name>, n of m, playing, m:ss of m:ss" (Ctrl+I in the queue), "No sound or video
-files here", "No sound or video files to add" (AF-9.2), "Undone: …", "Not undone: …", "Nothing to undo" (AF-4.14), "Refreshed", "Not found: <path>", "No program opens
+files here", "No sound or video files to add" (AF-9.2), "Not a text file", "Line n of m", "<kind>, …" and "No next <kind>" / "No previous <kind>" (the preview, AF-9.4), "Undone: …", "Not undone: …", "Nothing to undo" (AF-4.14), "Refreshed", "Not found: <path>", "No program opens
 .xyz. Ctrl+E opens it as text", "Failed: <message>", "<name>, <size>, modified <date>" (Ctrl+I), "Not found" (find),
 "Nothing to save here", "Text size n", "Windows text size", "Copied diagnostics", "<name>, <size>, modified <date>, n
 selected" (Ctrl+I with marks); and the guards "No folder" (nothing
@@ -402,7 +403,7 @@ other reasons of `FileOperations.CheckName`. A new selection is NVDA's own readi
 - AF-8.2 The log is `%LOCALAPPDATA%\Axit\logs\axfile.log`: the start, the exit, the errors of the operations and the
   player with Windows' message; no names of files or folders.
 
-### AF-9 The pane (specified 2026-10-21; the queue and the status lines built the same day, the preview to come)
+### AF-9 The pane (specified 2026-10-21, built the same day)
 
 - AF-9.1 **What it is.** A second control under the folder list, holding one thing at a time and named after it:
   the player's queue, the operations' status, or a file's text to read. It appears when it first has something to
@@ -436,21 +437,26 @@ other reasons of `FileOperations.CheckName`. A new selection is NVDA's own readi
   count to give (`SHFileOperationW` is silent) and shows "Copying 3 items" or "Moving 3 items" until it ends; a
   count for it needs the shell's newer file operation interface with its progress sink, a later step. The last
   twenty lines stay; Clear queue clears them too; nothing of this is kept across windows or starts.
-- AF-9.4 **A file to read** (not yet built). **Preview** (Item → Preview, Ctrl+Shift+P on a text file: the types AxDown and AxJSON
+- AF-9.4 **A file to read.** **Preview** (Item → Preview here, Ctrl+Shift+P on a text file: the types AxDown and AxJSON
   open, and any file whose first bytes are text, up to 1 MB) shows the file's text in the pane as a read-only text
   named "<name>, preview", the focus on its first line, and the player's list comes back with the next queue
-  command or Player → Show queue. The text has what every read-only text of the bundle has (AX-7.2): Ctrl+F, F3 and
-  Shift+F3, the page keys, Ctrl+Up and Ctrl+Down by paragraph, `l` for the line number, and for a Markdown file the
-  heading and element keys of AxDown through the bundle's `TextJumps`; Ctrl+A and Ctrl+C copy. Nothing is edited
-  there: Ctrl+E opens the file in its editor as before. A file that is not text, "Not a text file"; one over the
-  limit shows its first 1 MB and says so in its name. The folder list keeps the focus's place, so Escape returns to
-  the entry.
+  command or Player → Show queue (a status line arriving meanwhile leaves the preview in place). The text has what
+  every read-only text of the bundle has (AX-7.2): Ctrl+F, F3 and
+  Shift+F3, the page keys, Ctrl+Up and Ctrl+Down by paragraph, `l` for the line number ("Line 12 of 40"), and for a
+  Markdown file the heading, link and list keys of AxDown (Ctrl+H, Ctrl+K, Ctrl+L, with Shift for the previous one)
+  through the bundle's `TextJumps`; the list item, block quote and table keys are not there, their letters being
+  Information, What is playing and Go to time in this window; Ctrl+A and Ctrl+C copy. Nothing is edited
+  there: Ctrl+E opens the file in its editor as before. A file that is not text ("text": the editors' kinds by
+  extension, an empty file, a UTF-16 mark, or no zero byte and few control characters in the first eight
+  kilobytes; `Preview` in `AxFile.Core`, tested), "Not a text file"; one over the limit shows its first 1 MB and
+  says so in its name (", first megabyte"). The folder list keeps the focus's place, so Escape returns to the
+  entry. The menu item is "Preview here", since every letter of "Preview" is another item's mnemonic in the Item menu.
 - AF-9.5 **Later uses**, noted so that the pane's shape allows them, each a list or a text named after itself: the
   matches of a search through a folder's tree, "Search results, 12", Enter going to the file (a find across folders
   does not exist today); a folder's summary on Ctrl+I over a folder, its counts and size, which take a walk of the
   tree; a `.m3u` or `.pls` file loaded as the queue (§7). None is in the first build.
 - AF-9.6 **Keys new to the table** (AF-6.2): Ctrl+Enter (Play folder), Ctrl+Shift+Q (Add to queue), Ctrl+Shift+P
-  (Preview); Ctrl+Tab, F6 and Tab are the bundle's; in the pane, Enter, Delete, Escape, Ctrl+I and Ctrl+Q act on the
+  (Preview), and in the preview Ctrl+H, Ctrl+K, Ctrl+L with Shift and `l`; Ctrl+Tab, F6 and Tab are the bundle's; in the pane, Enter, Delete, Escape, Ctrl+I and Ctrl+Q act on the
   pane's item, and the list's own keys (AF-3.6) stay native.
 
 ## 5. Architecture
@@ -581,3 +587,6 @@ single-threaded-apartment thread of its own (AX-7.5).
 - 2026-10-21, late: Undo built (AF-4.14): Ctrl+Z and Folder → Undo <operation> over the window's last twenty operations,
   each with its inverse in `AxFile.Core` (tested) and a delete restored through the shell's Restore on the Recycle
   Bin's item (`Shell.Undelete`, checked on this machine); not yet checked with NVDA (test plan 3.14).
+- 2026-10-21, late: the preview built (AF-9.4): Item → Preview here, Ctrl+Shift+P, a read-only text in the pane with
+  the bundle's reading keys and three of AxDown's Markdown jumps; `Preview` in `AxFile.Core`, tested; not yet checked
+  with NVDA (test plan 6.8).
