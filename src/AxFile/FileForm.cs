@@ -93,11 +93,22 @@ public sealed partial class FileForm : AxitForm
 
         // Select (AF-3.7): the marks on the list's entries, which the operations act on; the menu of the whole list
         // rather than of one entry, so it sits beside Item (asked 2026-10-21).
-        var select = new ToolStripMenuItem("&Select");
+        // Selection (AF-3.7, AF-D10, 2026-10-22): the marks from anywhere, then the operations on them alone, which say
+        // "None selected" rather than fall back to the current entry; Item is the entry, Folder the folder.
+        var select = new ToolStripMenuItem("&Selection");
         select.DropDownItems.Add(Item("Select &all", SelectAll, AxFileKeys.SelectAll));
         select.DropDownItems.Add(Item("&Deselect all", SelectNone, AxFileKeys.SelectNone));
-        select.DropDownItems.Add(new ToolStripSeparator());
         select.DropDownItems.Add(Item("Select or deselect this &entry", ToggleSelection, AxFileKeys.Select));
+        select.DropDownItems.Add(Item("Select to &here", SelectToHere, AxFileKeys.SelectTo));
+        select.DropDownItems.Add(new ToolStripSeparator());
+        select.DropDownItems.Add(Item("Cu&t", () => OnMarks(() => CopyOrCut(cut: true)), AxFileKeys.Cut));
+        select.DropDownItems.Add(Item("&Copy", () => OnMarks(() => CopyOrCut(cut: false)), AxFileKeys.Copy));
+        select.DropDownItems.Add(Item("De&lete", () => OnMarks(Delete), AxFileKeys.Delete));
+        select.DropDownItems.Add(new ToolStripSeparator());
+        select.DropDownItems.Add(new ToolStripMenuItem("Mo&ve to new folder...", null, (_, _) => OnMarks(MoveIntoNewFolder)));
+        select.DropDownItems.Add(new ToolStripMenuItem("Compress to &zip", null, (_, _) => OnMarks(Compress)));
+        select.DropDownItems.Add(Item("Add to AxMedia's &queue", () => OnMarks(AddToQueue), AxFileKeys.AddToQueue));
+        select.DropDownItems.Add(Item("Copy &paths", () => OnMarks(CopyPath), AxFileKeys.CopyPath));
 
         // Drives (AF-3.11): the drives to go to, This PC, and the drive's own Eject and Properties; refilled when it
         // opens, since a stick may have come or gone.
@@ -461,6 +472,9 @@ public sealed partial class FileForm : AxitForm
                     return true;
                 case AxFileKeys.SelectNone:
                     SelectNone();
+                    return true;
+                case AxFileKeys.SelectTo:
+                    SelectToHere();
                     return true;
                 case AxFileKeys.SelectDown:
                     ExtendSelection(_list.SelectedIndex + 1);

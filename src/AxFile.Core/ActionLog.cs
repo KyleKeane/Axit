@@ -59,7 +59,7 @@ public sealed class ActionEntry
     public string Folder { get; internal set; }
 
     /// <summary>The entry to select there: what the action made or moved, or marked; null for a delete and while it runs.</summary>
-    public string? Select { get; internal set; }
+    public string? Select { get; set; }
 
     public DateTime Time { get; internal set; }
 

@@ -636,4 +636,4 @@ AF-D4 (the volume) and AF-D6 (the queue fixed at Enter) went to AxMedia with the
 - 2026-10-22, later: Shift+Space (AF-3.7), the Selection menu with the operations on the marks (AF-3.7, AF-6.1,
   AF-D10), the changes of the marks as lines of the Actions list, taken back on their line (AF-9.2, AF-9.3), and the
   list in three sections under header lines, the running operations first (AF-9.2, AF-D11), at the user's ask;
-  specified first, built after.
+  specified first, built the same day. Not yet checked with NVDA (test plan 3.7b, 6.8, 6.9).

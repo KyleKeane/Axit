@@ -73,6 +73,9 @@ public static class AxFileKeys
     /// <summary>In the list: no entry selected.</summary>
     public const Keys SelectNone = Keys.Control | Keys.Shift | Keys.A;
 
+    /// <summary>In the list: every entry from the nearest selected one to the current one selected (AF-3.7), one line in the Actions list.</summary>
+    public const Keys SelectTo = Keys.Shift | Keys.Space;
+
     /// <summary>In the list: the range from where it began to the next entry selected, as File Explorer's Shift+Down (AF-3.7).</summary>
     public const Keys SelectDown = Keys.Shift | Keys.Down;
 
@@ -137,6 +140,7 @@ public static class AxFileKeys
         ("Select or deselect (in the folder list)", Select),
         ("Select all (in the folder list)", SelectAll),
         ("Deselect all (in the folder list)", SelectNone),
+        ("Select to here, from the nearest selected entry (in the folder list)", SelectTo),
         ("Select to the next entry (in the folder list)", SelectDown),
         ("Select to the previous entry (in the folder list)", SelectUp),
         ("Select to the first entry (in the folder list)", SelectToStart),

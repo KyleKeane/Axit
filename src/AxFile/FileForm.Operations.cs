@@ -63,6 +63,13 @@ public sealed partial class FileForm
             return;
         }
 
+        if (entry.Kind == ActionKind.Selection)
+        {
+            // A change of the marks (AF-9.3): put back at once, in the folder shown, no shell and no check.
+            UndoMarks(entry);
+            return;
+        }
+
         if (entry.Operation is not { } operation)
         {
             Announce("Nothing to undo", true);

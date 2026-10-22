@@ -118,6 +118,7 @@ public sealed partial class FileForm
         if (!string.Equals(folder, _folder, StringComparison.OrdinalIgnoreCase))
         {
             _selected.Clear();
+            DropSelectionLines();
             _anchor = null;
             _filter = string.Empty;
         }
@@ -250,6 +251,7 @@ public sealed partial class FileForm
     {
         // A Shift range is indices into the shown entries: a new order or filter, or a read, ends it (AF-3.7).
         _anchor = null;
+        _rangeLine = null;
         // The drives of This PC stay in letter order (AF-3.10).
         _shown = FolderListing.IsThisPC(_folder) ? FolderListing.Filter(_entries, _filter) : FolderListing.Arrange(_entries, _settings.SortBy, _filter);
         FillList(select);
@@ -358,6 +360,58 @@ public sealed partial class FileForm
     private string ItemText(Entry entry) => _selected.Contains(entry.Path) ? entry.Label + ", selected" : entry.Label;
 
     // ---- the selection (AF-3.7): marks on entries, which the operations act on instead of the current entry ----
+    // Every change of the marks is a line of the Actions list's Selection section (AF-9.2), which Ctrl+Z on the line
+    // takes back (AF-9.3); a Shift range is one line, rewritten while the range goes on.
+
+    /// <summary>The line of the Shift range going on, rewritten as it grows or shrinks; null once it has ended.</summary>
+    private ActionEntry? _rangeLine;
+
+    /// <summary>The marks as a list, taken before a change, for the change's line to put back.</summary>
+    private List<string> MarksNow() => [.. _selected];
+
+    /// <summary>A change of the marks as a line of the Actions list, in the folder shown, leading to <paramref name="select"/>.</summary>
+    private ActionEntry MarkLine(string text, string? select, IReadOnlyList<string> before)
+    {
+        var keep = Keep();
+        var entry = _actions.Mark(text, _folder ?? string.Empty, select, before);
+        FillPane(keep);
+        return entry;
+    }
+
+    /// <summary>A Selection menu operation (AF-3.7): on the marked entries alone, "None selected" when there are none, never the current entry.</summary>
+    private void OnMarks(Action operation)
+    {
+        if (SelectedEntries().Count == 0)
+        {
+            Announce("None selected", true);
+            return;
+        }
+
+        operation();
+    }
+
+    /// <summary>Another folder shown: the marks are gone, and their lines with them (AF-9.2).</summary>
+    private void DropSelectionLines()
+    {
+        _rangeLine = null;
+        var keep = Keep();
+        _actions.DropSelection();
+        FillPane(keep);
+    }
+
+    /// <summary>Ctrl+Z on a selection line (AF-9.3): the marks as they were before it, entries gone since skipped; "Undone: 3 selected".</summary>
+    private void UndoMarks(ActionEntry entry)
+    {
+        var present = new HashSet<string>(_entries.Select(item => item.Path), StringComparer.OrdinalIgnoreCase);
+        _selected.Clear();
+        _selected.UnionWith((entry.Before ?? []).Where(present.Contains));
+        _anchor = null;
+        _rangeLine = null;
+        _actions.Undone(entry);
+        FillList(CurrentEntry()?.Name);
+        RefreshPane();
+        Announce(_selected.Count > 0 ? $"Undone: {_selected.Count} selected" : "Undone: none selected", true);
+    }
 
     /// <summary>Space in the list: the entry selected, or deselected again, its item reading ", selected" while it is; "Selected" or "Deselected", with the count when more are.</summary>
     private void ToggleSelection()
@@ -368,6 +422,7 @@ public sealed partial class FileForm
             return;
         }
 
+        var before = MarksNow();
         var on = _selected.Add(entry.Path);
         if (!on)
         {
@@ -375,13 +430,15 @@ public sealed partial class FileForm
         }
 
         _anchor = null;
+        _rangeLine = null;
         _list.Items[_list.SelectedIndex] = ItemText(entry);
-        var count = _selected.Count;
         var word = on ? "Selected" : "Deselected";
+        MarkLine($"{word} {entry.Name}", entry.Name, before);
+        var count = _selected.Count;
         Announce(count > (on ? 1 : 0) ? $"{word}, {count} selected" : word, true);
     }
 
-    /// <summary>Ctrl+A in the list, File operations → Select all: every entry shown, "n selected".</summary>
+    /// <summary>Ctrl+A in the list, Selection → Select all: every entry shown, "n selected".</summary>
     private void SelectAll()
     {
         if (_shown.Count == 0)
@@ -390,34 +447,100 @@ public sealed partial class FileForm
             return;
         }
 
+        var before = MarksNow();
         foreach (var entry in _shown)
         {
             _selected.Add(entry.Path);
         }
 
         _anchor = null;
+        _rangeLine = null;
         FillList(CurrentEntry()?.Name);
+        if (_selected.Count != before.Count)
+        {
+            MarkLine($"Selected all, {ActionLog.Items(_selected.Count)}", CurrentEntry()?.Name, before);
+        }
+
         Announce($"{_selected.Count} selected", true);
     }
 
-    /// <summary>Ctrl+Shift+A in the list, Item → Select none: the marks cleared, "None selected".</summary>
+    /// <summary>Ctrl+Shift+A in the list, Selection → Deselect all: the marks cleared, "None selected".</summary>
     private void SelectNone()
     {
         _anchor = null;
+        _rangeLine = null;
         if (_selected.Count > 0)
         {
+            var before = MarksNow();
             _selected.Clear();
             FillList(CurrentEntry()?.Name);
+            MarkLine($"Deselected all, {ActionLog.Items(before.Count)}", CurrentEntry()?.Name, before);
         }
 
         Announce("None selected", true);
     }
 
     /// <summary>
+    /// Shift+Space in the list (AF-3.7): every entry from the nearest marked entry to the current one marked, the one
+    /// above when both are as near, "Selected, n selected"; with no other entry marked, the current one alone, as Space.
+    /// </summary>
+    private void SelectToHere()
+    {
+        var current = _list.SelectedIndex;
+        if (current < 0 || current >= _shown.Count)
+        {
+            SayNoEntry();
+            return;
+        }
+
+        var nearest = -1;
+        for (var distance = 1; nearest < 0 && (current - distance >= 0 || current + distance < _shown.Count); distance++)
+        {
+            if (current - distance >= 0 && _selected.Contains(_shown[current - distance].Path))
+            {
+                nearest = current - distance;
+            }
+            else if (current + distance < _shown.Count && _selected.Contains(_shown[current + distance].Path))
+            {
+                nearest = current + distance;
+            }
+        }
+
+        if (nearest < 0)
+        {
+            if (!_selected.Contains(_shown[current].Path))
+            {
+                ToggleSelection();
+            }
+            else
+            {
+                Announce($"{_selected.Count} selected", true);
+            }
+
+            return;
+        }
+
+        var before = MarksNow();
+        for (var i = Math.Min(nearest, current); i <= Math.Max(nearest, current); i++)
+        {
+            if (_selected.Add(_shown[i].Path))
+            {
+                _list.Items[i] = ItemText(_shown[i]);
+            }
+        }
+
+        _anchor = null;
+        _rangeLine = null;
+        MarkLine($"Selected {ActionLog.Items(Math.Abs(current - nearest) + 1)}", _shown[current].Name, before);
+        Announce($"Selected, {_selected.Count} selected", true);
+    }
+
+    /// <summary>
     /// Shift with Up, Down, Home or End in the list (AF-3.7): the current entry moves to <paramref name="target"/>
     /// and every entry between where the range began and there is marked, as in File Explorer; a range begins where
     /// the first Shift key finds the current entry and keeps the marks made before it, and moving back shrinks it.
-    /// Each entry passed reads ", selected" on its own; nothing else is said.
+    /// Each entry passed reads ", selected" on its own; nothing else is said. The range is one line of the Actions
+    /// list, "Selected 5 items", rewritten as it goes on.
     /// </summary>
     private void ExtendSelection(int target)
     {
@@ -429,18 +552,20 @@ public sealed partial class FileForm
             return;
         }
 
-        if (_anchor is null || current != _anchorEnd)
+        var begins = _anchor is null || current != _anchorEnd || _rangeLine is null;
+        if (begins)
         {
             _anchor = current;
             _anchorBase = new HashSet<string>(_selected, StringComparer.OrdinalIgnoreCase);
         }
 
+        var anchor = _anchor!.Value;
         target = Math.Clamp(target, 0, _shown.Count - 1);
         _anchorEnd = target;
         var before = new HashSet<string>(_selected, StringComparer.OrdinalIgnoreCase);
         _selected.Clear();
         _selected.UnionWith(_anchorBase);
-        for (var i = Math.Min(_anchor.Value, target); i <= Math.Max(_anchor.Value, target); i++)
+        for (var i = Math.Min(anchor, target); i <= Math.Max(anchor, target); i++)
         {
             _selected.Add(_shown[i].Path);
         }
@@ -455,6 +580,18 @@ public sealed partial class FileForm
         }
 
         _list.SelectedIndex = target;
+        var text = $"Selected {ActionLog.Items(Math.Abs(target - anchor) + 1)}";
+        if (begins || _rangeLine is not { } line)
+        {
+            _rangeLine = MarkLine(text, _shown[target].Name, [.. _anchorBase]);
+        }
+        else
+        {
+            var keep = Keep();
+            _actions.Rewrite(line, text);
+            line.Select = _shown[target].Name;
+            FillPane(keep);
+        }
     }
 
     /// <summary>The selected entries among those shown, in the list's order; none when nothing is selected.</summary>
