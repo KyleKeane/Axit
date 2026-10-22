@@ -101,7 +101,7 @@ $apps = @(
     @{ Name = 'AxJSON'; Verb = 'json'; Description = 'AxJSON, an editor for JSON files'; Icon = (Join-Path $target 'AxJSON.ico'); Opens = 'files'; Types = '.json'; OpenWith = '.json'; TypeName = 'JSON document (AxJSON)' },
     @{ Name = 'AxGit'; Verb = 'git'; Description = 'AxGit, a git manager for one repository'; Icon = (Join-Path $target 'AxGit.ico'); Opens = 'folders' },
     @{ Name = 'AxTerminal'; Verb = 'terminal'; Description = 'AxTerminal, a shell as a transcript'; Icon = (Join-Path $target 'AxTerminal.ico'); Opens = 'folders' },
-    @{ Name = 'AxFile'; Verb = 'file'; Description = 'AxFile, a file manager for one folder, with a player'; Icon = (Join-Path $target 'AxFile.ico'); Opens = 'folders', 'files' },
+    @{ Name = 'AxFile'; Verb = 'file'; Description = 'AxFile, a file manager for one folder'; Icon = (Join-Path $target 'AxFile.ico'); Opens = 'folders', 'files' },
     @{ Name = 'AxMedia'; Verb = 'media'; Description = 'AxMedia, a player for sound and video files'; Icon = (Join-Path $target 'AxMedia.ico'); Opens = 'files'; Types = $mediaTypes; OpenWith = $mediaTypes; TypeName = 'Media file (AxMedia)' },
     @{ Name = 'AxPreview'; Verb = 'preview'; Description = 'AxPreview, a read-only viewer for text files'; Icon = (Join-Path $target 'AxPreview.ico'); Opens = 'files'; OpenWith = '.txt', '.md', '.markdown', '.log', '.json'; TypeName = 'Text file (AxPreview)' }
 )

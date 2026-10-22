@@ -28,26 +28,6 @@ public sealed class UndoTests : IDisposable
     private string In(string name) => Path.Combine(_folder, name);
 
     [Fact]
-    public void The_history_keeps_the_last_twenty_and_names_the_menu_item()
-    {
-        var history = new OperationHistory();
-        Assert.Equal("Un&do", history.MenuText);
-        Assert.Null(history.Pop());
-        for (var i = 0; i < 25; i++)
-        {
-            history.Push(new Operation(OperationKind.NewFile, [], [In($"{i}.txt")]));
-        }
-
-        history.Push(new Operation(OperationKind.Rename, [In("a")], [In("b")]));
-        Assert.Equal(OperationHistory.Limit, history.Count);
-        Assert.Equal("Un&do rename", history.MenuText);
-        Assert.Equal(OperationKind.Rename, history.Pop()!.Kind);
-        Assert.Equal("Un&do new text file", history.MenuText);
-        history.Clear();
-        Assert.Equal(0, history.Count);
-    }
-
-    [Fact]
     public void An_operation_knows_its_folder_its_entry_and_its_texts()
     {
         var rename = new Operation(OperationKind.Rename, [In("notes.md")], [In("todo.md")]);

@@ -13,9 +13,6 @@ public sealed class FileSettingsTests
         Assert.Empty(settings.RecentFolders);
         Assert.False(settings.ShowHidden);
         Assert.False(settings.ShowDotFiles);
-        Assert.True(settings.SayEachFile);
-        Assert.Equal(1, settings.Speed);
-        Assert.Equal(15, settings.SeekSeconds);
         Assert.Equal(SortBy.Name, settings.SortBy);
         Assert.Empty(settings.Favorites);
         Assert.True(settings.CheckForUpdates);
@@ -55,10 +52,9 @@ public sealed class FileSettingsTests
         File.WriteAllText(path, """{ "speed": 9, "seekSeconds": 0, "lastFolder": " ", "recentFolders": ["", "C:\\x"], "favorites": ["C:\\f", " ", "c:\\F"], "fontSize": 500, "programs": [{ "name": "", "path": "C:\\a.exe" }, { "name": "b", "path": "C:\\b.exe" }] }""");
         try
         {
+            // An older file's player keys (speed, seekSeconds) are AxMedia's now and are ignored.
             var settings = FileSettings.Load(path, out var error);
             Assert.Null(error);
-            Assert.Equal(3, settings.Speed);
-            Assert.Equal(15, settings.SeekSeconds);
             Assert.Null(settings.LastFolder);
             Assert.Equal(["C:\\x"], settings.RecentFolders);
             Assert.Equal(0, settings.FontSize);
@@ -77,16 +73,14 @@ public sealed class FileSettingsTests
         var path = Path.Combine(Path.GetTempPath(), "axfile-settings-" + Guid.NewGuid().ToString("N") + ".json");
         try
         {
-            var settings = new FileSettings { Speed = 1.5, ShowHidden = true, SayEachFile = false, SortBy = SortBy.Date };
+            var settings = new FileSettings { ShowHidden = true, SortBy = SortBy.Date };
             settings.RememberFolder("C:\\a");
             settings.Programs.Add(new UserProgram("tidy", "C:\\tools\\tidy.ps1"));
             settings.Save(path);
             Assert.Contains("\"sortBy\": \"date\"", File.ReadAllText(path));
             var loaded = FileSettings.Load(path, out _);
             Assert.Equal(SortBy.Date, loaded.SortBy);
-            Assert.Equal(1.5, loaded.Speed);
             Assert.True(loaded.ShowHidden);
-            Assert.False(loaded.SayEachFile);
             Assert.Equal("C:\\a", loaded.LastFolder);
             Assert.Equal([new UserProgram("tidy", "C:\\tools\\tidy.ps1")], loaded.Programs);
         }

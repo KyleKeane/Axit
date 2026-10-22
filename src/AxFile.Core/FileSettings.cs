@@ -5,8 +5,9 @@ namespace AxFile.Core;
 /// <summary>
 /// Everything AxFile remembers between runs (SPEC.md AF-8.1), in <c>%APPDATA%\Axit\axfile.json</c> through the bundle's
 /// <see cref="SettingsFile"/>: the font, the update check and the window's place from <see cref="WindowSettings"/>,
-/// plus the last folder, the recent folders, whether hidden entries show, the player's speed and seek step, whether
-/// each file is said as it starts, and the user's own programs. A missing or unreadable file falls back to the defaults.
+/// plus the last folder, the recent folders, the favorites, whether hidden entries show, the sort order and the user's
+/// own programs. A missing or unreadable file falls back to the defaults; the player's keys of an older file (speed,
+/// seekSeconds, sayEachFile) are AxMedia's now and are ignored here.
 /// </summary>
 public sealed class FileSettings : WindowSettings
 {
@@ -29,15 +30,6 @@ public sealed class FileSettings : WindowSettings
 
     /// <summary>The folders the user pinned with Ctrl+D (AF-3.9), in the order added, for Folder → Favorites.</summary>
     public List<string> Favorites { get; set; } = [];
-
-    /// <summary>The one unprompted announcement: the name of the next file when the player moves on (AF-5.4, G5).</summary>
-    public bool SayEachFile { get; set; } = true;
-
-    /// <summary>The playback speed, kept for the next file and the next window (AF-5.4).</summary>
-    public double Speed { get; set; } = 1;
-
-    /// <summary>What Ctrl+Left and Ctrl+Right move by.</summary>
-    public int SeekSeconds { get; set; } = 15;
 
     /// <summary>The user's own programs and scripts of Open with a custom program ▸ (AF-4.11), in the order added.</summary>
     public List<UserProgram> Programs { get; set; } = [];
@@ -79,12 +71,6 @@ public sealed class FileSettings : WindowSettings
         if (string.IsNullOrWhiteSpace(LastFolder))
         {
             LastFolder = null;
-        }
-
-        Speed = MediaFiles.SanitizeSpeed(Speed);
-        if (SeekSeconds is < 1 or > 600)
-        {
-            SeekSeconds = 15;
         }
 
         Programs ??= [];

@@ -536,7 +536,7 @@ public sealed partial class FileForm
 
     // ---- browsing (AF-3.1) ----
 
-    /// <summary>Enter in the list (G2): a folder opens here, a file in its app, a media file in the player, the rest in the program Windows has for it (AF-3.2).</summary>
+    /// <summary>Enter in the list (G2): a folder opens here, a file in the program the user has made its default in Windows, as in File Explorer (AF-3.2, AF-D2).</summary>
     private void OpenSelected()
     {
         if (CurrentEntry() is not { } entry)
@@ -545,24 +545,26 @@ public sealed partial class FileForm
             return;
         }
 
-        switch (FolderListing.WayOf(entry))
+        if (FolderListing.WayOf(entry) == OpenWay.Folder)
         {
-            case OpenWay.Folder:
-                Do(() => ShowFolderAsync(entry.Path, null, remember: false));
-                break;
-            case OpenWay.AxDown:
-                AxitMenu.Start(Dispatch.AxDown, entry.Path);
-                break;
-            case OpenWay.AxJSON:
-                AxitMenu.Start(Dispatch.AxJSON, entry.Path);
-                break;
-            case OpenWay.Play:
-                PlayFromList(entry);
-                break;
-            default:
-                OpenWithWindows(entry);
-                break;
+            Do(() => ShowFolderAsync(entry.Path, null, remember: false));
         }
+        else
+        {
+            OpenWithWindows(entry);
+        }
+    }
+
+    /// <summary>Shift+Enter in the list, Item → Preview (AF-3.2): a file read in AxPreview, which hands it to its open window itself; a folder in a new AxFile window, File Explorer's Shift+Enter.</summary>
+    private void OpenInPreview()
+    {
+        if (CurrentEntry() is not { } entry)
+        {
+            SayNoEntry();
+            return;
+        }
+
+        AxitMenu.Start(entry.IsFolder ? Dispatch.AxFile : Dispatch.AxPreview, entry.Path);
     }
 
     /// <summary>Backspace, Alt+Up, Folder → Up one level: the parent with the folder just left selected; This PC with the drive selected from a drive's root (AF-3.10); "Top" at This PC.</summary>

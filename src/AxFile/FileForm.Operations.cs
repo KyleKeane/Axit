@@ -26,20 +26,29 @@ public sealed partial class FileForm
     /// <summary>The entry being renamed in place (AF-4.2) while the box over it shows; null otherwise.</summary>
     private Entry? _renaming;
 
-    /// <summary>The operations of this window that can be taken back (AF-4.14), newest last; each operation pushes itself when it has succeeded.</summary>
-    private readonly OperationHistory _history = new();
-
     /// <summary>Whether an undo is on its way: a second Ctrl+Z says so rather than racing it.</summary>
     private bool _undoing;
 
-    /// <summary>
-    /// Folder → Undo <operation> (Ctrl+Z, AF-4.14): the last operation of this window taken back, one per press, and
-    /// the entry it touched selected in its folder: "Undone: …"; "Not undone: <name> has changed" when something
-    /// else moved the entry since, "Nothing to undo" at the end. A delete comes back through the shell's own
-    /// Restore on the Recycle Bin's item; the other kinds are the file operations' inverses. An undo that fails
-    /// (a zip open elsewhere) leaves the operation in the history to try again.
-    /// </summary>
+    /// <summary>Folder → Undo <operation> (Ctrl+Z, AF-4.14): the newest line of the Actions list that can be taken back; "Nothing to undo" when none can.</summary>
     private void Undo()
+    {
+        if (_actions.Newest() is not { } entry)
+        {
+            Announce(_undoing ? "Undo is still running" : "Nothing to undo", true);
+            return;
+        }
+
+        UndoAction(entry);
+    }
+
+    /// <summary>
+    /// One line of the Actions list taken back (AF-4.14, AF-9.3) and the entry it touched selected in its folder:
+    /// "Undone: …", the line reading ", undone" afterwards; "Not undone: <name> has changed" when something else moved
+    /// the entry since, the line saying so and its operation dropped. A delete comes back through the shell's own
+    /// Restore on the Recycle Bin's item; the other kinds are the file operations' inverses. An undo that fails (a zip
+    /// open elsewhere) leaves the line as it was, to try again.
+    /// </summary>
+    private void UndoAction(ActionEntry entry)
     {
         if (_undoing)
         {
@@ -47,7 +56,7 @@ public sealed partial class FileForm
             return;
         }
 
-        if (_history.Pop() is not { } operation)
+        if (entry.Operation is not { } operation)
         {
             Announce("Nothing to undo", true);
             return;
@@ -60,6 +69,9 @@ public sealed partial class FileForm
             {
                 if (await Task.Run(() => FileOperations.CheckUndo(operation)) is { } problem)
                 {
+                    // "Not undone: …": the line keeps the reason without the prefix.
+                    _actions.NotUndone(entry, problem.StartsWith("Not undone: ", StringComparison.Ordinal) ? problem["Not undone: ".Length..] : problem);
+                    FillPane();
                     Announce(problem, true);
                     return;
                 }
@@ -71,11 +83,12 @@ public sealed partial class FileForm
                     : await FileOperations.UndoAsync(operation);
                 if (reason is not null)
                 {
-                    _history.Push(operation);
                     Failed("Undo failed", reason);
                     return;
                 }
 
+                _actions.Undone(entry);
+                FillPane();
                 if (await ShowFolderAsync(operation.Folder, operation.Select ?? CurrentEntry()?.Name, remember: false))
                 {
                     Announce(operation.DoneText, true);
@@ -118,7 +131,7 @@ public sealed partial class FileForm
                     try
                     {
                         var made = await Task.Run(() => FileOperations.CreateFolder(folder, name));
-                        _history.Push(new Operation(OperationKind.NewFolder, [], [made]));
+                        Record($"Created {name}", new Operation(OperationKind.NewFolder, [], [made]));
                     }
                     catch (Exception ex) when (ex is IOException or UnauthorizedAccessException)
                     {
@@ -166,8 +179,8 @@ public sealed partial class FileForm
                 return;
             }
 
-            _history.Push(new Operation(OperationKind.NewFile, [], [path]));
             var name = Path.GetFileName(path);
+            Record($"Created {name}", new Operation(OperationKind.NewFile, [], [path]));
             if (!await ShowFolderAsync(folder, name, remember: false))
             {
                 return;
@@ -235,17 +248,15 @@ public sealed partial class FileForm
 
                     var sources = targets.Select(target => target.Path).ToList();
                     var destinations = await Task.Run(() => FileOperations.Destinations(sources, made));
-                    // AF-9.3: the operation's line in the pane, replaced when it ends.
-                    var token = Report(-1, $"Moving {what} into {name}");
+                    // AF-9.2: the operation's line in the Actions list, replaced when it ends.
+                    var action = Begin($"Moving {what} into {name}");
                     if (await FileOperations.CopyOrMoveAsync(sources, destinations, move: true) is { } reason)
                     {
-                        Report(token, "Failed: " + reason);
-                        Failed("Move failed", reason);
+                        Fail(action, "Move failed", reason);
                         return;
                     }
 
-                    Report(token, $"Moved {what} into {name}");
-                    _history.Push(new Operation(OperationKind.Move, sources, destinations, made));
+                    End(action, $"Moved {what} into {name}", new Operation(OperationKind.Move, sources, destinations, made));
                     if (await ShowFolderAsync(folder, name, remember: false))
                     {
                         Announce($"Moved {what} into {name}", true);
@@ -331,7 +342,7 @@ public sealed partial class FileForm
             try
             {
                 var renamed = await Task.Run(() => FileOperations.Rename(entry.Path, name));
-                _history.Push(new Operation(OperationKind.Rename, [entry.Path], [renamed]));
+                Record($"Renamed {entry.Name} to {name}", new Operation(OperationKind.Rename, [entry.Path], [renamed]));
             }
             catch (Exception ex) when (ex is IOException or UnauthorizedAccessException)
             {
@@ -405,25 +416,15 @@ public sealed partial class FileForm
         [
             new OverlayChoice("&Delete", () => Do(async () =>
             {
-                // AF-9.3: a delete of several has a line in the pane; one entry goes too fast to watch.
-                var token = one is null ? Report(-1, $"Deleting {targets.Count} items") : -1;
+                // AF-9.2: the operation's line in the Actions list, replaced when it ends.
+                var action = Begin(one is null ? $"Deleting {targets.Count} items" : $"Deleting {one.Name}");
                 if (await FileOperations.DeleteToRecycleBinAsync(targets.Select(target => target.Path).ToList()) is { } reason)
                 {
-                    if (token >= 0)
-                    {
-                        Report(token, "Failed: " + reason);
-                    }
-
-                    Failed("Delete failed", reason);
+                    Fail(action, "Delete failed", reason);
                     return;
                 }
 
-                if (token >= 0)
-                {
-                    Report(token, done);
-                }
-
-                _history.Push(new Operation(OperationKind.Delete, targets.Select(target => target.Path).ToList(), []));
+                End(action, done, new Operation(OperationKind.Delete, targets.Select(target => target.Path).ToList(), []));
                 if (await ShowFolderAsync(folder, next, remember: false))
                 {
                     Announce(done, true);
@@ -558,8 +559,8 @@ public sealed partial class FileForm
             // The names are chosen first: a name already in the folder becomes "name - 2" (AF-4.8).
             var destinations = await Task.Run(() => FileOperations.Destinations(paths, folder));
             var what = paths.Count == 1 ? Path.GetFileName(destinations[0]) : $"{paths.Count} items";
-            // AF-9.3: the operation's line in the pane; the shell gives no count, so the line waits until it ends.
-            var token = Report(-1, (move ? "Moving " : "Copying ") + what);
+            // AF-9.2: the operation's line in the Actions list; the shell gives no count, so the line waits until it ends.
+            var action = Begin((move ? "Moving " : "Copying ") + what);
             var operation = FileOperations.CopyOrMoveAsync(paths, destinations, move);
             if (await Task.WhenAny(operation, Task.Delay(1000)) != operation)
             {
@@ -568,13 +569,11 @@ public sealed partial class FileForm
 
             if (await operation is { } reason)
             {
-                Report(token, "Failed: " + reason);
-                Failed("Paste failed", reason);
+                Fail(action, "Paste failed", reason);
                 return;
             }
 
-            Report(token, "Pasted " + what);
-            _history.Push(new Operation(move ? OperationKind.Move : OperationKind.Copy, paths, destinations));
+            End(action, (move ? "Moved " : "Copied ") + what, new Operation(move ? OperationKind.Move : OperationKind.Copy, paths, destinations));
 
             if (move)
             {
@@ -706,8 +705,7 @@ public sealed partial class FileForm
             return;
         }
 
-        var verb = FolderListing.WayOf(entry) == OpenWay.AxJSON ? Dispatch.AxJSON : Dispatch.AxDown;
-        AxitMenu.Start(verb, entry.Path);
+        AxitMenu.Start(FolderListing.EditorOf(entry.Path), entry.Path);
     }
 
     /// <summary>Item → Open with Windows (AF-4.7): the program Windows has for the entry, a folder in File Explorer, or the dialog that picks one.</summary>
@@ -786,13 +784,13 @@ public sealed partial class FileForm
     }
 
     /// <summary>
-    /// Runs a zip operation on a task with its count in the pane's line, "Compressing, 40 of 120 files" (AF-9.3,
-    /// at most a few times a second), says "<doing>, please wait" when it passes a second, then shows the folder
-    /// with the result selected and says "<done> <name>", the line saying the same.
+    /// Runs a zip operation on a task with its count in the Actions list's line, "Compressing, 40 of 120 files"
+    /// (AF-9.2, at most a few times a second), says "<doing>, please wait" when it passes a second, then shows the
+    /// folder with the result selected and says "<done> <name>", the line saying the same.
     /// </summary>
     private void RunArchiveWork(string folder, string doing, string failTitle, Func<Action<int, int>, string> work, string done, OperationKind kind) => Do(async () =>
     {
-        var token = Report(-1, doing);
+        var action = Begin(doing);
         var reported = Environment.TickCount64;
         var task = Task.Run(() => work((count, total) =>
         {
@@ -802,7 +800,7 @@ public sealed partial class FileForm
                 reported = now;
                 if (!IsDisposed)
                 {
-                    BeginInvoke(() => Report(token, $"{doing}, {count} of {total} files"));
+                    BeginInvoke(() => Progress(action, $"{doing}, {count} of {total} files"));
                 }
             }
         }));
@@ -818,14 +816,12 @@ public sealed partial class FileForm
         }
         catch (Exception ex) when (ex is IOException or UnauthorizedAccessException or InvalidDataException or NotSupportedException)
         {
-            Report(token, "Failed: " + FileOperations.Message(ex));
-            Failed(failTitle, FileOperations.Message(ex));
+            Fail(action, failTitle, FileOperations.Message(ex));
             return;
         }
 
         var name = Path.GetFileName(result);
-        Report(token, $"{done} {name}");
-        _history.Push(new Operation(kind, [], [result]));
+        End(action, $"{done} {name}", new Operation(kind, [], [result]));
         if (await ShowFolderAsync(folder, name, remember: false))
         {
             Announce($"{done} {name}", true);

@@ -17,7 +17,8 @@ public enum OperationKind
 /// One operation the window made, with what its undo needs (SPEC.md AF-4.14): the paths before it and after it. A
 /// rename has the old path and the new; a new folder, a new file, a compress and an extract only what they made; a
 /// move and a copy the sources and where each landed (a move into a new folder names it, to remove when it is empty
-/// again); a delete the paths that went to the Recycle Bin.
+/// again); a delete the paths that went to the Recycle Bin. The Actions list (<see cref="ActionLog"/>) holds the
+/// operations the window can still take back.
 /// </summary>
 public sealed record Operation(OperationKind Kind, IReadOnlyList<string> Before, IReadOnlyList<string> After, string? MadeFolder = null)
 {
@@ -68,42 +69,3 @@ public sealed record Operation(OperationKind Kind, IReadOnlyList<string> Before,
     };
 }
 
-/// <summary>The window's own history of operations (SPEC.md AF-4.14): the last twenty, newest last, gone with the window; no redo.</summary>
-public sealed class OperationHistory
-{
-    public const int Limit = 20;
-
-    private readonly List<Operation> _operations = [];
-
-    public int Count => _operations.Count;
-
-    public void Push(Operation operation)
-    {
-        _operations.Add(operation);
-        while (_operations.Count > Limit)
-        {
-            _operations.RemoveAt(0);
-        }
-    }
-
-    /// <summary>The operation Undo would take back; null with none.</summary>
-    public Operation? Peek() => _operations.Count > 0 ? _operations[^1] : null;
-
-    /// <summary>The last operation, taken off the history for the window to undo; null with none.</summary>
-    public Operation? Pop()
-    {
-        if (_operations.Count == 0)
-        {
-            return null;
-        }
-
-        var last = _operations[^1];
-        _operations.RemoveAt(_operations.Count - 1);
-        return last;
-    }
-
-    public void Clear() => _operations.Clear();
-
-    /// <summary>The Folder menu's item, named after what it would undo: "Un&amp;do rename", or "Un&amp;do" with nothing to undo.</summary>
-    public string MenuText => Peek() is { } last ? $"Un&do {last.Label}" : "Un&do";
-}

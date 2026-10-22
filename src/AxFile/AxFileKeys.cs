@@ -1,19 +1,20 @@
-using Axit.Core;
-using Axit.Forms;
-
 namespace AxFile;
 
 /// <summary>
 /// AxFile's window-specific keys (SPEC.md AF-6.2; bundle AX-8). A key is changed here and nowhere else: the menu
 /// items, the key switch in <c>FileForm.ProcessWindowKey</c> and the F1 text read this table. The bundle-wide keys
 /// (F1, the control keys, find, Ctrl+S, text size) are <c>Axit.Forms.BundleKeys</c>. Enter, Backspace, Space, F2,
-/// Delete, Ctrl+X, Ctrl+C, Ctrl+V, Ctrl+A, Ctrl+Shift+A, Shift+F10 and the Applications key act in the list only; in
-/// a notice's field or the rename box they are the field's own.
+/// Delete, Ctrl+X, Ctrl+C, Ctrl+V, Ctrl+A, Ctrl+Shift+A, Shift+F10 and the Applications key act in the folder list
+/// only; in the Actions list Enter, Ctrl+Z, Ctrl+I and Escape act on its line; in a notice's field or the rename box
+/// they are the field's own.
 /// </summary>
 public static class AxFileKeys
 {
-    /// <summary>In the list: Enter opens the entry (a folder in the list, a file in its app, a media file in the player).</summary>
+    /// <summary>In the folder list: Enter opens the entry (a folder in the list, a file in the program Windows has for it); in the Actions list: where the action left things.</summary>
     public const Keys Open = Keys.Return;
+
+    /// <summary>In the folder list: the file read in AxPreview (AF-3.2); a folder in a new AxFile window, File Explorer's Shift+Enter.</summary>
+    public const Keys Preview = Keys.Shift | Keys.Return;
 
     /// <summary>In the list: the parent folder, the folder just left selected; Alt+Up the same from anywhere in the window.</summary>
     public const Keys Up = Keys.Back;
@@ -31,13 +32,15 @@ public static class AxFileKeys
     /// <summary>The Filter notice: the list narrowed to the names that contain a text (AF-3.8).</summary>
     public const Keys Filter = Keys.Control | Keys.Shift | Keys.F;
 
-    /// <summary>In the list: the filter cleared; nothing while there is none.</summary>
+    /// <summary>In the folder list: the filter cleared; nothing while there is none. In the Actions list: back to the folder list.</summary>
     public const Keys ClearFilter = Keys.Escape;
     public const Keys OpenFolder = Keys.Control | Keys.O;
     public const Keys GoToFolder = Keys.Control | Keys.G;
     public const Keys ShowInExplorer = Keys.Control | Keys.W;
     public const Keys ShowItemInExplorer = Keys.Control | Keys.Shift | Keys.W;
     public const Keys OpenInEditor = Keys.Control | Keys.E;
+
+    /// <summary>The entry's size and date; in the Actions list, the line's number and time.</summary>
     public const Keys Information = Keys.Control | Keys.I;
     public const Keys NewFolder = Keys.Control | Keys.Shift | Keys.N;
 
@@ -86,102 +89,53 @@ public static class AxFileKeys
     /// <summary>The Windows Properties sheet of the entry, File Explorer's key for it (AF-4.7).</summary>
     public const Keys Properties = Keys.Alt | Keys.Return;
 
-    /// <summary>The last operation of this window taken back (AF-4.14).</summary>
+    /// <summary>The newest operation of this window taken back (AF-4.14); in the Actions list, the line under the selection (AF-9.3).</summary>
     public const Keys Undo = Keys.Control | Keys.Z;
 
-    /// <summary>The player pauses or resumes, from anywhere in the window (AF-5.4); Space is the selection's since 2026-10-21.</summary>
-    public const Keys PauseResume = Keys.Control | Keys.P;
-
-    /// <summary>In the list: the folder's media files replace the queue and play from the first (AF-9.2).</summary>
+    /// <summary>In the folder list: AxMedia on the folder, its media files from the first (AF-5).</summary>
     public const Keys PlayFolder = Keys.Control | Keys.Return;
 
-    /// <summary>In the list: the entry, or the marked entries, appended to the queue (AF-9.2).</summary>
+    /// <summary>In the folder list: the entry, or the marked entries, to the end of AxMedia's queue (AF-5).</summary>
     public const Keys AddToQueue = Keys.Control | Keys.Shift | Keys.Q;
-
-    /// <summary>In the list: the file's text in the pane (AF-9.4).</summary>
-    public const Keys Preview = Keys.Control | Keys.Shift | Keys.P;
-
-    // In the preview (AF-9.4): the Markdown jumps the window's letters allow (AxDown's list item, block quote and
-    // table keys are Information, What is playing and Go to time here), and l for the line.
-    public const Keys NextHeading = Keys.Control | Keys.H;
-    public const Keys PreviousHeading = Keys.Control | Keys.Shift | Keys.H;
-    public const Keys NextLink = Keys.Control | Keys.K;
-    public const Keys PreviousLink = Keys.Control | Keys.Shift | Keys.K;
-    public const Keys NextList = Keys.Control | Keys.L;
-    public const Keys PreviousList = Keys.Control | Keys.Shift | Keys.L;
-    public const Keys LineNumber = Keys.L;
-
-    /// <summary>The preview's key pairs for the shared jumps (<c>Axit.Forms.TextJumps</c>), from the keys above.</summary>
-    public static readonly IReadOnlyList<TextJump> PreviewJumps =
-    [
-        TextJump.Markdown(NextHeading, PreviousHeading, ElementKind.Heading),
-        TextJump.Markdown(NextLink, PreviousLink, ElementKind.Link),
-        TextJump.Markdown(NextList, PreviousList, ElementKind.List),
-    ];
-
-    public const Keys Forward = Keys.Control | Keys.Right;
-    public const Keys Back = Keys.Control | Keys.Left;
-    public const Keys NextFile = Keys.Control | Keys.Shift | Keys.Right;
-    public const Keys PreviousFile = Keys.Control | Keys.Shift | Keys.Left;
-    public const Keys GoToTime = Keys.Control | Keys.T;
-    public const Keys Faster = Keys.Control | Keys.Shift | Keys.OemPeriod;
-    public const Keys Slower = Keys.Control | Keys.Shift | Keys.Oemcomma;
-    public const Keys WhatIsPlaying = Keys.Control | Keys.Q;
 
     /// <summary>Every key of the window with its name, for the collision test and the F1 text.</summary>
     public static readonly IReadOnlyList<(string Name, Keys Key)> All =
     [
-        ("Open (in the list); play the file (in the queue)", Open),
-        ("Up one level (in the list)", Up),
+        ("Open (in the folder list); go to the action's place (in the Actions list)", Open),
+        ("Preview in AxPreview, or a folder in a new window (in the folder list)", Preview),
+        ("Up one level (in the folder list)", Up),
         ("Up one level", UpAlso),
         ("New window", NewWindow),
         ("Refresh", Refresh),
         ("Add to or remove from Favorites", Favorite),
         ("Filter", Filter),
-        ("Clear the filter (in the list); back to the list (in the queue)", ClearFilter),
+        ("Clear the filter (in the folder list); back to the folder list (in the Actions list)", ClearFilter),
         ("Open folder", OpenFolder),
         ("Go to folder", GoToFolder),
         ("Show the folder in File Explorer", ShowInExplorer),
         ("Show the entry in File Explorer", ShowItemInExplorer),
         ("Open the file in its editor", OpenInEditor),
-        ("Information about the entry", Information),
+        ("Information about the entry, or the action's number and time", Information),
         ("New folder", NewFolder),
         ("New text file", NewFile),
-        ("Rename (in the list)", Rename),
-        ("Delete (in the list); take the line out (in the queue)", Delete),
+        ("Rename (in the folder list)", Rename),
+        ("Delete (in the folder list)", Delete),
         ("Copy path", CopyPath),
-        ("Cut (in the list)", Cut),
-        ("Copy (in the list)", Copy),
-        ("Paste (in the list)", Paste),
-        ("Select or deselect (in the list)", Select),
-        ("Select all (in the list)", SelectAll),
-        ("Deselect all (in the list)", SelectNone),
-        ("Select to the next entry (in the list)", SelectDown),
-        ("Select to the previous entry (in the list)", SelectUp),
-        ("Select to the first entry (in the list)", SelectToStart),
-        ("Select to the last entry (in the list)", SelectToEnd),
-        ("Item menu (in the list)", ContextMenu),
-        ("Item menu (in the list)", ContextMenuAlso),
+        ("Cut (in the folder list)", Cut),
+        ("Copy (in the folder list)", Copy),
+        ("Paste (in the folder list)", Paste),
+        ("Select or deselect (in the folder list)", Select),
+        ("Select all (in the folder list)", SelectAll),
+        ("Deselect all (in the folder list)", SelectNone),
+        ("Select to the next entry (in the folder list)", SelectDown),
+        ("Select to the previous entry (in the folder list)", SelectUp),
+        ("Select to the first entry (in the folder list)", SelectToStart),
+        ("Select to the last entry (in the folder list)", SelectToEnd),
+        ("Item menu (in the folder list)", ContextMenu),
+        ("Item menu (in the folder list)", ContextMenuAlso),
         ("Properties", Properties),
-        ("Undo the last operation", Undo),
-        ("Pause or resume", PauseResume),
-        ("Play folder (in the list)", PlayFolder),
-        ("Add to queue (in the list)", AddToQueue),
-        ("Preview (in the list)", Preview),
-        ("Next heading (in the preview)", NextHeading),
-        ("Previous heading (in the preview)", PreviousHeading),
-        ("Next link (in the preview)", NextLink),
-        ("Previous link (in the preview)", PreviousLink),
-        ("Next list (in the preview)", NextList),
-        ("Previous list (in the preview)", PreviousList),
-        ("Line number (in the preview)", LineNumber),
-        ("Forward", Forward),
-        ("Back", Back),
-        ("Next file", NextFile),
-        ("Previous file", PreviousFile),
-        ("Go to time", GoToTime),
-        ("Faster", Faster),
-        ("Slower", Slower),
-        ("What is playing", WhatIsPlaying),
+        ("Undo the newest operation, or the action under the selection (in the Actions list)", Undo),
+        ("Play the folder in AxMedia (in the folder list)", PlayFolder),
+        ("Add to AxMedia's queue (in the folder list)", AddToQueue),
     ];
 }

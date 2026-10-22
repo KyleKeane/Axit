@@ -182,11 +182,4 @@ public sealed class FileOperationsTests : IDisposable
         Assert.Equal("a b", FileOperations.Message(new IOException("a\r\nb")));
     }
 
-    [Fact]
-    public void Media_player_reasons_name_the_known_codes()
-    {
-        Assert.Equal("this kind of file is not supported", MediaPlayer.Reason(unchecked((int)0xC00D36C4)));
-        Assert.Equal("error 0xC00D0000", MediaPlayer.Reason(unchecked((int)0xC00D0000)));
-        Assert.Contains("cannot find the file", MediaPlayer.Reason(unchecked((int)0x80070002)));
-    }
 }

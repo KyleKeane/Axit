@@ -87,24 +87,21 @@ public sealed class FolderListingTests : IDisposable
     }
 
     [Theory]
-    [InlineData("notes.md", OpenWay.AxDown)]
-    [InlineData("README.MARKDOWN", OpenWay.AxDown)]
-    [InlineData("todo.txt", OpenWay.AxDown)]
-    [InlineData("settings.JSON", OpenWay.AxJSON)]
-    [InlineData("01 Chapter 1.mp3", OpenWay.Play)]
-    [InlineData("clip.mkv", OpenWay.Play)]
-    [InlineData("report.pdf", OpenWay.Windows)]
-    [InlineData("program", OpenWay.Windows)]
-    public void Enter_does_what_the_extension_says(string name, OpenWay expected)
+    [InlineData("notes.md", "down")]
+    [InlineData("README.MARKDOWN", "down")]
+    [InlineData("report.pdf", "down")]
+    [InlineData("settings.JSON", "json")]
+    public void The_editor_is_AxJSON_for_json_and_AxDown_for_the_rest(string name, string expected)
     {
-        Assert.Equal(expected, FolderListing.WayOf(Path.Combine("C:\\x", name)));
-        Assert.Equal(expected, FolderListing.WayOf(new Entry(name, Path.Combine("C:\\x", name), false, 0, DateTime.Now)));
+        Assert.Equal(expected, FolderListing.EditorOf(Path.Combine("C:\\x", name)));
     }
 
     [Fact]
-    public void A_folder_entry_opens_as_a_folder()
+    public void Enter_opens_a_folder_here_and_a_file_in_the_program_Windows_has()
     {
         Assert.Equal(OpenWay.Folder, FolderListing.WayOf(new Entry("notes.md", "C:\\x\\notes.md", true, 0, DateTime.Now)));
+        Assert.Equal(OpenWay.Windows, FolderListing.WayOf(new Entry("notes.md", "C:\\x\\notes.md", false, 0, DateTime.Now)));
+        Assert.Equal(OpenWay.Windows, FolderListing.WayOf(new Entry("01 Chapter 1.mp3", "C:\\x\\01 Chapter 1.mp3", false, 0, DateTime.Now)));
     }
 
     [Fact]

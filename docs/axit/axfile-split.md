@@ -129,6 +129,15 @@ Shift+Enter in AxFile as its own key (`docs/axpreview/SPEC.md` AP-D2, `docs/axfi
 Each commit builds and passes every test; the apps keep working between commits. The build goes to a scratch folder
 while Axit runs (root `CLAUDE.md`). Branch `split`, merged when the NVDA plans have passed.
 
+Built 2026-10-22 in this order, with these departures: the find in a list moved to the window base before AxMedia
+(its second use); AxPreview was built before the hand-over of AxFile's player (steps 7 before 6), so that AxFile could
+hand over to both apps in one step; `ActionLog` came before that step (step 9 first), and the two hand-overs and the
+Actions list were one commit of AxFile; `AppMessage.Send` grants the window the right to come to the front
+(`AllowSetForegroundWindow`) and the window activates itself once the paths are applied; AxPreview is the editor
+shell's read-only mode (AP-D4) and uses `EditorSettings`, so there is no `PreviewSettings`; Enter on a line of the
+Actions list goes where the action left things (the user's ask of 2026-10-22), Ctrl+I reads the number and time.
+Step 10's NVDA passes are the user's.
+
 1. The documents: the two specs, this inventory, `docs/axfile/SPEC.md` section 9 and its status line,
    `docs/axit/plan.md`'s note. (Done 2026-10-22.)
 2. `MediaFiles` to `Axit.Core` without `Queue(entries)` (AxFile's callers take `IsMedia` over the entries instead),

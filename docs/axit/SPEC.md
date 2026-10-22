@@ -55,9 +55,11 @@ allow it, see B-9).
   transcript with exchange blocks, the shell's integration marks for Done and Failed. Specification
   `docs/axterminal/SPEC.md`, guide `docs/axterminal/user-guide.md`, test plan `docs/axterminal/nvda-test-plan.md`.
 - **AxFile** (first draft, 2026-10-19): `Axit.exe file [<folder or file>]`, Start entry `Axit AxFile`, Open with Axit
-  on folders and on files, command `axfile`. A file manager for one folder as one list, Enter the verb, the four
-  operations, and a player for the folder's sound and video files through Windows' own decoders. Specification
-  `docs/axfile/SPEC.md`, guide `docs/axfile/user-guide.md`, test plan `docs/axfile/nvda-test-plan.md`.
+  on folders and on files, command `axfile`. A file manager for one folder as one list, Enter the verb (a folder
+  here, a file in the user's default program, as in File Explorer), the file operations with Undo and an Actions
+  list of every operation; its player and preview became AxMedia and AxPreview on 2026-10-22
+  (`docs/axit/axfile-split.md`). Specification `docs/axfile/SPEC.md`, guide `docs/axfile/user-guide.md`, test plan
+  `docs/axfile/nvda-test-plan.md`.
 - **AxMedia** (2026-10-22): `Axit.exe media [<file or folder>...] [--add] [--new]`, Start entry `Axit AxMedia`, Open
   with Axit on sound and video files and Open with for their kinds, command `axmedia`. A player with one queue, the
   player AxFile carried until the split (`docs/axit/axfile-split.md`); a start with paths hands them to the open
@@ -345,7 +347,7 @@ These are the rules of `docs/axclaude/SPEC.md` that are not about Claude; app sp
   (`OverlayPanel`), never a `Form` or a `MessageBox` once a window exists. A notice's button may open the next notice
   (the update's progress, an error, AxDown's changed-on-disk question after Save), which then stays in view. The
   Windows folder, file and font pickers, and the shell's own dialogs and menu an app hands an entry to (AxFile's Open
-  with, Properties and More from Windows, docs/axfile/SPEC.md AF-4.7), are the only separate windows.
+  with, Properties and Windows menu, docs/axfile/SPEC.md AF-4.7), are the only separate windows.
   A notice's text takes the window's own keys for moving by Markdown structure, one `TextJump` pair per kind from the
   window's key table handed to `OverlayPanel.Jumps` and acted on by `TextJumps`, the code AxDown's editor uses for the same
   keys: AxClaude's heading letters (h, Shift+H, 1 to 6), AxDown's

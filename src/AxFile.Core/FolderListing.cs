@@ -12,22 +12,13 @@ public sealed record Entry(string Name, string Path, bool IsFolder, long Size, D
 /// <summary>A folder as read (AF-2.2): the entries shown, and how many hidden ones and how many starting with a period were left out.</summary>
 public sealed record Listing(IReadOnlyList<Entry> Entries, int Hidden, int Dot);
 
-/// <summary>What Enter does with an entry (AF-3.1, AF-3.2), decided by its kind and its extension.</summary>
+/// <summary>What Enter does with an entry (AF-3.1, AF-3.2): a folder opens in the list, any file in the program the user has made its default in Windows, as in File Explorer.</summary>
 public enum OpenWay
 {
     /// <summary>A folder: the list shows it.</summary>
     Folder,
 
-    /// <summary>.md, .markdown, .txt: a new AxDown window.</summary>
-    AxDown,
-
-    /// <summary>.json: a new AxJSON window.</summary>
-    AxJSON,
-
-    /// <summary>A sound or video file (<see cref="Axit.Core.MediaFiles"/>): the player.</summary>
-    Play,
-
-    /// <summary>Anything else: the program Windows has for it.</summary>
+    /// <summary>A file: the program Windows has for it (the Axit apps among the choices once installed, AF-D2).</summary>
     Windows,
 }
 
@@ -165,20 +156,11 @@ public static class FolderListing
     /// <summary>"name", "date", "size": the order's word for the announcement and the menu.</summary>
     public static string SortName(SortBy by) => by.ToString().ToLowerInvariant();
 
-    public static OpenWay WayOf(Entry entry) => entry.IsFolder ? OpenWay.Folder : WayOf(entry.Path);
+    public static OpenWay WayOf(Entry entry) => entry.IsFolder ? OpenWay.Folder : OpenWay.Windows;
 
-    /// <summary>What Enter does with a file, by its extension (AF-3.2).</summary>
-    public static OpenWay WayOf(string path)
-    {
-        var extension = System.IO.Path.GetExtension(path).ToLowerInvariant();
-        return extension switch
-        {
-            ".md" or ".markdown" or ".txt" => OpenWay.AxDown,
-            ".json" => OpenWay.AxJSON,
-            _ when MediaFiles.IsMedia(path) => OpenWay.Play,
-            _ => OpenWay.Windows,
-        };
-    }
+    /// <summary>The editor Ctrl+E opens a file in (AF-1.3): AxJSON's verb for .json, AxDown's for anything else.</summary>
+    public static string EditorOf(string path) =>
+        System.IO.Path.GetExtension(path).Equals(".json", StringComparison.OrdinalIgnoreCase) ? Dispatch.AxJSON : Dispatch.AxDown;
 
     /// <summary>"24 items", "1 item", "Empty": the list's accessible name (AF-2.1), the folder's name being the window's; with a filter on, "3 of 24 items, filter chap" (AF-3.8).</summary>
     public static string ListName(int count, int total = -1, string filter = "")
