@@ -70,7 +70,7 @@ allow it, see B-9).
   one text file: the text editor shell in its read-only mode, with AxDown's navigation keys; a start with a file
   hands it to the open AxPreview window. Specification `docs/axpreview/SPEC.md`, guide `docs/axpreview/user-guide.md`,
   test plan `docs/axpreview/nvda-test-plan.md`.
-- **AxStart** (2026-10-22, branch `axstart`): `Axit.exe start [--hidden]`, Start entry `Axit AxStart`, command
+- **AxStart** (2026-10-22, 3.4.0): `Axit.exe start [--hidden]`, Start entry `Axit AxStart`, command
   `axstart`, no File Explorer entry. A program launcher: a background process from sign-in (the Run key) with a
   global hotkey, Ctrl+Shift+Space unless the user chose another, that shows one search field over the Start menu's
   programs, Down and Up through the matches with the caret kept in the field. Specification `docs/axstart/SPEC.md`,

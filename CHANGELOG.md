@@ -1,13 +1,13 @@
 # Changelog
 
-## Unreleased
+## 3.4.0
 
 - AxClaude: the conversation no longer flickers while Claude runs a command. Claude Code's timer under a running command, "(4s · timeout 3m)", on a row of its own, was taken for conversation and rewritten every second, which moved the caret and made NVDA redraw its highlight once a second. It is interface now, like the spinner.
 - AxStart: a new app of the bundle, a program launcher (`docs/axstart/SPEC.md`). It runs in the background from sign-in, and its hotkey, Ctrl+Shift+Space unless changed in Options, Hotkey, brings up one search field from any program. Typing narrows the Start menu's programs, desktop programs and Store apps alike, to the names holding every typed word; after a short pause the first match is said, "Calculator, 1 of 2". Down and Up, Page Down and Page Up, Ctrl+Home and Ctrl+End move through the matches while the caret stays in the field. Enter starts the match, Ctrl+Shift+Enter as administrator, Ctrl+I says where its program is, Ctrl+O shows it in AxFile, Escape hides AxStart at once. The programs started most often come first. `Axit.exe start`, `axstart`, Start menu entry "Axit AxStart"; the installer stops it before an install and starts it again after.
 - AxFile: Right and Left on the menu bar move between the menus again; with a folder selected in the list, Right opened that folder instead. The fix is in the window base, so no window's own keys act while its menu bar has the keyboard.
 - Axit: a development build started from the repository no longer offers the latest release when it starts; Check for updates in the Axit menu still asks.
 - Axit: `test.ps1` runs every test project in Release, as GitHub Actions does; `release.ps1` and `run.ps1 -Test` use it, so that a test that only fails in Release stops the release here rather than in the workflow, as it did 3.3.0.
-- Axit: the Build workflow tests every branch, not only `main`. The repository has a new README naming all eight apps, CONTRIBUTING and SECURITY pages, issue forms that ask for the app, the versions and the test plan step, a pull request checklist, and Dependabot for the workflow actions and the test packages.
+- Axit: the Build workflow tests every branch, not only `main`. The repository has a new README naming all the apps, CONTRIBUTING and SECURITY pages, issue forms that ask for the app, the versions and the test plan step, a pull request checklist, and Dependabot for the workflow actions and the test packages.
 
 ## 3.3.1
 

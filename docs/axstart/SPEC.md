@@ -234,3 +234,5 @@ AxStart before it changes anything, starts it hidden afterwards, and its removal
   its tests, the window, the Applications folder read (99 programs on the development machine, desktop programs,
   Store apps and the shell's own ids, through an off-screen probe without a window), the wiring, the installer and
   the documents. Not yet checked with NVDA.
+- 2026-10-22: merged into `main` and released in 3.4.0 at the user's word, before its NVDA pass; the default hotkey moved to
+  Ctrl+Shift+Space (AS-D4), Escape hides at once (AS-3.4), and the hidden window never keeps the keyboard (AS-3.4).
