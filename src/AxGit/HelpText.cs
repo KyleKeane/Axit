@@ -29,7 +29,7 @@ public static class HelpText
           Ctrl+E: open the file in AxDown, or AxJSON for a .json file
           Ctrl+Enter: commit what is staged; a notice asks for the message
           Ctrl+N: a new branch, after its name; AxGit switches to it
-          Ctrl+Shift+F, Ctrl+Shift+L, Ctrl+Shift+P: fetch, pull, push
+          Ctrl+Shift+F, Ctrl+Shift+L, Ctrl+Shift+H: fetch, pull, push
           Ctrl+S: nothing to save here; AxGit says so
 
         The details

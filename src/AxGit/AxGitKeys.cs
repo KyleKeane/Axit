@@ -31,7 +31,7 @@ public static class AxGitKeys
     public const Keys NewBranch = Keys.Control | Keys.N;
     public const Keys Fetch = Keys.Control | Keys.Shift | Keys.F;
     public const Keys Pull = Keys.Control | Keys.Shift | Keys.L;
-    public const Keys Push = Keys.Control | Keys.Shift | Keys.P;
+    public const Keys Push = Keys.Control | Keys.Shift | Keys.H;
 
     /// <summary>Every key of the window with its name, for the collision test and the F1 text.</summary>
     public static readonly IReadOnlyList<(string Name, Keys Key)> All =

@@ -36,7 +36,7 @@ Run with NVDA before a release, on a repository with a remote (the Axit reposito
 1. Ctrl+2, Enter on the first commit: "Commit <hash>, N lines", the focus in the details on "commit <full hash>"; Down Arrow reads the author, the date, the message and the files. Ctrl+Tab: the list.
 2. Ctrl+3: the branches; the current one reads "…, current". Enter on it: "Already on <name>". Enter on another: "Switched to <name>"; NVDA+End: the status bar names it; Ctrl+1: the Changes of that branch. Switch back.
 3. Ctrl+N: the notice "New branch" with the field "Name"; type "scratch-test", Enter: "Switched to scratch-test"; Ctrl+3 lists it as current. Switch back to the branch you had (Enter on it) and delete the test branch in a terminal (`git branch -d scratch-test`).
-4. Ctrl+Shift+F: the status bar says "Working: fetch…" (NVDA+End), then "Fetched". Ctrl+Shift+L: "Pulled" or "Already up to date". Ctrl+Shift+P on a branch with nothing to push: "Pushed" or git's "Everything up-to-date" read as "Pushed". With the network off, Ctrl+Shift+F: the notice "Fetch failed" with git's message.
+4. Ctrl+Shift+F: the status bar says "Working: fetch…" (NVDA+End), then "Fetched". Ctrl+Shift+L: "Pulled" or "Already up to date". Ctrl+Shift+H on a branch with nothing to push: "Pushed" or git's "Everything up-to-date" read as "Pushed". With the network off, Ctrl+Shift+F: the notice "Fetch failed" with git's message.
 5. Press Ctrl+Shift+F and at once Ctrl+Shift+L: "Working…" for the second; the first finishes on its own.
 
 ## 5. Text, notices, the Axit menu (AG-2.4, AG-6)

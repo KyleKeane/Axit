@@ -47,7 +47,7 @@ opens in the editor for its type (AG-1.4, AG-D1).
    line; Ctrl+Tab back to the list.
 3. Ctrl+2: "Log, 200 commits. 3a1f2c0 2026-10-18 Kyle: Release 2.11.0, 1 of 200". Enter: the commit's files and
    message in the details.
-4. Ctrl+3: "Branches, 2. main, current, origin/main, 1 ahead". Down, Enter on `axit`: "Switched to axit". Ctrl+Shift+P:
+4. Ctrl+3: "Branches, 2. main, current, origin/main, 1 ahead". Down, Enter on `axit`: "Switched to axit". Ctrl+Shift+H:
    "Pushed".
 5. In AxDown on `docs/plan.md`, Alt+F, I, G: AxGit on the repository that holds the file. Ctrl+1 shows it among the
    changes if it changed.
@@ -136,7 +136,7 @@ opens in the editor for its type (AG-1.4, AG-D1).
 - AG-5.3 Branches → New branch… (Ctrl+N): the notice "New branch" with a field "Name" (required) and the buttons Create
   and Cancel; Create runs `git switch -c <name>` and says "Switched to <name>".
 - AG-5.4 Branches → Fetch (Ctrl+Shift+F, `git fetch --prune`), Pull (Ctrl+Shift+L, `git pull --ff-only`) and Push
-  (Ctrl+Shift+P, `git push`; with no upstream `git push --set-upstream origin <branch>`). Each says "Fetched",
+  (Ctrl+Shift+H, Ctrl+Shift+P until the command palette took it, bundle AX-10.6; `git push`; with no upstream `git push --set-upstream origin <branch>`). Each says "Fetched",
   "Pulled" ("Already up to date" when git says so) or "Pushed" and refreshes the status bar; a failure is the notice
   **Fetch failed** (and so on) with git's output, so that a password prompt that git could not show, a diverged
   branch or a rejected push is read in full. While one runs the status bar says "Working: <verb>…" and the menu
@@ -149,7 +149,7 @@ opens in the editor for its type (AG-1.4, AG-D1).
   Show current repository in ▸ (File Explorer Ctrl+W | AxClaude | AxTerminal | AxFile) | ─ | Exit Alt+F4. **Changes (C):** Stage or unstage
   Space | Stage all Ctrl+Shift+A | Unstage all Ctrl+Shift+U | ─ | Show diff Enter | Open file in editor Ctrl+E |
   Discard changes… Delete | ─ | Commit… Ctrl+Enter. **Branches (B):** Switch to branch Enter | New branch… Ctrl+N |
-  ─ | Fetch Ctrl+Shift+F | Pull Ctrl+Shift+L | Push Ctrl+Shift+P. **View (V):** Changes Ctrl+1 | Log Ctrl+2 |
+  ─ | Fetch Ctrl+Shift+F | Pull Ctrl+Shift+L | Push Ctrl+Shift+H. **View (V):** Changes Ctrl+1 | Log Ctrl+2 |
   Branches Ctrl+3. **Options (O):** Text ▸ (Font… | Larger text Ctrl+Plus | Smaller text Ctrl+Minus | Windows text
   size) | General ▸ (Check for updates at start ✓) | Developer ▸ (Open settings file | Copy diagnostics). **Axit (A)**
   (AX-9). **Help (H):** Keyboard shortcuts F1 | User guide | ─ | Git resources ▸ (git-scm.com | Pro Git book).
@@ -157,7 +157,7 @@ opens in the editor for its type (AG-1.4, AG-D1).
 - AG-6.2 Keys (AX-8). Bundle-wide: F1, the control keys, Ctrl+F, F3, Shift+F3, Ctrl+S (AxGit holds nothing to save:
   "Nothing to save here. Space stages, Ctrl+Enter commits"), Ctrl+Plus, Ctrl+Minus, the edit keys of the details,
   Alt+F4. Window-specific (`AxGitKeys`): Ctrl+O, F5, Ctrl+W, Ctrl+1, Ctrl+2, Ctrl+3, Space and Enter and Delete in the
-  list, Ctrl+Shift+A, Ctrl+Shift+U, Ctrl+E, Ctrl+Enter, Ctrl+N, Ctrl+Shift+F, Ctrl+Shift+L, Ctrl+Shift+P. Space,
+  list, Ctrl+Shift+A, Ctrl+Shift+U, Ctrl+E, Ctrl+Enter, Ctrl+N, Ctrl+Shift+F, Ctrl+Shift+L, Ctrl+Shift+H. Space,
   Enter and Delete act only while the list has the focus; in the details they are the control's own. The collision
   test covers the table.
 - AG-6.3 The F1 text (`HelpText.Shortcuts`) names them all; `docs/axgit/user-guide.md` is embedded (Help → User guide);

@@ -41,7 +41,7 @@ Enter on a commit shows its message and the list of files it changed, in the det
 
 ## Branches
 
-Enter on a branch switches to it. Branches, New branch (Ctrl+N) asks for a name and switches to the new branch. Fetch (Ctrl+Shift+F), Pull (Ctrl+Shift+L) and Push (Ctrl+Shift+P) talk to the remote; AxGit says "Fetched", "Pulled" or "Pushed", and when git refuses, its whole answer comes as a notice you can read. The status bar says "Working" while one of them runs; the window stays usable.
+Enter on a branch switches to it. Branches, New branch (Ctrl+N) asks for a name and switches to the new branch. Fetch (Ctrl+Shift+F), Pull (Ctrl+Shift+L) and Push (Ctrl+Shift+H) talk to the remote; AxGit says "Fetched", "Pulled" or "Pushed", and when git refuses, its whole answer comes as a notice you can read. The status bar says "Working" while one of them runs; the window stays usable.
 
 AxGit does not merge, rebase or resolve conflicts. For those, use the terminal or ask Claude in AxClaude; AxGit shows you the result.
 
