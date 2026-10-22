@@ -455,6 +455,48 @@ public abstract class AxitForm : Form
         return true;
     }
 
+    // ---- find in a list (AxFile AF-3.6, AxMedia AM-3.1; shared on the second use, 2026-10-22) ----
+
+    /// <summary>Ctrl+F on a list: the Find notice with the field "Name contains"; Find next closes it and selects the next item of <paramref name="list"/> whose name (from <paramref name="names"/>, one per item) contains the text, wrapping once.</summary>
+    protected void ShowFindInList(ListBox list, Func<IReadOnlyList<string>> names) =>
+        ShowNotice(new Notice("Find", string.Empty,
+        [
+            new OverlayChoice("&Find next", () =>
+            {
+                _findText = Overlay.InputText;
+                FindInList(list, names, 1);
+            }, IsDefault: true),
+            new OverlayChoice("&Cancel", IsCancel: true),
+        ])
+        {
+            Input = new OverlayInput("Name contains:", "Name contains", _findText, "Type the text to find"),
+        });
+
+    /// <summary>F3 and Shift+F3 on a list: the next (or previous) item whose name contains the text, wrapping once, selected; "Not found" otherwise; the Find notice when nothing was searched for yet. The selection is NVDA's own reading.</summary>
+    protected void FindInList(ListBox list, Func<IReadOnlyList<string>> names, int direction)
+    {
+        if (_findText.Length == 0)
+        {
+            ShowFindInList(list, names);
+            return;
+        }
+
+        var items = names();
+        var count = Math.Min(items.Count, list.Items.Count);
+        var from = Math.Max(0, list.SelectedIndex);
+        for (var step = 1; step <= count; step++)
+        {
+            var i = ((from + direction * step) % count + count) % count;
+            if (items[i].Contains(_findText, StringComparison.OrdinalIgnoreCase))
+            {
+                list.SelectedIndex = i;
+                return;
+            }
+        }
+
+        Announce("Not found", true);
+    }
+
     // ---- fonts and the window's place (AX-7.6) ----
 
     private static Font SystemTextFont() => SystemFonts.MessageBoxFont ?? DefaultFont;

@@ -36,8 +36,6 @@ public sealed partial class FileForm
     /// <summary>The number of the latest read: a slow read of a folder left behind is dropped when it arrives.</summary>
     private int _reads;
 
-    private string _findText = string.Empty;
-
     /// <summary>The start (AF-1.1): the path given, or the last folder, or the user's profile folder; a file selects itself in its folder.</summary>
     private async Task StartAsync(string? path)
     {
@@ -661,43 +659,13 @@ public sealed partial class FileForm
 
     // ---- find (AF-3.6) and information (AF-2.4) ----
 
-    private void ShowFindNotice() =>
-        ShowNotice(new Notice("Find", string.Empty,
-        [
-            new OverlayChoice("&Find next", () =>
-            {
-                _findText = Overlay.InputText;
-                FindInList(1);
-            }, IsDefault: true),
-            new OverlayChoice("&Cancel", IsCancel: true),
-        ])
-        {
-            Input = new OverlayInput("Name contains:", "Name contains", _findText, "Type the text to find"),
-        });
+    /// <summary>Ctrl+F: the bundle's find in a list over the shown entries' names (AF-3.6); the lines after the entries are not searched.</summary>
+    private void ShowFindNotice() => ShowFindInList(_list, EntryNames);
 
-    /// <summary>The next (or previous) entry whose name contains the text, wrapping once; "Not found" otherwise; the Find notice when nothing was searched for yet.</summary>
-    private void FindInList(int direction)
-    {
-        if (_findText.Length == 0)
-        {
-            ShowFindNotice();
-            return;
-        }
+    /// <summary>F3 and Shift+F3: the next (or previous) entry whose name contains the text, wrapping once; "Not found" otherwise.</summary>
+    private void FindInList(int direction) => FindInList(_list, EntryNames, direction);
 
-        var count = _shown.Count;
-        var from = Math.Max(0, _list.SelectedIndex);
-        for (var step = 1; step <= count; step++)
-        {
-            var i = ((from + direction * step) % count + count) % count;
-            if (_shown[i].Name.Contains(_findText, StringComparison.OrdinalIgnoreCase))
-            {
-                _list.SelectedIndex = i;
-                return;
-            }
-        }
-
-        Announce("Not found", true);
-    }
+    private IReadOnlyList<string> EntryNames() => _shown.Select(entry => entry.Name).ToList();
 
     /// <summary>Item → Information (Ctrl+I): the entry's size, or that it is a folder, and its date, on demand (AF-D7); and how many entries are selected, when any are (AF-3.7).</summary>
     private void SayInformation()
