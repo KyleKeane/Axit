@@ -1,5 +1,3 @@
-using System.Globalization;
-using System.Text;
 using Axit.Core;
 
 namespace AxStart.Core;
@@ -14,16 +12,14 @@ public static class ProgramMatch
 {
     public static IReadOnlyList<ProgramEntry> Find(IReadOnlyList<ProgramEntry> programs, string text, IReadOnlyDictionary<string, int> starts)
     {
-        var query = Fold(text.Trim());
-        var words = query.Split(' ', StringSplitOptions.RemoveEmptyEntries);
+        var words = TextMatch.Words(text);
         var matches = new List<(ProgramEntry Entry, int Rank)>();
         foreach (var entry in programs)
         {
-            var name = Fold(entry.Name);
-            if (words.All(word => name.Contains(word, StringComparison.Ordinal)))
+            // The first word places it: "win power" puts "Windows PowerShell" with the names starting with "win".
+            if (TextMatch.Rank(TextMatch.Fold(entry.Name), words) is { } rank)
             {
-                // The first word places it: "win power" puts "Windows PowerShell" with the names starting with "win".
-                matches.Add((entry, Rank(name, words.Length > 0 ? words[0] : string.Empty)));
+                matches.Add((entry, rank));
             }
         }
 
@@ -44,38 +40,4 @@ public static class ProgramMatch
 
     /// <summary>What a text no program matches says: "No programs match xyz".</summary>
     public static string NoMatch(string text) => $"No programs match {text.Trim()}";
-
-    /// <summary>0 when the name starts with the text, 1 when one of its words does, 2 otherwise.</summary>
-    private static int Rank(string name, string query)
-    {
-        if (query.Length == 0 || name.StartsWith(query, StringComparison.Ordinal))
-        {
-            return 0;
-        }
-
-        for (var i = name.IndexOf(query, StringComparison.Ordinal); i > 0; i = name.IndexOf(query, i + 1, StringComparison.Ordinal))
-        {
-            if (!char.IsLetterOrDigit(name[i - 1]))
-            {
-                return 1;
-            }
-        }
-
-        return 2;
-    }
-
-    /// <summary>Lower case without accents, so that "cafe" finds "Café" and "Cafe" finds "café".</summary>
-    private static string Fold(string text)
-    {
-        var builder = new StringBuilder(text.Length);
-        foreach (var c in text.Normalize(NormalizationForm.FormD))
-        {
-            if (CharUnicodeInfo.GetUnicodeCategory(c) != UnicodeCategory.NonSpacingMark)
-            {
-                builder.Append(char.ToLowerInvariant(c));
-            }
-        }
-
-        return builder.ToString();
-    }
 }
