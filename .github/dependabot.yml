@@ -1,0 +1,18 @@
+# Keeps what the build uses current (docs/axit/SPEC.md AX-4.5): the workflow actions and the test projects' packages.
+# The apps themselves have no packages. Each update arrives as a pull request, which the Build workflow tests.
+version: 2
+updates:
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: monthly
+    groups:
+      actions:
+        patterns: ["*"]
+  - package-ecosystem: nuget
+    directory: /
+    schedule:
+      interval: monthly
+    groups:
+      test-packages:
+        patterns: ["*"]

@@ -1,0 +1,32 @@
+name: Idea
+description: A feature, a key, or a change to how an app reads.
+labels: [idea]
+body:
+  - type: dropdown
+    id: app
+    attributes:
+      label: App
+      options:
+        - AxClaude
+        - AxDown
+        - AxJSON
+        - AxGit
+        - AxTerminal
+        - AxFile
+        - AxMedia
+        - AxPreview
+        - The bundle, or a new app
+    validations:
+      required: true
+  - type: textarea
+    id: idea
+    attributes:
+      label: What you would like
+      description: What you would press and what you would hear.
+    validations:
+      required: true
+  - type: textarea
+    id: why
+    attributes:
+      label: Why
+      description: What it would let you do that is slow or impossible now.

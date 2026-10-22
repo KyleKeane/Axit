@@ -4,10 +4,10 @@
   publishes the zip and creates the GitHub release that installed copies update themselves from.
 
 .DESCRIPTION
-  Before running it, add a "## <version> - <date>" section to CHANGELOG.md: its text becomes the release notes and
+  Before running it, add a "## <version>" section to CHANGELOG.md: its text becomes the release notes and
   is what the update notice in the app shows. Everything else must be committed. The script then
     1. fetches origin and stops if origin/main has commits that main here does not (skipped with -NoPush),
-    2. runs the unit tests,
+    2. runs every test project in Release, as the workflows do (test.ps1),
     3. sets <Version> in src/Axit/Axit.csproj,
     4. commits CHANGELOG.md and the project file as "Release <version>",
     5. tags v<version> and pushes main and the tag.
@@ -76,15 +76,12 @@ if (-not (Select-String -Path $changelog -Pattern ('^## ' + [regex]::Escape($Ver
     exit 1
 }
 
-# The test projects one by one, never the solution: the solution would build src\Axit into the bin\Debug the app may be
-# running from. GitHub Actions builds and tests the whole solution before it publishes.
+# The tests as GitHub Actions runs them: every test project, in Release (test.ps1).
 Write-Host "Running the tests..."
-foreach ($tests in 'tests\Axit.Tests\Axit.Tests.csproj', 'tests\AxClaude.Tests\AxClaude.Tests.csproj', 'tests\AxJSON.Tests\AxJSON.Tests.csproj', 'tests\AxGit.Tests\AxGit.Tests.csproj', 'tests\AxTerminal.Tests\AxTerminal.Tests.csproj', 'tests\AxFile.Tests\AxFile.Tests.csproj', 'tests\AxMedia.Tests\AxMedia.Tests.csproj', 'tests\AxPreview.Tests\AxPreview.Tests.csproj') {
-    dotnet test (Join-Path $root $tests) --nologo -v q
-    if ($LASTEXITCODE -ne 0) {
-        Write-Host "The tests failed. Nothing was changed."
-        exit $LASTEXITCODE
-    }
+& (Join-Path $root 'test.ps1')
+if ($LASTEXITCODE -ne 0) {
+    Write-Host "The tests failed. Nothing was changed."
+    exit $LASTEXITCODE
 }
 
 $xml = Get-Content $project -Raw

@@ -1,5 +1,10 @@
 # Changelog
 
+## Unreleased
+
+- Axit: `test.ps1` runs every test project in Release, as GitHub Actions does; `release.ps1` and `run.ps1 -Test` use it, so that a test that only fails in Release stops the release here rather than in the workflow, as it did 3.3.0.
+- Axit: the Build workflow tests every branch, not only `main`. The repository has a new README naming all eight apps, CONTRIBUTING and SECURITY pages, issue forms that ask for the app, the versions and the test plan step, a pull request checklist, and Dependabot for the workflow actions and the test packages.
+
 ## 3.3.1
 
 - Axit: 3.3.0 was tagged but never published: its build stopped on a test that the Release build's analyser refused. 3.3.1 is that release with the test fixed, and these are its changes.

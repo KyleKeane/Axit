@@ -1,53 +1,78 @@
 # Axit
 
-One Windows program, several accessible apps for screen reader users, built for NVDA. **AxClaude** runs Claude Code in screen reader mode inside a hidden console and shows the conversation as plain text that NVDA reads line by line, with single-key navigation and a message field at the bottom; you are still talking to the real Claude Code. **AxDown** is a barebones editor for Markdown and text files that writes a file back exactly as it found it. Both share one installation, one updater and one release; adding an app follows `docs/axit/adding-an-app.md`.
+[![Build](https://github.com/KyleKeane/Axit/actions/workflows/build.yml/badge.svg)](https://github.com/KyleKeane/Axit/actions/workflows/build.yml)
+[![Latest release](https://img.shields.io/github/v/release/KyleKeane/Axit?label=release)](https://github.com/KyleKeane/Axit/releases/latest)
+[![Licence: MIT](https://img.shields.io/badge/licence-MIT-blue)](LICENSE)
 
-**Download:** `install.cmd` or the zip on the [latest release](https://github.com/KyleKeane/Axit/releases/latest); `docs/axit/README.md` (the README inside the zip) explains the rest. Installed copies offer newer releases themselves under Help.
+Accessible Windows apps for screen reader users, built for and tested with NVDA, in one program with one installer and one updater. Every app is made of native Windows controls that NVDA reads reliably, works without a mouse, says the result of each command once, and keeps its questions and errors inside its own window.
 
-Where things are:
+## The apps
 
-- `docs/axit/`: the bundle. `SPEC.md` (launch, install, update, release, shared pieces, the accessibility and modularity rules), `README.md` (shipped in the zip), `plan.md` (the steps from AxClaude to the bundle).
-- `docs/axclaude/`: AxClaude. `SPEC.md`, `user-guide.md` (Help, User guide inside the app), `claude-screens.md`, `nvda-test-plan.md`.
-- `CLAUDE.md`: the map and the rules for developing with Claude Code in this repository; each project under `src/` has its own `CLAUDE.md` with its notes.
-- `src/Axit`: the executable. `src/Axit.Core`: shared pure code. `src/AxClaude`, `src/AxClaude.Core`: AxClaude's window and pure code. `tests/`: xunit tests and the recorded fixtures. `tools/PtyCapture`: records raw console output; the recordings are the parser's test fixtures.
+- **AxClaude**: Claude Code in screen reader mode, shown as a plain-text conversation that NVDA reads line by line, with single-key navigation, a message field, and Claude's questions as lists. You are still talking to the real Claude Code.
+- **AxDown**: a barebones editor for Markdown and text files that writes a file back exactly as it found it, with keys for headings, links, lists, quotes and tables.
+- **AxJSON**: the same editor for JSON, with keys for keys, objects, arrays, items and errors, and a Format command that repairs what it can.
+- **AxGit**: a git manager for one repository: changes, the log and the branches as lists, staging, committing, fetch, pull and push. A first draft.
+- **AxTerminal**: PowerShell, Command Prompt or Git Bash as a transcript in AxClaude's kind of window. A first draft.
+- **AxFile**: a file manager for one folder, with an Actions list of every operation that Ctrl+Z can take back, selection, zip files, favourites and the drives.
+- **AxMedia**: a player for sound and video files with one queue, speed with the pitch kept, and seeking by key.
+- **AxPreview**: a read-only viewer for one text file, with the editors' navigation keys.
+
+The apps reach each other: AxFile hands a file to AxMedia or AxPreview, every window can show its folder in the others, and the Axit menu in every window lists the open windows and starts any app.
+
+## Install
+
+Download `install.cmd`, or the zip, from the [latest release](https://github.com/KyleKeane/Axit/releases/latest) and run it; no administrator rights are needed. It adds Start menu entries ("Axit AxClaude" and the others), commands such as `axfile` and `axdown`, and an "Open with Axit" submenu in File Explorer. Installed copies offer each new release themselves: Axit menu, Check for updates. `docs/axit/README.md` is the README inside the zip, with the rest.
+
+Needs Windows 10 1809 or later. AxClaude also needs [Claude Code](https://code.claude.com/docs/en/setup); every other app works offline.
 
 ## Build and run
 
-```
-.\run-axclaude.ps1                         # build, then start AxClaude on the current folder
-.\run-axclaude.ps1 C:\path\to\project      # start on that folder
-.\run-axclaude.ps1 C:\path\to\project -- --resume   # arguments after -- go to claude (default: --continue)
-.\run-axclaude.ps1 C:\path\to\project -New # a new conversation (PowerShell swallows a bare --)
-.\run-axdown.ps1 C:\notes\todo.md          # build, then start AxDown on that file (no file: docs\axdown\tutorial.md, the guided tour)
-.\run.ps1 [-App claude|down] [<path>]      # what both scripts call; AxClaude is the default
-.\run.ps1 -NoBuild                         # start without building
-.\run.ps1 -Test                            # run the unit tests
-```
-
-If PowerShell refuses to run the script: `powershell -ExecutionPolicy Bypass -File .\run.ps1`. Without the script: `dotnet build Axit.sln`, then `dotnet run --project src/Axit -- claude "C:\path\to\project"`. `Axit.exe claude …` and `Axit.exe down …` name the app; a folder or a file alone picks it.
-
-Needs Windows 10 1809 or later, the .NET 10 SDK, Claude Code and, for testing, NVDA.
-
-## Publish
+Needs the .NET 10 SDK, and NVDA for the manual checks.
 
 ```
-.\publish.ps1                # self-contained Axit.exe + installer + README, zipped, then installed for this user
-.\publish.ps1 -NoInstall     # build publish\win-x64 and the zip only
+.\run-axfile.ps1 C:\path\to\folder       # build, then start AxFile on that folder
+.\run-axclaude.ps1 C:\path\to\project    # AxClaude on a project folder
+.\run.ps1 -App down C:\notes\todo.md     # any app: claude, down, json, git, terminal, file, media, preview
+.\run.ps1 -NoBuild                       # start without building
 ```
 
-Send the zip. The recipient extracts it and double-clicks `install.cmd` (no administrator rights); `install.cmd -Uninstall` removes it again. Close a running installed Axit before publishing again. `tools\make-icon.ps1` draws the icons.
+There is a `run-ax<app>.ps1` for each app. Close a running Axit before building: the build writes into the folder it runs from. If PowerShell refuses to run scripts: `powershell -ExecutionPolicy Bypass -File .\run.ps1`.
+
+## Test
+
+```
+.\test.ps1                 # every test project, in Release, the way GitHub Actions runs them
+.\test.ps1 AxFile          # one project
+.\manual_tests\prepare.ps1 # the files of the NVDA test passes, made new
+```
+
+The unit tests cover everything that needs no window. What a window does is checked with NVDA, following each app's `docs/<app>/nvda-test-plan.md` on the files in `manual_tests/<app>`; each folder's `_main.md` says which section uses what. Every pass is written down in `docs/axit/nvda-test-record.md`, by step, version and commit.
 
 ## Release
 
 ```
-.\release.ps1 2.0.0          # tests, sets the version, commits, tags v2.0.0 and pushes
-gh run watch                 # follows the GitHub Actions run that builds and publishes the release
+.\release.ps1 3.4.0        # tests, sets the version, commits, tags v3.4.0 and pushes
+gh run watch               # follows the workflow that builds and publishes the release
 ```
 
-Add a `## 2.0.0 - <date>` section to `CHANGELOG.md` first: it becomes the release notes, which the apps show in their update notice. GitHub Actions (`.github/workflows/release.yml`) tests, runs `publish.ps1`, and attaches the zip and `install.cmd` to the release at `github.com/KyleKeane/Axit/releases`; installed copies find it there. `build.yml` runs the tests on every push.
+Add a `## 3.4.0` section to `CHANGELOG.md` first: it becomes the release notes, which the apps show in their update notice. The Release workflow tests, builds the self-contained `Axit.exe`, and publishes the zip and `install.cmd`; the Build workflow tests every push to every branch. `.\publish.ps1` makes the same zip locally and installs it for this user.
+
+## Where things are
+
+- `src/Axit`: the program. `src/Axit.Core` and `src/Axit.Forms`: the pieces the apps share.
+- `src/<App>` and `src/<App>.Core`: each app's window and its pure code. Each folder has a `CLAUDE.md` with its notes.
+- `tests/`: the unit tests, one project per app, and the recorded console fixtures.
+- `docs/<app>/`: each app's `SPEC.md`, `user-guide.md` (Help, User guide in the app) and `nvda-test-plan.md`. The specifications are the source of truth.
+- `docs/axit/`: the bundle's `SPEC.md` (launch, install, update, release, the accessibility and modularity rules), `plan.md`, `adding-an-app.md` and the test record.
+- `manual_tests/`: the script that makes the files for the NVDA passes.
+- `CLAUDE.md`: the map and the rules for working on this repository with Claude Code.
+
+## Contributing
+
+See [CONTRIBUTING.md](CONTRIBUTING.md). Report a bug or an idea with the [issue forms](https://github.com/KyleKeane/Axit/issues/new/choose); report a security problem privately, as [SECURITY.md](SECURITY.md) says.
 
 ## Licence
 
-MIT, see `LICENSE`. Axit is made by Dr. Kyle Keane (www.kylekeane.com). Use it, change it and pass it on; keep that notice with it.
+MIT, see [LICENSE](LICENSE). Axit is made by Dr. Kyle Keane (www.kylekeane.com). Use it, change it and pass it on; keep that notice with it.
 
-The software is provided "as is", without warranty of any kind, and the developer accepts no liability for its use; the full wording is in `LICENSE` and at the end of the README in the zip. Axit is an independent project, not affiliated with or endorsed by Anthropic.
+The software is provided "as is", without warranty of any kind, and the developer accepts no liability for its use; the full wording is in `LICENSE`. Axit is an independent project, not affiliated with or endorsed by Anthropic or NV Access.

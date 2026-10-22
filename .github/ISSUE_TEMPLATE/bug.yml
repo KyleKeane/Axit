@@ -1,0 +1,67 @@
+name: Bug report
+description: Something an Axit app does wrong, or something NVDA reads wrong.
+labels: [bug]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thank you. Please leave out personal data: no e-mail addresses, no paths with your account name in them (write %USERPROFILE% instead), no conversation text you would not publish.
+  - type: dropdown
+    id: app
+    attributes:
+      label: App
+      options:
+        - AxClaude
+        - AxDown
+        - AxJSON
+        - AxGit
+        - AxTerminal
+        - AxFile
+        - AxMedia
+        - AxPreview
+        - The bundle (install, update, the Axit menu)
+    validations:
+      required: true
+  - type: input
+    id: version
+    attributes:
+      label: Axit version
+      description: Axit menu, About, Version.
+      placeholder: "3.3.1"
+    validations:
+      required: true
+  - type: input
+    id: reader
+    attributes:
+      label: Screen reader and Windows
+      placeholder: "NVDA 2026.1, Windows 11 24H2"
+  - type: input
+    id: step
+    attributes:
+      label: Test plan step, if one covers it
+      description: The step in docs/<app>/nvda-test-plan.md, such as "AxFile 1.13". docs/axit/nvda-test-record.md says when it last passed.
+  - type: textarea
+    id: steps
+    attributes:
+      label: What you did
+      description: The keys, one per line.
+    validations:
+      required: true
+  - type: textarea
+    id: heard
+    attributes:
+      label: What happened, and what NVDA said
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: What you expected
+    validations:
+      required: true
+  - type: textarea
+    id: diagnostics
+    attributes:
+      label: Diagnostics
+      description: Options, Developer, Copy diagnostics, pasted here. Read it first for anything private.
+      render: text

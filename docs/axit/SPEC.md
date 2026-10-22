@@ -179,7 +179,8 @@ allow it, see B-9).
 - AX-4.1 `release.ps1 <version>` checks that `CHANGELOG.md` has a `## <version>` section, fetches origin and stops
   when `origin/main` has commits that `main` does not (nothing is released over work pushed from elsewhere; skipped
   with `-NoPush`, which pushes nothing and may run offline), runs
-  the tests, sets `<Version>`, commits `Release <version>`, tags `v<version>` and pushes. `.github/workflows/release.yml` checks the
+  every test project in Release through `test.ps1` (3.3.0 was tagged and never published because a test passed in
+  Debug and failed in Release), sets `<Version>`, commits `Release <version>`, tags `v<version>` and pushes. `.github/workflows/release.yml` checks the
   tag against the version, tests, runs `publish.ps1 -NoInstall` and creates the GitHub release `Axit <version>` with
   `Axit-<version>-win-x64.zip` and `install.cmd` attached and the CHANGELOG section as notes, as a draft that is
   published once the files are up (since 2026-10-21: the update check reads the latest published release, and one
@@ -188,7 +189,16 @@ allow it, see B-9).
   `install.ps1`, `LICENSE` and `docs/axit/README.md` as `README.md`, and zips it.
 - AX-4.3 One `CHANGELOG.md`; every bullet starts with the app it concerns (`AxClaude:`, `AxDown:`, `Axit:` for the
   bundle itself).
-- AX-4.4 `build.yml` runs the tests of the whole solution on every push and pull request.
+- AX-4.4 `build.yml` runs the tests of the whole solution in Release on every push to any branch and on every pull
+  request, so that a branch fails before it is merged rather than at its release (since 2026-10-22; it ran on `main`
+  alone). `test.ps1` runs the same tests locally (every `tests/*.Tests.csproj`, Release, one by one so that a running
+  Axit's `bin\Debug` is never written); `release.ps1` and `run.ps1 -Test` call it.
+- AX-4.5 The repository's own pages (2026-10-22): `README.md` (what Axit is, the apps, install, build, test, release,
+  where things are), `CONTRIBUTING.md` (how a change is made: spec first, one app's folders, tests, the NVDA plan and
+  its record, the changelog), `SECURITY.md` (private reports through GitHub's security advisories), issue forms in
+  `.github/ISSUE_TEMPLATE` (a bug asks for the app, the versions and the test plan step), a pull request checklist,
+  and Dependabot (`.github/dependabot.yml`) keeping the workflow actions and the test packages current, monthly; the
+  apps themselves have no packages (G4, B-10).
 
 ### AX-5 Settings, logs and paths
 

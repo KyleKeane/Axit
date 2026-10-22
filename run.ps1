@@ -15,7 +15,7 @@
   .\run.ps1 -App media C:\Music\Dune         # AxMedia on the folder's sound and video files (run-axmedia.ps1 says the same)
   .\run.ps1 -App preview C:\notes\README.md  # AxPreview on the file, read-only (run-axpreview.ps1 says the same)
   .\run.ps1 -NoBuild                         # skip the build, just start
-  .\run.ps1 -Test                            # run the unit tests instead
+  .\run.ps1 -Test                            # run the unit tests instead (test.ps1: every test project, in Release)
 
   run-axclaude.ps1, run-axdown.ps1, run-axjson.ps1, run-axgit.ps1, run-axterminal.ps1, run-axfile.ps1, run-axmedia.ps1 and run-axpreview.ps1 next to this script pass -App for you and take the same other arguments.
   If PowerShell refuses to run scripts: powershell -ExecutionPolicy Bypass -File .\run.ps1
@@ -47,7 +47,9 @@ $ErrorActionPreference = 'Stop'
 $root = $PSScriptRoot
 
 if ($Test) {
-    dotnet test "$root\Axit.sln" -nologo
+    # test.ps1: every test project one by one, in Release, as the workflows run them (the solution would build into
+    # the bin\Debug a running Axit holds open).
+    & (Join-Path $root 'test.ps1')
     exit $LASTEXITCODE
 }
 

@@ -1,8 +1,9 @@
 name: Build
 
 on:
+  # Every branch, so that work on a branch fails here before it is merged rather than at its release (AX-4.4).
   push:
-    branches: [main]
+    branches: ['**']
   pull_request:
 
 jobs:
