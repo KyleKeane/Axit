@@ -344,9 +344,15 @@ public sealed partial class FileForm
         Announce($"{_list.AccessibleName}, {_list.SelectedItem}", true);
     }
 
-    /// <summary>Escape in the list: the filter cleared; false, the key left alone, when there is none.</summary>
-    private bool ClearFilter()
+    /// <summary>Escape in the list: the selection cleared, as Ctrl+Shift+A, while entries are selected (AF-3.7); otherwise the filter cleared; false, the key left alone, when there is neither.</summary>
+    private bool ClearSelectionOrFilter()
     {
+        if (_selected.Count > 0)
+        {
+            SelectNone();
+            return true;
+        }
+
         if (_filter.Length == 0)
         {
             return false;

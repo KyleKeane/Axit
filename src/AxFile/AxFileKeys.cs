@@ -32,8 +32,8 @@ public static class AxFileKeys
     /// <summary>The Filter notice: the list narrowed to the names that contain a text (AF-3.8).</summary>
     public const Keys Filter = Keys.Control | Keys.Shift | Keys.F;
 
-    /// <summary>In the folder list: the filter cleared; nothing while there is none. In the Actions list: back to the folder list.</summary>
-    public const Keys ClearFilter = Keys.Escape;
+    /// <summary>In the folder list: the selection cleared while entries are selected, otherwise the filter; nothing while there is neither. In the Actions list: back to the folder list.</summary>
+    public const Keys Clear = Keys.Escape;
     public const Keys OpenFolder = Keys.Control | Keys.O;
     public const Keys GoToFolder = Keys.Control | Keys.G;
     public const Keys ShowInExplorer = Keys.Control | Keys.W;
@@ -122,7 +122,7 @@ public static class AxFileKeys
         ("Refresh", Refresh),
         ("Add to or remove from Favorites", Favorite),
         ("Filter", Filter),
-        ("Clear the filter (in the folder list); back to the folder list (in the Actions list)", ClearFilter),
+        ("Clear the selection, or else the filter (in the folder list); back to the folder list (in the Actions list)", Clear),
         ("Open folder", OpenFolder),
         ("Go to folder", GoToFolder),
         ("Show the folder in File Explorer", ShowInExplorer),

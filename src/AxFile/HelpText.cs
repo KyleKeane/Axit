@@ -22,7 +22,7 @@ public static class HelpText
           Enter on a folder: into it. Backspace, or Alt+Up: the folder above, the one you left selected; from a drive's top, This PC with the drives. Each says the folder, its count and the entry you land on: "docs, 5 items, plan.md"
           Ctrl+G: go to a typed path, %USERPROFILE%\Downloads for instance. Ctrl+O: the Windows folder picker. Folder, Open recent folder and Folder, Favorites: by number. Ctrl+D: add this folder to Favorites, or remove it
           Ctrl+N: a new AxFile window on this folder. F5: read the folder again
-          Ctrl+Shift+F: filter the list to the names containing a text, "3 of 24 items, filter chap"; Escape in the list clears it. Folder, Sort by: name, date or size
+          Ctrl+Shift+F: filter the list to the names containing a text, "3 of 24 items, filter chap"; Escape in the list clears it once nothing is selected. Folder, Sort by: name, date or size
           Alt+D: the Drives menu: the drives by number, This PC, Eject this drive, Drive properties
 
         Opening
@@ -37,7 +37,7 @@ public static class HelpText
           Space: select the entry, or deselect it; it reads "selected" after its name while it is
           Shift+Down, Shift+Up, Shift+Home, Shift+End: select from where you started to there, as in File Explorer, keeping what was selected before
           Shift+Space: select from the nearest selected entry to the one you are on, above or below; with none selected, this entry
-          Ctrl+A: select all. Ctrl+Shift+A: deselect all. Ctrl+I says how many are selected
+          Ctrl+A: select all. Ctrl+Shift+A, or Escape: deselect all. Ctrl+I says how many are selected
           Cut, Copy, Delete, Copy path, Move to new folder, Compress to zip and Add to AxMedia's queue act on the selected entries, or on the entry you are on when none is selected
           Alt+S: the Selection menu, the selected entries from anywhere: select all, deselect all, select to here, then Cut, Copy, Delete, Move to new folder, Compress to zip, Add to AxMedia's queue and Copy paths on them alone; "None selected" when there are none
           Every change of the selection is a line in the Actions list's Selection section; Ctrl+Z on that line puts the selection back as it was

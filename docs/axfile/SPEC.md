@@ -164,7 +164,7 @@ folder of the file or project in hand, and sends back. It works entirely offline
   empty folder's, the not-shown line) the keys say that line. **Shift+Space** (asked 2026-10-22) marks every entry
   from the nearest marked entry to the current one, above or below, the one above when both are as near, "Selected, n
   selected"; with nothing marked it marks the current entry, as Space does. **Ctrl+A** marks every entry, "n selected";
-  **Ctrl+Shift+A** unmarks them all, "None selected". Ctrl+I adds ", n selected" to the entry's information while
+  **Ctrl+Shift+A** unmarks them all, "None selected", and so does **Escape** in the list while any are marked (asked 2026-10-22; a filter in force is cleared by the next Escape). Ctrl+I adds ", n selected" to the entry's information while
   any are marked (AF-2.4). Cut, Copy, Delete, Copy path, Move to new folder, Compress to zip and Add to AxMedia's queue
   act on the marked entries when there are any, and on the current entry alone otherwise (AF-4.3, AF-4.4, AF-4.8,
   AF-5.2; kept 2026-10-22 over File Explorer's right-click rule, AF-D10); Enter, Rename, the ways to open and the
@@ -185,7 +185,7 @@ folder of the file or project in hand, and sends back. It works entirely offline
   "Filter" with the field "Name contains" holding the filter in force; Filter lists only the entries whose name
   contains the text, any case, names the list "3 of 24 items, filter chap" so that the count is read with the list,
   and says the name and the entry at once, "3 of 24 items, filter chap, Chapter 1.mp3"; an empty field clears it,
-  "Filter cleared", as does **Escape** in the list while a filter is on (Escape does nothing otherwise). A filter that nothing passes shows the one item "No names contain <text>", and a command on
+  "Filter cleared", as does **Escape** in the list while a filter is on and no entry is marked (Escape clears the marks first, AF-3.7, and does nothing when there is neither). A filter that nothing passes shows the one item "No names contain <text>", and a command on
   it says the same. The filter lives in the folder: another folder drops it, a refresh keeps it. What the list shows
   is what the commands see: Select all marks the shown entries, find moves among the shown entries. Find (AF-3.6)
   jumps, the filter narrows; both are kept. Play folder (AF-5.1) hands the folder itself to AxMedia, filter or not.

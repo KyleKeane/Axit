@@ -433,7 +433,7 @@ public sealed partial class FileForm : AxitForm
                 case AxFileKeys.Open:
                     GoToAction();
                     return true;
-                case AxFileKeys.ClearFilter:
+                case AxFileKeys.Clear:
                     _list.Focus();
                     return true;
             }
@@ -488,8 +488,8 @@ public sealed partial class FileForm : AxitForm
                 case AxFileKeys.SelectToEnd:
                     ExtendSelection(int.MaxValue);
                     return true;
-                case AxFileKeys.ClearFilter:
-                    return ClearFilter();
+                case AxFileKeys.Clear:
+                    return ClearSelectionOrFilter();
                 case AxFileKeys.Open:
                     OpenSelected();
                     return true;
