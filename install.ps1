@@ -9,11 +9,12 @@
     - a Start menu entry per app, "Axit AxClaude", "Axit AxDown" and so on (type axit in the Start menu to list them),
     - one submenu in File Explorer's right-click menu, "Open with Axit", on folders (and on a folder's background) and
       on files, listing the apps that open what was right-clicked: AxClaude, AxGit, AxTerminal and AxFile on folders,
-      AxDown and AxFile on every file, AxJSON on .json files; and AxDown under Windows' own "Open with" for .md,
-      .markdown and .txt, AxJSON for .json,
-    - the console commands axclaude, axdown, axjson, axgit, axterminal, axfile and axit (a folder opens AxClaude, a
-      file AxDown, a .json file AxJSON): one-line shims in %USERPROFILE%\.local\bin, the folder that Claude Code's
-      installer already puts on PATH.
+      AxDown and AxFile on every file, AxJSON on .json files, AxMedia on sound and video files; and AxDown under
+      Windows' own "Open with" for .md, .markdown and .txt, AxJSON for .json, AxMedia for the sound and video kinds,
+      so that the user can make an app the default program for a kind in Settings, Default apps,
+    - the console commands axclaude, axdown, axjson, axgit, axterminal, axfile, axmedia and axit (a folder opens
+      AxClaude, a file AxDown, a .json file AxJSON, a sound or video file AxMedia): one-line shims in
+      %USERPROFILE%\.local\bin, the folder that Claude Code's installer already puts on PATH.
   It also lists Axit in Settings, Apps (Add or remove programs), whose Uninstall runs install.cmd -Uninstall.
   -Uninstall removes all of that. The settings in %APPDATA%\Axit and the logs in %LOCALAPPDATA%\Axit stay.
   An installation of AxClaude 1.x, from before the bundle, is removed completely first; its settings file stays in
@@ -91,13 +92,16 @@ $appsKey = 'HKCU:\Software\Microsoft\Windows\CurrentVersion\Uninstall\Axit'
 # or both. Types: the file types a files entry is shown on; every file when absent. OpenWith: the file types the app
 # is registered as a program for, under Windows' own "Open with" and in Settings, Default apps (B-9), with the
 # TypeName that Windows shows for them.
+# The sound and video kinds AxMedia plays: the same list as Axit.Core/MediaFiles (docs/axmedia/SPEC.md AM-4.1).
+$mediaTypes = '.mp3', '.wav', '.wma', '.m4a', '.m4b', '.aac', '.flac', '.ogg', '.opus', '.aiff', '.mp4', '.m4v', '.mov', '.avi', '.wmv', '.mkv', '.webm'
 $apps = @(
     @{ Name = 'AxClaude'; Verb = 'claude'; Description = 'AxClaude, an accessible front end for Claude Code'; Icon = $exe; Opens = 'folders' },
     @{ Name = 'AxDown'; Verb = 'down'; Description = 'AxDown, a plain editor for Markdown and text files'; Icon = (Join-Path $target 'AxDown.ico'); Opens = 'files'; OpenWith = '.md', '.markdown', '.txt'; TypeName = 'Text document (AxDown)' },
     @{ Name = 'AxJSON'; Verb = 'json'; Description = 'AxJSON, an editor for JSON files'; Icon = (Join-Path $target 'AxJSON.ico'); Opens = 'files'; Types = '.json'; OpenWith = '.json'; TypeName = 'JSON document (AxJSON)' },
     @{ Name = 'AxGit'; Verb = 'git'; Description = 'AxGit, a git manager for one repository'; Icon = (Join-Path $target 'AxGit.ico'); Opens = 'folders' },
     @{ Name = 'AxTerminal'; Verb = 'terminal'; Description = 'AxTerminal, a shell as a transcript'; Icon = (Join-Path $target 'AxTerminal.ico'); Opens = 'folders' },
-    @{ Name = 'AxFile'; Verb = 'file'; Description = 'AxFile, a file manager for one folder, with a player'; Icon = (Join-Path $target 'AxFile.ico'); Opens = 'folders', 'files' }
+    @{ Name = 'AxFile'; Verb = 'file'; Description = 'AxFile, a file manager for one folder, with a player'; Icon = (Join-Path $target 'AxFile.ico'); Opens = 'folders', 'files' },
+    @{ Name = 'AxMedia'; Verb = 'media'; Description = 'AxMedia, a player for sound and video files'; Icon = (Join-Path $target 'AxMedia.ico'); Opens = 'files'; Types = $mediaTypes; OpenWith = $mediaTypes; TypeName = 'Media file (AxMedia)' }
 )
 # The places that follow from the name.
 foreach ($app in $apps) {

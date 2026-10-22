@@ -5,6 +5,7 @@ using AxFile;
 using AxGit;
 using Axit.Core;
 using AxJSON;
+using AxMedia;
 using AxTerminal;
 
 namespace Axit;
@@ -56,6 +57,10 @@ internal static class Program
             case Dispatch.AxFile:
                 SetAppId("Axit.AxFile");
                 AxFileApp.Run(launch.Arguments);
+                break;
+            case Dispatch.AxMedia:
+                SetAppId("Axit.AxMedia");
+                AxMediaApp.Run(launch.Arguments);
                 break;
             default:
                 // --help or --version for the bundle itself (AX-1.4).

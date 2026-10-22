@@ -19,7 +19,7 @@
     <Copyright>Copyright (c) 2026 Dr. Kyle Keane (www.kylekeane.com). MIT License.</Copyright>
   </PropertyGroup>
 
-  <!-- AxDown.ico, AxJSON.ico, AxGit.ico, AxTerminal.ico and AxFile.ico, next to this file, are the apps' icons for their Start menu
+  <!-- AxDown.ico, AxJSON.ico, AxGit.ico, AxTerminal.ico, AxFile.ico and AxMedia.ico, next to this file, are the apps' icons for their Start menu
        and File Explorer entries (the executable's own icon is AxClaude's). publish.ps1 copies them next to the
        executable, since a single-file publish would bundle a project item into the executable, and install.ps1
        copies them on. -->
@@ -31,6 +31,7 @@
     <ProjectReference Include="..\AxGit\AxGit.csproj" />
     <ProjectReference Include="..\AxTerminal\AxTerminal.csproj" />
     <ProjectReference Include="..\AxFile\AxFile.csproj" />
+    <ProjectReference Include="..\AxMedia\AxMedia.csproj" />
     <ProjectReference Include="..\Axit.Core\Axit.Core.csproj" />
   </ItemGroup>
 

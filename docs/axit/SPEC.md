@@ -58,15 +58,21 @@ allow it, see B-9).
   on folders and on files, command `axfile`. A file manager for one folder as one list, Enter the verb, the four
   operations, and a player for the folder's sound and video files through Windows' own decoders. Specification
   `docs/axfile/SPEC.md`, guide `docs/axfile/user-guide.md`, test plan `docs/axfile/nvda-test-plan.md`.
+- **AxMedia** (2026-10-22): `Axit.exe media [<file or folder>...] [--add] [--new]`, Start entry `Axit AxMedia`, Open
+  with Axit on sound and video files and Open with for their kinds, command `axmedia`. A player with one queue, the
+  player AxFile carried until the split (`docs/axit/axfile-split.md`); a start with paths hands them to the open
+  AxMedia window (`AppMessage`). Specification `docs/axmedia/SPEC.md`, guide `docs/axmedia/user-guide.md`, test plan
+  `docs/axmedia/nvda-test-plan.md`.
 
 ## 4. Functional requirements
 
 ### AX-1 Launch and dispatch
 
-- AX-1.1 The first argument may be a verb naming an app: `claude`, `down`, `json`, `git`. The rest of the arguments go to that app
+- AX-1.1 The first argument may be a verb naming an app: `claude`, `down`, `json`, `git`, `terminal`, `file`, `media`. The rest of the arguments go to that app
   unchanged, so `Axit.exe claude C:\src --record x.vt` is what `AxClaude.exe C:\src --record x.vt` was.
 - AX-1.2 Without a verb, a first argument that is an existing folder goes to AxClaude and an existing file to AxDown,
-  or to AxJSON when its extension is `.json`, with the remaining arguments. A path that does not exist is reported with the usage text (a message box, since no
+  or to AxJSON when its extension is `.json`, or to AxMedia when it is a sound or video file (`MediaFiles.IsMedia`),
+  with the remaining arguments. A path that does not exist is reported with the usage text (a message box, since no
   window exists yet, as `--help` does today).
 - AX-1.3 Without any argument, `Axit.exe` starts AxClaude on the current folder, which is what `axclaude` does today
   (B-8). AxClaude keeps its own rule for a current folder that is the program's own folder.
@@ -74,7 +80,7 @@ allow it, see B-9).
   usage text.
 - AX-1.5 The dispatch is pure code in `Axit.Core` (`Dispatch`): arguments in, app name and arguments out. It is unit
   tested and has no knowledge of the apps beyond their names.
-- AX-1.6 Each process sets a Windows application id before its window opens (`Axit.AxClaude`, `Axit.AxDown`, `Axit.AxJSON`, `Axit.AxGit`, `Axit.AxTerminal`, `Axit.AxFile`), so the
+- AX-1.6 Each process sets a Windows application id before its window opens (`Axit.AxClaude`, `Axit.AxDown`, `Axit.AxJSON`, `Axit.AxGit`, `Axit.AxTerminal`, `Axit.AxFile`, `Axit.AxMedia`), so the
   taskbar shows the apps apart and Win+number keys reach the right one.
 - AX-1.7 An app is a class library with one entry point, `static void Run(string[] args)` on a class named
   `<App>App`, plus a `Usage` text. `Axit`'s `Program` only dispatches; the entry point is one call into
@@ -109,11 +115,12 @@ allow it, see B-9).
   | AxGit | yes | | |
   | AxTerminal | yes | | |
   | AxFile | yes | every file (its folder, the file selected) | |
+  | AxMedia | | the sound and video kinds (`MediaFiles.Extensions`, listed again in the block) | the same kinds (`Axit.AxMedia`) |
 
   On Windows 11 the submenu is in the full menu (Shift+F10, or Show more options), as every program's own entries
   are. Up to 2.13.0 each app had an entry of its own (`Open in AxClaude` and the like); the installer removes them.
 - AX-2.4 Console commands: `axit.cmd` and one `<app>.cmd` per app (`axclaude.cmd`, `axdown.cmd`, `axjson.cmd`,
-  `axgit.cmd`, `axterminal.cmd`) in `%USERPROFILE%\.local\bin`, one line each, passing their arguments to `Axit.exe`
+  `axgit.cmd`, `axterminal.cmd`, `axfile.cmd`, `axmedia.cmd`) in `%USERPROFILE%\.local\bin`, one line each, passing their arguments to `Axit.exe`
   and `Axit.exe <verb>`. They work from cmd and from PowerShell.
 - AX-2.5 Settings, Apps lists one entry, `Axit`, with the version, the publisher and an Uninstall that runs
   `install.cmd -Uninstall`.
@@ -246,7 +253,7 @@ allow it, see B-9).
   Ctrl+Shift+Down the selection grown to there, as in Word (`EditParagraphs`; the EDIT control's own keys scroll a
   row and leave the caret where it is, as Notepad's do, which a screen reader, reading at the caret after the key,
   reports as the same text again); Alt+F4 exit; Alt and F10 the menu. Everything else is window-specific.
-- AX-8.3 Window-specific keys are defined once per window, in one table (`AxClaudeKeys`, `AxDownKeys`, `AxJSONKeys`, `AxGitKeys`, `AxTerminalKeys`, `AxFileKeys`), as constants
+- AX-8.3 Window-specific keys are defined once per window, in one table (`AxClaudeKeys`, `AxDownKeys`, `AxJSONKeys`, `AxGitKeys`, `AxTerminalKeys`, `AxFileKeys`, `AxMediaKeys`), as constants
   with names that say what the key does. Changing a key is a change to that one line: the menu item and the key
   handler read the table, and the F1 text names the same keys and is changed with it. Single-letter quick keys
   (AxClaude's `h`, `i`, `o`) are in the table too. The text editor shell's keys (`Axit.Forms/EditorKeys`: Ctrl+N new,
@@ -368,9 +375,11 @@ src/AxGit.Core/      class library (net10.0): GitRunner, GitStatus, GitLog, GitB
 src/AxTerminal/      class library (net10.0-windows): AxTerminalApp, TerminalForm, AxTerminalKeys, HelpText (AxTerminal's window)
 src/AxTerminal.Core/ class library (net10.0): ShellLauncher, TerminalModel, TerminalSettings, … (AxTerminal's pure code)
 src/AxFile/          class library (net10.0-windows): AxFileApp, FileForm, AxFileKeys, HelpText (AxFile's window)
-src/AxFile.Core/     class library (net10.0): FolderListing, NaturalOrder, MediaFiles, MediaPlayer, FileOperations,
-                     FileSettings (AxFile's pure code and its one seam to Windows' media stack)
-tests/Axit.Tests, tests/AxClaude.Tests, tests/AxJSON.Tests, tests/AxGit.Tests, tests/AxTerminal.Tests, tests/AxFile.Tests
+src/AxFile.Core/     class library (net10.0): FolderListing, FileOperations, Archives, FileSettings, … (AxFile's pure code)
+src/AxMedia/         class library (net10.0-windows): AxMediaApp, MediaForm, AxMediaKeys, HelpText (AxMedia's window)
+src/AxMedia.Core/    class library (net10.0): MediaPlayer, PlayQueue, MediaFolder, MediaSettings (AxMedia's pure code
+                     and its one seam to Windows' media stack); MediaFiles and NaturalOrder are Axit.Core's
+tests/Axit.Tests, tests/AxClaude.Tests, tests/AxJSON.Tests, tests/AxGit.Tests, tests/AxTerminal.Tests, tests/AxFile.Tests, tests/AxMedia.Tests
 ```
 
 References point one way: `Axit` references every app; an app's window project references its own `.Core`,

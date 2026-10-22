@@ -106,8 +106,9 @@ top of the window. It works entirely offline (bundle G6).
 - AM-3.2 **Adding:** Queue → Open files… (Ctrl+O), the Windows file picker on the media kinds, several at once,
   appended in the picker's order, "Added 3"; Queue → Open folder… (Ctrl+Shift+O), the Windows folder picker, the
   folder's media files appended in name order, hidden ones left out, "Added 12", "No sound or video files in
-  <folder>" when none; Queue → Open recent ▸, the last ten files and folders added by command, "1. name (path)"
-  (AX-9.5). A start with paths (AM-1.2): a file replaces the queue with its folder's media files from that file
+  <folder>" when none; Queue → Open recent ▸, the last ten files and folders added by command or handed over as
+  one path (a start, a play or an add from AxFile), "1. name (path)" (AX-9.5), one chosen appended again. A start
+  with paths (AM-1.2): a file replaces the queue with its folder's media files from that file
   (AM-D2) and plays; a folder replaces it with the folder's from the first; `--add` appends the paths, a folder as
   its media files. Nothing starts playing on an add when nothing was playing.
 - AM-3.3 When a file ends the next plays, to the end of the queue: "End of queue" with the done chime (the shared
@@ -140,9 +141,9 @@ top of the window. It works entirely offline (bundle G6).
 
 ### AM-5 Menus, keys, texts
 
-- AM-5.1 Menus (AX-6): **Queue (Q):** Open files… Ctrl+O | Open folder… Ctrl+Shift+O | Open recent ▸ | ─ | Play Enter |
-  Remove Delete | Clear queue | ─ | Information Ctrl+I | Show current file in ▸ (File Explorer Ctrl+W | AxFile) | ─ |
-  Exit Alt+F4. **Play (P):** Pause or resume Space | Next file Ctrl+Shift+Right | Previous file Ctrl+Shift+Left |
+- AM-5.1 Menus (AX-6): **Queue (Q):** New window Ctrl+N | Open files… Ctrl+O | Open folder… Ctrl+Shift+O | Open
+  recent ▸ | ─ | Play Enter | Remove Delete | Clear queue | ─ | Information Ctrl+I | Show current file in ▸ (File
+  Explorer Ctrl+W | AxFile) | ─ | Exit Alt+F4. **Play (P):** Pause or resume Space | Next file Ctrl+Shift+Right | Previous file Ctrl+Shift+Left |
   Forward 15 seconds Ctrl+Right | Back 15 seconds Ctrl+Left | Go to time… Ctrl+T | ─ | Faster Ctrl+Shift+Period |
   Slower Ctrl+Shift+Comma | Normal speed | ─ | Say each file as it starts ✓ | What is playing Ctrl+Q. **Options (O):**
   Text ▸ | General ▸ (Check for updates at start ✓) | Developer ▸ (Open settings file | Copy diagnostics). **Axit (A)**
@@ -170,7 +171,7 @@ AxFile: "Added n to AxMedia's queue", "No sound or video files to add", "No soun
 ### AM-7 Settings, log, errors
 
 - AM-7.1 `%APPDATA%\Axit\axmedia.json` (AX-5.3; `MediaSettings` on `WindowSettings`): `speed` 1, `seekSeconds` 15,
-  `sayEachFile` on, `recent` (the last ten files and folders added by command), and the window base's font, update
+  `sayEachFile` on, `recent` (the last ten files and folders added by command or handed over), and the window base's font, update
   check and window fields. AxFile's `speed`, `seekSeconds` and `sayEachFile` are not carried over: the defaults are
   theirs.
 - AM-7.2 The log is `%LOCALAPPDATA%\Axit\logs\axmedia.log`: the start, the exit, the player's errors with Windows'
@@ -261,6 +262,10 @@ events are posted back to it (AX-7.5).
 
 ## 10. Status
 
-- 2026-10-22: specified at the user's ask, with the inventory of the split in `docs/axit/axfile-split.md`; not built.
-  The build follows the inventory's order, one commit per step, and ends with the NVDA test plans of AxMedia and
-  AxFile.
+- 2026-10-22: specified at the user's ask, with the inventory of the split in `docs/axit/axfile-split.md`.
+- 2026-10-22, later the same day, on the branch `split`: built. `MediaFiles` and `NaturalOrder` to `Axit.Core`,
+  `AppMessage` in `Axit.Forms`, `AxMedia.Core` (the player and the queue from AxFile.Core, `MediaFolder`,
+  `MediaSettings`, 13 tests), the window (`MediaForm`), the keys, the texts, the guide, the test plan and the
+  wiring (the dispatcher with AX-1.2's media rule, the installer's block with the Open with registration, the
+  icon, `run-axmedia.ps1`). The window and the hand-over are not yet checked with NVDA or heard; AxFile hands over
+  in the next step of the inventory and keeps its own player until then.

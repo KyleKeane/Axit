@@ -43,6 +43,30 @@ public sealed class DispatchTests
         Assert.Equal([Folder], launch.Arguments);
         Assert.Contains(Dispatch.Apps, app => app.Verb == Dispatch.AxFile && app.Name == "AxFile");
         Assert.Contains("Axit file", Dispatch.Usage);
+        // AxMedia takes several paths and its own options, passed on whole (docs/axmedia/SPEC.md AM-1.1).
+        launch = Dispatch.Decide(["media", "a.mp3", "b.mp3", "--add"]);
+        Assert.Equal(Dispatch.AxMedia, launch.App);
+        Assert.Equal(["a.mp3", "b.mp3", "--add"], launch.Arguments);
+        Assert.Contains(Dispatch.Apps, app => app.Verb == Dispatch.AxMedia && app.Name == "AxMedia");
+        Assert.Contains("Axit media", Dispatch.Usage);
+    }
+
+    /// <summary>AX-1.2: a sound or video file alone on the command line starts AxMedia, as a double click in File Explorer would once it is the default.</summary>
+    [Fact]
+    public void MediaFileGoesToAxMedia()
+    {
+        var file = Path.Combine(Folder, $"axit-dispatch-{Guid.NewGuid():N}.mp3");
+        File.WriteAllBytes(file, []);
+        try
+        {
+            var launch = Dispatch.Decide([file]);
+            Assert.Equal(Dispatch.AxMedia, launch.App);
+            Assert.Equal([file], launch.Arguments);
+        }
+        finally
+        {
+            File.Delete(file);
+        }
     }
 
     [Fact]
@@ -120,7 +144,7 @@ public sealed class DispatchTests
         Assert.Equal(Dispatch.AxJSON, Dispatch.Decide(["json", "x.json"]).App);
         Assert.Equal(["x.json"], Dispatch.Decide(["JSON", "x.json"]).Arguments);
         Assert.Contains("Axit json", Dispatch.Usage);
-        Assert.Equal(["AxClaude", "AxDown", "AxJSON", "AxGit", "AxTerminal", "AxFile"], Dispatch.Apps.Select(a => a.Name));
+        Assert.Equal(["AxClaude", "AxDown", "AxJSON", "AxGit", "AxTerminal", "AxFile", "AxMedia"], Dispatch.Apps.Select(a => a.Name));
     }
 
     [Fact]

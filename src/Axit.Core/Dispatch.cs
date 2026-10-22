@@ -23,28 +23,30 @@ public static class Dispatch
     public const string AxGit = "git";
     public const string AxTerminal = "terminal";
     public const string AxFile = "file";
+    public const string AxMedia = "media";
 
     /// <summary>Not an app: the executable answers <c>--help</c> and <c>--version</c>, or reports <see cref="Launch.Error"/>.</summary>
     public const string Bundle = "axit";
 
     /// <summary>The apps, in the order the Axit menu lists them (AX-9).</summary>
-    public static readonly IReadOnlyList<App> Apps = [new("AxClaude", AxClaude), new("AxDown", AxDown), new("AxJSON", AxJSON), new("AxGit", AxGit), new("AxTerminal", AxTerminal), new("AxFile", AxFile)];
+    public static readonly IReadOnlyList<App> Apps = [new("AxClaude", AxClaude), new("AxDown", AxDown), new("AxJSON", AxJSON), new("AxGit", AxGit), new("AxTerminal", AxTerminal), new("AxFile", AxFile), new("AxMedia", AxMedia)];
 
     public const string Usage = """
-        Usage: Axit [claude|down|json|git|terminal|file] [arguments]
+        Usage: Axit [claude|down|json|git|terminal|file|media] [arguments]
 
           Axit claude [<folder>] ...  AxClaude, the front end for Claude Code (Axit claude --help lists its options)
           Axit down [<file>]          AxDown, the text editor
           Axit json [<file>]          AxJSON, the JSON editor
           Axit git [<folder or file>] AxGit, the git manager, on the repository that holds the path
           Axit terminal [<folder>]    AxTerminal, a shell in the folder as a transcript
-          Axit file [<folder or file>] AxFile, the file manager with a player, on the folder (a file selected in its folder)
+          Axit file [<folder or file>] AxFile, the file manager, on the folder (a file selected in its folder)
+          Axit media [<file or folder>...] [--add]  AxMedia, the player: the file with its folder's sound and video files after it, or a folder's; --add appends to the open window's queue
           Axit <folder>               the same as Axit claude <folder>
-          Axit <file>                 the same as Axit down <file>, or Axit json <file> for a .json file
+          Axit <file>                 the same as Axit down <file>, Axit json <file> for a .json file, or Axit media <file> for a sound or video file
           Axit                        AxClaude on the current folder
           --help, --version           this text, or the version
 
-        The installed console commands axit, axclaude, axdown, axjson, axgit, axterminal and axfile stand for Axit, Axit claude, Axit down, Axit json, Axit git, Axit terminal and Axit file.
+        The installed console commands axit, axclaude, axdown, axjson, axgit, axterminal, axfile and axmedia stand for Axit, Axit claude, Axit down, Axit json, Axit git, Axit terminal, Axit file and Axit media.
         """;
 
     public static Launch Decide(string[] args)
@@ -85,6 +87,11 @@ public static class Dispatch
             return new Launch(AxFile, args[1..]);
         }
 
+        if (string.Equals(first, AxMedia, StringComparison.OrdinalIgnoreCase))
+        {
+            return new Launch(AxMedia, args[1..]);
+        }
+
         if (first is "--help" or "-h" or "-?" or "/?" or "--version")
         {
             return new Launch(Bundle, args);
@@ -103,9 +110,13 @@ public static class Dispatch
 
         if (File.Exists(first))
         {
-            // AX-1.2: a .json file is AxJSON's, any other file AxDown's.
-            var json = Path.GetExtension(first).Equals(".json", StringComparison.OrdinalIgnoreCase);
-            return new Launch(json ? AxJSON : AxDown, args);
+            // AX-1.2: a .json file is AxJSON's, a sound or video file AxMedia's, any other file AxDown's.
+            if (Path.GetExtension(first).Equals(".json", StringComparison.OrdinalIgnoreCase))
+            {
+                return new Launch(AxJSON, args);
+            }
+
+            return new Launch(MediaFiles.IsMedia(first) ? AxMedia : AxDown, args);
         }
 
         return new Launch(Bundle, args, $"There is no folder or file at {first}.");
