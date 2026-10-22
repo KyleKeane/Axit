@@ -16,10 +16,10 @@ One file in one window, to read, not to change: a read-only text named after the
 bundle's texts have (AX-7.2): the arrows, Page Up and Page Down, Ctrl+Up and Ctrl+Down by paragraph, find, Go to
 line, `l` for the line number, and for a Markdown file AxDown's navigation keys (headings by level, links, lists,
 list items, block quotes, tables). Ctrl+E opens the same file in its editor, AxDown or AxJSON, for the one time in ten
-the reader wants to change something. The window is reached from AxFile (Enter on a text file, or Preview on any
-file), from File Explorer (Open with Axit on a file), from the Start menu, the Axit menu and the command line; a
-request from AxFile goes to the AxPreview window already open rather than opening another (AP-1.2). It works entirely
-offline (bundle G6).
+the reader wants to change something. The window is reached from AxFile (Shift+Enter on a file, or Item → Preview),
+from File Explorer (Open with Axit on a file, and as the file's default program when the user makes it so), from the
+Start menu, the Axit menu and the command line; a file opened while an AxPreview window is open goes into that window
+rather than a new one (AP-1.2). It works entirely offline (bundle G6).
 
 ## 2. Goals and non-goals
 
@@ -37,16 +37,18 @@ offline (bundle G6).
 
 ## 3. Scenarios
 
-1. In AxFile on a project, Enter on `README.md`: AxPreview opens on it, the window in front: NVDA reads "README.md -
-   AxPreview window", then "README.md, read only edit, multi line" and the first line. Ctrl+H: "Install, heading level
-   2"; Ctrl+K: the next link; `l`: "Line 12 of 40"; Ctrl+F `update`, Enter: the match selected and its line read.
-   Escape does nothing here; Alt+Tab or the Axit menu goes back to AxFile. Ctrl+E: AxDown on the same file, the
-   caret on the same line.
-2. Enter on `notes.txt` in AxFile while AxPreview is open on `README.md`: the same window shows `notes.txt`; "Open
-   recent" lists both.
-3. Ctrl+Shift+P on `report.log` in AxFile, a file no editor takes: AxPreview shows it, since its first bytes read as
-   text. Ctrl+Shift+P on `tool.exe`: AxPreview says "Not a text file" in a notice and keeps what it had.
-4. In File Explorer, right-click `CHANGELOG.md`, Open with Axit, AxPreview: the window opens on it.
+1. In AxFile on a project, Shift+Enter on `README.md`: AxPreview opens on it, the window in front: NVDA reads
+   "README.md - AxPreview window", then "README.md, read only edit, multi line" and the first line. Ctrl+H: "Install,
+   heading level 2"; Ctrl+K: the next link; `l`: "Line 12 of 40"; Ctrl+F `update`, Enter: the match selected and its
+   line read. Escape does nothing here; Alt+Tab or the Axit menu goes back to AxFile. Ctrl+E: AxDown on the same
+   file, the caret on the same line.
+2. Shift+Enter on `notes.txt` in AxFile while AxPreview is open on `README.md`: the same window shows `notes.txt`;
+   "Open recent" lists both.
+3. Shift+Enter on `report.log` in AxFile, a file no editor takes: AxPreview shows it, since its first bytes read as
+   text. Shift+Enter on `tool.exe`: AxPreview says "Not a text file" in a notice and keeps what it had.
+4. In File Explorer, right-click `CHANGELOG.md`, Open with Axit, AxPreview: the window opens on it. The user makes
+   AxPreview the default program for `.log` files in Windows' settings (the guide says how); from then on Enter on
+   a `.log` in AxFile, and a double click in File Explorer, open AxPreview.
 5. The file changes on disk while AxPreview is in the background (Claude edited it); Alt+Tab back: "Reloaded,
    README.md changed on disk", the caret on the same line and column (AxDown AD-3.6).
 
@@ -54,15 +56,19 @@ offline (bundle G6).
 
 ### AP-1 Launch and the hand-over
 
-- AP-1.1 `Axit.exe preview [<file>]`: the file shown; no path opens the window empty, named "Untitled" (Ctrl+O then).
-  Start menu entry `Axit AxPreview`, console command `axpreview`, File Explorer's Open with Axit ▸ AxPreview on every
-  file, the Axit menu's New window (AX-9). A file alone on the command line keeps going to its editor (AX-1.2); the
-  viewer is chosen by name.
-- AP-1.2 **One viewer.** A request from AxFile (Enter on a text file, Preview on any file) goes to the AxPreview window
-  that is open, the most recent by Z order when there are several, and starts one only when there is none; the
-  window is brought to the front, since the user chose to open the file (AP-D2).
-- AP-1.3 **The hand-over** is the bundle's `WM_COPYDATA` message (`Axit.Forms/AppMessage`, `docs/axmedia/SPEC.md`
-  AM-1.3) with the verb `open` and one path; the window answers nothing.
+- AP-1.1 `Axit.exe preview [<file>] [--new]`: the file shown; no path opens the window empty, named "Untitled" (Ctrl+O
+  then). Start menu entry `Axit AxPreview`, console command `axpreview`, File Explorer's Open with Axit ▸ AxPreview on
+  every file, AxPreview under Windows' own Open with for text kinds (`.txt`, `.md`, `.markdown`, `.log`, `.json`,
+  type name "Text file (AxPreview)"), so that the user can make it the default program for a kind in Windows'
+  settings (AP-D2), the Axit menu's New window (AX-9). A file alone on the command line keeps going to its editor
+  (AX-1.2); the viewer is chosen by name or by Windows' association.
+- AP-1.2 **One viewer.** A start with a file, from AxFile, from File Explorer or from the command line, hands the
+  file to the AxPreview window that is open, the most recent by Z order when there are several, brings it to the
+  front and ends; it opens a window of its own only when there is none, or with `--new` (the Axit menu's New window
+  passes it). AxFile does nothing special: it starts the app on the file.
+- AP-1.3 **The hand-over** between the starting process and the open window is the bundle's `WM_COPYDATA` message
+  (`Axit.Forms/AppMessage`, `docs/axmedia/SPEC.md` AM-1.3) with the verb `open` and one path; the window answers
+  nothing; the starting process ends once the message is taken.
 - AP-1.4 Ways out: File → Edit in AxDown / Edit in AxJSON (Ctrl+E; the editor by the file's kind, `.json` to AxJSON,
   anything else to AxDown, a new editor window on the file with the caret put on the viewer's line through the
   editor's own Go to line argument, §9 until the editors take one), Show current file in ▸ File Explorer (Ctrl+W),
@@ -165,8 +171,13 @@ Whether `PreviewForm` is better an `EditorApp` with a read-only flag is decided 
   list. The user's direction of 2026-10-22: AxFile is file operations and management; viewing is handled elsewhere;
   the apps stay simple and well scoped. A viewer of its own has the whole window, the editors' keys unchanged, Go to
   line and the status bar, and is reachable from File Explorer and the command line.
-- **AP-D2 Open takes the focus.** Enter on a file in AxFile opens it in its app, and the keys should be where the text
-  is; AxFile is one Alt+Tab or Axit-menu item away.
+- **AP-D2 Enter is Windows', Shift+Enter is the viewer.** The user's decision of 2026-10-22: Enter on a file in AxFile
+  opens it in the program the user has made its default in Windows, so that AxFile mirrors File Explorer, and the
+  Axit apps register themselves as programs for their kinds so that the user can choose them there (the installer
+  cannot set a default itself: Windows lets only the user do that, in Settings → Apps → Default apps or through
+  Open with → Always; the guide says so). AxPreview is then one Open with Axit choice among others, with Shift+Enter
+  in AxFile as its own key (Shift+Enter has no other meaning on a file in a list; on a folder AxFile gives it File
+  Explorer's: the folder in a new window). The started viewer takes the focus, since the user asked to read.
 - **AP-D3 Text first, whole.** The pane cut a file at a megabyte because it sat under a list; the viewer takes what
   the editors take, 32 MB, and the EDIT control copes as AxDown's does. Other kinds come when there is a way to read
   them that NVDA reads well (§9).
@@ -178,15 +189,12 @@ Whether `PreviewForm` is better an `EditorApp` with a read-only flag is decided 
 ## 8. Testing
 
 - `tests/AxPreview.Tests`: the text rule over bytes and over files in a temporary folder, the settings.
-- `docs/axpreview/nvda-test-plan.md`: opening from AxFile (Enter and Preview, with and without a window open), from
-  File Explorer and the Start menu; the reading keys and the jumps on the tutorial file; `l`, Go to line, find; a
+- `docs/axpreview/nvda-test-plan.md`: opening from AxFile (Shift+Enter and Item → Preview, with and without a window
+  open), from File Explorer (Open with Axit, and as the default for a kind) and the Start menu; the reading keys and the jumps on the tutorial file; `l`, Go to line, find; a
   binary file; a changed-on-disk reload; Ctrl+E into the editor; two viewer windows.
 
 ## 9. Open questions
 
-- Whether Enter on a text file in AxFile goes to AxPreview (read) or to its editor (as before), with the other on
-  another key; this spec and `docs/axfile/SPEC.md` section 9 assume AxPreview, Ctrl+E for the editor, to confirm
-  with the user before the build.
 - The caret handed to the editor on Ctrl+E (a line argument for AxDown and AxJSON on the command line).
 - JSON's navigation keys in the viewer, once AxJSON's outline is shared on this second use.
 - Other kinds: a PDF's text, an image's description, an archive's listing; each a way of reading that NVDA reads well.

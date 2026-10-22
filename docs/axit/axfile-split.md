@@ -14,9 +14,10 @@ apps simple to use and well scoped"). Three things happen:
 
 This file lists every place that changes, grouped by what happens to it, and the order of the commits, so that the
 split can be made step by step with the tests green after each one and nothing in the running apps broken between
-steps (root `CLAUDE.md`, rule 7). Each new app follows `docs/axit/adding-an-app.md`. One decision is still to confirm
-with the user before step 7: whether Enter on a text file in AxFile opens AxPreview (assumed) or its editor as
-before (`docs/axpreview/SPEC.md` §9).
+steps (root `CLAUDE.md`, rule 7). Each new app follows `docs/axit/adding-an-app.md`. The user decided the same day
+what Enter does in AxFile: a file opens in the program the user has made its default in Windows, as in File
+Explorer, and the Axit apps register as programs for their kinds so that they can be chosen there; AxPreview has
+Shift+Enter in AxFile as its own key (`docs/axpreview/SPEC.md` AP-D2, `docs/axfile/SPEC.md` AF-9.1).
 
 ## 1. Moves from AxFile to AxMedia, unchanged where possible (AX-6.3)
 
@@ -59,7 +60,7 @@ before (`docs/axpreview/SPEC.md` §9).
 
 | Place | Content |
 | --- | --- |
-| `src/Axit.Forms/AppMessage.cs` | `Send(appName, verb, paths)`: the newest window of that app through the same `EnumWindows` as `AxitMenu` (`Axit.Core/AxitWindows` tells the app from the title), `WM_COPYDATA` with the text, `SetForegroundWindow` for the verbs that take the focus; true when a window took it. `Receive(ref Message)`: the text back, for a window's `WndProc`. The text form (`verb`, then one path per line) is pure and tested in `Axit.Tests` (`AppMessageTests`). Verbs: `play`, `play-folder`, `add` (AxMedia), `open` (AxPreview). |
+| `src/Axit.Forms/AppMessage.cs` | `Send(appName, verb, paths)`: the newest window of that app through the same `EnumWindows` as `AxitMenu` (`Axit.Core/AxitWindows` tells the app from the title), `WM_COPYDATA` with the text, `SetForegroundWindow` for the verbs that take the focus; true when a window took it, so that the starting process can end. `Receive(ref Message)`: the text back, for a window's `WndProc`. The text form (`verb`, then one path per line) is pure and tested in `Axit.Tests` (`AppMessageTests`). Verbs: `play`, `play-folder`, `add` (AxMedia), `open` (AxPreview). Used by `AxMediaApp.Run` and `AxPreviewApp.Run` before they make a window: with paths and an open window of their own, they send and return; `--new` skips it. AxFile and File Explorer only start the app. |
 | `src/AxMedia.Core/` | `AxMedia.Core.csproj`, `MediaPlayer.cs` (moved), `PlayQueue.cs` (moved), `MediaFolder.cs`, `MediaSettings.cs`, `CLAUDE.md`. |
 | `src/AxMedia/` | `AxMedia.csproj` (embedding the guide), `AxMediaApp.cs`, `MediaForm.cs`, `AxMediaKeys.cs`, `HelpText.cs`, `CLAUDE.md`. |
 | `tests/AxMedia.Tests/` | The project, `PlayQueueTests.cs` (moved), `MediaFolderTests.cs`, `MediaSettingsTests.cs`, `MediaPlayerTests.cs`. |
@@ -76,14 +77,14 @@ before (`docs/axpreview/SPEC.md` §9).
 
 | Place | Change |
 | --- | --- |
-| `src/AxFile.Core/FolderListing.cs` `OpenWay`, `WayOf` | `Play` stays (AxMedia); `AxDown` and `AxJSON` become `Preview` for Enter (assumed, §9 of AxPreview's spec) while `EditorOf(path)` tells Ctrl+E which editor; `WayOf` reads `Axit.Core.MediaFiles.IsMedia`. |
-| `src/AxFile/FileForm.Browse.cs` `OpenSelected` | `Play`: `AppMessage.Send("AxMedia", "play", path)`, else `AxitMenu.Start(Dispatch.AxMedia, path)`; `Preview`: the same with `open` to AxPreview; a folder and Windows' program as now. |
-| `src/AxFile/FileForm.Pane.cs` | Becomes the Actions list (section 6): `_pane` named "Actions", filled from `ActionLog`; `PlayFolder` and `AddToQueue` become hand-overs (`play-folder`, `add`), "Added n to AxMedia's queue"; `ShowPreview` becomes the `open` hand-over; `Report` becomes `Begin`/`End`. |
-| `src/AxFile/FileForm.cs` | The Player menu goes; under Item: Open (Enter), Open with ▸, Open in Axit ▸ (AxMedia and AxPreview appear by themselves from `Dispatch.Apps`; `OpenInAxit` for AxMedia on a folder is `play-folder`), Preview Ctrl+Shift+P (the hand-over), Edit Ctrl+E (the editor), then the operations; Play folder (Ctrl+Enter) and Add to AxMedia's queue (Ctrl+Shift+Q) as two items after Preview. The pane keys: Enter re-reads the line, Ctrl+Z on a line undoes it, Ctrl+I its number and time, Escape back; Tab, Ctrl+Tab and F6 as now. `HideForNotice`, `ShowAfterNotice`, `FocusToKeep`, `ApplyFont`, `SizeChanged` lose the preview and the video. |
+| `src/AxFile.Core/FolderListing.cs` `OpenWay`, `WayOf` | `OpenWay` keeps `Folder` and `Windows` only: Enter on any file is Windows' default program (AF-9.1); `EditorOf(path)` tells Ctrl+E which editor (`.json` AxJSON, else AxDown); `IsMedia` (now `Axit.Core.MediaFiles`) serves Add to queue and Play folder. |
+| `src/AxFile/FileForm.Browse.cs` `OpenSelected` | A folder here; a file through `OpenWithWindows` (ShellExecute, the Open with dialog when Windows has no program), as the "anything else" branch does today. `Shift+Enter`: a file to AxPreview (`AxitMenu.Start(Dispatch.AxPreview, path)`), a folder in a new AxFile window. |
+| `src/AxFile/FileForm.Pane.cs` | Becomes the Actions list (section 6): `_pane` named "Actions", filled from `ActionLog`; `PlayFolder` and `AddToQueue` start AxMedia on the folder or the marked entries (`--add`), "Added n to AxMedia's queue"; `ShowPreview` starts AxPreview on the entry; `Report` becomes `Begin`/`End`. |
+| `src/AxFile/FileForm.cs` | The Player menu goes; under Item: Open (Enter), Open with ▸, Open in Axit ▸ (AxMedia and AxPreview appear by themselves from `Dispatch.Apps`; `OpenInAxit` for AxMedia on a folder plays the folder), Preview Shift+Enter, Edit Ctrl+E (the editor), Play folder in AxMedia Ctrl+Enter, Add to AxMedia's queue Ctrl+Shift+Q, then the operations. The pane keys: Enter re-reads the line, Ctrl+Z on a line undoes it, Ctrl+I its number and time, Escape back; Tab, Ctrl+Tab and F6 as now. `HideForNotice`, `ShowAfterNotice`, `FocusToKeep`, `ApplyFont`, `SizeChanged` lose the preview and the video. |
 | `src/AxFile/FileForm.Operations.cs` | `_history` becomes the `ActionLog`; every operation records its line and its `Operation` in one place; Ctrl+Z anywhere undoes the newest undoable action, Ctrl+Z on a line of the Actions list undoes that one. |
 | `src/AxFile.Core/OperationHistory.cs` | Replaced by `ActionLog`; `Operation` stays. |
 | `src/AxFile.Core/FileOperations.cs`, `Archives.cs` | Unchanged (the progress callback feeds the Actions line). |
-| `src/AxFile/AxFileKeys.cs`, `HelpText.cs` | The player's and the preview's keys go (Ctrl+Enter, Ctrl+Shift+Q and Ctrl+Shift+P stay as hand-overs); the F1 sections "The player", "The queue", "The preview" become "Sound, video and viewing" (four lines) and "Actions". |
+| `src/AxFile/AxFileKeys.cs`, `HelpText.cs` | The player's and the preview's keys go; `Preview` becomes Shift+Enter (Ctrl+Shift+P goes); Ctrl+Enter and Ctrl+Shift+Q stay as the AxMedia starts; the F1 sections "The player", "The queue", "The preview" become "Sound, video and viewing" (four lines) and "Actions". |
 | `src/AxFile/CLAUDE.md`, `src/AxFile.Core/CLAUDE.md` | The player, the queue and the preview paragraphs go; the Actions list and the hand-overs come. |
 | `docs/axfile/SPEC.md` | Section 1 (summary), 2 (G3, G5, non-goals), 3 (scenarios 1, 2), AF-1.3, AF-2 (the video area), AF-3.2 (Enter), AF-4.14 (undo on a line), AF-5 (a pointer to AxMedia), AF-6.1, AF-6.2, AF-7, AF-8.1, AF-9 (from section 9), the architecture block, AF-D2, AF-D3, AF-D4, AF-D6, AF-D9's last sentence, §7, §8. |
 | `docs/axfile/user-guide.md`, `docs/axfile/nvda-test-plan.md` | As above; §6 becomes the Actions pane. |
@@ -116,8 +117,8 @@ before (`docs/axpreview/SPEC.md` §9).
 | `src/Axit/Axit.csproj`, `Axit.sln` | The references and the six projects. |
 | `tests/Axit.Tests/KeyTests.cs`, `LayoutTests` | The two key tables and F1 texts; the reference direction holds (neither app references AxFile). |
 | `run.ps1` | `media` and `preview` in the `ValidateSet` and their branches. |
-| `install.ps1` | Two `$apps` blocks: AxMedia (Verb media, "AxMedia, a player for sound and video files", Opens files, Types the media extensions, OpenWith the same with TypeName "Media file (AxMedia)"); AxPreview (Verb preview, "AxPreview, a read-only viewer for files", Opens files). AxFile's description loses "with a player". |
-| `docs/axit/README.md` | The two apps, their Start entries, commands and Explorer entries; AxFile's line. |
+| `install.ps1` | Two `$apps` blocks: AxMedia (Verb media, "AxMedia, a player for sound and video files", Opens files, Types the media extensions, OpenWith the same with TypeName "Media file (AxMedia)"); AxPreview (Verb preview, "AxPreview, a read-only viewer for files", Opens files, OpenWith `.txt`, `.md`, `.markdown`, `.log`, `.json` with TypeName "Text file (AxPreview)"). AxFile's description loses "with a player". The registration makes each app a program the user can choose as the default for a kind in Windows' settings; Windows lets no installer set the default itself. |
+| `docs/axit/README.md`, the apps' guides | The two apps, their Start entries, commands and Explorer entries; AxFile's line; one paragraph on making an Axit app the default program for a kind (Settings → Apps → Default apps, or Open with → Always), since Enter in AxFile follows it. |
 | `docs/axit/SPEC.md` | Section 3 (the two apps; AxFile's entry), AX-1.2, AX-1.6 (the app ids), AX-2.3's table, AX-8.3 (the key tables), the architecture listing. |
 | Root `CLAUDE.md` | The map lines for AxMedia and AxPreview; AxFile's line loses "with a player". |
 | `docs/axit/plan.md` | The AxMedia paragraph: the reversal of AF-D2 and the date (done). |
@@ -135,16 +136,18 @@ while Axit runs (root `CLAUDE.md`). Branch `split`, merged when the NVDA plans h
 3. `Axit.Forms/AppMessage` with the text form's tests.
 4. `AxMedia.Core`: the project, `MediaPlayer` and `PlayQueue` copied in (the deletion from `AxFile.Core` comes in
    step 6, so that both apps build throughout), `MediaFolder`, `MediaSettings`, the tests, `CLAUDE.md`.
-5. `AxMedia`: the window, the keys, the texts, the guide, the test plan, the wiring, `CLAUDE.md`. AxMedia is usable
-   alone and from File Explorer after this commit; AxFile still plays in its own window.
-6. AxFile hands over to AxMedia: Enter on a media file, Play folder and Add to queue; the player, the video area, the
-   Player menu, its keys and settings leave AxFile; `FileForm.Player.cs`, the copies of `MediaPlayer` and `PlayQueue`
-   in `AxFile.Core` and their tests are deleted; the spec, guide, test plan and notes follow.
+5. `AxMedia`: the window, the keys, the texts, the guide, the test plan, the wiring, `CLAUDE.md`, the single-window
+   start through `AppMessage`. AxMedia is usable alone and from File Explorer after this commit; AxFile still plays
+   in its own window.
+6. AxFile hands over to AxMedia: Enter on a file becomes Windows' default program for every kind, Play folder and
+   Add to queue start AxMedia; the player, the video area, the Player menu, its keys and settings leave AxFile;
+   `FileForm.Player.cs`, the copies of `MediaPlayer` and `PlayQueue` in `AxFile.Core` and their tests are deleted;
+   the spec, guide, test plan and notes follow.
 7. `AxPreview.Core` and `AxPreview`: the projects, `TextSniff` copied in, the window on the shared pieces (AP-D4
    decided here, with any shell piece moved to `Axit.Forms` in its own commit first), the keys, the texts, the guide,
-   the test plan, the wiring, `CLAUDE.md`. The Enter question (above) is confirmed with the user before this step.
-8. AxFile hands over to AxPreview: Enter on a text file (as confirmed) and Preview; the preview leaves AxFile (code,
-   keys, texts, docs); `Preview.cs` and its tests are deleted.
+   the test plan, the wiring, `CLAUDE.md`, the single-window start.
+8. AxFile hands over to AxPreview: Shift+Enter and Item → Preview start it; the preview leaves AxFile (code, keys,
+   texts, docs); `Preview.cs` and its tests are deleted.
 9. `ActionLog` in `AxFile.Core` with tests; the pane becomes the Actions list; Ctrl+Z on a line; `OperationHistory`
    and the queue's status lines go; AF-9 rewritten from section 9; the test plan's section 6.
 10. Verification: every test project, the `accessibility-review` skill on the three windows, the probes off screen

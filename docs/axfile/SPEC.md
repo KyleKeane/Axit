@@ -607,16 +607,21 @@ with a tight hand-over from here. This section is what AF-1, AF-2, AF-3.2, AF-5,
 decisions become on the build; the inventory of every change and the order of the commits is
 `docs/axit/axfile-split.md`. Until the build, the sections above are the truth about the code.
 
-- AF-9.1 (planned) **What changes for the user.** Enter on a sound or video file opens it in AxMedia, which plays it
-  with the folder's media files after it; Enter on a text file opens it in AxPreview to read (assumed; to confirm:
-  the editors stay one key away, Ctrl+E), Enter on a folder opens it here, Enter on anything else opens the program
-  Windows has for it. Play folder in AxMedia (Ctrl+Enter) and Add to AxMedia's queue (Ctrl+Shift+Q) hand the folder
-  or the marked entries over; Preview (Ctrl+Shift+P) hands any file to AxPreview. The hand-over goes to the AxMedia
-  or AxPreview window already open, else starts one (AM-1.2, AP-1.2); a play and an open take the focus there, an
-  add does not: "Added 12 to AxMedia's queue" is said here. The Player menu, the player's keys (Ctrl+P, Ctrl+Left,
-  Ctrl+Right, Ctrl+Shift+Left, Ctrl+Shift+Right, Ctrl+T, Ctrl+Shift+Period, Ctrl+Shift+Comma, Ctrl+Q), the video
-  area, the queue and the preview leave this window; the settings `speed`, `seekSeconds` and `sayEachFile` leave
-  `axfile.json`.
+- AF-9.1 (planned) **What changes for the user.** Enter on a folder opens it here; Enter on any file opens it in the
+  program the user has made its default in Windows, exactly as a double click in File Explorer does (the user's
+  decision of 2026-10-22: AxFile mirrors the system's defaults, and the Axit apps register themselves as programs
+  for their kinds so that AxDown, AxJSON, AxMedia or AxPreview can be chosen as the default in Windows' settings; the
+  guide says how, since an installer cannot set a default). The kinds AxFile used to route itself (`.md`, `.txt` and
+  `.json` to the editors, media to the player) go the same way. **Shift+Enter** on a file opens it in AxPreview to
+  read (Item → Preview; Ctrl+Shift+P goes); on a folder it is File Explorer's Shift+Enter, the folder in a new AxFile
+  window. **Ctrl+E** stays the editor by kind (AxJSON for `.json`, AxDown otherwise). **Play folder in AxMedia**
+  (Ctrl+Enter) and **Add to AxMedia's queue** (Ctrl+Shift+Q) start AxMedia on the folder, or on the marked entries
+  with `--add`; AxMedia hands them to its open window itself (AM-1.2), so AxFile only starts the app; an add leaves
+  the focus here, "Added 12 to AxMedia's queue". Item → Open in Axit ▸ lists AxMedia and AxPreview with the other
+  apps, by themselves. The Player menu, the player's keys (Ctrl+P, Ctrl+Left, Ctrl+Right, Ctrl+Shift+Left,
+  Ctrl+Shift+Right, Ctrl+T, Ctrl+Shift+Period, Ctrl+Shift+Comma, Ctrl+Q), the video area, the queue and the preview
+  leave this window; the settings `speed`, `seekSeconds` and `sayEachFile` leave `axfile.json`; `OpenWay` keeps
+  only Folder and Windows, with the editor for Ctrl+E found by the extension.
 - AF-9.2 (planned) **The Actions list.** The pane under the folder list holds one list, "Actions", shown the first
   time an operation runs and kept for the window's life (AX-9.5: "No actions yet" as its one line until then is not
   needed, since it appears with the first); Tab, Shift+Tab, Ctrl+Tab, Ctrl+Shift+Tab and F6 move between the folder
@@ -634,9 +639,10 @@ decisions become on the build; the inventory of every change and the order of th
   line, whatever its place, with the same checks ("Not undone: … has changed" when a later action touched the entry;
   the line says so afterwards). Enter on a line reads it again; Ctrl+I says its number and time, "3 of 12, 21:04";
   Delete does nothing (an action is a record, not an entry). There is no redo.
-- AF-9.4 (planned) **The hand-over** is the bundle's window message, `Axit.Forms/AppMessage` (AM-1.3): the window
-  of the app found by its title through the Axit menu's window list, `WM_COPYDATA` with a verb and the paths; the
-  receiving app acts, the sending one says nothing but the add's count. Nothing of it is on the network (G6).
+- AF-9.4 (planned) **The hand-over** is not AxFile's: it starts the app on the paths (`Axit.exe media <paths>`,
+  `--add`; `Axit.exe preview <file>`), as the Axit menu starts a window, and the started process finds its open
+  window and hands the paths over with the bundle's window message, `Axit.Forms/AppMessage` (AM-1.3, AP-1.3). AxFile
+  says nothing but the add's count. Nothing of it is on the network (G6).
 - AF-9.5 (planned) **What AxFile is then.** One folder in one window: the list of its entries, the operations (new
   folder, new text file, rename, delete, cut, copy, paste, move to new folder, compress, extract, copy path), the
   marks, the sort and the filter, Favorites, This PC and the drives, the ways to the other apps on an entry or the
