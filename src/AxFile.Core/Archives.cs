@@ -16,15 +16,18 @@ public static class Archives
     /// <summary>
     /// Compresses files and folders into a new zip in <paramref name="folder"/>, named after the one entry without
     /// its extension, or after the folder for several; a folder's contents go under its name, an empty folder as an
-    /// entry of its own. Written to a temporary name and moved into place. Returns the zip's path.
+    /// entry of its own. The name is taken at once with an empty file, so that a second compress running meanwhile
+    /// picks the next one (AF-4.5); the zip is written to a temporary name and moved over it. Returns the zip's path.
     /// </summary>
     public static string Compress(IReadOnlyList<string> sources, string folder, Action<int, int>? progress = null)
     {
         var stem = sources.Count == 1 ? System.IO.Path.GetFileNameWithoutExtension(sources[0]) : FolderListing.FolderName(folder);
         var zip = FileOperations.FreeName(folder, stem.Length == 0 ? "archive" : stem, ".zip");
+        File.WriteAllBytes(zip, []);
         var temporary = zip + ".tmp";
         var total = sources.Sum(CountFiles);
         var done = 0;
+        var written = false;
         try
         {
             using (var archive = ZipFile.Open(temporary, ZipArchiveMode.Create))
@@ -35,13 +38,19 @@ public static class Archives
                 }
             }
 
-            File.Move(temporary, zip);
+            File.Move(temporary, zip, overwrite: true);
+            written = true;
         }
         finally
         {
             if (File.Exists(temporary))
             {
                 File.Delete(temporary);
+            }
+
+            if (!written && File.Exists(zip))
+            {
+                File.Delete(zip);
             }
         }
 

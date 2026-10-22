@@ -1,4 +1,5 @@
 using AxFile.Core;
+using Axit.Core;
 using Axit.Forms;
 
 namespace AxFile;
@@ -26,6 +27,18 @@ public static class AxFileApp
             if (!AppHost.OnePath(Name, "folder or file", Usage, arguments, out var path))
             {
                 return null;
+            }
+
+            // A file manager holds no folder open (AF-1.4): a folder that is a process's current directory cannot
+            // be renamed or moved while the process runs, and the apps started from here inherit this one's.
+            // The path of the command line is already full (OnePath), so nothing relative is lost.
+            try
+            {
+                Environment.CurrentDirectory = AppContext.BaseDirectory;
+            }
+            catch (Exception ex) when (ex is IOException or UnauthorizedAccessException or ArgumentException)
+            {
+                Log.Error("The working directory could not be moved off the user's folders", ex);
             }
 
             var settings = FileSettings.Load(FileSettings.DefaultPath, out var settingsError);

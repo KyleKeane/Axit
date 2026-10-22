@@ -29,6 +29,13 @@ public sealed partial class FileForm
     /// <summary>Whether an undo is on its way: a second Ctrl+Z says so rather than racing it.</summary>
     private bool _undoing;
 
+    /// <summary>
+    /// The paths the operations still running are writing, and the ones they are moving away (AF-4.5): every
+    /// operation runs on a thread of its own and several run at once, so a second paste chooses its names around the
+    /// first's, and a cut whose files are already on their way is not pasted twice.
+    /// </summary>
+    private readonly HashSet<string> _inFlight = new(StringComparer.OrdinalIgnoreCase);
+
     /// <summary>Folder → Undo <operation> (Ctrl+Z, AF-4.14): the newest line of the Actions list that can be taken back; "Nothing to undo" when none can.</summary>
     private void Undo()
     {
@@ -259,7 +266,20 @@ public sealed partial class FileForm
                     var destinations = await Task.Run(() => FileOperations.Destinations(sources, made));
                     // AF-9.2: the operation's line in the Actions list, replaced when it ends.
                     var action = Begin($"Moving {what} into {name}");
-                    if (await FileOperations.CopyOrMoveAsync(sources, destinations, move: true) is { } reason)
+                    _inFlight.UnionWith(sources);
+                    _inFlight.UnionWith(destinations);
+                    string? reason;
+                    try
+                    {
+                        reason = await FileOperations.CopyOrMoveAsync(sources, destinations, move: true);
+                    }
+                    finally
+                    {
+                        _inFlight.ExceptWith(sources);
+                        _inFlight.ExceptWith(destinations);
+                    }
+
+                    if (reason is not null)
                     {
                         Fail(action, "Move failed", reason);
                         return;
@@ -555,28 +575,58 @@ public sealed partial class FileForm
         {
             // A cut entry already in this folder has nowhere to go.
             paths.RemoveAll(path => string.Equals(Path.GetDirectoryName(path), folder, StringComparison.OrdinalIgnoreCase));
+            if (paths.Count == 0)
+            {
+                Announce("Already in this folder", true);
+                return;
+            }
+
+            // A cut whose files a paste is still moving (AF-4.5): a second paste would race the first.
+            if (paths.RemoveAll(_inFlight.Contains) > 0 && paths.Count == 0)
+            {
+                Announce("Already pasting", true);
+                return;
+            }
         }
 
         if (paths.Count == 0)
         {
-            Announce(move ? "Already in this folder" : "Nothing to paste", true);
+            Announce("Nothing to paste", true);
             return;
         }
 
         Do(async () =>
         {
-            // The names are chosen first: a name already in the folder becomes "name - 2" (AF-4.8).
-            var destinations = await Task.Run(() => FileOperations.Destinations(paths, folder));
+            // The names are chosen first: a name already in the folder, or one a running paste is writing, becomes "name - 2" (AF-4.8, AF-4.5).
+            var reserved = _inFlight.ToList();
+            var destinations = await Task.Run(() => FileOperations.Destinations(paths, folder, reserved));
             var what = paths.Count == 1 ? Path.GetFileName(destinations[0]) : $"{paths.Count} items";
             // AF-9.2: the operation's line in the Actions list; the shell gives no count, so the line waits until it ends.
             var action = Begin((move ? "Moving " : "Copying ") + what);
-            var operation = FileOperations.CopyOrMoveAsync(paths, destinations, move);
-            if (await Task.WhenAny(operation, Task.Delay(1000)) != operation)
+            _inFlight.UnionWith(destinations);
+            if (move)
             {
-                Announce("Pasting, please wait", true);
+                _inFlight.UnionWith(paths);
             }
 
-            if (await operation is { } reason)
+            string? reason;
+            try
+            {
+                var operation = FileOperations.CopyOrMoveAsync(paths, destinations, move);
+                if (await Task.WhenAny(operation, Task.Delay(1000)) != operation)
+                {
+                    Announce("Pasting, please wait", true);
+                }
+
+                reason = await operation;
+            }
+            finally
+            {
+                _inFlight.ExceptWith(destinations);
+                _inFlight.ExceptWith(paths);
+            }
+
+            if (reason is not null)
             {
                 Fail(action, "Paste failed", reason);
                 return;

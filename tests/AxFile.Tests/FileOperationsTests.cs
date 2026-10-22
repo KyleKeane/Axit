@@ -112,6 +112,40 @@ public sealed class FileOperationsTests : IDisposable
         Assert.Equal(["Docs"], Directory.GetDirectories(_folder).Select(Path.GetFileName));
     }
 
+    /// <summary>
+    /// A folder renamed once is renamed again at once, with the window's reads in between (the parent listed, the
+    /// folder itself listed, its information asked), which hold nothing open. What does hold a folder is a process
+    /// whose current directory it is: that is Windows' "being used by another process", said here as In use.
+    /// </summary>
+    [Fact]
+    public void A_folder_is_renamed_twice_in_a_row_and_a_current_directory_says_in_use()
+    {
+        var first = FileOperations.Rename(Path.Combine(_folder, "docs"), "Docs 2");
+        FolderListing.Read(_folder, showHidden: false, showDotFiles: false);
+        var listing = FolderListing.Read(first, showHidden: false, showDotFiles: false);
+        Assert.Empty(listing.Entries);
+        FolderListing.Information(new Entry("Docs 2", first, true, 0, Directory.GetLastWriteTime(first)));
+        var second = FileOperations.Rename(first, "Docs 3");
+        Assert.Equal(Path.Combine(_folder, "Docs 3"), second);
+        Assert.True(Directory.Exists(second));
+        var third = FileOperations.Rename(second, "Docs 4");
+        Assert.True(Directory.Exists(third));
+
+        var before = Environment.CurrentDirectory;
+        Environment.CurrentDirectory = third;
+        try
+        {
+            var error = Assert.Throws<IOException>(() => FileOperations.Rename(third, "Docs 5"));
+            Assert.Equal(FileOperations.InUse, FileOperations.Message(error));
+        }
+        finally
+        {
+            Environment.CurrentDirectory = before;
+        }
+
+        Assert.True(Directory.Exists(FileOperations.Rename(third, "Docs 5")));
+    }
+
     [Fact]
     public void A_rename_to_the_same_name_does_nothing_and_to_a_taken_name_is_an_error()
     {
@@ -154,6 +188,46 @@ public sealed class FileOperationsTests : IDisposable
     private static Task<string?> CopyOrMoveAsync(IReadOnlyList<string> sources, string folder, bool move) =>
         FileOperations.CopyOrMoveAsync(sources, FileOperations.Destinations(sources, folder), move);
 
+    /// <summary>Two pastes at once (AF-4.5): each shell operation runs on a thread of its own, and the second chooses its names around the first's.</summary>
+    [Fact]
+    public async Task Two_copies_run_at_the_same_time_and_the_second_avoids_the_firsts_names()
+    {
+        var docs = Path.Combine(_folder, "docs");
+        var notes = Path.Combine(_folder, "notes.md");
+        var first = FileOperations.Destinations([notes], docs);
+        var second = FileOperations.Destinations([notes], docs, reserved: first);
+        Assert.Equal([Path.Combine(docs, "notes.md")], first);
+        Assert.Equal([Path.Combine(docs, "notes - 2.md")], second);
+
+        var one = FileOperations.CopyOrMoveAsync([notes], first, move: false);
+        var two = FileOperations.CopyOrMoveAsync([notes], second, move: false);
+        var results = await Task.WhenAll(one, two);
+        Assert.All(results, Assert.Null);
+        Assert.True(File.Exists(first[0]));
+        Assert.True(File.Exists(second[0]));
+    }
+
+    [Fact]
+    public void Two_compresses_of_the_same_entry_take_different_names()
+    {
+        var notes = Path.Combine(_folder, "notes.md");
+        var started = new ManualResetEventSlim();
+        var release = new ManualResetEventSlim();
+        // The first compress holds its name while it works; the second starts meanwhile.
+        var first = Task.Run(() => Archives.Compress([notes], _folder, (_, _) =>
+        {
+            started.Set();
+            release.Wait();
+        }));
+        started.Wait();
+        var second = Archives.Compress([notes], _folder);
+        release.Set();
+        Assert.Equal(Path.Combine(_folder, "notes.zip"), first.Result);
+        Assert.Equal(Path.Combine(_folder, "notes - 2.zip"), second);
+        Assert.True(new FileInfo(first.Result).Length > 0);
+        Assert.True(new FileInfo(second).Length > 0);
+    }
+
     [Fact]
     public void A_free_name_adds_a_dash_and_a_number_and_destinations_avoid_each_other()
     {
@@ -178,6 +252,8 @@ public sealed class FileOperationsTests : IDisposable
     public void Messages_are_one_line()
     {
         Assert.Equal("Access denied", FileOperations.Message(new UnauthorizedAccessException("x")));
+        Assert.Equal(FileOperations.InUse, FileOperations.Message(new IOException("The process cannot access the file because it is being used by another process.", unchecked((int)0x80070020))));
+        Assert.Equal(FileOperations.AccessDenied, FileOperations.Message(new IOException("Access to the path is denied.", unchecked((int)0x80070005))));
         Assert.Equal("The folder is gone", FileOperations.Message(new DirectoryNotFoundException("x")));
         Assert.Equal("a b", FileOperations.Message(new IOException("a\r\nb")));
     }

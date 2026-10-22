@@ -157,23 +157,29 @@ public static class FileOperations
         }
     }
 
-    /// <summary>Where each source lands when copied or moved into <paramref name="folder"/> (AF-4.8): under its own name, or "name - 2" when that is taken by the folder or by an earlier source.</summary>
-    public static IReadOnlyList<string> Destinations(IReadOnlyList<string> sources, string folder)
+    /// <summary>
+    /// Where each source lands when copied or moved into <paramref name="folder"/> (AF-4.8): under its own name, or
+    /// "name - 2" when that is taken by the folder, by an earlier source, or by <paramref name="reserved"/>, the
+    /// paths an operation still running is writing (AF-4.5), so that two pastes at once never meet.
+    /// </summary>
+    public static IReadOnlyList<string> Destinations(IReadOnlyList<string> sources, string folder, IEnumerable<string>? reserved = null)
     {
+        var taken = new List<string>(reserved ?? []);
         var destinations = new List<string>();
         foreach (var source in sources)
         {
             var name = Path.GetFileName(Path.TrimEndingDirectorySeparator(source));
             var isFolder = Directory.Exists(source);
             var path = Path.Combine(folder, name);
-            if (File.Exists(path) || Directory.Exists(path) || destinations.Contains(path, StringComparer.OrdinalIgnoreCase))
+            if (File.Exists(path) || Directory.Exists(path) || taken.Contains(path, StringComparer.OrdinalIgnoreCase))
             {
                 path = isFolder
-                    ? FreeName(folder, name, string.Empty, destinations)
-                    : FreeName(folder, Path.GetFileNameWithoutExtension(name), Path.GetExtension(name), destinations);
+                    ? FreeName(folder, name, string.Empty, taken)
+                    : FreeName(folder, Path.GetFileNameWithoutExtension(name), Path.GetExtension(name), taken);
             }
 
             destinations.Add(path);
+            taken.Add(path);
         }
 
         return destinations;
@@ -278,11 +284,27 @@ public static class FileOperations
         }
     }
 
+    /// <summary>
+    /// Windows' "being used by another process" (AF-4.5), said with what it means here: a folder that is some
+    /// process's current directory (a terminal or an app started in it, AxTerminal or AxClaude opened on it) cannot be
+    /// renamed or moved while that process runs, nor a file that a program holds open.
+    /// </summary>
+    public const string InUse = "In use by another program: a terminal or an app runs in it, or the file is open";
+
+    /// <summary>Windows' "access denied" from a move of a folder with an open file inside it, which is what it most often is here.</summary>
+    public const string AccessDenied = "Access denied: a file inside is open in another program, or Windows protects the place";
+
+    private const int SharingViolation = unchecked((int)0x80070020);
+    private const int LockViolation = unchecked((int)0x80070021);
+    private const int AccessDeniedCode = unchecked((int)0x80070005);
+
     public static string Message(Exception exception) => exception switch
     {
         UnauthorizedAccessException => "Access denied",
         DirectoryNotFoundException => "The folder is gone",
         FileNotFoundException => "The file is gone",
+        IOException { HResult: SharingViolation or LockViolation } => InUse,
+        IOException { HResult: AccessDeniedCode } => AccessDenied,
         _ => exception.Message.Replace("\r\n", " ").Replace('\n', ' ').Trim(),
     };
 
@@ -339,6 +361,7 @@ public static class FileOperations
     /// <summary>The shell's own codes for a file operation, and Windows' message for the rest.</summary>
     private static string ShellMessage(int code, string what) => code switch
     {
+        0x20 or 0x21 => InUse,
         0x71 => "The source and the destination are the same",
         0x74 => $"{what} of a drive's root is not allowed",
         0x75 => $"{what} was cancelled",

@@ -67,7 +67,11 @@ folder of the file or project in hand, and sends back. It works entirely offline
   Explorer (AX-2.3). A folder or file given alone to `Axit.exe` still means AxClaude or an editor (AX-1.2); AxFile is
   always named by its verb. Without a path: the last folder opened, or the user's profile folder.
 - AF-1.2 `AxFileApp.Run(args)` is the entry point (AX-1.7), one call into `AppHost.Run` with the log name `axfile`,
-  the usage text, the settings (`axfile.json`) and the window.
+  the usage text, the settings (`axfile.json`) and the window. The process moves its working directory to the
+  program's own folder first (the path of the command line already being full): a folder that is some process's
+  current directory cannot be renamed or moved while that process runs (Windows' "being used by another process"),
+  so a file manager holds none, and the apps it starts inherit none (found 2026-10-22: a folder renamed once could
+  not be renamed again while a program had it as its current directory; AF-4.5).
 - AF-1.3 **To and from the other windows.** AxClaude's Session → Show current folder in ▸ **AxFile**, the editors'
   File → Show current file in ▸ **AxFile** (the file's folder, the file selected), AxGit's Repository → Show current
   repository in ▸ **AxFile**, AxTerminal's Session → Show current folder in ▸ **AxFile** and AxMedia's Queue → Show
@@ -223,8 +227,19 @@ Every operation here is one line of the Actions list (AF-9) as well as its annou
 - AF-4.4 **Copy path** (Ctrl+Shift+C): the full path to the clipboard, "Copied path"; with entries marked, each path
   on a line, "Copied n paths". Not an operation on disk: no line in the Actions list.
 - AF-4.5 A failure (a name taken, a file in use, access denied) is one announcement, "Failed: <Windows' message>",
-  when it is one line, a notice otherwise (AxGit AG-7), and the operation's line reads "Failed: <reason>". Every
-  operation runs on a background task; the list refreshes after it.
+  when it is one line, a notice otherwise (AxGit AG-7), and the operation's line reads "Failed: <reason>". Two of
+  Windows' messages are said with what they mean here, since both come from something outside AxFile: "In use by
+  another program: a terminal or an app runs in it, or the file is open" (a folder that is a process's current
+  directory, AxTerminal or AxClaude opened on it, a program started from Open with ▸ in it, or a file a program holds;
+  verified 2026-10-22, when a folder renamed once could not be renamed again for this reason), and "Access denied: a
+  file inside is open in another program, or Windows protects the place". **Every operation runs on a thread of its
+  own** (a task for the reads, the rename and the new folder; a single-threaded-apartment thread per shell operation
+  for copy, move, delete and the Recycle Bin's Restore) and the window never waits for one: a second paste, delete or
+  zip starts while the first runs, each with its own line in the Actions list (AF-9.2). Two operations at once are
+  kept apart: a paste chooses its names around the paths a running paste is still writing ("notes - 2.md" for the
+  same clipboard pasted twice, `FileOperations.Destinations` with the reserved paths), a cut whose files a paste is
+  still moving says "Already pasting" rather than moving them twice, and a compress takes its zip's name at once so
+  that a second compress picks the next (AF-4.12). The list refreshes after each operation.
 - AF-4.6 **The entry's menu** (Shift+F10, the Applications key, a right click): the Item menu as the list's context
   menu, the same items in the same order, on the selected entry (a right click selects the entry under it first, as
   File Explorer does). It is the window's own menu, fixed, with mnemonics and listed in F1, not the shell's (AF-D8).
@@ -253,7 +268,8 @@ Every operation here is one line of the Actions list (AF-9) as well as its annou
   than a question, nothing overwritten; `FileOperations.CopyOrMoveAsync`, tested): "Pasted <name>" or "Pasted n
   items", the first one selected, the line "Copied n items" or "Moved n items"; "Pasting, please wait" when it takes
   longer than a second; after a move the clipboard is cleared, as File Explorer does. "Nothing to paste" without
-  files on the clipboard; "Already in this folder" for a cut entry pasted where it is.
+  files on the clipboard; "Already in this folder" for a cut entry pasted where it is; "Already pasting" for a cut
+  whose files a paste is still moving (AF-4.5).
 - AF-4.9 **Open in Axit ▸**: one item per app of the bundle, from `Dispatch.Apps`, a new window of that app on the
   entry: AxDown, AxJSON and AxPreview on the file ("Not a file" on a folder), AxMedia on the file with its folder's
   media files after it, or on a folder's (AxMedia hands them to its open window itself), AxGit on the repository that
@@ -282,8 +298,9 @@ Every operation here is one line of the Actions list (AF-9) as well as its annou
 - AF-4.12 **Compress to zip, Extract here** (the Item menu; asked 2026-10-21), through .NET's own `ZipFile`, no
   package (`Archives` in `AxFile.Core`, tested). **Compress to zip** puts the selected entries, or the current one
   (AF-3.7), into a new zip in the folder shown, named after the one entry without its extension ("notes.zip") or
-  after the folder for several ("Dune.zip"), "name - 2.zip" when the name is taken, a folder's contents under its
-  name; "Compressed to <name>", the zip selected; "Compressing, please wait" when it passes a second, the line
+  after the folder for several ("Dune.zip"), "name - 2.zip" when the name is taken (the name is taken the moment the
+  compress starts, so two at once never share one), a folder's contents under its name; "Compressed to <name>", the
+  zip selected; "Compressing, please wait" when it passes a second, the line
   counting the files meanwhile (AF-9.2). **Extract here** on a `.zip` makes a new folder named after it next to it
   ("Dune", or "Dune - 2" when taken) and extracts into it, so that nothing is written over; "Extracted to <name>",
   the folder selected; "Not a zip file" on anything else. A failure is "Failed: <reason>" (AF-4.5). Other archive
@@ -385,13 +402,15 @@ video files here", "No sound or video files to add" (AF-5), "Undone: …", "Not 
 still running" (AF-4.14), "No actions yet", "Still running", "Already undone", "Nothing to undo here", "n of m, hh:mm",
 "Folder not found" (the Actions list, AF-9.3), "Refreshed", "Not found: <path>", "Failed: <message>", "<name>, <size>,
 modified <date>" (Ctrl+I), "Not found" (find), "Nothing to save here", "Text size n", "Windows text size", "Copied
-diagnostics", "<name>, <size>, modified <date>, n selected" (Ctrl+I with marks); and the guards "No folder" (nothing
+diagnostics", "<name>, <size>, modified <date>, n selected" (Ctrl+I with marks), "Failed: In use by another program: a
+terminal or an app runs in it, or the file is open", "Failed: Access denied: a file inside is open in another program,
+or Windows protects the place" (AF-4.5); and the guards "No folder" (nothing
 listed yet), "No items in this folder" (a command on an empty folder's one item, AF-2.2), "No names contain <text>"
 (the same under a filter, AF-3.8), "Not shown: …" (the same on the list's last line, AF-2.2), "Nothing selected",
 "Choose a drive first" (a folder command at This PC, AF-3.10), "Not a file" (Ctrl+E or Open with… on a folder), "Not
 a zip file" (Extract here, AF-4.12), "Name unchanged" (a rename to the same name), "Nothing to paste" (no files on the
-clipboard), "Already in this folder" (a cut entry pasted where it is), "Reads the same as <name>, which is already
-here" (AF-4.2), "Type a name" and the other reasons of `FileOperations.CheckName`. A new selection is NVDA's own
+clipboard), "Already in this folder" (a cut entry pasted where it is), "Already pasting" (a cut still on its way,
+AF-4.5), "Reads the same as <name>, which is already here" (AF-4.2), "Type a name" and the other reasons of `FileOperations.CheckName`. A new selection is NVDA's own
 reading.
 
 ### AF-8 Settings, log, status
@@ -543,3 +562,9 @@ AF-D4 (the volume) and AF-D6 (the queue fixed at Enter) went to AxMedia with the
   with Enter to the action's place and Ctrl+Z on a line, at the user's ask; the Player menu, its keys, the video area,
   the queue and the settings `speed`, `seekSeconds` and `sayEachFile` left the window; `MediaFiles` and `NaturalOrder`
   moved to `Axit.Core`. The window shrank by a third. Not yet checked with NVDA (test plan sections 3.14, 4 and 6).
+- 2026-10-22, later: the operations side by side (AF-4.5), at the user's ask: a second paste chooses its names around
+  a running one, a cut on its way says "Already pasting", a compress takes its name at once; the process's working
+  directory moved off the user's folders (AF-1.2) and Windows' "being used by another process" said with its cause,
+  after the user found a folder renamed once could not be renamed again: verified by experiment that a process whose
+  current directory the folder is (a terminal or an app started in it) is what refuses, and that AxFile itself holds
+  nothing (renaming twice in a row works, test `A_folder_is_renamed_twice_in_a_row_and_a_current_directory_says_in_use`).
