@@ -123,6 +123,8 @@ public sealed class KeyTests
     [InlineData(Keys.Control | Keys.Shift | Keys.OemPeriod, "Ctrl+Shift+Period")]
     [InlineData(Keys.Control | Keys.Shift | Keys.Oemcomma, "Ctrl+Shift+Comma")]
     [InlineData(Keys.Back, "Backspace")]
+    [InlineData(Keys.Return, "Enter")]
+    [InlineData(Keys.Alt | Keys.Return, "Alt+Enter")]
     public void Menu_text_of_a_key(Keys key, string expected)
     {
         Assert.Equal(expected, BundleKeys.Text(key));

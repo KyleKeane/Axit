@@ -31,6 +31,9 @@ public sealed class MediaForm : AxitForm
     /// <summary>How the file now opening was asked for: by the user (said, interrupting), or by the queue moving on (said when the setting says, not interrupting).</summary>
     private bool _prompted;
 
+    /// <summary>The hand-overs applied one after another, in the order they came, each after the folder reads of the one before.</summary>
+    private Task _applying = Task.CompletedTask;
+
     /// <param name="start">What the command line asked for (AM-1.1): a play or an add with its paths; null for an empty queue.</param>
     /// <param name="settingsPath">Where the settings are saved; the app's own file unless a probe says otherwise, so that a probe never writes the user's.</param>
     public MediaForm(HandOver? start, MediaSettings settings, string? settingsError, string? settingsPath = null)
@@ -38,7 +41,8 @@ public sealed class MediaForm : AxitForm
     {
         _settings = settings;
         _start = start;
-        Text = AxMediaApp.Name;
+        // A start on one file is named after it from the first moment, so that NVDA reads the file's window as it opens (AM-2.3).
+        Text = start is { Verb: AppMessage.Play, Paths: [var only] } && File.Exists(only) ? $"{Path.GetFileName(only)} - {AxMediaApp.Name}" : AxMediaApp.Name;
 
         // ---- menus (AM-5.1); the keys are handled in ProcessWindowKey from the tables, the items only show them ----
         // Queue is the thing worked on, in the standard order of a first menu (bundle AX-6): New and Open with the
@@ -154,8 +158,8 @@ public sealed class MediaForm : AxitForm
 
     protected override void ApplyFont(Font font) => _list.Font = font;
 
-    /// <summary>After Update and restart: the file playing again, with its folder (AM-1.1); an empty window otherwise.</summary>
-    protected override IReadOnlyList<string> RestartArguments() => _queue.PlayingPath is { } path ? [Dispatch.AxMedia, path] : [Dispatch.AxMedia];
+    /// <summary>After Update and restart: the file in hand again, with its folder (AM-1.1); an empty window otherwise.</summary>
+    protected override IReadOnlyList<string> RestartArguments() => FileInHand is { } path ? [Dispatch.AxMedia, path] : [Dispatch.AxMedia];
 
     protected override string UpdateRestartText => $"closes {AxMediaApp.Name}, installs it and starts it again on the file playing";
 
@@ -175,16 +179,16 @@ public sealed class MediaForm : AxitForm
         base.OnShown(e);
         if (_start is { } start)
         {
-            Do(() => ApplyAsync(start));
+            Apply(start);
         }
     }
 
     protected override void OnFormClosing(FormClosingEventArgs e)
     {
-        if (_queue.PlayingPath is { } playing)
+        if (FileInHand is { } file)
         {
-            // AX-9.4: the file playing joins the bundle's Recently closed list; chosen there, it plays with its folder again.
-            RecentlyClosed.Remember(AxMediaApp.Name, playing);
+            // AX-9.4: the file in hand joins the bundle's Recently closed list; chosen there, it plays with its folder again.
+            RecentlyClosed.Remember(AxMediaApp.Name, file);
         }
 
         // AM-4.4: closing the window stops the player.
@@ -192,17 +196,46 @@ public sealed class MediaForm : AxitForm
         base.OnFormClosing(e);
     }
 
-    /// <summary>AM-1.2, AM-1.3: a start with paths while this window is open hands them here; the message is answered at once and the paths are applied after.</summary>
+    /// <summary>AM-1.2, AM-1.3: a start with paths while this window is open hands them here; the message is answered at once and the paths are applied after, nothing read before the answer.</summary>
     protected override void WndProc(ref Message m)
     {
         if (AppMessage.Receive(ref m) is { } message)
         {
             m.Result = 1;
-            Do(() => ApplyAsync(message));
+            BeginInvoke(() =>
+            {
+                if (!IsDisposed)
+                {
+                    Apply(message);
+                }
+            });
             return;
         }
 
         base.WndProc(ref m);
+    }
+
+    /// <summary>A hand-over (or the start) applied after the ones before it, in the order they came; an earlier one's failure is its own notice.</summary>
+    private void Apply(HandOver message)
+    {
+        var previous = _applying;
+        var task = ApplyAfterAsync(previous, message);
+        _applying = task;
+        Do(() => task);
+    }
+
+    private async Task ApplyAfterAsync(Task previous, HandOver message)
+    {
+        try
+        {
+            await previous;
+        }
+        catch (Exception)
+        {
+            // Reported by the Do that owns it.
+        }
+
+        await ApplyAsync(message);
     }
 
     // ---- keys (AM-5.2): every key comes from BundleKeys or AxMediaKeys, and is handled here only ----
@@ -318,28 +351,25 @@ public sealed class MediaForm : AxitForm
 
     /// <summary>
     /// What a start or a hand-over asks (AM-1.1, AM-3.2): a play replaces the queue (one file with its folder's media
-    /// files around it, a folder's files, several paths expanded) and plays, the window in front; an add appends
-    /// and says nothing here, since AxFile says it (AM-D3). A path is remembered for Open recent.
+    /// files around it, a folder's files, several paths expanded), plays, and brings the window to the front, the
+    /// starting process having let it (AppMessage); an add appends and says nothing here, since AxFile says it
+    /// (AM-D3). A single path is remembered for Open recent.
     /// </summary>
     private async Task ApplyAsync(HandOver message)
     {
-        if (message.Paths.Count == 1)
-        {
-            _settings.Remember(message.Paths[0]);
-            SaveSettings();
-        }
-
         if (message.Verb == AppMessage.Add)
         {
             var paths = await Task.Run(() => MediaFolder.Expand(message.Paths));
             _queue.Add(paths);
             FillList();
+            RememberPath(message.Paths);
             return;
         }
 
         var (queue, start) = await Task.Run(() => MediaFolder.Queue(message.Paths));
         if (queue.Count == 0)
         {
+            AxitMenu.Activate(Handle);
             Announce($"No sound or video files in {Describe(message.Paths)}", true);
             return;
         }
@@ -348,6 +378,18 @@ public sealed class MediaForm : AxitForm
         FillList();
         _list.SelectedIndex = start;
         PlayCurrent(prompted: true);
+        AxitMenu.Activate(Handle);
+        RememberPath(message.Paths);
+    }
+
+    /// <summary>One path handed over, remembered for Open recent (AM-3.2); several are not, since the list would not say what they were.</summary>
+    private void RememberPath(IReadOnlyList<string> paths)
+    {
+        if (paths.Count == 1)
+        {
+            _settings.Remember(paths[0]);
+            SaveSettings();
+        }
     }
 
     private static string Describe(IReadOnlyList<string> paths) =>
@@ -454,17 +496,18 @@ public sealed class MediaForm : AxitForm
     /// <summary>Queue → New window (Ctrl+N): another AxMedia window, empty; the Axit menu's New window does the same (AX-9).</summary>
     private void NewWindow() => AxitMenu.Start(Dispatch.AxMedia, null);
 
-    /// <summary>The file playing, or the one under the selection; null, and said, when the queue is empty.</summary>
+    /// <summary>The file in hand (AM-1.4): the one playing or paused, else the one under the selection; null with an empty queue.</summary>
+    private string? FileInHand =>
+        PlayerActive && _queue.PlayingPath is { } playing ? playing
+        : _queue.IsFile(_list.SelectedIndex) ? _queue.Paths[_list.SelectedIndex]
+        : null;
+
+    /// <summary>The file in hand for a command; null, and said, when the queue is empty.</summary>
     private string? CurrentFile()
     {
-        if (_queue.PlayingPath is { } playing)
+        if (FileInHand is { } file)
         {
-            return playing;
-        }
-
-        if (_queue.IsFile(_list.SelectedIndex))
-        {
-            return _queue.Paths[_list.SelectedIndex];
+            return file;
         }
 
         Announce(PlayQueue.EmptyText, true);
@@ -703,7 +746,7 @@ public sealed class MediaForm : AxitForm
     /// <summary>Ctrl+Shift+Right and Ctrl+Shift+Left: the next or the previous file of the queue; "First file" and "End of queue" at the ends.</summary>
     private void MoveInQueue(int direction)
     {
-        if (_queue.Count == 0 || _player is null)
+        if (_queue.Playing < 0 || _player is null)
         {
             Announce("Nothing playing", true);
             return;
@@ -729,7 +772,20 @@ public sealed class MediaForm : AxitForm
     /// <summary>Play → Faster, Slower, Normal speed: the rate for this file and the next ones, kept in the settings (AM-4.3).</summary>
     private void ChangeSpeed(double speed)
     {
-        if (!Player().SetRate(speed))
+        bool accepted;
+        try
+        {
+            accepted = Player().SetRate(speed);
+        }
+        catch (InvalidOperationException ex)
+        {
+            // The engine could not be made (AM-4.2): a notice, not a crash.
+            Log.Error("The media player could not be created", ex);
+            Fail(ex.Message);
+            return;
+        }
+
+        if (!accepted)
         {
             Announce($"{MediaFiles.SpeedText(speed)} is not supported here", true);
             return;

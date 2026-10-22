@@ -11,10 +11,13 @@ public sealed record HandOver(string Verb, IReadOnlyList<string> Paths);
 /// The hand-over between a starting process and the open window of the same app (docs/axmedia/SPEC.md AM-1.2,
 /// AM-1.3, AM-D4; docs/axpreview/SPEC.md AP-1.2): an app that keeps one window (AxMedia, AxPreview) is started with
 /// paths, finds its newest open window through the same window list the Axit menu reads, hands the paths over with
-/// one <c>WM_COPYDATA</c> message carrying a text (the verb, then one path per line), brings the window to the front
-/// for the verbs that take the focus, and ends. The window reads the message in its <c>WndProc</c> through
-/// <see cref="Receive"/>. Win32 of the plainest kind: synchronous, one-way, nothing on the network (G6). The text form
-/// is pure and tested in <c>tests/Axit.Tests</c>; the sending and receiving are checked with the apps.
+/// one <c>WM_COPYDATA</c> message carrying a text (the verb, then one path per line), and ends. For the verbs that
+/// take the focus it first lets the window's process bring itself to the front (<c>AllowSetForegroundWindow</c>,
+/// which this process may grant because the user's own command started it), so that the window activates itself
+/// once the paths are applied and NVDA reads the new content, not the old. The window reads the message in its
+/// <c>WndProc</c> through <see cref="Receive"/>. Win32 of the plainest kind: synchronous, one-way, nothing on the
+/// network (G6). The text form is pure and tested in <c>tests/Axit.Tests</c>; the sending and receiving are checked
+/// with the apps.
 /// </summary>
 public static class AppMessage
 {
@@ -35,7 +38,7 @@ public static class AppMessage
     /// <summary>Marks a message as the bundle's, so that another program's WM_COPYDATA is left alone: the letters AXIT.</summary>
     private static readonly nint Signature = 0x41584954;
 
-    /// <summary>Whether a verb brings the window to the front: everything but an add, which leaves the user where they are (AM-D3).</summary>
+    /// <summary>Whether a verb brings the window to the front (the window does it itself, once the paths are applied): everything but an add, which leaves the user where they are (AM-D3).</summary>
     public static bool TakesFocus(string verb) => !string.Equals(verb, Add, StringComparison.Ordinal);
 
     /// <summary>The text of a message: the verb on the first line, then one path per line.</summary>
@@ -72,6 +75,14 @@ public static class AppMessage
         }
 
         var target = windows[0].Handle;
+        if (TakesFocus(verb))
+        {
+            // The window brings itself to the front once it has applied the paths; this process, started by the
+            // user's own command, passes its right to do so on to the window's process.
+            GetWindowThreadProcessId(target, out var processId);
+            AllowSetForegroundWindow(processId);
+        }
+
         var bytes = Encoding.Unicode.GetBytes(Format(verb, paths) + "\0");
         var buffer = Marshal.AllocHGlobal(bytes.Length);
         try
@@ -87,11 +98,6 @@ public static class AppMessage
         finally
         {
             Marshal.FreeHGlobal(buffer);
-        }
-
-        if (TakesFocus(verb))
-        {
-            AxitMenu.Activate(target);
         }
 
         Log.Info($"Handed {verb} with {paths.Count} path(s) to the open {appName} window");
@@ -130,4 +136,10 @@ public static class AppMessage
 
     [DllImport("user32.dll", CharSet = CharSet.Unicode)]
     private static extern nint SendMessageTimeoutW(nint hWnd, uint msg, nint wParam, ref CopyData lParam, uint flags, uint timeout, out nint result);
+
+    [DllImport("user32.dll")]
+    private static extern uint GetWindowThreadProcessId(nint hWnd, out uint processId);
+
+    [DllImport("user32.dll")]
+    private static extern bool AllowSetForegroundWindow(uint processId);
 }

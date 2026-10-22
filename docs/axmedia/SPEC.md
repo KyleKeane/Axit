@@ -30,8 +30,8 @@ top of the window. It works entirely offline (bundle G6).
   deliberate act (the Axit menu's New window).
 - **G4 Streamlined.** What AxFile's player had and no more (AF-5): the transport, the speed, the position; the rest
   waits (§9).
-- **G5 Nothing spoken unprompted** (AX-7.3) but one thing: the name of the next file when the player moves on, which
-  the user asked for by playing the queue (a setting, AM-4.3).
+- **G5 Nothing spoken unprompted** (AX-7.3) but two things the user asked for by playing the queue: the name of the
+  next file when the player moves on (a setting, AM-4.3), and "End of queue" with the done chime when it ends (AM-3.3).
 - **Non-goals.** Tags (ID3), album art, an equalizer, shuffle and repeat, streaming addresses, a library or a
   search, reordering the queue by key (§9), playlist files (§9), a picture beyond a plain area, a preview or a viewer
   of anything that is not sound or video (another app's, when one exists).
@@ -148,7 +148,8 @@ top of the window. It works entirely offline (bundle G6).
   Slower Ctrl+Shift+Comma | Normal speed | ─ | Say each file as it starts ✓ | What is playing Ctrl+Q. **Options (O):**
   Text ▸ | General ▸ (Check for updates at start ✓) | Developer ▸ (Open settings file | Copy diagnostics). **Axit (A)**
   (AX-9). **Help (H):** Keyboard shortcuts F1 | User guide | ─ | Media resources ▸ (Formats Windows plays, Microsoft's
-  page, in the browser). Every item has a mnemonic (AX-7.4).
+  page on Media Foundation; Free codecs in the Microsoft Store, a Store search for media extensions; each in the
+  browser). Every item has a mnemonic (AX-7.4).
 - AM-5.2 Keys (AX-8). Bundle-wide: F1, the control keys (one control, so they stay in the list), Ctrl+F, F3, Shift+F3,
   Ctrl+S ("Nothing to save here"), Ctrl+Plus, Ctrl+Minus, Alt+F4. Window-specific (`AxMediaKeys`): Enter, Delete and
   Space in the list; Ctrl+P, Ctrl+I, Ctrl+O, Ctrl+Shift+O, Ctrl+N (New window, AX-9), Ctrl+W, Ctrl+Right, Ctrl+Left,
@@ -162,10 +163,12 @@ top of the window. It works entirely offline (bundle G6).
 One UI Automation notification each, on the list, or on the notice while one shows (AX-7.3): "Playing <name>",
 "Paused at m:ss", "Playing" (resumed), "m:ss" after a seek or Go to time, "Speed n", "Speed n is not supported here",
 "First file", "End of queue", "Nothing playing", "Playing <name>, m:ss of m:ss, speed n", "Paused <name>, …", "Cannot
-play <name>: <reason>", "Removed <name>", "Queue cleared", "Added n", "No sound or video files in <folder>", "<name>,
-n of m" and "<name>, n of m, playing, m:ss of m:ss" (Ctrl+I), "Queue is empty" (a command on the empty line), "Not a
-time", "Not found" (find), "Nothing to save here", "Text size n", "Windows text size", "Copied diagnostics". In
-AxFile: "Added n to AxMedia's queue", "No sound or video files to add", "No sound or video files here"
+play <name>: <reason>", "Removed <name>", "Queue cleared", "Added n", "No sound or video files in <folder>" (a folder
+opened or handed over; "… in <file>" for one file that is none, "… in n paths" for several), "No sound or video files
+to add" (a recent file that is gone), "<name>, n of m", "<name>, n of m, playing, m:ss of m:ss" and "…, paused, m:ss of
+m:ss" (Ctrl+I), "Queue is empty" (a command on the empty line), "Not a time", "Not found" (find), "Nothing to save
+here", "Text size n", "Windows text size", "Copied diagnostics". In AxFile: "Added n to AxMedia's queue", "No sound or
+video files to add", "No sound or video files here"
 (`docs/axfile/SPEC.md`). A new selection is NVDA's own reading.
 
 ### AM-7 Settings, log, errors
@@ -238,8 +241,8 @@ events are posted back to it (AX-7.5).
 - **AM-D6 Volume is Windows'.** The keyboard's volume keys change the system volume from any window and are read by
   NVDA (from AF-D4).
 - **AM-D7 Space pauses.** In AxFile Space marks entries, so pause had moved to Ctrl+P; in AxMedia the list is the
-  queue and Space is what every player's pause is. Ctrl+P stays as the key from anywhere in the window, a notice's
-  field included.
+  queue and Space is what every player's pause is. Ctrl+P stays as the key from anywhere in the window; while a
+  notice shows, the keys are the notice's, as in every window (AX-6.5).
 
 ## 8. Testing
 

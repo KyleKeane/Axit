@@ -316,6 +316,8 @@ public sealed class TextEditorForm : AxitForm
                     if (!IsDisposed)
                     {
                         LoadDocument(path);
+                        // The starting process let this one come to the front (AppMessage); the user asked to read.
+                        AxitMenu.Activate(Handle);
                     }
                 });
             }
