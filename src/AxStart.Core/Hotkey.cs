@@ -2,7 +2,7 @@ namespace AxStart.Core;
 
 /// <summary>
 /// The system-wide key that brings AxStart up (SPEC.md AS-4): the modifiers as <c>RegisterHotKey</c> takes them and a
-/// virtual key code, written in the settings and said as a menu writes keys, "Windows+Alt+Space". Only the keys of
+/// virtual key code, written in the settings and said as a menu writes keys, "Ctrl+Shift+Space". Only the keys of
 /// <see cref="Names"/> can be a hotkey's key.
 /// </summary>
 public sealed record Hotkey(int Modifiers, int Key)
@@ -12,8 +12,8 @@ public sealed record Hotkey(int Modifiers, int Key)
     public const int Shift = 0x4;
     public const int Windows = 0x8;
 
-    /// <summary>Windows+Alt+Space (AS-D4).</summary>
-    public static readonly Hotkey Default = new(Windows | Alt, 0x20);
+    /// <summary>Ctrl+Shift+Space (AS-D4).</summary>
+    public static readonly Hotkey Default = new(Control | Shift, 0x20);
 
     /// <summary>The keys a hotkey may end in, by virtual key code, with the names the text uses.</summary>
     public static readonly IReadOnlyDictionary<int, string> Names = BuildNames();

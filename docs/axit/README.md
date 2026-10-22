@@ -12,7 +12,7 @@ The apps:
 - **AxFile** (first draft) is a file manager for one folder: a plain list of its entries, folders first, where Enter opens a folder in the list and a file in the program you have made its default in Windows, as in File Explorer. New folder, new text file, rename, delete to the Recycle Bin, cut, copy and paste, move to a new folder, zip and unzip, copy the path, with Space to select several; every operation is a line of the Actions list under the folder list, to read again, undo (Ctrl+Z) or jump back to (Enter). It opens from the other windows on the folder or file you are in, and hands sound and video to AxMedia and reading to AxPreview.
 - **AxMedia** is a player for sound and video files with one queue: Enter on a file in AxFile or File Explorer (once AxMedia is its default program) plays it with its folder's other files after it; Space pauses, Ctrl+Left and Ctrl+Right seek, Ctrl+Shift+Left and Ctrl+Shift+Right change file, Ctrl+Shift+Comma and Ctrl+Shift+Period change the speed with the pitch kept, Ctrl+Q says what is playing. One window takes everything you open; a video's picture shows at the top of it.
 - **AxPreview** is a read-only viewer for one text file: the text in a plain field with every reading key AxDown has, including the Markdown navigation keys, `l` for the line, Go to line and find; Ctrl+E opens the file in its editor. Shift+Enter in AxFile reads a file here; one window takes everything you open.
-- **AxStart** is a program launcher: Windows+Alt+Space from anywhere brings up one search field; type part of a program's name, Down and Up move through the matches while the caret stays in the field, and Enter starts it. It runs in the background from sign-in, with no window until the key.
+- **AxStart** is a program launcher: Ctrl+Shift+Space from anywhere brings up one search field; type part of a program's name, Down and Up move through the matches while the caret stays in the field, and Enter starts it. It runs in the background from sign-in, with no window until the key.
 
 Each app's guide is inside it: Help, User guide.
 
@@ -29,7 +29,7 @@ If you had AxClaude installed before Axit existed, the installer removes it firs
 ## Start
 
 - Start menu: `Axit AxClaude`, `Axit AxDown`, `Axit AxJSON`, `Axit AxGit`, `Axit AxTerminal`, `Axit AxFile`, `Axit AxMedia`, `Axit AxPreview`, `Axit AxStart`.
-- Anywhere: Windows+Alt+Space, AxStart's search field.
+- Anywhere: Ctrl+Shift+Space, AxStart's search field.
 - Console: `axclaude`, or `axclaude C:\my\project`; `axdown notes.md`; `axterminal C:\my\project`; `axfile C:\Music`; `axmedia C:\Music\Dune` or `axmedia 03.mp3`; `axpreview README.md`. `axit C:\my\project` and `axit notes.md` do the same as the first two, since a folder means AxClaude and a file AxDown, a `.json` file AxJSON, a sound or video file AxMedia.
 - File Explorer: right-click a folder, open `Open with Axit` and choose AxClaude, AxGit, AxTerminal or AxFile; right-click a file, open `Open with Axit` and choose AxDown, AxFile or AxPreview, AxJSON on a `.json` file, AxMedia on a sound or video file. On Windows 11 the submenu is in the full menu (Shift+F10, or Show more options).
 - From any Axit window: the Axit menu (Alt+A) starts a new AxClaude or AxDown, reopens a file or folder you closed lately, lists the open Axit windows, the one you were in last first and by type, closes them all, checks for updates, and has About with the version, the licence, the attribution, this guide and the project's page on GitHub.

@@ -11,7 +11,7 @@ namespace AxStart.Core;
 /// </summary>
 public sealed class StartSettings : WindowSettings
 {
-    /// <summary>The hotkey as text, "Windows+Alt+Space" (AS-4.1); <see cref="Key"/> reads it.</summary>
+    /// <summary>The hotkey as text, "Ctrl+Shift+Space" (AS-4.1); <see cref="Key"/> reads it.</summary>
     public string Hotkey { get; set; } = Core.Hotkey.Default.ToString();
 
     /// <summary>AxStart starts hidden at sign-in (AS-1.3).</summary>

@@ -4,13 +4,13 @@ AxStart is a program launcher, made for screen reader users: one key from anywhe
 
 ## Install and start
 
-AxStart is part of Axit. Installing Axit (see the Axit guide in the Axit menu, About) starts AxStart in the background and makes it start again each time you sign in to Windows. It has no window and no taskbar button until you press its hotkey, **Windows+Alt+Space**.
+AxStart is part of Axit. Installing Axit (see the Axit guide in the Axit menu, About) starts AxStart in the background and makes it start again each time you sign in to Windows. It has no window and no taskbar button until you press its hotkey, **Ctrl+Shift+Space**.
 
 You can also start it from the Start menu, `Axit AxStart`, or the console, `axstart`: the search field comes up, and AxStart keeps running afterwards. Starting it again while it runs just brings up the field.
 
 ## Finding and starting a program
 
-1. Press **Windows+Alt+Space** from any program. NVDA says "AxStart window, Search programs, edit".
+1. Press **Ctrl+Shift+Space** from any program. NVDA says "AxStart window, Search programs, edit".
 2. Type part of the name, for example `calc`. After a short pause AxStart says the first match and how many there are: "Calculator, 1 of 2". "No programs match xyz" when nothing does.
 3. **Down** and **Up** move to the next and the previous match, each said with its place: "Notepad++, 2 of 3". **Page Down** and **Page Up** move a page of matches, **Ctrl+Home** and **Ctrl+End** to the first and the last. At either end a low note sounds and nothing moves.
 4. **Enter** starts the match you are on. AxStart goes away and the program comes up in front.

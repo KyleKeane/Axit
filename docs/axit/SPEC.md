@@ -72,7 +72,7 @@ allow it, see B-9).
   test plan `docs/axpreview/nvda-test-plan.md`.
 - **AxStart** (2026-10-22, branch `axstart`): `Axit.exe start [--hidden]`, Start entry `Axit AxStart`, command
   `axstart`, no File Explorer entry. A program launcher: a background process from sign-in (the Run key) with a
-  global hotkey, Windows+Alt+Space unless the user chose another, that shows one search field over the Start menu's
+  global hotkey, Ctrl+Shift+Space unless the user chose another, that shows one search field over the Start menu's
   programs, Down and Up through the matches with the caret kept in the field. Specification `docs/axstart/SPEC.md`,
   guide `docs/axstart/user-guide.md`, test plan `docs/axstart/nvda-test-plan.md`.
 

@@ -165,7 +165,7 @@ function Start-AxStart {
         try { if ((Get-Content -LiteralPath $settingsFile -Raw | ConvertFrom-Json).startWithWindows -eq $false) { return } } catch { }
     }
     Start-Process -FilePath $exe -ArgumentList @('start', '--hidden') -WorkingDirectory $target
-    Say "AxStart, the launcher, runs in the background: Windows+Alt+Space, or the hotkey you chose, brings up its search field"
+    Say "AxStart, the launcher, runs in the background: Ctrl+Shift+Space, or the hotkey you chose, brings up its search field"
 }
 
 function Test-Running {

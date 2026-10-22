@@ -15,7 +15,7 @@ public static class HelpText
           Alt+A: the Axit menu: a new window of any app, the open Axit windows, Check for updates, and About
 
         Bringing AxStart up
-          The hotkey, Windows+Alt+Space unless you chose another in Options, Hotkey: from any program, the search field
+          The hotkey, Ctrl+Shift+Space unless you chose another in Options, Hotkey: from any program, the search field
           The same hotkey while AxStart shows hides it again
 
         In the search field (the caret stays here: type and delete at any time)
