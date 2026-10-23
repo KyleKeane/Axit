@@ -1,0 +1,18 @@
+﻿# AxClaude: a set of two questions (docs/axclaude/nvda-test-plan.md section 12 step 19). The first question reads
+# itself; after its answer the second cuts in and reads itself, with nothing of the first read again.
+mkdir q
+start claude {temp}\q -- --model haiku
+try said trust
+iffound wait 1500
+iffound keys enter
+expect said Ready
+type Use your AskUserQuestion tool once, with two questions: which colour I prefer, red or blue, and which season I prefer, summer or winter.
+keys enter
+expect said colour
+wait 1500
+keys enter
+expect said season
+said
+wait 1500
+keys enter
+said

@@ -9,6 +9,9 @@ namespace Axit.Forms;
 /// </summary>
 public static class Announcer
 {
+    /// <summary>Every notification raised, with whether it interrupts: the automation channel's record of what was said (docs/axit/automation.md).</summary>
+    public static event Action<string, bool>? Raised;
+
     public static bool Raise(Control source, string text, bool interrupt)
     {
         if (!source.IsHandleCreated)
@@ -16,6 +19,7 @@ public static class Announcer
             return false;
         }
 
+        Raised?.Invoke(text, interrupt);
         var processing = interrupt ? AutomationNotificationProcessing.MostRecent : AutomationNotificationProcessing.All;
         return source.AccessibilityObject.RaiseAutomationNotification(AutomationNotificationKind.ActionCompleted, processing, text);
     }

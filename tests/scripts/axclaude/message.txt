@@ -1,0 +1,19 @@
+﻿# AxClaude: a fresh session with Haiku, a message, its reply and Done (docs/axclaude/nvda-test-plan.md sections 1 and 2).
+mkdir a
+start claude {temp}\a -- --model haiku
+try said trust
+iffound wait 1500
+iffound keys enter
+expect said Ready
+expect focus Message
+type Reply with the single word hello.
+keys enter
+expect said Done
+keys ctrl+2
+expect focus Conversation
+keys ctrl+3
+expect said Output 1
+keys down down
+expect focus hello
+
+

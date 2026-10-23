@@ -1,0 +1,12 @@
+﻿# The notice focus rule and the palette in AxDown, driven from inside (docs/axit/automation.md).
+start down {temp}\notes.md
+expect focus Text
+keys f1
+expect state Keyboard shortcuts
+keys escape
+expect focus Text
+keys ctrl+shift+p
+type save as
+expect said Save as
+keys escape
+expect focus Text

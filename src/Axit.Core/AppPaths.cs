@@ -8,14 +8,14 @@ namespace Axit.Core;
 public static class AppPaths
 {
     public static string SettingsFile(string app) =>
-        Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "Axit", app + ".json");
+        Path.Combine(Home(Environment.SpecialFolder.ApplicationData), "Axit", app + ".json");
 
     /// <summary>The bundle's one list of recently closed files and folders, for the Axit menu (AX-9.4).</summary>
     public static string RecentlyClosedFile { get; } =
-        Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "Axit", "recently-closed.json");
+        Path.Combine(Home(Environment.SpecialFolder.ApplicationData), "Axit", "recently-closed.json");
 
     public static string LogsFolder { get; } =
-        Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "Axit", "logs");
+        Path.Combine(Home(Environment.SpecialFolder.LocalApplicationData), "Axit", "logs");
 
     public static string UpdatesFolder { get; } =
         Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "Axit", "updates");
@@ -25,4 +25,12 @@ public static class AppPaths
         Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "Programs", "Axit");
 
     public static string InstalledExe => Path.Combine(InstallFolder, "Axit.exe");
+
+    /// <summary>
+    /// The folder the settings, the recently closed list and the logs live under: the user's, or <c>AXIT_HOME</c> when
+    /// it is set, which a test run sets to a folder of its own so that its windows neither read nor write the user's
+    /// files (docs/axit/automation.md).
+    /// </summary>
+    private static string Home(Environment.SpecialFolder folder) =>
+        Environment.GetEnvironmentVariable("AXIT_HOME") is { Length: > 0 } home ? home : Environment.GetFolderPath(folder);
 }

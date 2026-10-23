@@ -218,6 +218,20 @@ public abstract partial class AxitForm : Form
     protected override void OnShown(EventArgs e)
     {
         base.OnShown(e);
+        AutomationChannel.StartIfRequested(this);
+        StartUpWork();
+    }
+
+    /// <summary>What the automation channel reports for <c>state</c> (docs/axit/automation.md): the title, the notice, the status bar's texts.</summary>
+    internal object AutomationState() => new
+    {
+        title = Text,
+        notice = NoticeOpen ? Overlay.Shown?.Title : null,
+        status = Controls.OfType<StatusStrip>().SelectMany(strip => strip.Items.Cast<ToolStripItem>()).Select(item => item.Text).ToArray(),
+    };
+
+    private void StartUpWork()
+    {
         if (_settingsError is { } error)
         {
             SettingsNotRead(error);
