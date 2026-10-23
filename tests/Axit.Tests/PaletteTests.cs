@@ -19,14 +19,6 @@ public sealed class PaletteTests
     private static List<string> Lines(string text) => Palette.Find(Entries, text).Select(entry => entry.Text).ToList();
 
     [Fact]
-    public void A_name_is_the_item_text_without_its_mnemonic_and_dots()
-    {
-        Assert.Equal("Save as", Palette.Name("Save &as..."));
-        Assert.Equal("Font", Palette.Name("&Font…"));
-        Assert.Equal("Find & replace", Palette.Name("Find && &replace"));
-    }
-
-    [Fact]
     public void A_line_is_the_name_the_menus_the_key_and_checked()
     {
         Assert.Equal("Word wrap, Edit, Ctrl+Shift+W, checked", Palette.Text("Word wrap", ["Edit"], "Ctrl+Shift+W", true));

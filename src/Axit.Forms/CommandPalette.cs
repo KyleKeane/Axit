@@ -53,7 +53,7 @@ public static class CommandPalette
                 continue;
             }
 
-            var name = Palette.Name(menuItem.Text ?? string.Empty);
+            var name = MenuText.Plain(menuItem.Text ?? string.Empty);
             if (menuItem.HasDropDownItems)
             {
                 path.Add(name);

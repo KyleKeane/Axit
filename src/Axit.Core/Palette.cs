@@ -7,16 +7,13 @@ namespace Axit.Core;
 public sealed record PaletteEntry(string Text, Action Run);
 
 /// <summary>
-/// The command palette's text and search (AX-10.2, AX-10.3): an entry's line from its menu item, the matches of the
-/// typed text in order, and what is said of them. The window side, which reads the menus and shows the notice, is
-/// <c>Axit.Forms.CommandPalette</c> and the window base.
+/// The command palette's text and search (AX-10.2, AX-10.3): an entry's line from its menu item (its name being
+/// <see cref="MenuText.Plain"/> of the item's text), the matches of the typed text in order, and what is said of
+/// them. The window side, which reads the menus and shows the notice, is <c>Axit.Forms.CommandPalette</c> and the
+/// window base.
 /// </summary>
 public static class Palette
 {
-    /// <summary>A menu item's text as a name: "Save &amp;as..." is "Save as"; a doubled ampersand stays one.</summary>
-    public static string Name(string itemText) =>
-        itemText.Replace("&&", "\0").Replace("&", string.Empty).Replace("\0", "&").TrimEnd('.', '…').Trim();
-
     /// <summary>
     /// An entry's line: the name, the menus it is in, the key when it has one, "checked" when it is:
     /// "Word wrap, Edit, Ctrl+Shift+W, checked".

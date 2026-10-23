@@ -1,5 +1,6 @@
 using AxClaude.Core.Pty;
 using AxClaude.Core.Transcript;
+using Axit.Core;
 using Axit.Forms;
 
 namespace AxClaude;
@@ -218,7 +219,7 @@ internal sealed partial class MainForm
 
         _arrivals.Skip(_model.Lines);
         SaveSettings();
-        Announce(ReplySpeechChoices.First(c => c.Mode == mode).Text.Replace("&", string.Empty), true);
+        Announce(MenuText.Plain(ReplySpeechChoices.First(c => c.Mode == mode).Text), true);
     }
 
     private void FillRecentFolders() =>

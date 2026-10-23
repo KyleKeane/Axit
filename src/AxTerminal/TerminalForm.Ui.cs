@@ -197,7 +197,7 @@ internal sealed partial class TerminalForm
         // What is already there is not read out: the next frame's lines are the first spoken.
         _arrivals.Update(_model.Lines, _model.Running, speak: true);
         SaveSettings();
-        Announce(SpeechChoices.First(c => c.Mode == mode).Text.Replace("&", string.Empty), true);
+        Announce(MenuText.Plain(SpeechChoices.First(c => c.Mode == mode).Text), true);
     }
 
     private void FillRecentFolders() =>

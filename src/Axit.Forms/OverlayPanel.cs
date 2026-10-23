@@ -500,8 +500,8 @@ public sealed class OverlayPanel : Panel
     {
         var enter = choices.FirstOrDefault(choice => choice.IsDefault);
         var escape = choices.FirstOrDefault(choice => choice.IsCancel);
-        // The button's text without its mnemonic marker or a trailing ellipsis.
-        static string Label(OverlayChoice choice) => choice.Text.Replace("&", string.Empty).TrimEnd('.');
+        // The button's text as spoken: without its mnemonic marker or a trailing ellipsis.
+        static string Label(OverlayChoice choice) => MenuText.Plain(choice.Text);
         var keys = enter is not null && ReferenceEquals(enter, escape) ? $"Enter or Escape: {Label(enter)}."
             : string.Join(" ", new[] { enter is null ? null : $"Enter: {Label(enter)}.", escape is null ? null : $"Escape: {Label(escape)}." }.OfType<string>());
         return keys.Length == 0 ? text : text.Length == 0 ? keys : text.TrimEnd('\n') + "\n" + keys;
