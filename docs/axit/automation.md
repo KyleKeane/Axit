@@ -63,6 +63,26 @@ including while the user works, because nothing takes the foreground.
   each step's result in a report; what a window said stays queued until an expectation takes it; a failing step prints what was said and focused instead. The NVDA test plans become scripts in
   `tests/scripts/<app>/`, one per section, with Claude always on `--model haiku`.
 
+### What the scripts cover, and what stays manual (2026-10-23)
+
+The NVDA test plans of AxDown, AxJSON, AxPreview, AxFile, AxGit, AxTerminal and AxMedia are scripts in
+`tests/scripts/<app>`, one per section of the plan, about two thousand steps, all passing; AxClaude's are being written,
+on Haiku. Every step a script cannot drive is a `#` line naming the plan step and why. What stays manual, for now:
+
+- The menu bar and context menus opened with Alt, F10 or Shift+F10: menu mode needs the foreground; `menu` runs the
+  same command by its name. Submenus that fill as they open (Open recent, Recently closed, Open windows) are not in
+  the palette's list either.
+- The Windows pickers (Open, Save as, Font, the folder picker) and the shell's own windows (Open with, Properties,
+  File Explorer, a default program).
+- The clipboard: the test desktop shares it with the user's session, so copy and paste steps are not run.
+- Coming back to a window with Alt+Tab (the files changed on disk); F5 is used instead where the app has it.
+- What only NVDA shows, and sound and video quality: tier 3 and the user's ear.
+
+The first runs found, and the same day fixed: AxGit's commit while a stage ran, AxTerminal's "Done" before a
+command's last line, two undo steps for Format, AxPreview's size in whole megabytes, AxMedia's status after a pause or
+a clear and Go to time closing on a wrong time, and in AxClaude the banner shown twice and the refused Enter of
+Claude's first seconds. They also found plan steps the apps had outgrown, corrected in the plans.
+
 ## 3. NVDA in the loop
 
 For what only NVDA can show: what it reads on a focus change, whether a notification cut it off, the order of

@@ -82,7 +82,7 @@ letter), and a `long.md` with headings and lines longer than the window.
 
 1. Alt opens the menu; every item is read with its shortcut; Escape closes without changing the text.
 2. F1 opens the shortcuts notice, its first line naming the text's own keys; Page Down and Page Up move a screen of
-   its text, Ctrl+Down and Ctrl+Up a paragraph; h and Ctrl+H alike: "AxDown, heading level 2" (the next section),
+   its text, Ctrl+Down and Ctrl+Up a paragraph; h and Ctrl+H alike: "In every window of Axit, heading level 2" (the first section),
    Shift+H back; Ctrl+F, type `wrap`, Enter: the shortcuts text is back with "wrap" selected and NVDA reads the
    line, F3: the next line with it, Ctrl+F then Escape: the text is back where it was; Escape closes the notice and
    the focus is back in the editor at the same place.

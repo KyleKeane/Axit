@@ -36,8 +36,9 @@ and `broken.json`, the same with the comma after `"opus"` removed and a comma ad
    object with 2 keys"; Ctrl+J: "No next object".
 3. Ctrl+Home, Ctrl+L: "allow, array with 2 items"; Ctrl+L: "deny, empty array". Ctrl+Home, Ctrl+I: "Item 1 of 2,
    Bash"; Ctrl+I: "Item 2 of 2, Read"; Ctrl+I: "No next item".
-4. Ctrl+E in `settings.json`: "No next error". In `broken.json`, Ctrl+Home, Ctrl+E: "Error, line 3: expected a comma
-   or a closing brace after model, found a string", the caret on `"permissions"`. Ctrl+Shift+E from the end lands there too.
+4. Ctrl+E in `settings.json`: "No next error". In `broken.json`, Ctrl+Home, Ctrl+E: "No next error" as well: its missing
+   comma and its trailing comma are repairs (AJ-2.2), which Format makes. A value left out is an error: in a copy with `"model": ,`,
+   Ctrl+Home, Ctrl+E: "Error, line 2: expected a value, found ','', the caret there. Ctrl+Shift+E from the end lands there too.
 5. Navigate, Next lists Key, Object, Array, Item and Error with their keys, Navigate, Previous the same; each item does
    what its key does. Help, User guide: Ctrl+K and the other keys move through the guide's text too, "No next key"
    when there is none.
