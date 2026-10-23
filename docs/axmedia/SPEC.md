@@ -1,10 +1,10 @@
 # AxMedia — Specification
 
 AxMedia is an app of the Axit bundle (`docs/axit/SPEC.md`): a player for sound and video files with one queue, for a
-blind developer who uses the NVDA screen reader. Specified 2026-10-22 at the user's ask and not yet built: the player
-that AxFile has carried since 2026-10-19 (`docs/axfile/SPEC.md` AF-5, AF-9.2) moves here whole, so that AxFile is file
+blind developer who uses the NVDA screen reader. Specified and built 2026-10-22 at the user's ask, released in 3.3.1 and checked with NVDA the same day (the record: `docs/axit/nvda-test-record.md`): the player
+that AxFile had carried since 2026-10-19 (`docs/axfile/SPEC.md` AF-5) moved here whole, so that AxFile is file
 operations and management only and playing, like viewing, is another app's with a tight hand-over (AM-D1). The
-document is kept in step with the code once it exists (a behaviour change updates it in the same commit).
+document is kept in step with the code (a behaviour change updates it in the same commit).
 Requirements are numbered `AM-n.m` and decisions `AM-Dn`; the bundle's rules, AX-7 (accessibility), AX-8 (keys) and
 AX-9 (the Axit menu), are cited by number and not repeated. In AxMedia's code and documents, "SPEC.md" means this
 file. The inventory of the split of AxFile, what leaves it, what is shared and what is new, with the order of the
@@ -76,8 +76,9 @@ top of the window. It works entirely offline (bundle G6).
   media file is Windows' default program, AxMedia when the user has chosen it (`docs/axfile/SPEC.md` section 9).
 - AM-1.3 **The hand-over** between the starting process and the open window is one window message, `WM_COPYDATA`,
   to the AxMedia window found by its title's ending through the same window list the Axit menu reads
-  (`Axit.Core/AxitWindows`), carrying a verb (`play`, `play-folder`, `add`) and the paths, one per line; the window
-  answers nothing and the starting process ends once the message is taken (AM-D4). The sending and the receiving are
+  (`Axit.Core/AxitWindows`), carrying a verb (`play`, `add`; AxPreview's `open`, AxStart's `show`) and the paths, one
+  per line; the window answers 1 once it has taken the message, and the starting process, which waits up to five
+  seconds for the answer, ends on it (AM-D4). The sending and the receiving are
   one shared piece, `Axit.Forms/AppMessage`, which AxPreview uses the same way. Nothing listens on the network (G6).
 - AM-1.4 Ways out: Show current file in ▸ File Explorer (Ctrl+W: the playing file, or the file under the selection,
   selected in File Explorer) and AxFile (the same file selected in its folder, a new AxFile window; `docs/axfile/SPEC.md`

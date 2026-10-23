@@ -22,7 +22,7 @@ public static class Log
     public static void Error(string message, Exception? exception = null) =>
         Write("ERROR", exception is null ? message : $"{message}\r\n{exception}");
 
-    /// <summary>The last lines of the log, for Help, Copy diagnostics.</summary>
+    /// <summary>The last lines of the log, for Options → Developer → Copy diagnostics.</summary>
     public static string Tail(int lines)
     {
         try

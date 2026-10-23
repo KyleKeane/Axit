@@ -32,7 +32,7 @@
   install.cmd, next to this script, runs it with the execution policy bypassed: double-click it, or install.cmd -Uninstall.
   Downloaded on its own from the releases page, install.cmd fetches the latest release and runs this script from it.
 
-  The apps' own Update (Help menu) runs the downloaded version's copy of this script as
+  The apps' own Update (the Axit menu) runs the downloaded version's copy of this script as
     install.ps1 -InPlace -LogFile <file>
   while the app keeps running (AX-2.8): the new files are written over the old ones, what earlier versions left goes
   (their File Explorer entries, AxClaude 1.x's folder and entries, files this version does not ship), and the
@@ -74,7 +74,7 @@ if ($WaitForProcess) {
     Say "Waiting for the app (process $WaitForProcess) to close..."
     try { Wait-Process -Id $WaitForProcess -Timeout 120 -ErrorAction Stop } catch { }
     if (Get-Process -Id $WaitForProcess -ErrorAction SilentlyContinue) {
-        Say "The app is still running after two minutes. The update was not installed; start it from the Help menu again."
+        Say "The app is still running after two minutes. The update was not installed; start it from the Axit menu again."
         exit 1
     }
 }

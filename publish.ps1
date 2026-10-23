@@ -38,16 +38,10 @@ if ($LASTEXITCODE -ne 0) {
 }
 
 $exe = Join-Path $out 'Axit.exe'
-# AxDown's icon for its Start menu and File Explorer entries, next to the executable (a project item would be
-# bundled into the single file).
-Copy-Item (Join-Path $root 'src\Axit\AxDown.ico') $out -Force
-Copy-Item (Join-Path $root 'src\Axit\AxJSON.ico') $out -Force
-Copy-Item (Join-Path $root 'src\Axit\AxGit.ico') $out -Force
-Copy-Item (Join-Path $root 'src\Axit\AxTerminal.ico') $out -Force
-Copy-Item (Join-Path $root 'src\Axit\AxFile.ico') $out -Force
-Copy-Item (Join-Path $root 'src\Axit\AxMedia.ico') $out -Force
-Copy-Item (Join-Path $root 'src\Axit\AxPreview.ico') $out -Force
-Copy-Item (Join-Path $root 'src\Axit\AxStart.ico') $out -Force
+# The apps' icons for their Start menu and File Explorer entries, next to the executable (a project item would be
+# bundled into the single file): every .ico of src\Axit, so that a new app's icon is never left out (3.0.0 shipped
+# without AxTerminal's when the list was kept by hand).
+Get-ChildItem (Join-Path $root 'src\Axit') -Filter '*.ico' | Copy-Item -Destination $out -Force
 Copy-Item (Join-Path $root 'install.ps1') $out -Force
 Copy-Item (Join-Path $root 'install.cmd') $out -Force
 Copy-Item (Join-Path $root 'LICENSE') $out -Force

@@ -56,5 +56,5 @@ and `broken.json`, the same with the comma after `"opus"` removed and a comma ad
 
 ## 4. The Axit menu and About
 
-1. Alt+A, N: New window lists AxClaude, AxDown and AxJSON; Alt+A, N, J starts a new AxJSON window.
-2. Alt+A, B: Open windows by type lists AxJSON (n) with this window checked. Alt+A, About, Version names the three apps.
+1. Alt+A, N: New window lists every app of the bundle; Alt+A, N, J starts a new AxJSON window.
+2. Alt+A, B: Open windows by type lists AxJSON (n) with this window checked. Alt+A, About, Version names the nine apps.

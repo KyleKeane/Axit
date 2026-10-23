@@ -4,7 +4,7 @@
        sounds, paging in an edit control, the status layout, the bundle-wide keys. No window of its own, no tests
        (checked with NVDA in the apps). -->
   <PropertyGroup>
-    <TargetFramework>net10.0-windows</TargetFramework>
+    <TargetFramework>$(AxitDotNet)-windows</TargetFramework>
     <UseWindowsForms>true</UseWindowsForms>
     <RootNamespace>Axit.Forms</RootNamespace>
   </PropertyGroup>

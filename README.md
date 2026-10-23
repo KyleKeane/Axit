@@ -11,8 +11,8 @@ Accessible Windows apps for screen reader users, built for and tested with NVDA,
 - **AxClaude**: Claude Code in screen reader mode, shown as a plain-text conversation that NVDA reads line by line, with single-key navigation, a message field, and Claude's questions as lists. You are still talking to the real Claude Code.
 - **AxDown**: a barebones editor for Markdown and text files that writes a file back exactly as it found it, with keys for headings, links, lists, quotes and tables.
 - **AxJSON**: the same editor for JSON, with keys for keys, objects, arrays, items and errors, and a Format command that repairs what it can.
-- **AxGit**: a git manager for one repository: changes, the log and the branches as lists, staging, committing, fetch, pull and push. A first draft.
-- **AxTerminal**: PowerShell, Command Prompt or Git Bash as a transcript in AxClaude's kind of window. A first draft.
+- **AxGit**: a git manager for one repository: changes, the log and the branches as lists, staging, committing, fetch, pull and push.
+- **AxTerminal**: PowerShell, Command Prompt or Git Bash as a transcript in AxClaude's kind of window.
 - **AxFile**: a file manager for one folder, with an Actions list of every operation that Ctrl+Z can take back, selection, zip files, favourites and the drives.
 - **AxMedia**: a player for sound and video files with one queue, speed with the pitch kept, and seeking by key.
 - **AxPreview**: a read-only viewer for one text file, with the editors' navigation keys.

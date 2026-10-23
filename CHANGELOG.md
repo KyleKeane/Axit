@@ -25,7 +25,7 @@
 - AxFile: the command palette holds the folder's entries after the commands, "notes.md, file", "docs, folder"; Enter on one opens it as Enter in the list does.
 - AxGit: Push is Ctrl+Shift+H; Ctrl+Shift+P is the command palette's in every window.
 
-## 3.4.0
+## 3.4.0 - 2026-10-22
 
 - AxClaude: the conversation no longer flickers while Claude runs a command. Claude Code's timer under a running command, "(4s · timeout 3m)", on a row of its own, was taken for conversation and rewritten every second, which moved the caret and made NVDA redraw its highlight once a second. It is interface now, like the spinner.
 - AxStart: a new app of the bundle, a program launcher (`docs/axstart/SPEC.md`). It runs in the background from sign-in, and its hotkey, Ctrl+Shift+Space unless changed in Options, Hotkey, brings up one search field from any program. Typing narrows the Start menu's programs, desktop programs and Store apps alike, to the names holding every typed word; after a short pause the first match is said, "Calculator, 1 of 2". Down and Up, Page Down and Page Up, Ctrl+Home and Ctrl+End move through the matches while the caret stays in the field. Enter starts the match, Ctrl+Shift+Enter as administrator, Ctrl+I says where its program is, Ctrl+O shows it in AxFile, Escape hides AxStart at once. The programs started most often come first. `Axit.exe start`, `axstart`, Start menu entry "Axit AxStart"; the installer stops it before an install and starts it again after.
@@ -34,7 +34,7 @@
 - Axit: `test.ps1` runs every test project in Release, as GitHub Actions does; `release.ps1` and `run.ps1 -Test` use it, so that a test that only fails in Release stops the release here rather than in the workflow, as it did 3.3.0.
 - Axit: the Build workflow tests every branch, not only `main`. The repository has a new README naming all the apps, CONTRIBUTING and SECURITY pages, issue forms that ask for the app, the versions and the test plan step, a pull request checklist, and Dependabot for the workflow actions and the test packages.
 
-## 3.3.1
+## 3.3.1 - 2026-10-22
 
 - Axit: 3.3.0 was tagged but never published: its build stopped on a test that the Release build's analyser refused. 3.3.1 is that release with the test fixed, and these are its changes.
 - AxMedia: a new app of the bundle, the player that AxFile carried, with one queue (`docs/axmedia/SPEC.md`). `Axit.exe media [<file or folder>...] [--add]`, `axmedia`, Start menu entry "Axit AxMedia", AxMedia under Open with Axit on sound and video files and under Windows' own Open with for their kinds, so that it can be made the program Enter uses for them. One list, the queue, named with its count: Enter plays a file and the rest follow, Delete takes one out, Ctrl+I says its place and position, Ctrl+O and Ctrl+Shift+O add files and a folder's files, Open recent lists what was added. Space or Ctrl+P pauses, Ctrl+Left and Ctrl+Right seek, Ctrl+Shift+Left and Ctrl+Shift+Right change file, Ctrl+Shift+Comma and Ctrl+Shift+Period change the speed with the pitch kept, Ctrl+T goes to a time, Ctrl+Q says what is playing; "End of queue" with the chime at the end; a video's picture at the top of the window. A file opened from AxFile, File Explorer or the console while an AxMedia window is open goes into that window (replacing its queue, or appended with --add) rather than opening another; a sound or video file alone on the command line starts AxMedia.

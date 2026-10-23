@@ -2,6 +2,9 @@ root = true
 
 [*]
 charset = utf-8
+# The files are CRLF on disk (.gitattributes normalizes them to LF in the repository); an editor that writes LF
+# leaves a file that the next git touch rewrites, and a multi-line replace made against CRLF fails on it.
+end_of_line = crlf
 indent_style = space
 indent_size = 4
 insert_final_newline = true

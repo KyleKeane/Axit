@@ -136,7 +136,7 @@ public sealed class Screen
         }
     }
 
-    // ---- IVtSink ----
+    // ---- what the parser calls ----
 
     internal void Print(string text)
     {

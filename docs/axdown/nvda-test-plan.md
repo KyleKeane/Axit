@@ -87,7 +87,7 @@ letter), and a `long.md` with headings and lines longer than the window.
    line, F3: the next line with it, Ctrl+F then Escape: the text is back where it was; Escape closes the notice and
    the focus is back in the editor at the same place.
 3. Help, User guide shows this app's guide, and Ctrl+H, Ctrl+K, Ctrl+L and the other navigation keys move through it, spoken
-   as in the editor, "No next table" when there is none; Axit, About, Version names the version of Axit, the two apps
+   as in the editor, "No next table" when there is none; Axit, About, Version names the version of Axit, the nine apps
    and the folders; About, Licence, Attribution and Axit guide open their notices, Escape closes each.
 4. Alt+A: the Axit menu with New window, Recently closed, Open windows, Open windows by type, Close all windows, Check
    for updates and About (bundle AX-9); About, Axit on GitHub: the browser opens the repository page. With a second

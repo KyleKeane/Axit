@@ -4,7 +4,7 @@
        data for the text editor shell in Axit.Forms (read-only), its key table and its texts; the pure code is
        AxPreview.Core. -->
   <PropertyGroup>
-    <TargetFramework>net10.0-windows</TargetFramework>
+    <TargetFramework>$(AxitDotNet)-windows</TargetFramework>
     <UseWindowsForms>true</UseWindowsForms>
     <RootNamespace>AxPreview</RootNamespace>
     <AssemblyName>AxPreview</AssemblyName>

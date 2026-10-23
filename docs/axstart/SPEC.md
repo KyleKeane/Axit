@@ -1,9 +1,10 @@
 # AxStart — Specification
 
 AxStart is an app of the Axit bundle (`docs/axit/SPEC.md`): a program launcher for a blind developer who uses the
-NVDA screen reader. Specified 2026-10-22 at the user's ask and not yet built: "the windows launcher has become very
+NVDA screen reader. Specified and built 2026-10-22 at the user's ask, released in 3.4.0 before its NVDA pass (section
+9): "the windows launcher has become very
 bloated and i want a quick global key i hit to then search for a program to launch". The document is kept in step with
-the code once it exists (a behaviour change updates it in the same commit). Requirements are numbered `AS-n.m` and
+the code (a behaviour change updates it in the same commit). Requirements are numbered `AS-n.m` and
 decisions `AS-Dn`; the bundle's rules, AX-7 (accessibility), AX-8 (keys) and AX-9 (the Axit menu), are cited by
 number and not repeated. In AxStart's code and documents, "SPEC.md" means this file.
 
@@ -143,14 +144,17 @@ taskbar. It works entirely offline (bundle G6).
 
 - AS-5.1 `%APPDATA%\Axit\axstart.json` (AX-5.3): `hotkey` (the key as text, "Ctrl+Shift+Space"), `startWithWindows`
   (on), `sayFirstMatch` (on), `starts` (each program's display name and how often AxStart started it, for the order),
-  and the window base's font, update check and window fields (the place is not used: the window is centred).
+  and the window base's font, update check and window fields (the place is saved as every window's and never
+  restored: the window is centred each time it shows).
 - AS-5.2 Menus (AX-6): **AxStart (S):** Start Enter | Start as administrator Ctrl+Shift+Enter | Open file location
-  Ctrl+O | ─ | Refresh programs F5 | ─ | Hide Escape | Quit AxStart. **Options (O):** Hotkey… | Text ▸ (Font… |
+  Ctrl+O | Information Ctrl+I | ─ | Refresh programs F5 | ─ | Hide Escape | Quit AxStart. **Options (O):** Hotkey… | Text ▸ (Font… |
   Larger text | Smaller text | Windows text size) | General ▸ (Start with Windows ✓ | Say the first match while typing
   ✓ | Check for updates at start ✓) | Developer ▸ (Open settings file | Copy diagnostics). **Axit (A)** (AX-9).
-  **Help (H):** Keyboard shortcuts F1 | User guide. Every item has a mnemonic (AX-7.4).
-- AS-5.3 Keys (AX-8). Bundle-wide: F1, Ctrl+Plus, Ctrl+Minus, Alt+F4 (hides, AS-3.4). Window-specific
-  (`AxStartKeys`): Up, Down, Page Up, Page Down, Ctrl+Home, Ctrl+End (in the field, AS-3.3), Enter,
+  **Help (H):** Keyboard shortcuts F1 | User guide | ─ | Windows resources ▸ (Keyboard shortcuts in Windows). Every
+  item has a mnemonic (AX-7.4).
+- AS-5.3 Keys (AX-8). Bundle-wide: F1, Ctrl+Shift+P, Ctrl+Plus, Ctrl+Minus, Page Up and Page Down (in the field,
+  AS-3.3), Alt+F4 (hides, AS-3.4). Window-specific (`AxStartKeys`): Up, Down, Ctrl+Home, Ctrl+End (in the field,
+  AS-3.3), Enter,
   Ctrl+Shift+Enter, Ctrl+O, Ctrl+I, F5, Escape. The hotkey is a setting, not in a table; the collision test covers
   the table, and Hotkey… refuses a key of the table only when it has no Ctrl, Alt or Windows key (AS-4.2).
 - AS-5.4 Announcements, one UI Automation notification each on the field, or on the notice while one shows (AX-7.3):

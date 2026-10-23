@@ -6,7 +6,7 @@ namespace AxFile.Core;
 /// Zip files the window makes and opens (SPEC.md AF-4.12), through .NET's own <see cref="ZipFile"/>, no package: the
 /// entries compressed into a new zip in their folder, and a zip extracted into a new folder next to it. Both pick a
 /// name that is free, "name - 2.zip" (<see cref="FileOperations.FreeName"/>), rather than write over anything, and
-/// both count their files for the pane's status line (AF-9.3) through the <c>progress</c> callback, called on the
+/// both count their files for the Actions list's line (AF-9.2) through the <c>progress</c> callback, called on the
 /// caller's thread after each file with the files done and the total.
 /// </summary>
 public static class Archives

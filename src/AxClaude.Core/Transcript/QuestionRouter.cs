@@ -3,7 +3,7 @@ namespace AxClaude.Core.Transcript;
 /// <summary>Where the app presents a question Claude waits on.</summary>
 public enum QuestionDialog
 {
-    /// <summary>The answer notice: one answer out of a list, or several ticked, chosen with their keys or the arrow keys.</summary>
+    /// <summary>The answer list in the control area (D33; a notice until 1.5.1, hence the name): one answer out of a list, or several ticked, chosen with their keys or the arrow keys.</summary>
     AnswerNotice,
 
     /// <summary>

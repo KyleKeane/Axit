@@ -531,7 +531,7 @@ public sealed partial class GitForm : AxitForm
         }
     }
 
-    /// <summary>git is not on the PATH (AG-1.5): said once as a notice, and every command stays disabled.</summary>
+    /// <summary>git is not on the PATH (AG-1.5): a notice each time a command is asked for, with the chime the first time, and every command stays disabled.</summary>
     private void GitMissing()
     {
         var first = !_gitMissing;

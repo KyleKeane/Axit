@@ -19,6 +19,7 @@ body:
         - AxFile
         - AxMedia
         - AxPreview
+        - AxStart
         - The bundle (install, update, the Axit menu)
     validations:
       required: true
@@ -27,7 +28,7 @@ body:
     attributes:
       label: Axit version
       description: Axit menu, About, Version.
-      placeholder: "3.3.1"
+      placeholder: "3.4.0"
     validations:
       required: true
   - type: input

@@ -1,20 +1,20 @@
 # Axit — Bundle Specification
 
-Describes Axit as of 2.0.0 (2026-10-02), the bundle the AxClaude repository became (plan: `docs/axit/plan.md`). Every
-requirement is built unless its heading says otherwise; this document is kept in step with the code (a behaviour
-change updates it in the same commit). It covers only what crosses apps. Each app has its own specification:
-`docs/axclaude/SPEC.md`, `docs/axdown/SPEC.md`. Requirements here are numbered `AX-n.m` and decisions `B-n`, so that
-they never clash with an app's `FR-n.m` and `D-n`.
+Describes Axit, the bundle the AxClaude repository became on 2026-10-02 (plan: `docs/axit/plan.md`). Every
+requirement is built unless its text says otherwise; this document is kept in step with the code (a behaviour change
+updates it in the same commit), and what each release brought is section 7. It covers only what crosses apps. Each
+app has its own specification, `docs/<app>/SPEC.md` (section 3). Requirements here are numbered `AX-n.m` and
+decisions `B-n`, so that they never clash with an app's `FR-n.m` and `D-n`.
 
 ## 1. Summary
 
 Axit is one installed Windows program, `Axit.exe`, that holds several accessible apps for a blind developer who uses
 the NVDA screen reader. Each app is a separate window that starts on its own, has its own Start menu entry, its place in
 File Explorer's Open with Axit submenu and its own console command, and all of them share one installer, one updater, one
-version number and one release workflow. The first apps are **AxClaude**, the front end for the Claude Code CLI that
-exists today, and **AxDown**, a barebones editor for Markdown and text files; **AxJSON**, **AxGit**, **AxTerminal** and
-**AxFile** followed (section 3). Later apps are planned (a password manager, a vault manager: `docs/axit/plan.md`) and
-follow the same pattern without changes to the bundle.
+version number and one release workflow. The first apps were **AxClaude**, the front end for the Claude Code CLI, and
+**AxDown**, a barebones editor for Markdown and text files; **AxJSON**, **AxGit**, **AxTerminal**, **AxFile**,
+**AxMedia**, **AxPreview** and **AxStart** followed (section 3). Later apps are planned (a password manager, a vault
+manager: `docs/axit/plan.md`) and follow the same pattern without changes to the bundle.
 
 ## 2. Goals and non-goals
 
@@ -80,7 +80,7 @@ allow it, see B-9).
 
 ### AX-1 Launch and dispatch
 
-- AX-1.1 The first argument may be a verb naming an app: `claude`, `down`, `json`, `git`, `terminal`, `file`, `media`, `preview`. The rest of the arguments go to that app
+- AX-1.1 The first argument may be a verb naming an app: `claude`, `down`, `json`, `git`, `terminal`, `file`, `media`, `preview`, `start` (the one list is `Dispatch.Apps`). The rest of the arguments go to that app
   unchanged, so `Axit.exe claude C:\src --record x.vt` is what `AxClaude.exe C:\src --record x.vt` was.
 - AX-1.2 Without a verb, a first argument that is an existing folder goes to AxClaude and an existing file to AxDown,
   or to AxJSON when its extension is `.json`, or to AxMedia when it is a sound or video file (`MediaFiles.IsMedia`),
@@ -199,7 +199,8 @@ allow it, see B-9).
 - AX-4.2 `publish.ps1` publishes `src/Axit` self-contained, single file, into `publish\win-x64` with `install.cmd`,
   `install.ps1`, `LICENSE` and `docs/axit/README.md` as `README.md`, and zips it.
 - AX-4.3 One `CHANGELOG.md`; every bullet starts with the app it concerns (`AxClaude:`, `AxDown:`, `Axit:` for the
-  bundle itself).
+  bundle itself, `For developers:` for the repository, the scripts and the tests); every released section's heading
+  carries its date.
 - AX-4.4 `build.yml` runs the tests of the whole solution in Release on every push to any branch and on every pull
   request, so that a branch fails before it is merged rather than at its release (since 2026-10-22; it ran on `main`
   alone). `test.ps1` runs the same tests locally (every `tests/*.Tests.csproj`, Release, one by one so that a running
@@ -228,14 +229,20 @@ allow it, see B-9).
 
 - AX-6.1 `Axit.Core` (pure, unit tested): `Dispatch` (with `Apps`, the name and verb of each app), `BundleInfo`, `AppPaths`, `SettingsFile`, `WindowSettings` (what every window's settings hold, AX-6.5), `TextMatch` (a typed text against a name, AX-10.3) and `Accents` (the European letters taken apart and stripped without the globalization data: the executable runs with invariant globalization, where `string.Normalize` does nothing, and the test projects run the same way so that such a dependence fails in a test and not in the program; 2026-10-23),
   `Log` (per-app file name), `Updates/` (`UpdateCheck`, the release check, and `Updater`, the download and the
-  hand-over to `install.ps1`; neither needs a window), `Audio/WaveTone` (the sounds as WAV bytes), `MarkdownOutline` (the headings, links, lists, block quotes and tables of a Markdown text, with next and previous from a caret position; AxDown SPEC §9, shared since its second use), `AxitWindows` (the window lists of the Axit menu from the windows the system names, AX-9), `RecentlyClosed` (the bundle's list of closed files and folders, AX-9.4), `BundleAbout` (the About sections and the embedded Axit guide, AX-9.9), and the console-to-transcript pieces that came from AxClaude on their second use, AxTerminal (2026-10-18, docs/axterminal/SPEC.md §5): `Pty/` (`PtyHost`, the ConPTY host, and `StreamRecorder`), `Vt/` (`VtParser`, `Screen`, `Wcwidth`) and `Transcript/` (`Line` and `LineKind`, `LineStore`, the base of each app's model that the screen writes its lines to, `TranscriptMirror` and `Utterance`), tested in `tests/AxClaude.Tests` against its recordings.
-- AX-6.2 `Axit.Forms` (WinForms, no tests, checked with NVDA): `OverlayPanel` (the notices in the
+  hand-over to `install.ps1`; neither needs a window), `Audio/WaveTone` (the sounds as WAV bytes), `Paragraphs` (the
+  paragraph starts of a text, for Ctrl+Up and Ctrl+Down), `WindowPlacement`, `EmbeddedText` (the embedded guides),
+  `NaturalOrder` and `MediaFiles` (File Explorer's order of names, and the sound and video kinds with the time and
+  speed rules; from AxFile on their second use, AxMedia), `Palette` (the command palette's lines and search, AX-10), `MarkdownOutline` (the headings, links, lists, block quotes and tables of a Markdown text, with next and previous from a caret position; AxDown SPEC §9, shared since its second use), `AxitWindows` (the window lists of the Axit menu from the windows the system names, AX-9), `RecentlyClosed` (the bundle's list of closed files and folders, AX-9.4), `BundleAbout` (the About sections and the embedded Axit guide, AX-9.9), and the console-to-transcript pieces that came from AxClaude on their second use, AxTerminal (2026-10-18, docs/axterminal/SPEC.md §5): `Pty/` (`PtyHost`, the ConPTY host, and `StreamRecorder`), `Vt/` (`VtParser`, `Screen`, `Wcwidth`) and `Transcript/` (`Line` and `LineKind`, `LineStore`, the base of each app's model that the screen writes its lines to, `TranscriptMirror` and `Utterance`), tested in `tests/AxClaude.Tests` against its recordings.
+- AX-6.2 `Axit.Forms` (WinForms, checked with NVDA; the pure parts, `AppMessage`'s text form, `BundleKeys.Text` and
+  `TextJumps`, have unit tests in `tests/Axit.Tests`): `OverlayPanel` (the notices in the
   window, with the `Notice` record callers pass), `ControlArea` and `ListKeys` (a question's answers as a list or a
   field in the message field's place, with the number and page keys of every such list), `Sounds` (wave-out devices kept
   open for the life of the process; `Notice` for every window, `Edge`, one short low note, for a key that moves nothing), `EditPaging` (Page Up and Page Down in an edit control), `EditParagraphs`
   (Ctrl+Up and Ctrl+Down by paragraph, with Shift selecting), `EditKeys` (the KeyDown handler that gives an edit
   control both), `Announcer` (the UI Automation notification, AX-7.1), `TextJump` and `TextJumps` (a window's key pairs for the kinds of element in a text and the jump itself on an edit control, used by every notice text and by AxDown's editor, AX-7.2), `StatusLayout`, the font
-  handling (text size and the font picker), `BundleKeys` (AX-8), `AxitMenu` (the Axit menu every window has, AX-9), `RecentMenu` (the "Open recent …" submenus, AX-9.5), `AppMessage` (the hand-over from a starting process to the open window of an app that keeps one window, one `WM_COPYDATA` message with a verb and paths, found through the Axit menu's window list; AxMedia and AxPreview, docs/axmedia/SPEC.md AM-1.3, 2026-10-22; `SendTo` a window the caller found, AxStart's hidden one, docs/axstart/SPEC.md AS-1.2), `TranscriptView` with `TranscriptKeys` and `QuickKey` (the read-only transcript of a console with its single-key navigation, the keys handed in by the window from its table; from AxClaude on its second use, AxTerminal, docs/axterminal/SPEC.md §5),
+  handling (text size and the font picker), `BundleKeys` (AX-8), `CommandPalette` (the menu bar read into the
+  palette's entries, AX-10), `WindowAccessibleObject` (the window's client area as its UI Automation rectangle, so
+  that NVDA+End finds the status bar), `AxitMenu` (the Axit menu every window has, AX-9), `RecentMenu` (the "Open recent …" submenus, AX-9.5), `AppMessage` (the hand-over from a starting process to the open window of an app that keeps one window, one `WM_COPYDATA` message with a verb and paths, found through the Axit menu's window list; AxMedia and AxPreview, docs/axmedia/SPEC.md AM-1.3, 2026-10-22; `SendTo` a window the caller found, AxStart's hidden one, docs/axstart/SPEC.md AS-1.2), `TranscriptView` with `TranscriptKeys` and `QuickKey` (the read-only transcript of a console with its single-key navigation, the keys handed in by the window from its table; from AxClaude on its second use, AxTerminal, docs/axterminal/SPEC.md §5),
   and the text editor shell: `TextEditorForm` (the window every text editor app is: the file, the menus, find, go to
   line, the status bar, the notices, the fonts, the update flow; AxDown's `EditorForm` until AxJSON, the second
   editor), `EditorApp` (what differs between the editor apps, as data: name, verb, settings file, file types, F1 text,
@@ -262,9 +269,10 @@ allow it, see B-9).
   window adds its controls (the `Overlay` first) and fills in the hooks: the F1 text, what to hide for a notice and
   what to show after, where the focus goes after one (`FocusTarget`, `FocusToKeep`), whether the chime follows a
   setting, what gets the font, how the new version starts it again (`RestartArguments`, `UpdateRestartText`), what
-  to note of an update (`UpdateNoted`), its diagnostics lines, and its own keys (`ProcessWindowKey`). The settings
-  each window needs are an interface in `Axit.Core`, `WindowSettings` (font, update check, place; `Save`), which
-  every app's settings class implements while its file keeps its own shape. The base grew out of the editor shell on
+  to note of an update (`UpdateNoted`), its diagnostics lines, the control its announcements are raised on
+  (`AnnounceSource`), its own palette entries (`PaletteEntries`, AX-10.5), and its own keys (`ProcessWindowKey`). The
+  settings each window needs are an abstract class in `Axit.Core`, `WindowSettings` (font, update check, place;
+  `Save`), which every app's settings class derives from while its file keeps its own shape. The base grew out of the editor shell on
   the third copy, AxGit (2026-10-18); AxClaude's `MainForm` moved onto it the same day, its own extras (the sound
   setting for the chime, the reader's kept caret, system lines for the update's steps) as hooks.
 
@@ -379,8 +387,11 @@ name, so that a command is reached without knowing its menu or its key, and its 
   Options, Text, Ctrl+Plus", "Word wrap, Edit, Ctrl+Shift+W, checked". The name is the item's text without its
   mnemonic ampersand and its trailing dots. Left out: separators, items that only open a submenu, disabled items, and
   the lists a menu fills only as it opens (Open recent, Open windows, Recently closed), whose state the palette would
-  have to guess; a window marks such a submenu where it attaches its filling (`CommandPalette.FilledOnOpening`). The
-  palette reads the menus and keeps no list of its own: a command added to a menu is in the palette.
+  have to guess; a window marks such a submenu where it attaches its filling (`CommandPalette.FilledOnOpening`), and
+  the fixed items such a submenu also holds (AxFile's Add or remove this folder under Favorites, This PC and Eject
+  under Drives) are left out with it, their keys still working. A menu item whose text or check mark changes only as
+  its menu opens (AxFile's Undo, AxTerminal's Switch shell) reads in the palette as it last stood. The palette reads
+  the menus and keeps no list of its own: a command added to a menu is in the palette.
 - AX-10.3 **Matching** is AxStart's (AS-2.2), moved to `Axit.Core` on this second use: the typed text, trimmed, case
   and accents ignored, against the entry's whole line; an entry matches when its line holds every typed word (`text
   larger` finds "Larger text, Options, Text"). The order: a line that starts with the first word, then a line with a
@@ -472,16 +483,25 @@ tests/Axit.Tests, tests/AxClaude.Tests, tests/AxJSON.Tests, tests/AxGit.Tests, t
 ```
 
 References point one way: `Axit` references every app; an app's window project references its own `.Core`,
-`Axit.Core` and `Axit.Forms`; an app's `.Core` references `Axit.Core`; the shared projects reference nothing of the
-apps. `tests/Axit.Tests/LayoutTests` reads the project files and fails when this is broken.
+`Axit.Core` and `Axit.Forms`; an app's `.Core` references `Axit.Core` and never `Axit.Forms`; the shared projects
+reference nothing of the apps. `tests/Axit.Tests/LayoutTests` reads the project files and fails when this is broken,
+and `InventoryTests` fails when an app lacks one of its places (5.3 M1, `adding-an-app.md`).
+
+The .NET version is one property, `AxitDotNet` in `Directory.Build.props`, from which every project's
+`TargetFramework` is built (`$(AxitDotNet)` for the pure projects, `$(AxitDotNet)-windows` for WinForms), and the SDK
+band is `global.json`, which the workflows read too (2026-10-23). .NET 10 is an LTS release supported until
+November 2028; the move to the next LTS is those two files and a run of the tests (`docs/axit/longevity.md`).
 
 ### 5.2 Documents
 
 ```
 CLAUDE.md               the map of the bundle and its rules (short); each project has its own CLAUDE.md with its notes
-docs/axit/              SPEC.md (this), README.md (the zip's guide: install, the apps, uninstall), adding-an-app.md, plan.md
-docs/axclaude/          SPEC.md, user-guide.md (embedded by src/AxClaude), claude-screens.md, nvda-test-plan.md
-docs/axdown/            SPEC.md, user-guide.md (embedded by src/AxDown), nvda-test-plan.md
+README.md, CONTRIBUTING.md, SECURITY.md   the repository's own pages (AX-4.5)
+docs/axit/              SPEC.md (this), README.md (the zip's guide: install, the apps, uninstall), adding-an-app.md, plan.md,
+                        nvda-test-record.md (every NVDA pass, by step), axfile-split.md (the inventory of the split),
+                        review-2026-10-23.md (the review of the code and documents) and longevity.md (the practices for the years ahead)
+docs/<app>/             SPEC.md, user-guide.md (embedded by the app's project), nvda-test-plan.md, for each app of section 3;
+                        docs/axclaude also claude-screens.md, docs/axdown also tutorial.md
 ```
 
 ### 5.3 Modularity rules
@@ -585,9 +605,20 @@ docs/axdown/            SPEC.md, user-guide.md (embedded by src/AxDown), nvda-te
   editor shell, AxGit and AxClaude's `MainForm` on it. Heard under NVDA by the user: the notices in AxClaude and
   AxDown on the base, AxGit's start, views, diff, staging and notices, and the way to and from it; AxGit's commit,
   discard, switch and remote commands await their pass.
-- Unreleased (2026-10-22), developed on `split`: the split of AxFile (`docs/axit/axfile-split.md`): AxMedia, the
-  player with one queue, and AxPreview, the viewer as the editor shell's read-only mode, as apps of their own with a
+- 3.0.0 to 3.2.2 (2026-10-19 to 2026-10-21): AxTerminal with the console pieces shared (AX-6.1), the in-place update
+  clearing old remnants (AX-2.8), one Open with Axit submenu (AX-2.3); AxFile (3.1.0) with its operations, Undo and
+  pane; the delayed question focus in AxClaude (3.2.1); the editors' undo and redo (3.2.2). `CHANGELOG.md` has each.
+- 3.3.1 (2026-10-22), developed on `split`: the split of AxFile (`docs/axit/axfile-split.md`): AxMedia, the player
+  with one queue, and AxPreview, the viewer as the editor shell's read-only mode, as apps of their own with a
   hand-over from a starting process to the open window (`Axit.Forms/AppMessage`, AX-6.2); AxFile lean, Enter the
   user's default program, the pane its Actions list; `MediaFiles`, `NaturalOrder` and the find in a list shared
   (AX-6.3); the dispatcher's media rule (AX-1.2) and the installer's Open with registrations for both apps (AX-2.3).
-  Not yet checked with NVDA.
+  Every plan passed under NVDA by the user the same day (`docs/axit/nvda-test-record.md`); 3.3.0 was tagged from the
+  same work and never published (a test the Release build refused).
+- 3.4.0 (2026-10-22): AxStart, the program launcher (section 3, `docs/axstart/SPEC.md`), its NVDA pass still owed;
+  `test.ps1` running the tests as CI does (AX-4.4); the repository's pages (AX-4.5).
+- Unreleased (2026-10-23), developed on `palette`: the command palette in every window (AX-10); the heading letters
+  and Ctrl+F in every notice's text (AX-7.2); the review of the code and documents of 2026-10-18 to 2026-10-22
+  (`docs/axit/review-2026-10-23.md`) with its fixes, the tests run without the globalization data as the program
+  runs (AX-6.1, `Accents`), and the practices for the years ahead (`docs/axit/longevity.md`). Not yet checked with
+  NVDA.

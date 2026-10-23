@@ -96,7 +96,7 @@ public sealed partial class FileForm : AxitForm
         _itemMenu = new ItemMenu(SayInformation) { AccessibleName = "Item" };
         FillItemMenu(_itemMenu.Items);
 
-        // Select (AF-3.7): the marks on the list's entries, which the operations act on; the menu of the whole list
+        // Selection (AF-3.7): the marks on the list's entries, which the operations act on; the menu of the whole list
         // rather than of one entry, so it sits beside Item (asked 2026-10-21).
         // Selection (AF-3.7, AF-D10, 2026-10-22): the marks from anywhere, then the operations on them alone, which say
         // "None selected" rather than fall back to the current entry; Item is the entry, Folder the folder.

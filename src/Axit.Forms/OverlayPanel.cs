@@ -43,8 +43,8 @@ public sealed record OverlaySession(string? Folder, Action ChooseFolder, IReadOn
 /// <summary>
 /// What a notice says and offers, and nothing about how it is shown (D23): the title, the text, the buttons, at most
 /// one of the text field and the New session controls, and whether the user opened it. Every notice goes through
-/// <c>MainForm.ShowNotice</c>, which adds what all notices share: the key line made from the buttons, the chime and
-/// the hold of a notice the user did not open, the focus, and the blocked window.
+/// the window base's <c>AxitForm.ShowNotice</c>, which adds what all notices share: the key line made from the
+/// buttons, the chime and the hold of a notice the user did not open, the focus, and the blocked window.
 /// </summary>
 public sealed record Notice(string Title, string Text, IReadOnlyList<OverlayChoice> Choices)
 {

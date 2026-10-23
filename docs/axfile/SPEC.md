@@ -159,7 +159,7 @@ folder of the file or project in hand, and sends back. It works entirely offline
   short low note (`Sounds.Edge`, A3 for 60 ms) on Up or Home at the first entry and Down or End at the last, in the
   folder list and the Actions list alike (`AxFileKeys.FirstItem`, `LastItem` and their seconds; the keys are the
   list's own everywhere else, `AtEdge`). **Find** (Ctrl+F, the bundle's Find notice with the field "Name contains") selects the first entry
-  Shift+F3 the next and the previous. NVDA reads the selected entry; the app adds nothing.
+  whose name holds the text, F3 and Shift+F3 the next and the previous. NVDA reads the selected entry; the app adds nothing.
 - AF-3.7 **Selection** (asked 2026-10-21). The list stays a single-selection list box, where the arrow keys choose
   the current entry (AF-3.6); the selection the operations act on is a set of marks on top of it. **Space** marks the
   current entry, or unmarks it again: its item reads "<name>, selected" while it is marked ("notes.md, selected";
@@ -540,7 +540,8 @@ src/AxFile/         class library (net10.0-windows): AxFileApp (Run, Usage), Fil
                     the Information key while open; AF-4.6, AF-4.10), Shell (Windows' own ways with an entry: the
                     Open with dialog, the Properties sheet, the shell's context menu through IShellFolder and
                     IContextMenu, Eject, the Recycle Bin's Restore; AF-4.7); references AxFile.Core, Axit.Core, Axit.Forms
-tests/AxFile.Tests/ FolderListingTests, FileOperationsTests, UndoTests and ArchivesTests over temporary folders (the
+tests/AxFile.Tests/ FolderListingTests, FileOperationsTests, UndoTests, ArchivesTests, PathCompletionTests, ActionLogTests,
+                    UserProgramsTests and FileSettingsTests over temporary folders (the
                     Recycle Bin is not exercised), ActionLogTests, UserProgramsTests, FileSettingsTests
 docs/axfile/        this spec, user-guide.md (embedded), nvda-test-plan.md
 ```

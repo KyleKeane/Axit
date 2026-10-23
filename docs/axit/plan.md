@@ -92,8 +92,8 @@ the restart by the app itself (2.3.0).
 Each would be one more app of the bundle, a window per thing worked on, added the way `adding-an-app.md` says, with no
 library dependency (B-10: `git.exe` and the file system through the APIs already used, as Claude is `claude.exe`).
 
-- **AxGit**: built as a first draft the same day (`docs/axgit/SPEC.md`), unreleased until its NVDA pass; the notes
-  below were its plan. A git manager for a repository. One window per repository, named after it, opened from the other windows'
+- **AxGit**: built the same day (`docs/axgit/SPEC.md`), released in 2.12.0 and passed under NVDA on 2026-10-22; the
+  notes below were its plan. A git manager for a repository. One window per repository, named after it, opened from the other windows'
   "Show current folder in ▸" and "Show current file in ▸" submenus (the slot the specs already keep for an Axit app
   next to File Explorer) and from the Axit menu, so that it stays tied to the folder or file the user came from and is
   found again in Open windows (AX-9) rather than lost. Inside the window the bundle's own pieces: lists (status as
@@ -104,8 +104,8 @@ library dependency (B-10: `git.exe` and the file system through the APIs already
   window as AxClaude or the editors it would be a Git menu three times over and a second set of lists in a window
   built around one thing; and in AxClaude much of it can already be asked of Claude, so AxGit's worth is the quick,
   deterministic read of a repository's state without a turn.
-- **AxTerminal** (asked 2026-10-18; specified and built as a first draft the same day, `docs/axterminal/SPEC.md`,
-  unreleased until its NVDA pass): AxClaude's window around a
+- **AxTerminal** (asked 2026-10-18; specified and built the same day, `docs/axterminal/SPEC.md`, released in 3.0.0
+  and passed under NVDA on 2026-10-22): AxClaude's window around a
   shell. PowerShell (or Windows PowerShell, or cmd) in a ConPTY; every row a line of the transcript; a command typed
   in the field gets AxClaude's exchange block; the shell's prompt rows hidden and shown in the status bar; the shell's
   integration marks (OSC 133, the Windows Terminal convention, injected by the app for the session) say when a command
@@ -122,11 +122,15 @@ library dependency (B-10: `git.exe` and the file system through the APIs already
   **AxPreview**, a read-only viewer for one file, so that AxFile is file operations and management only; the
   specifications are `docs/axmedia/SPEC.md` and `docs/axpreview/SPEC.md`, the inventory of the split
   `docs/axit/axfile-split.md`, and AxFile's pane becomes its Actions list (`docs/axfile/SPEC.md` AF-9); all three
-  built the same day on the branch `split`, awaiting the user's NVDA passes. As first built, the player was:
+  built the same day on the branch `split`, released in 3.3.1 and passed under NVDA the same day. As first built, the player was:
   Enter on a sound or video file plays it and the folder's media files follow in order; pause, seek, next, previous,
   speed, go to time, what is playing on Ctrl+Q; Windows' own decoders through one P/Invoke seam (MCI or MFPlay, chosen
   by the first build), the keyboard's own volume keys. The worry on record stands: the scope stays small; copy and
   paste wait for the ask.
+- **AxStart** (asked, specified and built 2026-10-22, `docs/axstart/SPEC.md`; released in 3.4.0 before its NVDA pass,
+  which is still owed): a program launcher behind a global hotkey, the one app of the bundle with no document: a
+  hidden process from sign-in whose hotkey brings up one search field over the Start menu's programs, Down and Up
+  through the matches with the caret kept in the field, Enter to start.
 - **AxKeePassium** (asked 2026-10-18; no spec yet; the name is the user's, after the KeePass app on the phone, and is
   someone's product name, so AxKeePass is the alternative): a KeePass client for one database (`.kdbx`) per window: the
   entries as a list, by group and by search, Enter for an entry's fields as read-only text with the password withheld,

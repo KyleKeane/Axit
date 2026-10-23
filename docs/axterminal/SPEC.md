@@ -1,9 +1,10 @@
 # AxTerminal — Specification
 
-AxTerminal is a planned app of the Axit bundle (`docs/axit/SPEC.md`): a terminal for a shell, shown the way AxClaude
-shows Claude Code, for a blind developer who uses the NVDA screen reader. Describes AxTerminal as planned on
-2026-10-18; nothing is built yet, and once it is the document is kept in step with the code (a behaviour change updates
-it in the same commit). Requirements are numbered `AT-n.m` and decisions `AT-Dn`; the bundle's rules, AX-7
+AxTerminal is an app of the Axit bundle (`docs/axit/SPEC.md`): a terminal for a shell, shown the way AxClaude shows
+Claude Code, for a blind developer who uses the NVDA screen reader. Specified and built 2026-10-18, released in
+3.0.0, and the whole test plan passed under NVDA on 2026-10-22 (the record: `docs/axit/nvda-test-record.md`; what
+each release brought is section 8). The document is kept in step with the code (a behaviour change updates it in
+the same commit). Requirements are numbered `AT-n.m` and decisions `AT-Dn`; the bundle's rules, AX-7
 (accessibility), AX-8 (keys) and AX-9 (the Axit menu), and AxClaude's requirements (`docs/axclaude/SPEC.md`, cited as
 "AxClaude FR-n.m" and "AxClaude Dn") are cited by number and not repeated. In AxTerminal's code and documents,
 "SPEC.md" means this file.

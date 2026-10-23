@@ -2,7 +2,7 @@
 
   <PropertyGroup>
     <OutputType>WinExe</OutputType>
-    <TargetFramework>net10.0-windows</TargetFramework>
+    <TargetFramework>$(AxitDotNet)-windows</TargetFramework>
     <UseWindowsForms>true</UseWindowsForms>
     <RootNamespace>Axit</RootNamespace>
     <AssemblyName>Axit</AssemblyName>
@@ -13,16 +13,16 @@
     <ApplicationIcon>AxClaude.ico</ApplicationIcon>
     <Version>3.4.0</Version>
     <Product>Axit</Product>
-    <Description>Accessible Windows apps for screen reader users: AxClaude, a front end for the Claude Code CLI, AxDown, a text editor, AxJSON, a JSON editor, AxGit, a git manager, AxTerminal, a terminal, and AxFile, a file manager with a player</Description>
+    <Description>Accessible Windows apps for screen reader users: AxClaude, a front end for the Claude Code CLI, AxDown, a text editor, AxJSON, a JSON editor, AxGit, a git manager, AxTerminal, a terminal, AxFile, a file manager, AxMedia, a player, AxPreview, a viewer, and AxStart, a program launcher</Description>
     <Authors>Dr. Kyle Keane</Authors>
     <Company>Dr. Kyle Keane, www.kylekeane.com</Company>
     <Copyright>Copyright (c) 2026 Dr. Kyle Keane (www.kylekeane.com). MIT License.</Copyright>
   </PropertyGroup>
 
-  <!-- AxDown.ico, AxJSON.ico, AxGit.ico, AxTerminal.ico, AxFile.ico, AxMedia.ico and AxPreview.ico, next to this file, are the apps' icons for their Start menu
-       and File Explorer entries (the executable's own icon is AxClaude's). publish.ps1 copies them next to the
-       executable, since a single-file publish would bundle a project item into the executable, and install.ps1
-       copies them on. -->
+  <!-- One .ico per app next to this file (AxDown.ico to AxStart.ico; tools/make-icon.ps1 draws them) are the apps'
+       icons for their Start menu and File Explorer entries (the executable's own icon is AxClaude's). publish.ps1
+       copies every one of them next to the executable, since a single-file publish would bundle a project item
+       into the executable, and install.ps1 copies them on. -->
 
   <ItemGroup>
     <ProjectReference Include="..\AxClaude\AxClaude.csproj" />

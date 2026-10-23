@@ -1,10 +1,10 @@
 # AxPreview — Specification
 
 AxPreview is an app of the Axit bundle (`docs/axit/SPEC.md`): a read-only viewer for one file, for a blind developer
-who uses the NVDA screen reader. Specified 2026-10-22 at the user's ask and not yet built: the preview that AxFile
+who uses the NVDA screen reader. Specified and built 2026-10-22 at the user's ask, released in 3.3.1 and checked with NVDA the same day (the record: `docs/axit/nvda-test-record.md`): the preview that AxFile
 gained the night before (`docs/axfile/SPEC.md` AF-9.4) moves here and grows into a window of its own, so that AxFile
 is file operations and management only and viewing, like playing (`docs/axmedia/SPEC.md`), is another app's with a
-tight hand-over (AP-D1). The document is kept in step with the code once it exists (a behaviour change updates it in
+tight hand-over (AP-D1). The document is kept in step with the code (a behaviour change updates it in
 the same commit). Requirements are numbered `AP-n.m` and decisions `AP-Dn`; the bundle's rules, AX-7 (accessibility),
 AX-8 (keys) and AX-9 (the Axit menu), and AxDown's (`docs/axdown/SPEC.md`, cited as "AxDown AD-n.m") are cited by
 number and not repeated. In AxPreview's code and documents, "SPEC.md" means this file. The inventory of the split
@@ -150,23 +150,21 @@ notices are the bundle's overlay in place of the text (AX-7.2). The window has t
 ## 6. Architecture
 
 ```
-src/AxPreview.Core/  class library (net10.0): TextSniff (IsText over a file's first bytes; AxFile's Preview.IsText
-                     moved), PreviewSettings; references Axit.Core (TextDocument, MarkdownOutline, Paragraphs)
-src/AxPreview/       class library (net10.0-windows): AxPreviewApp (Run, Usage), PreviewForm (the window, on AxitForm:
-                     the read-only text with EditKeys and TextJumps, the question area for Go to line, the status
-                     bar, the menus, the keys, the reload on activation, the hand-over received through AppMessage),
-                     AxPreviewKeys (AxDown's navigation letters, the file keys), HelpText; references AxPreview.Core,
-                     Axit.Core, Axit.Forms
-tests/AxPreview.Tests/ TextSniffTests (the rule over bytes and files), PreviewSettingsTests
+src/AxPreview.Core/  class library (net10.0): TextSniff (whether a file's first bytes read as text, and the refusal
+                     texts; AxFile's Preview.IsText moved); references Axit.Core
+src/AxPreview/       class library (net10.0-windows): AxPreviewApp (Run, Usage, the hand-over to an open window, the
+                     EditorApp record with ReadOnly and Refuse), AxPreviewKeys (AxDown's navigation letters, the
+                     viewer's keys from EditorKeys.Viewer), HelpText; references AxPreview.Core, Axit.Core, Axit.Forms
+tests/AxPreview.Tests/ TextSniffTests (the rule over bytes and files)
 docs/axpreview/      this spec, user-guide.md (embedded), nvda-test-plan.md
 ```
 
-Much of the window is what `Axit.Forms/TextEditorForm` already does for the editors (the text, Go to line, the
-status bar, the reload, the jumps, the Next and Previous submenus): `PreviewForm` is written against the same shared
-pieces (`EditKeys`, `TextJumps`, `ControlArea`, `StatusLayout`, `AxitForm`'s find), not as a copy of the editor
-shell; what the two share beyond that moves to `Axit.Forms` on this second use (AX-6.3), one piece per commit: the
-line and column arithmetic (`Position`, `MoveTo`), the reload-on-activation check, the Next and Previous submenus.
-Whether `PreviewForm` is better an `EditorApp` with a read-only flag is decided at the build (AP-D4).
+The window is `Axit.Forms/TextEditorForm`, the text editor shell, in its read-only mode (AP-D4, decided at the build):
+`EditorApp.ReadOnly` turns the editor control read-only, drops the Edit menu, Save and the history, and adds the
+viewer's commands (Reload, Edit in the editor, `l` for the line, the hand-over received through `AppMessage`); the
+settings are the editors' `EditorSettings` in `axpreview.json`. Nothing of the shell is copied; AxDown and AxJSON are
+unchanged. What the viewer adds to the shell is marked with the flag in the shell's code, the one place a change to
+the viewer is made (`src/Axit.Forms/CLAUDE.md`).
 
 ## 7. Design decisions
 
@@ -192,7 +190,8 @@ Whether `PreviewForm` is better an `EditorApp` with a read-only flag is decided 
 
 ## 8. Testing
 
-- `tests/AxPreview.Tests`: the text rule over bytes and over files in a temporary folder, the settings.
+- `tests/AxPreview.Tests`: the text rule over bytes and over files in a temporary folder (`TextSniffTests`); the
+  settings are the editors' (`EditorSettingsTests` in `tests/Axit.Tests`).
 - `docs/axpreview/nvda-test-plan.md`: opening from AxFile (Shift+Enter and Item → Preview, with and without a window
   open), from File Explorer (Open with Axit, and as the default for a kind) and the Start menu; the reading keys and the jumps on the tutorial file; `l`, Go to line, find; a
   binary file; a changed-on-disk reload; Ctrl+E into the editor; two viewer windows.
@@ -210,6 +209,6 @@ Whether `PreviewForm` is better an `EditorApp` with a read-only flag is decided 
 - 2026-10-22, later the same day, on the branch `split`: built as the editor shell's read-only mode (AP-D4), with
   `TextSniff` in `AxPreview.Core` (tested), the keys, the texts, the guide, the test plan and the wiring (the
   dispatcher, the installer's block with Open with for the text kinds, the icon, `run-axpreview.ps1`); a file alone
-  on the command line still goes to its editor (AP-1.1). Not yet checked with NVDA; AxFile hands over in the next
-  step of the inventory and keeps its preview pane until then.
+  on the command line still goes to its editor (AP-1.1). AxFile handed over and lost its preview pane in the next
+  step of the inventory, the same day.
 - 2026-10-22: released in 3.3.1 (3.3.0 tagged, not published). The whole NVDA test plan marked passed at the user's word, no step reported failing; the record by step is `docs/axit/nvda-test-record.md`.

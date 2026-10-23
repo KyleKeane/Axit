@@ -2,8 +2,8 @@
 .SYNOPSIS
   Generates the icons in src\Axit: AxClaude.ico (the letters Ax on dark blue, also the icon of Axit.exe),
   AxDown.ico (the letters Ad on dark green), AxJSON.ico (the letters Aj on dark brown), AxGit.ico, AxTerminal.ico,
-  AxFile.ico (the letters Af on purple), AxMedia.ico (the letters Am on teal) and AxPreview.ico (the letters Ap on
-  slate blue), rounded squares at the usual Windows sizes.
+  AxFile.ico (the letters Af on purple), AxMedia.ico (the letters Am on teal), AxPreview.ico (the letters Ap on
+  slate blue) and AxStart.ico (the letters As on orange), rounded squares at the usual Windows sizes.
 
 .DESCRIPTION
   Uses System.Drawing only, so it runs on any Windows machine. The 256 pixel image is stored PNG-compressed, the
@@ -11,7 +11,7 @@
   the result is committed. A new app of the bundle adds a line at the end with its letters and colour.
 
 .EXAMPLE
-  .\tools\make-icon.ps1                                   # both icons
+  .\tools\make-icon.ps1                                   # every icon
   .\tools\make-icon.ps1 -Out x.ico -Text Ab -Rgb 90,40,120  # one icon of your own
 #>
 [CmdletBinding()]

@@ -3,7 +3,7 @@
   <!-- The bundle's tests: the shared pure code, the layout rules, and the key tables of every window (AX-8.4), which
        is why this project references the window projects; LayoutTests constrains src/, not tests/. -->
   <PropertyGroup>
-    <TargetFramework>net10.0-windows</TargetFramework>
+    <TargetFramework>$(AxitDotNet)-windows</TargetFramework>
     <UseWindowsForms>true</UseWindowsForms>
   </PropertyGroup>
 

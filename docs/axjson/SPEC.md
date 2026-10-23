@@ -1,8 +1,8 @@
 # AxJSON — Specification
 
 AxJSON is the third app of the Axit bundle (`docs/axit/SPEC.md`): an editor for JSON files for a blind developer who
-uses the NVDA screen reader. Describes AxJSON as of Axit 2.10.0 (2026-10-18), in beta: raw mode (AJ-1, AJ-2, AJ-4) is
-built and awaits its NVDA pass; structured mode (AJ-3) is specified and not built (AJ-D3). The document is kept in step with the code (a behaviour
+uses the NVDA screen reader. Raw mode (AJ-1, AJ-2, AJ-4) is built and checked with NVDA (the record:
+`docs/axit/nvda-test-record.md`); structured mode (AJ-3) is specified and not built (AJ-D3). The document is kept in step with the code (a behaviour
 change updates it in the same commit). Requirements are numbered `AJ-n.m` and decisions `AJ-Dn`; the bundle's rules,
 AX-7 (accessibility) and AX-8 (keys), and the editor shell's, AxDown's AD-n in `docs/axdown/SPEC.md`, are cited by
 number and not repeated. In AxJSON's code and documents, "SPEC.md" means this file.

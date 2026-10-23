@@ -2,7 +2,7 @@
 
   <!-- AxGit's pure code (docs/axgit/SPEC.md §5): git as a process, the parsers of its output, the settings; no window. -->
   <PropertyGroup>
-    <TargetFramework>net10.0</TargetFramework>
+    <TargetFramework>$(AxitDotNet)</TargetFramework>
     <RootNamespace>AxGit.Core</RootNamespace>
   </PropertyGroup>
 

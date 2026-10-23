@@ -15,6 +15,7 @@ body:
         - AxFile
         - AxMedia
         - AxPreview
+        - AxStart
         - The bundle, or a new app
     validations:
       required: true

@@ -11,8 +11,9 @@ jobs:
     runs-on: windows-latest
     steps:
       - uses: actions/checkout@v7
+      # The SDK band is global.json's, the one place it is set (docs/axit/longevity.md).
       - uses: actions/setup-dotnet@v6
         with:
-          dotnet-version: 10.0.x
+          global-json-file: global.json
       - name: Build and test
         run: dotnet test Axit.sln --configuration Release --nologo

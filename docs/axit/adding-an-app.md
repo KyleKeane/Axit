@@ -47,11 +47,11 @@ Its own code is the outline and the commands (pure, in its Core, tested), its ke
   `AxGitApp` is the example.
 - `ThingForm`: the window, derived from `Axit.Forms/AxitForm` (AX-6.5), which already holds the notice flow,
   `Announce`, the fonts, the window's place, the settings saving, the Axit menu with the update flow, find in a text
-  box, the diagnostics and the common keys. Pass the app's name, its settings (a class that implements
+  box, the diagnostics and the common keys. Pass the app's name, its settings (a class derived from
   `Axit.Core/WindowSettings`) and the settings path to the base; add `Overlay` to the controls first; fill in the
   hooks (`Shortcuts`, `HideForNotice`, `ShowAfterNotice`, `FocusTarget`, `ApplyFont`, `RestartArguments`,
   `UpdateRestartText`, `ProcessWindowKey`, and the optional ones `FocusToKeep`, `NoticeChime`, `OnNoticeOpened`,
-  `OnNoticeClosed`, `UpdateNoted`, `DiagnosticsLines`). Use the other shared pieces, never a copy: `ControlArea` for
+  `OnNoticeClosed`, `UpdateNoted`, `DiagnosticsLines`, `AnnounceSource`, `PaletteEntries`). Use the other shared pieces, never a copy: `ControlArea` for
   a field or a list in the input's place, `EditKeys` for an edit control's page and paragraph keys, `StatusLayout`
   for two status labels, `Notice` records for every question and text of the window's own. `GitForm` is the
   smallest example.
@@ -72,9 +72,9 @@ Its own code is the outline and the commands (pure, in its Core, tested), its ke
 
 ## 5. Wiring
 
-- `Axit.Core/Dispatch`: the verb constant, the `Decide` branch, the usage text, and the entry in `Apps` (the name
-  and the verb), which gives the app its item under New window and its submenu in the Axit menu (AX-9); a test in
-  `DispatchTests`.
+- `Axit.Core/Dispatch`: the verb constant, the usage text, and the entry in `Apps` (the name and the verb), which
+  `Decide` loops over and which gives the app its item under New window, its submenu in the Axit menu (AX-9) and its
+  line in About, Version; `DispatchTests` and `BundleAboutTests` cover every entry by themselves.
 - `src/Axit/Program.cs`: `case Dispatch.AxThing: SetAppId("Axit.AxThing"); AxThingApp.Run(launch.Arguments);`.
 - `src/Axit/Axit.csproj`: the project reference. `Axit.sln`: the two projects (`dotnet sln add`).
 - `tests/Axit.Tests`: the project reference and the window's table in `KeyTests.Windows`.
@@ -91,9 +91,15 @@ Its own code is the outline and the commands (pure, in its Core, tested), its ke
   entries, the ProgID, the icon's copy, the removal and the `Say` lines all follow from the block (AX-2.3). A
   `-Start…` parameter for the updater if the app should come back on what it had open, and the matching argument
   in `Updater.LaunchInstaller`.
-- `docs/axit/README.md` (the zip's guide): the app in the list, its Start entry, its command.
-- `docs/axit/SPEC.md` section 3: the app. `CLAUDE.md` (root): the map line. `CHANGELOG.md`: bullets with the app's
-  name in front.
+- `docs/axit/README.md` (the zip's guide): the app in the list, its Start entry, its command. `README.md` (the
+  repository's page): the app in its list. `.github/ISSUE_TEMPLATE/bug.yml` and `idea.yml`: the app among the
+  choices. `src/Axit/Axit.csproj`: the `<Description>`.
+- `docs/axit/SPEC.md` section 3: the app, and its verb in AX-1.1. `CLAUDE.md` (root): the map line. `CHANGELOG.md`:
+  bullets with the app's name in front.
+- `tests/Axit.Tests/InventoryTests` checks every place above for every app of `Dispatch.Apps` (the folders, the
+  three documents, the notes, the icon, the installer's block, the icon script, the templates, the pages, the map,
+  the spec, the program's dispatch and `run.ps1`) and fails until the new app has them all (AxStart was missing from
+  nine of them on 2026-10-23).
 - Build to a scratch folder, run every test project, run the `accessibility-review` skill on the window, probe the
   window off screen (see `src/AxDown/CLAUDE.md`), publish without installing and check the zip, then install and run
   the app's NVDA test plan before the release.

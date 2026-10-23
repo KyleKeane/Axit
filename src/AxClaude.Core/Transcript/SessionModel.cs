@@ -88,7 +88,7 @@ public sealed partial class SessionModel : LineStore
     /// </summary>
     public string? DraftTitle { get; private set; }
 
-    /// <summary>Look for screens that wait on a hint row (<see cref="PendingScreen"/>) and hide the feedback card; off with the Answer Claude's questions in a notice option.</summary>
+    /// <summary>Look for screens that wait on a hint row (<see cref="PendingScreen"/>) and hide the feedback card; off with the Answer from a list option (<c>QuestionNotices</c>).</summary>
     public bool DetectScreens { get; set; } = true;
 
     /// <summary>A spinner row or an "esc to interrupt" hint was on screen at the end of the last frame.</summary>

@@ -77,8 +77,8 @@ makes a hard line break in rendered Markdown. In AxDown it is simply two lines.
 - [x] A ticked task: an x inside the brackets.
 - [ ] Another task.
 
-Lists are the next structure the navigation keys learn: Ctrl+L for the next list and Ctrl+I for the next list item,
-the letters NVDA uses on web pages.
+Lists have navigation keys of their own: Ctrl+L for the next list and Ctrl+I for the next list item, the letters
+NVDA uses on web pages.
 
 ## 4. Links and images
 
@@ -91,7 +91,7 @@ the document or section:
 [axit]: https://github.com/KyleKeane/Axit
 
 An image is a link with an exclamation mark in front: ![the Axit icon](AxDown.ico). AxDown shows the text, not the
-image. Links are the structure behind Ctrl+K when it arrives.
+image. Links are the structure behind Ctrl+K.
 
 ## 5. Block quotes
 
@@ -102,7 +102,7 @@ image. Links are the structure behind Ctrl+K when it arrives.
 >
 > And come back to one.
 
-Block quotes are the structure behind Ctrl+Q when it arrives.
+Block quotes are the structure behind Ctrl+Q.
 
 ## 6. Tables
 
@@ -118,8 +118,7 @@ A table is a row of cells separated by vertical bars, a row of dashes that sets 
 | Ctrl+Plus, Ctrl+Minus | Larger and smaller text | Bundle |
 | F1 | The keyboard shortcuts | Bundle |
 
-NVDA reads a table row as one line of text here, bars and all; a key that moves between tables, Ctrl+T, is still to
-come. The Kind column says where each key is defined: bundle-wide keys are the same in every window of Axit,
+NVDA reads a table row as one line of text here, bars and all; Ctrl+T moves between tables. The Kind column says where each key is defined: bundle-wide keys are the same in every window of Axit,
 AxDown's own keys are AxDown's alone.
 
 ## 7. Code

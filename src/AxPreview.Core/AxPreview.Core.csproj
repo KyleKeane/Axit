@@ -3,7 +3,7 @@
   <!-- AxPreview's pure code (docs/axpreview/SPEC.md §6): whether a file reads as text; no window. The window is the
        text editor shell in Axit.Forms, read-only. -->
   <PropertyGroup>
-    <TargetFramework>net10.0</TargetFramework>
+    <TargetFramework>$(AxitDotNet)</TargetFramework>
     <RootNamespace>AxPreview.Core</RootNamespace>
   </PropertyGroup>
 

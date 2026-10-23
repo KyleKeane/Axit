@@ -3,7 +3,7 @@
   <!-- AxGit's window side, as a class library inside Axit.exe (docs/axit/SPEC.md AX-1.7): the window, its key table
        and its texts; the pure code is AxGit.Core. -->
   <PropertyGroup>
-    <TargetFramework>net10.0-windows</TargetFramework>
+    <TargetFramework>$(AxitDotNet)-windows</TargetFramework>
     <UseWindowsForms>true</UseWindowsForms>
     <RootNamespace>AxGit</RootNamespace>
     <AssemblyName>AxGit</AssemblyName>

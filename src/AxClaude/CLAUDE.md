@@ -8,8 +8,8 @@ The WinForms side of AxClaude: the window that hosts Claude Code's screen reader
 .\run-axclaude.ps1 "C:\path\to\project"  # build Axit and start AxClaude there (run.ps1 -App claude, the default; -NoBuild, -Test, -- claude args)
 .\run-axclaude.ps1 "C:\path" -New        # a new conversation instead of the default --continue (PowerShell swallows a bare --)
 dotnet build Axit.sln
-dotnet test Axit.sln
-AXCLAUDE_UPDATE_EXPECTED=1 dotnet test   # regenerate tests/fixtures/*.expected.txt after a deliberate parser change; review the diff
+.\test.ps1 AxClaude                      # the tests in Release, as CI runs them (never dotnet test Axit.sln while Axit runs: it writes into the running program's bin\Debug)
+AXCLAUDE_UPDATE_EXPECTED=1 dotnet test tests/AxClaude.Tests/AxClaude.Tests.csproj   # regenerate tests/fixtures/*.expected.txt after a deliberate parser change; review the diff
 ```
 
 The app records the raw stream with `--record file.vt` or Options → Developer → Record raw stream (the PtyCapture format).

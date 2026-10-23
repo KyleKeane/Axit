@@ -24,9 +24,10 @@ jobs:
         with:
           ref: ${{ github.event.inputs.tag || github.ref }}
 
+      # The SDK band is global.json's, the one place it is set (docs/axit/longevity.md).
       - uses: actions/setup-dotnet@v6
         with:
-          dotnet-version: 10.0.x
+          global-json-file: global.json
 
       - name: Check the tag against the project version
         shell: pwsh
@@ -51,7 +52,10 @@ jobs:
 
       - name: Release notes from CHANGELOG.md
         shell: pwsh
-        run: .\tools\release-notes.ps1 -Version $env:VERSION | Set-Content -Path notes.md -Encoding utf8
+        run: |
+          .\tools\release-notes.ps1 -Version $env:VERSION | Set-Content -Path notes.md -Encoding utf8
+          # The SDK that built this release, so that a rebuild years later knows what to reproduce (docs/axit/longevity.md).
+          Add-Content -Path notes.md -Value "`nBuilt with the .NET SDK $(dotnet --version)." -Encoding utf8
 
       # The release is made as a draft and published only once its files are up: the apps' update check reads the
       # latest published release (AX-3), and a window that checked while the zip was still uploading downloaded a

@@ -1,8 +1,7 @@
 # AxDown — Specification
 
 AxDown is the second app of the Axit bundle (`docs/axit/SPEC.md`): a barebones editor for Markdown and plain text files
-for a blind developer who uses the NVDA screen reader. Describes AxDown as of Axit 2.9.0 (2026-10-18): everything in
-sections 4 and 9 is built and checked with NVDA. The
+for a blind developer who uses the NVDA screen reader. Everything in sections 4 and 9 is built and checked with NVDA (the record: `docs/axit/nvda-test-record.md`). The
 document is kept in step with the code (a behaviour change updates it in the same commit). Requirements are numbered
 `AD-n.m` and decisions `AD-Dn`. The bundle's rules that every app follows, AX-7 (accessibility) and AX-8 (keys), are
 cited by number and not repeated.
@@ -242,7 +241,7 @@ its name (the file's) and the first line.
 
 Two labels through the bundle's `StatusLayout` (no `Spring`, fixed widths when the texts do not fit, as AxClaude's
 §6.2): the left one the document's state ("notes.md", "notes.md, unsaved changes"), the right one "Line 12,
-Column 4 · UTF-8 · CRLF", updated on caret moves (cheap: `EM_LINEFROMCHAR` and `EM_LINEINDEX`, no text copy). NVDA
+Column 4 · UTF-8 · CRLF", updated on caret moves (the file's lines counted by scanning the text 300 ms after the last key, `Position`, since `EM_LINEFROMCHAR` counts wrapped rows while word wrap is on). NVDA
 reads it with NVDA+End; nothing is spoken automatically.
 
 ### AD-10 Title
@@ -284,7 +283,7 @@ Shared pieces AxDown uses (AX-6): `OverlayPanel` and `Notice`,
 `BundleKeys`; from `Axit.Core`: `SettingsFile`, `AppPaths`, `Log`, `Updater`, `BundleInfo`.
 
 Data flow: `TextDocument.Read(path)` gives text, encoding, mark and line ending; the form puts the text in the
-control; `TextDocument.Write(path, text, encoding, mark, lineEnding)` writes it back. No background thread: files
+control; `document.Write(path, text)` writes it back with the encoding, the mark and the line ending it was read with. No background thread: files
 are read and written on the UI thread (a 32 MB file is the ceiling, AD-3.7).
 
 ## 7. Design decisions
@@ -318,7 +317,8 @@ are read and written on the UI thread (a 32 MB file is the ceiling, AD-3.7).
 
 Unit tests (xunit, `tests/Axit.Tests`, where AxDown's shared pure code is tested): `TextDocumentTests` with byte arrays for UTF-8 with and without a mark,
 UTF-16 LE and BE with marks, Windows-1252, `\r\n`, `\n`, `\r` and no line ending, round trips that reproduce the
-bytes, a new document's defaults. The window has no automated tests; `docs/axdown/nvda-test-plan.md` covers it, and
+bytes, a new document's defaults; `EditorSettingsTests` (AD-8) and `EditHistoryTests` (AD-2.5); `TextJumpsTests`
+and `MarkdownOutlineTests` for the navigation keys (§9). The window has no automated tests; `docs/axdown/nvda-test-plan.md` covers it, and
 the off-screen probe approach of AxClaude checks layout and keys without disturbing the user.
 
 ## 9. Markdown navigation (headings since 2.1.0, the rest since 2.9.0)

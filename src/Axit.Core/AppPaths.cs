@@ -3,7 +3,7 @@ namespace Axit.Core;
 /// <summary>
 /// Where the bundle keeps its files (docs/axit/SPEC.md AX-5.1): one folder for the bundle, one file per app. Settings
 /// in <c>%APPDATA%\Axit\&lt;app&gt;.json</c>, logs in <c>%LOCALAPPDATA%\Axit\logs</c>, downloaded updates in
-/// <c>%LOCALAPPDATA%\Axit\updates</c>. The app names are the verbs: <c>axclaude</c>, <c>axdown</c>.
+/// <c>%LOCALAPPDATA%\Axit\updates</c>. The files are named after the apps in lower case: <c>axclaude.json</c>, <c>axdown.log</c>.
 /// </summary>
 public static class AppPaths
 {

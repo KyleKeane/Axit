@@ -29,7 +29,7 @@ public static class AxFileApp
                 return null;
             }
 
-            // A file manager holds no folder open (AF-1.4): a folder that is a process's current directory cannot
+            // A file manager holds no folder open (AF-1.2): a folder that is a process's current directory cannot
             // be renamed or moved while the process runs, and the apps started from here inherit this one's.
             // The path of the command line is already full (OnePath), so nothing relative is lost.
             try

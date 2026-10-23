@@ -63,7 +63,9 @@ if (-not $NoBuild) {
     }
 }
 
-$exe = Join-Path $root 'src\Axit\bin\Debug\net10.0-windows\Axit.exe'
+# The .NET version is Directory.Build.props' AxitDotNet, the one place it is set.
+$dotnet = ([xml](Get-Content (Join-Path $root 'Directory.Build.props') -Raw)).Project.PropertyGroup.AxitDotNet
+$exe = Join-Path $root "src\Axit\bin\Debug\$dotnet-windows\Axit.exe"
 if (-not (Test-Path $exe)) {
     Write-Host "Axit.exe was not found at $exe. Run without -NoBuild first."
     exit 1
