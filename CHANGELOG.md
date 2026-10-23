@@ -45,6 +45,12 @@
 - AxFile: Ctrl+N and the restart after an update at This PC open the new window on the last folder; the new window said that This PC does not exist.
 - AxFile: Enter on a line of the Actions list moves the focus to the folder list before the folder is said, so that the announcement is not cut short. Delete and Move to new folder say "Deleting, please wait" and "Moving, please wait" after a second, as Paste and the zip operations do.
 - For developers: AxFile runs every operation through one runner (RunOperation, RunAtOnceAsync) and keeps its marks in one pure piece (Marks in AxFile.Core, tested); the type-ahead rule is FolderListing.TypeAhead, tested; the Actions list finds the line the user is on itself; OpenWay is gone.
+- AxGit: Open repository on a folder outside any repository keeps the repository that is open; it was dropped before the notice.
+- AxGit: a command of another view says which view to show first, "Changes view first: Ctrl+1" or "Branches view first: Ctrl+3", for Space, Enter, Delete and the menu items alike; Space, Enter and Show diff switched the view silently.
+- AxGit: a detached HEAD is no longer listed as a branch; the status bar says detached.
+- For developers: AxGit's views are one record each (ViewState); GitRunner.Program lets the tests run a fake git for the output, the timeout and the open pipe, which found that every timeout was reported as a program keeping the output open.
+- AxStart: the launcher stays up while NVDA's own menu or settings are in front; it hid as for any other program.
+- For developers: AxStart hands the foreground back by one rule (GiveForegroundBack) in place of three patches, and tells its first showing by the handle, not a flag; the hotkey setting's property is HotkeyText (the file's key stays hotkey).
 
 ## 3.4.0 - 2026-10-22
 

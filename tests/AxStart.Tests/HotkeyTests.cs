@@ -57,11 +57,11 @@ public sealed class HotkeyTests
             var path = Path.Combine(folder, "axstart.json");
             var settings = StartSettings.Load(path, out var error);
             Assert.Null(error);
-            Assert.Equal("Ctrl+Shift+Space", settings.Hotkey);
+            Assert.Equal("Ctrl+Shift+Space", settings.HotkeyText);
             Assert.True(settings.StartWithWindows);
             Assert.True(settings.SayFirstMatch);
 
-            settings.Hotkey = "Ctrl+Alt+K";
+            settings.HotkeyText = "Ctrl+Alt+K";
             settings.Started("Notepad");
             settings.Started("notepad");
             settings.Save(path);
@@ -71,7 +71,7 @@ public sealed class HotkeyTests
 
             File.WriteAllText(path, """{ "hotkey": "Shift+A", "starts": { "Notepad": 2, "notepad": 1, "": 4, "Calculator": -3 } }""");
             var mended = StartSettings.Load(path, out _);
-            Assert.Equal("Ctrl+Shift+Space", mended.Hotkey);
+            Assert.Equal("Ctrl+Shift+Space", mended.HotkeyText);
             Assert.Equal(3, mended.Starts["Notepad"]);
             Assert.Single(mended.Starts);
         }

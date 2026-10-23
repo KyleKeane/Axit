@@ -1,3 +1,4 @@
+using System.Text.Json.Serialization;
 using Axit.Core;
 
 namespace AxStart.Core;
@@ -11,8 +12,9 @@ namespace AxStart.Core;
 /// </summary>
 public sealed class StartSettings : WindowSettings
 {
-    /// <summary>The hotkey as text, "Ctrl+Shift+Space" (AS-4.1); <see cref="Key"/> reads it.</summary>
-    public string Hotkey { get; set; } = Core.Hotkey.Default.ToString();
+    /// <summary>The hotkey as text, "Ctrl+Shift+Space" (AS-4.1), the file's <c>hotkey</c>; <see cref="Key"/> reads it. (Named after the record until 2026-10-23, which hid the record's name inside this class.)</summary>
+    [JsonPropertyName("hotkey")]
+    public string HotkeyText { get; set; } = Hotkey.Default.ToString();
 
     /// <summary>AxStart starts hidden at sign-in (AS-1.3).</summary>
     public bool StartWithWindows { get; set; } = true;
@@ -26,7 +28,7 @@ public sealed class StartSettings : WindowSettings
     public static string DefaultPath => AppPaths.SettingsFile("axstart");
 
     /// <summary>The hotkey of the settings, or the default when the text is not one.</summary>
-    public Hotkey Key => Core.Hotkey.Parse(Hotkey) is { } key && key.Refusal() is null ? key : Core.Hotkey.Default;
+    public Hotkey Key => Hotkey.Parse(HotkeyText) is { } key && key.Refusal() is null ? key : Hotkey.Default;
 
     public static StartSettings Load(string path, out string? error)
     {
@@ -43,7 +45,7 @@ public sealed class StartSettings : WindowSettings
     private void Sanitize()
     {
         SanitizeWindow();
-        Hotkey = Key.ToString();
+        HotkeyText = Key.ToString();
         // Read back with the serializer's own comparer: names differing in case only are added together.
         var starts = new Dictionary<string, int>(StringComparer.OrdinalIgnoreCase);
         foreach (var (name, count) in Starts ?? [])

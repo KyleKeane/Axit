@@ -113,18 +113,22 @@ taskbar. It works entirely offline (bundle G6).
   app".
 - AS-3.4 **Escape** hides the window at once, whatever the field holds (the user's ask, 2026-10-22: it first cleared
   a field with text and hid only an empty one); Alt+F4 hides it the same way; Backspace and Ctrl+A clear the text. Hiding gives the focus back to the
-  window that had it before the hotkey: AxStart remembers it when it shows and brings it to the front as it hides
-  (left to Windows, the focus went to one of AxStart's own hidden windows while NVDA still showed the program from
-  before, and typing went nowhere; 2026-10-22). After a start the program comes up in front by itself; if nothing has
-  taken the focus three seconds later (a program without a window, a declined administrator prompt), the window from
-  before gets it back. When the focus went to another program (AS-3.5), it stays there.
-  The hidden window never holds the keyboard: Windows activated it when AxStart started hidden (from the installer, at
-  sign-in, from a console), and everything typed went into a window nobody could see, while NVDA still showed the
-  program in front (the user's lost typing of 2026-10-22). An activation while hidden hands the front back at once,
-  to the window being left, or the one in front when AxStart started. The text is empty each time the
+  window that had it before the hotkey, by one rule (`GiveForegroundBack`, 2026-10-23; three patches with three
+  fields before): while the launcher is hidden this process never keeps the foreground, and whenever it holds it with
+  the window hidden, the window of another program that was in front when the launcher last showed (or, before any
+  showing, when the process started) gets it back. The rule runs as the window hides (left to Windows, the focus went
+  to one of AxStart's own hidden windows while NVDA still showed the program from before, and typing went nowhere;
+  2026-10-22), when Windows activates the hidden window (it did so when AxStart started hidden, from the installer,
+  at sign-in, from a console, and everything typed went into a window nobody could see while NVDA still showed the
+  program in front; the user's lost typing of 2026-10-22), and three seconds after a start, which leaves the front
+  to the program started, since a process no longer in front could not start it in front (a program without a
+  window, or a declined administrator prompt, brings nothing up). When the focus went to another program (AS-3.5),
+  the rule finds nothing to do and it stays there. The text is empty each time the
   window shows; the selection starts on the first match.
 - AS-3.5 The window hides by itself when it loses the focus to another program (Alt+Tab, a click elsewhere), as the
-  Start menu does; a notice of its own (Hotkey…, Keyboard shortcuts, About) keeps it.
+  Start menu does; a notice of its own (Hotkey…, Keyboard shortcuts, About) keeps it, and so do NVDA's own windows
+  (its menu on NVDA+N, its settings), since NVDA is how the launcher is seen, not another program: a process named
+  nvda is left out (decided 2026-10-23, before the NVDA pass).
 
 ### AS-4 The hotkey
 
