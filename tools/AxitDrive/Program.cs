@@ -18,11 +18,11 @@
 // Script steps, one per line, '#' starts a comment:
 //   mkdir <name>              a fresh folder {temp}\<name>
 //   file <name> <text>        a file {temp}\<name> holding the text (\n for a new line)
-//   silence <name> <ms>       a silent WAV file {temp}\<name> of that length, for AxMedia without a sound
+//   silence <name> <ms>       a silent WAV file {temp}\<name> of that length, for axMedia without a sound
 //   run <command line>        a command through cmd.exe in {temp}, waited for up to 60 s (git init, git commit ...)
 //   start <arguments>         Axit.exe with these arguments, on the test desktop; the window becomes the current one
 //   launch <arguments>        Axit.exe on the test desktop without waiting for a window: a start that hands over to an
-//                             open window (AxMedia, AxPreview) and ends; waits up to 30 s for the process to end
+//                             open window (axMedia, axPreview) and ends; waits up to 30 s for the process to end
 //   adopt                     waits up to 15 s for an Axit window the app itself started (Ctrl+N, New window, Show
 //                             in) and makes it the current one; it is closed at the end like the others
 //   use <n>                   the n-th window started in the script (from 1) becomes the current one
@@ -808,7 +808,7 @@ internal sealed class Window : IDisposable
         }
     }
 
-    /// <summary>A start that hands over to an open window and ends (AxMedia, AxPreview): run on the desktop and waited for.</summary>
+    /// <summary>A start that hands over to an open window and ends (axMedia, axPreview): run on the desktop and waited for.</summary>
     public static (bool, string?) Launch(string exe, string arguments, string? desktop, string home)
     {
         var id = Create(exe, arguments, desktop, home);

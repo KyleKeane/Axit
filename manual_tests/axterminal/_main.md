@@ -1,4 +1,4 @@
-# AxTerminal manual tests
+# axTerminal manual tests
 
 The steps and every expected announcement are in `docs/axterminal/nvda-test-plan.md`. Run `.\manual_tests\prepare.ps1 axterminal` first.
 

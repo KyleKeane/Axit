@@ -1,4 +1,4 @@
-# AxFile, test plan section 6: the Actions list (docs/axfile/nvda-test-plan.md 6.1 to 6.9; AF-9).
+# axFile, test plan section 6: the Actions list (docs/axfile/nvda-test-plan.md 6.1 to 6.9; AF-9).
 # The files are those of manual_tests/prepare.ps1 axfile (actions-list, selection), made in {temp}.
 file home\Axit\axfile.json {"checkForUpdates": false}
 file act\start-here.txt Make temp here.

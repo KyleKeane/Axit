@@ -13,7 +13,7 @@ public static class EditorKeys
     public const Keys GoToLine = Keys.Control | Keys.G;
     public const Keys WordWrap = Keys.Control | Keys.Shift | Keys.W;
 
-    /// <summary>File → Show current file in → File Explorer (AD-4.1), the key AxClaude uses for its folder.</summary>
+    /// <summary>File → Show current file in → File Explorer (AD-4.1), the key axClaude uses for its folder.</summary>
     public const Keys ShowInExplorer = Keys.Control | Keys.W;
 
     /// <summary>Edit → Undo and Redo over the window's own history (AD-2.5); Ctrl+Shift+Z is Redo as well, as in most editors.</summary>
@@ -35,13 +35,13 @@ public static class EditorKeys
         ("Word wrap", WordWrap),
     ];
 
-    // The viewer's keys (a read-only editor app, AxPreview, docs/axpreview/SPEC.md AP-3.2): the shell handles them in
+    // The viewer's keys (a read-only editor app, axPreview, docs/axpreview/SPEC.md AP-3.2): the shell handles them in
     // read-only mode only, and the viewer's table includes Viewer instead of All.
 
     /// <summary>File → Reload: the file read again, the caret kept (AP-2.4).</summary>
     public const Keys Reload = Keys.F5;
 
-    /// <summary>File → Edit in AxDown or AxJSON: the file in its editor, a new window (AP-1.4).</summary>
+    /// <summary>File → Edit in axDown or axJSON: the file in its editor, a new window (AP-1.4).</summary>
     public const Keys Edit = Keys.Control | Keys.E;
 
     /// <summary>In the text: the line said, "Line 12 of 40" (AP-2.3); a plain letter, which a read-only text has no use for.</summary>

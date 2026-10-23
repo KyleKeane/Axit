@@ -1,8 +1,8 @@
-# AxPreview, test plan section 2 (The hand-over, AP-1.2, AP-1.3), what can be driven from inside the windows
+# axPreview, test plan section 2 (The hand-over, AP-1.2, AP-1.3), what can be driven from inside the windows
 # (docs/axpreview/nvda-test-plan.md).
-# 2.1 to 2.5 manual: the hand-over is a second AxPreview process that gives its file to the open window and ends
+# 2.1 to 2.5 manual: the hand-over is a second axPreview process that gives its file to the open window and ends
 # without a window of its own; the runner's start waits for the new process's window and its channel, so it cannot
-# start one (see the report). AxFile's Shift+Enter, File Explorer's Open with Axit and Windows' default program are
+# start one (see the report). axFile's Shift+Enter, File Explorer's Open with Axit and Windows' default program are
 # outside the window as well.
 # 2.6 manual, the first half: axpreview plain.txt from a console, which the open window takes.
 # The run's own settings: no update check, whose network call logs an ERROR when GitHub cannot be reached.
@@ -12,10 +12,10 @@ file plain.txt Plain text file, line 1.\nLine 2.
 
 # 2.6, the second half: axpreview --new plain.txt opens a second window while one is open.
 start preview {temp}\README.md
-expect state "title":"README.md - AxPreview"
+expect state "title":"README.md - axPreview"
 start preview --new {temp}\plain.txt
-expect state "title":"plain.txt - AxPreview"
+expect state "title":"plain.txt - axPreview"
 expect focus {"name":"plain.txt","role":"Text","value":"Plain text file, line 1."}
 use 1
-expect state "title":"README.md - AxPreview"
+expect state "title":"README.md - axPreview"
 expect focus README.md

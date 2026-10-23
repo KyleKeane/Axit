@@ -5,10 +5,10 @@ using Axit.Core.Transcript;
 namespace Axit.Forms;
 
 /// <summary>
-/// The read-only transcript view (AxClaude's conversation, AxTerminal's terminal). Mirrors the visible transcript
+/// The read-only transcript view (axClaude's conversation, axTerminal's terminal). Mirrors the visible transcript
 /// lines into a native multi-line edit control with minimal edits, keeps the user's caret on the content it was on,
 /// and adds NVDA-style single-key navigation with the keys the window hands in (<see cref="TranscriptKeys"/>). It
-/// came from AxClaude on its second use (docs/axterminal/SPEC.md §5); the requirement numbers below are AxClaude's.
+/// came from axClaude on its second use (docs/axterminal/SPEC.md §5); the requirement numbers below are axClaude's.
 /// </summary>
 public sealed class TranscriptView : TextBox
 {
@@ -37,7 +37,7 @@ public sealed class TranscriptView : TextBox
     private long _lastKeyTick = long.MinValue / 2;
 
     /// <param name="keys">The window's keys for the view, from its key table.</param>
-    /// <param name="accessibleName">What NVDA calls the view: "Conversation" in AxClaude, "Terminal" in AxTerminal.</param>
+    /// <param name="accessibleName">What NVDA calls the view: "Conversation" in axClaude, "Terminal" in axTerminal.</param>
     public TranscriptView(TranscriptKeys keys, string accessibleName)
     {
         _keys = keys;
@@ -79,7 +79,7 @@ public sealed class TranscriptView : TextBox
     [System.ComponentModel.DefaultValue(false)]
     public bool KeepCaret { get; set; }
 
-    /// <summary>The # markers of the heading lines in the text (AxClaude FR-4.6a); the window re-syncs after a change.</summary>
+    /// <summary>The # markers of the heading lines in the text (axClaude FR-4.6a); the window re-syncs after a change.</summary>
     [System.ComponentModel.DefaultValue(true)]
     public bool ShowMarkers { get => _mirror.ShowMarkers; set => _mirror.ShowMarkers = value; }
 

@@ -5,7 +5,7 @@ namespace AxStart.Core;
 /// <summary>
 /// Which programs match the typed text, and in what order (SPEC.md AS-2.2). A name matches when it holds every word of
 /// the text, case and accents ignored. A name that starts with the text's first word comes first, then one with a
-/// word that starts with it, then any other match; within each, the programs AxStart started more often first, then the names
+/// word that starts with it, then any other match; within each, the programs axStart started more often first, then the names
 /// in File Explorer's order. An empty text matches every program, the most started first.
 /// </summary>
 public static class ProgramMatch

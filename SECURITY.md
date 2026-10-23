@@ -13,5 +13,5 @@ Only the latest release is supported. Installed copies check for it themselves (
 ## What Axit does that matters here
 
 - The update check asks GitHub for the latest release of this repository and, when the user agrees, downloads and installs it for the user only, without administrator rights. It is the only network call a window makes on its own, and it can be turned off (Options, General).
-- AxClaude runs the user's own Claude Code; AxTerminal runs the user's own shells; AxFile runs the programs the user chooses. None of them run anything the user did not ask for.
+- axClaude runs the user's own Claude Code; axTerminal runs the user's own shells; axFile runs the programs the user chooses. None of them run anything the user did not ask for.
 - Settings and logs stay in the user's profile (`%APPDATA%\Axit`, `%LOCALAPPDATA%\Axit`). Copy diagnostics puts the versions, paths and the log's end on the clipboard for the user to read before sharing.

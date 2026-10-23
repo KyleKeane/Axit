@@ -745,7 +745,7 @@ public sealed partial class FileForm
         }
     }
 
-    /// <summary>Shift+Enter in the list, Item → Preview (AF-3.2): a file read in AxPreview, which hands it to its open window itself; a folder in a new AxFile window, File Explorer's Shift+Enter.</summary>
+    /// <summary>Shift+Enter in the list, Item → Preview (AF-3.2): a file read in axPreview, which hands it to its open window itself; a folder in a new axFile window, File Explorer's Shift+Enter.</summary>
     private void OpenInPreview()
     {
         if (!TryEntry(out var entry))
@@ -859,7 +859,7 @@ public sealed partial class FileForm
     /// <summary>
     /// The next or the previous completion in the field, "Documents, folder, 2 of 5"; the folder the text names is read
     /// on a task when the text is new; past either end the edge earcon and then the completion again, as the palette
-    /// and AxStart do at an end (AX-10.4); the earcon alone when no name starts with the text.
+    /// and axStart do at an end (AX-10.4); the earcon alone when no name starts with the text.
     /// </summary>
     private async Task CompleteAsync(int step)
     {

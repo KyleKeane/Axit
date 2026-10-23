@@ -16,7 +16,7 @@ public static class UpdateCheck
 {
     public const string Repository = "KyleKeane/Axit";
 
-    /// <summary>The end of the zip's file name, as publish.ps1 names it: <c>Axit-2.0.0-win-x64.zip</c> (<c>AxClaude-1.7.0-win-x64.zip</c> before the bundle).</summary>
+    /// <summary>The end of the zip's file name, as publish.ps1 names it: <c>Axit-2.0.0-win-x64.zip</c> (<c>axClaude-1.7.0-win-x64.zip</c> before the bundle).</summary>
     public const string ZipSuffix = "-win-x64.zip";
 
     /// <summary>The repository's page: Axit menu → About → Axit on GitHub (AX-9.9).</summary>

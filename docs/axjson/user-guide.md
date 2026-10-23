@@ -1,16 +1,16 @@
-# AxJSON user guide
+# axJSON user guide
 
-AxJSON is a small editor for JSON files, part of Axit, made for working with a screen reader: one plain text field with the whole file in it, keys that jump through the file by its structure, and a Format command that lays the file out and repairs the small things that make JSON invalid. It opens one file in one window. The structured view with a field per value is planned for a later version.
+axJSON is a small editor for JSON files, part of Axit, made for working with a screen reader: one plain text field with the whole file in it, keys that jump through the file by its structure, and a Format command that lays the file out and repairs the small things that make JSON invalid. It opens one file in one window. The structured view with a field per value is planned for a later version.
 
 ## Install
 
-Axit installs all its apps at once; see the Axit guide (Axit menu, About, Axit guide). AxJSON is "Axit AxJSON" in the Start menu, `axjson` in a console, and "Open with" for `.json` files in File Explorer.
+Axit installs all its apps at once; see the Axit guide (Axit menu, About, Axit guide). axJSON is "Axit axJSON" in the Start menu, `axjson` in a console, and "Open with" for `.json` files in File Explorer.
 
 ## Start
 
-- Start menu: Axit AxJSON opens an empty document.
-- Console: `axjson settings.json` opens that file; so does `axit settings.json`, since a `.json` file means AxJSON.
-- File Explorer: right-click a `.json` file, Open with Axit, AxJSON; or Windows' own Open with, AxJSON.
+- Start menu: Axit axJSON opens an empty document.
+- Console: `axjson settings.json` opens that file; so does `axit settings.json`, since a `.json` file means axJSON.
+- File Explorer: right-click a `.json` file, Open with Axit, axJSON; or Windows' own Open with, axJSON.
 
 ## Write and read
 
@@ -20,13 +20,13 @@ Long lines wrap at the window's edge, so Down Arrow reads one screen line at a t
 
 ## Files
 
-Ctrl+S saves and AxJSON says "Saved". A new document asks for a name first, with the Windows file dialog; Ctrl+Shift+S, Save as, asks every time. Ctrl+O opens another file in this window and Ctrl+N starts an empty one; both ask first if you have unsaved changes, as does closing the window: a notice says "Save changes to settings.json?" with Save, Don't save and Cancel; Enter saves, Escape cancels. File, Open recent file lists the last ten files you opened or saved; File, Show current file in, File Explorer (Ctrl+W) opens File Explorer with the file selected.
+Ctrl+S saves and axJSON says "Saved". A new document asks for a name first, with the Windows file dialog; Ctrl+Shift+S, Save as, asks every time. Ctrl+O opens another file in this window and Ctrl+N starts an empty one; both ask first if you have unsaved changes, as does closing the window: a notice says "Save changes to settings.json?" with Save, Don't save and Cancel; Enter saves, Escape cancels. File, Open recent file lists the last ten files you opened or saved; File, Show current file in, File Explorer (Ctrl+W) opens File Explorer with the file selected.
 
-When another program changes the file while it is open here, for example Claude editing it while you are in AxClaude, AxJSON notices when you come back to its window: with nothing unsaved it reloads the file, keeps your line, and says "Reloaded, settings.json changed on disk"; with unsaved changes it says "settings.json changed on disk; Save will ask", and Ctrl+S then offers Write over, Reload and lose mine, or Cancel.
+When another program changes the file while it is open here, for example Claude editing it while you are in axClaude, axJSON notices when you come back to its window: with nothing unsaved it reloads the file, keeps your line, and says "Reloaded, settings.json changed on disk"; with unsaved changes it says "settings.json changed on disk; Save will ask", and Ctrl+S then offers Write over, Reload and lose mine, or Cancel.
 
-AxJSON writes a file back the way it found it: the same encoding, with or without a byte order mark, and the same kind of line ending. The status bar shows what it found, for example "UTF-8 · CRLF". If the file changed on disk while you had it open, saving asks before writing over it.
+axJSON writes a file back the way it found it: the same encoding, with or without a byte order mark, and the same kind of line ending. The status bar shows what it found, for example "UTF-8 · CRLF". If the file changed on disk while you had it open, saving asks before writing over it.
 
-The title is the file's name, with a star in front while there are unsaved changes: "*settings.json - AxJSON".
+The title is the file's name, with a star in front while there are unsaved changes: "*settings.json - axJSON".
 
 ## Find and go to a line
 
@@ -34,7 +34,7 @@ Ctrl+F opens a Find field inside the window; Enter finds the next match, selects
 
 ## Move by structure
 
-The keys follow AxDown's: Ctrl and a letter go to the next thing of that kind, Ctrl+Shift and the letter to the previous one, and each jump speaks what it landed on. The caret goes to the key or the value, so Enter and typing act right there.
+The keys follow axDown's: Ctrl and a letter go to the next thing of that kind, Ctrl+Shift and the letter to the previous one, and each jump speaks what it landed on. The caret goes to the key or the value, so Enter and typing act right there.
 
 - Ctrl+K: the next key, spoken with its value, "model: opus", or with its size when the value is an object or an array, "permissions, object with 2 keys".
 - Ctrl+J: the next object, "permissions, object with 2 keys"; the whole file is the first one.
@@ -50,34 +50,34 @@ Edit, Format (Ctrl+Shift+F) writes the file out again with two spaces per level 
 
 ## Text size and fonts
 
-Ctrl+Plus and Ctrl+Minus make the text larger and smaller, and AxJSON says the new size. Options, Text, Font opens the Windows font dialog. Both are remembered.
+Ctrl+Plus and Ctrl+Minus make the text larger and smaller, and axJSON says the new size. Options, Text, Font opens the Windows font dialog. Both are remembered.
 
 ## Menus
 
-- **File**: New, Open, Open recent file, Save, Save as, Show current file in (File Explorer, Ctrl+W; AxGit, a git manager on the repository that holds the file; AxTerminal, a shell in the file's folder; AxFile, the file's folder with the file selected), Exit.
+- **File**: New, Open, Open recent file, Save, Save as, Show current file in (File Explorer, Ctrl+W; axGIT, a git manager on the repository that holds the file; axTerminal, a shell in the file's folder; axFile, the file's folder with the file selected), Exit.
 - **Edit**: Undo, Redo, Cut, Copy, Paste, Select all, Format (Ctrl+Shift+F).
 - **Navigate**: Find, Find next, Find previous, Go to line, and the submenus Next and Previous, each with Key, Object, Array, Item and Error.
-- **Options**: Text (Word wrap, Font, Larger text, Smaller text, Windows text size), General (Check for updates at start) and Developer (Open settings file, which opens axjson.json in a new AxJSON window, and Copy diagnostics).
+- **Options**: Text (Word wrap, Font, Larger text, Smaller text, Windows text size), General (Check for updates at start) and Developer (Open settings file, which opens axjson.json in a new axJSON window, and Copy diagnostics).
 - **Axit**: the bundle's menu, the same in every Axit window: New window, Recently closed, Open windows, Open windows by type, Close all windows, Check for updates, Update to the newest version while one is known, and About.
 - **Help**: Keyboard shortcuts (F1), this guide, JSON resources (the JSON syntax page and Claude Code's settings documentation, in your browser).
 
 ## Settings
 
-AxJSON remembers the font, the text size, word wrap, the recent files and the window's place in `%APPDATA%\Axit\axjson.json`. Options, Developer, Open settings file opens it in a new AxJSON window.
+axJSON remembers the font, the text size, word wrap, the recent files and the window's place in `%APPDATA%\Axit\axjson.json`. Options, Developer, Open settings file opens it in a new axJSON window.
 
 ## Updates
 
-New versions of Axit are published on GitHub, and every app of Axit updates together. When AxJSON starts, it asks GitHub once whether there is a newer one; if there is, a notice opens with four buttons. Update and restart downloads and installs the new version, then closes AxJSON (asking first about unsaved changes) and starts the new version on the same file; Update and close installs it and closes without starting it again. Later keeps the version you have, and Axit, Update to Axit n offers it until you take it. Axit, Check for updates asks at any time. Axit, About, Version names the version you have and the latest release on GitHub.
+New versions of Axit are published on GitHub, and every app of Axit updates together. When axJSON starts, it asks GitHub once whether there is a newer one; if there is, a notice opens with four buttons. Update and restart downloads and installs the new version, then closes axJSON (asking first about unsaved changes) and starts the new version on the same file; Update and close installs it and closes without starting it again. Later keeps the version you have, and Axit, Update to Axit n offers it until you take it. Axit, Check for updates asks at any time. Axit, About, Version names the version you have and the latest release on GitHub.
 
 ## If something goes wrong
 
 - A file that cannot be opened, is not text, or is larger than 32 MB, is reported in a notice; the window stays open, empty and untitled, so that saving cannot write over the file.
-- An error from AxJSON is a notice inside the window. Escape closes it. Options, Developer, Copy diagnostics puts the version, the paths and the last log lines on the clipboard for a bug report; the log is in `%LOCALAPPDATA%\Axit\logs\axjson.log`.
+- An error from axJSON is a notice inside the window. Escape closes it. Options, Developer, Copy diagnostics puts the version, the paths and the last log lines on the clipboard for a bug report; the log is in `%LOCALAPPDATA%\Axit\logs\axjson.log`.
 
-## About AxJSON
+## About axJSON
 
-AxJSON is part of Axit, made by Dr. Kyle Keane, www.kylekeane.com. It is free under the MIT licence: use it, change it and pass it on, as long as the note that says who made it stays with it (the `LICENSE` file next to the program).
+axJSON is part of Axit, made by Dr. Kyle Keane, www.kylekeane.com. It is free under the MIT licence: use it, change it and pass it on, as long as the note that says who made it stays with it (the `LICENSE` file next to the program).
 
 ## Disclaimer
 
-AxJSON is provided "as is" and "as available", without warranty of any kind, express or implied, including but not limited to the implied warranties of merchantability, fitness for a particular purpose, title and non-infringement. The developer has no obligation to provide support, maintenance, updates or corrections. To the fullest extent permitted by law, the developer is not liable for any claim, damages or other liability, whether in contract, tort or otherwise, arising from or in connection with the software or its use, including loss of data or work. You use AxJSON at your own risk.
+axJSON is provided "as is" and "as available", without warranty of any kind, express or implied, including but not limited to the implied warranties of merchantability, fitness for a particular purpose, title and non-infringement. The developer has no obligation to provide support, maintenance, updates or corrections. To the fullest extent permitted by law, the developer is not liable for any claim, damages or other liability, whether in contract, tort or otherwise, arising from or in connection with the software or its use, including loss of data or work. You use axJSON at your own risk.

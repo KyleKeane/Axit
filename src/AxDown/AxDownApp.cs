@@ -4,9 +4,9 @@ using Axit.Forms;
 namespace AxDown;
 
 /// <summary>
-/// AxDown's entry point inside Axit (docs/axit/SPEC.md AX-1.7; SPEC.md AD-1.4): <c>Axit.exe down [&lt;file&gt;]</c>
+/// axDown's entry point inside Axit (docs/axit/SPEC.md AX-1.7; SPEC.md AD-1.4): <c>Axit.exe down [&lt;file&gt;]</c>
 /// calls <see cref="Run"/>, which hands the editor shell (<c>Axit.Forms.EditorHost</c>, <c>TextEditorForm</c>) what
-/// AxDown is: its name and verb, its settings file, its file types, its texts, its Markdown keys and its resources.
+/// axDown is: its name and verb, its settings file, its file types, its texts, its Markdown keys and its resources.
 /// </summary>
 public static class AxDownApp
 {
@@ -18,9 +18,9 @@ public static class AxDownApp
           --help, --version this text, or the version
         """;
 
-    /// <summary>AxDown as the editor shell sees it (bundle AX-6.2, AJ-D4).</summary>
+    /// <summary>axDown as the editor shell sees it (bundle AX-6.2, AJ-D4).</summary>
     public static readonly EditorApp App = new(
-        Name: "AxDown",
+        Name: "axDown",
         Verb: Dispatch.AxDown,
         SettingsName: "axdown",
         FileFilter: "Markdown and text files (*.md;*.markdown;*.txt)|*.md;*.markdown;*.txt|All files (*.*)|*.*",

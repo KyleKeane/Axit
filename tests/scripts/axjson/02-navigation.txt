@@ -1,4 +1,4 @@
-# AxJSON, test plan section 2 (Navigation, AJ-2.2), driven from inside the window (docs/axjson/nvda-test-plan.md).
+# axJSON, test plan section 2 (Navigation, AJ-2.2), driven from inside the window (docs/axjson/nvda-test-plan.md).
 # The run's own settings: no update check, whose network call logs an ERROR when GitHub cannot be reached.
 file home\Axit\axjson.json {"checkForUpdates": false}
 file settings.json {\n  "model": "opus",\n  "permissions": { "allow": ["Bash", "Read"], "deny": [] },\n  "count": 3,\n  "on": true\n}
@@ -66,7 +66,7 @@ expect said ! No next item
 keys ctrl+home ctrl+e
 expect said ! No next error
 
-# 2.6: plain arrow keys speak nothing of AxJSON's own.
+# 2.6: plain arrow keys speak nothing of axJSON's own.
 keys down down right right left up end home
 expect quiet 1000
 
@@ -129,7 +129,7 @@ expect said ! Error, line 4: expected a value, found ','
 expect state Line 4, Column 12 \u00B7
 
 # 2.2: Ctrl+Home, Ctrl+J: the object after the caret, since the caret on the first brace is on the whole file already
-# (AJ-2.2, as AxDown's headings); Ctrl+Shift+J from inside reaches the whole file.
+# (AJ-2.2, as axDown's headings); Ctrl+Shift+J from inside reaches the whole file.
 use 1
 keys ctrl+home ctrl+j
 expect said ! permissions, object with 2 keys

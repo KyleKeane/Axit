@@ -1,11 +1,11 @@
-# AxFile, test plan section 4: sound, video and reading, the hand-overs (docs/axfile/nvda-test-plan.md 4.1 to 4.5; AF-5).
-# Every hand-over starts AxPreview or AxMedia, windows the runner cannot reach or close; only the answers AxFile gives
+# axFile, test plan section 4: sound, video and reading, the hand-overs (docs/axfile/nvda-test-plan.md 4.1 to 4.5; AF-5).
+# Every hand-over starts axPreview or axMedia, windows the runner cannot reach or close; only the answers axFile gives
 # itself without starting anything are checked here.
-# Manual (4.1): Shift+Enter on README.md and plain.txt, Shift+F10, E, and Shift+Enter on a folder or an .exe start AxPreview or a new AxFile window.
-# Manual (4.2): Ctrl+Enter in a folder of chapters starts AxMedia.
-# Manual (4.3): Ctrl+Shift+Q on two folders with media and Shift+F10, Q on a chapter start AxMedia (behind this window).
-# Manual (4.4): Shift+F10, A, M on a chapter or a folder and A, P on README.md start AxMedia or AxPreview.
-# Manual (4.5): Enter with AxMedia or AxPreview made the default program needs Windows' Default apps.
+# Manual (4.1): Shift+Enter on README.md and plain.txt, Shift+F10, E, and Shift+Enter on a folder or an .exe start axPreview or a new axFile window.
+# Manual (4.2): Ctrl+Enter in a folder of chapters starts axMedia.
+# Manual (4.3): Ctrl+Shift+Q on two folders with media and Shift+F10, Q on a chapter start axMedia (behind this window).
+# Manual (4.4): Shift+F10, A, M on a chapter or a folder and A, P on README.md start axMedia or axPreview.
+# Manual (4.5): Enter with axMedia or axPreview made the default program needs Windows' Default apps.
 file home\Axit\axfile.json {"checkForUpdates": false}
 file hand\README.md # Read me\nA text to read.
 file hand\plain.txt A plain text.
@@ -32,11 +32,11 @@ expect focus "value":"README.md"
 keys ctrl+shift+q
 expect said ! No sound or video files to add
 # The Item menu's command does the same.
-menu Add to AxMedia's queue, Item
+menu Add to axMedia's queue, Item
 expect said ! No sound or video files to add
 
-# 4.4 Open in Axit, AxPreview on a folder: "Not a file".
+# 4.4 Open in Axit, axPreview on a folder: "Not a file".
 keys home
 expect focus "value":"a-folder-for-not-a-file, folder"
-menu AxPreview, Item, Open in Axit
+menu axPreview, Item, Open in Axit
 expect said ! Not a file

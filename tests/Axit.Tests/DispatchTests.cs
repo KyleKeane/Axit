@@ -27,43 +27,43 @@ public sealed class DispatchTests
         Assert.Equal(Dispatch.AxDown, launch.App);
         Assert.Equal(["notes.md"], launch.Arguments);
 
-        // AxGit is always named by its verb: a folder alone still means AxClaude (docs/axgit/SPEC.md AG-1.1).
+        // axGIT is always named by its verb: a folder alone still means axClaude (docs/axgit/SPEC.md AG-1.1).
         launch = Dispatch.Decide(["git", Folder]);
         Assert.Equal(Dispatch.AxGit, launch.App);
         Assert.Equal([Folder], launch.Arguments);
         Assert.Equal(Dispatch.AxClaude, Dispatch.Decide([Folder]).App);
-        Assert.Contains(Dispatch.Apps, app => app.Verb == Dispatch.AxGit && app.Name == "AxGit");
+        Assert.Contains(Dispatch.Apps, app => app.Verb == Dispatch.AxGit && app.Name == "axGIT");
         launch = Dispatch.Decide(["terminal", Folder]);
         Assert.Equal(Dispatch.AxTerminal, launch.App);
         Assert.Equal([Folder], launch.Arguments);
-        Assert.Contains(Dispatch.Apps, app => app.Verb == Dispatch.AxTerminal && app.Name == "AxTerminal");
-        // AxFile is always named by its verb too (docs/axfile/SPEC.md AF-1.1).
+        Assert.Contains(Dispatch.Apps, app => app.Verb == Dispatch.AxTerminal && app.Name == "axTerminal");
+        // axFile is always named by its verb too (docs/axfile/SPEC.md AF-1.1).
         launch = Dispatch.Decide(["file", Folder]);
         Assert.Equal(Dispatch.AxFile, launch.App);
         Assert.Equal([Folder], launch.Arguments);
-        Assert.Contains(Dispatch.Apps, app => app.Verb == Dispatch.AxFile && app.Name == "AxFile");
+        Assert.Contains(Dispatch.Apps, app => app.Verb == Dispatch.AxFile && app.Name == "axFile");
         Assert.Contains("Axit file", Dispatch.Usage);
-        // AxMedia takes several paths and its own options, passed on whole (docs/axmedia/SPEC.md AM-1.1).
+        // axMedia takes several paths and its own options, passed on whole (docs/axmedia/SPEC.md AM-1.1).
         launch = Dispatch.Decide(["media", "a.mp3", "b.mp3", "--add"]);
         Assert.Equal(Dispatch.AxMedia, launch.App);
         Assert.Equal(["a.mp3", "b.mp3", "--add"], launch.Arguments);
-        Assert.Contains(Dispatch.Apps, app => app.Verb == Dispatch.AxMedia && app.Name == "AxMedia");
+        Assert.Contains(Dispatch.Apps, app => app.Verb == Dispatch.AxMedia && app.Name == "axMedia");
         Assert.Contains("Axit media", Dispatch.Usage);
-        // AxPreview is always named by its verb: a file alone keeps going to its editor (docs/axpreview/SPEC.md AP-1.1).
+        // axPreview is always named by its verb: a file alone keeps going to its editor (docs/axpreview/SPEC.md AP-1.1).
         launch = Dispatch.Decide(["preview", "notes.md", "--new"]);
         Assert.Equal(Dispatch.AxPreview, launch.App);
         Assert.Equal(["notes.md", "--new"], launch.Arguments);
-        Assert.Contains(Dispatch.Apps, app => app.Verb == Dispatch.AxPreview && app.Name == "AxPreview");
+        Assert.Contains(Dispatch.Apps, app => app.Verb == Dispatch.AxPreview && app.Name == "axPreview");
         Assert.Contains("Axit preview", Dispatch.Usage);
-        // AxStart, the launcher, takes no path (docs/axstart/SPEC.md AS-1.1).
+        // axStart, the launcher, takes no path (docs/axstart/SPEC.md AS-1.1).
         launch = Dispatch.Decide(["start", "--hidden"]);
         Assert.Equal(Dispatch.AxStart, launch.App);
         Assert.Equal(["--hidden"], launch.Arguments);
-        Assert.Contains(Dispatch.Apps, app => app.Verb == Dispatch.AxStart && app.Name == "AxStart");
+        Assert.Contains(Dispatch.Apps, app => app.Verb == Dispatch.AxStart && app.Name == "axStart");
         Assert.Contains("Axit start", Dispatch.Usage);
     }
 
-    /// <summary>AX-1.2: a sound or video file alone on the command line starts AxMedia, as a double click in File Explorer would once it is the default.</summary>
+    /// <summary>AX-1.2: a sound or video file alone on the command line starts axMedia, as a double click in File Explorer would once it is the default.</summary>
     [Fact]
     public void MediaFileGoesToAxMedia()
     {
@@ -159,7 +159,7 @@ public sealed class DispatchTests
         Assert.Equal(Dispatch.AxJSON, Dispatch.Decide(["json", "x.json"]).App);
         Assert.Equal(["x.json"], Dispatch.Decide(["JSON", "x.json"]).Arguments);
         Assert.Contains("Axit json", Dispatch.Usage);
-        Assert.Equal(["AxClaude", "AxDown", "AxJSON", "AxGit", "AxTerminal", "AxFile", "AxMedia", "AxPreview", "AxStart"], Dispatch.Apps.Select(a => a.Name));
+        Assert.Equal(["axClaude", "axDown", "axJSON", "axGIT", "axTerminal", "axFile", "axMedia", "axPreview", "axStart"], Dispatch.Apps.Select(a => a.Name));
     }
 
     [Fact]

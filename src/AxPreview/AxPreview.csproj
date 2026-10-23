@@ -1,13 +1,13 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
-  <!-- AxPreview's app side, as a class library inside Axit.exe (docs/axit/SPEC.md AX-1.7): what AxPreview is, as
+  <!-- axPreview's app side, as a class library inside Axit.exe (docs/axit/SPEC.md AX-1.7): what axPreview is, as
        data for the text editor shell in Axit.Forms (read-only), its key table and its texts; the pure code is
        AxPreview.Core. -->
   <PropertyGroup>
     <TargetFramework>$(AxitDotNet)-windows</TargetFramework>
     <UseWindowsForms>true</UseWindowsForms>
-    <RootNamespace>AxPreview</RootNamespace>
-    <AssemblyName>AxPreview</AssemblyName>
+    <RootNamespace>axPreview</RootNamespace>
+    <AssemblyName>axPreview</AssemblyName>
   </PropertyGroup>
 
   <ItemGroup>

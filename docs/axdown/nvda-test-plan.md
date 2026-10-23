@@ -1,4 +1,4 @@
-# AxDown NVDA test plan
+# axDown NVDA test plan
 
 The files for this plan are in `manual_tests/axdown`, made and reset by `.\manual_tests\prepare.ps1 axdown`; its `_main.md` says which folder or file each section uses.
 
@@ -9,19 +9,19 @@ letter), and a `long.md` with headings and lines longer than the window.
 
 ## 1. Install and start
 
-1. `.\publish.ps1` installs Axit. Press the Windows key, type `axd`: "Axit AxDown" is offered; Enter opens an
-   empty window. NVDA reads the title "Untitled - AxDown" and then "Untitled edit multi line".
-2. Right-click `plain.txt` in File Explorer: the "Open with Axit" submenu lists AxDown, and not AxJSON; Enter on
-   AxDown opens the file. "Open with"
-   lists AxDown for `.md`, `.markdown` and `.txt`.
-3. In a console: `axdown plain.txt` opens it; `axit plain.txt` opens it in AxDown, `axit <folder>` opens AxClaude;
+1. `.\publish.ps1` installs Axit. Press the Windows key, type `axd`: "Axit axDown" is offered; Enter opens an
+   empty window. NVDA reads the title "Untitled - axDown" and then "Untitled edit multi line".
+2. Right-click `plain.txt` in File Explorer: the "Open with Axit" submenu lists axDown, and not axJSON; Enter on
+   axDown opens the file. "Open with"
+   lists axDown for `.md`, `.markdown` and `.txt`.
+3. In a console: `axdown plain.txt` opens it; `axit plain.txt` opens it in axDown, `axit <folder>` opens axClaude;
    `axdown missing.md` opens an empty document named `missing.md`.
 4. Two files from Explorer give two windows; Alt+Tab names both.
 
 ## 2. Reading and writing
 
 1. In `long.md`, Down Arrow reads one line at a time; Ctrl+Right reads words; NVDA's say-all reads on. Nothing is
-   spoken by AxDown on these keys.
+   spoken by axDown on these keys.
 2. Type a sentence; Backspace and Delete behave as in Notepad; Enter makes a line; Tab types a tab (the focus does
    not leave the editor). Ctrl+Z: "Undone", the whole sentence is gone in one step; Ctrl+Y: "Redone", it is back.
 3. Page Down moves a screen and reaches the last line; Page Up the first. In a short file both do something.
@@ -46,7 +46,7 @@ letter), and a `long.md` with headings and lines longer than the window.
    cancels and the text is still there; Enter saves and the document is empty, "Untitled".
 5. Ctrl+S on Untitled opens the Windows Save dialog; cancelling returns to the editor with the focus where it was.
 6. Ctrl+Shift+S saves under a new name; the title, the editor's name and the status bar show the new name.
-7. With `plain.txt` open and unchanged, go to another window and append a line to the file there (in AxClaude: "add
+7. With `plain.txt` open and unchanged, go to another window and append a line to the file there (in axClaude: "add
    a line to plain.txt"; or in a console: `echo more>> plain.txt`), then Alt+Tab back: "Reloaded, plain.txt changed
    on disk", the caret on the line it was on, and Ctrl+End reads the new line. Now type a character, go away, change
    the file again, come back: "plain.txt changed on disk; Save will ask", your character still there; Alt+Tab away
@@ -62,7 +62,7 @@ letter), and a `long.md` with headings and lines longer than the window.
     choosing one opens it, after the unsaved-changes question when there are changes; before any file, "No recent files",
     which NVDA reads and which does nothing on Enter.
 11. File, Show current file in, File Explorer (Ctrl+W): a File Explorer window opens with the file selected and NVDA
-    reads its title; Alt+F4 closes it and the focus is back in AxDown. On Untitled: "No file yet".
+    reads its title; Alt+F4 closes it and the focus is back in axDown. On Untitled: "No file yet".
 
 ## 4. Find and go to line
 
@@ -91,12 +91,12 @@ letter), and a `long.md` with headings and lines longer than the window.
    and the folders; About, Licence, Attribution and Axit guide open their notices, Escape closes each.
 4. Alt+A: the Axit menu with New window, Recently closed, Open windows, Open windows by type, Close all windows, Check
    for updates and About (bundle AX-9); About, Axit on GitHub: the browser opens the repository page. With a second
-   AxDown open, Open windows reads "1. <name> - AxDown, 1 of 1" and Enter brings that window to the front; Alt+A, B, D there
+   axDown open, Open windows reads "1. <name> - axDown, 1 of 1" and Enter brings that window to the front; Alt+A, B, D there
    lists both windows, the current one checked; Alt+A, N, D starts a new Untitled window. Alone, Open windows holds
    "No other open windows", which NVDA reads and which does nothing. Close a window that has `plain.txt` open: in another window Alt+A, R reads "1. plain.txt
-   (<path>) - AxDown" and Enter opens it in a new window; File, Open on another file puts the one you left there too. Alt+A, C
+   (<path>) - axDown" and Enter opens it in a new window; File, Open on another file puts the one you left there too. Alt+A, C
    (Close all windows) with unsaved changes in one window: that window asks "Save changes?" and the others close.
-5. Options, General, Check for updates at start: read as checked; Enter unchecks it. Options, Developer, Copy diagnostics: "Copied diagnostics"; Options, Developer, Open settings file: a new AxJSON
+5. Options, General, Check for updates at start: read as checked; Enter unchecks it. Options, Developer, Copy diagnostics: "Copied diagnostics"; Options, Developer, Open settings file: a new axJSON
    window on `axdown.json`. Help, Markdown resources, Markdown basics: the browser opens commonmark.org; GitHub
    Flavored Markdown opens its page.
 6. The command palette (bundle AX-10), with the caret in the middle of a line. Ctrl+Shift+P: "Command palette",
@@ -106,7 +106,7 @@ letter), and a `long.md` with headings and lines longer than the window.
    "Word wrap, checked" (or "not checked") is said; Options shows the item changed. Ctrl+Shift+P, type `xyz`:
    "No commands match xyz"; Enter says it again and the palette stays; Escape: back in the editor, nothing run.
    Ctrl+Shift+P, `save as`, Enter: the Save as picker opens. Alt+A, P (Axit, Command palette, the menu's first item) opens it too. Recent files and the
-   Axit menu's window lists are not in it; Alt+A, New window, AxDown is ("AxDown, Axit, New window").
+   Axit menu's window lists are not in it; Alt+A, New window, axDown is ("axDown, Axit, New window").
 
 ## 7. Updates and uninstall
 
@@ -117,13 +117,13 @@ letter), and a `long.md` with headings and lines longer than the window.
    the Axit menu has "Update to Axit <newest>..." below Check for updates, and Check for updates asks GitHub again and opens
    the notice once more. Enter (Update and restart): the notice "Updating to Axit <newest>" with a progress bar that
    NVDA reports by its progress bar settings; "Downloaded. Installing" at about 80 percent, then "Installed.
-   Restarting"; AxDown closes and comes back on the same file (or empty, as it was), Axit, About, Version naming the newest
+   Restarting"; axDown closes and comes back on the same file (or empty, as it was), Axit, About, Version naming the newest
    version. Again with the older build: Escape during the download says "Update cancelled" and keeps the version;
-   Update and close says "Installed. Closing" and AxDown does not come back; the Start menu entry is the newest
+   Update and close says "Installed. Closing" and axDown does not come back; the Start menu entry is the newest
    version. With unsaved changes, Update and restart: the "Save changes?" question; Escape (Cancel): "Update
-   installed. It starts with the next AxDown", the window stays; a later Exit with Don't save closes without
-   starting AxDown again.
-3. Settings, Apps, Axit, Uninstall removes AxDown's Start entry, its file menu entries, Open with, and `axdown.cmd`
+   installed. It starts with the next axDown", the window stays; a later Exit with Don't save closes without
+   starting axDown again.
+3. Settings, Apps, Axit, Uninstall removes axDown's Start entry, its file menu entries, Open with, and `axdown.cmd`
    together with everything else of Axit; `%APPDATA%\Axit\axdown.json` stays.
 
 ## 8. Navigation (from the version with section 9 of the spec)
@@ -131,7 +131,7 @@ letter), and a `long.md` with headings and lines longer than the window.
 1. In `long.md`, Ctrl+H: the caret moves to the next heading and its line is spoken; Ctrl+Shift+H back; at the last
    heading: "No next heading", at the first: "No previous heading".
 2. A heading-looking line inside a fenced code block is skipped.
-3. Plain arrow keys still speak nothing of AxDown's own.
+3. Plain arrow keys still speak nothing of axDown's own.
 4. Ctrl+2: the next level-2 heading, other levels skipped, spoken "…, heading level 2"; Ctrl+Shift+2 back; past the
    last one: "No next heading level 2". Navigate, Next and Navigate, Previous each list Heading and Heading level 1 to
    6 with their keys, and the items do the same as the keys.

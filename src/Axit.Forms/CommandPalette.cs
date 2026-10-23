@@ -9,7 +9,7 @@ namespace Axit.Forms;
 /// </summary>
 public static class CommandPalette
 {
-    /// <summary>The keys in the palette's field (AX-10.4), which act there only, as AxStart's do in its field.</summary>
+    /// <summary>The keys in the palette's field (AX-10.4), which act there only, as axStart's do in its field.</summary>
     public const Keys NextMatch = Keys.Down;
 
     public const Keys PreviousMatch = Keys.Up;
@@ -30,8 +30,8 @@ public static class CommandPalette
     }
 
     /// <summary>
-    /// Attaches <paramref name="refresh"/> to a menu whose items change their text or check mark as it opens (AxFile's
-    /// Undo named after what it would undo, AxTerminal's Switch shell with the shell in use checked), and marks the
+    /// Attaches <paramref name="refresh"/> to a menu whose items change their text or check mark as it opens (axFile's
+    /// Undo named after what it would undo, axTerminal's Switch shell with the shell in use checked), and marks the
     /// menu so that the palette runs it before reading (AX-10.2; until 2026-10-23 the palette read such an item as it
     /// last stood). Returns the item.
     /// </summary>

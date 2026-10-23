@@ -30,7 +30,7 @@ public static class BundleAbout
 
     public const string Attribution = """
         Axit is made by Dr. Kyle Keane, www.kylekeane.com.
-        Everything you type in AxClaude goes to Claude Code and, through it, to Anthropic under Anthropic's own terms; the developer has no access to it. Axit is an independent project, not affiliated with or endorsed by Anthropic. Claude and Claude Code are products of Anthropic.
+        Everything you type in axClaude goes to Claude Code and, through it, to Anthropic under Anthropic's own terms; the developer has no access to it. Axit is an independent project, not affiliated with or endorsed by Anthropic. Claude and Claude Code are products of Anthropic.
         Axit is built with .NET and Windows Forms and uses no third-party packages.
         """;
 

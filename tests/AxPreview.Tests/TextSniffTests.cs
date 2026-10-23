@@ -57,7 +57,7 @@ public sealed class TextSniffTests : IDisposable
         Assert.Null(TextSniff.Refuse(Write("empty.bin", [])));
         var refusal = TextSniff.Refuse(Write("tool.exe", [0x4D, 0x5A, 0x90, 0x00, 0x03, 0x00, 0x00, 0x00]));
         Assert.Equal("Not a text file", refusal!.Title);
-        Assert.Equal("tool.exe is not a text file. AxFile's Enter opens it in the program Windows has for it.", refusal.Text);
+        Assert.Equal("tool.exe is not a text file. axFile's Enter opens it in the program Windows has for it.", refusal.Text);
         // A file that cannot be read is left to the reader.
         Assert.Null(TextSniff.Refuse(Path.Combine(_folder, "gone.txt")));
     }

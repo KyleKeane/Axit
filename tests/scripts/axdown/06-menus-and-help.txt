@@ -1,4 +1,4 @@
-# AxDown, test plan section 6 (Menus and help), driven from inside the window (docs/axdown/nvda-test-plan.md).
+# axDown, test plan section 6 (Menus and help), driven from inside the window (docs/axdown/nvda-test-plan.md).
 # The run's own settings: no update check, whose network call logs an ERROR when GitHub cannot be reached.
 file home\Axit\axdown.json {"checkForUpdates": false}
 file a.md # A file for the menus\n\nSome text here.\nMore text.
@@ -23,7 +23,7 @@ expect focus {"name":"Keyboard shortcuts","role":"Text","value":"In this text: h
 keys h
 expect said ! In every window of Axit, heading level 2
 keys ctrl+h
-expect said ! AxDown, heading level 2
+expect said ! axDown, heading level 2
 keys shift+h
 expect said ! In every window of Axit, heading level 2
 keys h h
@@ -53,7 +53,7 @@ expect state Line 3, Column 2 \u00B7
 
 # 6.3: Help, User guide: this app's guide; the navigation keys move through it, spoken as in the editor.
 menu User guide
-expect state "notice":"User guide","noticeText":"# AxDown user guide
+expect state "notice":"User guide","noticeText":"# axDown user guide
 keys ctrl+h
 expect said heading level 2
 keys ctrl+t
@@ -63,7 +63,7 @@ expect focus a.md
 # Axit, About, Version names the version of Axit, the nine apps and the folders.
 menu Version
 expect state "notice":"Axit 3.
-expect state : AxClaude, AxDown, AxJSON, AxGit, AxTerminal, AxFile, AxMedia, AxPreview, AxStart.
+expect state : axClaude, axDown, axJSON, axGIT, axTerminal, axFile, axMedia, axPreview, axStart.
 expect state Settings: 
 expect state Logs: 
 keys escape
@@ -102,7 +102,7 @@ expect said Check for updates at start, Options, General, checked, 1 of 1
 keys enter
 expect said Check for updates at start, not checked
 expect focus a.md
-# 6.5 manual: Copy diagnostics writes the user's clipboard; Open settings file starts an AxJSON window the runner does
+# 6.5 manual: Copy diagnostics writes the user's clipboard; Open settings file starts an axJSON window the runner does
 # not reach; the Markdown resources open the browser.
 
 # 6.6: the command palette, with the caret in the middle of a line.
@@ -144,6 +144,6 @@ expect state "notice":null
 expect focus a.md
 expect quiet 1000
 # 6.6 manual: save as, Enter opens the Windows Save as picker; Alt+A, P needs the menu bar's menu mode.
-# Recent files and the Axit menu's window lists are not in the palette; Alt+A, New window, AxDown is.
+# Recent files and the Axit menu's window lists are not in the palette; Alt+A, New window, axDown is.
 # Not checked here: that they are absent, since the runner has no refuse for the commands (see the report).
-expect commands "AxDown, Axit, New window"
+expect commands "axDown, Axit, New window"

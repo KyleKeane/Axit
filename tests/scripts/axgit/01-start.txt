@@ -1,4 +1,4 @@
-# AxGit: start (docs/axgit/nvda-test-plan.md section 1; SPEC AG-1, AG-2, AG-6.2).
+# axGIT: start (docs/axgit/nvda-test-plan.md section 1; SPEC AG-1, AG-2, AG-6.2).
 # A scratch repository with two commits, a second branch and two changes: a modified tracked file and an untracked one.
 # The update check off in the run's own settings (AXIT_HOME): a network call, and its failure is a logged ERROR.
 file home\Axit\axgit.json {"checkForUpdates": false}
@@ -16,7 +16,7 @@ mkdir plain
 
 # 1.1 The window is named after the repository, the Changes list focused on its first item; nothing announced.
 start git {temp}\repo
-expect state repo - AxGit
+expect state repo - axGIT
 expect focus Changes, 2 files
 expect focus Modified a.txt, unstaged
 expect quiet 1500
@@ -83,6 +83,6 @@ expect state plain is not inside a git repository
 wait 1200
 keys enter
 expect state "notice":null
-expect state No repository - AxGit
+expect state No repository - axGIT
 # 1.5 Ctrl+O opens the Windows folder picker, and Ctrl+O on a folder outside any repository with one open: manual,
 # the picker is a system dialog the channel cannot drive.

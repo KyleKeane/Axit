@@ -1,34 +1,34 @@
-# AxDown user guide
+# axDown user guide
 
-AxDown is a plain editor for Markdown and text files, made for NVDA and for anyone who reads with a screen reader. It is one app of Axit, one program that holds several apps for screen reader users; the others have their own guides. AxDown opens one file in one window: a menu bar, the text, and a status bar. Nothing is spoken unless you ask for it or a command finishes.
+axDown is a plain editor for Markdown and text files, made for NVDA and for anyone who reads with a screen reader. It is one app of Axit, one program that holds several apps for screen reader users; the others have their own guides. axDown opens one file in one window: a menu bar, the text, and a status bar. Nothing is spoken unless you ask for it or a command finishes.
 
 ## Install
 
-AxDown comes with Axit. The README in the Axit zip, or on the releases page (https://github.com/KyleKeane/Axit/releases), explains the installation: download `install.cmd` and double-click it. This puts Axit in your Programs folder and adds a Start menu entry, "Axit AxDown" (press the Windows key and type `axd`), AxDown in the "Open with Axit" submenu of the right-click menu of files, AxDown under "Open with" for `.md`, `.markdown` and `.txt` files, and the `axdown` command for consoles. To make AxDown the program that opens `.md` files when you press Enter on one, use Settings, Apps, Default apps, and choose AxDown for `.md`; Windows does not let a program set that for itself.
+axDown comes with Axit. The README in the Axit zip, or on the releases page (https://github.com/KyleKeane/Axit/releases), explains the installation: download `install.cmd` and double-click it. This puts Axit in your Programs folder and adds a Start menu entry, "Axit axDown" (press the Windows key and type `axd`), axDown in the "Open with Axit" submenu of the right-click menu of files, axDown under "Open with" for `.md`, `.markdown` and `.txt` files, and the `axdown` command for consoles. To make axDown the program that opens `.md` files when you press Enter on one, use Settings, Apps, Default apps, and choose axDown for `.md`; Windows does not let a program set that for itself.
 
 ## Start
 
-- Start menu: Axit AxDown opens an empty document called Untitled.
-- File Explorer: right-click a file, open "Open with Axit" and choose AxDown; or choose AxDown under Windows' own "Open with".
-- Console: `axdown notes.md`, or `axit notes.md`, since a file means AxDown. `axdown new.md` opens an empty document with that name, and the file is created when you save.
+- Start menu: Axit axDown opens an empty document called Untitled.
+- File Explorer: right-click a file, open "Open with Axit" and choose axDown; or choose axDown under Windows' own "Open with".
+- Console: `axdown notes.md`, or `axit notes.md`, since a file means axDown. `axdown new.md` opens an empty document with that name, and the file is created when you save.
 
 Each file opens in its own window; Alt+Tab moves between them.
 
 ## Write and read
 
-The text is an ordinary Windows edit field, so NVDA's own keys read it: arrows for characters and lines, Ctrl+Left and Ctrl+Right for words, NVDA's say-all to read on from the caret, and so on. Type to write; Enter starts a new line; Tab types a tab. Ctrl+Z undoes the last change and Ctrl+Y does it again, as far back as the file was opened in this window: a run of typing is one step, a deletion the same, a paste or a cut one step each. AxDown says "Undone" or "Redone", and "Nothing to undo" or "Nothing to redo" at the ends. Saving keeps the history; opening another file or a new document ends it. Page Up and Page Down move a screen at a time and reach the first and last line. Ctrl+Up and Ctrl+Down move to the previous and next paragraph, the first line after a blank line, and with Shift they select to there, as in Word.
+The text is an ordinary Windows edit field, so NVDA's own keys read it: arrows for characters and lines, Ctrl+Left and Ctrl+Right for words, NVDA's say-all to read on from the caret, and so on. Type to write; Enter starts a new line; Tab types a tab. Ctrl+Z undoes the last change and Ctrl+Y does it again, as far back as the file was opened in this window: a run of typing is one step, a deletion the same, a paste or a cut one step each. axDown says "Undone" or "Redone", and "Nothing to undo" or "Nothing to redo" at the ends. Saving keeps the history; opening another file or a new document ends it. Page Up and Page Down move a screen at a time and reach the first and last line. Ctrl+Up and Ctrl+Down move to the previous and next paragraph, the first line after a blank line, and with Shift they select to there, as in Word.
 
-Long lines wrap at the window's edge, so Down Arrow reads one screen line at a time. Options, Text, Word wrap (Ctrl+Shift+W) turns that off: each line of the file is then one line in the window, however long, and AxDown says "Word wrap off". Your place in the text is kept either way.
+Long lines wrap at the window's edge, so Down Arrow reads one screen line at a time. Options, Text, Word wrap (Ctrl+Shift+W) turns that off: each line of the file is then one line in the window, however long, and axDown says "Word wrap off". Your place in the text is kept either way.
 
 ## Files
 
-Ctrl+S saves and AxDown says "Saved". A new document asks for a name first, with the Windows file dialog; Ctrl+Shift+S, Save as, asks every time. Ctrl+O opens another file in this window and Ctrl+N starts an empty one; both ask first if you have unsaved changes, as does closing the window: a notice says "Save changes to notes.md?" with Save, Don't save and Cancel; Enter saves, Escape cancels. File, Open recent file lists the last ten files you opened or saved; File, Show current file in, File Explorer (Ctrl+W) opens File Explorer with the file selected.
+Ctrl+S saves and axDown says "Saved". A new document asks for a name first, with the Windows file dialog; Ctrl+Shift+S, Save as, asks every time. Ctrl+O opens another file in this window and Ctrl+N starts an empty one; both ask first if you have unsaved changes, as does closing the window: a notice says "Save changes to notes.md?" with Save, Don't save and Cancel; Enter saves, Escape cancels. File, Open recent file lists the last ten files you opened or saved; File, Show current file in, File Explorer (Ctrl+W) opens File Explorer with the file selected.
 
-When another program changes the file while it is open here, for example Claude editing it while you are in AxClaude, AxDown notices when you come back to its window: with nothing unsaved it reloads the file, keeps your line, and says "Reloaded, notes.md changed on disk"; with unsaved changes it says "notes.md changed on disk; Save will ask", and Ctrl+S then offers Write over, Reload and lose mine, or Cancel.
+When another program changes the file while it is open here, for example Claude editing it while you are in axClaude, axDown notices when you come back to its window: with nothing unsaved it reloads the file, keeps your line, and says "Reloaded, notes.md changed on disk"; with unsaved changes it says "notes.md changed on disk; Save will ask", and Ctrl+S then offers Write over, Reload and lose mine, or Cancel.
 
-AxDown writes a file back the way it found it: the same encoding, with or without a byte order mark, and the same kind of line ending. The status bar shows what it found, for example "UTF-8 · CRLF". A new document is UTF-8 without a mark. If the file changed on disk while you had it open, saving asks before writing over it.
+axDown writes a file back the way it found it: the same encoding, with or without a byte order mark, and the same kind of line ending. The status bar shows what it found, for example "UTF-8 · CRLF". A new document is UTF-8 without a mark. If the file changed on disk while you had it open, saving asks before writing over it.
 
-The title is the file's name, with a star in front while there are unsaved changes: "*notes.md - AxDown".
+The title is the file's name, with a star in front while there are unsaved changes: "*notes.md - axDown".
 
 ## Find and go to a line
 
@@ -38,38 +38,38 @@ Ctrl+G asks for a line number; the field is named with where you are, for exampl
 
 ## Move by structure
 
-In a Markdown file, the keys NVDA uses on a web page work with Ctrl: Ctrl+H moves to the next heading (a line that starts with one or more `#`) and Ctrl+Shift+H to the previous one; Ctrl+1 to Ctrl+6 to the next heading of that level only; Ctrl+K to the next link, Ctrl+L to the next list, Ctrl+I to the next list item, Ctrl+Q to the next block quote and Ctrl+T to the next table, each with Shift added for the previous one. The caret lands at the start of what was found and AxDown says what it is, as NVDA would: "Install, heading level 2", "GitHub, link", "List with 3 items, one", "Block quote, …", "Table with 3 rows and 2 columns". When there is none, AxDown says so ("No next link") and the caret stays. Lines inside fenced code blocks are skipped. The Navigate menu lists all of them under Next and Previous. They work in the user guide and the other help texts too.
+In a Markdown file, the keys NVDA uses on a web page work with Ctrl: Ctrl+H moves to the next heading (a line that starts with one or more `#`) and Ctrl+Shift+H to the previous one; Ctrl+1 to Ctrl+6 to the next heading of that level only; Ctrl+K to the next link, Ctrl+L to the next list, Ctrl+I to the next list item, Ctrl+Q to the next block quote and Ctrl+T to the next table, each with Shift added for the previous one. The caret lands at the start of what was found and axDown says what it is, as NVDA would: "Install, heading level 2", "GitHub, link", "List with 3 items, one", "Block quote, …", "Table with 3 rows and 2 columns". When there is none, axDown says so ("No next link") and the caret stays. Lines inside fenced code blocks are skipped. The Navigate menu lists all of them under Next and Previous. They work in the user guide and the other help texts too.
 
 ## Text size and fonts
 
-Ctrl+Plus and Ctrl+Minus make the text larger and smaller, and AxDown says the new size. Options, Text, Font opens the Windows font dialog. Both are remembered.
+Ctrl+Plus and Ctrl+Minus make the text larger and smaller, and axDown says the new size. Options, Text, Font opens the Windows font dialog. Both are remembered.
 
 ## Menus
 
-- **File**: New, Open, Open recent file (each as a number, the file's name and its full path), Save, Save as, Show current file in (File Explorer, Ctrl+W; AxGit, a git manager on the repository that holds the file; AxTerminal, a shell in the file's folder; AxFile, the file's folder with the file selected), Exit.
+- **File**: New, Open, Open recent file (each as a number, the file's name and its full path), Save, Save as, Show current file in (File Explorer, Ctrl+W; axGIT, a git manager on the repository that holds the file; axTerminal, a shell in the file's folder; axFile, the file's folder with the file selected), Exit.
 - **Edit**: Undo, Redo, Cut, Copy, Paste, Select all.
 - **Navigate**: Find, Find next, Find previous, Go to line, and the submenus Next and Previous, each with Heading, Heading level 1 to 6, Link, List, List item, Block quote and Table.
-- **Options**: Text (Word wrap, Font, Larger text, Smaller text, Windows text size), General (Check for updates at start) and Developer (Open settings file, which opens axdown.json in a new AxJSON window, and Copy diagnostics).
+- **Options**: Text (Word wrap, Font, Larger text, Smaller text, Windows text size), General (Check for updates at start) and Developer (Open settings file, which opens axdown.json in a new axJSON window, and Copy diagnostics).
 - **Axit**: the bundle's menu, the same in every Axit window. Command palette finds any command of the window by name (Ctrl+Shift+P). New window starts another window of any app. Recently closed lists the last ten files and folders any Axit window held, each as a number, the name and the full path; Enter opens one in a new window. Open windows lists the other open Axit windows, the one you were in last first, each with a number: Alt+A, O, 1 takes you back to it. Open windows by type has a submenu per app with its windows, the one you are in checked. Enter on a window brings it to the front. Close all windows closes every Axit window, each asking about unsaved changes where there are any. Then Check for updates (which names the version you have), Update to the newest version while one is known, and About, a submenu: Version (the version, the apps, the latest release and where the settings and logs are), Licence, Attribution, Axit guide (how to install, start, update and remove the bundle) and Axit on GitHub, which opens the project's page in your browser.
 - **Help**: Keyboard shortcuts (F1), this guide, Markdown resources (Markdown basics and GitHub Flavored Markdown, in your browser).
 
 ## Settings
 
-Everything you change is saved in `%APPDATA%\Axit\axdown.json`: the font, the text size, word wrap, the recent files, the window's place and size, and whether AxDown checks for updates when it starts.
+Everything you change is saved in `%APPDATA%\Axit\axdown.json`: the font, the text size, word wrap, the recent files, the window's place and size, and whether axDown checks for updates when it starts.
 
 ## Updates
 
-New versions of Axit are published on GitHub, and every app of Axit updates together. When AxDown starts, it asks GitHub once whether there is a newer one; if there is, a notice opens with four buttons. Update and restart (Enter) downloads and installs the new version while AxDown stays open, then closes AxDown (asking first about unsaved changes) and starts the new version on the same file; Update and close installs it and closes without starting it again. One progress bar covers the download and the installation, and NVDA reports it the way it reports any progress bar (beeps or percentages, by your NVDA settings). Escape during the download cancels it and keeps the version you have; once the installation has begun it runs to the end, a few seconds. Open release page opens it in the browser; Later keeps the version you have, and Axit, "Update to Axit n" offers it until you take it. Axit, "Check for updates (Axit n)" names the version you have, asks at any time and is always there, so after skipping a version you can look again. Axit, About, Version names the version you have, the latest release on GitHub and where the settings and logs are.
+New versions of Axit are published on GitHub, and every app of Axit updates together. When axDown starts, it asks GitHub once whether there is a newer one; if there is, a notice opens with four buttons. Update and restart (Enter) downloads and installs the new version while axDown stays open, then closes axDown (asking first about unsaved changes) and starts the new version on the same file; Update and close installs it and closes without starting it again. One progress bar covers the download and the installation, and NVDA reports it the way it reports any progress bar (beeps or percentages, by your NVDA settings). Escape during the download cancels it and keeps the version you have; once the installation has begun it runs to the end, a few seconds. Open release page opens it in the browser; Later keeps the version you have, and Axit, "Update to Axit n" offers it until you take it. Axit, "Check for updates (Axit n)" names the version you have, asks at any time and is always there, so after skipping a version you can look again. Axit, About, Version names the version you have, the latest release on GitHub and where the settings and logs are.
 
 ## If something goes wrong
 
 - A file that cannot be opened, is not text, or is larger than 32 MB, is reported in a notice; the window stays open, empty and untitled, so that saving cannot write over the file.
-- An error from AxDown is a notice inside the window. Escape closes it. Options, Developer, Copy diagnostics puts the version, the paths and the last log lines on the clipboard for a bug report; the log is in `%LOCALAPPDATA%\Axit\logs\axdown.log`.
+- An error from axDown is a notice inside the window. Escape closes it. Options, Developer, Copy diagnostics puts the version, the paths and the last log lines on the clipboard for a bug report; the log is in `%LOCALAPPDATA%\Axit\logs\axdown.log`.
 
-## About AxDown
+## About axDown
 
-AxDown is part of Axit, made by Dr. Kyle Keane, www.kylekeane.com. It is free under the MIT licence: use it, change it and pass it on, as long as the note that says who made it stays with it (the `LICENSE` file next to the program).
+axDown is part of Axit, made by Dr. Kyle Keane, www.kylekeane.com. It is free under the MIT licence: use it, change it and pass it on, as long as the note that says who made it stays with it (the `LICENSE` file next to the program).
 
 ## Disclaimer
 
-AxDown is free software offered under the MIT licence. It is provided "as is" and "as available", without warranty of any kind, express or implied, including but not limited to the implied warranties of merchantability, fitness for a particular purpose, title and non-infringement. The developer has no obligation to provide support, maintenance, updates or corrections. To the fullest extent permitted by law, the developer is not liable for any claim, damages or other liability, whether in contract, tort or otherwise, arising from or in connection with the software or its use, including loss of data or work. You use AxDown at your own risk.
+axDown is free software offered under the MIT licence. It is provided "as is" and "as available", without warranty of any kind, express or implied, including but not limited to the implied warranties of merchantability, fitness for a particular purpose, title and non-infringement. The developer has no obligation to provide support, maintenance, updates or corrections. To the fullest extent permitted by law, the developer is not liable for any claim, damages or other liability, whether in contract, tort or otherwise, arising from or in connection with the software or its use, including loss of data or work. You use axDown at your own risk.

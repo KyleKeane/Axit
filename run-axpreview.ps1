@@ -1,6 +1,6 @@
 <#
 .SYNOPSIS
-  Builds Axit and starts AxPreview: run.ps1 with -App preview. Every other argument goes through unchanged. Without a
+  Builds Axit and starts axPreview: run.ps1 with -App preview. Every other argument goes through unchanged. Without a
   path it opens an empty window.
 
 .EXAMPLE

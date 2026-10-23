@@ -1,7 +1,7 @@
 namespace AxMedia;
 
 /// <summary>
-/// AxMedia's window-specific keys (SPEC.md AM-5.2; bundle AX-8). A key is changed here and nowhere else: the menu
+/// axMedia's window-specific keys (SPEC.md AM-5.2; bundle AX-8). A key is changed here and nowhere else: the menu
 /// items, the key switch in <c>MediaForm.ProcessWindowKey</c> and the F1 text read this table. The bundle-wide keys
 /// (F1, the control keys, find, Ctrl+S, text size) are <c>Axit.Forms.BundleKeys</c>. Enter, Delete and Space act in
 /// the list only; in a notice's field they are the field's own. Everything else works from anywhere in the window.
@@ -28,7 +28,7 @@ public static class AxMediaKeys
     /// <summary>The Windows folder picker; the folder's media files appended.</summary>
     public const Keys OpenFolder = Keys.Control | Keys.Shift | Keys.O;
 
-    /// <summary>A new AxMedia window (AX-9).</summary>
+    /// <summary>A new axMedia window (AX-9).</summary>
     public const Keys NewWindow = Keys.Control | Keys.N;
 
     /// <summary>The file playing, or the one under the selection, selected in File Explorer.</summary>

@@ -9,7 +9,7 @@ public sealed record HandOver(string Verb, IReadOnlyList<string> Paths);
 
 /// <summary>
 /// The hand-over between a starting process and the open window of the same app (docs/axmedia/SPEC.md AM-1.2,
-/// AM-1.3, AM-D4; docs/axpreview/SPEC.md AP-1.2): an app that keeps one window (AxMedia, AxPreview) is started with
+/// AM-1.3, AM-D4; docs/axpreview/SPEC.md AP-1.2): an app that keeps one window (axMedia, axPreview) is started with
 /// paths, finds its newest open window through the same window list the Axit menu reads, hands the paths over with
 /// one <c>WM_COPYDATA</c> message carrying a text (the verb, then one path per line), and ends. For the verbs that
 /// take the focus it first lets the window's process bring itself to the front (<c>AllowSetForegroundWindow</c>,
@@ -21,16 +21,16 @@ public sealed record HandOver(string Verb, IReadOnlyList<string> Paths);
 /// </summary>
 public static class AppMessage
 {
-    /// <summary>AxMedia: the queue replaced by the paths (a file with its folder's media files after it, a folder's media files) and played.</summary>
+    /// <summary>axMedia: the queue replaced by the paths (a file with its folder's media files after it, a folder's media files) and played.</summary>
     public const string Play = "play";
 
-    /// <summary>AxMedia: the paths appended to the queue; nothing starts, and the focus stays where it was.</summary>
+    /// <summary>axMedia: the paths appended to the queue; nothing starts, and the focus stays where it was.</summary>
     public const string Add = "add";
 
-    /// <summary>AxPreview: the one file shown.</summary>
+    /// <summary>axPreview: the one file shown.</summary>
     public const string Open = "open";
 
-    /// <summary>AxStart: the hidden window shown with the focus in its field (docs/axstart/SPEC.md AS-1.2); no paths.</summary>
+    /// <summary>axStart: the hidden window shown with the focus in its field (docs/axstart/SPEC.md AS-1.2); no paths.</summary>
     public const string Show = "show";
 
     private const int WM_COPYDATA = 0x004A;
@@ -66,7 +66,7 @@ public static class AppMessage
     /// </summary>
     public static bool Send(string appName, string verb, IReadOnlyList<string> paths)
     {
-        if (Dispatch.Apps.FirstOrDefault(app => app.Name == appName) is not { } app)
+        if (Dispatch.Apps.FirstOrDefault(app => string.Equals(app.Name, appName, StringComparison.OrdinalIgnoreCase)) is not { } app)
         {
             return false;
         }
@@ -81,7 +81,7 @@ public static class AppMessage
     }
 
     /// <summary>
-    /// Hands the verb and the paths to one window found by the caller: AxStart's, which is hidden and so not in the
+    /// Hands the verb and the paths to one window found by the caller: axStart's, which is hidden and so not in the
     /// Axit menu's list (docs/axstart/SPEC.md AS-1.2). True when the window took them.
     /// </summary>
     public static bool SendTo(nint target, string appName, string verb, IReadOnlyList<string> paths)

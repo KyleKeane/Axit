@@ -1,18 +1,18 @@
-# AxDown tutorial
+# axDown tutorial
 
-Welcome. This file is both a guided tour of AxDown and a practice ground: every kind of Markdown structure has a
+Welcome. This file is both a guided tour of axDown and a practice ground: every kind of Markdown structure has a
 section of its own below, so each navigation key has somewhere to land, and the text explains what to try as you
 go. `run-axdown.ps1` opens this file when it is given no other; edit it as much as you like, the repository keeps
 the original.
 
 Read it the way you read any text: Down Arrow for the next line, Ctrl+Down for the next paragraph in NVDA, NVDA's
-say-all to read on. AxDown adds nothing to that reading; it speaks only when you ask it to or when a command
+say-all to read on. axDown adds nothing to that reading; it speaks only when you ask it to or when a command
 finishes.
 
 ## 1. Headings
 
 A heading is a line that starts with one to six hash signs and a space. Ctrl+H moves to the next heading and
-Ctrl+Shift+H to the previous one; the caret lands at the start of the heading's line and AxDown says the heading as
+Ctrl+Shift+H to the previous one; the caret lands at the start of the heading's line and axDown says the heading as
 NVDA's browse mode would: "Headings, heading level 2". At the last heading Ctrl+H says "No next heading" and the
 caret stays. Try it now: press Ctrl+H a few times, then Ctrl+Shift+H back to here.
 
@@ -30,7 +30,7 @@ Headings nest by their number of hashes. This one has three.
 
 ## A heading may end with hashes too ##
 
-Markdown allows closing hashes; AxDown drops them when it speaks the heading, so this one is spoken as "A heading
+Markdown allows closing hashes; axDown drops them when it speaks the heading, so this one is spoken as "A heading
 may end with hashes too, heading level 2".
 
 ### 1.3 What is not a heading
@@ -41,17 +41,17 @@ a code fence (see section 7). Ctrl+H passes over both.
 ## 2. Paragraphs and emphasis
 
 A paragraph is one or more lines of text with a blank line before and after. Markdown joins the lines of a paragraph
-when it is rendered, but AxDown is a plain editor and shows the file as it is: each line of the file is one line in
+when it is rendered, but axDown is a plain editor and shows the file as it is: each line of the file is one line in
 the window. With word wrap on (the default), a long line wraps at the window's edge and Down Arrow reads one screen
 line at a time; Options, Text, Word wrap (Ctrl+Shift+W) turns that off, and each line of the file is then one line in the
 window however long. Your place in the text is kept either way.
 
 Emphasis is written with asterisks or underscores: *italic* with one, **bold** with two, ***both*** with three, and
-`inline code` with backticks. AxDown shows the marks as they are; NVDA reads them as punctuation according to its
+`inline code` with backticks. axDown shows the marks as they are; NVDA reads them as punctuation according to its
 own punctuation level.
 
 A line that ends with two spaces  
-makes a hard line break in rendered Markdown. In AxDown it is simply two lines.
+makes a hard line break in rendered Markdown. In axDown it is simply two lines.
 
 ## 3. Lists
 
@@ -90,7 +90,7 @@ the document or section:
 
 [axit]: https://github.com/KyleKeane/Axit
 
-An image is a link with an exclamation mark in front: ![the Axit icon](AxDown.ico). AxDown shows the text, not the
+An image is a link with an exclamation mark in front: ![the Axit icon](AxDown.ico). axDown shows the text, not the
 image. Links are the structure behind Ctrl+K.
 
 ## 5. Block quotes
@@ -110,16 +110,16 @@ A table is a row of cells separated by vertical bars, a row of dashes that sets 
 
 | Key | What it does | Kind |
 | :-- | :-- | :-- |
-| Ctrl+H, Ctrl+Shift+H | Next and previous heading | AxDown |
-| Ctrl+G | Go to a line; the field says where you are | AxDown |
+| Ctrl+H, Ctrl+Shift+H | Next and previous heading | axDown |
+| Ctrl+G | Go to a line; the field says where you are | axDown |
 | Ctrl+F, F3, Shift+F3 | Find, next match, previous match | Bundle |
-| Ctrl+S, Ctrl+Shift+S | Save, save as | Bundle, AxDown |
-| Ctrl+Shift+W | Word wrap on or off | AxDown |
+| Ctrl+S, Ctrl+Shift+S | Save, save as | Bundle, axDown |
+| Ctrl+Shift+W | Word wrap on or off | axDown |
 | Ctrl+Plus, Ctrl+Minus | Larger and smaller text | Bundle |
 | F1 | The keyboard shortcuts | Bundle |
 
 NVDA reads a table row as one line of text here, bars and all; Ctrl+T moves between tables. The Kind column says where each key is defined: bundle-wide keys are the same in every window of Axit,
-AxDown's own keys are AxDown's alone.
+axDown's own keys are axDown's alone.
 
 ## 7. Code
 
@@ -129,7 +129,7 @@ lines of their own, with the language's name after the opening fence if you like
 ```csharp
 // A heading-looking line inside a fence is code, not a heading:
 # Ctrl+H skips this line.
-Console.WriteLine("Hello from AxDown");
+Console.WriteLine("Hello from axDown");
 ```
 
 ~~~
@@ -145,9 +145,9 @@ rendered:
 
 ---
 
-An HTML comment is hidden when the file is rendered and visible in AxDown:
+An HTML comment is hidden when the file is rendered and visible in axDown:
 
-<!-- This is a comment. AxDown shows it; a renderer would not. -->
+<!-- This is a comment. axDown shows it; a renderer would not. -->
 
 ## 9. Finding and going to a line
 
@@ -165,12 +165,12 @@ Ctrl+S saves and says "Saved". A new document asks for a name first, with the Wi
 asks every time. Ctrl+O opens another file in this window and Ctrl+N starts an empty one; both ask first about
 unsaved changes, as does closing the window: "Save changes to tutorial.md?" with Save, Don't save and Cancel.
 
-AxDown writes a file back exactly the way it found it: the same encoding (UTF-8, UTF-8 with a byte order mark,
+axDown writes a file back exactly the way it found it: the same encoding (UTF-8, UTF-8 with a byte order mark,
 UTF-16, or the Windows code page), with or without the mark, and the same line endings (CRLF, LF or CR). The status
 bar shows what it found. A new document is UTF-8 without a mark with CRLF. If the file changed on disk while you
 had it open, saving asks before writing over it.
 
-The title is the file's name, with a star in front while there are unsaved changes: "*tutorial.md - AxDown". Make a
+The title is the file's name, with a star in front while there are unsaved changes: "*tutorial.md - axDown". Make a
 change now and listen to the title with NVDA+T, then undo it with Ctrl+Z.
 
 ## 11. Text size, fonts and updates
@@ -178,10 +178,10 @@ change now and listen to the title with NVDA+T, then undo it with Ctrl+Z.
 Ctrl+Plus and Ctrl+Minus make the text larger and smaller and say the new size; Options, Text, Font opens the Windows font
 dialog; Options, Text, Windows text size goes back to the system's. All of it is remembered in `%APPDATA%\Axit\axdown.json`.
 
-New versions of Axit are published on GitHub, and every app of Axit updates together. When AxDown starts, it asks
+New versions of Axit are published on GitHub, and every app of Axit updates together. When axDown starts, it asks
 GitHub once whether there is a newer one; if there is, a notice opens with Update and restart, Update and close,
 Open release page and Later. One progress bar covers the download and the installation, reported by NVDA the way it
-reports any progress bar, and after Update and restart AxDown comes back on this very file.
+reports any progress bar, and after Update and restart axDown comes back on this very file.
 
 ## 12. The end
 

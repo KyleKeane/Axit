@@ -7,7 +7,7 @@ namespace Axit.Forms;
 
 public abstract partial class ConsoleForm
 {
-    // ---- find, export, recording (AxClaude FR-3.7, FR-3.8, FR-13.3; AxTerminal AT-4.5, AT-4.7, AT-8.2) ----
+    // ---- find, export, recording (axClaude FR-3.7, FR-3.8, FR-13.3; axTerminal AT-4.5, AT-4.7, AT-8.2) ----
 
     private StreamRecorder? _recorder;
 
@@ -77,7 +77,7 @@ public abstract partial class ConsoleForm
             FileName = $"{AppName.ToLowerInvariant()}-{DateTime.Now:yyyyMMdd-HHmm}.vt",
             AddExtension = true,
             DefaultExt = "vt",
-            // A recording holds everything on screen, account details and paths included: outside the project (AxClaude D34).
+            // A recording holds everything on screen, account details and paths included: outside the project (axClaude D34).
             InitialDirectory = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments),
         };
         if (ShowSystemDialog(dialog) == DialogResult.OK)
@@ -86,7 +86,7 @@ public abstract partial class ConsoleForm
         }
     }
 
-    /// <summary>Records the raw stream to <paramref name="path"/> from now (the menu, or AxClaude's --record).</summary>
+    /// <summary>Records the raw stream to <paramref name="path"/> from now (the menu, or axClaude's --record).</summary>
     protected void StartRecording(string path)
     {
         try

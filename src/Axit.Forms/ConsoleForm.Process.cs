@@ -5,7 +5,7 @@ namespace Axit.Forms;
 
 public abstract partial class ConsoleForm
 {
-    // ---- the program in its pseudo console (AxClaude FR-1, §7.3; AxTerminal AT-1) ----
+    // ---- the program in its pseudo console (axClaude FR-1, §7.3; axTerminal AT-1) ----
 
     /// <summary>A frame ends after this long without output, besides at the cursor shown again.</summary>
     private readonly System.Windows.Forms.Timer _quiet = new() { Interval = 100 };
@@ -25,7 +25,7 @@ public abstract partial class ConsoleForm
     /// <summary>The program runs: its process was started and has not ended or been stopped.</summary>
     protected bool ProcessRunning => _host is not null;
 
-    /// <summary>When output last arrived from the program (Environment.TickCount64), for a window's quiet heuristics (AxTerminal AT-5.4).</summary>
+    /// <summary>When output last arrived from the program (Environment.TickCount64), for a window's quiet heuristics (axTerminal AT-5.4).</summary>
     protected long LastOutputTick { get; private set; }
 
     /// <summary>A write is on its way or queued: the program has not seen everything typed yet.</summary>
@@ -146,7 +146,7 @@ public abstract partial class ConsoleForm
     /// Stops the program and everything that was waiting on it: the timers, the write pump and its queue, the
     /// control area (nothing waits on an answer any more), the status bar and the music. The program gets two
     /// seconds to end on its console closing, unless <paramref name="terminateAtOnce"/>: a restart or a close the
-    /// user confirmed while it was busy ends it now (AxClaude FR-1.7, AxTerminal AT-1.6). A window with timers of its
+    /// user confirmed while it was busy ends it now (axClaude FR-1.7, axTerminal AT-1.6). A window with timers of its
     /// own stops them first and calls here.
     /// </summary>
     protected virtual void StopProcess(bool terminateAtOnce = false)
@@ -189,7 +189,7 @@ public abstract partial class ConsoleForm
         }
     }
 
-    // ---- the writes (AxClaude §7.3, AxTerminal AT-3.1): one paced queue, one pump ----
+    // ---- the writes (axClaude §7.3, axTerminal AT-3.1): one paced queue, one pump ----
 
     /// <summary>Text straight to the program, now.</summary>
     protected void Write(string text) => _host?.Write(text);

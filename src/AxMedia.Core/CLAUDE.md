@@ -1,6 +1,6 @@
 # AxMedia.Core, the pure code
 
-Everything of AxMedia that needs no window: the one seam to Windows' media stack, the queue, a folder's media files, the settings. Unit tested in `tests/AxMedia.Tests` over temporary folders; the player itself is checked by ear. The spec is `docs/axmedia/SPEC.md` ("SPEC.md" below); the window is `src/AxMedia`, with its own `CLAUDE.md`. The bundle rules are in the root `CLAUDE.md`. The player and the queue came from AxFile.Core on 2026-10-22 (`docs/axit/axfile-split.md`); the rules of media files (`MediaFiles`: the extensions, the time format, the speed steps) and `NaturalOrder` are `Axit.Core`'s, shared with AxFile.
+Everything of axMedia that needs no window: the one seam to Windows' media stack, the queue, a folder's media files, the settings. Unit tested in `tests/AxMedia.Tests` over temporary folders; the player itself is checked by ear. The spec is `docs/axmedia/SPEC.md` ("SPEC.md" below); the window is `src/AxMedia`, with its own `CLAUDE.md`. The bundle rules are in the root `CLAUDE.md`. The player and the queue came from AxFile.Core on 2026-10-22 (`docs/axit/axfile-split.md`); the rules of media files (`MediaFiles`: the extensions, the time format, the speed steps) and `NaturalOrder` are `Axit.Core`'s, shared with axFile.
 
 ## Commands
 

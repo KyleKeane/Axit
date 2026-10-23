@@ -1,4 +1,4 @@
-# AxMedia: playing (docs/axmedia/nvda-test-plan.md section 3; SPEC.md AM-4, AM-3.3, AM-6).
+# axMedia: playing (docs/axmedia/nvda-test-plan.md section 3; SPEC.md AM-4, AM-3.3, AM-6).
 # Every sound is the runner's silence. Whether the sound starts, stops, jumps or keeps its pitch is for the ear and
 # stays with the NVDA pass; here the announcements, the list, the title and the status bar are checked.
 
@@ -108,7 +108,7 @@ expect said ! 1:00
 refuse said 1:05
 expect said ♪ Done
 expect said End of queue
-expect state "title":"AxMedia"
+expect state "title":"axMedia"
 expect state "status":["",""]
 wait 300
 keys ctrl+q
@@ -143,7 +143,7 @@ refuse said Playing s4.wav
 # Step 6 again from a file ending on its own.
 expect said ♪ Done
 expect said End of queue
-expect state "title":"AxMedia"
+expect state "title":"axMedia"
 expect state "status":["",""]
 wait 300
 keys ctrl+q
@@ -155,7 +155,7 @@ wait 2000
 # Step 8: a file Windows cannot decode is in 03b-cannot-play.txt, since its "Cannot play" is logged as an ERROR,
 # which fails the run by the runner's own check.
 # Step 9: Alt+Tab to another program and the background announcement need the foreground (tier 3); Ctrl+W opens
-# File Explorer, a system window outside the test desktop; Show current file in, AxFile starts a window the runner
+# File Explorer, a system window outside the test desktop; Show current file in, axFile starts a window the runner
 # cannot reach or close; that Alt+F4 stops the sound is for the ear. All left to the NVDA pass.
 
 # Step 2: a time that is not one says "Not a time" and the notice stays. Last in the script, since it fails today:

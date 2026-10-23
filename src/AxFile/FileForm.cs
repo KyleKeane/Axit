@@ -5,13 +5,13 @@ using Axit.Forms;
 namespace AxFile;
 
 /// <summary>
-/// AxFile's window (SPEC.md AF-2): a menu bar, one list with a folder's entries, the Actions list always under it ("No
+/// axFile's window (SPEC.md AF-2): a menu bar, one list with a folder's entries, the Actions list always under it ("No
 /// actions yet" until the first operation), and a status bar with the newest action and the folder's path. Enter is the verb (G2): a
-/// folder opens in the list, a file in the program Windows has for it; Shift+Enter reads a file in AxPreview. The
+/// folder opens in the list, a file in the program Windows has for it; Shift+Enter reads a file in axPreview. The
 /// folder reads and the operations run on background tasks. The notices, the fonts, the window's place, the update
 /// flow and the announcements are the bundle's window base (<see cref="AxitForm"/>). The window is in four files:
 /// this one (the controls, the menus, the hooks, the keys), Browse (the folder, the list and the selection),
-/// Operations (the operations and the ways out) and Actions (the Actions list and the hand-overs to AxMedia).
+/// Operations (the operations and the ways out) and Actions (the Actions list and the hand-overs to axMedia).
 /// </summary>
 public sealed partial class FileForm : AxitForm
 {
@@ -112,7 +112,7 @@ public sealed partial class FileForm : AxitForm
         select.DropDownItems.Add(new ToolStripSeparator());
         select.DropDownItems.Add(new ToolStripMenuItem("Mo&ve to new folder...", null, (_, _) => OnMarks(MoveIntoNewFolder)));
         select.DropDownItems.Add(new ToolStripMenuItem("Compress to &zip", null, (_, _) => OnMarks(Compress)));
-        select.DropDownItems.Add(Item("Add to AxMedia's &queue", () => OnMarks(AddToQueue), AxFileKeys.AddToQueue));
+        select.DropDownItems.Add(Item("Add to axMedia's &queue", () => OnMarks(AddToQueue), AxFileKeys.AddToQueue));
         select.DropDownItems.Add(Item("Copy &paths", () => OnMarks(CopyPath), AxFileKeys.CopyPath));
 
         // Options, as the other windows' (AX-6): every setting in the submenu for what it is about.
@@ -197,8 +197,8 @@ public sealed partial class FileForm : AxitForm
     /// <summary>
     /// The entry's menu (AF-4.6, AF-6.1), filled for the menu bar and again for the list's context menu: one flat
     /// list in File Explorer's order and words, with two submenus for the ways to open (Open with: Windows and the
-    /// user's programs, AF-4.7, AF-4.11; Open in Axit: the bundle's apps, AF-4.9), and the hand-overs to AxPreview
-    /// and AxMedia (AF-3.2, AF-5).
+    /// user's programs, AF-4.7, AF-4.11; Open in Axit: the bundle's apps, AF-4.9), and the hand-overs to axPreview
+    /// and axMedia (AF-3.2, AF-5).
     /// </summary>
     private void FillItemMenu(ToolStripItemCollection items)
     {
@@ -210,7 +210,7 @@ public sealed partial class FileForm : AxitForm
         var axit = new ToolStripMenuItem("Open in &Axit");
         axit.DropDownItems.Add(Item("&Editor", OpenInEditor, AxFileKeys.OpenInEditor));
         axit.DropDownItems.Add(new ToolStripSeparator());
-        // Every app that takes a path (AF-4.9): AxStart takes none and refuses one with a message box.
+        // Every app that takes a path (AF-4.9): axStart takes none and refuses one with a message box.
         foreach (var app in Dispatch.Apps.Where(app => app.Verb != Dispatch.AxStart))
         {
             axit.DropDownItems.Add(new ToolStripMenuItem("Ax&" + app.Name[2..], null, (_, _) => OpenInAxit(app.Verb)));
@@ -219,7 +219,7 @@ public sealed partial class FileForm : AxitForm
         items.Add(axit);
         items.Add(Item("Pr&eview", OpenInPreview, AxFileKeys.Preview));
         items.Add(Item("Play folder in AxMe&dia", PlayFolder, AxFileKeys.PlayFolder));
-        items.Add(Item("Add to AxMedia's &queue", AddToQueue, AxFileKeys.AddToQueue));
+        items.Add(Item("Add to axMedia's &queue", AddToQueue, AxFileKeys.AddToQueue));
         items.Add(new ToolStripSeparator());
         items.Add(Item("Cu&t", () => CopyOrCut(cut: true), AxFileKeys.Cut));
         items.Add(Item("&Copy", () => CopyOrCut(cut: false), AxFileKeys.Copy));

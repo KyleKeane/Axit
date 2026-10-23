@@ -1,4 +1,4 @@
-# AxMedia: text, notices, the Axit menu (docs/axmedia/nvda-test-plan.md section 4; SPEC.md AM-5, AM-6).
+# axMedia: text, notices, the Axit menu (docs/axmedia/nvda-test-plan.md section 4; SPEC.md AM-5, AM-6).
 
 file home\Axit\axmedia.json {"checkForUpdates":false}
 mkdir ch
@@ -34,10 +34,10 @@ keys ctrl+s
 expect said ! Nothing to save here
 
 # Step 3: the Axit menu's commands (its submenus filled on opening, New window's apps aside, are not in the
-# command palette's list, and menu mode needs the foreground): New window with AxMedia among the apps, Close all
+# command palette's list, and menu mode needs the foreground): New window with axMedia among the apps, Close all
 # windows, About. Recently closed, Open windows and Open windows by type, and choosing a recently closed file, are
 # left to the NVDA pass; New window would start a window the runner cannot reach or close.
-expect commands AxMedia, Axit, New window
+expect commands axMedia, Axit, New window
 expect commands Close all windows, Axit
 expect commands Version, Axit, About
 expect commands Check for updates at start, Options, General

@@ -1,11 +1,11 @@
-# AxMedia: the hand-over (docs/axmedia/nvda-test-plan.md section 2; SPEC.md AM-1.1, AM-1.2, AM-1.3).
+# axMedia: the hand-over (docs/axmedia/nvda-test-plan.md section 2; SPEC.md AM-1.1, AM-1.2, AM-1.3).
 # What the channel can drive: the starts that open a window of their own (a play on a file, an add with no window
 # open, --new beside an open window). A start that hands its paths to an open window ends at once without a window
 # and without a pipe, and the runner's start step then waits 30 s for a pipe and fails, although the hand-over
 # itself works (it was seen to: the open window played the file handed over); so the hand-over proper waits for a
 # runner step that starts a process on the test desktop and waits for it to end.
 #
-# Step 1, 1a, 2, 3 and 4 (first half): AxFile's Open in Axit, Ctrl+Enter, Ctrl+Shift+Q, with AxMedia open; a
+# Step 1, 1a, 2, 3 and 4 (first half): axFile's Open in Axit, Ctrl+Enter, Ctrl+Shift+Q, with axMedia open; a
 # hand-over each, from another app's window (above), and the front window and NVDA's reading of it are tier 3.
 # Step 5: Windows' default program and File Explorer are the system's, outside the test desktop.
 # Step 6 (first two parts): "axmedia <file>" and "axmedia --add <folder>" with a window open are hand-overs (above).
@@ -16,12 +16,12 @@ silence ch\alpha.wav 30000
 silence ch\beta.wav 30000
 silence ch\gamma.wav 30000
 
-# Step 4 (second half, AM-1.2, AM-D3): an add with no AxMedia window open opens one with the queue and nothing
-# playing; an add says nothing in AxMedia (AxFile says it).
+# Step 4 (second half, AM-1.2, AM-D3): an add with no axMedia window open opens one with the queue and nothing
+# playing; an add says nothing in axMedia (axFile says it).
 # Shown without activation, that window has no focused control, so the channel's list and focus answers are empty;
 # the queue is read through Ctrl+I instead, which the window takes from anywhere.
 start media --add {temp}\ch
-expect state "title":"AxMedia"
+expect state "title":"axMedia"
 expect quiet 1000
 keys ctrl+q
 expect said ! Nothing playing
@@ -36,15 +36,15 @@ start media {temp}\ch\beta.wav
 expect said ! Playing beta.wav
 expect list ["alpha.wav","beta.wav (playing)","gamma.wav"]
 expect focus beta.wav (playing)
-expect state "title":"beta.wav - AxMedia"
+expect state "title":"beta.wav - axMedia"
 expect state "2 of 3, speed 1"
 
 # Step 6 (third part): --new with a window open: a second window of its own, on the file, the first left alone.
 start media --new {temp}\ch\gamma.wav
 expect said ! Playing gamma.wav
 expect list ["alpha.wav","beta.wav","gamma.wav (playing)"]
-expect state "title":"gamma.wav - AxMedia"
+expect state "title":"gamma.wav - axMedia"
 use 2
-expect state "title":"beta.wav - AxMedia"
+expect state "title":"beta.wav - axMedia"
 expect list ["alpha.wav","beta.wav (playing)","gamma.wav"]
 expect quiet 500

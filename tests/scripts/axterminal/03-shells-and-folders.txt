@@ -1,4 +1,4 @@
-# AxTerminal, section 3 of docs/axterminal/nvda-test-plan.md: shells and folders (AT-1.2, AT-1.6, AT-1.7). Alt+S, W
+# axTerminal, section 3 of docs/axterminal/nvda-test-plan.md: shells and folders (AT-1.2, AT-1.6, AT-1.7). Alt+S, W
 # (the Switch shell submenu) needs menu mode, which only the foreground window enters: "menu" runs the same items.
 mkdir work\myproject
 # The run's own settings: no update check, which would go to the network and log an ERROR when it fails.
@@ -32,7 +32,7 @@ expect focus "value":"Command Prompt"}
 keys enter
 expect said New session in myproject
 expect said Ready
-expect state - Command Prompt - AxTerminal"
+expect state - Command Prompt - axTerminal"
 keys ctrl+2
 expect focus "name":"Terminal"
 expect text "System: New session: Command Prompt in
@@ -58,7 +58,7 @@ keys ctrl+1
 menu Git Bash
 expect said Git Bash
 expect said Ready
-expect state "myproject - Git Bash - AxTerminal"
+expect state "myproject - Git Bash - axTerminal"
 # The prompt in the status bar is the user's PS1 with its rows joined (user, host, MINGW64, the path), ending in $.
 expect state "status":["Idle",
 expect state $"]}
@@ -76,7 +76,7 @@ type cd ..
 keys enter
 expect said Done
 expect said ♪ Done
-expect state "work - Git Bash - AxTerminal"
+expect state "work - Git Bash - axTerminal"
 type cd myproject
 keys enter
 expect said Done
@@ -84,18 +84,18 @@ expect said ♪ Done
 menu Windows PowerShell
 expect said Windows PowerShell
 expect said Ready
-expect state "myproject - Windows PowerShell - AxTerminal"
+expect state "myproject - Windows PowerShell - axTerminal"
 
 # Step 3: cd .. in PowerShell: the title and the status bar name the parent folder; Ctrl+P says its full path.
 type cd ..
 keys enter
 expect said Done
 expect said ♪ Done
-expect state "work - Windows PowerShell - AxTerminal"
+expect state "work - Windows PowerShell - axTerminal"
 expect state \\work\u003E"]
 keys ctrl+p
 expect said {temp}\work
-# Ctrl+W (File Explorer) and Alt+S, I, C (AxClaude on the folder) stay manual: both start a program of their own
+# Ctrl+W (File Explorer) and Alt+S, I, C (axClaude on the folder) stay manual: both start a program of their own
 # outside the test desktop's control, and the Alt keys need menu mode.
 type cd myproject
 keys enter

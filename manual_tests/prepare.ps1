@@ -179,7 +179,7 @@ $settingsJson = @'
 }
 '@
 
-# The same with the comma after "opus" removed and a comma added after [] (AxJSON test plan).
+# The same with the comma after "opus" removed and a comma added after [] (axJSON test plan).
 $brokenJson = @'
 {
   "model": "opus"
@@ -200,7 +200,7 @@ function Write-ChangeCmd([string]$folder, [string]$target) {
     Write-Text (Join-Path $folder "append-a-line-to-$target.cmd") ($changeCmd -replace '\{0\}', $target)
 }
 
-# A long Markdown file for the editor's navigation keys (AxDown test plan sections 2 and 8).
+# A long Markdown file for the editor's navigation keys (axDown test plan sections 2 and 8).
 $longLine = ('This line is longer than the window, so word wrap shows it on several rows and the caret test can tell. ' * 6).Trim()
 $longMd = @"
 # Long Markdown file for navigation
@@ -277,7 +277,7 @@ function Build-AxFile([string]$d) {
 
     # Enter, Ctrl+E and Windows' Open with (1.6, 3.10, 3.12).
     $open = New-Folder (Join-Path $d 'open-with-windows-and-editors')
-    Write-Text (Join-Path $open 'markdown-for-enter-and-ctrl-e.md') "# A Markdown file`n`nEnter opens it in Windows' program for .md; Ctrl+E in AxDown."
+    Write-Text (Join-Path $open 'markdown-for-enter-and-ctrl-e.md') "# A Markdown file`n`nEnter opens it in Windows' program for .md; Ctrl+E in axDown."
     Write-Text (Join-Path $open 'json-ctrl-e-opens-axjson.json') $settingsJson
     Write-Text (Join-Path $open 'text-for-notepad-1.txt') 'The first text file for your own program, Notepad.'
     Write-Text (Join-Path $open 'text-for-notepad-2.txt') 'The second text file for your own program, Notepad.'
@@ -327,7 +327,7 @@ function Build-AxFile([string]$d) {
     Write-Text (Join-Path $undo 'delete-two-then-undo-2.txt') 'Delete me with the first, then Ctrl+Z.'
     Write-Text (Join-Path $undo 'move-two-then-undo-1.txt') 'Move to new folder with the second, then Ctrl+Z.'
     Write-Text (Join-Path $undo 'move-two-then-undo-2.txt') 'Move to new folder with the first, then Ctrl+Z.'
-    Write-Text (Join-Path $undo 'rename-here-then-in-file-explorer.txt') 'Rename in AxFile, rename again in File Explorer, then Ctrl+Z: Not undone.'
+    Write-Text (Join-Path $undo 'rename-here-then-in-file-explorer.txt') 'Rename in axFile, rename again in File Explorer, then Ctrl+Z: Not undone.'
     Write-Text (Join-Path $undo 'compress-then-undo\inside.txt') 'Compress the folder, then Ctrl+Z.'
 
     # The Actions list (section 6).
@@ -340,9 +340,9 @@ function Build-AxFile([string]$d) {
     # Changes from outside (1.9, 1.12).
     $out = New-Folder (Join-Path $d 'changes-from-file-explorer')
     Write-Text (Join-Path $out 'add-a-file-next-to-me-in-file-explorer.txt') 'Add a file in this folder from File Explorer, then Alt+Tab back.'
-    Write-Text (Join-Path $out 'delete-this-folder-while-axfile-is-in-it\stand-here.txt') 'Stand in this folder in AxFile, delete the folder in File Explorer, Alt+Tab back.'
+    Write-Text (Join-Path $out 'delete-this-folder-while-axfile-is-in-it\stand-here.txt') 'Stand in this folder in axFile, delete the folder in File Explorer, Alt+Tab back.'
 
-    # Hand-overs to AxMedia and AxPreview (section 4).
+    # Hand-overs to axMedia and axPreview (section 4).
     $hand = New-Folder (Join-Path $d 'hand-over-to-axmedia-and-axpreview')
     Write-Text (Join-Path $hand 'README.md') $readme
     Write-Text (Join-Path $hand 'plain.txt') $plain
@@ -357,7 +357,7 @@ function Build-AxFile([string]$d) {
 function Build-AxMedia([string]$d) {
     $first = New-Folder (Join-Path $d 'first-queue-play-this-folder')
     New-Tracks $first 'First queue' 'first' 4 15
-    Write-Text (Join-Path $first 'not-media-a-text-file.txt') 'Not sound: AxMedia says it cannot play this, and plays the next.'
+    Write-Text (Join-Path $first 'not-media-a-text-file.txt') 'Not sound: axMedia says it cannot play this, and plays the next.'
     Write-Bytes (Join-Path $first 'cannot-decode-broken.opus') ([byte[]](1..255) * 8)
 
     New-Tracks (Join-Path $d 'replacement-queue-play-to-replace-the-first') 'Replacement queue' 'replacement' 3 10
@@ -386,7 +386,7 @@ function Build-AxPreview([string]$d) {
     Write-Bytes (Join-Path $d 'binary-not-text.bin') ([byte[]](0, 1, 2, 3, 0, 255, 254, 0) * 64)
     Write-ChangeCmd $d 'README.md'
     # Over 32 MB of text: the "Too large" notice.
-    $line = 'A line of the file that is too large for AxPreview, over 32 megabytes of text in all.' + "`r`n"
+    $line = 'A line of the file that is too large for axPreview, over 32 megabytes of text in all.' + "`r`n"
     $chunk = $utf8.GetBytes($line * 4000)
     $stream = [IO.File]::Create((Join-Path $d 'too-large-over-32-mb.txt'))
     try { for ($i = 0; $i -lt 100; $i++) { $stream.Write($chunk, 0, $chunk.Length) } } finally { $stream.Dispose() }
@@ -410,7 +410,7 @@ function Build-AxJson([string]$d) {
     Write-Text (Join-Path $d 'broken.json') $brokenJson
     Write-Text (Join-Path $d 'one-line-format-me.json') '{"model":"opus","permissions":{"allow":["Bash","Read"],"deny":[]},"count":3,"on":true}'
     Write-Text (Join-Path $d 'already-formatted.json') "{`n  `"name`": `"formatted`",`n  `"items`": [`n    1,`n    2`n  ]`n}`n"
-    Write-Text (Join-Path $d 'notes.txt') 'A text file: Open with Axit lists AxDown alone for it.'
+    Write-Text (Join-Path $d 'notes.txt') 'A text file: Open with Axit lists axDown alone for it.'
     Write-ChangeCmd $d 'settings.json'
 }
 
@@ -431,7 +431,7 @@ function Build-AxGit([string]$d) {
     git init -q -b main $repo
     git -C $repo config user.name 'Axit tester'
     git -C $repo config user.email $mail
-    Write-Text (Join-Path $repo 'README.md') "# Scratch repository`n`nFor the AxGit tests."
+    Write-Text (Join-Path $repo 'README.md') "# Scratch repository`n`nFor the axGIT tests."
     Write-Text (Join-Path $repo 'settings.json') $settingsJson
     Write-Text (Join-Path $repo 'tracked-change-me.txt') "Line 1.`nLine 2."
     Write-Text (Join-Path $repo 'tracked-discard-my-change.txt') 'The original text.'

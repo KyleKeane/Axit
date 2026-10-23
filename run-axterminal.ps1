@@ -1,6 +1,6 @@
 <#
 .SYNOPSIS
-  Builds Axit and starts AxTerminal: run.ps1 with -App terminal. Every other argument goes through unchanged. Without
+  Builds Axit and starts axTerminal: run.ps1 with -App terminal. Every other argument goes through unchanged. Without
   a folder the shell starts in the current folder.
 
 .EXAMPLE

@@ -55,7 +55,7 @@ public sealed class TranscriptMirror
     public bool HasBreaks => _breaks.Count > 0;
 
     /// <summary>
-    /// The Markdown markers of the heading lines in the text (AxClaude FR-4.6a): off, a heading line is shown as its
+    /// The Markdown markers of the heading lines in the text (axClaude FR-4.6a): off, a heading line is shown as its
     /// <see cref="Line.BareText"/>; the lines, the keys and <see cref="Render"/> (the export) are unchanged. The
     /// window re-syncs after a change, and every heading line is then an edit.
     /// </summary>

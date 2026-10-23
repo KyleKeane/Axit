@@ -13,13 +13,13 @@ Built 2026-10-23. Several Claude Code sessions at once through the app's console
 `ClaudeLauncher`, `SessionModel`), each in a fresh folder under `%TEMP%\axit-qa`: the trust prompt, a message, its
 reply, `/exit`. The model is chosen on Claude's command line (`--model haiku`, as `axclaude <folder> -- --model
 haiku`), never with `/model`, which saves the choice as the user's default for every session. It found on its first
-day that Claude drops an early Enter (AxClaude FR-2.1).
+day that Claude drops an early Enter (axClaude FR-2.1).
 
 ## 2. The windows driven from inside: the automation channel
 
 Built 2026-10-23: `Axit.Forms/AutomationChannel` (started by the window base when it first shows), `AXIT_HOME` in
-`AppPaths`, `tools/AxitDrive` with the test desktop, and the first scripts in `tests/scripts` (AxDown's notices and
-palette, AxClaude's message and its set of two questions), all passing.
+`AppPaths`, `tools/AxitDrive` with the test desktop, and the first scripts in `tests/scripts` (axDown's notices and
+palette, axClaude's message and its set of two questions), all passing.
 
 Run one:
 
@@ -65,8 +65,8 @@ including while the user works, because nothing takes the foreground.
 
 ### What the scripts cover, and what stays manual (2026-10-23)
 
-The NVDA test plans of AxDown, AxJSON, AxPreview, AxFile, AxGit, AxTerminal and AxMedia are scripts in
-`tests/scripts/<app>`, one per section of the plan, about two thousand steps, all passing; AxClaude's are being written,
+The NVDA test plans of axDown, axJSON, axPreview, axFile, axGIT, axTerminal and axMedia are scripts in
+`tests/scripts/<app>`, one per section of the plan, about two thousand steps, all passing; axClaude's are being written,
 on Haiku. Every step a script cannot drive is a `#` line naming the plan step and why. What stays manual, for now:
 
 - The menu bar and context menus opened with Alt, F10 or Shift+F10: menu mode needs the foreground; `menu` runs the
@@ -78,9 +78,9 @@ on Haiku. Every step a script cannot drive is a `#` line naming the plan step an
 - Coming back to a window with Alt+Tab (the files changed on disk); F5 is used instead where the app has it.
 - What only NVDA shows, and sound and video quality: tier 3 and the user's ear.
 
-The first runs found, and the same day fixed: AxGit's commit while a stage ran, AxTerminal's "Done" before a
-command's last line, two undo steps for Format, AxPreview's size in whole megabytes, AxMedia's status after a pause or
-a clear and Go to time closing on a wrong time, and in AxClaude the banner shown twice and the refused Enter of
+The first runs found, and the same day fixed: axGIT's commit while a stage ran, axTerminal's "Done" before a
+command's last line, two undo steps for Format, axPreview's size in whole megabytes, axMedia's status after a pause or
+a clear and Go to time closing on a wrong time, and in axClaude the banner shown twice and the refused Enter of
 Claude's first seconds. They also found plan steps the apps had outgrown, corrected in the plans.
 
 ## 3. NVDA in the loop

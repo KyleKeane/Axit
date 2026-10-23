@@ -286,7 +286,7 @@ public static class FileOperations
 
     /// <summary>
     /// Windows' "being used by another process" (AF-4.5), said with what it means here: a folder that is some
-    /// process's current directory (a terminal or an app started in it, AxTerminal or AxClaude opened on it) cannot be
+    /// process's current directory (a terminal or an app started in it, axTerminal or axClaude opened on it) cannot be
     /// renamed or moved while that process runs, nor a file that a program holds open.
     /// </summary>
     public const string InUse = "In use by another program: a terminal or an app runs in it, or the file is open";

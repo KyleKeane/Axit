@@ -5,9 +5,14 @@ namespace Axit.Core;
 /// that does not exist.</summary>
 public sealed record Launch(string App, string[] Arguments, string? Error = null);
 
-/// <summary>An app of the bundle: its name, which ends every title of its windows ("notes.md - AxDown") and names its
+/// <summary>An app of the bundle: its name, which ends every title of its windows ("notes.md - axDown") and names its
 /// Start menu entry, and the verb that starts it (AX-1.1).</summary>
-public sealed record App(string Name, string Verb);
+/// <summary>
+/// An app of the bundle: <paramref name="Name"/> is its name as shown and spoken ("axClaude", "axGIT", lower-case "ax"
+/// so that a screen reader says it as a word; 2026-10-23), <paramref name="Project"/> the name of its code (the folder
+/// src/AxClaude, the class AxClaudeApp, the icon AxClaude.ico), which keeps the C# spelling.
+/// </summary>
+public sealed record App(string Name, string Verb, string Project);
 
 /// <summary>
 /// Decides which app <c>Axit.exe</c> starts (docs/axit/SPEC.md AX-1). The first argument may be a verb naming one of
@@ -32,23 +37,23 @@ public static class Dispatch
     public const string Bundle = "axit";
 
     /// <summary>The apps, in the order the Axit menu lists them (AX-9).</summary>
-    public static readonly IReadOnlyList<App> Apps = [new("AxClaude", AxClaude), new("AxDown", AxDown), new("AxJSON", AxJSON), new("AxGit", AxGit), new("AxTerminal", AxTerminal), new("AxFile", AxFile), new("AxMedia", AxMedia), new("AxPreview", AxPreview), new("AxStart", AxStart)];
+    public static readonly IReadOnlyList<App> Apps = [new("axClaude", AxClaude, "AxClaude"), new("axDown", AxDown, "AxDown"), new("axJSON", AxJSON, "AxJSON"), new("axGIT", AxGit, "AxGit"), new("axTerminal", AxTerminal, "AxTerminal"), new("axFile", AxFile, "AxFile"), new("axMedia", AxMedia, "AxMedia"), new("axPreview", AxPreview, "AxPreview"), new("axStart", AxStart, "AxStart")];
 
     public const string Usage = """
         Usage: Axit [claude|down|json|git|terminal|file|media|preview|start] [arguments]
 
-          Axit claude [<folder>] ...  AxClaude, the front end for Claude Code (Axit claude --help lists its options)
-          Axit down [<file>]          AxDown, the text editor
-          Axit json [<file>]          AxJSON, the JSON editor
-          Axit git [<folder or file>] AxGit, the git manager, on the repository that holds the path
-          Axit terminal [<folder>]    AxTerminal, a shell in the folder as a transcript
-          Axit file [<folder or file>] AxFile, the file manager, on the folder (a file selected in its folder)
-          Axit media [<file or folder>...] [--add]  AxMedia, the player: the file with its folder's sound and video files after it, or a folder's; --add appends to the open window's queue
-          Axit preview [<file>]       AxPreview, the read-only viewer, on the file (the open AxPreview window takes it)
-          Axit start [--hidden]       AxStart, the program launcher: its search field, or with --hidden running until its hotkey
+          Axit claude [<folder>] ...  axClaude, the front end for Claude Code (Axit claude --help lists its options)
+          Axit down [<file>]          axDown, the text editor
+          Axit json [<file>]          axJSON, the JSON editor
+          Axit git [<folder or file>] axGIT, the git manager, on the repository that holds the path
+          Axit terminal [<folder>]    axTerminal, a shell in the folder as a transcript
+          Axit file [<folder or file>] axFile, the file manager, on the folder (a file selected in its folder)
+          Axit media [<file or folder>...] [--add]  axMedia, the player: the file with its folder's sound and video files after it, or a folder's; --add appends to the open window's queue
+          Axit preview [<file>]       axPreview, the read-only viewer, on the file (the open axPreview window takes it)
+          Axit start [--hidden]       axStart, the program launcher: its search field, or with --hidden running until its hotkey
           Axit <folder>               the same as Axit claude <folder>
           Axit <file>                 the same as Axit down <file>, Axit json <file> for a .json file, or Axit media <file> for a sound or video file
-          Axit                        AxClaude on the current folder
+          Axit                        axClaude on the current folder
           --help, --version           this text, or the version
 
         The installed console commands axit, axclaude, axdown, axjson, axgit, axterminal, axfile, axmedia, axpreview and axstart stand for Axit, Axit claude, Axit down, Axit json, Axit git, Axit terminal, Axit file, Axit media, Axit preview and Axit start.

@@ -10,7 +10,7 @@ namespace AxFile;
 /// operations first, then the operations, then the selection; "No actions yet" until the first. Tab, Shift+Tab, Ctrl+Tab, Ctrl+Shift+Tab and F6 move
 /// between the folder list and it, Escape in it goes back; Enter on a line goes where the action left things, Ctrl+Z
 /// on a line takes that one back, Ctrl+I says its number and time. The lines are <see cref="ActionLog"/>; the
-/// operations themselves (Operations) begin and end them. Also here: the hand-overs to AxMedia, Play folder and Add
+/// operations themselves (Operations) begin and end them. Also here: the hand-overs to axMedia, Play folder and Add
 /// to queue (AF-5).
 /// </summary>
 public sealed partial class FileForm
@@ -236,9 +236,9 @@ public sealed partial class FileForm
         Announce(_actions.Count > 0 && index >= 0 ? _actions.Information(index) : NoActionsText, true);
     }
 
-    // ---- the hand-overs to AxMedia (AF-5): AxFile starts the app on the paths and says nothing but the add's count ----
+    // ---- the hand-overs to axMedia (AF-5): axFile starts the app on the paths and says nothing but the add's count ----
 
-    /// <summary>Item → Play folder in AxMedia (Ctrl+Enter): AxMedia on the folder shown, its media files from the first; "No sound or video files here" without any.</summary>
+    /// <summary>Item → Play folder in axMedia (Ctrl+Enter): axMedia on the folder shown, its media files from the first; "No sound or video files here" without any.</summary>
     private void PlayFolder()
     {
         if (!TryFolder(out var folder))
@@ -256,8 +256,8 @@ public sealed partial class FileForm
     }
 
     /// <summary>
-    /// Item → Add to AxMedia's queue (Ctrl+Shift+Q): the entry, or the marked entries (AF-3.7), to the end of AxMedia's
-    /// queue, a folder as its media files; "Added 12 to AxMedia's queue", the focus staying here (AM-D3). The count is
+    /// Item → Add to axMedia's queue (Ctrl+Shift+Q): the entry, or the marked entries (AF-3.7), to the end of axMedia's
+    /// queue, a folder as its media files; "Added 12 to axMedia's queue", the focus staying here (AM-D3). The count is
     /// this window's own reading of the folders, on a task.
     /// </summary>
     private void AddToQueue()
@@ -283,7 +283,7 @@ public sealed partial class FileForm
             }
 
             AxitMenu.StartWith(Dispatch.AxMedia, [.. targets.Select(target => target.Path), "--add"]);
-            Announce($"Added {count} to AxMedia's queue", true);
+            Announce($"Added {count} to axMedia's queue", true);
         });
     }
 

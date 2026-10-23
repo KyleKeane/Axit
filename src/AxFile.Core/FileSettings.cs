@@ -3,11 +3,11 @@ using Axit.Core;
 namespace AxFile.Core;
 
 /// <summary>
-/// Everything AxFile remembers between runs (SPEC.md AF-8.1), in <c>%APPDATA%\Axit\axfile.json</c> through the bundle's
+/// Everything axFile remembers between runs (SPEC.md AF-8.1), in <c>%APPDATA%\Axit\axfile.json</c> through the bundle's
 /// <see cref="SettingsFile"/>: the font, the update check and the window's place from <see cref="WindowSettings"/>,
 /// plus the last folder, the recent folders, the favorites, whether hidden entries show, the sort order and the user's
 /// own programs. A missing or unreadable file falls back to the defaults; the player's keys of an older file (speed,
-/// seekSeconds, sayEachFile) are AxMedia's now and are ignored here.
+/// seekSeconds, sayEachFile) are axMedia's now and are ignored here.
 /// </summary>
 public sealed class FileSettings : WindowSettings
 {

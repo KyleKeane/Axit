@@ -1,6 +1,6 @@
 # Adding an app to Axit
 
-The checklist for a new app of the bundle, written against what AxDown took (2026-10-02). An app
+The checklist for a new app of the bundle, written against what axDown took (2026-10-02). An app
 is a window with a verb; everything else below exists so that the app can be built, changed and released without the
 rest of the bundle in context (`docs/axit/SPEC.md` 5.3). Work in this order: the spec first, then the pure code with
 its tests, then the window, then the installer.
@@ -10,7 +10,7 @@ its tests, then the window, then the installer.
 - The name (`AxThing`), the verb `Axit.exe` takes (`thing`), the console command (`axthing`), the Start menu entry
   (`Axit AxThing`), what in File Explorer opens it (a folder, a file, file types), and what it holds (so that
   `Dispatch` can route a path to it, if a path means this app).
-- What is in version one and what waits. Barebones first (AxDown AD-D2).
+- What is in version one and what waits. Barebones first (axDown AD-D2).
 
 ## 2. Documents (`docs/axthing/`)
 
@@ -38,7 +38,7 @@ file, file filter, F1 text, guide, the `TextJump` pairs of its outline, its reso
 handed to `Axit.Forms/EditorHost.Run`, as `AxDownApp` and `AxJSONApp` do; the window is `Axit.Forms/TextEditorForm`.
 Its own code is the outline and the commands (pure, in its Core, tested), its key table (the shell's keys through
 `EditorKeys.All` plus its letters) and its texts. An app around a program in a pseudo console derives its window from
-`Axit.Forms/ConsoleForm`, as AxClaude and AxTerminal do: its settings class from `Axit.Core/ConsoleSettings`, its model
+`Axit.Forms/ConsoleForm`, as axClaude and axTerminal do: its settings class from `Axit.Core/ConsoleSettings`, its model
 from `Axit.Core/Transcript/LineStore`, and the window fills in the console hooks (`Working`, `OnTranscriptChanged`,
 `UpdateStatus`, `OnProcessExited`, `AskBeforeClosing`, `FolderInHand`, `SwitchFolder`, `ProcessConsoleKey`) besides
 the base's. The rest of this section is for a window of a new kind.
@@ -73,7 +73,7 @@ the base's. The rest of this section is for a window of a new kind.
 - `HelpText`: the F1 text (bundle-wide keys first, then the app's) and the embedded guide.
 - The base sets `AccessibleRole = AccessibleRole.Window`: NVDA then speaks the window's title when it opens
   ("name - AxThing window") before the focused control; without the role the window is a nameless pane to NVDA and
-  the app is never named (AxDown 2.1.1).
+  the app is never named (axDown 2.1.1).
 - Every control gets an `AccessibleName`; the caret moves only on the user's command; nothing speaks on a plain key.
 - `CLAUDE.md`: where things are, the rules, the gotchas.
 
@@ -105,7 +105,7 @@ the base's. The rest of this section is for a window of a new kind.
   bullets with the app's name in front.
 - `tests/Axit.Tests/InventoryTests` checks every place above for every app of `Dispatch.Apps` (the folders, the
   three documents, the notes, the icon, the installer's block, the icon script, the templates, the pages, the map,
-  the spec, the program's dispatch and `run.ps1`) and fails until the new app has them all (AxStart was missing from
+  the spec, the program's dispatch and `run.ps1`) and fails until the new app has them all (axStart was missing from
   nine of them on 2026-10-23).
 - Build to a scratch folder, run every test project, run the `accessibility-review` skill on the window, probe the
   window off screen (see `src/AxDown/CLAUDE.md`), publish without installing and check the zip, then install and run

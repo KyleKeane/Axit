@@ -4,10 +4,10 @@ using Axit.Forms;
 namespace AxPreview;
 
 /// <summary>
-/// AxPreview's window-specific keys (SPEC.md AP-3.2; bundle AX-8). A key is changed here and nowhere else: the menu
+/// axPreview's window-specific keys (SPEC.md AP-3.2; bundle AX-8). A key is changed here and nowhere else: the menu
 /// items, the key handling in the editor shell and the F1 text read this table. The viewer's keys of the shell (new
 /// window, open, reload, edit in the editor, show in File Explorer, go to line, word wrap, the line number) are
-/// <c>Axit.Forms.EditorKeys.Viewer</c>, and <see cref="All"/> includes them; the navigation letters are AxDown's
+/// <c>Axit.Forms.EditorKeys.Viewer</c>, and <see cref="All"/> includes them; the navigation letters are axDown's
 /// (docs/axdown/SPEC.md §9), the same values, so that a file read here and edited there is under the same keys (G2);
 /// the bundle-wide keys (F1, find, Ctrl+S, text size, the controls) are <c>Axit.Forms.BundleKeys</c>.
 /// </summary>

@@ -1,11 +1,11 @@
-# AxGit, the window
+# axGIT, the window
 
-The WinForms side of AxGit: one list with three views, one read-only details text, a status bar, the bundle's notices. The pure code (git as a process, the parsers, the settings) is `src/AxGit.Core`, with its own `CLAUDE.md`. The spec is `docs/axgit/SPEC.md` ("SPEC.md" below); the guide `docs/axgit/user-guide.md` is embedded by `AxGit.csproj` for Help → User guide; the manual test plan is `docs/axgit/nvda-test-plan.md`. The bundle rules are in the root `CLAUDE.md`.
+The WinForms side of axGIT: one list with three views, one read-only details text, a status bar, the bundle's notices. The pure code (git as a process, the parsers, the settings) is `src/AxGit.Core`, with its own `CLAUDE.md`. The spec is `docs/axgit/SPEC.md` ("SPEC.md" below); the guide `docs/axgit/user-guide.md` is embedded by `AxGit.csproj` for Help → User guide; the manual test plan is `docs/axgit/nvda-test-plan.md`. The bundle rules are in the root `CLAUDE.md`.
 
 ## Commands
 
 ```
-.\run-axgit.ps1 C:\path\to\repo   # build Axit and start AxGit on the repository that holds the path (run.ps1 -App git)
+.\run-axgit.ps1 C:\path\to\repo   # build Axit and start axGIT on the repository that holds the path (run.ps1 -App git)
 .\run-axgit.ps1                   # the last repository opened
 dotnet build Axit.sln
 dotnet test tests/AxGit.Tests/AxGit.Tests.csproj

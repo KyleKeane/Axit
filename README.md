@@ -8,31 +8,31 @@ Accessible Windows apps for screen reader users, built for and tested with NVDA,
 
 ## The apps
 
-- **AxClaude**: Claude Code in screen reader mode, shown as a plain-text conversation that NVDA reads line by line, with single-key navigation, a message field, and Claude's questions as lists. You are still talking to the real Claude Code.
-- **AxDown**: a barebones editor for Markdown and text files that writes a file back exactly as it found it, with keys for headings, links, lists, quotes and tables.
-- **AxJSON**: the same editor for JSON, with keys for keys, objects, arrays, items and errors, and a Format command that repairs what it can.
-- **AxGit**: a git manager for one repository: changes, the log and the branches as lists, staging, committing, fetch, pull and push.
-- **AxTerminal**: PowerShell, Command Prompt or Git Bash as a transcript in AxClaude's kind of window.
-- **AxFile**: a file manager for one folder, with an Actions list of every operation that Ctrl+Z can take back, selection, zip files, favourites and the drives.
-- **AxMedia**: a player for sound and video files with one queue, speed with the pitch kept, and seeking by key.
-- **AxPreview**: a read-only viewer for one text file, with the editors' navigation keys.
-- **AxStart**: a program launcher. One key from anywhere, Ctrl+Shift+Space unless you choose another, brings up a search field over the Start menu's programs; Down and Up move through the matches while the caret stays in the field.
+- **axClaude**: Claude Code in screen reader mode, shown as a plain-text conversation that NVDA reads line by line, with single-key navigation, a message field, and Claude's questions as lists. You are still talking to the real Claude Code.
+- **axDown**: a barebones editor for Markdown and text files that writes a file back exactly as it found it, with keys for headings, links, lists, quotes and tables.
+- **axJSON**: the same editor for JSON, with keys for keys, objects, arrays, items and errors, and a Format command that repairs what it can.
+- **axGIT**: a git manager for one repository: changes, the log and the branches as lists, staging, committing, fetch, pull and push.
+- **axTerminal**: PowerShell, Command Prompt or Git Bash as a transcript in axClaude's kind of window.
+- **axFile**: a file manager for one folder, with an Actions list of every operation that Ctrl+Z can take back, selection, zip files, favourites and the drives.
+- **axMedia**: a player for sound and video files with one queue, speed with the pitch kept, and seeking by key.
+- **axPreview**: a read-only viewer for one text file, with the editors' navigation keys.
+- **axStart**: a program launcher. One key from anywhere, Ctrl+Shift+Space unless you choose another, brings up a search field over the Start menu's programs; Down and Up move through the matches while the caret stays in the field.
 
-The apps reach each other: AxFile hands a file to AxMedia or AxPreview, every window can show its folder in the others, and the Axit menu in every window lists the open windows and starts any app.
+The apps reach each other: axFile hands a file to axMedia or axPreview, every window can show its folder in the others, and the Axit menu in every window lists the open windows and starts any app.
 
 ## Install
 
-Download `install.cmd`, or the zip, from the [latest release](https://github.com/KyleKeane/Axit/releases/latest) and run it; no administrator rights are needed. It adds Start menu entries ("Axit AxClaude" and the others), commands such as `axfile` and `axdown`, and an "Open with Axit" submenu in File Explorer. Installed copies offer each new release themselves: Axit menu, Check for updates. `docs/axit/README.md` is the README inside the zip, with the rest.
+Download `install.cmd`, or the zip, from the [latest release](https://github.com/KyleKeane/Axit/releases/latest) and run it; no administrator rights are needed. It adds Start menu entries ("Axit axClaude" and the others), commands such as `axfile` and `axdown`, and an "Open with Axit" submenu in File Explorer. Installed copies offer each new release themselves: Axit menu, Check for updates. `docs/axit/README.md` is the README inside the zip, with the rest.
 
-Needs Windows 10 1809 or later. AxClaude also needs [Claude Code](https://code.claude.com/docs/en/setup); every other app works offline.
+Needs Windows 10 1809 or later. axClaude also needs [Claude Code](https://code.claude.com/docs/en/setup); every other app works offline.
 
 ## Build and run
 
 Needs the .NET 10 SDK, and NVDA for the manual checks.
 
 ```
-.\run-axfile.ps1 C:\path\to\folder       # build, then start AxFile on that folder
-.\run-axclaude.ps1 C:\path\to\project    # AxClaude on a project folder
+.\run-axfile.ps1 C:\path\to\folder       # build, then start axFile on that folder
+.\run-axclaude.ps1 C:\path\to\project    # axClaude on a project folder
 .\run.ps1 -App down C:\notes\todo.md     # any app: claude, down, json, git, terminal, file, media, preview, start
 .\run.ps1 -NoBuild                       # start without building
 ```
@@ -43,7 +43,7 @@ There is a `run-ax<app>.ps1` for each app. Close a running Axit before building:
 
 ```
 .\test.ps1                 # every test project, in Release, the way GitHub Actions runs them
-.\test.ps1 AxFile          # one project
+.\test.ps1 axFile          # one project
 .\manual_tests\prepare.ps1 # the files of the NVDA test passes, made new
 ```
 

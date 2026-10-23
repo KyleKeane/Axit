@@ -5,7 +5,7 @@ using Axit.Core.Audio;
 namespace Axit.Forms;
 
 /// <summary>
-/// The app's sounds (AxClaude FR-7.3, FR-7.8, FR-7.9), played through winmm wave-out devices that are opened at the
+/// The app's sounds (axClaude FR-7.3, FR-7.8, FR-7.9), played through winmm wave-out devices that are opened at the
 /// first sound and stay open for the life of the process (D31). Every sound is generated once, pinned and prepared
 /// for its device; playing it is a single <c>waveOutWrite</c>, which queues the buffer behind whatever is playing. A
 /// chime clears the queue first, so it is never delayed and a tick never cuts it short. A tick is dropped while its
@@ -187,15 +187,15 @@ public static class Sounds
     private static readonly Sound NoticeChime = new(WaveTone.Notes(0.35, (1046.5, 45), (1318.5, 45), (1046.5, 45), (1318.5, 110)));
 
     // A3 alone, short and low: the edge, nothing there (a list's first or last entry under Up or Down, a typed name no
-    // entry starts with; AxFile AF-3.6). An earcon where a sentence would be noise, asked 2026-10-22.
+    // entry starts with; axFile AF-3.6). An earcon where a sentence would be noise, asked 2026-10-22.
     private static readonly Sound EdgeTick = new(WaveTone.Notes(0.35, (220, 60)));
 
     // G5, C6 up to a held E6, and once more: longer and louder than the chimes, so that Claude finishing or asking is
-    // heard from another window, where the done chime was missed (AxClaude FR-7.3).
+    // heard from another window, where the done chime was missed (axClaude FR-7.3).
     private static readonly Sound AlertChime = new(WaveTone.Notes(0.6, (783.99, 100), (1046.5, 100), (1318.5, 300), (0, 200), (783.99, 100), (1046.5, 100), (1318.5, 500)));
 
     // Sixteen soft plucked notes, an arpeggio up C, A minor, F and G at 500 ms a note: 8 s that loop without a seam
-    // while Claude works (AxClaude FR-7.9). Quiet, slow and dull next to the chimes, on a device of its own; the first
+    // while Claude works (axClaude FR-7.9). Quiet, slow and dull next to the chimes, on a device of its own; the first
     // version, at half the chimes' peak and 300 ms a note with a music-box ring, was too much over NVDA's speech.
     private static readonly Sound WorkingMusic = new(WaveTone.Plucks(0.08, 500,
         261.63, 329.63, 392.00, 523.25,
@@ -254,7 +254,7 @@ public static class Sounds
     /// <summary>A longer, louder call, three rising notes to a held one and again: Claude is done or asks while the window is in the background.</summary>
     public static void Alert() => Play("Alert", () => Chimes.Play(AlertChime, replace: true));
 
-    /// <summary>Starts the soft music loop that plays while Claude works (AxClaude FR-7.9); nothing while it plays already.</summary>
+    /// <summary>Starts the soft music loop that plays while Claude works (axClaude FR-7.9); nothing while it plays already.</summary>
     public static void StartMusic() => Play("StartMusic", () => Music.Play(WorkingMusic, replace: false));
 
     /// <summary>Stops the music loop at once; nothing when it is not playing.</summary>

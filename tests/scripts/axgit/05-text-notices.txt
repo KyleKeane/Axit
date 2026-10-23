@@ -1,4 +1,4 @@
-# AxGit: text, notices, the Axit menu (docs/axgit/nvda-test-plan.md section 5; SPEC AG-2.4, AG-6, AG-7).
+# axGIT: text, notices, the Axit menu (docs/axgit/nvda-test-plan.md section 5; SPEC AG-2.4, AG-6, AG-7).
 # The update check off in the run's own settings (AXIT_HOME): a network call, and its failure is a logged ERROR.
 file home\Axit\axgit.json {"checkForUpdates": false}
 run git init -q -b main repo
@@ -76,22 +76,22 @@ keys escape
 expect state "notice":null
 menu User guide
 expect state "notice":"User guide"
-expect state # AxGit user guide
+expect state # axGIT user guide
 wait 1200
 keys escape
 expect state "notice":null
 
-# 5.4 The Axit menu's commands; About, Version names the version and AxGit among the apps.
+# 5.4 The Axit menu's commands; About, Version names the version and axGIT among the apps.
 # (Recently closed and Open windows fill themselves as the menu opens, and the menu bar's menu mode needs the
 # foreground: those two lists are manual.)
-expect commands AxClaude, Axit, New window
-expect commands AxGit, Axit, New window
+expect commands axClaude, Axit, New window
+expect commands axGIT, Axit, New window
 expect commands Close all windows, Axit
 expect commands Check for updates
 expect commands Version, Axit, About
 menu Version
 expect state "notice":"Axit 
-expect state AxDown, AxJSON, AxGit, AxTerminal
+expect state axDown, axJSON, axGIT, axTerminal
 wait 1200
 keys escape
 expect state "notice":null
@@ -103,5 +103,5 @@ expect state "notice":null
 # repository fills itself as the menu opens: its "1. repo (path)" item is manual.)
 close
 start git
-expect state repo - AxGit
+expect state repo - axGIT
 expect focus Changes, 1 file

@@ -7,9 +7,9 @@ using System.Text;
 namespace Axit.Core.Updates;
 
 /// <summary>
-/// The bundle's side of updating (docs/axit/SPEC.md AX-3; AxClaude's FR-1.10): asks GitHub for the latest release,
+/// The bundle's side of updating (docs/axit/SPEC.md AX-3; axClaude's FR-1.10): asks GitHub for the latest release,
 /// downloads its zip into <c>%LOCALAPPDATA%\Axit\updates\&lt;version&gt;</c>, runs that version's own install.ps1 in
-/// place while the app keeps running (the running program file is renamed, never overwritten, AxClaude's D25), and
+/// place while the app keeps running (the running program file is renamed, never overwritten, axClaude's D25), and
 /// starts the installed program file again when the app closes after Update and restart.
 /// </summary>
 public static class Updater

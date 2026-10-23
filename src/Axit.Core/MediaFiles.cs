@@ -2,7 +2,7 @@ namespace Axit.Core;
 
 /// <summary>
 /// The rules of sound and video files that need no engine (docs/axmedia/SPEC.md AM-4.1, AM-4.3, AM-4.5): which
-/// files are media, the time format, the time a user types, and the speed steps. AxMedia plays them and AxFile asks
+/// files are media, the time format, the time a user types, and the speed steps. axMedia plays them and axFile asks
 /// which entries are media (docs/axfile/SPEC.md section 9), which is why they are the bundle's (AX-6.3; from
 /// AxFile.Core, 2026-10-22). Tested in <c>tests/Axit.Tests</c>.
 /// </summary>

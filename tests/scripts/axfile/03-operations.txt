@@ -1,4 +1,4 @@
-# AxFile, test plan section 3: file operations and the entry's menu (docs/axfile/nvda-test-plan.md 3.1 to 3.14; AF-4).
+# axFile, test plan section 3: file operations and the entry's menu (docs/axfile/nvda-test-plan.md 3.1 to 3.14; AF-4).
 # The files are those of manual_tests/prepare.ps1 axfile (file-operations, undo-ctrl-z), made in {temp}.
 # Not here: every step that puts something on the clipboard (Ctrl+X, Ctrl+C, Ctrl+V, Ctrl+Shift+C, the Selection
 # menu's Cut, Copy and Copy paths): the test desktop shares the system clipboard with the user.
@@ -89,7 +89,7 @@ type Notes
 keys enter
 expect said ! Renamed to Notes
 expect focus "value":"Notes, folder"
-# Manual (3.2): the "In use by another program" failure needs AxTerminal (or another program) started in the folder.
+# Manual (3.2): the "In use by another program" failure needs axTerminal (or another program) started in the folder.
 # F2 on a file: the part before the extension is selected, so typing replaces the name and keeps the extension.
 keys ctrl+f
 expect focus "name":"Name contains"
@@ -165,9 +165,9 @@ expect focus "value":"a.txt"
 # 3.7 Manual: the entry's menu as a context menu (Shift+F10, the Applications key) and the menu bar (Alt+I, 3.7a, 3.7b's
 # Alt+S) cannot be opened from the channel; the items and their order are the menu's, checked through the palette's list.
 expect commands "Open, Item, Enter","Editor, Item, Open in Axit, Ctrl\u002BE"
-expect commands "Preview, Item, Shift\u002BEnter","Play folder in AxMedia, Item, Ctrl\u002BEnter","Add to AxMedia\u0027s queue, Item, Ctrl\u002BShift\u002BQ","Cut, Item, Ctrl\u002BX","Copy, Item, Ctrl\u002BC","Paste, Item, Ctrl\u002BV","Rename, Item, F2","Delete, Item, Delete","New folder, Item, Ctrl\u002BShift\u002BN","New text file, Item, Ctrl\u002BShift\u002BT","Move to new folder, Item","Compress to zip, Item","Extract here, Item","Copy path, Item, Ctrl\u002BShift\u002BC","Show in File Explorer, Item, Ctrl\u002BShift\u002BW","Information, Item, Ctrl\u002BI","Properties, Item, Alt\u002BEnter","Windows menu, Item"
+expect commands "Preview, Item, Shift\u002BEnter","Play folder in axMedia, Item, Ctrl\u002BEnter","Add to axMedia\u0027s queue, Item, Ctrl\u002BShift\u002BQ","Cut, Item, Ctrl\u002BX","Copy, Item, Ctrl\u002BC","Paste, Item, Ctrl\u002BV","Rename, Item, F2","Delete, Item, Delete","New folder, Item, Ctrl\u002BShift\u002BN","New text file, Item, Ctrl\u002BShift\u002BT","Move to new folder, Item","Compress to zip, Item","Extract here, Item","Copy path, Item, Ctrl\u002BShift\u002BC","Show in File Explorer, Item, Ctrl\u002BShift\u002BW","Information, Item, Ctrl\u002BI","Properties, Item, Alt\u002BEnter","Windows menu, Item"
 # 3.7b The Selection menu: its items, and its operations never fall back to the current entry.
-expect commands "Select all, Selection, Ctrl\u002BA","Deselect all, Selection, Ctrl\u002BShift\u002BA","Select or deselect this entry, Selection, Space","Select to here, Selection, Shift\u002BSpace","Cut, Selection, Ctrl\u002BX","Copy, Selection, Ctrl\u002BC","Delete, Selection, Delete","Move to new folder, Selection","Compress to zip, Selection","Add to AxMedia\u0027s queue, Selection, Ctrl\u002BShift\u002BQ","Copy paths, Selection, Ctrl\u002BShift\u002BC"
+expect commands "Select all, Selection, Ctrl\u002BA","Deselect all, Selection, Ctrl\u002BShift\u002BA","Select or deselect this entry, Selection, Space","Select to here, Selection, Shift\u002BSpace","Cut, Selection, Ctrl\u002BX","Copy, Selection, Ctrl\u002BC","Delete, Selection, Delete","Move to new folder, Selection","Compress to zip, Selection","Add to axMedia\u0027s queue, Selection, Ctrl\u002BShift\u002BQ","Copy paths, Selection, Ctrl\u002BShift\u002BC"
 menu Cut, Selection
 expect said ! None selected
 menu Select all, Selection
@@ -184,11 +184,11 @@ expect said ! None selected
 # 3.9 Open in Axit on a folder: "Not a file" for the apps that take a file (nothing starts).
 keys home
 expect focus "value":"bundle, folder"
-menu AxDown, Item, Open in Axit
+menu axDown, Item, Open in Axit
 expect said ! Not a file
-menu AxPreview, Item, Open in Axit
+menu axPreview, Item, Open in Axit
 expect said ! Not a file
-# Manual (3.9): D on a .txt file and T on a folder start AxDown and AxTerminal, windows outside this one.
+# Manual (3.9): D on a .txt file and T on a folder start axDown and axTerminal, windows outside this one.
 # Manual (3.10, 3.11, 3.12): Properties, Choose a program, the Windows menu and Open with's own programs are Windows'
 # own windows and the shell's menu; the Open with submenu is filled as it opens (not in the palette).
 
@@ -250,7 +250,7 @@ file undo\delete-two-then-undo-1.txt Delete me with the second.
 file undo\delete-two-then-undo-2.txt Delete me with the first.
 file undo\move-two-then-undo-1.txt Move me with the second.
 file undo\move-two-then-undo-2.txt Move me with the first.
-file undo\rename-here-then-outside.txt Rename in AxFile, then outside, then Ctrl+Z.
+file undo\rename-here-then-outside.txt Rename in axFile, then outside, then Ctrl+Z.
 file undo\compress-then-undo\inside.txt Compress the folder, then Ctrl+Z.
 start file {temp}\undo
 expect focus "value":"compress-then-undo, folder"
@@ -285,7 +285,7 @@ expect said ! Undone: temp removed
 refuse said ! Created temp
 expect list "count":8
 # A new folder that has a file now: "Not undone: temp has files now", and the next Ctrl+Z goes on to an older
-# operation. The file is put in temp from outside: made in AxFile (Enter, Ctrl+Shift+T, Escape, Backspace, as the plan
+# operation. The file is put in temp from outside: made in axFile (Enter, Ctrl+Shift+T, Escape, Backspace, as the plan
 # says) it is itself the newest operation, and Ctrl+Z takes it back first (AF-4.14, the newest that can be taken back).
 keys ctrl+f
 expect focus "name":"Name contains"

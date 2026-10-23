@@ -3,7 +3,7 @@ namespace Axit.Core.Audio;
 /// <summary>
 /// The app's sounds as WAV data (16-bit mono PCM), generated in code so that no media file ships: the tick for a
 /// new line, the chimes for a sent message and for Claude replying, finishing and asking, and the music loop that
-/// plays while Claude works (AxClaude FR-7.3, FR-7.8, FR-7.9).
+/// plays while Claude works (axClaude FR-7.3, FR-7.8, FR-7.9).
 /// </summary>
 public static class WaveTone
 {
@@ -91,7 +91,7 @@ public static class WaveTone
     /// two overtones, which die faster than the fundamental as a struck string's do, swelling over 20 ms and ringing
     /// into the next note's time, down to about two percent where the one after that starts. The tail of the last
     /// note wraps round to the start, so the sequence is exactly periodic and loops without a seam, which is what a
-    /// sound that plays for as long as Claude works needs (AxClaude FR-7.9). The whole is scaled so that its loudest
+    /// sound that plays for as long as Claude works needs (axClaude FR-7.9). The whole is scaled so that its loudest
     /// sample is <paramref name="amplitude"/>.
     /// </summary>
     public static byte[] Plucks(double amplitude, int millisecondsEach, params double[] hertz)

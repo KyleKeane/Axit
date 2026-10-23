@@ -6,7 +6,7 @@ namespace Axit.Forms;
 /// <summary>
 /// Ctrl+Up and Ctrl+Down in a multi-line edit control (docs/axit/SPEC.md AX-8.2): the caret goes to the start of
 /// the previous or next paragraph, where a paragraph starts at the first line or at a line with text directly after
-/// a blank line (the rule of AxClaude's p key), and with Shift the selection grows to there from its anchor, as in
+/// a blank line (the rule of axClaude's p key), and with Shift the selection grows to there from its anchor, as in
 /// Word. The EDIT control itself scrolls the view one row on Ctrl+Up and Ctrl+Down and leaves the caret where it is,
 /// as Notepad does, which a screen reader, reading at the caret after the key, reports as the same text again. The
 /// screen reader reads the new paragraph, or the change of selection, itself; nothing is announced here. The

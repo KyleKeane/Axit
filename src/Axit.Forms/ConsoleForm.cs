@@ -6,14 +6,14 @@ namespace Axit.Forms;
 /// <summary>
 /// The window of a console app (docs/axit/SPEC.md AX-6.5; docs/axterminal/SPEC.md AT-2): a program in a pseudo
 /// console shown as a transcript with single-key navigation (<see cref="TranscriptView"/>), a multi-line field at
-/// the bottom (or the control area in its place), a status bar with two labels, and everything AxClaude's window and
-/// AxTerminal's window had twice until 2026-10-23 (docs/axit/review-2026-10-23.md, 5.1): the pty bridge with its
+/// the bottom (or the control area in its place), a status bar with two labels, and everything axClaude's window and
+/// axTerminal's window had twice until 2026-10-23 (docs/axit/review-2026-10-23.md, 5.1): the pty bridge with its
 /// inbox and quiet timer, the paced write queue with one pump, the recording, the export, the find, the signals and
 /// the music, the focus keys, the bookmark toggle, the notice hooks and the font. One class in partial files: this
 /// one (the controls, the hooks a console window fills in, the keys, the focus, the close), <c>ConsoleForm.Process.cs</c>
 /// (the program's start, output, exit and stop; the writes), <c>ConsoleForm.Files.cs</c> (find, export, recording)
-/// and <c>ConsoleForm.Signals.cs</c> (the chimes, the taskbar flash, the music). AxClaude's <c>MainForm</c> keeps
-/// what is Claude's and AxTerminal's <c>TerminalForm</c> what is the shell's.
+/// and <c>ConsoleForm.Signals.cs</c> (the chimes, the taskbar flash, the music). axClaude's <c>MainForm</c> keeps
+/// what is Claude's and axTerminal's <c>TerminalForm</c> what is the shell's.
 /// </summary>
 public abstract partial class ConsoleForm : AxitForm
 {
@@ -55,14 +55,14 @@ public abstract partial class ConsoleForm : AxitForm
         Input.AcceptsTab = false;
         Input.WordWrap = true;
         Input.ScrollBars = ScrollBars.Vertical;
-        // The control's default of 32 767 characters cut a long paste short without a word (AxClaude FR-2.1).
+        // The control's default of 32 767 characters cut a long paste short without a word (axClaude FR-2.1).
         Input.MaxLength = 0;
         Input.Dock = DockStyle.Bottom;
         Input.TabIndex = 0;
-        // The bundle's page and paragraph keys (AxClaude FR-2.1): the control's own keys do nothing while the text fits, or scroll a row and leave the caret.
+        // The bundle's page and paragraph keys (axClaude FR-2.1): the control's own keys do nothing while the text fits, or scroll a row and leave the caret.
         Input.KeyDown += EditKeys.Handle;
 
-        // What the program waits on, or a list of the window's own, takes the field's place (AxClaude D33), one control at a time.
+        // What the program waits on, or a list of the window's own, takes the field's place (axClaude D33), one control at a time.
         Area.TabIndex = 0;
         SizeChanged += (_, _) => Area.FitHeight();
 
@@ -139,7 +139,7 @@ public abstract partial class ConsoleForm : AxitForm
 
     // ---- what the console window fills in ----
 
-    /// <summary>Whether the program is busy, for the music (AxClaude FR-7.9, AxTerminal AT-5.5): Claude working and not asking, a command running.</summary>
+    /// <summary>Whether the program is busy, for the music (axClaude FR-7.9, axTerminal AT-5.5): Claude working and not asking, a command running.</summary>
     protected abstract bool Working { get; }
 
     /// <summary>The window's own pass after the transcript changed (a frame ended, a line went in), after the view, the status bar and the music: the tick, the speech, the attention.</summary>
@@ -157,7 +157,7 @@ public abstract partial class ConsoleForm : AxitForm
     /// <summary>The folder the window is on, for the bundle's Recently closed list (AX-9.4): the project folder, the shell's current directory; null when none.</summary>
     protected abstract string? FolderInHand { get; }
 
-    /// <summary>Open recent folder (AxClaude FR-8.1, AxTerminal AT-1.5): the program again in that folder.</summary>
+    /// <summary>Open recent folder (axClaude FR-8.1, axTerminal AT-1.5): the program again in that folder.</summary>
     protected abstract void SwitchFolder(string folder);
 
     /// <summary>The window's own keys, from its table, after the console's shared ones (the focus keys, find, the bookmark, read to the end).</summary>
@@ -165,7 +165,7 @@ public abstract partial class ConsoleForm : AxitForm
 
     // ---- the window base's hooks, filled in for both console windows ----
 
-    /// <summary>The notice chime follows the sounds setting (AxClaude FR-7.3, AxTerminal AT-5.1).</summary>
+    /// <summary>The notice chime follows the sounds setting (axClaude FR-7.3, axTerminal AT-5.1).</summary>
     protected override bool NoticeChime => ConsoleSettings.SoundOnBell;
 
     protected override void HideForNotice()
@@ -189,7 +189,7 @@ public abstract partial class ConsoleForm : AxitForm
     /// <summary>Everything is announced on the view, the control NVDA reads the window by.</summary>
     protected override Control AnnounceSource => Transcript;
 
-    /// <summary>A reader keeps their line while the notice hides the view (AxClaude FR-3.3): the notice opened from the view.</summary>
+    /// <summary>A reader keeps their line while the notice hides the view (axClaude FR-3.3): the notice opened from the view.</summary>
     protected override void OnNoticeOpened(Control? focusBefore) => Transcript.KeepCaret = ReferenceEquals(focusBefore, Transcript);
 
     /// <summary>Cleared after the notice's action, so that a system line the action adds does not move a reader's caret.</summary>
@@ -205,13 +205,13 @@ public abstract partial class ConsoleForm : AxitForm
         Area.FitHeight();
     }
 
-    /// <summary>The update's steps as system lines in the transcript (AxClaude FR-1.10).</summary>
+    /// <summary>The update's steps as system lines in the transcript (axClaude FR-1.10).</summary>
     protected override void UpdateNoted(string message) => Model.AddSystemLine(message);
 
     /// <summary>A settings file that could not be read is a system line, not a notice over the start of the program.</summary>
     protected override void SettingsNotRead(string error) => Model.AddSystemLine("The settings file could not be read, so the defaults are in use: " + error);
 
-    /// <summary>An error the user must see: logged, a system line in the transcript, the status, and the notice (AxClaude FR-13.1).</summary>
+    /// <summary>An error the user must see: logged, a system line in the transcript, the status, and the notice (axClaude FR-13.1).</summary>
     protected sealed override void Fail(string message)
     {
         Log.Error(message);
@@ -220,7 +220,7 @@ public abstract partial class ConsoleForm : AxitForm
         ShowError("Error", message);
     }
 
-    /// <summary>The focus starts in the field (AxClaude FR-6.1, AxTerminal AT-2.2); a notice shown by what follows takes it from here and gives it back.</summary>
+    /// <summary>The focus starts in the field (axClaude FR-6.1, axTerminal AT-2.2); a notice shown by what follows takes it from here and gives it back.</summary>
     protected override void OnShown(EventArgs e)
     {
         base.OnShown(e);
@@ -228,7 +228,7 @@ public abstract partial class ConsoleForm : AxitForm
     }
 
     /// <summary>
-    /// Closing: the window asks first while the program is in the middle of something (AxClaude FR-1.7, AxTerminal
+    /// Closing: the window asks first while the program is in the middle of something (axClaude FR-1.7, axTerminal
     /// AT-1.7), unless Windows or Close all windows closes it; then the folder joins Recently closed (AX-9.4), the
     /// process and the recording stop, and the base saves the window and starts the installed new version (AX-3.2).
     /// </summary>
@@ -259,7 +259,7 @@ public abstract partial class ConsoleForm : AxitForm
         Close();
     }
 
-    // ---- keys and focus (AxClaude FR-6, AxTerminal AT-2.2) ----
+    // ---- keys and focus (axClaude FR-6, axTerminal AT-2.2) ----
 
     /// <summary>The console's shared keys, then the window's own (<see cref="ProcessConsoleKey"/>).</summary>
     protected sealed override bool ProcessWindowKey(Keys keyData)
@@ -300,7 +300,7 @@ public abstract partial class ConsoleForm : AxitForm
             return true;
         }
 
-        // Ctrl+Alt with a quick key letter reads that kind of line to the end, from anywhere (AxClaude FR-5, D36).
+        // Ctrl+Alt with a quick key letter reads that kind of line to the end, from anywhere (axClaude FR-5, D36).
         if ((keyData & Keys.Modifiers) == _keys.ReadToEnd && Transcript.ReadToEnd(keyData & Keys.KeyCode))
         {
             return true;
@@ -310,7 +310,7 @@ public abstract partial class ConsoleForm : AxitForm
     }
 
     /// <summary>
-    /// Ctrl+1, Ctrl+2 and the Navigate menu (AxClaude FR-6.5, D26): the control takes the focus, and NVDA announces the
+    /// Ctrl+1, Ctrl+2 and the Navigate menu (axClaude FR-6.5, D26): the control takes the focus, and NVDA announces the
     /// change. When it has the focus already, its name is spoken instead, so the key also answers "where am I".
     /// </summary>
     protected void GoTo(Control control)
@@ -342,7 +342,7 @@ public abstract partial class ConsoleForm : AxitForm
         Area.Clear();
     }
 
-    /// <summary>m, Ctrl+Shift+K or Navigate → Bookmark this line (AxClaude FR-3.9): the model adds or removes the bookmark line and the result is spoken.</summary>
+    /// <summary>m, Ctrl+Shift+K or Navigate → Bookmark this line (axClaude FR-3.9): the model adds or removes the bookmark line and the result is spoken.</summary>
     private void ToggleBookmark(Line line)
     {
         if (Model.ToggleBookmark(line) is not ({ } bookmark, var added))
@@ -365,7 +365,7 @@ public abstract partial class ConsoleForm : AxitForm
         OnTranscriptChanged();
     }
 
-    /// <summary>The two status labels, fitted into the strip when either changed (AxClaude §6.2).</summary>
+    /// <summary>The two status labels, fitted into the strip when either changed (axClaude §6.2).</summary>
     protected void SetStatus(string state, string place)
     {
         if (StateLabel.Text == state && PlaceLabel.Text == place)
@@ -380,7 +380,7 @@ public abstract partial class ConsoleForm : AxitForm
 
     // ---- the menu items both windows have, for the window to place ----
 
-    /// <summary>Find…, Find next and Find previous for the Navigate menu (AxClaude FR-3.7).</summary>
+    /// <summary>Find…, Find next and Find previous for the Navigate menu (axClaude FR-3.7).</summary>
     protected ToolStripItem[] FindItems() =>
     [
         Item("&Find...", FindDialog, BundleKeys.Find),
@@ -388,7 +388,7 @@ public abstract partial class ConsoleForm : AxitForm
         Item("Find &previous", () => FindNext(backward: true), BundleKeys.FindPrevious),
     ];
 
-    /// <summary>Bookmark this line, Next bookmark and Previous bookmark for the Navigate menu (AxClaude FR-3.9), with the view's letters named.</summary>
+    /// <summary>Bookmark this line, Next bookmark and Previous bookmark for the Navigate menu (axClaude FR-3.9), with the view's letters named.</summary>
     protected ToolStripItem[] BookmarkItems()
     {
         var view = _transcriptName.ToLowerInvariant();
@@ -400,7 +400,7 @@ public abstract partial class ConsoleForm : AxitForm
         ];
     }
 
-    /// <summary>The transcript's two switches for Options → Text: the time stamps on the markers and the # markers in the text (AxClaude FR-4.6, FR-4.6a).</summary>
+    /// <summary>The transcript's two switches for Options → Text: the time stamps on the markers and the # markers in the text (axClaude FR-4.6, FR-4.6a).</summary>
     protected ToolStripItem[] TranscriptTextItems() =>
     [
         Toggle("Time &stamps on Input and Output lines", ConsoleSettings.MarkerTimeStamps, v =>

@@ -32,7 +32,7 @@ public static class HelpText
           F1: this list
           Ctrl+Shift+P: the command palette: type part of a command's name, Down and Up through the matches, Enter runs it
           Alt+A: the Axit menu: the command palette, a new window of any app, the files and folders closed lately, the open Axit windows, most recent first (Alt+A, O, 1 is the one you were in last) and by type, Close all windows, Check for updates, and About
-          Alt+F4: close AxTerminal (asks first while a command runs)
+          Alt+F4: close axTerminal (asks first while a command runs)
 
         ## Command field
           Enter: send the command (an empty field sends a plain Enter to the shell). A command of several lines goes line by line, with one more Enter at the end for PowerShell
@@ -61,7 +61,7 @@ public static class HelpText
           Escape: clear the selection, else go to the command field
 
         ## Notices
-          AxTerminal's questions, errors and help texts appear inside the window, in place of the terminal.
+          axTerminal's questions, errors and help texts appear inside the window, in place of the terminal.
           Tab moves between the text, a field and the buttons. Enter chooses the main button. Escape closes the notice. In a notice's text, h, 1 to 6 and Ctrl+F work as in this one
         """;
 

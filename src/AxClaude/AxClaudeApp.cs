@@ -5,14 +5,14 @@ using Axit.Forms;
 namespace AxClaude;
 
 /// <summary>
-/// AxClaude's entry point inside Axit (docs/axit/SPEC.md AX-1.7): <c>Axit.exe claude [arguments]</c> calls
-/// <see cref="Run"/>, one call into the bundle's <see cref="AppHost"/> with AxClaude's own command line
+/// axClaude's entry point inside Axit (docs/axit/SPEC.md AX-1.7): <c>Axit.exe claude [arguments]</c> calls
+/// <see cref="Run"/>, one call into the bundle's <see cref="AppHost"/> with axClaude's own command line
 /// (<see cref="StartupOptions"/>), the take-over of the 1.x settings file, the settings and <see cref="MainForm"/>.
 /// </summary>
 public static class AxClaudeApp
 {
     public static void Run(string[] args) =>
-        AppHost.Run("AxClaude", "axclaude", StartupOptions.Usage, args, arguments =>
+        AppHost.Run("axClaude", "axclaude", StartupOptions.Usage, args, arguments =>
         {
             StartupOptions options;
             try
@@ -21,11 +21,11 @@ public static class AxClaudeApp
             }
             catch (ArgumentException ex)
             {
-                AppHost.BadCommandLine("AxClaude", ex.Message, usage: null);
+                AppHost.BadCommandLine("axClaude", ex.Message, usage: null);
                 return null;
             }
 
-            // AX-5.2: the first start under Axit takes over the settings of AxClaude 1.x.
+            // AX-5.2: the first start under Axit takes over the settings of axClaude 1.x.
             try
             {
                 AppSettings.TakeOverOldFile();

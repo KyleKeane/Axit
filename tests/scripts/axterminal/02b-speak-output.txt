@@ -1,4 +1,4 @@
-# AxTerminal, section 2 of docs/axterminal/nvda-test-plan.md, step 9: Speak output (AT-5.3), in a script of its own
+# axTerminal, section 2 of docs/axterminal/nvda-test-plan.md, step 9: Speak output (AT-5.3), in a script of its own
 # because it fails at present (seen 2026-10-23: the listing's last line comes after "Done", in an utterance of its own),
 # so that 02-commands.txt checks the rest of the section.
 mkdir myproject

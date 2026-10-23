@@ -4,7 +4,7 @@ namespace Axit.Core;
 /// The accented letters of Latin-1 Supplement and Latin Extended-A (U+00C0 to U+017F), the letters of the European
 /// languages, taken apart and put together without the globalization data: the executable runs with invariant
 /// globalization (src/Axit/Axit.csproj), where <c>string.Normalize</c> returns its input, so the places that fold or
-/// compare text do it from these tables (<see cref="TextMatch.Fold"/>; AxFile's names that read the same; found
+/// compare text do it from these tables (<see cref="TextMatch.Fold"/>; axFile's names that read the same; found
 /// 2026-10-23, when the tests were made to run as the program does). Other scripts are left as they are.
 /// </summary>
 public static class Accents

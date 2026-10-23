@@ -5,9 +5,9 @@ using AxJSON.Core;
 namespace AxJSON;
 
 /// <summary>
-/// AxJSON's entry point inside Axit (docs/axit/SPEC.md AX-1.7; SPEC.md AJ-1): <c>Axit.exe json [&lt;file&gt;]</c>
+/// axJSON's entry point inside Axit (docs/axit/SPEC.md AX-1.7; SPEC.md AJ-1): <c>Axit.exe json [&lt;file&gt;]</c>
 /// calls <see cref="Run"/>, which hands the editor shell (<c>Axit.Forms.EditorHost</c>, <c>TextEditorForm</c>) what
-/// AxJSON is: its name and verb, its settings file, its file types, its texts, its JSON keys, its resources and its
+/// axJSON is: its name and verb, its settings file, its file types, its texts, its JSON keys, its resources and its
 /// Format command (AJ-D4).
 /// </summary>
 public static class AxJSONApp
@@ -20,9 +20,9 @@ public static class AxJSONApp
           --help, --version this text, or the version
         """;
 
-    /// <summary>AxJSON as the editor shell sees it (bundle AX-6.2, AJ-D4).</summary>
+    /// <summary>axJSON as the editor shell sees it (bundle AX-6.2, AJ-D4).</summary>
     public static readonly EditorApp App = new(
-        Name: "AxJSON",
+        Name: "axJSON",
         Verb: Dispatch.AxJSON,
         SettingsName: "axjson",
         FileFilter: "JSON files (*.json;*.jsonc)|*.json;*.jsonc|All files (*.*)|*.*",

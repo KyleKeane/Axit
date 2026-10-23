@@ -1,6 +1,6 @@
 <#
 .SYNOPSIS
-  Builds Axit and starts AxMedia: run.ps1 with -App media. Every other argument goes through unchanged. Without a path
+  Builds Axit and starts axMedia: run.ps1 with -App media. Every other argument goes through unchanged. Without a path
   it opens with an empty queue.
 
 .EXAMPLE

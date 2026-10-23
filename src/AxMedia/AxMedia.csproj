@@ -1,12 +1,12 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
-  <!-- AxMedia's window side, as a class library inside Axit.exe (docs/axit/SPEC.md AX-1.7): the window, its key table
+  <!-- axMedia's window side, as a class library inside Axit.exe (docs/axit/SPEC.md AX-1.7): the window, its key table
        and its texts; the pure code is AxMedia.Core. -->
   <PropertyGroup>
     <TargetFramework>$(AxitDotNet)-windows</TargetFramework>
     <UseWindowsForms>true</UseWindowsForms>
-    <RootNamespace>AxMedia</RootNamespace>
-    <AssemblyName>AxMedia</AssemblyName>
+    <RootNamespace>axMedia</RootNamespace>
+    <AssemblyName>axMedia</AssemblyName>
   </PropertyGroup>
 
   <ItemGroup>

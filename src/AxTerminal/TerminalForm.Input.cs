@@ -65,7 +65,7 @@ internal sealed partial class TerminalForm
 
     /// <summary>
     /// Queues a command for the shell: each line as its own write and Enter as a separate write after it, with
-    /// AxClaude's pacing, so the shell reads a multi-line command as it would from the keyboard (AT-3.1). PowerShell's
+    /// axClaude's pacing, so the shell reads a multi-line command as it would from the keyboard (AT-3.1). PowerShell's
     /// console host, which runs without PSReadLine while a screen reader is on, ends a block only on an empty line,
     /// so a command of several lines gets one more Enter; with PSReadLine on it is an empty Enter at the next prompt.
     /// </summary>

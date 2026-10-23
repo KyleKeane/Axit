@@ -1,4 +1,4 @@
-# AxGit manual tests
+# axGIT manual tests
 
 The steps and every expected announcement are in `docs/axgit/nvda-test-plan.md`. Run `.\manual_tests\prepare.ps1 axgit` first, and again after commits, switches or discards, to have the repository as new.
 
@@ -17,12 +17,12 @@ Ctrl+2: the log, five commits, newest "Commit 5 of the history". Ctrl+3: the bra
 
 ## scratch-remote-for-fetch-pull-push.git
 
-The repository's remote, a folder on this disk, so fetch, pull and push work with the network off (section 4, step 4). Leave it alone; AxGit uses it through the repository. For the "Fetch failed" step, rename this folder first, then run prepare again.
+The repository's remote, a folder on this disk, so fetch, pull and push work with the network off (section 4, step 4). Leave it alone; axGIT uses it through the repository. For the "Fetch failed" step, rename this folder first, then run prepare again.
 
 ## not-a-repository
 
-Section 1, step 5: start AxGit on it; the "Not a git repository" notice.
+Section 1, step 5: start axGIT on it; the "Not a git repository" notice.
 
 ## Not in a folder
 
-Section 2, from the other windows: open AxClaude, AxDown or AxFile on the scratch repository, then their Show current folder in, AxGit.
+Section 2, from the other windows: open axClaude, axDown or axFile on the scratch repository, then their Show current folder in, axGIT.

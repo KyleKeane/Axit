@@ -3,7 +3,7 @@ namespace Axit.Core;
 /// <summary>A top-level window of one of the bundle's processes: its handle and its title.</summary>
 public sealed record AxitWindow(nint Handle, string Title)
 {
-    /// <summary>The app the title ends with ("notes.md - AxDown" is AxDown's); the whole title when it has no " - ".</summary>
+    /// <summary>The app the title ends with ("notes.md - axDown" is axDown's); the whole title when it has no " - ".</summary>
     public string App => AxitWindows.AppOf(Title);
 }
 
@@ -26,10 +26,10 @@ public static class AxitWindows
 
     /// <summary>The app's windows, the current one included, most recently used first.</summary>
     public static IReadOnlyList<AxitWindow> Of(IReadOnlyList<AxitWindow> windows, App app) =>
-        windows.Where(w => w.App == app.Name).ToList();
+        windows.Where(w => string.Equals(w.App, app.Name, StringComparison.OrdinalIgnoreCase)).ToList();
 
     /// <summary>
-    /// "&amp;1. notes.md - AxDown": the item's number as its mnemonic, 1 to 9 and then a to z, a full stop, which the
+    /// "&amp;1. notes.md - axDown": the item's number as its mnemonic, 1 to 9 and then a to z, a full stop, which the
     /// synthesizer takes as a pause before the name (AX-8.5), and the title; an ampersand in a title is doubled, as a
     /// menu needs. The same shape serves the apps' own recent lists (FR-8.5, AD-4.1).
     /// </summary>
@@ -42,7 +42,7 @@ public static class AxitWindows
 
     /// <summary>"Ax&amp;Claude": the app's name with the letter after Ax as the mnemonic.</summary>
     public static string AppLabel(App app) =>
-        app.Name.StartsWith("Ax", StringComparison.Ordinal) ? "Ax&" + app.Name[2..] : "&" + app.Name;
+        app.Name.StartsWith("ax", StringComparison.OrdinalIgnoreCase) ? app.Name[..2] + "&" + app.Name[2..] : "&" + app.Name;
 
-    private static bool IsApp(AxitWindow window) => Dispatch.Apps.Any(a => a.Name == window.App);
+    private static bool IsApp(AxitWindow window) => Dispatch.Apps.Any(a => string.Equals(a.Name, window.App, StringComparison.OrdinalIgnoreCase));
 }

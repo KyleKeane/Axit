@@ -1,4 +1,4 @@
-# AxTerminal, section 2 of docs/axterminal/nvda-test-plan.md: commands (AT-3, AT-5), in Windows PowerShell or
+# axTerminal, section 2 of docs/axterminal/nvda-test-plan.md: commands (AT-3, AT-5), in Windows PowerShell or
 # PowerShell 7, the default shell of a fresh settings file.
 mkdir myproject
 # The run's own settings: no update check (network, and an ERROR in the log when it fails); a small font in a

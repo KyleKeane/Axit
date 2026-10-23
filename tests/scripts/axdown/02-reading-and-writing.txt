@@ -1,5 +1,5 @@
-# AxDown, test plan section 2 (Reading and writing), driven from inside the window (docs/axdown/nvda-test-plan.md).
-# What NVDA reads by itself (say-all, words) is tier 3; here the caret's line is checked and AxDown's silence.
+# axDown, test plan section 2 (Reading and writing), driven from inside the window (docs/axdown/nvda-test-plan.md).
+# What NVDA reads by itself (say-all, words) is tier 3; here the caret's line is checked and axDown's silence.
 file long.md # Long Markdown file for navigation\n\nThe first paragraph, one line.\n\nThis line is longer than the window, so word wrap shows it on several rows and the caret test can tell. This line is longer than the window, so word wrap shows it on several rows and the caret test can tell. This line is longer than the window, so word wrap shows it on several rows and the caret test can tell. This line is longer than the window, so word wrap shows it on several rows and the caret test can tell.\n\n## Second heading, level 2\n\nA paragraph of two lines,\nthe second line of it.\n\n### Third heading, level 3\n\nThe last paragraph of the file.
 # The run's own settings: no update check, whose network call logs an ERROR when GitHub cannot be reached.
 file home\Axit\axdown.json {"checkForUpdates": false}
@@ -8,7 +8,7 @@ file short.md First line.\nSecond line.\nThird line.
 start down {temp}\long.md
 expect focus # Long Markdown file for navigation
 
-# 2.1: Down reads one line at a time; Ctrl+Right moves by word; AxDown says nothing on either.
+# 2.1: Down reads one line at a time; Ctrl+Right moves by word; axDown says nothing on either.
 keys down
 expect focus {"name":"long.md","role":"Text","value":""}
 keys down
@@ -41,7 +41,7 @@ expect state Line 14, Column 1 \u00B7
 keys ctrl+down
 expect state Line 14, Column 32 \u00B7
 expect quiet 1000
-# 2.3a: Ctrl+Shift+Down and Ctrl+Shift+Up select and unselect; NVDA reads the selection, AxDown nothing.
+# 2.3a: Ctrl+Shift+Down and Ctrl+Shift+Up select and unselect; NVDA reads the selection, axDown nothing.
 keys ctrl+home ctrl+shift+down
 expect quiet 1000
 keys ctrl+shift+up
@@ -76,7 +76,7 @@ keys enter tab
 type Second line.
 expect text A sentence!
 expect focus {"name":"new.md","role":"Text","value":"\tSecond line."}
-expect state *new.md - AxDown
+expect state *new.md - axDown
 wait 1500
 keys ctrl+z
 expect said ! Undone
@@ -91,7 +91,7 @@ start down {temp}\empty.md
 expect focus empty.md
 keys ctrl+m ctrl+h ctrl+i ctrl+j
 expect said No next list item
-expect state "title":"empty.md - AxDown"
+expect state "title":"empty.md - axDown"
 expect focus {"name":"empty.md","role":"Text","value":""}
 
 # 2.6: two words with a pause are two steps; the ends say so.
@@ -127,10 +127,10 @@ expect state Column 11
 type  gamma
 keys ctrl+s
 expect said ! Saved
-expect state "title":"empty.md - AxDown"
+expect state "title":"empty.md - axDown"
 keys ctrl+z
 expect said ! Undone
-expect state *empty.md - AxDown
+expect state *empty.md - axDown
 expect focus {"name":"empty.md","role":"Text","value":"alpha beta"}
 # 2.6: Edit, Undo and Edit, Redo do the same as the keys.
 menu Redo
@@ -150,7 +150,7 @@ expect focus Enter: Save. Escape: Cancel.
 keys tab tab
 expect focus Don\u0027t save
 keys enter
-expect state Untitled - AxDown
+expect state Untitled - axDown
 keys ctrl+z
 expect said ! Nothing to undo
 refuse said Saved

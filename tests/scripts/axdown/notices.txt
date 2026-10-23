@@ -1,4 +1,4 @@
-﻿# The notice focus rule and the palette in AxDown, driven from inside (docs/axit/automation.md).
+# The notice focus rule and the palette in axDown, driven from inside (docs/axit/automation.md).
 start down {temp}\notes.md
 expect focus Text
 keys f1

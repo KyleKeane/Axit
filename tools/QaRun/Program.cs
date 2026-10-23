@@ -1,4 +1,4 @@
-// QaRun: an automated quality check of AxClaude's console pipeline without windows (docs/axit/plan.md, automated
+// QaRun: an automated quality check of axClaude's console pipeline without windows (docs/axit/plan.md, automated
 // quality checks). It starts several Claude Code sessions at once, each in a fresh test folder, through the app's own
 // pieces (PtyHost, ClaudeLauncher's command line and environment, SessionModel), and walks each the way a user does:
 // the trust prompt answered, a message sent and its reply awaited, /exit. The model is chosen on Claude's command

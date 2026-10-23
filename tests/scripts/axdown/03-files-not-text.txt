@@ -1,4 +1,4 @@
-# AxDown, test plan section 3 step 9 (a file that is not text), apart from 03-files.txt: the window logs the refused
+# axDown, test plan section 3 step 9 (a file that is not text), apart from 03-files.txt: the window logs the refused
 # file as an ERROR, and the runner fails a run with an ERROR in its logs (see the report), so this script fails after its steps.
 allow error is not a text file
 file home\Axit\axdown.json {"checkForUpdates": false}
@@ -12,5 +12,5 @@ expect state "notice":"Error"
 expect state image.png is not a text file (it holds a NUL character).
 keys escape
 expect state "notice":null
-expect state Untitled - AxDown
+expect state Untitled - axDown
 expect focus {"name":"Untitled","role":"Text","value":""}

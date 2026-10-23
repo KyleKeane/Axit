@@ -1,7 +1,7 @@
 namespace Axit.Core;
 
 /// <summary>
-/// What the two console windows, AxClaude and AxTerminal, remember between runs beyond <see cref="WindowSettings"/>
+/// What the two console windows, axClaude and axTerminal, remember between runs beyond <see cref="WindowSettings"/>
 /// (docs/axit/SPEC.md AX-6.5): the console size, the recent folders, the sounds and the attention signals, and the
 /// transcript's options. Their shared window base (<c>Axit.Forms/ConsoleForm</c>) reads these without knowing the
 /// app; each app's settings class derives from it and adds its own, every property keeping the JSON name it had
@@ -11,7 +11,7 @@ public abstract class ConsoleSettings : WindowSettings
 {
     public const int MaxRecentFolders = 10;
 
-    /// <summary>The folders the program was started in, newest first, for the Open recent folder submenu (AxClaude FR-8.1, AxTerminal AT-1.5).</summary>
+    /// <summary>The folders the program was started in, newest first, for the Open recent folder submenu (axClaude FR-8.1, axTerminal AT-1.5).</summary>
     public List<string> RecentFolders { get; set; } = [];
 
     /// <summary>The pseudo console's size; 240 columns keep Claude Code's rows from wrapping before the model joins them.</summary>
@@ -19,31 +19,31 @@ public abstract class ConsoleSettings : WindowSettings
 
     public int PtyRows { get; set; } = 50;
 
-    /// <summary>The chimes: ready, sent, replying, done, question (AxClaude FR-7.3, AxTerminal AT-5.1). The key keeps its 1.0 name.</summary>
+    /// <summary>The chimes: ready, sent, replying, done, question (axClaude FR-7.3, axTerminal AT-5.1). The key keeps its 1.0 name.</summary>
     public bool SoundOnBell { get; set; } = true;
 
-    /// <summary>A tick whenever a line from the program arrives (AxClaude FR-7.8, AxTerminal AT-5.2).</summary>
+    /// <summary>A tick whenever a line from the program arrives (axClaude FR-7.8, axTerminal AT-5.2).</summary>
     public bool ClickOnNewLine { get; set; } = true;
 
-    /// <summary>A soft music loop while the program works (AxClaude FR-7.9, AxTerminal AT-5.5).</summary>
+    /// <summary>A soft music loop while the program works (axClaude FR-7.9, axTerminal AT-5.5).</summary>
     public bool WorkingMusic { get; set; }
 
     /// <summary>The taskbar button flashes when the program is done or asks while the window is in the background.</summary>
     public bool FlashTaskbar { get; set; } = true;
 
-    /// <summary>A longer, louder call in place of the done or question chime while the window is in the background (AxClaude FR-7.3).</summary>
+    /// <summary>A longer, louder call in place of the done or question chime while the window is in the background (axClaude FR-7.3).</summary>
     public bool BackgroundAlert { get; set; }
 
-    /// <summary>The time of sending in the Input and Output markers (AxClaude FR-4.6, AxTerminal AT-3.2).</summary>
+    /// <summary>The time of sending in the Input and Output markers (axClaude FR-4.6, axTerminal AT-3.2).</summary>
     public bool MarkerTimeStamps { get; set; }
 
-    /// <summary>The # markers of the heading lines shown in the view (AxClaude FR-4.6a); the export keeps them either way.</summary>
+    /// <summary>The # markers of the heading lines shown in the view (axClaude FR-4.6a); the export keeps them either way.</summary>
     public bool ShowMarkers { get; set; } = true;
 
-    /// <summary>Show rows the program hard-wrapped at the console width as one line (AxClaude FR-3.2a, AxTerminal AT-4.1). File only, no menu item.</summary>
+    /// <summary>Show rows the program hard-wrapped at the console width as one line (axClaude FR-3.2a, axTerminal AT-4.1). File only, no menu item.</summary>
     public bool JoinWrappedLines { get; set; } = true;
 
-    /// <summary>Above this many lines the oldest tenth of the transcript is dropped (AxClaude FR-3.6).</summary>
+    /// <summary>Above this many lines the oldest tenth of the transcript is dropped (axClaude FR-3.6).</summary>
     public int MaxTranscriptLines { get; set; } = 20000;
 
     /// <summary>The folder the program starts in goes to the front of the recent list; each class keeps the last folder under its own name as well.</summary>

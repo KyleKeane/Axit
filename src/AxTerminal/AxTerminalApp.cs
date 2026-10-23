@@ -4,13 +4,13 @@ using Axit.Forms;
 namespace AxTerminal;
 
 /// <summary>
-/// AxTerminal's entry point inside Axit (docs/axit/SPEC.md AX-1.7; SPEC.md AT-1.5): <c>Axit.exe terminal [&lt;folder&gt;]</c>
+/// axTerminal's entry point inside Axit (docs/axit/SPEC.md AX-1.7; SPEC.md AT-1.5): <c>Axit.exe terminal [&lt;folder&gt;]</c>
 /// calls <see cref="Run"/>, one call into the bundle's <see cref="AppHost"/> with the one folder of the command line,
 /// the settings and <see cref="TerminalForm"/>.
 /// </summary>
 public static class AxTerminalApp
 {
-    public const string Name = "AxTerminal";
+    public const string Name = "axTerminal";
 
     public const string Usage = """
         Usage: Axit terminal [<folder>]

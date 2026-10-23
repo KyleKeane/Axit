@@ -5,14 +5,14 @@ using Axit.Forms;
 namespace AxMedia;
 
 /// <summary>
-/// AxMedia's entry point inside Axit (docs/axit/SPEC.md AX-1.7; SPEC.md AM-1.1, AM-1.2): <c>Axit.exe media [&lt;file or
+/// axMedia's entry point inside Axit (docs/axit/SPEC.md AX-1.7; SPEC.md AM-1.1, AM-1.2): <c>Axit.exe media [&lt;file or
 /// folder&gt;...] [--add] [--new]</c> calls <see cref="Run"/>, one call into the bundle's <see cref="AppHost"/>. With
-/// paths and an open AxMedia window, the paths are handed to that window (<see cref="AppMessage"/>) and no window of
+/// paths and an open axMedia window, the paths are handed to that window (<see cref="AppMessage"/>) and no window of
 /// this process opens; otherwise <see cref="MediaForm"/> opens on them.
 /// </summary>
 public static class AxMediaApp
 {
-    public const string Name = "AxMedia";
+    public const string Name = "axMedia";
 
     public const string Usage = """
         Usage: Axit media [<file or folder>...] [--add] [--new]
@@ -22,7 +22,7 @@ public static class AxMediaApp
           <folder>          its sound and video files, played from the first
           several paths     queued in that order; the first plays
           --add             the paths are added to the end of the queue and nothing starts
-          --new             a window of its own, even while an AxMedia window is open (the open window takes the paths otherwise)
+          --new             a window of its own, even while an axMedia window is open (the open window takes the paths otherwise)
           --help, --version this text, or the version
         """;
 

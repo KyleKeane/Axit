@@ -12,7 +12,7 @@ Git ignores everything the script makes, so a test pass never changes the reposi
 
 ## The app folders
 
-- `axfile`: navigation with levels, type-ahead, hidden entries, filter and sort, selection, file operations, undo, the Actions list, the hand-overs to AxMedia and AxPreview.
+- `axfile`: navigation with levels, type-ahead, hidden entries, filter and sort, selection, file operations, undo, the Actions list, the hand-overs to axMedia and axPreview.
 - `axmedia`: a first queue, a replacement queue, two folders to add, one long file with the time spoken every 5 seconds, two short files for the end of the queue, a video, files that cannot play.
 - `axpreview`: a readme with headings, links, a list, a quote and a table; plain text; a log; JSON; a binary file; a file over 32 MB.
 - `axdown`: the four encodings, a long Markdown file for every navigation key, a file to change on disk, a file that is not text.
@@ -27,4 +27,4 @@ The sound files are made with Windows' own speech voice. Each one says what it i
 
 ## Order
 
-The apps are independent. A full pass before a release: AxFile, then AxMedia and AxPreview (AxFile hands over to both), then AxDown, AxJSON, AxGit, AxTerminal and AxClaude.
+The apps are independent. A full pass before a release: axFile, then axMedia and axPreview (axFile hands over to both), then axDown, axJSON, axGIT, axTerminal and axClaude.

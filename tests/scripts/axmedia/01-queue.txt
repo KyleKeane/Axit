@@ -1,4 +1,4 @@
-# AxMedia: start and the queue (docs/axmedia/nvda-test-plan.md section 1; SPEC.md AM-1, AM-2, AM-3).
+# axMedia: start and the queue (docs/axmedia/nvda-test-plan.md section 1; SPEC.md AM-1, AM-2, AM-3).
 # Every sound is the runner's silence; nothing reaches the speakers. The names start with letters so that a typed
 # letter has something to jump to; the queue's order is name order: alpha, beta, delta, gamma.
 
@@ -9,7 +9,7 @@ file home\Axit\axmedia.json {"checkForUpdates":false}
 # Step 1: no path, an empty queue; the list reads "Queue is empty", and every command on that line says so.
 start media
 expect focus Queue is empty
-expect state "title":"AxMedia"
+expect state "title":"axMedia"
 keys enter
 expect said ! Queue is empty
 keys delete
@@ -105,7 +105,7 @@ expect list "beta.wav (playing)"
 keys down
 keys up
 expect focus beta.wav (playing)
-expect state "title":"beta.wav - AxMedia"
+expect state "title":"beta.wav - axMedia"
 expect state Playing beta.wav 0:0
 expect state / 0:30","2 of 4, speed 1"]
 
@@ -118,7 +118,7 @@ expect said ! delta.wav, 3 of 4
 refuse said playing,
 
 # Step 7: Delete on another file; the mark stays. Delete on the playing file: the next plays, said (not
-# interrupting) since Say each file is on. Clear queue empties and stops; the title is AxMedia again.
+# interrupting) since Say each file is on. Clear queue empties and stops; the title is axMedia again.
 keys delete
 expect said ! Removed delta.wav
 expect list "name":"Queue, 3 items"
@@ -132,11 +132,11 @@ menu Clear queue
 expect said ! Queue cleared
 expect list ["Queue is empty"]
 expect focus Queue is empty
-expect state "title":"AxMedia"
+expect state "title":"axMedia"
 keys ctrl+q
 expect said ! Nothing playing
 
-# Step 8: Ctrl+N starts a second AxMedia process the runner did not start and so cannot reach or close (it would be
+# Step 8: Ctrl+N starts a second axMedia process the runner did not start and so cannot reach or close (it would be
 # left running on the test desktop), and Alt+A, O, 1 is menu mode; left to the NVDA pass. A second window by
 # --new is in 02-hand-over.txt.
 

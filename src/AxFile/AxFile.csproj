@@ -1,12 +1,12 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
-  <!-- AxFile's window side, as a class library inside Axit.exe (docs/axit/SPEC.md AX-1.7): the window, its key table
+  <!-- axFile's window side, as a class library inside Axit.exe (docs/axit/SPEC.md AX-1.7): the window, its key table
        and its texts; the pure code is AxFile.Core. -->
   <PropertyGroup>
     <TargetFramework>$(AxitDotNet)-windows</TargetFramework>
     <UseWindowsForms>true</UseWindowsForms>
-    <RootNamespace>AxFile</RootNamespace>
-    <AssemblyName>AxFile</AssemblyName>
+    <RootNamespace>axFile</RootNamespace>
+    <AssemblyName>axFile</AssemblyName>
   </PropertyGroup>
 
   <ItemGroup>

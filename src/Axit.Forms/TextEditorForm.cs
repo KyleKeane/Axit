@@ -8,8 +8,8 @@ namespace Axit.Forms;
 /// file types, keys, texts and commands as data (<see cref="EditorApp"/>). The notices, the fonts, the window's
 /// place, the update flow and find are the bundle's window base (<see cref="AxitForm"/>); the question area
 /// (<see cref="ControlArea"/>) holds the Go to line field under the editor. The caret moves only on the user's
-/// command, and nothing is spoken unless asked for or a command finishes (AD-2.6, AD-7). It was AxDown's
-/// <c>EditorForm</c> and moved here on its second use, AxJSON (AX-6.3). What the viewer alone does is
+/// command, and nothing is spoken unless asked for or a command finishes (AD-2.6, AD-7). It was axDown's
+/// <c>EditorForm</c> and moved here on its second use, axJSON (AX-6.3). What the viewer alone does is
 /// <c>TextEditorForm.Viewer.cs</c>.
 /// </summary>
 public sealed partial class TextEditorForm : AxitForm
@@ -60,7 +60,7 @@ public sealed partial class TextEditorForm : AxitForm
         // ---- menus (AD-4); the keys are handled in ProcessWindowKey from the tables, the items only show them ----
         // File is the thing worked on, in the standard order of a File menu (AD-4.1, bundle AX-6): New, Open and the
         // recent files, then Save and Save as where every Windows program has them, then the extras, then Exit.
-        // AxClaude's Session menu has the same order with the Save slot empty and its export before Exit.
+        // axClaude's Session menu has the same order with the Save slot empty and its export before Exit.
         var file = new ToolStripMenuItem("&File");
         file.DropDownItems.Add(_app.ReadOnly
             ? Item("&New window", NewWindow, EditorKeys.NewDocument)
@@ -84,11 +84,11 @@ public sealed partial class TextEditorForm : AxitForm
         // Show current file in ▸ File Explorer and the other apps' windows on the file or its folder (AD-4.1).
         var showIn = new ToolStripMenuItem("Show current file &in");
         showIn.DropDownItems.Add(Item("File &Explorer", ShowInExplorer, EditorKeys.ShowInExplorer));
-        // AxGit on the repository that holds the file, a new window (AD-4.1; docs/axgit/SPEC.md AG-1.4).
+        // axGIT on the repository that holds the file, a new window (AD-4.1; docs/axgit/SPEC.md AG-1.4).
         showIn.DropDownItems.Add(new ToolStripMenuItem("Ax&Git", null, (_, _) => OpenIn(Dispatch.AxGit)));
-        // AxTerminal with a shell in the file's folder, a new window (docs/axterminal/SPEC.md AT-1.5).
+        // axTerminal with a shell in the file's folder, a new window (docs/axterminal/SPEC.md AT-1.5).
         showIn.DropDownItems.Add(new ToolStripMenuItem("Ax&Terminal", null, (_, _) => OpenInAxTerminal()));
-        // AxFile on the file's folder with the file selected, a new window (docs/axfile/SPEC.md AF-1.3).
+        // axFile on the file's folder with the file selected, a new window (docs/axfile/SPEC.md AF-1.3).
         showIn.DropDownItems.Add(new ToolStripMenuItem("Ax&File", null, (_, _) => OpenIn(Dispatch.AxFile)));
         file.DropDownItems.Add(showIn);
         file.DropDownItems.Add(new ToolStripSeparator());
@@ -129,7 +129,7 @@ public sealed partial class TextEditorForm : AxitForm
         navigate.DropDownItems.Add(next);
         navigate.DropDownItems.Add(previous);
 
-        // Options, as AxClaude's (AD-4.3): every setting in the submenu for what it is about, none outside one.
+        // Options, as axClaude's (AD-4.3): every setting in the submenu for what it is about, none outside one.
         var options = new ToolStripMenuItem("&Options");
         _wordWrapItem = Item("&Word wrap", ToggleWordWrap, EditorKeys.WordWrap);
         _wordWrapItem.Checked = _settings.WordWrap;
@@ -137,7 +137,7 @@ public sealed partial class TextEditorForm : AxitForm
         options.DropDownItems.Add(CreateGeneralMenu());
         options.DropDownItems.Add(CreateDeveloperMenu());
 
-        // As AxClaude's Claude Code resources: where the file format is explained, in the browser (AD-4.4).
+        // As axClaude's Claude Code resources: where the file format is explained, in the browser (AD-4.4).
         var help = CreateHelpMenu(_app.UserGuide, _app.ResourcesLabel, _app.Resources);
 
         // The bundle's Axit menu (AX-9) sits before Help in every window and ends with the update items and About.
@@ -465,7 +465,7 @@ public sealed partial class TextEditorForm : AxitForm
     /// that name written by the first save. Null, with the notice shown, when the window keeps what it has: a file
     /// the app refuses (the viewer's kinds), one that cannot be read on a reload (AD-3.6) or in the viewer at all,
     /// and in the viewer a path that does not exist (AP-1.1; until 2026-10-23 it opened an empty window under the
-    /// missing name, and Edit in AxDown created the file). In an editor a file that cannot be read on an open is the
+    /// missing name, and Edit in axDown created the file). In an editor a file that cannot be read on an open is the
     /// notice and Untitled, so that Save cannot write the empty editor over it (AD-3.7).
     /// </summary>
     private (TextDocument Document, DateTime? WriteTime, string? Path)? ReadDocument(string? path, bool reloading)
@@ -656,7 +656,7 @@ public sealed partial class TextEditorForm : AxitForm
         OpenInExplorer(_path);
     }
 
-    /// <summary>File → Show current file in → AxGit, AxFile (AD-4.1): a new window of that app on the file (the repository that holds it; the folder with the file selected).</summary>
+    /// <summary>File → Show current file in → axGIT, axFile (AD-4.1): a new window of that app on the file (the repository that holds it; the folder with the file selected).</summary>
     private void OpenIn(string verb)
     {
         if (_path is null)
@@ -668,7 +668,7 @@ public sealed partial class TextEditorForm : AxitForm
         AxitMenu.Start(verb, _path);
     }
 
-    /// <summary>File → Show current file in → AxTerminal: a new AxTerminal window with a shell in the file's folder (docs/axterminal/SPEC.md AT-1.5).</summary>
+    /// <summary>File → Show current file in → axTerminal: a new axTerminal window with a shell in the file's folder (docs/axterminal/SPEC.md AT-1.5).</summary>
     private void OpenInAxTerminal()
     {
         if (_path is null || Path.GetDirectoryName(_path) is not { } folder)

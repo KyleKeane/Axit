@@ -3,8 +3,8 @@
   <PropertyGroup>
     <TargetFramework>$(AxitDotNet)-windows</TargetFramework>
     <UseWindowsForms>true</UseWindowsForms>
-    <RootNamespace>AxDown</RootNamespace>
-    <AssemblyName>AxDown</AssemblyName>
+    <RootNamespace>axDown</RootNamespace>
+    <AssemblyName>axDown</AssemblyName>
   </PropertyGroup>
 
   <ItemGroup>

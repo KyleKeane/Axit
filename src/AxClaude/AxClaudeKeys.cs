@@ -5,7 +5,7 @@ using Axit.Forms;
 namespace AxClaude;
 
 /// <summary>
-/// AxClaude's window-specific keys (SPEC.md §6.3; bundle AX-8). A key is changed here and nowhere else: the window's
+/// axClaude's window-specific keys (SPEC.md §6.3; bundle AX-8). A key is changed here and nowhere else: the window's
 /// key switch, the menu items and the conversation's quick keys read this table, and the F1 text in <c>HelpText</c>
 /// names the same keys. The bundle-wide keys (F1, the controls, find, save, text size, the page and paragraph keys) are
 /// <c>Axit.Forms.BundleKeys</c>; the collision test in <c>tests/Axit.Tests</c> fails when a key here equals one of those
@@ -122,7 +122,7 @@ public static class AxClaudeKeys
 
     /// <summary>
     /// The conversation's keys for the bundle's transcript view (FR-5; the view is <c>Axit.Forms/TranscriptView</c>
-    /// since AxTerminal, its letters each window's own): the quick keys as data, a letter, the kind's spoken name and
+    /// since axTerminal, its letters each window's own): the quick keys as data, a letter, the kind's spoken name and
     /// which lines it stops at, and the view's other keys from this table.
     /// </summary>
     public static readonly TranscriptKeys Transcript = new(

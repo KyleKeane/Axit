@@ -74,7 +74,7 @@ public sealed class AxitMenu : ToolStripMenuItem
         for (var i = 0; i < closed.Count; i++)
         {
             var item = closed[i];
-            if (Dispatch.Apps.FirstOrDefault(a => a.Name == item.App) is { } app)
+            if (Dispatch.Apps.FirstOrDefault(a => string.Equals(a.Name, item.App, StringComparison.OrdinalIgnoreCase)) is { } app)
             {
                 _recentlyClosed.DropDownItems.Add(new ToolStripMenuItem(AxitWindows.Label(i, RecentlyClosed.Title(item)), null, (_, _) => Start(app.Verb, item.Path)));
             }
@@ -173,7 +173,7 @@ public sealed class AxitMenu : ToolStripMenuItem
     /// <summary>A new window of the app: this program file with the app's verb and, for a recently closed item, its path; a new process (B-2).</summary>
     public static void Start(string verb, string? path) => StartWith(verb, path is null ? [] : [path]);
 
-    /// <summary>The app started with several arguments after its verb (AxMedia's paths and --add, a viewer's --new); a new process, which may hand its paths to the app's open window and end (AppMessage).</summary>
+    /// <summary>The app started with several arguments after its verb (axMedia's paths and --add, a viewer's --new); a new process, which may hand its paths to the app's open window and end (AppMessage).</summary>
     public static void StartWith(string verb, IReadOnlyList<string> arguments)
     {
         if (Environment.ProcessPath is not { } exe)

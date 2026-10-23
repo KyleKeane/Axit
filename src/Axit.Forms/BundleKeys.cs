@@ -21,7 +21,7 @@ public static class BundleKeys
     public const Keys FindNext = Keys.F3;
     public const Keys FindPrevious = Keys.Shift | Keys.F3;
 
-    /// <summary>What the window holds: AxClaude's conversation as a text file, AxDown's file.</summary>
+    /// <summary>What the window holds: axClaude's conversation as a text file, axDown's file.</summary>
     public const Keys Save = Keys.Control | Keys.S;
 
     public const Keys LargerText = Keys.Control | Keys.Oemplus;

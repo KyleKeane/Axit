@@ -4,10 +4,10 @@ using AxJSON.Core;
 namespace AxJSON;
 
 /// <summary>
-/// AxJSON's window-specific keys (SPEC.md AJ-2.2, AJ-2.3; bundle AX-8). A key is changed here and nowhere else: the
+/// axJSON's window-specific keys (SPEC.md AJ-2.2, AJ-2.3; bundle AX-8). A key is changed here and nowhere else: the
 /// menu items, the key handling and the F1 text read this table. The editor shell's keys (new, open, save as, go to
 /// line, word wrap, show in File Explorer) are <c>Axit.Forms.EditorKeys</c>, the same in every editor window, and
-/// <see cref="All"/> includes them; the bundle-wide keys are <c>Axit.Forms.BundleKeys</c>. The letters follow AxDown's
+/// <see cref="All"/> includes them; the bundle-wide keys are <c>Axit.Forms.BundleKeys</c>. The letters follow axDown's
 /// where the concept exists in both (L a list and an array, I an item in both); the others are JSON's own (AJ-D5).
 /// </summary>
 public static class AxJSONKeys

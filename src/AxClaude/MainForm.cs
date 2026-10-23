@@ -8,7 +8,7 @@ using Axit.Forms;
 namespace AxClaude;
 
 /// <summary>
-/// AxClaude's window (SPEC.md §6): the bundle's console window (<see cref="ConsoleForm"/>: the conversation, the
+/// axClaude's window (SPEC.md §6): the bundle's console window (<see cref="ConsoleForm"/>: the conversation, the
 /// message field, the control area, the status bar, the pty bridge, the paced writes, the recording, the export,
 /// find, the signals and the music) around Claude Code in screen reader mode. What is Claude's stays here: the menus,
 /// the attention and the question flow in the control area (D33), the project folder, New session, the restart with
@@ -79,7 +79,7 @@ internal sealed partial class MainForm : ConsoleForm
 
     /// <summary>The model is made first so that the base and this class both hold it: the base as a LineStore, this class as Claude's.</summary>
     private MainForm(StartupOptions options, AppSettings settings, string? settingsError, SessionModel model)
-        : base("AxClaude", settings, AppSettings.DefaultPath, settingsError, model, AxClaudeKeys.Transcript, "Conversation", "Message to Claude")
+        : base("axClaude", settings, AppSettings.DefaultPath, settingsError, model, AxClaudeKeys.Transcript, "Conversation", "Message to Claude")
     {
         _options = options;
         _claudeArgs = options.ClaudeArgs is { } given ? [.. given] : null;
@@ -153,7 +153,7 @@ internal sealed partial class MainForm : ConsoleForm
         return true;
     }
 
-    /// <summary>The Close AxClaude? notice (FR-1.7): what Claude is doing, what closing does to it. Enter closes, Escape keeps the window.</summary>
+    /// <summary>The Close axClaude? notice (FR-1.7): what Claude is doing, what closing does to it. Enter closes, Escape keeps the window.</summary>
     private void ConfirmClose()
     {
         var background = ClaudeBackground;
@@ -181,10 +181,10 @@ internal sealed partial class MainForm : ConsoleForm
         var stops = ClaudeBusy ? "Claude stops in the middle of its work" : "the background work stops";
         var consequence = !RestartPending
             ? $"If you close now, {stops}."
-            : $"If you close now, {stops} and the updated AxClaude starts again.";
-        ShowNotice(new Notice("Close AxClaude?",
+            : $"If you close now, {stops} and the updated axClaude starts again.";
+        ShowNotice(new Notice("Close axClaude?",
             $"{state}. {consequence}\n" +
-            "What is done so far is saved. Start AxClaude again to carry on.",
+            "What is done so far is saved. Start axClaude again to carry on.",
         [
             new OverlayChoice("&Close anyway", CloseConfirmed, IsDefault: true),
             new OverlayChoice("&Keep working", KeepWorkingAfterUpdate, IsCancel: true),
@@ -267,7 +267,7 @@ internal sealed partial class MainForm : ConsoleForm
     }
 
     protected override string UpdateRestartText =>
-        "closes AxClaude, installs it and starts it again on the same folder; the conversation is picked up again if one is open";
+        "closes axClaude, installs it and starts it again on the same folder; the conversation is picked up again if one is open";
 
     /// <summary>FR-13.3: the program, Claude, the folder, the console size and the state, after the base's version line and before its paths.</summary>
     protected override IEnumerable<string> DiagnosticsLines =>

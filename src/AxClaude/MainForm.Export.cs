@@ -14,7 +14,7 @@ internal sealed partial class MainForm
             Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments));
 
     /// <summary>
-    /// Adds AxClaude's patterns to the local exclude file of the project's git repository, or removes them, as the
+    /// Adds axClaude's patterns to the local exclude file of the project's git repository, or removes them, as the
     /// option says (D34). A failure is logged and changes nothing else.
     /// </summary>
     private void KeepFilesOutOfGit()
@@ -28,7 +28,7 @@ internal sealed partial class MainForm
         {
             if (GitExclude.Update(_folder, _settings.KeepFilesOutOfGit) is { } path)
             {
-                Log.Info($"{(_settings.KeepFilesOutOfGit ? "Added AxClaude's patterns to" : "Removed AxClaude's patterns from")} {path}");
+                Log.Info($"{(_settings.KeepFilesOutOfGit ? "Added axClaude's patterns to" : "Removed axClaude's patterns from")} {path}");
             }
         }
         catch (Exception ex) when (ex is IOException or UnauthorizedAccessException)

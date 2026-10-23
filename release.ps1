@@ -1,14 +1,14 @@
 <#
 .SYNOPSIS
-  Releases a new version of Axit, the bundle AxClaude is one app of: sets the version, commits, tags and pushes. GitHub Actions then builds, tests,
+  Releases a new version of Axit, the bundle axClaude is one app of: sets the version, commits, tags and pushes. GitHub Actions then builds, tests,
   publishes the zip and creates the GitHub release that installed copies update themselves from.
 
 .DESCRIPTION
   Before running it, add a "## <version>" section to CHANGELOG.md: its text becomes the release notes and
   is what the update notice in the app shows. Everything else must be committed. The script then
     1. fetches origin and stops if origin/main has commits that main here does not (skipped with -NoPush),
-    2. checks the "## <version>" section: it is not empty, and every bullet starts with its app or apps ("- AxFile: ",
-       "- AxDown, AxJSON: ") or with "- For developers: ",
+    2. checks the "## <version>" section: it is not empty, and every bullet starts with its app or apps ("- axFile: ",
+       "- axDown, axJSON: ") or with "- For developers: ",
     3. runs every test project in Release, as the workflows do (test.ps1),
     4. sets <Version> in src/Axit/Axit.csproj,
     5. commits CHANGELOG.md and the project file as "Release <version>" and tags v<version>,
@@ -93,7 +93,7 @@ $apps = @(Get-ChildItem (Join-Path $root 'docs') -Directory | ForEach-Object { $
 $prefix = "^- (($apps)(, ($apps))*|For developers): "
 $unnamed = @($notes -split "`n" | Where-Object { $_ -match '^- ' -and $_ -notmatch $prefix })
 if ($unnamed.Count -gt 0) {
-    Write-Host "Every bullet of the '## $Version' section starts with its app or apps ('- AxFile: ', '- AxDown, AxJSON: ') or with '- For developers: '. These do not:"
+    Write-Host "Every bullet of the '## $Version' section starts with its app or apps ('- axFile: ', '- axDown, axJSON: ') or with '- For developers: '. These do not:"
     $unnamed | ForEach-Object { Write-Host "  $_" }
     exit 1
 }

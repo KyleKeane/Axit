@@ -150,6 +150,6 @@ internal sealed partial class TerminalForm
         OpenInExplorer(CurrentDirectory);
     }
 
-    /// <summary>Session → Show current folder in → AxClaude, AxGit or AxFile (AT-1.5): a new window of that app on the shell's current directory.</summary>
+    /// <summary>Session → Show current folder in → axClaude, axGIT or axFile (AT-1.5): a new window of that app on the shell's current directory.</summary>
     private void OpenIn(string verb) => AxitMenu.Start(verb, CurrentDirectory);
 }

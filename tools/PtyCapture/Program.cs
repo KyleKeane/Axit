@@ -6,7 +6,7 @@
 // Usage:
 //   PtyCapture --out <file.vt> [--cwd <dir>] [--cols N] [--rows N] [--script <file>] -- <command line>
 //   PtyCapture --out <file.vt> --shell pwsh|powershell|cmd|bash [--cwd <dir>] [--cols N] [--rows N] [--script <file>] [--env NAME=VALUE]
-//                                          (the shell as AxTerminal starts it: its command line with the prompt
+//                                          (the shell as axTerminal starts it: its command line with the prompt
 //                                          snippet and its environment, ShellLauncher in AxTerminal.Core;
 //                                          --env sets or replaces one variable of that environment)
 //   PtyCapture --dump <file.vt> [--raw]    (print a human readable rendering of a recording; e-mail addresses,
@@ -85,7 +85,7 @@ internal static class Program
         Dictionary<string, string> environment;
         if (shell is not null)
         {
-            // A shell as AxTerminal starts it (docs/axterminal/SPEC.md AT-1.2, AT-1.3).
+            // A shell as axTerminal starts it (docs/axterminal/SPEC.md AT-1.2, AT-1.3).
             var kind = ShellLauncher.Parse(shell);
             if (ShellLauncher.BuildCommandLine(kind) is not { } shellLine)
             {

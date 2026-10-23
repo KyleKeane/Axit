@@ -1,4 +1,4 @@
-# AxTerminal, section 1 of docs/axterminal/nvda-test-plan.md: start (AT-1, AT-2). The shell is the default one of a
+# axTerminal, section 1 of docs/axterminal/nvda-test-plan.md: start (AT-1, AT-2). The shell is the default one of a
 # fresh settings file: PowerShell 7 when installed, otherwise Windows PowerShell; the texts below name neither.
 # Plan step 1 by the Start menu entry stays manual: the Start menu is the system's, outside the window.
 # NVDA's own reading of the window's name on opening is tier 3 (NVDA in the loop); here the title is checked.
@@ -9,7 +9,7 @@ start terminal {temp}\myproject
 # Step 1: the window and the field; after a moment the ping and "Ready".
 expect focus Command
 expect state "title":"myproject -
-expect state - AxTerminal"
+expect state - axTerminal"
 expect said Ready
 expect said ♪ Ready
 

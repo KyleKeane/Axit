@@ -1,6 +1,6 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
-  <!-- AxPreview's pure code (docs/axpreview/SPEC.md §6): whether a file reads as text; no window. The window is the
+  <!-- axPreview's pure code (docs/axpreview/SPEC.md §6): whether a file reads as text; no window. The window is the
        text editor shell in Axit.Forms, read-only. -->
   <PropertyGroup>
     <TargetFramework>$(AxitDotNet)</TargetFramework>

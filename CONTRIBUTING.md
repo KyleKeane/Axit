@@ -19,7 +19,7 @@ Axit is built for people who use a screen reader, and every change is judged by 
 
 1. `.\test.ps1`: every test project, in Release, as the Build workflow runs them.
 2. The steps of `docs/<app>/nvda-test-plan.md` that the change touches, with NVDA running, on the files `.\manual_tests\prepare.ps1` makes. Write the pass into `docs/axit/nvda-test-record.md`, or list the steps in the pull request as not yet run.
-3. A line in `CHANGELOG.md` under the coming version, starting with the app: `AxFile: …`, `Axit: …` for the bundle.
+3. A line in `CHANGELOG.md` under the coming version, starting with the app: `axFile: …`, `Axit: …` for the bundle.
 4. The F1 text (`HelpText`), the user guide and the test plan saying the same as the specification.
 
 Small commits with imperative subject lines; `main` is always releasable, and larger work runs on a branch until its NVDA checks pass.

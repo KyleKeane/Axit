@@ -3,7 +3,7 @@ namespace Axit.Core;
 /// <summary>
 /// Where Ctrl+Up and Ctrl+Down go in a text whose lines end with <c>\r\n</c> (docs/axit/SPEC.md AX-8.2, used by
 /// <c>Axit.Forms.EditParagraphs</c>): the starts of its paragraphs, where a paragraph starts at the first line, or at
-/// a line with text directly after an empty line, the rule of AxClaude's <c>p</c> key. Offsets are character
+/// a line with text directly after an empty line, the rule of axClaude's <c>p</c> key. Offsets are character
 /// indexes into the text, the caret's included; the text's length is the position after its last character.
 /// </summary>
 public static class Paragraphs

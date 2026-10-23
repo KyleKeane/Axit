@@ -1,7 +1,7 @@
 <#
 .SYNOPSIS
-  Builds Axit and starts AxFile: run.ps1 with -App file. Every other argument goes through unchanged. Without a path it
-  opens the last folder AxFile had.
+  Builds Axit and starts axFile: run.ps1 with -App file. Every other argument goes through unchanged. Without a path it
+  opens the last folder axFile had.
 
 .EXAMPLE
   .\run-axfile.ps1                          # the last folder

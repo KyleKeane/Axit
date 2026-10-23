@@ -1,21 +1,21 @@
-# AxStart — NVDA test plan
+# axStart — NVDA test plan
 
-The manual checks of AxStart (`docs/axstart/SPEC.md`), run with NVDA before a release. AxStart needs no files of its
+The manual checks of axStart (`docs/axstart/SPEC.md`), run with NVDA before a release. axStart needs no files of its
 own: it reads the Start menu's programs. Write each pass into `docs/axit/nvda-test-record.md`, by step.
 
-Before starting: install the build (`publish.ps1`), or quit any running AxStart (AxStart, Quit AxStart) and run
+Before starting: install the build (`publish.ps1`), or quit any running axStart (axStart, Quit axStart) and run
 `.\run-axstart.ps1`. Have Notepad and Calculator installed (they are, on Windows 11).
 
 ## 1. Bringing it up and putting it away
 
-1. In AxClaude, press Ctrl+Shift+Space: NVDA says "AxStart window, Search programs, edit" and nothing else.
-2. Escape: AxStart is gone and AxClaude has the focus again, on the line it was on.
+1. In axClaude, press Ctrl+Shift+Space: NVDA says "axStart window, Search programs, edit" and nothing else.
+2. Escape: axStart is gone and axClaude has the focus again, on the line it was on.
 3. From File Explorer, then from the desktop (Windows+D): Ctrl+Shift+Space brings the field up each time, in front.
 5a. Bring it up, then NVDA+N: the NVDA menu opens and the launcher stays; Escape: the menu closes and the field has the focus again. NVDA+Ctrl+G (the NVDA settings), then close it: the same.
 4. Ctrl+Shift+Space while the field shows: it hides.
-5. Bring it up, Alt+Tab to another program: AxStart hides itself.
+5. Bring it up, Alt+Tab to another program: axStart hides itself.
 6. Bring it up, Alt+F4: it hides; Ctrl+Shift+Space brings it back (the process still runs).
-7. Start menu, `Axit AxStart`, while AxStart runs: the field comes up; no second AxStart starts (Task Manager shows one `Axit.exe start`).
+7. Start menu, `Axit axStart`, while axStart runs: the field comes up; no second axStart starts (Task Manager shows one `Axit.exe start`).
 
 ## 2. Typing and moving
 
@@ -31,13 +31,13 @@ Before starting: install the build (`publish.ps1`), or quit any running AxStart 
 
 ## 3. Starting
 
-1. `calc`, Enter: Calculator starts in front; AxStart is gone.
+1. `calc`, Enter: Calculator starts in front; axStart is gone.
 2. `notepad`, Enter: Notepad starts in front.
 3. Bring it up, empty field: the most started programs first (Notepad and Calculator now lead).
-4. `powershell`, Ctrl+Shift+Enter: Windows' administrator prompt; Yes: an elevated PowerShell. Again, No at the prompt: nothing said, AxStart gone.
+4. `powershell`, Ctrl+Shift+Enter: Windows' administrator prompt; Yes: an elevated PowerShell. Again, No at the prompt: nothing said, axStart gone.
 5. `calc`, Ctrl+Shift+Enter: "Cannot start as administrator".
 6. `notepad++` (or any desktop program), Ctrl+I: "<name>, desktop program, <path>". `calc`, Ctrl+I: "Calculator, Store app".
-7. A desktop program, Ctrl+O: AxFile opens on its folder with the program file selected. A Store app, Ctrl+O: "No file location for <name>".
+7. A desktop program, Ctrl+O: axFile opens on its folder with the program file selected. A Store app, Ctrl+O: "No file location for <name>".
 8. F5: "Programs refreshed, n programs".
 
 ## 4. The hotkey
@@ -45,14 +45,14 @@ Before starting: install the build (`publish.ps1`), or quit any running AxStart 
 1. Options, Hotkey: the notice says the key in use; the field says "Ctrl+Shift+Space".
 2. Press A alone: "Use Ctrl, Alt or the Windows key with it". Press Shift+A: the same.
 3. Press Ctrl+Alt+K: the field says it and NVDA reads it. Enter: "Hotkey Ctrl+Alt+K".
-4. Hide; Ctrl+Alt+K brings AxStart up; Ctrl+Shift+Space no longer does.
+4. Hide; Ctrl+Alt+K brings axStart up; Ctrl+Shift+Space no longer does.
 5. Options, Hotkey, a key another program holds (if one is known), Enter: "<key> is taken by another program"; the old key still works.
 6. Options, Hotkey, Escape: the key in use is unchanged. Set it back to Ctrl+Shift+Space.
 
 ## 5. Sign-in and update
 
 1. Options, General, Start with Windows is checked; sign out and in: Ctrl+Shift+Space works without starting anything.
-2. Uncheck it, sign out and in: the hotkey does nothing until AxStart is started from the Start menu. Check it again.
+2. Uncheck it, sign out and in: the hotkey does nothing until axStart is started from the Start menu. Check it again.
 3. Options, General, Say the first match while typing off: typing says nothing; Ctrl+I says the match. On again.
-4. An update in place from another Axit window: afterwards Ctrl+Shift+Space still works (AxStart was stopped and started again hidden).
-5. AxStart, Quit AxStart: the hotkey does nothing until AxStart is started again.
+4. An update in place from another Axit window: afterwards Ctrl+Shift+Space still works (axStart was stopped and started again hidden).
+5. axStart, Quit axStart: the hotkey does nothing until axStart is started again.

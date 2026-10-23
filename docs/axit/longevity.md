@@ -13,7 +13,7 @@ code like the specs; `review-2026-10-23.md` is the review it came out of.
 - **One self-contained executable.** The .NET runtime ships inside `Axit.exe`; an installed copy keeps working whatever
   happens to the .NET installed on the machine, and every released zip stays downloadable from GitHub while the
   repository exists.
-- **Local first (G6, B-15).** Every app but AxClaude keeps its full use with the network off; the update check is the
+- **Local first (G6, B-15).** Every app but axClaude keeps its full use with the network off; the update check is the
   only call a window makes on its own, and it is a setting. A world without the GitHub API is a world without
   updates, not without Axit.
 - **Specifications as the source of truth,** one per app, with every behaviour change in the same commit, numbered
@@ -38,7 +38,7 @@ code like the specs; `review-2026-10-23.md` is the review it came out of.
   `TargetFramework` is built; the SDK band is `global.json`, which the workflows read too (`setup-dotnet` with
   `global-json-file`). The move to the next LTS is those two files, a run of the tests and a release.
 - **The release notes name the SDK** that built the release, so that a rebuild years later knows what to reproduce.
-- **`InventoryTests`** fails when an app lacks one of its places (AxStart lacked nine on this day).
+- **`InventoryTests`** fails when an app lacks one of its places (axStart lacked nine on this day).
 - **The NVDA record asks for the environment** of a pass (the NVDA version, the synthesizer, the Windows build), so
   that a regression is dated to an NVDA release rather than to some time.
 - **The status of an app lives in two places only**: its spec's status section and the NVDA record. The spec headers
@@ -106,7 +106,7 @@ In the order of what they do for the decades goal. What needed no account and no
    needs a packaged app. Cost: two sentences. Done 2026-10-23.
 10. **Claude Code's version in the log and in Copy diagnostics** (`claude --version` once at session start), and a
     fixture recorded whenever a Claude Code release note touches screen reader mode (the `record-fixture` skill),
-    since AxClaude is the one app coupled to a service that changes. Cost: one process call; a fixture an hour. Done
+    since axClaude is the one app coupled to a service that changes. Cost: one process call; a fixture an hour. Done
     2026-10-23: `ClaudeLauncher.VersionAsync`, the log line `Claude Code version:` and the diagnostics line; the rule
     for the fixture is in the `record-fixture` skill.
 11. **The cheap text rules enforced in `release.ps1`**: every bullet of the version's changelog section starts with an
@@ -138,7 +138,7 @@ the flags stay in `publish.ps1`, the one way to build a release).
 | The repository moves or its owner's account ends | years | The organization with a second owner (3.2); the redirect; the settings key. |
 | Windows removes an API | years; MFPlay is the one with a notice | The API table with its fallbacks (3.6); every API is behind one file. |
 | NVDA changes how it reads a control | each NVDA release | The yearly pass (3.14) with the environment recorded; the gotchas in `src/AxClaude/CLAUDE.md` say what is relied on. |
-| Claude Code changes its screen reader mode | any release of Claude Code | The fixtures and the recorded version (3.10); AxClaude is a thin layer and the parser's patterns are one class. |
+| Claude Code changes its screen reader mode | any release of Claude Code | The fixtures and the recorded version (3.10); axClaude is a thin layer and the parser's patterns are one class. |
 | Windows PowerShell 5.1, which the local scripts are written for, is retired | not announced; it is a Windows component | The scripts run under pwsh 7 in CI already; a pwsh-only Windows is a known edit to `Updater` (`powershell.exe`) and `prepare.ps1` (`System.Speech`). |
 | The one maintainer is away | any time | Everything a stranger needs is written down: `README.md` (build, test, release), `CONTRIBUTING.md`, the specs, the notes, this page; the NVDA pass is the one thing a stranger cannot do alone, and the record says what "passed" meant. |
 | The documents rot | every week of fast work | The tests that read the files (`InventoryTests`, `KeyTests`, `MenuTests`, `PrivacyTests`); the status in two places only; the review of 2026-10-23 as the baseline. |

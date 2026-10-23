@@ -1,17 +1,17 @@
 namespace AxClaude.Core.Privacy;
 
 /// <summary>
-/// Keeps AxClaude's own files (raw recordings, exported conversations; all named <c>axclaude-…</c>) out of the git
+/// Keeps axClaude's own files (raw recordings, exported conversations; all named <c>axclaude-…</c>) out of the git
 /// repository of the project folder Claude runs in (D34). The patterns go into the repository's local exclude file,
 /// <c>.git\info\exclude</c>, which git reads like a <c>.gitignore</c> but never commits, so the project's own files are
 /// not touched. A marked block holds them; off removes the block, to commit such a file on purpose.
 /// </summary>
 public static class GitExclude
 {
-    public const string BlockStart = "# AxClaude: its recordings and saved conversations stay out of git (Options menu)";
-    public const string BlockEnd = "# end AxClaude";
+    public const string BlockStart = "# axClaude: its recordings and saved conversations stay out of git (Options menu)";
+    public const string BlockEnd = "# end axClaude";
 
-    /// <summary>The patterns: every file AxClaude offers to save starts with <c>axclaude-</c>.</summary>
+    /// <summary>The patterns: every file axClaude offers to save starts with <c>axclaude-</c>.</summary>
     public static readonly IReadOnlyList<string> Patterns = ["axclaude-*.vt", "axclaude-*.vt.chunks.txt", "axclaude-*.txt"];
 
     /// <summary>

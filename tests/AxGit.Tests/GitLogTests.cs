@@ -2,7 +2,7 @@ using AxGit.Core;
 
 namespace AxGit.Tests;
 
-/// <summary>The Log view read off git log with AxGit's format (docs/axgit/SPEC.md AG-4).</summary>
+/// <summary>The Log view read off git log with axGIT's format (docs/axgit/SPEC.md AG-4).</summary>
 public sealed class GitLogTests
 {
     [Fact]
@@ -10,7 +10,7 @@ public sealed class GitLogTests
     {
         var commits = GitLog.Parse(
             "3369581\t2026-10-18\tKyle\tRelease 2.11.0\n" +
-            "efe0662\t2026-10-18\tKyle\tRecord AxGit and AxFile as later apps in the plan\n" +
+            "efe0662\t2026-10-18\tKyle\tRecord axGIT and axFile as later apps in the plan\n" +
             "\n" +
             "c2e4c25\t2026-10-18\tKyle\tSave conversation as is Export conversation: colons, too\r\n");
         Assert.Equal(3, commits.Count);

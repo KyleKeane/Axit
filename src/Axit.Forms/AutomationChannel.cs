@@ -239,7 +239,7 @@ internal sealed class AutomationChannel : IMessageFilter
         _ => control.Text,
     };
 
-    /// <summary>The focused list's items, or the list named, with the selected index: a question's answers, AxFile's entries, AxGit's views.</summary>
+    /// <summary>The focused list's items, or the list named, with the selected index: a question's answers, axFile's entries, axGIT's views.</summary>
     private static AxitForm? _formForList;
 
     private static ListBox? FirstVisibleList(Control? parent)

@@ -1,6 +1,6 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
-  <!-- AxGit's pure code (docs/axgit/SPEC.md §5): git as a process, the parsers of its output, the settings; no window. -->
+  <!-- axGIT's pure code (docs/axgit/SPEC.md §5): git as a process, the parsers of its output, the settings; no window. -->
   <PropertyGroup>
     <TargetFramework>$(AxitDotNet)</TargetFramework>
     <RootNamespace>AxGit.Core</RootNamespace>

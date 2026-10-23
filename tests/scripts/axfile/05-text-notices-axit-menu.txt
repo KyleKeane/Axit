@@ -1,4 +1,4 @@
-# AxFile, test plan section 5: text, notices, the Axit menu, the command palette (docs/axfile/nvda-test-plan.md 5.1 to 5.6; AF-6).
+# axFile, test plan section 5: text, notices, the Axit menu, the command palette (docs/axfile/nvda-test-plan.md 5.1 to 5.6; AF-6).
 file home\Axit\axfile.json {"checkForUpdates": false}
 file pal\plan.md # Plan
 file pal\docs\inside.txt Inside docs.
@@ -21,13 +21,13 @@ expect said ! Windows text size
 # 5.2 Help, User guide: the guide as a notice; Escape.
 menu User guide
 expect focus "name":"User guide"
-expect focus # AxFile user guide
+expect focus # axFile user guide
 keys escape
 expect state "notice":null
 expect focus "value":"docs, folder"
 
-# 5.3 The Axit menu: New window with AxFile among the apps, Close all windows, About's Version "Axit <version>".
-expect commands "AxFile, Axit, New window"
+# 5.3 The Axit menu: New window with axFile among the apps, Close all windows, About's Version "Axit <version>".
+expect commands "axFile, Axit, New window"
 expect commands "Close all windows, Axit"
 menu Version, Axit, About
 expect state Axit 3.
@@ -64,10 +64,10 @@ expect focus "value":"No actions yet"
 keys escape
 expect focus "value":"other, folder"
 
-# 5.5 Close the window and start AxFile without a folder: it opens on the same folder, the last one.
+# 5.5 Close the window and start axFile without a folder: it opens on the same folder, the last one.
 close
 start file
-expect state "title":"pal - AxFile"
+expect state "title":"pal - axFile"
 # A modifier key sent while the window still settles can lose its modifier (the channel); let it settle.
 wait 500
 expect focus "value":"docs, folder"

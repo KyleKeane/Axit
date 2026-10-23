@@ -1,4 +1,4 @@
-# AxGit: log and branches (docs/axgit/nvda-test-plan.md section 4; SPEC AG-4, AG-5, AG-7).
+# axGIT: log and branches (docs/axgit/nvda-test-plan.md section 4; SPEC AG-4, AG-5, AG-7).
 # A scratch repository with a bare repository in {temp} as its remote (never a network remote), a second branch, and
 # a clone that pushes a commit the scratch repository has not fetched yet.
 # The update check off in the run's own settings (AXIT_HOME): a network call, and its failure is a logged ERROR.

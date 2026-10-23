@@ -8,18 +8,18 @@ public sealed class AxitWindowsTests
     /// <summary>In Z order, the most recently used first; handle 3 is the bundle's own message box, no app's window.</summary>
     private static readonly IReadOnlyList<AxitWindow> Windows =
     [
-        new(1, "*notes.md - AxDown"),
-        new(2, "my - project - AxClaude"),
+        new(1, "*notes.md - axDown"),
+        new(2, "my - project - axClaude"),
         new(3, "Axit"),
-        new(4, "AxClaude"),
-        new(5, "Untitled - AxDown"),
+        new(4, "axClaude"),
+        new(5, "Untitled - axDown"),
     ];
 
     [Theory]
-    [InlineData("notes.md - AxDown", "AxDown")]
-    [InlineData("*notes.md - AxDown", "AxDown")]
-    [InlineData("my - project - AxClaude", "AxClaude")]
-    [InlineData("AxClaude", "AxClaude")]
+    [InlineData("notes.md - axDown", "axDown")]
+    [InlineData("*notes.md - axDown", "axDown")]
+    [InlineData("my - project - axClaude", "axClaude")]
+    [InlineData("axClaude", "axClaude")]
     public void The_app_is_what_the_title_ends_with(string title, string app) => Assert.Equal(app, AxitWindows.AppOf(title));
 
     [Fact]
@@ -32,7 +32,7 @@ public sealed class AxitWindowsTests
     [Fact]
     public void An_apps_list_keeps_the_current_window()
     {
-        Assert.Equal("AxClaude", Dispatch.Apps[0].Name);
+        Assert.Equal("axClaude", Dispatch.Apps[0].Name);
         Assert.Equal([2, 4], AxitWindows.Of(Windows, Dispatch.Apps[0]).Select(w => (int)w.Handle));
         Assert.Equal([1, 5], AxitWindows.Of(Windows, Dispatch.Apps[1]).Select(w => (int)w.Handle));
     }
@@ -40,11 +40,11 @@ public sealed class AxitWindowsTests
     [Fact]
     public void Labels_number_the_items_and_name_the_apps_with_the_letter_after_Ax()
     {
-        Assert.Equal("&1. notes.md - AxDown", AxitWindows.Label(0, "notes.md - AxDown"));
+        Assert.Equal("&1. notes.md - axDown", AxitWindows.Label(0, "notes.md - axDown"));
         Assert.Equal("&9. a", AxitWindows.Label(8, "a"));
         Assert.Equal("&a. a", AxitWindows.Label(9, "a"));
-        Assert.Equal("&2. Q && A - AxDown", AxitWindows.Label(1, "Q & A - AxDown"));
-        Assert.Equal("Ax&Claude", AxitWindows.AppLabel(Dispatch.Apps[0]));
-        Assert.Equal("Ax&Down", AxitWindows.AppLabel(Dispatch.Apps[1]));
+        Assert.Equal("&2. Q && A - axDown", AxitWindows.Label(1, "Q & A - axDown"));
+        Assert.Equal("ax&Claude", AxitWindows.AppLabel(Dispatch.Apps[0]));
+        Assert.Equal("ax&Down", AxitWindows.AppLabel(Dispatch.Apps[1]));
     }
 }

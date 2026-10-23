@@ -1,4 +1,4 @@
-# AxMedia manual tests
+# axMedia manual tests
 
 The steps and every expected announcement are in `docs/axmedia/nvda-test-plan.md`. This file says which folder each section uses. Run `.\manual_tests\prepare.ps1 axmedia` first.
 
@@ -11,15 +11,15 @@ Section 1 and section 3, steps 1 to 4 and 8.
 - Four tracks of 15 seconds, each saying "First queue, track n of 4".
 - `not-media-a-text-file.txt`: add it with Ctrl+O, All files; Enter on it says "Cannot play" and the next plays.
 - `cannot-decode-broken.opus`: not real sound; "Cannot play" and the next plays.
-- Start AxMedia empty, Ctrl+Shift+O, pick this folder: "Added 5", the four tracks and the `.opus` file, which counts as sound by its name.
+- Start axMedia empty, Ctrl+Shift+O, pick this folder: "Added 5", the four tracks and the `.opus` file, which counts as sound by its name.
 
 ## replacement-queue-play-to-replace-the-first
 
-Does playing a folder replace the queue? Play `first-queue-play-this-folder` first. Then, from AxFile on this folder, Ctrl+Enter (or `axmedia` with this folder's path): the queue now holds only the three "Replacement queue" tracks, and the first queue's tracks are gone. Section 2, steps 1 and 2.
+Does playing a folder replace the queue? Play `first-queue-play-this-folder` first. Then, from axFile on this folder, Ctrl+Enter (or `axmedia` with this folder's path): the queue now holds only the three "Replacement queue" tracks, and the first queue's tracks are gone. Section 2, steps 1 and 2.
 
 ## add-to-queue-folder-a and add-to-queue-folder-b
 
-Does adding keep the queue? With anything playing, in AxFile select both folders, Ctrl+Shift+Q: "Added 6 to AxMedia's queue", the sound goes on. In AxMedia, End: the last tracks say "Added folder B". Section 2, steps 3 and 4. From the console: `axmedia --add <path of add-to-queue-folder-a>`.
+Does adding keep the queue? With anything playing, in axFile select both folders, Ctrl+Shift+Q: "Added 6 to axMedia's queue", the sound goes on. In axMedia, End: the last tracks say "Added folder B". Section 2, steps 3 and 4. From the console: `axmedia --add <path of add-to-queue-folder-a>`.
 
 ## seek-and-speed-one-long-file
 

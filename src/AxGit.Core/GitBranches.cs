@@ -47,7 +47,7 @@ public sealed record Branch(string Name, bool Current, string? Upstream, int Ahe
     public IReadOnlyList<string> SwitchArguments => ["switch", Name];
 }
 
-/// <summary>Reads the branch list as AxGit asks for it: name, HEAD mark, upstream and its track state, separated by tabs (SPEC.md AG-5.1).</summary>
+/// <summary>Reads the branch list as axGIT asks for it: name, HEAD mark, upstream and its track state, separated by tabs (SPEC.md AG-5.1).</summary>
 public static class GitBranches
 {
     public static readonly IReadOnlyList<string> Arguments =

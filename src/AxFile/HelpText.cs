@@ -3,10 +3,10 @@ using Axit.Core;
 
 namespace AxFile;
 
-/// <summary>The texts AxFile shows as notices: the keyboard shortcuts (F1) and the user guide; About is the bundle's (<c>Axit.Core.BundleAbout</c>).</summary>
+/// <summary>The texts axFile shows as notices: the keyboard shortcuts (F1) and the user guide; About is the bundle's (<c>Axit.Core.BundleAbout</c>).</summary>
 public static class HelpText
 {
-    /// <summary>The F1 text (SPEC.md AF-6.3): a first line naming the text's own keys, then one Markdown heading per group (bundle AX-7.2): the bundle-wide keys, then AxFile's own by what they do.</summary>
+    /// <summary>The F1 text (SPEC.md AF-6.3): a first line naming the text's own keys, then one Markdown heading per group (bundle AX-7.2): the bundle-wide keys, then axFile's own by what they do.</summary>
     public const string Shortcuts = """
         In this text: h and Shift+H move by heading, 1 to 6 by level. Ctrl+F finds, F3 and Shift+F3 the next and the previous match
 
@@ -16,7 +16,7 @@ public static class HelpText
           Tab, Shift+Tab, Ctrl+Tab, Ctrl+Shift+Tab or F6: between the folder list and the Actions list
           Ctrl+F: find an entry whose name contains the text. F3 and Shift+F3: the next or the previous match
           Ctrl+Plus, Ctrl+Minus: bigger or smaller text
-          Alt: the menu. Alt+F4: close AxFile
+          Alt: the menu. Alt+F4: close axFile
           Alt+A: the Axit menu: the command palette, a new window of any app, the files and folders closed lately, the open Axit windows, most recent first (Alt+A, O, 1 is the one you were in last) and by type, Close all windows, Check for updates, and About
 
         ## Moving around
@@ -24,15 +24,15 @@ public static class HelpText
           Type the start of a name, the letters within a second of each other: the first name starting with it, as in File Explorer; the same letter again, the next such name; the low note when no name starts with it
           Enter or Right Arrow on a folder: into it; Right on a file plays the low note and never opens it. Backspace, Left Arrow or Alt+Up: the folder above, the one you left selected; from a drive's top, This PC with the drives. Each says the folder, its count and the entry you land on: "docs, 5 items, plan.md"
           Ctrl+G or Alt+D: go to a typed path, %USERPROFILE%\Downloads for instance; in its field, Down and Up complete the path from what you typed, "Documents, folder, 2 of 5", and Right at the end of a completed folder goes into it. Ctrl+O: the Windows folder picker. Folder, Open recent folder and Folder, Favorites: by number. Ctrl+D: add this folder to Favorites, or remove it
-          Ctrl+N: a new AxFile window on this folder. F5: read the folder again
+          Ctrl+N: a new axFile window on this folder. F5: read the folder again
           Ctrl+Shift+F: filter the list to the names containing a text, "3 of 24 items, filter chap"; Escape in the list clears it once nothing is selected. Folder, Sort by: name, date or size
           Folder, Drives: the drives by number, This PC, Eject this drive, Drive properties
 
         ## Opening
-          Enter on a file: the program Windows has for it (the one you made its default: AxDown, AxMedia, AxPreview or any other), or the Windows dialog that picks one when there is none
-          Shift+Enter: read the file in AxPreview; a folder opens in a new AxFile window
-          Ctrl+E: edit the file in AxDown, or AxJSON for a .json file
-          Ctrl+Enter: play the folder's sound and video files in AxMedia. Ctrl+Shift+Q: add the entry, or the selected entries, to AxMedia's queue, staying here
+          Enter on a file: the program Windows has for it (the one you made its default: axDown, axMedia, axPreview or any other), or the Windows dialog that picks one when there is none
+          Shift+Enter: read the file in axPreview; a folder opens in a new axFile window
+          Ctrl+E: edit the file in axDown, or axJSON for a .json file
+          Ctrl+Enter: play the folder's sound and video files in axMedia. Ctrl+Shift+Q: add the entry, or the selected entries, to axMedia's queue, staying here
           Shift+F10, or the Applications key: the entry's menu, one list in File Explorer's order, with Open with (Windows default, Choose a program, your own programs), Open in Axit (every app) and Windows menu, the full Windows menu for the entry. Ctrl+I inside this menu says the entry without closing it
           Alt+Enter: the entry's Properties, the Windows sheet
 
@@ -41,8 +41,8 @@ public static class HelpText
           Shift+Down, Shift+Up, Shift+Home, Shift+End: select from where you started to there, as in File Explorer, keeping what was selected before
           Shift+Space: select from the nearest selected entry to the one you are on, above or below; with no other selected, as Space
           Ctrl+A: select all. Ctrl+Shift+A, or Escape: deselect all. Ctrl+I says how many are selected
-          Cut, Copy, Delete, Copy path, Move to new folder, Compress to zip and Add to AxMedia's queue act on the selected entries, or on the entry you are on when none is selected
-          Alt+S: the Selection menu, the selected entries from anywhere: select all, deselect all, select to here, then Cut, Copy, Delete, Move to new folder, Compress to zip, Add to AxMedia's queue and Copy paths on them alone; "None selected" when there are none
+          Cut, Copy, Delete, Copy path, Move to new folder, Compress to zip and Add to axMedia's queue act on the selected entries, or on the entry you are on when none is selected
+          Alt+S: the Selection menu, the selected entries from anywhere: select all, deselect all, select to here, then Cut, Copy, Delete, Move to new folder, Compress to zip, Add to axMedia's queue and Copy paths on them alone; "None selected" when there are none
           Every change of the selection is a line in the Actions list's Selection section; Ctrl+Z on that line puts the selection back as it was
 
         ## File operations
@@ -55,9 +55,9 @@ public static class HelpText
 
         ## Information
           Ctrl+I: the entry's size and date; for a drive, the free space
-          Ctrl+Shift+W: show the entry in File Explorer. Ctrl+W: show the folder in File Explorer. Folder, Show current folder in: AxClaude, AxGit, AxTerminal
+          Ctrl+Shift+W: show the entry in File Explorer. Ctrl+W: show the folder in File Explorer. Folder, Show current folder in: axClaude, axGIT, axTerminal
           NVDA+End: the status bar: the newest operation on the left, the folder's full path on the right
-          Ctrl+S: nothing to save here; AxFile says so
+          Ctrl+S: nothing to save here; axFile says so
 
         ## The Actions list
           Under the folder list, always; "No actions yet" until the first operation. Tab, Shift+Tab, Ctrl+Tab, Ctrl+Shift+Tab or F6 moves between the two lists, Escape goes back to the folder list, Folder, Actions goes there
@@ -66,7 +66,7 @@ public static class HelpText
           Enter: go to where it happened, the folder list on the entry it made, moved or selected. Ctrl+Z: undo this line, whatever its place; Ctrl+Z in the folder list undoes operations only. Ctrl+I: its section, number and time, "Operations, 3 of 12, 21:04"
 
         ## Notices
-          AxFile's questions, errors and help texts appear inside the window, in place of the lists.
+          axFile's questions, errors and help texts appear inside the window, in place of the lists.
           Tab moves between the text, a field and the buttons. Enter chooses the main button. Escape closes the notice. In a notice's text, h, 1 to 6 and Ctrl+F work as in this one
         """;
 

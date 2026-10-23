@@ -1,9 +1,9 @@
-# AxGit: changes (docs/axgit/nvda-test-plan.md section 3; SPEC AG-3, AG-7).
+# axGIT: changes (docs/axgit/nvda-test-plan.md section 3; SPEC AG-3, AG-7).
 # A scratch repository with one commit, then a modified tracked file and an untracked one.
 # The update check off in the run's own settings (AXIT_HOME): a network call, and its failure is a logged ERROR.
 file home\Axit\axgit.json {"checkForUpdates": false}
 run git init -q -b main repo
-# The scratch repository's own identity, for the commit AxGit makes (the user's configuration is never read or changed).
+# The scratch repository's own identity, for the commit axGIT makes (the user's configuration is never read or changed).
 run git -C repo config user.name Test
 run git -C repo config user.email none
 file repo\a.txt hello\nworld

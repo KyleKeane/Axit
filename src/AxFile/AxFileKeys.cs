@@ -1,7 +1,7 @@
 namespace AxFile;
 
 /// <summary>
-/// AxFile's window-specific keys (SPEC.md AF-6.2; bundle AX-8). A key is changed here and nowhere else: the menu
+/// axFile's window-specific keys (SPEC.md AF-6.2; bundle AX-8). A key is changed here and nowhere else: the menu
 /// items, the key switch in <c>FileForm.ProcessWindowKey</c> and the F1 text read this table. The bundle-wide keys
 /// (F1, the control keys, find, Ctrl+S, text size) are <c>Axit.Forms.BundleKeys</c>. Enter, Backspace, Space, F2,
 /// Delete, Ctrl+X, Ctrl+C, Ctrl+V, Ctrl+A, Ctrl+Shift+A, Shift+F10 and the Applications key act in the folder list
@@ -13,7 +13,7 @@ public static class AxFileKeys
     /// <summary>In the folder list: Enter opens the entry (a folder in the list, a file in the program Windows has for it); in the Actions list: where the action left things.</summary>
     public const Keys Open = Keys.Return;
 
-    /// <summary>In the folder list: the file read in AxPreview (AF-3.2); a folder in a new AxFile window, File Explorer's Shift+Enter.</summary>
+    /// <summary>In the folder list: the file read in axPreview (AF-3.2); a folder in a new axFile window, File Explorer's Shift+Enter.</summary>
     public const Keys Preview = Keys.Shift | Keys.Return;
 
     /// <summary>In the list: the parent folder, the folder just left selected; Alt+Up the same from anywhere in the window.</summary>
@@ -21,7 +21,7 @@ public static class AxFileKeys
 
     public const Keys UpAlso = Keys.Alt | Keys.Up;
 
-    /// <summary>A new AxFile window on the folder shown, File Explorer's key for it (AF-3.3).</summary>
+    /// <summary>A new axFile window on the folder shown, File Explorer's key for it (AF-3.3).</summary>
     public const Keys NewWindow = Keys.Control | Keys.N;
 
     public const Keys Refresh = Keys.F5;
@@ -120,17 +120,17 @@ public static class AxFileKeys
 
     public const Keys LastItemAlso = Keys.End;
 
-    /// <summary>In the folder list: AxMedia on the folder, its media files from the first (AF-5).</summary>
+    /// <summary>In the folder list: axMedia on the folder, its media files from the first (AF-5).</summary>
     public const Keys PlayFolder = Keys.Control | Keys.Return;
 
-    /// <summary>In the folder list: the entry, or the marked entries, to the end of AxMedia's queue (AF-5).</summary>
+    /// <summary>In the folder list: the entry, or the marked entries, to the end of axMedia's queue (AF-5).</summary>
     public const Keys AddToQueue = Keys.Control | Keys.Shift | Keys.Q;
 
     /// <summary>Every key of the window with its name, for the collision test and the F1 text.</summary>
     public static readonly IReadOnlyList<(string Name, Keys Key)> All =
     [
         ("Open (in the folder list); go to the action's place (in the Actions list)", Open),
-        ("Preview in AxPreview, or a folder in a new window (in the folder list)", Preview),
+        ("Preview in axPreview, or a folder in a new window (in the folder list)", Preview),
         ("Up one level (in the folder list)", Up),
         ("Up one level", UpAlso),
         ("New window", NewWindow),
@@ -171,7 +171,7 @@ public static class AxFileKeys
         ("Into the folder (in the folder list); into the completed folder (in the Go to folder field)", IntoFolder),
         ("Up one level (in the folder list)", OutOfFolder),
         ("The edge earcon at the last entry (in a list)", LastItemAlso),
-        ("Play the folder in AxMedia (in the folder list)", PlayFolder),
-        ("Add to AxMedia's queue (in the folder list)", AddToQueue),
+        ("Play the folder in axMedia (in the folder list)", PlayFolder),
+        ("Add to axMedia's queue (in the folder list)", AddToQueue),
     ];
 }

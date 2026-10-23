@@ -4,10 +4,10 @@ using Axit.Core;
 namespace AxStart.Core;
 
 /// <summary>
-/// Everything AxStart remembers between runs (SPEC.md AS-5.1), in <c>%APPDATA%\Axit\axstart.json</c> through the
+/// Everything axStart remembers between runs (SPEC.md AS-5.1), in <c>%APPDATA%\Axit\axstart.json</c> through the
 /// bundle's <see cref="SettingsFile"/>: the font and the update check from <see cref="WindowSettings"/> (the window's
 /// place is not used: the window is centred), plus the hotkey, Start with Windows, Say the first match while typing,
-/// and how often AxStart started each program, for the order of the matches. A missing or unreadable file falls back
+/// and how often axStart started each program, for the order of the matches. A missing or unreadable file falls back
 /// to the defaults.
 /// </summary>
 public sealed class StartSettings : WindowSettings
@@ -16,13 +16,13 @@ public sealed class StartSettings : WindowSettings
     [JsonPropertyName("hotkey")]
     public string HotkeyText { get; set; } = Hotkey.Default.ToString();
 
-    /// <summary>AxStart starts hidden at sign-in (AS-1.3).</summary>
+    /// <summary>axStart starts hidden at sign-in (AS-1.3).</summary>
     public bool StartWithWindows { get; set; } = true;
 
     /// <summary>The first match and the count said after the typing pauses (AS-3.2).</summary>
     public bool SayFirstMatch { get; set; } = true;
 
-    /// <summary>Each program's display name and how often AxStart started it (AS-2.2).</summary>
+    /// <summary>Each program's display name and how often axStart started it (AS-2.2).</summary>
     public Dictionary<string, int> Starts { get; set; } = new(StringComparer.OrdinalIgnoreCase);
 
     public static string DefaultPath => AppPaths.SettingsFile("axstart");

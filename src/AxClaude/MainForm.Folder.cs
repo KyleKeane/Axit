@@ -7,7 +7,7 @@ internal sealed partial class MainForm
 {
     // ---- project folder ----
 
-    /// <summary>Session → Show current folder in → AxGit (FR-8.2): a new AxGit window on the repository that holds the project folder.</summary>
+    /// <summary>Session → Show current folder in → axGIT (FR-8.2): a new axGIT window on the repository that holds the project folder.</summary>
     private void OpenInAxGit()
     {
         if (_folder is null)
@@ -19,7 +19,7 @@ internal sealed partial class MainForm
         AxitMenu.Start(Dispatch.AxGit, _folder);
     }
 
-    /// <summary>Session → Show current folder in → AxTerminal: a new AxTerminal window with a shell in the project folder (docs/axterminal/SPEC.md AT-1.5).</summary>
+    /// <summary>Session → Show current folder in → axTerminal: a new axTerminal window with a shell in the project folder (docs/axterminal/SPEC.md AT-1.5).</summary>
     private void OpenInAxTerminal()
     {
         if (_folder is null)
@@ -31,7 +31,7 @@ internal sealed partial class MainForm
         AxitMenu.Start(Dispatch.AxTerminal, _folder);
     }
 
-    /// <summary>Session → Show current folder in → AxFile: a new AxFile window listing the project folder (docs/axfile/SPEC.md AF-1.3).</summary>
+    /// <summary>Session → Show current folder in → axFile: a new axFile window listing the project folder (docs/axfile/SPEC.md AF-1.3).</summary>
     private void OpenInAxFile()
     {
         if (_folder is null)
@@ -71,7 +71,7 @@ internal sealed partial class MainForm
         if (_folder is { } old && !string.Equals(old, folder, StringComparison.OrdinalIgnoreCase))
         {
             // AX-9.4: the folder left behind joins the bundle's Recently closed list.
-            RecentlyClosed.Remember("AxClaude", old);
+            RecentlyClosed.Remember("axClaude", old);
         }
 
         _folder = folder;

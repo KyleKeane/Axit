@@ -1,4 +1,4 @@
-# AxDown, test plan section 4 (Find and go to line), driven from inside the window (docs/axdown/nvda-test-plan.md).
+# axDown, test plan section 4 (Find and go to line), driven from inside the window (docs/axdown/nvda-test-plan.md).
 # The run's own settings: no update check, whose network call logs an ERROR when GitHub cannot be reached.
 file home\Axit\axdown.json {"checkForUpdates": false}
 file find.md # Find and go to line\n\nThe first apple is on line 3.\nNothing here.\nThe second apple is on line 5.\nLine 6.\nThe last line, line 7.

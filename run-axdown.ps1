@@ -1,7 +1,7 @@
 <#
 .SYNOPSIS
-  Builds Axit and starts AxDown: run.ps1 with -App down. Every other argument goes through unchanged. Without a file
-  it opens docs\axdown\tutorial.md, the guided tour of AxDown with every Markdown structure to practise on.
+  Builds Axit and starts axDown: run.ps1 with -App down. Every other argument goes through unchanged. Without a file
+  it opens docs\axdown\tutorial.md, the guided tour of axDown with every Markdown structure to practise on.
 
 .EXAMPLE
   .\run-axdown.ps1                    # the tutorial file

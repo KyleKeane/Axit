@@ -1,12 +1,12 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
-  <!-- AxGit's window side, as a class library inside Axit.exe (docs/axit/SPEC.md AX-1.7): the window, its key table
+  <!-- axGIT's window side, as a class library inside Axit.exe (docs/axit/SPEC.md AX-1.7): the window, its key table
        and its texts; the pure code is AxGit.Core. -->
   <PropertyGroup>
     <TargetFramework>$(AxitDotNet)-windows</TargetFramework>
     <UseWindowsForms>true</UseWindowsForms>
-    <RootNamespace>AxGit</RootNamespace>
-    <AssemblyName>AxGit</AssemblyName>
+    <RootNamespace>axGIT</RootNamespace>
+    <AssemblyName>axGIT</AssemblyName>
   </PropertyGroup>
 
   <ItemGroup>

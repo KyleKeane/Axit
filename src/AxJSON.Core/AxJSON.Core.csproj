@@ -1,6 +1,6 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
-  <!-- AxJSON's pure code (docs/axjson/SPEC.md §5): the JSON outline for the navigation keys and the formatter, no window. -->
+  <!-- axJSON's pure code (docs/axjson/SPEC.md §5): the JSON outline for the navigation keys and the formatter, no window. -->
   <PropertyGroup>
     <TargetFramework>$(AxitDotNet)</TargetFramework>
     <RootNamespace>AxJSON.Core</RootNamespace>

@@ -1,23 +1,23 @@
-# AxMedia — Specification
+# axMedia — Specification
 
-AxMedia is an app of the Axit bundle (`docs/axit/SPEC.md`): a player for sound and video files with one queue, for a
+axMedia is an app of the Axit bundle (`docs/axit/SPEC.md`): a player for sound and video files with one queue, for a
 blind developer who uses the NVDA screen reader. Specified and built 2026-10-22 at the user's ask, released in 3.3.1 and checked with NVDA the same day (the record: `docs/axit/nvda-test-record.md`): the player
-that AxFile had carried since 2026-10-19 (`docs/axfile/SPEC.md` AF-5) moved here whole, so that AxFile is file
+that axFile had carried since 2026-10-19 (`docs/axfile/SPEC.md` AF-5) moved here whole, so that axFile is file
 operations and management only and playing, like viewing, is another app's with a tight hand-over (AM-D1). The
 document is kept in step with the code (a behaviour change updates it in the same commit).
 Requirements are numbered `AM-n.m` and decisions `AM-Dn`; the bundle's rules, AX-7 (accessibility), AX-8 (keys) and
-AX-9 (the Axit menu), are cited by number and not repeated. In AxMedia's code and documents, "SPEC.md" means this
-file. The inventory of the split of AxFile, what leaves it, what is shared and what is new, with the order of the
-commits, is `docs/axit/axfile-split.md`; AxPreview (`docs/axpreview/SPEC.md`) is the other half of it.
+AX-9 (the Axit menu), are cited by number and not repeated. In axMedia's code and documents, "SPEC.md" means this
+file. The inventory of the split of axFile, what leaves it, what is shared and what is new, with the order of the
+commits, is `docs/axit/axfile-split.md`; axPreview (`docs/axpreview/SPEC.md`) is the other half of it.
 
 ## 1. Summary
 
 One queue in one window: a list of the files to play, in order, the one playing marked, named with its count. Enter
 plays the file under the selection and the rest follow; the transport keys pause, seek, skip, change the speed and say
 the position on demand; the keyboard's own keys set the volume; what plays is in the status bar and the title. The
-window is reached from AxFile (Enter on a sound or video file once AxMedia is the user's default program for it,
+window is reached from axFile (Enter on a sound or video file once axMedia is the user's default program for it,
 Play folder, Add to queue, Open in Axit), from File Explorer (Open with Axit on a media file, or as the default
-program), from the Start menu, the Axit menu and the command line. A start with files while an AxMedia window is
+program), from the Start menu, the Axit menu and the command line. A start with files while an axMedia window is
 open hands them to that window rather than opening another (AM-1.2). A video's picture is drawn in an area at the
 top of the window. It works entirely offline (bundle G6).
 
@@ -26,9 +26,9 @@ top of the window. It works entirely offline (bundle G6).
 - **G1 One list, native.** A list box NVDA reads item by item, a status bar, the bundle's notices (AX-7.1).
 - **G2 The queue is the thing.** A folder of files in order is a playlist; so is what was added from anywhere. The
   queue is fixed when play starts and the user is free to roam elsewhere (AM-D2).
-- **G3 One player.** AxFile and the others hand files to the AxMedia window that is open; a second window is a
+- **G3 One player.** axFile and the others hand files to the axMedia window that is open; a second window is a
   deliberate act (the Axit menu's New window).
-- **G4 Streamlined.** What AxFile's player had and no more (AF-5): the transport, the speed, the position; the rest
+- **G4 Streamlined.** What axFile's player had and no more (AF-5): the transport, the speed, the position; the rest
   waits (§9).
 - **G5 Nothing spoken unprompted** (AX-7.3) but two things the user asked for by playing the queue: the name of the
   next file when the player moves on (a setting, AM-4.3), and "End of queue" with the done chime when it ends (AM-3.3).
@@ -38,19 +38,19 @@ top of the window. It works entirely offline (bundle G6).
 
 ## 3. Scenarios
 
-1. In AxFile on a folder of chapters, with AxMedia the default program for `.mp3` in Windows' settings, Enter on
-   `03 Chapter 3.mp3`: AxMedia opens with the folder's media files as the queue, the third playing, the window in
-   front: NVDA reads "03 Chapter 3.mp3 - AxMedia window", then "Queue, 12 items, 03 Chapter 3.mp3 (playing), 3 of
+1. In axFile on a folder of chapters, with axMedia the default program for `.mp3` in Windows' settings, Enter on
+   `03 Chapter 3.mp3`: axMedia opens with the folder's media files as the queue, the third playing, the window in
+   front: NVDA reads "03 Chapter 3.mp3 - axMedia window", then "Queue, 12 items, 03 Chapter 3.mp3 (playing), 3 of
    12". Space: "Paused at 12:40". Space: "Playing". Ctrl+Left: "12:25". Ctrl+Shift+Period: "Speed 1.25". Ctrl+Q:
    "Playing 03 Chapter 3.mp3, 12:52 of 45:30, speed 1.25". Without that default, Enter opens the file in whatever
-   plays it on the machine, and Item → Open in Axit → AxMedia does the same as above.
+   plays it on the machine, and Item → Open in Axit → axMedia does the same as above.
 2. The chapter ends: "Playing 04 Chapter 4.mp3" and the next plays; the window can be left in the background, Alt+Tab
    or the Axit menu brings the keys back.
-3. Back in AxFile, Space on two folders and Ctrl+Shift+Q: "Added 24 to AxMedia's queue"; the sound goes on and the
-   focus stays in AxFile.
-4. Start menu, "Axit AxMedia": the window opens with "Queue is empty"; Ctrl+O, pick three files: "Added 3", the first
+3. Back in axFile, Space on two folders and Ctrl+Shift+Q: "Added 24 to axMedia's queue"; the sound goes on and the
+   focus stays in axFile.
+4. Start menu, "Axit axMedia": the window opens with "Queue is empty"; Ctrl+O, pick three files: "Added 3", the first
    selected; Enter: "Playing <name>". Ctrl+Shift+O on a folder: its media files are appended.
-5. In File Explorer, right-click an `.mp3`, Open with Axit, AxMedia: the file plays with its folder's media files
+5. In File Explorer, right-click an `.mp3`, Open with Axit, axMedia: the file plays with its folder's media files
    after it.
 6. Enter on a video file: "Playing <name>", the picture appears at the top of the window; Space pauses it.
 7. A file Windows cannot decode: "Cannot play clip.ogg: this kind of file is not supported" and the next plays.
@@ -62,28 +62,28 @@ top of the window. It works entirely offline (bundle G6).
 - AM-1.1 `Axit.exe media [<file or folder>...] [--add] [--new]`: a file is played with its folder's other media files
   after it, in name order (AM-3.2); a folder's media files are played from the first; several paths are appended in
   that order and the first plays; with `--add` the paths are appended and nothing starts; no path opens the window
-  with an empty queue (§9 for the last queue). Start menu entry `Axit AxMedia`, console command `axmedia`, File
-  Explorer's Open with Axit ▸ AxMedia on files of the media kinds (AM-4.1) and AxMedia under Windows' own Open with for
-  them (type name "Media file (AxMedia)"), so that the user can make it the default program for a kind in Windows'
+  with an empty queue (§9 for the last queue). Start menu entry `Axit axMedia`, console command `axmedia`, File
+  Explorer's Open with Axit ▸ axMedia on files of the media kinds (AM-4.1) and axMedia under Windows' own Open with for
+  them (type name "Media file (axMedia)"), so that the user can make it the default program for a kind in Windows'
   settings (the installer cannot; the guide says how), the Axit menu's New window (AX-9). A media file alone on the
-  command line (`Axit song.mp3`) starts AxMedia (AX-1.2).
-- AM-1.2 **One player.** A start with paths, from AxFile, from File Explorer (a double click once AxMedia is the
-  default, or Open with Axit) or from the command line, hands them to the AxMedia window that is open, the most
+  command line (`Axit song.mp3`) starts axMedia (AX-1.2).
+- AM-1.2 **One player.** A start with paths, from axFile, from File Explorer (a double click once axMedia is the
+  default, or Open with Axit) or from the command line, hands them to the axMedia window that is open, the most
   recent by Z order when there are several, and ends; it opens a window of its own only when there is none, or with
   `--new` (the Axit menu's New window passes it). A play brings the window to the front, since the user chose to
-  open the file in its app; an add leaves the focus where it is, and AxFile says "Added 24 to AxMedia's queue"
-  (AM-D3). AxFile does nothing special: it starts the app on the paths, with `--add` for Add to queue; Enter on a
-  media file is Windows' default program, AxMedia when the user has chosen it (`docs/axfile/SPEC.md` section 9).
+  open the file in its app; an add leaves the focus where it is, and axFile says "Added 24 to axMedia's queue"
+  (AM-D3). axFile does nothing special: it starts the app on the paths, with `--add` for Add to queue; Enter on a
+  media file is Windows' default program, axMedia when the user has chosen it (`docs/axfile/SPEC.md` section 9).
 - AM-1.3 **The hand-over** between the starting process and the open window is one window message, `WM_COPYDATA`,
-  to the AxMedia window found by its title's ending through the same window list the Axit menu reads
-  (`Axit.Core/AxitWindows`), carrying a verb (`play`, `add`; AxPreview's `open`, AxStart's `show`) and the paths, one
+  to the axMedia window found by its title's ending through the same window list the Axit menu reads
+  (`Axit.Core/AxitWindows`), carrying a verb (`play`, `add`; axPreview's `open`, axStart's `show`) and the paths, one
   per line; the window answers 1 once it has taken the message, and the starting process, which waits up to five
   seconds for the answer, ends on it (AM-D4). The sending and the receiving are
-  one shared piece, `Axit.Forms/AppMessage`, which AxPreview uses the same way. Nothing listens on the network (G6).
+  one shared piece, `Axit.Forms/AppMessage`, which axPreview uses the same way. Nothing listens on the network (G6).
   Hand-overs that arrive while one is being applied wait in a queue and apply in the order they came (one queue
   drained in turn since 2026-10-23; a chain of tasks before).
 - AM-1.4 Ways out: Show current file in ▸ File Explorer (Ctrl+W: the playing file, or the file under the selection,
-  selected in File Explorer) and AxFile (the same file selected in its folder, a new AxFile window; `docs/axfile/SPEC.md`
+  selected in File Explorer) and axFile (the same file selected in its folder, a new axFile window; `docs/axfile/SPEC.md`
   AF-1.1). The Axit menu (AX-9).
 
 ### AM-2 The window
@@ -95,7 +95,7 @@ top of the window. It works entirely offline (bundle G6).
 - AM-2.2 The status bar: on the left the state, the file and the time while something plays, "Playing 03 Chapter
   3.mp3 12:40 / 45:30", moving every second; on the right the place and the speed, "3 of 12, speed 1.25"; both empty
   otherwise. The labels have no accessible name and no spring (AX-6.2).
-- AM-2.3 The title: "<name> - AxMedia" while a file plays or is paused, "AxMedia" otherwise; the Axit menu names the
+- AM-2.3 The title: "<name> - axMedia" while a file plays or is paused, "axMedia" otherwise; the Axit menu names the
   window by it (AX-9).
 - AM-2.4 A video's picture is drawn in an area at the top of the window (not focusable; never a window of its own,
   AX-7.2), two fifths of the height while a video plays or is paused, hidden otherwise; its sound goes the same way.
@@ -112,7 +112,7 @@ top of the window. It works entirely offline (bundle G6).
   appended in the picker's order, "Added 3"; Queue → Open folder… (Ctrl+Shift+O), the Windows folder picker, the
   folder's media files appended in name order, hidden ones left out, "Added 12", "No sound or video files in
   <folder>" when none; Queue → Open recent ▸, the last ten files and folders added by command or handed over as
-  one path (a start, a play or an add from AxFile), "1. name (path)" (AX-9.5), one chosen appended again. A start
+  one path (a start, a play or an add from axFile), "1. name (path)" (AX-9.5), one chosen appended again. A start
   with paths (AM-1.2): a file replaces the queue with its folder's media files from that file
   (AM-D2) and plays; a folder replaces it with the folder's from the first; `--add` appends the paths, a folder as
   its media files. Nothing starts playing on an add when nothing was playing.
@@ -155,7 +155,7 @@ top of the window. It works entirely offline (bundle G6).
 
 - AM-5.1 Menus (AX-6): **Queue (Q):** New window Ctrl+N | Open files… Ctrl+O | Open folder… Ctrl+Shift+O | Open
   recent ▸ | ─ | Play Enter | Remove Delete | Clear queue | ─ | Information Ctrl+I | Show current file in ▸ (File
-  Explorer Ctrl+W | AxFile) | ─ | Exit Alt+F4. **Play (P):** Pause or resume Space | Next file Ctrl+Shift+Right | Previous file Ctrl+Shift+Left |
+  Explorer Ctrl+W | axFile) | ─ | Exit Alt+F4. **Play (P):** Pause or resume Space | Next file Ctrl+Shift+Right | Previous file Ctrl+Shift+Left |
   Forward 15 seconds Ctrl+Right | Back 15 seconds Ctrl+Left | Go to time… Ctrl+T | ─ | Faster Ctrl+Shift+Period |
   Slower Ctrl+Shift+Comma | Normal speed | ─ | Say each file as it starts ✓ | What is playing Ctrl+Q. **Options (O):**
   Text ▸ | General ▸ (Check for updates at start ✓) | Developer ▸ (Open settings file | Copy diagnostics). **Axit (A)**
@@ -179,7 +179,7 @@ play <name>: <reason>", "Removed <name>", "Queue cleared", "Added n", "No sound 
 opened or handed over; "… in <file>" for one file that is none, "… in n paths" for several), "No sound or video files
 to add" (a recent file that is gone), "<name>, n of m", "<name>, n of m, playing, m:ss of m:ss" and "…, paused, m:ss of
 m:ss" (Ctrl+I), "Queue is empty" (a command on the empty line), "Not a time", "Not found" (find), "Nothing to save
-here", "Text size n", "Windows text size", "Copied diagnostics". In AxFile: "Added n to AxMedia's queue", "No sound or
+here", "Text size n", "Windows text size", "Copied diagnostics". In axFile: "Added n to axMedia's queue", "No sound or
 video files to add", "No sound or video files here"
 (`docs/axfile/SPEC.md`). A new selection is NVDA's own reading.
 
@@ -187,7 +187,7 @@ video files to add", "No sound or video files here"
 
 - AM-7.1 `%APPDATA%\Axit\axmedia.json` (AX-5.3; `MediaSettings` on `WindowSettings`): `speed` 1, `seekSeconds` 15,
   `sayEachFile` on, `recent` (the last ten files and folders added by command or handed over), and the window base's font, update
-  check and window fields. AxFile's `speed`, `seekSeconds` and `sayEachFile` are not carried over: the defaults are
+  check and window fields. axFile's `speed`, `seekSeconds` and `sayEachFile` are not carried over: the defaults are
   theirs.
 - AM-7.2 The log is `%LOCALAPPDATA%\Axit\logs\axmedia.log`: the start, the exit, the player's errors with Windows'
   message; no names of files.
@@ -206,11 +206,11 @@ the list (AX-7.2). The window has the accessible role Window, so that NVDA names
 src/AxMedia.Core/   class library (net10.0): MediaPlayer (MFPlay through P/Invoke: open, play, pause, position,
                     length, speed, the started, ended and failed events, a window handle for video; moved from
                     AxFile.Core unchanged), PlayQueue (the paths, the index playing, Set, Add, Remove, MoveOn, the
-                    lines; moved from AxFile.Core without the status lines, which stay AxFile's), MediaFolder (a
+                    lines; moved from AxFile.Core without the status lines, which stay axFile's), MediaFolder (a
                     folder's media files in name order, hidden ones left out), MediaSettings; references Axit.Core
 src/AxMedia/        class library (net10.0-windows): AxMediaApp (Run, Usage), MediaForm (the window, on AxitForm:
                     the queue list, the video area, the status bar and its clock, the menus, the keys, the player's
-                    events, the hand-over received through AppMessage; grown from AxFile's FileForm.Player.cs and the
+                    events, the hand-over received through AppMessage; grown from axFile's FileForm.Player.cs and the
                     queue part of FileForm.Pane.cs), AxMediaKeys, HelpText; references AxMedia.Core, Axit.Core,
                     Axit.Forms
 tests/AxMedia.Tests/ PlayQueueTests (moved), MediaFolderTests over a temporary folder, MediaSettingsTests, the
@@ -219,40 +219,40 @@ docs/axmedia/       this spec, user-guide.md (embedded), nvda-test-plan.md; the 
 ```
 
 Shared on the second use (AX-6.3), unchanged: `MediaFiles` (the extensions, `IsMedia`, the time format and the
-typed time, the speed steps) and `NaturalOrder` move from `AxFile.Core` to `Axit.Core`, since AxFile keeps asking
-which entries are media (Enter, Add to queue) and AxMedia orders a folder's files as AxFile does; `MediaFiles.Queue`
-over AxFile's entries becomes `MediaFolder` in AxMedia.Core. New in `Axit.Forms`: `AppMessage`, the `WM_COPYDATA`
-hand-over (AM-1.3), sent by AxFile and received by `MediaForm`. The player is driven from the UI thread and its
+typed time, the speed steps) and `NaturalOrder` move from `AxFile.Core` to `Axit.Core`, since axFile keeps asking
+which entries are media (Enter, Add to queue) and axMedia orders a folder's files as axFile does; `MediaFiles.Queue`
+over axFile's entries becomes `MediaFolder` in AxMedia.Core. New in `Axit.Forms`: `AppMessage`, the `WM_COPYDATA`
+hand-over (AM-1.3), sent by axFile and received by `MediaForm`. The player is driven from the UI thread and its
 events are posted back to it (AX-7.5).
 
 ## 7. Design decisions
 
-- **AM-D1 A separate app after all.** AxFile's AF-D2 (2026-10-18) made the player AxFile's feature, since a folder's
-  files are a playlist and the list was already there. The user's direction of 2026-10-22: AxFile is file operations
+- **AM-D1 A separate app after all.** axFile's AF-D2 (2026-10-18) made the player axFile's feature, since a folder's
+  files are a playlist and the list was already there. The user's direction of 2026-10-22: axFile is file operations
   and management; viewing and playing are handled elsewhere, with tight integration. The costs are known and
   accepted: the transport keys are in another window (Alt+Tab, or the Axit menu's most recent window, brings them
   back), and a hand-over mechanism exists (AM-1.3). The gains: one player for the whole bundle, reached from File
-  Explorer and the command line as well, a queue that outlives the folder list, and an AxFile with one job.
-- **AM-D2 The queue is what was handed over** (AF-D6 kept): a play from AxFile replaces the queue with the folder's
+  Explorer and the command line as well, a queue that outlives the folder list, and an axFile with one job.
+- **AM-D2 The queue is what was handed over** (AF-D6 kept): a play from axFile replaces the queue with the folder's
   media files from the chosen one, in name order, and nothing changes it while the user browses elsewhere; an add
-  appends. AxFile's own order and its hidden-files setting are not carried: AxMedia reads the folder itself, in name
+  appends. axFile's own order and its hidden-files setting are not carried: axMedia reads the folder itself, in name
   order, hidden files left out, so that the hand-over is a path, not a list.
-- **AM-D3 Play takes the focus, Add does not.** Opening a media file in AxMedia is opening it in its app, as opening a
-  Markdown file in AxDown is; the keys are then where the sound is. Add to queue is a background act, answered in
-  AxFile; a window that an add opens, when none was open, shows without activation and stays behind. Enter in AxFile itself is Windows' default program (the user's decision of 2026-10-22, `docs/axpreview/SPEC.md`
-  AP-D2): AxMedia gets Enter when the user has made it the default for the kind, as in File Explorer.
-- **AM-D4 The hand-over is a window message, sent by the app to itself.** A second AxMedia process started with
+- **AM-D3 Play takes the focus, Add does not.** Opening a media file in axMedia is opening it in its app, as opening a
+  Markdown file in axDown is; the keys are then where the sound is. Add to queue is a background act, answered in
+  axFile; a window that an add opens, when none was open, shows without activation and stays behind. Enter in axFile itself is Windows' default program (the user's decision of 2026-10-22, `docs/axpreview/SPEC.md`
+  AP-D2): axMedia gets Enter when the user has made it the default for the kind, as in File Explorer.
+- **AM-D4 The hand-over is a window message, sent by the app to itself.** A second axMedia process started with
   paths finds the open window and hands them over with `WM_COPYDATA`, Win32 of the plainest kind, synchronous and
   one-way, needing no server, no pipe, no file, and nothing of it is on the network (G6); it works the same from
-  AxFile, from File Explorer and from a console, and AxFile needs to know nothing of it. The window list already
+  axFile, from File Explorer and from a console, and axFile needs to know nothing of it. The window list already
   exists for the Axit menu (AX-9). The message carries text only.
-- **AM-D5 Windows' own decoders through one seam: MFPlay.** From AxFile's AF-D3, unchanged: no codec ships with the
+- **AM-D5 Windows' own decoders through one seam: MFPlay.** From axFile's AF-D3, unchanged: no codec ships with the
   bundle (B-10); MFPlay was chosen over MCI because Media Foundation keeps the pitch at a changed rate and decodes
   FLAC, AAC in MP4 and Opus; `mfplay.dll` ships with Windows 11; the Media Engine is the fallback should a Windows drop
   it. The user's NVDA pass of 2026-10-21 played MP3 chapters and an MP4 video through this engine with the pitch kept.
 - **AM-D6 Volume is Windows'.** The keyboard's volume keys change the system volume from any window and are read by
   NVDA (from AF-D4).
-- **AM-D7 Space pauses.** In AxFile Space marks entries, so pause had moved to Ctrl+P; in AxMedia the list is the
+- **AM-D7 Space pauses.** In axFile Space marks entries, so pause had moved to Ctrl+P; in axMedia the list is the
   queue and Space is what every player's pause is. Ctrl+P stays as the key from anywhere in the window; while a
   notice shows, the keys are the notice's, as in every window (AX-6.5).
 
@@ -261,18 +261,18 @@ events are posted back to it (AX-7.5).
 - `tests/AxMedia.Tests`: the queue (moved tests), a folder's media files in order, the settings' defaults and
   sanitising, the player's reason texts; `tests/Axit.Tests` takes `MediaFilesTests` with the move and gains
   `AppMessage`'s text form (the verb and the paths in and out).
-- Playing is checked by ear and with NVDA, `docs/axmedia/nvda-test-plan.md`: the hand-over from AxFile (Open in Axit,
-  Play folder, Add to queue, and Enter once AxMedia is the default, with and without an AxMedia window open), from
+- Playing is checked by ear and with NVDA, `docs/axmedia/nvda-test-plan.md`: the hand-over from axFile (Open in Axit,
+  Play folder, Add to queue, and Enter once axMedia is the default, with and without an axMedia window open), from
   File Explorer, the transport keys, the speed and the pitch, a video, a file Windows cannot decode, the background
-  announcement, two AxMedia windows.
+  announcement, two axMedia windows.
 
 ## 9. Open questions
 
 - Keeping the queue for the next start, with a resume position per file (an audiobook resumed where it stopped; per
   file in the settings, with a cap).
-- Reordering the queue by key (Alt+Up and Alt+Down are AxFile's words for up one level; a Move up / Move down pair).
-- A `.m3u` or `.pls` file as the queue, from AxFile's Enter or AxMedia's Open files.
-- Whether AxFile should carry remote keys for the player (pause, what is playing) sent through the hand-over; decided
+- Reordering the queue by key (Alt+Up and Alt+Down are axFile's words for up one level; a Move up / Move down pair).
+- A `.m3u` or `.pls` file as the queue, from axFile's Enter or axMedia's Open files.
+- Whether axFile should carry remote keys for the player (pause, what is playing) sent through the hand-over; decided
   against for the first build, since an answer back would need a second message (AM-D4).
 
 ## 10. Status
@@ -282,6 +282,6 @@ events are posted back to it (AX-7.5).
   `AppMessage` in `Axit.Forms`, `AxMedia.Core` (the player and the queue from AxFile.Core, `MediaFolder`,
   `MediaSettings`, 13 tests), the window (`MediaForm`), the keys, the texts, the guide, the test plan and the
   wiring (the dispatcher with AX-1.2's media rule, the installer's block with the Open with registration, the
-  icon, `run-axmedia.ps1`). The window and the hand-over are not yet checked with NVDA or heard; AxFile hands over
+  icon, `run-axmedia.ps1`). The window and the hand-over are not yet checked with NVDA or heard; axFile hands over
   in the next step of the inventory and keeps its own player until then.
 - 2026-10-22: released in 3.3.1 (3.3.0 tagged, not published). The whole NVDA test plan marked passed at the user's word, no step reported failing; the record by step is `docs/axit/nvda-test-record.md`.

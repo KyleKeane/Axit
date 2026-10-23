@@ -12,21 +12,21 @@ internal sealed partial class MainForm
     private void BuildMenus()
     {
         // The menus (FR-10): short, grouped by what the items are about, every mnemonic unique within its menu.
-        // Session is the thing worked on, as AxDown's File is: the session, where Claude runs, what the window holds.
+        // Session is the thing worked on, as axDown's File is: the session, where Claude runs, what the window holds.
         var session = new ToolStripMenuItem("&Session");
         session.DropDownItems.Add(new ToolStripMenuItem("&New session...", null, (_, _) => NewSession()) { ShortcutKeys = AxClaudeKeys.NewSession });
         session.DropDownItems.Add(new ToolStripMenuItem("&Open folder...", null, (_, _) => OpenFolder()));
         session.DropDownItems.Add(RecentFoldersItem);
-        // The standard order of a File menu (bundle AX-6): the editors have Save and Save as here; AxClaude has none.
+        // The standard order of a File menu (bundle AX-6): the editors have Save and Save as here; axClaude has none.
         session.DropDownItems.Add(new ToolStripSeparator());
         // FR-8.2: Show current folder in ▸ File Explorer and the other apps' windows on the project folder.
         var showIn = new ToolStripMenuItem("Show current folder &in");
         showIn.DropDownItems.Add(new ToolStripMenuItem("File &Explorer", null, (_, _) => ShowInExplorer()) { ShortcutKeys = AxClaudeKeys.ShowInExplorer });
-        // AxGit on the repository that holds the project folder, a new window (FR-8.2; docs/axgit/SPEC.md AG-1.4).
+        // axGIT on the repository that holds the project folder, a new window (FR-8.2; docs/axgit/SPEC.md AG-1.4).
         showIn.DropDownItems.Add(new ToolStripMenuItem("Ax&Git", null, (_, _) => OpenInAxGit()));
-        // AxTerminal with a shell in the project folder, a new window (docs/axterminal/SPEC.md AT-1.5).
+        // axTerminal with a shell in the project folder, a new window (docs/axterminal/SPEC.md AT-1.5).
         showIn.DropDownItems.Add(new ToolStripMenuItem("Ax&Terminal", null, (_, _) => OpenInAxTerminal()));
-        // AxFile listing the project folder, a new window (docs/axfile/SPEC.md AF-1.3).
+        // axFile listing the project folder, a new window (docs/axfile/SPEC.md AF-1.3).
         showIn.DropDownItems.Add(new ToolStripMenuItem("Ax&File", null, (_, _) => OpenInAxFile()));
         session.DropDownItems.Add(showIn);
         session.DropDownItems.Add(new ToolStripSeparator());

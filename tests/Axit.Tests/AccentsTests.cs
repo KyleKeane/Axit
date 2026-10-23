@@ -2,7 +2,7 @@ using Axit.Core;
 
 namespace Axit.Tests;
 
-/// <summary>The European letters taken apart and put together without the globalization data (Accents; TextMatch AX-10.3, AxFile's lookalike names).</summary>
+/// <summary>The European letters taken apart and put together without the globalization data (Accents; TextMatch AX-10.3, axFile's lookalike names).</summary>
 public sealed class AccentsTests
 {
     [Fact]

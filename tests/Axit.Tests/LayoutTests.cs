@@ -51,7 +51,7 @@ public sealed class LayoutTests
         Assert.Empty(problems);
     }
 
-    /// <summary><c>AxDown.Core</c> and <c>AxDown</c> are both the app AxDown.</summary>
+    /// <summary><c>AxDown.Core</c> and <c>axDown</c> are both the app axDown.</summary>
     private static string AppOf(string project) =>
         project.EndsWith(".Core", StringComparison.Ordinal) ? project[..^".Core".Length] : project;
 

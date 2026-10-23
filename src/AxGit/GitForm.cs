@@ -7,7 +7,7 @@ using Axit.Forms;
 namespace AxGit;
 
 /// <summary>
-/// AxGit's window (SPEC.md AG-2): a menu bar, one list with three views (Changes, Log, Branches), one read-only text
+/// axGIT's window (SPEC.md AG-2): a menu bar, one list with three views (Changes, Log, Branches), one read-only text
 /// for the details (a diff, a commit, what git answered), and a status bar with the branch. Every action is one git
 /// command run on a background task (AG-D6); the result is one announcement, or a notice with git's whole answer.
 /// The notices, the fonts, the window's place, the update flow and find are the bundle's window base
@@ -98,7 +98,7 @@ public sealed partial class GitForm : AxitForm
         repository.DropDownItems.Add(new ToolStripSeparator());
         repository.DropDownItems.Add(Git(Item("Re&fresh", () => Do(() => RefreshAsync(announce: true)), AxGitKeys.Refresh)));
         repository.DropDownItems.Add(new ToolStripSeparator());
-        // Show current repository in ▸ File Explorer, AxClaude, AxTerminal, AxFile: the way back to where the user came from (AG-1.4).
+        // Show current repository in ▸ File Explorer, axClaude, axTerminal, axFile: the way back to where the user came from (AG-1.4).
         var showIn = new ToolStripMenuItem("Show current repository &in");
         showIn.DropDownItems.Add(Item("File &Explorer", ShowInExplorer, AxGitKeys.ShowInExplorer));
         showIn.DropDownItems.Add(new ToolStripMenuItem("Ax&Claude", null, (_, _) => OpenIn(Dispatch.AxClaude)));
@@ -421,7 +421,7 @@ public sealed partial class GitForm : AxitForm
         OpenInExplorer(_root);
     }
 
-    /// <summary>Repository → Show current repository in → AxClaude, AxTerminal, AxFile (AG-1.4): a new window of that app on the repository's folder.</summary>
+    /// <summary>Repository → Show current repository in → axClaude, axTerminal, axFile (AG-1.4): a new window of that app on the repository's folder.</summary>
     private void OpenIn(string verb)
     {
         if (_root is null)
@@ -433,7 +433,7 @@ public sealed partial class GitForm : AxitForm
         AxitMenu.Start(verb, _root);
     }
 
-    /// <summary>Changes → Open file in editor (Ctrl+E): the selected file in AxJSON for .json, AxDown otherwise (AG-1.4).</summary>
+    /// <summary>Changes → Open file in editor (Ctrl+E): the selected file in axJSON for .json, axDown otherwise (AG-1.4).</summary>
     private void OpenInEditor()
     {
         if (_root is null)
@@ -523,7 +523,7 @@ public sealed partial class GitForm : AxitForm
         SetGitItems(false);
         UpdateStatusBar();
         ShowNotice(new Notice("Git was not found",
-            "AxGit runs the git program, and it is not on the PATH of this computer. Install Git for Windows from git-scm.com, then start AxGit again.",
+            "axGIT runs the git program, and it is not on the PATH of this computer. Install Git for Windows from git-scm.com, then start axGIT again.",
         [
             new OverlayChoice("&Open git-scm.com", () => OpenUrl("https://git-scm.com"), StaysOpen: true),
             OverlayChoice.Close,
@@ -632,7 +632,7 @@ public sealed partial class GitForm : AxitForm
         }
     }
 
-    /// <summary>View → Changes, Log, Branches (Ctrl+1, 2, 3): the list refilled, read on the first visit or when stale, and its name said with the item the focus is on (AxClaude D26).</summary>
+    /// <summary>View → Changes, Log, Branches (Ctrl+1, 2, 3): the list refilled, read on the first visit or when stale, and its name said with the item the focus is on (axClaude D26).</summary>
     private async Task ShowViewAsync(View view)
     {
         if (_root is null)

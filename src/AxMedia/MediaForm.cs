@@ -5,13 +5,13 @@ using Axit.Forms;
 namespace AxMedia;
 
 /// <summary>
-/// AxMedia's window (SPEC.md AM-2): a menu bar, the video area shown only while a video plays, one list with the
+/// axMedia's window (SPEC.md AM-2): a menu bar, the video area shown only while a video plays, one list with the
 /// queue, and a status bar with what plays and where. Enter plays the file under the selection and the rest follow;
 /// the transport keys work from anywhere in the window. The engine is <see cref="MediaPlayer"/>, its events posted
 /// back to this thread; the queue is <see cref="PlayQueue"/>. A start with paths while this window is open arrives as
 /// a hand-over message (AM-1.2, <see cref="AppMessage"/>) in <see cref="WndProc"/>. The notices, the fonts, the
 /// window's place, the update flow, find and the announcements are the bundle's window base (<see cref="AxitForm"/>).
-/// Grown from AxFile's player and queue pane (docs/axit/axfile-split.md).
+/// Grown from axFile's player and queue pane (docs/axit/axfile-split.md).
 /// </summary>
 public sealed class MediaForm : AxitForm
 {
@@ -138,7 +138,7 @@ public sealed class MediaForm : AxitForm
 
     // ---- what the window base asks for ----
 
-    /// <summary>A window opened by an add (AxFile's Ctrl+Shift+Q with no AxMedia open) stays behind: the user asked to add, not to come here (AM-D3).</summary>
+    /// <summary>A window opened by an add (axFile's Ctrl+Shift+Q with no axMedia open) stays behind: the user asked to add, not to come here (AM-D3).</summary>
     protected override bool ShowWithoutActivation => _start is { Verb: AppMessage.Add };
 
     protected override string Shortcuts => HelpText.Shortcuts;
@@ -324,7 +324,7 @@ public sealed class MediaForm : AxitForm
     /// <summary>
     /// What a start or a hand-over asks (AM-1.1, AM-3.2): a play replaces the queue (one file with its folder's media
     /// files around it, a folder's files, several paths expanded), plays, and brings the window to the front, the
-    /// starting process having let it (AppMessage); an add appends and says nothing here, since AxFile says it
+    /// starting process having let it (AppMessage); an add appends and says nothing here, since axFile says it
     /// (AM-D3). A single path is remembered for Open recent.
     /// </summary>
     private async Task ApplyAsync(HandOver message)
@@ -466,7 +466,7 @@ public sealed class MediaForm : AxitForm
         RecentMenu.Fill(_recentItem, _settings.Recent, path => File.Exists(path) || Directory.Exists(path), PathName.Of, "&No recent files or folders",
             target => AddPaths([target], Directory.Exists(target) ? $"No sound or video files in {PathName.Of(target)}" : null));
 
-    /// <summary>Queue → New window (Ctrl+N): another AxMedia window, empty; the Axit menu's New window does the same (AX-9).</summary>
+    /// <summary>Queue → New window (Ctrl+N): another axMedia window, empty; the Axit menu's New window does the same (AX-9).</summary>
     private void NewWindow() => AxitMenu.Start(Dispatch.AxMedia, null);
 
     /// <summary>The file in hand (AM-1.4): the one playing or paused, else the one under the selection; null with an empty queue.</summary>
@@ -496,7 +496,7 @@ public sealed class MediaForm : AxitForm
         }
     }
 
-    /// <summary>Queue → Show current file in → AxFile: a new AxFile window on the file's folder with the file selected (docs/axfile/SPEC.md AF-1.1).</summary>
+    /// <summary>Queue → Show current file in → axFile: a new axFile window on the file's folder with the file selected (docs/axfile/SPEC.md AF-1.1).</summary>
     private void OpenInAxFile()
     {
         if (CurrentFile() is { } file)
@@ -813,7 +813,7 @@ public sealed class MediaForm : AxitForm
         Announce($"{word} {_queue.PlayingName}, {MediaFiles.FormatTime(_player.Position)} of {MediaFiles.FormatTime(_player.Duration)}, {MediaFiles.SpeedText(Speed).ToLowerInvariant()}", true);
     }
 
-    /// <summary>The title (AM-2.3): "<name> - AxMedia" while a file plays or is paused, "AxMedia" otherwise; the Axit menu names the window by it.</summary>
+    /// <summary>The title (AM-2.3): "<name> - axMedia" while a file plays or is paused, "axMedia" otherwise; the Axit menu names the window by it.</summary>
     private void UpdateTitle() => Text = PlayerActive && _queue.PlayingName is { } name ? $"{name} - {AxMediaApp.Name}" : AxMediaApp.Name;
 
     /// <summary>The status bar (AM-2.2): the state, the file and the time on the left while something plays; the place and the speed on the right.</summary>

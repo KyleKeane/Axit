@@ -4,7 +4,7 @@ namespace AxMedia.Core;
 /// The queue (SPEC.md AM-3): the files to play in order and the one playing. The window plays from
 /// <see cref="Playing"/> and fills its list from <see cref="Lines"/>. The queue holds paths, not entries: it is
 /// what was handed over and nothing changes it while the user browses elsewhere (AM-D2). From AxFile.Core
-/// (2026-10-22), without the operations' status lines, which stayed AxFile's.
+/// (2026-10-22), without the operations' status lines, which stayed axFile's.
 /// </summary>
 public sealed class PlayQueue
 {
@@ -24,7 +24,7 @@ public sealed class PlayQueue
 
     public string? PlayingName => PlayingPath is { } path ? Path.GetFileName(path) : null;
 
-    /// <summary>The queue replaced by <paramref name="paths"/> (a play from AxFile, a start with paths), playing from <paramref name="start"/>.</summary>
+    /// <summary>The queue replaced by <paramref name="paths"/> (a play from axFile, a start with paths), playing from <paramref name="start"/>.</summary>
     public void Set(IReadOnlyList<string> paths, int start)
     {
         _paths.Clear();

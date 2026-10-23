@@ -1,20 +1,20 @@
 <#
 .SYNOPSIS
-  Builds Axit and starts one of its apps: AxClaude on a project folder (the default), AxDown on a file, or AxJSON on a file.
+  Builds Axit and starts one of its apps: axClaude on a project folder (the default), axDown on a file, or axJSON on a file.
 
 .EXAMPLE
-  .\run.ps1                                  # AxClaude on the current folder
-  .\run.ps1 C:\src\myproject                 # AxClaude on that folder
+  .\run.ps1                                  # axClaude on the current folder
+  .\run.ps1 C:\src\myproject                 # axClaude on that folder
   .\run.ps1 C:\src\myproject -- --resume     # extra arguments go to claude (default: --continue)
   .\run.ps1 C:\src\myproject -New            # a new conversation (PowerShell swallows a bare --)
-  .\run.ps1 -App down C:\notes\todo.md       # AxDown on that file (run-axdown.ps1 says the same)
-  .\run.ps1 -App down                        # AxDown with an empty document (run-axdown.ps1 opens the tutorial file instead)
-  .\run.ps1 -App json C:\x\settings.json     # AxJSON on that file (run-axjson.ps1 says the same)
-  .\run.ps1 -App git C:\src\myproject        # AxGit on the repository that holds the folder (run-axgit.ps1 says the same)
-  .\run.ps1 -App terminal C:\src\myproject   # AxTerminal with a shell in that folder (run-axterminal.ps1 says the same)
-  .\run.ps1 -App media C:\Music\Dune         # AxMedia on the folder's sound and video files (run-axmedia.ps1 says the same)
-  .\run.ps1 -App preview C:\notes\README.md  # AxPreview on the file, read-only (run-axpreview.ps1 says the same)
-  .\run.ps1 -App start                       # AxStart, the launcher: its field shown; it keeps running (run-axstart.ps1 says the same)
+  .\run.ps1 -App down C:\notes\todo.md       # axDown on that file (run-axdown.ps1 says the same)
+  .\run.ps1 -App down                        # axDown with an empty document (run-axdown.ps1 opens the tutorial file instead)
+  .\run.ps1 -App json C:\x\settings.json     # axJSON on that file (run-axjson.ps1 says the same)
+  .\run.ps1 -App git C:\src\myproject        # axGIT on the repository that holds the folder (run-axgit.ps1 says the same)
+  .\run.ps1 -App terminal C:\src\myproject   # axTerminal with a shell in that folder (run-axterminal.ps1 says the same)
+  .\run.ps1 -App media C:\Music\Dune         # axMedia on the folder's sound and video files (run-axmedia.ps1 says the same)
+  .\run.ps1 -App preview C:\notes\README.md  # axPreview on the file, read-only (run-axpreview.ps1 says the same)
+  .\run.ps1 -App start                       # axStart, the launcher: its field shown; it keeps running (run-axstart.ps1 says the same)
   .\run.ps1 -NoBuild                         # skip the build, just start
   .\run.ps1 -Test                            # run the unit tests instead (test.ps1: every test project, in Release)
 
@@ -24,14 +24,14 @@
 #>
 [CmdletBinding()]
 param(
-    # The app to start: the verb Axit.exe takes (docs/axit/SPEC.md AX-1). AxClaude unless said otherwise.
+    # The app to start: the verb Axit.exe takes (docs/axit/SPEC.md AX-1). axClaude unless said otherwise.
     [ValidateSet('claude', 'down', 'json', 'git', 'terminal', 'file', 'media', 'preview', 'start')]
     [string]$App = 'claude',
 
-    # AxClaude's project folder (default: the current folder), AxDown's or AxJSON's file (default: an empty document),
-    # a folder or file inside AxGit's repository (default: the last one opened), AxTerminal's folder, AxFile's folder
-    # or file (default: the last folder opened), AxMedia's file or folder (default: an empty queue), or AxPreview's
-    # file (default: an empty window). AxStart takes none.
+    # axClaude's project folder (default: the current folder), axDown's or axJSON's file (default: an empty document),
+    # a folder or file inside axGIT's repository (default: the last one opened), axTerminal's folder, axFile's folder
+    # or file (default: the last folder opened), axMedia's file or folder (default: an empty queue), or axPreview's
+    # file (default: an empty window). axStart takes none.
     [Parameter(Position = 0)]
     [Alias('Project')]
     [string]$Path,
@@ -72,7 +72,7 @@ if (-not (Test-Path $exe)) {
 }
 
 if ($App -ne 'claude') {
-    $name = switch ($App) { 'down' { 'AxDown' } 'json' { 'AxJSON' } 'terminal' { 'AxTerminal' } 'file' { 'AxFile' } 'media' { 'AxMedia' } 'preview' { 'AxPreview' } 'start' { 'AxStart' } default { 'AxGit' } }
+    $name = switch ($App) { 'down' { 'axDown' } 'json' { 'axJSON' } 'terminal' { 'axTerminal' } 'file' { 'axFile' } 'media' { 'axMedia' } 'preview' { 'axPreview' } 'start' { 'axStart' } default { 'axGIT' } }
     if ($Path -and $App -ne 'start') {
         Write-Host "Starting $name on $Path"
         & $exe $App $Path
@@ -85,7 +85,7 @@ if ($App -ne 'claude') {
 
 if (-not $Path) { $Path = (Get-Location).Path }
 $Path = (Resolve-Path $Path).Path
-Write-Host "Starting AxClaude on $Path"
+Write-Host "Starting axClaude on $Path"
 if ($New) {
     # A bare -- never reaches the app: PowerShell takes it as the end of the script's own parameters.
     & $exe claude $Path '--'

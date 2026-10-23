@@ -5,26 +5,26 @@ using AxPreview.Core;
 namespace AxPreview;
 
 /// <summary>
-/// AxPreview's entry point inside Axit (docs/axit/SPEC.md AX-1.7; SPEC.md AP-1.1, AP-1.2): <c>Axit.exe preview
+/// axPreview's entry point inside Axit (docs/axit/SPEC.md AX-1.7; SPEC.md AP-1.1, AP-1.2): <c>Axit.exe preview
 /// [&lt;file&gt;] [--new]</c> calls <see cref="Run"/>, which hands the text editor shell (<c>Axit.Forms.TextEditorForm</c>)
-/// what AxPreview is: the editor shell read-only (AP-D4), with AxDown's navigation keys, the viewer's own keys and
-/// texts, and the rule that refuses a file that is not text. With a file and an open AxPreview window, the file is
+/// what axPreview is: the editor shell read-only (AP-D4), with axDown's navigation keys, the viewer's own keys and
+/// texts, and the rule that refuses a file that is not text. With a file and an open axPreview window, the file is
 /// handed to that window (<see cref="AppMessage"/>) and no window of this process opens.
 /// </summary>
 public static class AxPreviewApp
 {
-    public const string Name = "AxPreview";
+    public const string Name = "axPreview";
 
     public const string Usage = """
         Usage: Axit preview [<file>] [--new]
                axpreview [<file>]  the same, as the installed console command
 
           <file>            the file to read; without one, an empty window
-          --new             a window of its own, even while an AxPreview window is open (the open window takes the file otherwise)
+          --new             a window of its own, even while an axPreview window is open (the open window takes the file otherwise)
           --help, --version this text, or the version
         """;
 
-    /// <summary>AxPreview as the editor shell sees it (bundle AX-6.2): the shell read-only, AxDown's keys and resources.</summary>
+    /// <summary>axPreview as the editor shell sees it (bundle AX-6.2): the shell read-only, axDown's keys and resources.</summary>
     public static readonly EditorApp App = new(
         Name: Name,
         Verb: Dispatch.AxPreview,

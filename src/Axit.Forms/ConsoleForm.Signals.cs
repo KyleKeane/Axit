@@ -4,7 +4,7 @@ namespace Axit.Forms;
 
 public abstract partial class ConsoleForm
 {
-    // ---- the attention signals and the music (AxClaude FR-7.3, FR-7.9; AxTerminal AT-5.1, AT-5.5) ----
+    // ---- the attention signals and the music (axClaude FR-7.3, FR-7.9; axTerminal AT-5.1, AT-5.5) ----
 
     private const uint FLASHW_ALL = 3;
     private const uint FLASHW_TIMERNOFG = 12;
@@ -14,7 +14,7 @@ public abstract partial class ConsoleForm
 
     /// <summary>
     /// The chime (two equal notes for a question, three falling notes when the program is done) and the taskbar
-    /// flash that go with an attention announcement; without <paramref name="chime"/> only the flash (AxClaude's
+    /// flash that go with an attention announcement; without <paramref name="chime"/> only the flash (axClaude's
     /// control area plays the notice chime for what it shows). While the window is in the background the alert,
     /// when it is on, plays in place of any chime: it is the one sound meant to carry into another window.
     /// </summary>

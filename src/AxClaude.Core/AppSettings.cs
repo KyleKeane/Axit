@@ -6,10 +6,10 @@ namespace AxClaude.Core;
 
 /// <summary>
 /// Everything the app remembers between runs. Stored as JSON in <c>%APPDATA%\Axit\axclaude.json</c> (see SPEC.md
-/// Appendix C) through the bundle's <see cref="SettingsFile"/>; the first start under Axit copies AxClaude 1.x's
+/// Appendix C) through the bundle's <see cref="SettingsFile"/>; the first start under Axit copies axClaude 1.x's
 /// <c>%APPDATA%\AxClaude\settings.json</c> there (<see cref="TakeOverOldFile"/>). A missing or unreadable file falls
 /// back to the defaults. The console fields (the size, the recent folders, the sounds, the signals, the transcript
-/// options) are <see cref="ConsoleSettings"/>', shared with AxTerminal; the font, the update check and the window's
+/// options) are <see cref="ConsoleSettings"/>', shared with axTerminal; the font, the update check and the window's
 /// place are <see cref="WindowSettings"/>' (bundle AX-6.5).
 /// </summary>
 public sealed class AppSettings : ConsoleSettings
@@ -48,16 +48,16 @@ public sealed class AppSettings : ConsoleSettings
     public bool ReviewAnswers { get; set; }
 
     /// <summary>
-    /// AxClaude's recordings and exported conversations (<c>axclaude-…</c>) are listed in the project repository's local
+    /// axClaude's recordings and exported conversations (<c>axclaude-…</c>) are listed in the project repository's local
     /// exclude file, so git never offers them for a commit (D34). Off removes the lines.
     /// </summary>
     public bool KeepFilesOutOfGit { get; set; } = true;
 
     public static string DefaultPath => AppPaths.SettingsFile("axclaude");
 
-    /// <summary>Where AxClaude 1.x kept the file, before the Axit bundle.</summary>
+    /// <summary>Where axClaude 1.x kept the file, before the Axit bundle.</summary>
     public static string OldPath =>
-        Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "AxClaude", "settings.json");
+        Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "axClaude", "settings.json");
 
     /// <summary>Copies the 1.x file to <see cref="DefaultPath"/> when there is one and no new file yet (docs/axit/SPEC.md AX-5.2).</summary>
     public static void TakeOverOldFile() => SettingsFile.TakeOverOldFile(OldPath, DefaultPath);

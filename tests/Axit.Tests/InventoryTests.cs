@@ -7,12 +7,12 @@ namespace Axit.Tests;
 /// docs/axit/adding-an-app.md): its folders, its three documents, its notes, its icon, its block in the installer and
 /// its line in the icon script, its place in the issue forms, the pages, the map and the spec, its call in the
 /// program and its branch in run.ps1. Read off the files, so that a new app that is missing somewhere fails here
-/// rather than at its release (AxStart was missing from nine of these on 2026-10-23).
+/// rather than at its release (axStart was missing from nine of these on 2026-10-23).
 /// </summary>
 public sealed class InventoryTests
 {
-    /// <summary>AxDown's pure code and tests live in Axit.Core and Axit.Tests since AxJSON, the second editor (docs/axdown/SPEC.md §6).</summary>
-    private static readonly IReadOnlySet<string> WithoutOwnCore = new HashSet<string> { "AxDown" };
+    /// <summary>axDown's pure code and tests live in Axit.Core and Axit.Tests since axJSON, the second editor (docs/axdown/SPEC.md §6).</summary>
+    private static readonly IReadOnlySet<string> WithoutOwnCore = new HashSet<string>(StringComparer.OrdinalIgnoreCase) { "axDown" };
 
     [Fact]
     public void Every_app_has_its_places()
@@ -32,7 +32,9 @@ public sealed class InventoryTests
 
         foreach (var app in Dispatch.Apps)
         {
-            var name = app.Name;
+            // The code's places by the project name, the texts by the name as shown (Dispatch.App).
+            var name = app.Project;
+            var shown = app.Name;
             var lower = name.ToLowerInvariant();
             Expect(name, Directory.Exists(Path.Combine(root, "src", name)), "src folder");
             Expect(name, File.Exists(Path.Combine(root, "src", name, "CLAUDE.md")), "src notes (CLAUDE.md)");
@@ -53,18 +55,18 @@ public sealed class InventoryTests
             Expect(name, File.Exists(Path.Combine(root, "src", "Axit", $"{name}.ico")), "icon in src/Axit");
             Expect(name, File.Exists(Path.Combine(root, $"run-{lower}.ps1")), $"run-{lower}.ps1");
             Expect(name, Text("run.ps1").Contains($"'{app.Verb}'", StringComparison.Ordinal), "run.ps1's verb");
-            Expect(name, Text("install.ps1").Contains($"Name = '{name}'", StringComparison.Ordinal), "install.ps1's block");
+            Expect(name, Text("install.ps1").Contains($"Name = '{shown}'", StringComparison.Ordinal), "install.ps1's block");
             Expect(name, Text("tools/make-icon.ps1").Contains($"'{name}.ico'", StringComparison.Ordinal), "make-icon.ps1's line");
             Expect(name, Text("src/Axit/Program.cs").Contains($"{name}App.Run", StringComparison.Ordinal), "Program.cs's call");
-            Expect(name, Text("src/Axit/Axit.csproj").Contains(name, StringComparison.Ordinal), "Axit.csproj's description");
-            Expect(name, Text("CLAUDE.md").Contains($"**{name}**", StringComparison.Ordinal), "the root CLAUDE.md map");
-            Expect(name, Text("README.md").Contains($"**{name}**", StringComparison.Ordinal), "README.md");
-            Expect(name, Text("docs/axit/README.md").Contains($"**{name}**", StringComparison.Ordinal), "docs/axit/README.md");
-            Expect(name, Text("docs/axit/SPEC.md").Contains($"**{name}**", StringComparison.Ordinal), "docs/axit/SPEC.md section 3");
+            Expect(name, Text("src/Axit/Axit.csproj").Contains(shown, StringComparison.Ordinal), "Axit.csproj's description");
+            Expect(name, Text("CLAUDE.md").Contains($"**{shown}**", StringComparison.Ordinal), "the root CLAUDE.md map");
+            Expect(name, Text("README.md").Contains($"**{shown}**", StringComparison.Ordinal), "README.md");
+            Expect(name, Text("docs/axit/README.md").Contains($"**{shown}**", StringComparison.Ordinal), "docs/axit/README.md");
+            Expect(name, Text("docs/axit/SPEC.md").Contains($"**{shown}**", StringComparison.Ordinal), "docs/axit/SPEC.md section 3");
             Expect(name, Text("docs/axit/SPEC.md").Contains($"`{app.Verb}`", StringComparison.Ordinal), "docs/axit/SPEC.md AX-1.1's verb");
-            Expect(name, Text(".github/ISSUE_TEMPLATE/bug.yml").Contains($"- {name}", StringComparison.Ordinal), "the bug form's choices");
-            Expect(name, Text(".github/ISSUE_TEMPLATE/idea.yml").Contains($"- {name}", StringComparison.Ordinal), "the idea form's choices");
-            Expect(name, Text("CHANGELOG.md").Contains($"{name}:", StringComparison.Ordinal), "a CHANGELOG.md bullet");
+            Expect(name, Text(".github/ISSUE_TEMPLATE/bug.yml").Contains($"- {shown}", StringComparison.Ordinal), "the bug form's choices");
+            Expect(name, Text(".github/ISSUE_TEMPLATE/idea.yml").Contains($"- {shown}", StringComparison.Ordinal), "the idea form's choices");
+            Expect(name, Text("CHANGELOG.md").Contains($"{shown}:", StringComparison.Ordinal), "a CHANGELOG.md bullet");
         }
 
         Assert.True(missing.Count == 0, "Missing: " + string.Join("; ", missing));

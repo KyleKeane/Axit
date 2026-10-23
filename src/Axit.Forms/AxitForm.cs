@@ -12,7 +12,7 @@ namespace Axit.Forms;
 /// picker), <c>AxitForm.Updates.cs</c> (the update check, the update notice and the install in place, AX-3) and
 /// <c>AxitForm.Palette.cs</c> (the command palette, AX-10). A window derives from it, adds its controls (the
 /// <see cref="Overlay"/> first, so that it docks over the rest), and fills in the hooks listed under "what the window
-/// fills in". It grew out of AxDown's window (the editor shell) on the third copy, AxGit (2026-10-18); the notice and
+/// fills in". It grew out of axDown's window (the editor shell) on the third copy, axGIT (2026-10-18); the notice and
 /// focus core was written again on 2026-10-23 (docs/axit/review-2026-10-23.md, 5.3).
 /// </summary>
 public abstract partial class AxitForm : Form
@@ -30,7 +30,7 @@ public abstract partial class AxitForm : Form
         Settings = settings;
         SettingsPath = settingsPath;
         _settingsError = settingsError;
-        // With the role Window, NVDA speaks the window when it opens ("notes.md - AxDown window") before the focused
+        // With the role Window, NVDA speaks the window when it opens ("notes.md - axDown window") before the focused
         // control; without it the window is a nameless pane to NVDA and the app is never named (AX-7.1).
         AccessibleRole = AccessibleRole.Window;
         MinimumSize = new Size(500, 300);
@@ -95,10 +95,10 @@ public abstract partial class AxitForm : Form
     /// <summary>How the installed new version starts this window again after Update and restart: the verb and what it holds (AX-3.2).</summary>
     protected abstract IReadOnlyList<string> RestartArguments();
 
-    /// <summary>What Update and restart does to this window, in the update notice: "closes AxDown (asking first…), installs it and starts it again on the same file".</summary>
+    /// <summary>What Update and restart does to this window, in the update notice: "closes axDown (asking first…), installs it and starts it again on the same file".</summary>
     protected virtual string UpdateRestartText => $"closes {AppName}, installs it and starts it again";
 
-    /// <summary>A step of the update worth a line of the window's own (AxClaude writes it into the conversation); nothing by default.</summary>
+    /// <summary>A step of the update worth a line of the window's own (axClaude writes it into the conversation); nothing by default.</summary>
     protected virtual void UpdateNoted(string message)
     {
     }
@@ -106,7 +106,7 @@ public abstract partial class AxitForm : Form
     /// <summary>The window's own lines of Copy diagnostics, after the version line.</summary>
     protected virtual IEnumerable<string> DiagnosticsLines => [];
 
-    /// <summary>The window's own entries of the command palette, after the menus' commands (AX-10.5): AxFile's folder entries; none by default.</summary>
+    /// <summary>The window's own entries of the command palette, after the menus' commands (AX-10.5): axFile's folder entries; none by default.</summary>
     protected virtual IEnumerable<PaletteEntry> PaletteEntries() => [];
 
     /// <summary>The window's own keys, from its table; true when the key was handled. Called when no notice shows and after the common keys.</summary>
@@ -330,7 +330,7 @@ public abstract partial class AxitForm : Form
         }
 
         // In menu mode (Alt, a menu's name selected on the bar) WinForms routes the keys to the menu bar, whose
-        // ProcessCmdKey hands them up to the window: they are the menu's (AX-6.6), or Right in AxFile's list opened
+        // ProcessCmdKey hands them up to the window: they are the menu's (AX-6.6), or Right in axFile's list opened
         // the entry instead of moving to the next menu (2026-10-22); F1 opened the shortcuts over an open menu and
         // disabled the bar under it (2026-10-23).
         if (FromHandle(msg.HWnd) is ToolStrip)
@@ -426,7 +426,7 @@ public abstract partial class AxitForm : Form
     /// <summary>
     /// Whether one of the Windows dialogs (the folder, file and font pickers) is up. Its closing activates the window
     /// before the command that opened it has gone on, so a window that acts on activation (the editors' reload of a
-    /// file changed on disk, AxFile's read of the folder) waits while this is set (2026-10-23: "Reloaded" was said in
+    /// file changed on disk, axFile's read of the folder) waits while this is set (2026-10-23: "Reloaded" was said in
     /// the middle of Save as).
     /// </summary>
     protected bool DialogShowing { get; private set; }
@@ -470,7 +470,7 @@ public abstract partial class AxitForm : Form
         }
     }
 
-    /// <summary>The path in File Explorer: a folder opened, a file selected in its folder; with <paramref name="select"/> a folder is selected in its parent too (AxFile's Show in File Explorer on an entry).</summary>
+    /// <summary>The path in File Explorer: a folder opened, a file selected in its folder; with <paramref name="select"/> a folder is selected in its parent too (axFile's Show in File Explorer on an entry).</summary>
     protected void OpenInExplorer(string path, bool select = false)
     {
         var arguments = !select && Directory.Exists(path) ? $"\"{path}\"" : $"/select,\"{path}\"";
@@ -484,7 +484,7 @@ public abstract partial class AxitForm : Form
         }
     }
 
-    /// <summary>Options → Developer → Open settings file: the app's settings, written first, in a new AxJSON window, as any JSON file.</summary>
+    /// <summary>Options → Developer → Open settings file: the app's settings, written first, in a new axJSON window, as any JSON file.</summary>
     protected void OpenSettingsFile()
     {
         SaveSettings();

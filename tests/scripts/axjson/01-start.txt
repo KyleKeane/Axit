@@ -1,26 +1,26 @@
-# AxJSON, test plan section 1 (Start), driven from inside the window (docs/axjson/nvda-test-plan.md).
+# axJSON, test plan section 1 (Start), driven from inside the window (docs/axjson/nvda-test-plan.md).
 # 1.1 manual: the Start menu entry needs the installed bundle and the real Start menu.
 # 1.3 manual: File Explorer's Open with Axit submenu and Windows' Open with are the shell's menus, outside the window.
 # The run's own settings: no update check, whose network call logs an ERROR when GitHub cannot be reached.
 file home\Axit\axjson.json {"checkForUpdates": false}
 file settings.json {\n  "model": "opus",\n  "permissions": { "allow": ["Bash", "Read"], "deny": [] },\n  "count": 3,\n  "on": true\n}
 
-# 1.1, the window part: no file, an empty Untitled document; nothing of AxJSON's own is said.
+# 1.1, the window part: no file, an empty Untitled document; nothing of axJSON's own is said.
 start json
-expect state Untitled - AxJSON
+expect state Untitled - axJSON
 expect focus {"name":"Untitled","role":"Text","value":""}
 expect quiet 1000
 
-# 1.2: the json verb (axjson settings.json) and a .json file alone (axit settings.json) both open AxJSON on the file.
+# 1.2: the json verb (axjson settings.json) and a .json file alone (axit settings.json) both open axJSON on the file.
 start json {temp}\settings.json
-expect state "title":"settings.json - AxJSON"
+expect state "title":"settings.json - axJSON"
 expect focus {"name":"settings.json","role":"Text","value":"{"}
 expect quiet 1000
 start {temp}\settings.json
-expect state "title":"settings.json - AxJSON"
+expect state "title":"settings.json - axJSON"
 expect focus settings.json
 
-# 1.4: the shell's file flows on a .json file, the part at the save (AxDown's section 3, step 7); the announcements
+# 1.4: the shell's file flows on a .json file, the part at the save (axDown's section 3, step 7); the announcements
 # name the file.
 # 1.4 manual: the reload on coming back to the window needs its activation (Alt+Tab), which a test window never gets.
 use 2
@@ -37,4 +37,4 @@ expect focus Reload and lose mine
 keys enter
 expect said Reloaded
 expect text added
-expect state "title":"settings.json - AxJSON"
+expect state "title":"settings.json - axJSON"

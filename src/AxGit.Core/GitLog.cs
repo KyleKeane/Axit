@@ -10,7 +10,7 @@ public sealed record Commit(string Hash, string Date, string Author, string Subj
     public IReadOnlyList<string> ShowArguments => ["show", "--stat", "--format=medium", Hash];
 }
 
-/// <summary>Reads the log as AxGit asks for it: one commit per line, the four fields separated by tabs (SPEC.md AG-4.1).</summary>
+/// <summary>Reads the log as axGIT asks for it: one commit per line, the four fields separated by tabs (SPEC.md AG-4.1).</summary>
 public static class GitLog
 {
     public const int Count = 200;

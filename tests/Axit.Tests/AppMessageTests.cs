@@ -40,7 +40,7 @@ public sealed class AppMessageTests
     public void Nothing_is_sent_to_an_app_that_is_not_in_the_bundle_or_has_no_window()
     {
         Assert.False(AppMessage.Send("AxNothing", AppMessage.Open, [@"C:\x"]));
-        // No AxPreview window is open while the tests run.
-        Assert.False(AppMessage.Send("AxPreview", AppMessage.Open, [@"C:\x"]));
+        // No axPreview window is open while the tests run.
+        Assert.False(AppMessage.Send("axPreview", AppMessage.Open, [@"C:\x"]));
     }
 }

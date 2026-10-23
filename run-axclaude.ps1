@@ -1,6 +1,6 @@
 <#
 .SYNOPSIS
-  Builds Axit and starts AxClaude: run.ps1 with -App claude. Every other argument goes through unchanged.
+  Builds Axit and starts axClaude: run.ps1 with -App claude. Every other argument goes through unchanged.
 
 .EXAMPLE
   .\run-axclaude.ps1                       # the current folder

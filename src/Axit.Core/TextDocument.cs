@@ -4,7 +4,7 @@ using System.Text;
 namespace Axit.Core;
 
 /// <summary>
-/// A text file as AxDown holds it (docs/axdown/SPEC.md AD-3): the text with <c>\r\n</c> line endings for the edit control, and
+/// A text file as axDown holds it (docs/axdown/SPEC.md AD-3): the text with <c>\r\n</c> line endings for the edit control, and
 /// what is needed to write it back as it was found: the encoding, whether it had a byte order mark, and its line
 /// ending. <see cref="FromBytes"/> and <see cref="ToBytes"/> are the pure core; <see cref="Read"/> and
 /// <see cref="Write"/> only add the file.
@@ -38,7 +38,7 @@ public sealed record TextDocument(string Text, Encoding Encoding, bool ByteOrder
         var length = new FileInfo(path).Length;
         if (length > MaxBytes)
         {
-            // Exact and without an app's name: the reader is every editor's (until 2026-10-23 it named AxDown in AxJSON, and a file one byte over said it was 32 MB).
+            // Exact and without an app's name: the reader is every editor's (until 2026-10-23 it named axDown in axJSON, and a file one byte over said it was 32 MB).
             throw new InvalidOperationException($"{Path.GetFileName(path)} is {length:N0} bytes, over the {MaxBytes / (1024 * 1024)} MB a window can open.");
         }
 

@@ -1,4 +1,4 @@
-# AxDown, test plan section 7 (Updates and uninstall), the part a window shows (docs/axdown/nvda-test-plan.md).
+# axDown, test plan section 7 (Updates and uninstall), the part a window shows (docs/axdown/nvda-test-plan.md).
 # 7.2 manual: an older build installed with publish.ps1, the update notice, the download and the restart replace the
 # installed program, which a test run must not touch.
 # 7.3 manual: Settings, Apps, Axit, Uninstall is Windows' own and removes the installation.

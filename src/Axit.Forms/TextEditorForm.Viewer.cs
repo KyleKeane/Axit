@@ -4,13 +4,13 @@ namespace Axit.Forms;
 
 /// <summary>
 /// The viewer's own part of the editor shell (docs/axpreview/SPEC.md AP-D4): what the shell does only in its
-/// read-only mode, AxPreview. The app names here (Edit in AxDown, Edit in AxJSON, the <c>.json</c> rule) are
-/// AxPreview's rule of which editor opens a file (AP-1.4), written where the viewer lives rather than in the
+/// read-only mode, axPreview. The app names here (Edit in axDown, Edit in axJSON, the <c>.json</c> rule) are
+/// axPreview's rule of which editor opens a file (AP-1.4), written where the viewer lives rather than in the
 /// viewer's data, since the shell makes the menu item. In its own file since 2026-10-23 (review 5.6).
 /// </summary>
 public sealed partial class TextEditorForm
 {
-    /// <summary>File → Edit in AxDown or AxJSON, named after the file's kind; null in an editor.</summary>
+    /// <summary>File → Edit in axDown or axJSON, named after the file's kind; null in an editor.</summary>
     private ToolStripMenuItem? _editItem;
 
     /// <summary>The edit control as the viewer's text (AP-2.1): read-only, in the window's colours, Tab moving on to the Go to line field.</summary>
@@ -29,7 +29,7 @@ public sealed partial class TextEditorForm
     {
         file.DropDownItems.Add(Item("Re&load", ReloadCommand, EditorKeys.Reload));
         file.DropDownItems.Add(new ToolStripSeparator());
-        _editItem = Item("&Edit in AxDown", OpenInEditor, EditorKeys.Edit);
+        _editItem = Item("&Edit in axDown", OpenInEditor, EditorKeys.Edit);
         file.DropDownItems.Add(_editItem);
     }
 
@@ -99,7 +99,7 @@ public sealed partial class TextEditorForm
         Reload("Reloaded");
     }
 
-    /// <summary>The viewer's File → Edit in AxDown or AxJSON (Ctrl+E, AP-1.4): the file in its editor by its kind, a new editor window.</summary>
+    /// <summary>The viewer's File → Edit in axDown or axJSON (Ctrl+E, AP-1.4): the file in its editor by its kind, a new editor window.</summary>
     private void OpenInEditor()
     {
         if (_path is null)
@@ -111,7 +111,7 @@ public sealed partial class TextEditorForm
         AxitMenu.Start(EditorVerb(_path), _path);
     }
 
-    /// <summary>AxPreview's rule (AP-1.4; docs/axfile/SPEC.md AF-1.3 has the same): AxJSON for .json, AxDown for anything else.</summary>
+    /// <summary>axPreview's rule (AP-1.4; docs/axfile/SPEC.md AF-1.3 has the same): axJSON for .json, axDown for anything else.</summary>
     private static string EditorVerb(string path) => Path.GetExtension(path).Equals(".json", StringComparison.OrdinalIgnoreCase) ? Dispatch.AxJSON : Dispatch.AxDown;
 
     /// <summary>The viewer's way to the editor, named after the file's kind (AP-1.4); nothing in an editor.</summary>
@@ -119,7 +119,7 @@ public sealed partial class TextEditorForm
     {
         if (_editItem is not null)
         {
-            _editItem.Text = _path is { } path && EditorVerb(path) == Dispatch.AxJSON ? "&Edit in AxJSON" : "&Edit in AxDown";
+            _editItem.Text = _path is { } path && EditorVerb(path) == Dispatch.AxJSON ? "&Edit in axJSON" : "&Edit in axDown";
         }
     }
 }

@@ -11,15 +11,15 @@ body:
     attributes:
       label: App
       options:
-        - AxClaude
-        - AxDown
-        - AxJSON
-        - AxGit
-        - AxTerminal
-        - AxFile
-        - AxMedia
-        - AxPreview
-        - AxStart
+        - axClaude
+        - axDown
+        - axJSON
+        - axGIT
+        - axTerminal
+        - axFile
+        - axMedia
+        - axPreview
+        - axStart
         - The bundle (install, update, the Axit menu)
     validations:
       required: true
@@ -40,7 +40,7 @@ body:
     id: step
     attributes:
       label: Test plan step, if one covers it
-      description: The step in docs/<app>/nvda-test-plan.md, such as "AxFile 1.13". docs/axit/nvda-test-record.md says when it last passed.
+      description: The step in docs/<app>/nvda-test-plan.md, such as "axFile 1.13". docs/axit/nvda-test-record.md says when it last passed.
   - type: textarea
     id: steps
     attributes:

@@ -5,7 +5,7 @@ using Axit.Forms;
 namespace AxTerminal;
 
 /// <summary>
-/// AxTerminal's window-specific keys (SPEC.md AT-6.2; bundle AX-8). A key is changed here and nowhere else: the
+/// axTerminal's window-specific keys (SPEC.md AT-6.2; bundle AX-8). A key is changed here and nowhere else: the
 /// window's key switch, the menu items and the terminal's quick keys (<see cref="Transcript"/>) read this table, and
 /// the F1 text in <c>HelpText</c> names the same keys. The bundle-wide keys (F1, the controls, find, save, text size,
 /// the page and paragraph keys) are <c>Axit.Forms.BundleKeys</c>; the collision test in <c>tests/Axit.Tests</c> fails
@@ -22,7 +22,7 @@ public static class AxTerminalKeys
     public const Keys SendEscape = Keys.Shift | Keys.Escape;
     /// <summary>Ctrl+C to the shell, the interrupt (AT-3.5); plain Ctrl+C copies.</summary>
     public const Keys Interrupt = Keys.Control | Keys.Shift | Keys.C;
-    /// <summary>Ctrl+Alt with a quick key letter, from anywhere: every line of that kind from the caret's line to the end, spoken once (AxClaude D36).</summary>
+    /// <summary>Ctrl+Alt with a quick key letter, from anywhere: every line of that kind from the caret's line to the end, spoken once (axClaude D36).</summary>
     public const Keys ReadToEnd = Keys.Control | Keys.Alt;
     public const Keys BookmarkLine = Keys.Control | Keys.Shift | Keys.K;
     public const Keys ShowInExplorer = Keys.Control | Keys.W;
@@ -47,7 +47,7 @@ public static class AxTerminalKeys
     /// <summary>In the terminal with a selection: copies it and says so; the control's own copy otherwise.</summary>
     public const Keys CopySelection = Keys.Control | Keys.C;
 
-    // The terminal's quick keys (AxClaude FR-5): a letter alone, Shift with it for the previous one.
+    // The terminal's quick keys (axClaude FR-5): a letter alone, Shift with it for the previous one.
     public const Keys Heading = Keys.H;
     public const Keys Input = Keys.I;
     public const Keys Output = Keys.O;
@@ -120,7 +120,7 @@ public static class AxTerminalKeys
             new(Heading, "heading", l => l.HeadingLevel > 0),
             new(Input, "input", l => l.Kind == LineKind.InputMarker),
             OutputKey,
-            // A paragraph is a line with text after a blank line, or the first line (AxClaude FR-5's rule without Claude's kinds).
+            // A paragraph is a line with text after a blank line, or the first line (axClaude FR-5's rule without Claude's kinds).
             new(Paragraph, "paragraph", l => l.Text.Length > 0, Previous: (_, p) => p.Text.Length == 0, ReadsWhole: true),
             new(SystemLine, "system line", l => l.Kind == LineKind.System),
             BookmarkKey,

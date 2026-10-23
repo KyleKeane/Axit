@@ -39,7 +39,7 @@ public static class AppsFolder
         })
         {
             IsBackground = true,
-            Name = "AxStart programs",
+            Name = "axStart programs",
         };
         thread.SetApartmentState(ApartmentState.STA);
         thread.Start();

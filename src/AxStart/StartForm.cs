@@ -6,10 +6,10 @@ using Axit.Forms;
 namespace AxStart;
 
 /// <summary>
-/// AxStart's window (SPEC.md AS-3): a menu bar, one search field with the caret always in it, the list of matches
+/// axStart's window (SPEC.md AS-3): a menu bar, one search field with the caret always in it, the list of matches
 /// under it that never takes the focus (AS-D2), and a status bar. The process runs from sign-in with the window
 /// hidden (AS-D3); the hotkey, registered on this window (AS-4), shows it in front with the field empty, and Enter,
-/// Escape, Alt+F4 and the focus going to another program hide it again. Only Quit AxStart ends
+/// Escape, Alt+F4 and the focus going to another program hide it again. Only Quit axStart ends
 /// the process. The notices, the fonts, the update flow and the announcements are the bundle's window base
 /// (<see cref="AxitForm"/>).
 /// </summary>
@@ -70,7 +70,7 @@ public sealed class StartForm : AxitForm
         start.DropDownItems.Add(Item("&Refresh programs", () => Do(() => RefreshAsync(announce: true)), AxStartKeys.Refresh));
         start.DropDownItems.Add(new ToolStripSeparator());
         start.DropDownItems.Add(Item("&Hide", () => HideLauncher(), AxStartKeys.Hide));
-        start.DropDownItems.Add(new ToolStripMenuItem("&Quit AxStart", null, (_, _) => Quit()));
+        start.DropDownItems.Add(new ToolStripMenuItem("&Quit axStart", null, (_, _) => Quit()));
 
         var options = new ToolStripMenuItem("&Options");
         options.DropDownItems.Add(new ToolStripMenuItem("&Hotkey...", null, (_, _) => ShowHotkeyNotice()));
@@ -238,7 +238,7 @@ public sealed class StartForm : AxitForm
 
     protected override void OnFormClosing(FormClosingEventArgs e)
     {
-        // AS-1.4: Alt+F4 and Close all windows hide the window; Quit AxStart, the update's own close (AX-3.2) and
+        // AS-1.4: Alt+F4 and Close all windows hide the window; Quit axStart, the update's own close (AX-3.2) and
         // Windows' own end end the process.
         if (!_quitting && !ClosingForUpdate && e.CloseReason == CloseReason.UserClosing)
         {
@@ -253,7 +253,7 @@ public sealed class StartForm : AxitForm
     {
         if (m.Msg == WM_ACTIVATE && (m.WParam & 0xFFFF) != 0 && !IsWindowVisible(Handle))
         {
-            // AS-3.4: the hidden window must never hold the keyboard. Windows activated it when AxStart started hidden
+            // AS-3.4: the hidden window must never hold the keyboard. Windows activated it when axStart started hidden
             // and when it hid, and the user's typing went into a window nobody could see (2026-10-22).
             Log.Info("Activated while hidden; the front given back");
             BeginInvoke(GiveForegroundBack);
@@ -664,7 +664,7 @@ public sealed class StartForm : AxitForm
         _captured = null;
         _capturing = true;
         ShowNotice(new Notice("Hotkey",
-            $"Press the key that brings AxStart up, with Ctrl, Alt or the Windows key, then Enter. Now: {_settings.Key}.",
+            $"Press the key that brings axStart up, with Ctrl, Alt or the Windows key, then Enter. Now: {_settings.Key}.",
             [
                 new OverlayChoice("&Save", () => ApplyHotkey(_captured), IsDefault: true),
                 new OverlayChoice("&Cancel", () => _capturing = false, IsCancel: true),

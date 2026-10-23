@@ -1,11 +1,11 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
-  <!-- AxClaude's window, as a class library inside Axit.exe (docs/axit/SPEC.md AX-1.7, B-2); src/Axit is the executable. -->
+  <!-- axClaude's window, as a class library inside Axit.exe (docs/axit/SPEC.md AX-1.7, B-2); src/Axit is the executable. -->
   <PropertyGroup>
     <TargetFramework>$(AxitDotNet)-windows</TargetFramework>
     <UseWindowsForms>true</UseWindowsForms>
-    <RootNamespace>AxClaude</RootNamespace>
-    <AssemblyName>AxClaude</AssemblyName>
+    <RootNamespace>axClaude</RootNamespace>
+    <AssemblyName>axClaude</AssemblyName>
   </PropertyGroup>
 
   <ItemGroup>

@@ -7,15 +7,15 @@ body:
     attributes:
       label: App
       options:
-        - AxClaude
-        - AxDown
-        - AxJSON
-        - AxGit
-        - AxTerminal
-        - AxFile
-        - AxMedia
-        - AxPreview
-        - AxStart
+        - axClaude
+        - axDown
+        - axJSON
+        - axGIT
+        - axTerminal
+        - axFile
+        - axMedia
+        - axPreview
+        - axStart
         - The bundle, or a new app
     validations:
       required: true

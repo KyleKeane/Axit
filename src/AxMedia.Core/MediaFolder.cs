@@ -5,7 +5,7 @@ namespace AxMedia.Core;
 /// <summary>
 /// What a start with paths, Open folder and Add make of folders and files (SPEC.md AM-1.1, AM-3.2, AM-D2): a folder's
 /// media files in name order with the hidden ones left out, a file with its folder's other media files after it. The
-/// hand-over is a path, not a list: AxMedia reads the folder itself, so that AxFile's own order and settings are not
+/// hand-over is a path, not a list: axMedia reads the folder itself, so that axFile's own order and settings are not
 /// carried. Pure apart from the file system reads; tested in <c>tests/AxMedia.Tests</c>.
 /// </summary>
 public static class MediaFolder

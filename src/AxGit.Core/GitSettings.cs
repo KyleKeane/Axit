@@ -3,7 +3,7 @@ using Axit.Core;
 namespace AxGit.Core;
 
 /// <summary>
-/// Everything AxGit remembers between runs (SPEC.md AG-8.1), in <c>%APPDATA%\Axit\axgit.json</c> through the bundle's
+/// Everything axGIT remembers between runs (SPEC.md AG-8.1), in <c>%APPDATA%\Axit\axgit.json</c> through the bundle's
 /// <see cref="SettingsFile"/>: the font, the update check and the window's place from <see cref="WindowSettings"/>,
 /// plus the recent repositories. A missing or unreadable file falls back to the defaults.
 /// </summary>

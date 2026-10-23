@@ -9,8 +9,8 @@ namespace Axit.Core.Transcript;
 /// count, and what the screen does to the lines: a line for a row that gets its first text, a committed line when
 /// its row scrolls off the top or is let go, a removed line when its row is discarded, and the new text of a
 /// rewritten row at the end of a frame. The screen knows nothing beyond this. Each app's model derives from it and
-/// adds what its program's output means: AxClaude's <c>SessionModel</c> (Claude Code's labels, chrome and echoes),
-/// AxTerminal's <c>TerminalModel</c> (a shell's prompts and marks). It began as the seam that let the screen, the
+/// adds what its program's output means: axClaude's <c>SessionModel</c> (Claude Code's labels, chrome and echoes),
+/// axTerminal's <c>TerminalModel</c> (a shell's prompts and marks). It began as the seam that let the screen, the
 /// parser and the mirror move into the shared project (2026-10-18); the decoder, the parser, the screen, the
 /// bookmarks and the cap, which both models had copied, moved in on 2026-10-23. Single threaded.
 /// </summary>
@@ -40,13 +40,13 @@ public abstract class LineStore
 
     public IReadOnlyList<Line> Lines => _lines;
 
-    /// <summary>Above this many lines the oldest tenth of the transcript is dropped (AxClaude FR-3.6, AxTerminal AT-4.4).</summary>
+    /// <summary>Above this many lines the oldest tenth of the transcript is dropped (axClaude FR-3.6, axTerminal AT-4.4).</summary>
     public int MaxLines { get; set; } = 20000;
 
-    /// <summary>Show rows the program hard-wrapped at the console width as one line (AxClaude FR-3.2a, AxTerminal AT-4.1); each model has the rule.</summary>
+    /// <summary>Show rows the program hard-wrapped at the console width as one line (axClaude FR-3.2a, axTerminal AT-4.1); each model has the rule.</summary>
     public bool JoinWrappedLines { get; set; } = true;
 
-    /// <summary>The time of sending in the Input and Output markers (AxClaude FR-4.6, AxTerminal AT-3.2).</summary>
+    /// <summary>The time of sending in the Input and Output markers (axClaude FR-4.6, axTerminal AT-3.2).</summary>
     public bool TimeStamps { get; set; }
 
     /// <summary>The clock the time stamps use; tests replace it.</summary>
@@ -81,7 +81,7 @@ public abstract class LineStore
 
     /// <summary>
     /// Drops a bookmark line in front of the line (or of the first row of a joined group), or takes the bookmark away
-    /// when the line is one or has one in front of it (AxClaude FR-3.9): an app line, <c>Bookmark 3</c>, read in place,
+    /// when the line is one or has one in front of it (axClaude FR-3.9): an app line, <c>Bookmark 3</c>, read in place,
     /// found with k and saved with the transcript. Null when the line is not in the transcript.
     /// </summary>
     public (Line Bookmark, bool Added)? ToggleBookmark(Line line)

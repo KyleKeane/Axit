@@ -1,4 +1,4 @@
-﻿# NVDA tier (docs/axit/automation.md, tier 3): AxDown's notices and the palette as NVDA speaks them. Run only with
+# NVDA tier (docs/axit/automation.md, tier 3): axDown's notices and the palette as NVDA speaks them. Run only with
 # --nvda, at the user's word, with the user away from the keyboard: the window comes to the front.
 file notes.md # Notes\n\nA line.
 start down {temp}\notes.md

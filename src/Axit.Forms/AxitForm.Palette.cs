@@ -9,7 +9,7 @@ public abstract partial class AxitForm
     private IReadOnlyList<PaletteEntry> _paletteAll = [];
     private IReadOnlyList<PaletteEntry> _paletteShown = [];
 
-    /// <summary>The pause after typing in the palette before its first match is said (AX-10.4, AxStart's 300 ms).</summary>
+    /// <summary>The pause after typing in the palette before its first match is said (AX-10.4, axStart's 300 ms).</summary>
     private readonly System.Windows.Forms.Timer _paletteSpeak = new() { Interval = 300 };
 
     /// <summary>

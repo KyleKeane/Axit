@@ -175,7 +175,7 @@ public sealed class PtyHost : IDisposable
 
     /// <summary>
     /// Ends the client at once, without the two seconds its console's closing gives it: for a restart or a close the
-    /// user confirmed while a command runs (AxClaude FR-1.7, AxTerminal AT-1.6), when a program that ignores the
+    /// user confirmed while a command runs (axClaude FR-1.7, axTerminal AT-1.6), when a program that ignores the
     /// console closing (ping -t) would otherwise hold the window for the whole wait. <see cref="Dispose"/> follows.
     /// </summary>
     public void Kill()

@@ -11,11 +11,11 @@
 
 .EXAMPLE
   .\test.ps1                 # every test project
-  .\test.ps1 AxFile          # one project: tests\AxFile.Tests
+  .\test.ps1 axFile          # one project: tests\AxFile.Tests
 #>
 [CmdletBinding()]
 param(
-    # One app's tests alone, by the folder name without ".Tests" (AxFile, Axit, AxClaude, ...).
+    # One app's tests alone, by the folder name without ".Tests" (axFile, Axit, axClaude, ...).
     [Parameter(Position = 0)]
     [string]$Only = ''
 )

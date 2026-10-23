@@ -1,4 +1,4 @@
-# AxJSON, test plan section 4 (The Axit menu and About), driven from inside the window (docs/axjson/nvda-test-plan.md).
+# axJSON, test plan section 4 (The Axit menu and About), driven from inside the window (docs/axjson/nvda-test-plan.md).
 # The run's own settings: no update check, whose network call logs an ERROR when GitHub cannot be reached.
 file home\Axit\axjson.json {"checkForUpdates": false}
 file settings.json {\n  "model": "opus"\n}
@@ -6,22 +6,22 @@ file settings.json {\n  "model": "opus"\n}
 start json {temp}\settings.json
 expect focus settings.json
 # 4.1: Axit, New window lists every app of the bundle, as the palette reads the menu.
-expect commands "AxClaude, Axit, New window"
-expect commands "AxDown, Axit, New window"
-expect commands "AxJSON, Axit, New window"
-expect commands "AxGit, Axit, New window"
-expect commands "AxTerminal, Axit, New window"
-expect commands "AxFile, Axit, New window"
-expect commands "AxMedia, Axit, New window"
-expect commands "AxPreview, Axit, New window"
-expect commands "AxStart, Axit, New window"
-# 4.1 manual: Alt+A, N, J needs the menu bar's menu mode; the new AxJSON window it starts is a process the runner
+expect commands "axClaude, Axit, New window"
+expect commands "axDown, Axit, New window"
+expect commands "axJSON, Axit, New window"
+expect commands "axGIT, Axit, New window"
+expect commands "axTerminal, Axit, New window"
+expect commands "axFile, Axit, New window"
+expect commands "axMedia, Axit, New window"
+expect commands "axPreview, Axit, New window"
+expect commands "axStart, Axit, New window"
+# 4.1 manual: Alt+A, N, J needs the menu bar's menu mode; the new axJSON window it starts is a process the runner
 # does not reach.
 # 4.2 manual: Open windows by type is a submenu filled as it opens, which the palette leaves out.
 # 4.2: Axit, About, Version names the nine apps.
 menu Version
 expect state "notice":"Axit 3.
-expect state : AxClaude, AxDown, AxJSON, AxGit, AxTerminal, AxFile, AxMedia, AxPreview, AxStart.
+expect state : axClaude, axDown, axJSON, axGIT, axTerminal, axFile, axMedia, axPreview, axStart.
 keys escape
 expect state "notice":null
 expect focus settings.json

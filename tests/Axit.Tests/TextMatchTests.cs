@@ -2,7 +2,7 @@ using Axit.Core;
 
 namespace Axit.Tests;
 
-/// <summary>The shared matching of a typed text against a name (docs/axit/SPEC.md AX-10.3, AxStart AS-2.2).</summary>
+/// <summary>The shared matching of a typed text against a name (docs/axit/SPEC.md AX-10.3, axStart AS-2.2).</summary>
 public sealed class TextMatchTests
 {
     private static int? Rank(string name, string text) => TextMatch.Rank(TextMatch.Fold(name), TextMatch.Words(text));

@@ -1,6 +1,6 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
-  <!-- AxMedia's pure code (docs/axmedia/SPEC.md §6): the player seam over Windows' media stack, the queue, a folder's
+  <!-- axMedia's pure code (docs/axmedia/SPEC.md §6): the player seam over Windows' media stack, the queue, a folder's
        media files, the settings; no window. -->
   <PropertyGroup>
     <TargetFramework>$(AxitDotNet)</TargetFramework>

@@ -55,7 +55,7 @@ public sealed class Line
 
     /// <summary>
     /// The text without its Markdown heading marker (<c>## Folder</c> as <c>Folder</c>), for a view whose markers are
-    /// hidden (AxClaude FR-4.6a): the text itself for a line that is no heading, and the same object while the text
+    /// hidden (axClaude FR-4.6a): the text itself for a line that is no heading, and the same object while the text
     /// and the level are unchanged, so that a mirror can tell a changed line by reference.
     /// </summary>
     public string BareText

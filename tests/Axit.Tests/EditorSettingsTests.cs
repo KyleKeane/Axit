@@ -2,7 +2,7 @@ using Axit.Core;
 
 namespace Axit.Tests;
 
-/// <summary>AxDown's settings file (docs/axdown/SPEC.md AD-8): round trip, defaults, sanity checks.</summary>
+/// <summary>axDown's settings file (docs/axdown/SPEC.md AD-8): round trip, defaults, sanity checks.</summary>
 public sealed class EditorSettingsTests
 {
     [Fact]

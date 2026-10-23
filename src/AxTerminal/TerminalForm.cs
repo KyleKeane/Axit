@@ -5,7 +5,7 @@ using Axit.Forms;
 namespace AxTerminal;
 
 /// <summary>
-/// AxTerminal's window (SPEC.md AT-2): the bundle's console window (<see cref="ConsoleForm"/>: the terminal view, the
+/// axTerminal's window (SPEC.md AT-2): the bundle's console window (<see cref="ConsoleForm"/>: the terminal view, the
 /// command field, the control area, the status bar, the pty bridge, the paced writes, the recording, the export,
 /// find, the signals and the music) around a shell. What is the shell's stays here: the menus, the marks' state and
 /// its announcements, the recent commands, the shells and their folders, the "a program asks" heuristic. One class
@@ -13,7 +13,7 @@ namespace AxTerminal;
 /// </summary>
 internal sealed partial class TerminalForm : ConsoleForm
 {
-    /// <summary>Spoken for plain Escape in the command field (AT-3.5; AxClaude D20).</summary>
+    /// <summary>Spoken for plain Escape in the command field (AT-3.5; axClaude D20).</summary>
     private const string EscapeGuardText = "Shift+Escape sends Escape, Ctrl+Shift+C interrupts";
 
     /// <summary>How long output must have stopped before a cursor row that ends like a question is announced (AT-5.4).</summary>
@@ -164,7 +164,7 @@ internal sealed partial class TerminalForm : ConsoleForm
     /// <summary>How the new version starts after Update and restart: a shell in the current directory.</summary>
     protected override IReadOnlyList<string> RestartArguments() => [Dispatch.AxTerminal, CurrentDirectory];
 
-    protected override string UpdateRestartText => "closes AxTerminal, installs it and starts it again with a new shell in the same folder";
+    protected override string UpdateRestartText => "closes axTerminal, installs it and starts it again with a new shell in the same folder";
 
     protected override IEnumerable<string> DiagnosticsLines =>
     [

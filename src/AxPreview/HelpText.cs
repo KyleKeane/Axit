@@ -3,10 +3,10 @@ using Axit.Core;
 
 namespace AxPreview;
 
-/// <summary>The texts AxPreview shows as notices: the keyboard shortcuts (F1) and the user guide; About is the bundle's (<c>Axit.Core.BundleAbout</c>).</summary>
+/// <summary>The texts axPreview shows as notices: the keyboard shortcuts (F1) and the user guide; About is the bundle's (<c>Axit.Core.BundleAbout</c>).</summary>
 public static class HelpText
 {
-    /// <summary>The F1 text (SPEC.md AP-3.3): a first line naming the text's own keys, then one Markdown heading per group (bundle AX-7.2): the bundle-wide keys, then AxPreview's own.</summary>
+    /// <summary>The F1 text (SPEC.md AP-3.3): a first line naming the text's own keys, then one Markdown heading per group (bundle AX-7.2): the bundle-wide keys, then axPreview's own.</summary>
     public const string Shortcuts = """
         In this text: h and Shift+H move by heading, 1 to 6 by level; the Next and Previous keys of the Navigate menu work here too. Ctrl+F finds, F3 and Shift+F3 the next and the previous match
 
@@ -15,13 +15,13 @@ public static class HelpText
           Ctrl+Shift+P: the command palette: type part of a command's name, Down and Up through the matches, Enter runs it
           Ctrl+F: find text. F3 and Shift+F3: next or previous match
           Ctrl+Plus, Ctrl+Minus: bigger or smaller text
-          Alt: the menu. Alt+F4: close AxPreview
+          Alt: the menu. Alt+F4: close axPreview
           Alt+A: the Axit menu: the command palette, a new window of any app, the files and folders closed lately, the open Axit windows, most recent first (Alt+A, O, 1 is the one you were in last) and by type, Close all windows, Check for updates, and About
 
-        ## AxPreview
-          Ctrl+O: open a file to read. Ctrl+N: a new AxPreview window
+        ## axPreview
+          Ctrl+O: open a file to read. Ctrl+N: a new axPreview window
           F5: read the file again; coming back to the window after another program changed it does the same by itself
-          Ctrl+E: open the same file in its editor, AxDown, or AxJSON for a .json file
+          Ctrl+E: open the same file in its editor, axDown, or axJSON for a .json file
           Ctrl+W: show the file in File Explorer
           Ctrl+G: go to a line; the field also says where you are, like "Go to line (now line 12, column 4)"
           l: say the line, "Line 12 of 40"
@@ -34,7 +34,7 @@ public static class HelpText
           Ctrl+T and Ctrl+Shift+T: next and previous table
             All of them work in the user guide and the other notices too
           Ctrl+Shift+W: word wrap on or off
-          Ctrl+S: nothing to save here; AxPreview says so
+          Ctrl+S: nothing to save here; axPreview says so
 
         ## The text
           Arrow keys, Home, End, Ctrl+Home, Ctrl+End, Ctrl+Left, Ctrl+Right: move as in any text
@@ -43,7 +43,7 @@ public static class HelpText
           Shift with any of them, or Ctrl+A: select. Ctrl+C: copy. Typing changes nothing
 
         ## Notices
-          AxPreview's errors and help texts appear inside the window, in place of the text.
+          axPreview's errors and help texts appear inside the window, in place of the text.
           Tab moves between the text, a field and the buttons. Enter chooses the main button. Escape closes the notice. In a notice's text, h, 1 to 6, the Navigate keys and Ctrl+F work as in this one
         """;
 

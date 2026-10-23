@@ -46,7 +46,7 @@ public static class RecentlyClosed
     public static void Write(string file, IReadOnlyList<ClosedItem> items) =>
         SettingsFile.Save(file, new RecentlyClosedList { Items = [.. items] });
 
-    /// <summary>"notes.md (C:\notes\notes.md) - AxDown", "myproject (C:\src\myproject) - AxClaude": the name, the full path in parentheses, the app (AX-9.5).</summary>
+    /// <summary>"notes.md (C:\notes\notes.md) - axDown", "myproject (C:\src\myproject) - axClaude": the name, the full path in parentheses, the app (AX-9.5).</summary>
     public static string Title(ClosedItem item)
     {
         var name = PathName.Of(item.Path);
@@ -54,5 +54,5 @@ public static class RecentlyClosed
     }
 
     private static bool Same(ClosedItem a, ClosedItem b) =>
-        a.App == b.App && string.Equals(a.Path, b.Path, StringComparison.OrdinalIgnoreCase);
+        string.Equals(a.App, b.App, StringComparison.OrdinalIgnoreCase) && string.Equals(a.Path, b.Path, StringComparison.OrdinalIgnoreCase);
 }

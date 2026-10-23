@@ -1,4 +1,4 @@
-# AxDown, test plan section 8 (Navigation), driven from inside the window (docs/axdown/nvda-test-plan.md, SPEC.md §9).
+# axDown, test plan section 8 (Navigation), driven from inside the window (docs/axdown/nvda-test-plan.md, SPEC.md §9).
 # The run's own settings: no update check, whose network call logs an ERROR when GitHub cannot be reached.
 file home\Axit\axdown.json {"checkForUpdates": false}
 # long.md as manual_tests/prepare.ps1 makes it, with a shorter long line.
@@ -36,7 +36,7 @@ keys ctrl+shift+h
 expect said ! No previous heading
 expect state Line 1, Column 1 \u00B7
 
-# 8.3: plain arrow keys speak nothing of AxDown's own.
+# 8.3: plain arrow keys speak nothing of axDown's own.
 keys down down down up right left end home
 expect quiet 1000
 

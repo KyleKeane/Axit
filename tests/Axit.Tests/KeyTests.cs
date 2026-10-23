@@ -13,15 +13,15 @@ public sealed class KeyTests
     private static readonly IReadOnlyDictionary<string, IReadOnlyList<(string Name, Keys Key)>> Windows =
         new Dictionary<string, IReadOnlyList<(string Name, Keys Key)>>
         {
-            ["AxDown"] = AxDown.AxDownKeys.All,
-            ["AxJSON"] = AxJSON.AxJSONKeys.All,
-            ["AxClaude"] = AxClaude.AxClaudeKeys.All,
-            ["AxGit"] = AxGit.AxGitKeys.All,
-            ["AxTerminal"] = AxTerminal.AxTerminalKeys.All,
-            ["AxFile"] = AxFile.AxFileKeys.All,
-            ["AxMedia"] = AxMedia.AxMediaKeys.All,
-            ["AxPreview"] = AxPreview.AxPreviewKeys.All,
-            ["AxStart"] = AxStart.AxStartKeys.All,
+            ["axDown"] = AxDown.AxDownKeys.All,
+            ["axJSON"] = AxJSON.AxJSONKeys.All,
+            ["axClaude"] = AxClaude.AxClaudeKeys.All,
+            ["axGIT"] = AxGit.AxGitKeys.All,
+            ["axTerminal"] = AxTerminal.AxTerminalKeys.All,
+            ["axFile"] = AxFile.AxFileKeys.All,
+            ["axMedia"] = AxMedia.AxMediaKeys.All,
+            ["axPreview"] = AxPreview.AxPreviewKeys.All,
+            ["axStart"] = AxStart.AxStartKeys.All,
         };
 
     [Fact]
@@ -61,15 +61,15 @@ public sealed class KeyTests
 
     private static readonly IReadOnlyDictionary<string, string> F1Texts = new Dictionary<string, string>
     {
-        ["AxDown"] = AxDown.HelpText.Shortcuts,
-        ["AxJSON"] = AxJSON.HelpText.Shortcuts,
-        ["AxClaude"] = AxClaude.HelpText.Shortcuts,
-        ["AxGit"] = AxGit.HelpText.Shortcuts,
-        ["AxTerminal"] = AxTerminal.HelpText.Shortcuts,
-        ["AxFile"] = AxFile.HelpText.Shortcuts,
-        ["AxMedia"] = AxMedia.HelpText.Shortcuts,
-        ["AxPreview"] = AxPreview.HelpText.Shortcuts,
-        ["AxStart"] = AxStart.HelpText.Shortcuts,
+        ["axDown"] = AxDown.HelpText.Shortcuts,
+        ["axJSON"] = AxJSON.HelpText.Shortcuts,
+        ["axClaude"] = AxClaude.HelpText.Shortcuts,
+        ["axGIT"] = AxGit.HelpText.Shortcuts,
+        ["axTerminal"] = AxTerminal.HelpText.Shortcuts,
+        ["axFile"] = AxFile.HelpText.Shortcuts,
+        ["axMedia"] = AxMedia.HelpText.Shortcuts,
+        ["axPreview"] = AxPreview.HelpText.Shortcuts,
+        ["axStart"] = AxStart.HelpText.Shortcuts,
     };
 
     /// <summary>

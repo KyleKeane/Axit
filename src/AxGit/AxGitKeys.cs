@@ -1,7 +1,7 @@
 namespace AxGit;
 
 /// <summary>
-/// AxGit's window-specific keys (SPEC.md AG-6.2; bundle AX-8). A key is changed here and nowhere else: the menu
+/// axGIT's window-specific keys (SPEC.md AG-6.2; bundle AX-8). A key is changed here and nowhere else: the menu
 /// items, the key switch in <c>GitForm.ProcessCmdKey</c> and the F1 text read this table. The bundle-wide keys
 /// (F1, the control keys, find, Ctrl+S, text size, the edit keys of the details) are <c>Axit.Forms.BundleKeys</c>.
 /// Space, Enter and Delete act in the list only; in the details they are the control's own.
@@ -12,7 +12,7 @@ public static class AxGitKeys
     public const Keys Refresh = Keys.F5;
     public const Keys ShowInExplorer = Keys.Control | Keys.W;
 
-    /// <summary>The three views of the list (AG-2.2); the key names the view when it already shows (AxClaude D26).</summary>
+    /// <summary>The three views of the list (AG-2.2); the key names the view when it already shows (axClaude D26).</summary>
     public const Keys ViewChanges = Keys.Control | Keys.D1;
 
     public const Keys ViewLog = Keys.Control | Keys.D2;

@@ -1,7 +1,7 @@
 namespace AxStart.Core;
 
 /// <summary>
-/// The system-wide key that brings AxStart up (SPEC.md AS-4): the modifiers as <c>RegisterHotKey</c> takes them and a
+/// The system-wide key that brings axStart up (SPEC.md AS-4): the modifiers as <c>RegisterHotKey</c> takes them and a
 /// virtual key code, written in the settings and said as a menu writes keys, "Ctrl+Shift+Space". Only the keys of
 /// <see cref="Names"/> can be a hotkey's key.
 /// </summary>

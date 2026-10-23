@@ -1,7 +1,7 @@
 namespace Axit.Forms;
 
 /// <summary>
-/// Moving through an edit control's text by its structure (docs/axit/SPEC.md AX-7.2, AxDown SPEC §9), the one
+/// Moving through an edit control's text by its structure (docs/axit/SPEC.md AX-7.2, axDown SPEC §9), the one
 /// implementation for every editor window and for every notice's text: the key pairs come from the window's table
 /// (<see cref="TextJump"/>), the elements from the pair's own outline, and the result is one announcement, the
 /// element's text, or "No next heading" and the like with the caret staying. Tested in <c>tests/Axit.Tests</c>.

@@ -1,7 +1,7 @@
 namespace AxStart;
 
 /// <summary>
-/// AxStart's window-specific keys (SPEC.md AS-5.3; bundle AX-8). A key is changed here and nowhere else: the menu
+/// axStart's window-specific keys (SPEC.md AS-5.3; bundle AX-8). A key is changed here and nowhere else: the menu
 /// items, the key switch in <c>StartForm.ProcessWindowKey</c> and the F1 text read this table. The bundle-wide keys
 /// (F1, text size, Page Up and Page Down) are <c>Axit.Forms.BundleKeys</c>; the hotkey is a setting, not a key of
 /// the window. The caret stays in the field (AS-D2): every key here acts on the list of matches or on the program.
@@ -18,7 +18,7 @@ public static class AxStartKeys
 
     public const Keys StartAsAdministrator = Keys.Control | Keys.Shift | Keys.Return;
 
-    /// <summary>AxFile on the program file's folder, the file selected.</summary>
+    /// <summary>axFile on the program file's folder, the file selected.</summary>
     public const Keys OpenFileLocation = Keys.Control | Keys.O;
 
     /// <summary>The selected match, its kind and its path.</summary>

@@ -1,6 +1,6 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
-  <!-- AxFile's pure code (docs/axfile/SPEC.md §5): a folder's entries, the file operations and their undo, the Actions
+  <!-- axFile's pure code (docs/axfile/SPEC.md §5): a folder's entries, the file operations and their undo, the Actions
        list's lines, the archives, the path completion, the settings; no window. The player and the media rules left
        for AxMedia.Core and Axit.Core on 2026-10-22. -->
   <PropertyGroup>

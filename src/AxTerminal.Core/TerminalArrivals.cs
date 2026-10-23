@@ -7,10 +7,10 @@ namespace AxTerminal.Core;
 public readonly record struct TerminalArrival(bool NewLine, string? Speech);
 
 /// <summary>
-/// The per-frame pass behind the tick and the spoken output (SPEC.md AT-5.2, AT-5.3), the shape of AxClaude's
+/// The per-frame pass behind the tick and the spoken output (SPEC.md AT-5.2, AT-5.3), the shape of axClaude's
 /// Arrivals without Claude's kinds: a frame that added a visible line from the shell ticks once; with speech on, the
 /// shell's lines that became final (committed, followed by another visible line, or the shell idle) and were not
-/// spoken yet go out as one utterance (AxClaude D32). Lines are told apart by id, which grows with creation.
+/// spoken yet go out as one utterance (axClaude D32). Lines are told apart by id, which grows with creation.
 /// </summary>
 public sealed class TerminalArrivals
 {

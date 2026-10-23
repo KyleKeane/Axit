@@ -52,7 +52,7 @@ public sealed class FileSettingsTests
         File.WriteAllText(path, """{ "speed": 9, "seekSeconds": 0, "lastFolder": " ", "recentFolders": ["", "C:\\x"], "favorites": ["C:\\f", " ", "c:\\F"], "fontSize": 500, "programs": [{ "name": "", "path": "C:\\a.exe" }, { "name": "b", "path": "C:\\b.exe" }] }""");
         try
         {
-            // An older file's player keys (speed, seekSeconds) are AxMedia's now and are ignored.
+            // An older file's player keys (speed, seekSeconds) are axMedia's now and are ignored.
             var settings = FileSettings.Load(path, out var error);
             Assert.Null(error);
             Assert.Null(settings.LastFolder);

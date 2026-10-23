@@ -22,7 +22,7 @@ public abstract partial class AxitForm
     /// <summary>Update and restart was chosen and the update is installed: the new version starts when the window closes.</summary>
     protected bool RestartPending => _restartArguments is not null;
 
-    /// <summary>The update is installed and the window is closing for it (AX-3.2): a window that otherwise hides on closing (AxStart) closes.</summary>
+    /// <summary>The update is installed and the window is closing for it (AX-3.2): a window that otherwise hides on closing (axStart) closes.</summary>
     protected bool ClosingForUpdate { get; private set; }
 
     /// <summary>

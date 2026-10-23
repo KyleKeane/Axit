@@ -1,7 +1,7 @@
 namespace Axit.Core;
 
 /// <summary>
-/// Rolling diagnostic log in <c>%LOCALAPPDATA%\Axit\logs\&lt;app&gt;.log</c> (docs/axit/SPEC.md AX-5.1; AxClaude's
+/// Rolling diagnostic log in <c>%LOCALAPPDATA%\Axit\logs\&lt;app&gt;.log</c> (docs/axit/SPEC.md AX-5.1; axClaude's
 /// FR-13.2). Never throws. Each app names its file with <see cref="UseApp"/> as the first thing its Run does.
 /// </summary>
 public static class Log

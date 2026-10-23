@@ -1,4 +1,4 @@
-# AxDown, test plan section 3 (Files), driven from inside the window (docs/axdown/nvda-test-plan.md).
+# axDown, test plan section 3 (Files), driven from inside the window (docs/axdown/nvda-test-plan.md).
 # The files are made here with their encodings, and checked byte by byte after a save through PowerShell.
 # The run's own settings: no update check, whose network call logs an ERROR when GitHub cannot be reached.
 file home\Axit\axdown.json {"checkForUpdates": false}
@@ -51,12 +51,12 @@ expect state "notice":"Save changes to plain.txt?"
 keys escape
 expect state "notice":null
 expect focus Added.Plain text file, line 1.
-expect state *plain.txt - AxDown
+expect state *plain.txt - axDown
 keys ctrl+n
 expect state "notice":"Save changes to plain.txt?"
 keys enter
 expect said ! Saved
-expect state Untitled - AxDown
+expect state Untitled - axDown
 expect focus {"name":"Untitled","role":"Text","value":""}
 run findstr /c:"Added.Plain text file" plain.txt
 
@@ -88,7 +88,7 @@ keys enter
 expect said Reloaded
 expect focus Added.Plain text file, line 1.
 expect text Another line, added by another program.
-expect state "title":"plain.txt - AxDown"
+expect state "title":"plain.txt - axDown"
 # Changed on disk again, a change here, Ctrl+S, Enter on Write over: "Saved".
 wait 1100
 run echo A second line from another program.>> plain.txt
@@ -127,7 +127,7 @@ close
 expect state "notice":"Save changes to wide.txt?"
 keys escape
 expect state "notice":null
-expect state *wide.txt - AxDown
+expect state *wide.txt - axDown
 close
 expect state "notice":"Save changes to wide.txt?"
 keys tab tab

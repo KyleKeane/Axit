@@ -1,4 +1,4 @@
-# AxPreview, test plan section 1 step 9a, the second half: a file whose first eight kilobytes are text with a NUL
+# axPreview, test plan section 1 step 9a, the second half: a file whose first eight kilobytes are text with a NUL
 # further in: the error notice, and what the window showed is kept. Apart from 01-start-and-the-text.txt: the window
 # logs the refused read as an ERROR, and the runner fails a run with an ERROR in its logs (see the report), so this
 # script fails after its steps.
@@ -12,7 +12,7 @@ run powershell -NoProfile -Command "[IO.File]::WriteAllText('nul-later.txt', ('A
 start preview {temp}\nul-later.txt
 expect state "notice":"Error"
 expect state nul-later.txt is not a text file (it holds a NUL character).
-expect state "title":"Untitled - AxPreview"
+expect state "title":"Untitled - axPreview"
 wait 1200
 keys escape
 expect state "notice":null

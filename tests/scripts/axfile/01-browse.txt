@@ -1,4 +1,4 @@
-# AxFile, test plan section 1: start, the list, browsing (docs/axfile/nvda-test-plan.md 1.1 to 1.12b; AF-1, AF-2, AF-3).
+# axFile, test plan section 1: start, the list, browsing (docs/axfile/nvda-test-plan.md 1.1 to 1.12b; AF-1, AF-2, AF-3).
 # The folders are those of manual_tests/prepare.ps1 axfile, made in {temp}.
 mkdir nav
 file nav\aardvark.txt The aardvark file.
@@ -26,7 +26,7 @@ expect focus "name":"13 items"
 # A modifier key sent while the window still settles can lose its modifier (the channel); let it settle.
 wait 500
 expect focus empty-folder-no-items, folder
-expect state "title":"nav - AxFile"
+expect state "title":"nav - axFile"
 expect quiet 1500
 
 # 1.2 Down: the next entry, nothing said. Home, End: the first and the last.
@@ -104,7 +104,7 @@ keys home
 keys down
 keys enter
 expect said ! level-1-enter-me, 2 items, level-2-enter-me, folder
-expect state "title":"level-1-enter-me - AxFile"
+expect state "title":"level-1-enter-me - axFile"
 refuse said ! level-2-enter-me, folder
 # Backspace: the folder above, on the folder left; Alt+Up the same.
 keys backspace
@@ -150,7 +150,7 @@ keys enter
 expect said ! C:\,
 keys backspace
 expect said (C:), drive
-expect state "title":"This PC - AxFile"
+expect state "title":"This PC - axFile"
 expect focus (C:), drive
 keys ctrl+i
 expect said GB free of
@@ -189,7 +189,7 @@ keys right
 expect said ! level-3-enter-me, 1 item, you-reached-the-bottom.txt
 keys right
 expect said ♪ Edge
-expect state "title":"level-3-enter-me - AxFile"
+expect state "title":"level-3-enter-me - axFile"
 keys left
 expect said ! level-2-enter-me, 2 items, level-3-enter-me, folder
 keys left
@@ -204,7 +204,7 @@ keys end
 keys ctrl+i
 expect said ! fig.txt, 13 bytes, modified
 
-# 1.6 Manual: Enter on a file starts the user's default program for it, and Ctrl+E starts AxDown or AxJSON, windows outside this one.
+# 1.6 Manual: Enter on a file starts the user's default program for it, and Ctrl+E starts axDown or axJSON, windows outside this one.
 
 # 1.7 Go to folder: the field "Path" holds the current folder with a backslash at its end.
 keys ctrl+g
@@ -216,7 +216,7 @@ expect focus "name":"Path"
 type %AXIT_HOME%
 keys enter
 expect said ! home,
-expect state "title":"home - AxFile"
+expect state "title":"home - axFile"
 # A file's path: its folder with the file selected.
 keys ctrl+g
 expect focus "name":"Path"
@@ -299,7 +299,7 @@ expect said ! Removed from Favorites
 # 1.9 A file added from outside: F5 reads the folder again, "Refreshed", the entry kept. (Coming back to the window with Alt+Tab is manual: the test window is never activated.)
 keys end
 expect focus fig.txt
-file nav\added-from-outside.txt Added while AxFile shows the folder.
+file nav\added-from-outside.txt Added while axFile shows the folder.
 keys f5
 expect said ! Refreshed
 expect focus fig.txt

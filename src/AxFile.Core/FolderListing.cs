@@ -175,7 +175,7 @@ public static class FolderListing
         return -1;
     }
 
-    /// <summary>The editor Ctrl+E opens a file in (AF-1.3): AxJSON's verb for .json, AxDown's for anything else.</summary>
+    /// <summary>The editor Ctrl+E opens a file in (AF-1.3): axJSON's verb for .json, axDown's for anything else.</summary>
     public static string EditorOf(string path) =>
         System.IO.Path.GetExtension(path).Equals(".json", StringComparison.OrdinalIgnoreCase) ? Dispatch.AxJSON : Dispatch.AxDown;
 

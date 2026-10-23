@@ -2,7 +2,7 @@ using System.Text;
 
 namespace AxTerminal.Core;
 
-/// <summary>The shells AxTerminal starts (SPEC.md AT-1.2).</summary>
+/// <summary>The shells axTerminal starts (SPEC.md AT-1.2).</summary>
 public enum ShellKind
 {
     PowerShell7,

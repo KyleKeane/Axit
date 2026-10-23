@@ -1,17 +1,17 @@
 namespace Axit.Forms;
 
-/// <summary>A recommended way to start the session (AxClaude FR-8.6, AxTerminal AT-1.6): the radio button's text and the arguments it stands for.</summary>
+/// <summary>A recommended way to start the session (axClaude FR-8.6, axTerminal AT-1.6): the radio button's text and the arguments it stands for.</summary>
 public sealed record SessionPreset(string Text, IReadOnlyList<string> Arguments);
 
 /// <summary>
-/// The New session controls of AxClaude and AxTerminal (FR-8.6, AT-1.6), a control of the window's own that a
+/// The New session controls of axClaude and axTerminal (FR-8.6, AT-1.6), a control of the window's own that a
 /// <see cref="Notice"/> carries (<see cref="Notice.Custom"/>), under the notice's text: the Choose folder button,
 /// the presets as radio buttons in a named group (the arrow keys move between them, Tab lands on the selected one)
 /// with Custom last, and the free field under Custom, where Enter presses the notice's default button and
 /// Shift+Enter is a new line. The window makes it with its own wording, reads the choice from it when the notice is
 /// answered, and gives it the folder picker, the announcer, the notice's head line and its default button. Out of
 /// <see cref="OverlayPanel"/> since 2026-10-23 (docs/axit/review-2026-10-23.md 5.6), where it sat because the panel
-/// moved whole from AxClaude.
+/// moved whole from axClaude.
 /// </summary>
 public sealed class SessionControls : FlowLayoutPanel
 {

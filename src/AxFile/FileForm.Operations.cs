@@ -746,10 +746,10 @@ public sealed partial class FileForm
         OpenInExplorer(entry.Path, select: true);
     }
 
-    /// <summary>Folder → New window (Ctrl+N, AF-3.3): another AxFile window on the folder shown, as File Explorer's Ctrl+N; without a folder, and at This PC, one that starts as this one did (AF-3.10).</summary>
+    /// <summary>Folder → New window (Ctrl+N, AF-3.3): another axFile window on the folder shown, as File Explorer's Ctrl+N; without a folder, and at This PC, one that starts as this one did (AF-3.10).</summary>
     private void NewWindow() => AxitMenu.Start(Dispatch.AxFile, RealFolder);
 
-    /// <summary>Folder → Show current folder in → AxClaude, AxGit, AxTerminal (AF-1.3): a new window of that app on the folder shown.</summary>
+    /// <summary>Folder → Show current folder in → axClaude, axGIT, axTerminal (AF-1.3): a new window of that app on the folder shown.</summary>
     private void OpenIn(string verb)
     {
         if (TryFolder(out var folder))
@@ -759,8 +759,8 @@ public sealed partial class FileForm
     }
 
     /// <summary>
-    /// Item → Open in Axit → one app (AF-4.9): a new window of it on the entry: the editors on the file, AxGit on the
-    /// repository that holds it, AxFile on the folder or the file in its folder, AxClaude and AxTerminal on the folder,
+    /// Item → Open in Axit → one app (AF-4.9): a new window of it on the entry: the editors on the file, axGIT on the
+    /// repository that holds it, axFile on the folder or the file in its folder, axClaude and axTerminal on the folder,
     /// or on the entry's folder for a file.
     /// </summary>
     private void OpenInAxit(string verb)
@@ -784,7 +784,7 @@ public sealed partial class FileForm
         }
     }
 
-    /// <summary>Item → Open in editor (Ctrl+E): the file in AxJSON for .json and AxDown for anything else, whatever Enter would do with it.</summary>
+    /// <summary>Item → Open in editor (Ctrl+E): the file in axJSON for .json and axDown for anything else, whatever Enter would do with it.</summary>
     private void OpenInEditor()
     {
         if (!TryEntry(out var entry))

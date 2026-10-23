@@ -1,6 +1,6 @@
 <#
 .SYNOPSIS
-  Builds Axit and starts AxJSON: run.ps1 with -App json. Every other argument goes through unchanged. Without a file
+  Builds Axit and starts axJSON: run.ps1 with -App json. Every other argument goes through unchanged. Without a file
   it opens an empty document.
 
 .EXAMPLE

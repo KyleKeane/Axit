@@ -10,10 +10,10 @@ public enum OutputSpeechMode
 }
 
 /// <summary>
-/// Everything AxTerminal remembers between runs (SPEC.md AT-8.1), in <c>%APPDATA%\Axit\axterminal.json</c> through
+/// Everything axTerminal remembers between runs (SPEC.md AT-8.1), in <c>%APPDATA%\Axit\axterminal.json</c> through
 /// the bundle's <see cref="SettingsFile"/>: the shell, the last folder and the speech options here; the console size,
 /// the recent folders, the sounds, the signals and the transcript options from <see cref="ConsoleSettings"/>, shared
-/// with AxClaude; the font, the update check and the window's place from <see cref="WindowSettings"/>. A missing or
+/// with axClaude; the font, the update check and the window's place from <see cref="WindowSettings"/>. A missing or
 /// unreadable file falls back to the defaults; out-of-range values do too.
 /// </summary>
 public sealed class TerminalSettings : ConsoleSettings

@@ -1,4 +1,4 @@
-# AxDown, test plan section 1 (Install and start), driven from inside the window (docs/axdown/nvda-test-plan.md).
+# axDown, test plan section 1 (Install and start), driven from inside the window (docs/axdown/nvda-test-plan.md).
 # 1.1 manual: the Start menu entry and the installer need publish.ps1 and the real Start menu.
 # 1.2 manual: File Explorer's Open with Axit submenu is the shell's menu, outside the window.
 # 1.4 manual: Alt+Tab is the system's window switcher, which needs the foreground.
@@ -8,31 +8,31 @@ file plain.txt Plain text file, line 1.\nLine 2 of the plain text file.\nLine 3:
 
 # 1.1, the window part: no file gives an empty Untitled document, named so in the title and the editor.
 start down
-expect state Untitled - AxDown
+expect state Untitled - axDown
 expect focus {"name":"Untitled","role":"Text","value":""}
 expect quiet 1000
 
-# 1.3: the down verb with a file opens it, the caret on the first line; nothing of AxDown's own is said.
+# 1.3: the down verb with a file opens it, the caret on the first line; nothing of axDown's own is said.
 start down {temp}\plain.txt
-expect state plain.txt - AxDown
+expect state plain.txt - axDown
 expect focus {"name":"plain.txt","role":"Text","value":"Plain text file, line 1."}
 expect quiet 1000
 
-# 1.3: a file alone (axit plain.txt) opens AxDown.
+# 1.3: a file alone (axit plain.txt) opens axDown.
 start {temp}\plain.txt
-expect state plain.txt - AxDown
+expect state plain.txt - axDown
 expect focus plain.txt
 
 # 1.3: a missing file opens an empty document of that name.
 start down {temp}\missing.md
-expect state missing.md - AxDown
+expect state missing.md - axDown
 expect focus {"name":"missing.md","role":"Text","value":""}
 # Nothing is written until the first save.
 run if exist missing.md (exit 1) else (exit 0)
-# 1.3 manual: axit <folder> opens AxClaude, which starts a Claude session; AxClaude's own scripts cover that window.
+# 1.3 manual: axit <folder> opens axClaude, which starts a Claude session; axClaude's own scripts cover that window.
 
 # 1.4, the window part: two files, two windows, each its own.
 use 2
-expect state plain.txt - AxDown
+expect state plain.txt - axDown
 use 4
-expect state missing.md - AxDown
+expect state missing.md - axDown

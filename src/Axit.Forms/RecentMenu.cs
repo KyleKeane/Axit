@@ -3,7 +3,7 @@ using Axit.Core;
 namespace Axit.Forms;
 
 /// <summary>
-/// The "Open recent …" submenu every window has (AxClaude FR-8.1, AxDown AD-4.1, AxGit AG-6.1; the Axit menu's
+/// The "Open recent …" submenu every window has (axClaude FR-8.1, axDown AD-4.1, axGIT AG-6.1; the Axit menu's
 /// shape, AX-9.5): the paths that still exist as "1. name (path)", with the number as the mnemonic, or one enabled
 /// item that says there are none, since a disabled item is skipped by the keyboard and NVDA would read nothing.
 /// </summary>

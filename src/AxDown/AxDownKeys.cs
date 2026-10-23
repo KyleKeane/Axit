@@ -4,7 +4,7 @@ using Axit.Forms;
 namespace AxDown;
 
 /// <summary>
-/// AxDown's window-specific keys (SPEC.md AD-5; bundle AX-8). A key is changed here and nowhere else: the menu items,
+/// axDown's window-specific keys (SPEC.md AD-5; bundle AX-8). A key is changed here and nowhere else: the menu items,
 /// the key handling and the F1 text read this table. The editor shell's keys (new, open, save as, go to line, word
 /// wrap, show in File Explorer) are <c>Axit.Forms.EditorKeys</c>, the same in every editor window, and <see cref="All"/>
 /// includes them; the bundle-wide keys (F1, find, save, text size, the controls) are <c>Axit.Forms.BundleKeys</c>. The

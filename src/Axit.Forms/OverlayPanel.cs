@@ -14,7 +14,7 @@ public sealed record OverlayChoice(string Text, Action? Action = null, bool IsDe
 /// A text field on a notice (Find): its label, its accessible name, the initial
 /// text, and, when <paramref name="Required"/>, what to say when the default button is pressed while the field is
 /// empty (the notice then stays open). <paramref name="KeyHook"/>, when given, is asked about each key in the field
-/// first and takes it by returning true (AxFile's path completion on Down, Up and Right). <paramref name="Changed"/> is
+/// first and takes it by returning true (axFile's path completion on Down, Up and Right). <paramref name="Changed"/> is
 /// called on each change of the text, and <paramref name="ListName"/>, when given, shows a list under the field that
 /// never takes the focus, filled by the window with <see cref="OverlayPanel.SetMatches"/> (the command palette, AX-10).
 /// </summary>
@@ -126,7 +126,7 @@ public sealed class OverlayPanel : Panel
         _input.TextChanged += (_, _) => _inputSpec?.Changed?.Invoke();
 
         // The matches under the field (OverlayInput.ListName): for the eyes and NVDA's object navigation, never the
-        // focus, as AxStart's list (AS-D2); the field's keys move the selection.
+        // focus, as axStart's list (AS-D2); the field's keys move the selection.
         _matches.Dock = DockStyle.Fill;
         _matches.IntegralHeight = false;
         _matches.TabStop = false;
@@ -428,7 +428,7 @@ public sealed class OverlayPanel : Panel
     /// <summary>
     /// The last line of every notice, made from its buttons so that no notice words its keys itself: "Enter: Close
     /// anyway. Escape: Keep working.", or "Enter or Escape: Close." for a single button; the whole text of a notice
-    /// with no words of its own (AxDown's save question), so that there is always text to land on.
+    /// with no words of its own (axDown's save question), so that there is always text to land on.
     /// </summary>
     private static string WithKeyLine(string text, IReadOnlyList<OverlayChoice> choices)
     {
@@ -459,7 +459,7 @@ public sealed class OverlayPanel : Panel
         }
     }
 
-    /// <summary>A key in the field that the window asked for (<see cref="OverlayInput.KeyHook"/>), such as AxFile's path completion.</summary>
+    /// <summary>A key in the field that the window asked for (<see cref="OverlayInput.KeyHook"/>), such as axFile's path completion.</summary>
     private void OnInputKeyDown(object? sender, KeyEventArgs e)
     {
         if (_inputSpec?.KeyHook is { } hook && hook(e.KeyData))

@@ -1,4 +1,4 @@
-# AxMedia: a file Windows cannot decode (docs/axmedia/nvda-test-plan.md section 3 step 8; SPEC.md AM-4.1, AM-6).
+# axMedia: a file Windows cannot decode (docs/axmedia/nvda-test-plan.md section 3 step 8; SPEC.md AM-4.1, AM-6).
 # A text file named .mp3 stands for it: "Cannot play <name>: <reason>", and the next file plays. The window logs
 # the player's error as an ERROR (AM-7.2), as it should, and the runner fails a run on any ERROR in its logs, so
 # this script fails after its steps until the runner can be told which ERROR a script expects; it is kept apart so
@@ -15,7 +15,7 @@ start media {temp}\c
 expect said ! Cannot play a-broken.mp3:
 expect said Playing b-good.wav
 expect list ["a-broken.mp3","b-good.wav (playing)"]
-expect state "title":"b-good.wav - AxMedia"
+expect state "title":"b-good.wav - axMedia"
 # Enter on it again: the same.
 keys home
 keys enter

@@ -38,7 +38,7 @@ public sealed class TextJumpsTests
         Assert.Equal(3, spoken.Count);
     }
 
-    /// <summary>The heading letters every notice's text takes (AX-7.2): h, Shift+H, 1 to 6, the same values as AxClaude's transcript keys.</summary>
+    /// <summary>The heading letters every notice's text takes (AX-7.2): h, Shift+H, 1 to 6, the same values as axClaude's transcript keys.</summary>
     [Fact]
     public void The_heading_letters_work_in_a_notice_text()
     {
@@ -54,27 +54,27 @@ public sealed class TextJumpsTests
 
     /// <summary>Every F1 text is written under Markdown headings, one per group of keys, so that the letters walk it (AX-7.2).</summary>
     [Theory]
-    [InlineData("AxClaude")]
-    [InlineData("AxDown")]
-    [InlineData("AxJSON")]
-    [InlineData("AxGit")]
-    [InlineData("AxTerminal")]
-    [InlineData("AxFile")]
-    [InlineData("AxMedia")]
-    [InlineData("AxPreview")]
-    [InlineData("AxStart")]
+    [InlineData("axClaude")]
+    [InlineData("axDown")]
+    [InlineData("axJSON")]
+    [InlineData("axGIT")]
+    [InlineData("axTerminal")]
+    [InlineData("axFile")]
+    [InlineData("axMedia")]
+    [InlineData("axPreview")]
+    [InlineData("axStart")]
     public void Every_F1_text_has_headings_for_the_letters_to_walk(string app)
     {
         var text = app switch
         {
-            "AxClaude" => AxClaude.HelpText.Shortcuts,
-            "AxDown" => AxDown.HelpText.Shortcuts,
-            "AxJSON" => AxJSON.HelpText.Shortcuts,
-            "AxGit" => AxGit.HelpText.Shortcuts,
-            "AxTerminal" => AxTerminal.HelpText.Shortcuts,
-            "AxFile" => AxFile.HelpText.Shortcuts,
-            "AxMedia" => AxMedia.HelpText.Shortcuts,
-            "AxPreview" => AxPreview.HelpText.Shortcuts,
+            "axClaude" => AxClaude.HelpText.Shortcuts,
+            "axDown" => AxDown.HelpText.Shortcuts,
+            "axJSON" => AxJSON.HelpText.Shortcuts,
+            "axGIT" => AxGit.HelpText.Shortcuts,
+            "axTerminal" => AxTerminal.HelpText.Shortcuts,
+            "axFile" => AxFile.HelpText.Shortcuts,
+            "axMedia" => AxMedia.HelpText.Shortcuts,
+            "axPreview" => AxPreview.HelpText.Shortcuts,
             _ => AxStart.HelpText.Shortcuts,
         };
         var headings = MarkdownOutline.Headings(text);

@@ -13,7 +13,7 @@ namespace Axit.Forms;
 public sealed record TextJump(Keys Next, Keys Previous, string Name, Func<string, int, Element?> NextOf, Func<string, int, Element?> PreviousOf)
 {
     /// <summary>
-    /// The pairs every notice's text takes (AX-7.2), the letters of AxClaude's transcript: h and Shift+H for the next
+    /// The pairs every notice's text takes (AX-7.2), the letters of axClaude's transcript: h and Shift+H for the next
     /// and the previous heading, 1 to 6 and Shift with them for one level. A read-only text has no use for typed
     /// letters, so they are free in every window; an editor's notices take these and the editor's own Ctrl+letter pairs.
     /// </summary>

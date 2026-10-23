@@ -1,5 +1,5 @@
-# AxPreview, test plan section 1 (Start and the text), driven from inside the window (docs/axpreview/nvda-test-plan.md).
-# A second AxPreview start hands its file to the open window and ends (AP-1.2), so every window after the first is
+# axPreview, test plan section 1 (Start and the text), driven from inside the window (docs/axpreview/nvda-test-plan.md).
+# A second axPreview start hands its file to the open window and ends (AP-1.2), so every window after the first is
 # started with --new.
 # The run's own settings: no update check, whose network call logs an ERROR when GitHub cannot be reached.
 file home\Axit\axpreview.json {"checkForUpdates": false}
@@ -12,7 +12,7 @@ run powershell -NoProfile -Command "[IO.File]::WriteAllText('too-large.txt', ('a
 
 # 1.1: README.md: the title, the text named after the file with its first line; nothing else spoken.
 start preview {temp}\README.md
-expect state "title":"README.md - AxPreview"
+expect state "title":"README.md - axPreview"
 expect focus {"name":"README.md","role":"Text","value":"# Readme for the preview tests"}
 expect quiet 1000
 # 1.1 manual: the menu bar (Alt) needs the foreground; its menus as the palette reads them: File, Navigate, Options,
@@ -31,9 +31,9 @@ expect focus This file has headings, links, lists
 type xyz
 keys ctrl+v
 expect quiet 1000
-expect state "title":"README.md - AxPreview"
+expect state "title":"README.md - axPreview"
 expect focus {"name":"README.md","role":"Text","value":"This file has headings, links, lists, a block quote and a table, for the navigation keys."}
-# Shift+Down selects a line, without a word of AxPreview's.
+# Shift+Down selects a line, without a word of axPreview's.
 keys shift+down
 expect quiet 1000
 # 1.2 manual: Ctrl+A, Ctrl+C puts the text on the clipboard, which is the user's, shared with the test desktop.
@@ -102,7 +102,7 @@ keys f3
 expect state Line 32, Column 38 \u00B7
 keys shift+f3
 expect state Line 7, Column 84 \u00B7
-# Page Down, Page Up, Ctrl+Down, Ctrl+Up as in AxDown.
+# Page Down, Page Up, Ctrl+Down, Ctrl+Up as in axDown.
 keys ctrl+home pagedown
 expect quiet 500
 keys ctrl+end pageup
@@ -146,15 +146,15 @@ expect state Line 5, Column 1 \u00B7
 expect text An added line.
 # 1.10 manual: the reload on coming back to the window (Alt+Tab) needs its activation, which a test window never gets.
 
-# 1.11: on a .json file the File menu's item reads "Edit in AxJSON Ctrl+E"; on README.md "Edit in AxDown".
-expect commands "Edit in AxDown, File, Ctrl\u002BE"
-# 1.11 manual: Ctrl+E starts an editor window, and the Show current file in items start File Explorer, AxGit,
-# AxTerminal and AxFile, processes the runner does not reach (File Explorer on the user's desktop).
+# 1.11: on a .json file the File menu's item reads "Edit in axJSON Ctrl+E"; on README.md "Edit in axDown".
+expect commands "Edit in axDown, File, Ctrl\u002BE"
+# 1.11 manual: Ctrl+E starts an editor window, and the Show current file in items start File Explorer, axGIT,
+# axTerminal and axFile, processes the runner does not reach (File Explorer on the user's desktop).
 
 # 1.8: a plain text file has no headings: Ctrl+H, "No next heading".
 # 1.8 manual: Ctrl+O is the Windows file picker; Alt+F, R, Open recent, is a submenu filled as it opens.
 start preview --new {temp}\plain.txt
-expect state "title":"plain.txt - AxPreview"
+expect state "title":"plain.txt - axPreview"
 expect focus plain.txt
 keys ctrl+h
 expect said ! No next heading
@@ -163,12 +163,12 @@ expect said ! No next heading
 # the window keeping what it had (here nothing, Untitled); over 32 MB, "Too large" naming the size; a .log opens.
 start preview --new {temp}\tool.exe
 expect state "notice":"Not a text file"
-expect state tool.exe is not a text file. AxFile\u0027s Enter opens it in the program Windows has for it.
+expect state tool.exe is not a text file. axFile\u0027s Enter opens it in the program Windows has for it.
 # A notice that opens by itself holds the answering keys for a second (KeyHold), so the Enter waits.
 wait 1200
 keys enter
 expect state "notice":null
-expect state "title":"Untitled - AxPreview"
+expect state "title":"Untitled - axPreview"
 start preview --new {temp}\too-large.txt
 expect state "notice":"Too large"
 expect state too-large.txt is 34,000,000 bytes, over the 32 MB a window can open.
@@ -177,15 +177,15 @@ wait 1200
 keys enter
 expect state "notice":null
 start preview --new {temp}\app.log
-expect state "title":"app.log - AxPreview"
+expect state "title":"app.log - axPreview"
 expect focus 2026-10-22 09:00:01 INFO  The log file starts.
 
-# 1.9a: a file that does not exist: the notice "File not found" naming it, the window empty, "Untitled - AxPreview";
+# 1.9a: a file that does not exist: the notice "File not found" naming it, the window empty, "Untitled - axPreview";
 # Enter closes it; Ctrl+E: "No file yet".
 start preview --new {temp}\gone.txt
 expect state "notice":"File not found"
 expect state gone.txt does not exist.
-expect state "title":"Untitled - AxPreview"
+expect state "title":"Untitled - axPreview"
 # A notice that opens by itself holds the answering keys for a second (KeyHold), so the Enter waits.
 wait 1200
 keys enter
@@ -198,10 +198,10 @@ keys ctrl+w
 expect said ! No file yet
 keys f5
 expect said ! No file yet
-# 1.12 manual: Ctrl+N starts a second AxPreview window, a process the runner does not reach.
+# 1.12 manual: Ctrl+N starts a second axPreview window, a process the runner does not reach.
 # 1.9a, a NUL further in: 01-start-and-the-text-nul.txt, apart, since its error notice is logged as an ERROR.
 
-# 1.11: on the .json file, "Edit in AxJSON".
+# 1.11: on the .json file, "Edit in axJSON".
 start preview --new {temp}\data.json
 expect focus data.json
-expect commands "Edit in AxJSON, File, Ctrl\u002BE"
+expect commands "Edit in axJSON, File, Ctrl\u002BE"

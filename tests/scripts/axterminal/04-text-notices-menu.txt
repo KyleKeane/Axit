@@ -1,4 +1,4 @@
-# AxTerminal, section 4 of docs/axterminal/nvda-test-plan.md: text, notices, the Axit menu (AT-4, AT-6).
+# axTerminal, section 4 of docs/axterminal/nvda-test-plan.md: text, notices, the Axit menu (AT-4, AT-6).
 mkdir myproject
 # The run's own settings: no update check (network, and an ERROR in the log when it fails); a small font in a
 # maximized window, so that no line wraps in the view, since the channel reads the caret's line by its visual row.
@@ -91,9 +91,9 @@ keys escape
 expect state "notice":null
 expect focus "name":"Terminal"
 
-# Step 6: the Axit menu's New window lists AxTerminal (Alt+A itself needs menu mode; the palette's list is the same
+# Step 6: the Axit menu's New window lists axTerminal (Alt+A itself needs menu mode; the palette's list is the same
 # menu). Open windows by type stays manual: it is filled as it opens, so the palette does not list it.
-expect commands AxTerminal, Axit, New window
+expect commands axTerminal, Axit, New window
 
 # Step 5 (last, since it closes the window): Alt+F4 while a command runs asks first; Escape keeps it; Alt+F4 again
 # (here the channel's close, which is Alt+F4's path, so that the runner knows the window closes on purpose), Enter

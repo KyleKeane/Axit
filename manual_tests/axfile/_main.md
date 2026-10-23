@@ -1,8 +1,8 @@
-# AxFile manual tests
+# axFile manual tests
 
 The steps and every expected announcement are in `docs/axfile/nvda-test-plan.md`. This file says which folder each section uses. Run `.\manual_tests\prepare.ps1 axfile` first, and again after any section that changed files.
 
-Start AxFile on a folder with `.\run-axfile.ps1 manual_tests\axfile\<folder>`, or with Ctrl+G and the path once AxFile runs.
+Start axFile on a folder with `.\run-axfile.ps1 manual_tests\axfile\<folder>`, or with Ctrl+G and the path once axFile runs.
 
 ## navigate-arrows-type-ahead-and-levels
 
@@ -23,8 +23,8 @@ Section 1, step 3a. `visible-file.txt` always shows; `hidden-file.txt` has the h
 
 Section 1, step 6, and section 3, steps 10 and 12.
 
-- `markdown-for-enter-and-ctrl-e.md`: Enter opens Windows' program for .md; Ctrl+E opens AxDown.
-- `json-ctrl-e-opens-axjson.json`: Ctrl+E opens AxJSON.
+- `markdown-for-enter-and-ctrl-e.md`: Enter opens Windows' program for .md; Ctrl+E opens axDown.
+- `json-ctrl-e-opens-axjson.json`: Ctrl+E opens axJSON.
 - `type-nothing-opens.axtest`: Enter shows the Windows "How do you want to open this file?" dialog.
 - `text-for-notepad-1.txt` and `text-for-notepad-2.txt`: Add Notepad as your own program, select both, open them with it.
 
@@ -57,7 +57,7 @@ Section 3, steps 1 to 13.
 - `existing-archive-extract-me.zip`: Shift+F10, X extracts it. `not-a-zip.txt`: "Not a zip file".
 - `paste-into-this-folder`: the target for Ctrl+X and Ctrl+V.
 - `big-folder-copy-twice-at-once`: 200 files, 50 MB; Ctrl+C, then Ctrl+V twice quickly, to see two copies run side by side in the Actions list.
-- `in-use-open-a-terminal-in-me-then-rename`: Shift+F10, A, T opens AxTerminal in it; then F2 fails with "In use by another program". Close the terminal and F2 works.
+- `in-use-open-a-terminal-in-me-then-rename`: Shift+F10, A, T opens axTerminal in it; then F2 fails with "In use by another program". Close the terminal and F2 works.
 - Ctrl+Shift+N and Ctrl+Shift+T make new entries here.
 
 ## undo-ctrl-z
@@ -77,15 +77,15 @@ Section 1, steps 9 and 12.
 
 ## hand-over-to-axmedia-and-axpreview
 
-Section 4, and AxMedia's and AxPreview's hand-over sections.
+Section 4, and axMedia's and axPreview's hand-over sections.
 
-- `README.md`, `plain.txt`, `app.log`: Shift+Enter shows each in one AxPreview window. `binary-not-text.bin`: "Not a text file".
+- `README.md`, `plain.txt`, `app.log`: Shift+Enter shows each in one axPreview window. `binary-not-text.bin`: "Not a text file".
 - `chapters-ctrl-enter-plays-me`: enter it, Ctrl+Enter plays its four chapters. Each says "Play folder chapter, track n of 4".
-- `queue-folder-a-add-with-ctrl-shift-q` and `queue-folder-b-add-with-ctrl-shift-q`: select both from this folder, Ctrl+Shift+Q: "Added 6 to AxMedia's queue". In AxMedia you hear "Queue folder A" and then "Queue folder B" after the chapters.
+- `queue-folder-a-add-with-ctrl-shift-q` and `queue-folder-b-add-with-ctrl-shift-q`: select both from this folder, Ctrl+Shift+Q: "Added 6 to axMedia's queue". In axMedia you hear "Queue folder A" and then "Queue folder B" after the chapters.
 - `no-media-here`: Ctrl+Enter inside it says "No sound or video files here".
 
 ## Not in a folder
 
 - Section 1, step 4's This PC and drives, step 12a's Drives submenu (Folder, Drives): start anywhere and Backspace up to This PC. A USB stick is needed for Eject.
-- Section 2, from the other windows: open AxClaude, AxDown, AxGit or AxTerminal on any folder here.
+- Section 2, from the other windows: open axClaude, axDown, axGIT or axTerminal on any folder here.
 - Section 5: any folder.

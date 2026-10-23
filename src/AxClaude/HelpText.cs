@@ -33,7 +33,7 @@ public static class HelpText
           F1: this list
           Ctrl+Shift+P: the command palette: type part of a command's name, Down and Up through the matches, Enter runs it
           Alt+A: the Axit menu: the command palette, a new window of any app, the files and folders closed lately, the open Axit windows, most recent first (Alt+A, O, 1 is the one you were in last) and by type, Close all windows, Check for updates, and About
-          Alt+F4: close AxClaude (asks first while Claude is working)
+          Alt+F4: close axClaude (asks first while Claude is working)
 
         ## Message field
           Enter: send (an empty field sends a plain Enter to Claude)
@@ -76,7 +76,7 @@ public static class HelpText
           The message field comes back when Claude has your answer
 
         ## Notices
-          AxClaude's questions, errors and help texts appear inside the window, in place of the conversation.
+          axClaude's questions, errors and help texts appear inside the window, in place of the conversation.
           Tab moves between the text, a field and the buttons. Enter chooses the main button. Escape closes the notice. In a notice's text, h, 1 to 6 and Ctrl+F work as in this one
 
         ## Claude Code itself
@@ -92,9 +92,9 @@ public static class HelpText
     {
         var lines = new List<string>
         {
-            "Claude Code was not found, so AxClaude cannot start it.",
+            "Claude Code was not found, so axClaude cannot start it.",
             string.Empty,
-            "AxClaude looked here:",
+            "axClaude looked here:",
         };
         lines.AddRange(candidates.Select(c => "  " + c));
         lines.AddRange(
@@ -105,7 +105,7 @@ public static class HelpText
             string.Empty,
             "Then run claude once in PowerShell to log in. Come back here, close this notice and press Ctrl+Shift+R.",
             string.Empty,
-            "If Claude Code is installed somewhere else, use Locate claude.exe. AxClaude remembers the path.",
+            "If Claude Code is installed somewhere else, use Locate claude.exe. axClaude remembers the path.",
             string.Empty,
             "Install page: " + ClaudeLauncher.InstallUrl,
         ]);

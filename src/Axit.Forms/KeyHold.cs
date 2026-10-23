@@ -5,7 +5,7 @@ namespace Axit.Forms;
 /// user did not ask for (docs/axit/SPEC.md AX-6.4): a notice (<see cref="OverlayPanel"/>) or a question in the message
 /// field's place (<see cref="ControlArea"/>) can open while the user types, and the next keys were meant for the
 /// message field; after an answer goes, a second Enter would send it twice. One second unless the caller says
-/// otherwise (AxClaude holds for three seconds after an answer). The two panels kept a copy each until 2026-10-23.
+/// otherwise (axClaude holds for three seconds after an answer). The two panels kept a copy each until 2026-10-23.
 /// </summary>
 internal sealed class KeyHold
 {

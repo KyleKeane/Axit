@@ -2,7 +2,7 @@ using AxGit.Core;
 
 namespace AxGit.Tests;
 
-/// <summary>The Branches view read off git branch --list with AxGit's format (docs/axgit/SPEC.md AG-5).</summary>
+/// <summary>The Branches view read off git branch --list with axGIT's format (docs/axgit/SPEC.md AG-5).</summary>
 public sealed class GitBranchesTests
 {
     [Fact]

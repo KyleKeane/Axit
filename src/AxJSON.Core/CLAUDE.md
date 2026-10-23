@@ -1,6 +1,6 @@
 # AxJSON.Core, the pure code
 
-Everything of AxJSON that does not need a window. The spec is `docs/axjson/SPEC.md` ("SPEC.md" below); the window side is `src/AxJSON`, with its own `CLAUDE.md`; the bundle rules are in the root `CLAUDE.md`. Unit tested in `tests/AxJSON.Tests` (`dotnet test tests/AxJSON.Tests/AxJSON.Tests.csproj`, which works while an app runs).
+Everything of axJSON that does not need a window. The spec is `docs/axjson/SPEC.md` ("SPEC.md" below); the window side is `src/AxJSON`, with its own `CLAUDE.md`; the bundle rules are in the root `CLAUDE.md`. Unit tested in `tests/AxJSON.Tests` (`dotnet test tests/AxJSON.Tests/AxJSON.Tests.csproj`, which works while an app runs).
 
 - `JsonScanner` (AJ-2.3): the tokens of a text, forgivingly: comments are skipped and counted as repairs, single-quoted strings and bare words are tokens, an unclosed string ends with its line. `Unquote` and `Quote` are the string escapes both ways.
 - `JsonParser` and `JsonTree` (AJ-2.2, AJ-2.3): the tree of values (`JsonNode`: kind, start, key, text, children) from the tokens; a trailing comma, a missing comma between members or items, a single-quoted string and an unquoted key are repairs; anything else is the first `JsonProblem`, with the tree so far kept, so that the keys before it still navigate.

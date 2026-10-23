@@ -3,7 +3,7 @@ using Axit.Core;
 namespace AxMedia.Core;
 
 /// <summary>
-/// Everything AxMedia remembers between runs (SPEC.md AM-7.1), in <c>%APPDATA%\Axit\axmedia.json</c> through the
+/// Everything axMedia remembers between runs (SPEC.md AM-7.1), in <c>%APPDATA%\Axit\axmedia.json</c> through the
 /// bundle's <see cref="SettingsFile"/>: the font, the update check and the window's place from
 /// <see cref="WindowSettings"/>, plus the speed, the seek step, whether each file is said as it starts, and the
 /// files and folders added by command. A missing or unreadable file falls back to the defaults.

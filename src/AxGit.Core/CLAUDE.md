@@ -1,6 +1,6 @@
 # AxGit.Core, the pure code
 
-Everything of AxGit that needs no window: git as a process and the parsers of its output. Unit tested in `tests/AxGit.Tests` from recorded git output, with no git process but a fake git.cmd the runner tests write. The spec is `docs/axgit/SPEC.md` ("SPEC.md" below); the window is `src/AxGit`, with its own `CLAUDE.md`. The bundle rules are in the root `CLAUDE.md`.
+Everything of axGIT that needs no window: git as a process and the parsers of its output. Unit tested in `tests/AxGit.Tests` from recorded git output, with no git process but a fake git.cmd the runner tests write. The spec is `docs/axgit/SPEC.md` ("SPEC.md" below); the window is `src/AxGit`, with its own `CLAUDE.md`. The bundle rules are in the root `CLAUDE.md`.
 
 ## Commands
 

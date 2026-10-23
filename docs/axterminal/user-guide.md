@@ -1,6 +1,6 @@
-# AxTerminal user guide
+# axTerminal user guide
 
-AxTerminal is a terminal for a blind developer who uses a screen reader: a shell (PowerShell by default) runs in a hidden console, and everything it prints comes into a plain text window, one line at a time, the way AxClaude shows Claude Code. You type a command in a field at the bottom, press Enter, and the command and what it printed stand in the text under their own Input and Output lines, so that the keys you know from AxClaude find them again. When a command is done you hear it, and whether it failed. It is one of the apps of Axit and shares its installation, updates and the Axit menu with them.
+axTerminal is a terminal for a blind developer who uses a screen reader: a shell (PowerShell by default) runs in a hidden console, and everything it prints comes into a plain text window, one line at a time, the way axClaude shows Claude Code. You type a command in a field at the bottom, press Enter, and the command and what it printed stand in the text under their own Input and Output lines, so that the keys you know from axClaude find them again. When a command is done you hear it, and whether it failed. It is one of the apps of Axit and shares its installation, updates and the Axit menu with them.
 
 ## What you need
 
@@ -10,18 +10,18 @@ AxTerminal is a terminal for a blind developer who uses a screen reader: a shell
 
 ## Install
 
-Axit's installer installs AxTerminal with the other apps: see the Axit guide (Alt+A, About, Axit guide) or the README that came with the download. It adds the Start menu entry `Axit AxTerminal`, the console command `axterminal` and AxTerminal in the `Open with Axit` submenu on folders in File Explorer.
+Axit's installer installs axTerminal with the other apps: see the Axit guide (Alt+A, About, Axit guide) or the README that came with the download. It adds the Start menu entry `Axit axTerminal`, the console command `axterminal` and axTerminal in the `Open with Axit` submenu on folders in File Explorer.
 
 ## Start
 
-- Start menu: `Axit AxTerminal`. Press the Windows key and type `axt`.
+- Start menu: `Axit axTerminal`. Press the Windows key and type `axt`.
 - Console: `axterminal`, or `axterminal C:\src\myproject` to start the shell in that folder.
-- File Explorer: right-click a folder, open `Open with Axit` and choose AxTerminal.
-- From AxClaude: Session, Show current folder in, AxTerminal. From AxDown or AxJSON: File, Show current file in, AxTerminal (the file's folder). From AxGit: Repository, Show current repository in, AxTerminal. From AxFile: Folder, Show current folder in, AxTerminal. Each opens a new AxTerminal window.
+- File Explorer: right-click a folder, open `Open with Axit` and choose axTerminal.
+- From axClaude: Session, Show current folder in, axTerminal. From axDown or axJSON: File, Show current file in, axTerminal (the file's folder). From axGIT: Repository, Show current repository in, axTerminal. From axFile: Folder, Show current folder in, axTerminal. Each opens a new axTerminal window.
 
 The window opens with the command field focused. When the shell's first prompt appears you hear "Ready" with a short ping. The status bar shows the state on the left (Idle, or Running with the command) and the shell's prompt on the right, which is where you are. The title is the name of the current folder and the shell. Ctrl+P says the current folder, the full path.
 
-With a screen reader running, PowerShell turns its line editor (PSReadLine) off and prints a line saying so. That is expected: AxTerminal's field is the editor.
+With a screen reader running, PowerShell turns its line editor (PSReadLine) off and prints a line saying so. That is expected: axTerminal's field is the editor.
 
 ## The window
 
@@ -63,7 +63,7 @@ Options, Speech, Speak output: all lines reads each line as it arrives, joined i
 
 Session, New session (Ctrl+N) opens a notice with the folder, a Choose folder button, the shells (PowerShell 7, Windows PowerShell, Command Prompt, Git Bash, or Custom with a command line of your own) and Start session. Starting ends the current shell and starts the new one in the folder; the terminal is cleared. Session, Switch shell lists the shells: choosing one starts it in the same folder and keeps the text. The title names the shell you are in, and Ctrl+Q says it while nothing runs. Open recent folder does what New session does for a folder you had before. Restart shell (Ctrl+Shift+R) starts the same shell again in its current folder and keeps the text. While a command runs, all of them ask first.
 
-The shell's prompt is not shown in the terminal: it is in the status bar, and the folder it names follows your `cd`. The prompt rows are recognised through marks the shell prints for terminals (the Windows Terminal convention), which AxTerminal adds to PowerShell's prompt, to Command Prompt's PROMPT and to Git Bash's prompt command for the session; your profile is not touched. A shell of your own gives no marks unless its prompt prints them, and then the window shows every row and says nothing when a command ends.
+The shell's prompt is not shown in the terminal: it is in the status bar, and the folder it names follows your `cd`. The prompt rows are recognised through marks the shell prints for terminals (the Windows Terminal convention), which axTerminal adds to PowerShell's prompt, to Command Prompt's PROMPT and to Git Bash's prompt command for the session; your profile is not touched. A shell of your own gives no marks unless its prompt prints them, and then the window shows every row and says nothing when a command ends.
 
 `exit` ends the shell: a system line says so, and Ctrl+Shift+R starts it again. Closing the window ends the shell and whatever runs in it, after a question while a command runs.
 
@@ -71,27 +71,27 @@ Clear transcript (Ctrl+L) empties the window; the shell's own `cls` clears only 
 
 ## Menus
 
-Alt opens the menu bar. Session: new session, the recent folders, switch shell, restart, clear, say current folder (Ctrl+P), Show current folder in (File Explorer, AxClaude, AxGit, AxFile), export the transcript as a Markdown file (Ctrl+S), exit. Shell: interrupt, Escape, the keys, the recent commands, send without recording, what is running. Navigate: the field, the terminal, the latest output, find, the bookmarks. Options: Sounds (the chimes, the ticks, background music while a command runs, Ctrl+Space), Speech (speak output, say when a program asks), When a command is done (the taskbar flash, the louder alert for the background), Text (time stamps, markers in the text, the font and size), General, Developer. Axit: the bundle's menu. Help: the shortcuts (F1), this guide, shell resources.
+Alt opens the menu bar. Session: new session, the recent folders, switch shell, restart, clear, say current folder (Ctrl+P), Show current folder in (File Explorer, axClaude, axGIT, axFile), export the transcript as a Markdown file (Ctrl+S), exit. Shell: interrupt, Escape, the keys, the recent commands, send without recording, what is running. Navigate: the field, the terminal, the latest output, find, the bookmarks. Options: Sounds (the chimes, the ticks, background music while a command runs, Ctrl+Space), Speech (speak output, say when a program asks), When a command is done (the taskbar flash, the louder alert for the background), Text (time stamps, markers in the text, the font and size), General, Developer. Axit: the bundle's menu. Help: the shortcuts (F1), this guide, shell resources.
 
 ## Settings
 
-Every option in the menus is saved as you change it, in `%APPDATA%\Axit\axterminal.json`, which Options, Developer, Open settings file opens in AxJSON. The console is 240 columns by 50 rows; `ptyColumns` and `ptyRows` in the file change it.
+Every option in the menus is saved as you change it, in `%APPDATA%\Axit\axterminal.json`, which Options, Developer, Open settings file opens in axJSON. The console is 240 columns by 50 rows; `ptyColumns` and `ptyRows` in the file change it.
 
 ## Updates
 
-Alt+A, Check for updates asks GitHub for a newer Axit; Update to installs it and starts AxTerminal again with a new shell in the same folder. Options, General, Check for updates at start turns the check at start off.
+Alt+A, Check for updates asks GitHub for a newer Axit; Update to installs it and starts axTerminal again with a new shell in the same folder. Options, General, Check for updates at start turns the check at start off.
 
 ## If something goes wrong
 
 - "PowerShell 7 was not found": Ctrl+N and choose Windows PowerShell or Command Prompt, or install PowerShell 7.
 - Nothing is spoken when a command ends: the shell gives no marks (a custom shell, or a shell started inside the shell). Ctrl+Q says what the window knows.
-- A program took the whole screen (an editor, a pager): press q and Enter, or Ctrl+Shift+C. AxTerminal shows such programs row by row and is not meant for them.
+- A program took the whole screen (an editor, a pager): press q and Enter, or Ctrl+Shift+C. axTerminal shows such programs row by row and is not meant for them.
 - Options, Developer, Record raw stream writes everything the shell prints to a file, for a bug report; Copy diagnostics copies the state and the last log lines. The log is `%LOCALAPPDATA%\Axit\logs\axterminal.log`; it never holds a command or a line of output.
 
-## About AxTerminal
+## About axTerminal
 
-AxTerminal is part of Axit, made by Dr. Kyle Keane, www.kylekeane.com, free under the MIT licence. Alt+A, About has the version, the licence and the Axit guide.
+axTerminal is part of Axit, made by Dr. Kyle Keane, www.kylekeane.com, free under the MIT licence. Alt+A, About has the version, the licence and the Axit guide.
 
 ## Disclaimer
 
-The software is provided "as is" and "as available", without warranty of any kind, express or implied. The developer has no obligation to provide support, maintenance, updates or corrections, and, to the fullest extent permitted by law, is not liable for any claim, damages or other liability arising from or in connection with the software or its use, including loss of data or work and anything a command run through it does. You use AxTerminal at your own risk.
+The software is provided "as is" and "as available", without warranty of any kind, express or implied. The developer has no obligation to provide support, maintenance, updates or corrections, and, to the fullest extent permitted by law, is not liable for any claim, damages or other liability arising from or in connection with the software or its use, including loss of data or work and anything a command run through it does. You use axTerminal at your own risk.

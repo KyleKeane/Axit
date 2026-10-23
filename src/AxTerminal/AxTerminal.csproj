@@ -1,11 +1,11 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
-  <!-- AxTerminal's window, as a class library inside Axit.exe (docs/axit/SPEC.md AX-1.7, B-2); src/Axit is the executable. -->
+  <!-- axTerminal's window, as a class library inside Axit.exe (docs/axit/SPEC.md AX-1.7, B-2); src/Axit is the executable. -->
   <PropertyGroup>
     <TargetFramework>$(AxitDotNet)-windows</TargetFramework>
     <UseWindowsForms>true</UseWindowsForms>
-    <RootNamespace>AxTerminal</RootNamespace>
-    <AssemblyName>AxTerminal</AssemblyName>
+    <RootNamespace>axTerminal</RootNamespace>
+    <AssemblyName>axTerminal</AssemblyName>
   </PropertyGroup>
 
   <ItemGroup>
