@@ -359,7 +359,7 @@ public static class FileOperations
     }
 
     /// <summary>The shell's own codes for a file operation, and Windows' message for the rest.</summary>
-    private static string ShellMessage(int code, string what) => code switch
+    public static string ShellMessage(int code, string what) => code switch
     {
         0x20 or 0x21 => InUse,
         0x71 => "The source and the destination are the same",

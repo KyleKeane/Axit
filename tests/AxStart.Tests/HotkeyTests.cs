@@ -48,6 +48,15 @@ public sealed class HotkeyTests
     }
 
     [Fact]
+    public void A_key_outside_the_names_is_written_by_its_number_and_refused()
+    {
+        var odd = new Hotkey(Hotkey.Control | Hotkey.Alt, 0xFF);
+        Assert.Equal("Ctrl+Alt+Key 255", odd.ToString());
+        Assert.Equal("That key cannot be a hotkey", odd.Refusal());
+        Assert.Null(Hotkey.Parse(odd.ToString()));
+    }
+
+    [Fact]
     public void Settings_keep_their_values_and_mend_nonsense()
     {
         var folder = Path.Combine(Path.GetTempPath(), "axstart-tests-" + Guid.NewGuid().ToString("N"));

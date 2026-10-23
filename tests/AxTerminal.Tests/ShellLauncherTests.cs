@@ -15,7 +15,8 @@ public sealed class ShellLauncherTests
         Assert.Equal("cat", env["GIT_PAGER"]);
         Assert.Equal("cat", env["GH_PAGER"]);
         Assert.Equal("xterm-256color", env["TERM"]);
-        Assert.False(env.TryGetValue("PROMPT_COMMAND", out var bash) && bash == ShellLauncher.BashPromptCommand);
+        // Command Prompt does not get bash's prompt command (asserted on the value; the earlier form passed with any other value).
+        Assert.NotEqual(ShellLauncher.BashPromptCommand, env.GetValueOrDefault("PROMPT_COMMAND"));
     }
 
     [Fact]
@@ -29,7 +30,14 @@ public sealed class ShellLauncherTests
         Assert.Contains("9;9", decoded);
         Assert.Contains("ProgressPreference", decoded);
         Assert.DoesNotContain("`e", decoded);
-        Assert.False(ShellLauncher.BuildEnvironment(ShellKind.WindowsPowerShell).ContainsKey("PROMPT_AXIT"));
+        // PowerShell's marks travel on its command line, not in the environment: no cmd prompt with marks, no bash prompt command.
+        var powerShell = ShellLauncher.BuildEnvironment(ShellKind.WindowsPowerShell);
+        Assert.False(powerShell.TryGetValue("PROMPT", out var prompt) && prompt.Contains("133;", StringComparison.Ordinal));
+        Assert.NotEqual(ShellLauncher.BashPromptCommand, powerShell.GetValueOrDefault("PROMPT_COMMAND"));
+        if (ShellLauncher.BuildCommandLine(ShellKind.WindowsPowerShell) is { } commandLine)
+        {
+            Assert.EndsWith(" -EncodedCommand " + encoded, commandLine);
+        }
     }
 
     [Fact]

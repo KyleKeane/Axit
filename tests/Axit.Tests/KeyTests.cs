@@ -100,6 +100,15 @@ public sealed class KeyTests
         Assert.True(missing.Count == 0, "Not in the F1 text: " + string.Join("; ", missing));
     }
 
+    /// <summary>Every F1 text names the Axit menu with its first items in the bundle's words (AX-9), so that the menu is found from any window's help and the texts do not drift apart.</summary>
+    [Fact]
+    public void Every_F1_text_names_the_Axit_menu_and_its_first_items()
+    {
+        const string line = "Alt+A: the Axit menu: the command palette, a new window of any app, the files and folders closed lately";
+        var missing = F1Texts.Where(pair => !pair.Value.Contains(line, StringComparison.Ordinal)).Select(pair => pair.Key).ToList();
+        Assert.True(missing.Count == 0, "Without the Axit menu line: " + string.Join(", ", missing));
+    }
+
     /// <summary>Every F1 text names the bundle keys every window has (AX-8.2, AX-10.6): F1, the palette, find, the text size.</summary>
     [Fact]
     public void Every_F1_text_names_the_keys_every_window_has()
