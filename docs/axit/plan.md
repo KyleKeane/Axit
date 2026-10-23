@@ -169,6 +169,21 @@ library dependency (B-10: `git.exe` and the file system through the APIs already
   task side grows. Other names considered: AxNotes, AxTodo. The rule the user set for both: plain text files on disk
   (Markdown lists, one file per list) with a clear, documented format, so that an AI system or a script can read and
   change them as easily as the app does; no database the user cannot open in AxDown.
+- **An anywhere, anytime helper** (asked 2026-10-23, high priority for the user; placeholder name AxAsk): one key
+  from anywhere, as AxStart's, opens a field for a question about the user's own files: an index of the folders the
+  user allows, kept as plain files, and answers drawn from it (retrieval over the index, RAG) through the shared AI
+  service. The foundation comes first: the list of allowed folders, the index format, and the service's one switch
+  for network use (B-15).
+- **Screen capture and description** (asked 2026-10-23; placeholder AxSee): a key that takes a screenshot and sends it
+  to a vision API for a description and a chat about it, through the shared AI service. Later, on that foundation:
+  a parser that segments the screen into objects, and actions on them (move the mouse to an object, click it), an
+  agent the user steers by speech and keys. The user's thought: these may be add-ons run from the launcher (AxRun,
+  the user's word for AxStart running scripts as well as programs) rather than apps, one simple place where all of
+  them are on hand, each a script with a clear interface.
+- **Automated quality checks** (asked 2026-10-23): runs that drive the apps the way a user does and check the
+  result, so that a robustness question (several AxClaude sessions at once, a model change, a message each) is a
+  command rather than a manual pass. The first is `tools/QaRun`, which runs Claude sessions through the app's own
+  console pieces without windows; driving real windows waits for a way that never takes the foreground.
 - **Other everyday utilities, on record only** (2026-10-23): **AxWeb**, a simple browser for reading the web as a
   transcript of headings, links and text (the hard part is the engine: WebView2 is a web view, which B-10 rules out,
   so a reader over fetched HTML is the likely shape); **AxMail**, a mail reader and writer over IMAP and SMTP;

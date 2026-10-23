@@ -1,0 +1,15 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>$(AxitDotNet)</TargetFramework>
+    <RootNamespace>QaRun</RootNamespace>
+    <InvariantGlobalization>true</InvariantGlobalization>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <!-- SessionModel, ClaudeLauncher and Redaction; the host and the lines are Axit.Core's. -->
+    <ProjectReference Include="..\..\src\AxClaude.Core\AxClaude.Core.csproj" />
+  </ItemGroup>
+
+</Project>
