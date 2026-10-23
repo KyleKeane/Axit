@@ -74,7 +74,7 @@ out of scope; programs that print and ask are in. It works entirely offline (bun
 - AT-1.3 **Integration marks.** The window asks the shell to mark its prompt the way Windows Terminal's shell
   integration does (OSC 133 `A` the prompt starts, `B` the prompt ends and the command begins, `D;<exit code>` the
   previous command finished; OSC 9;9 the current directory), without touching the user's profile: PowerShell starts
-  with `-NoExit -Command` and a snippet that runs after the profile, keeps the user's `prompt` function and wraps its
+  with `-NoLogo -NoExit -EncodedCommand` and a snippet that runs after the profile, keeps the user's `prompt` function and wraps its
   text in the marks (the shape Windows Terminal documents for oh-my-posh), written with `[char]27` so that Windows
   PowerShell takes it too, and sets `$ProgressPreference` to `SilentlyContinue`, since a progress bar drawn over the
   top rows of the screen would rewrite lines already read; Command Prompt starts with the `PROMPT` variable wrapping
@@ -101,7 +101,8 @@ out of scope; programs that print and ask are in. It works entirely offline (bun
   still running. A new session ends it." while one runs; the **Choose folder…** button (the folder picker); the group
   **Shell** with the radio buttons **PowerShell 7**, **Windows PowerShell**, **Command Prompt**, **Git Bash** and
   **Custom**, and, while Custom is selected, the field **Command line**; the buttons **Start session** (Enter) and
-  **Cancel** (Escape). Start clears the transcript, prints the system line `New session: PowerShell 7 in C:\path`,
+  **Cancel** (Escape). Start clears the transcript and gives the new shell a fresh screen, as a restart does (until
+  2026-10-23 it drew on the old shell's rows), prints the system line `New session: PowerShell 7 in C:\path`,
   announces "New session in <folder name>" and remembers the folder and the shell. Session → **Switch shell ▸** lists
   the shells (PowerShell 7, Windows PowerShell, Command Prompt, Git Bash, the current one checked, then Custom…,
   which opens the New session notice): choosing one ends the shell and starts the chosen one in the current
@@ -140,8 +141,8 @@ out of scope; programs that print and ask are in. It works entirely offline (bun
 ### AT-3 The command field and the sending
 
 - AT-3.1 **Enter** sends the field's text and clears it: each line as one write, a single `\r` as a separate write
-  after it, with AxClaude's pacing (AxClaude FR-2.2, FR-2.5: 30 ms between lines, 100 ms before `\r`), so that the
-  shell reads a multi-line command line by line as it would from the keyboard, PowerShell's `>>` continuation taking
+  after it, paced as AxClaude's writes are (AxClaude FR-2.2, FR-2.5), 60 ms after each line and 120 ms after each
+  `\r`, so that the shell reads a multi-line command line by line as it would from the keyboard, PowerShell's `>>` continuation taking
   the rest; for PowerShell a command of several lines gets one more Enter at the end, since with a screen reader
   running PowerShell turns PSReadLine off and its console host ends a block only on an empty line (with PSReadLine on
   the extra Enter is an empty prompt, which announces nothing). **Shift+Enter** is a new line in the field (AxClaude
@@ -161,8 +162,9 @@ out of scope; programs that print and ask are in. It works entirely offline (bun
 - AT-3.3 **No send lock** (AxClaude D12): while a command runs, the text goes at once as input to the running program
   (an answer, or what the shell reads next), with its block; the status keeps the running command's name.
 - AT-3.4 **Send without recording** (Ctrl+Enter in the field; Shell → Send without recording): the text goes as on
-  Enter, with no block, no entry in the recent commands and nothing in the log; "Sent, not recorded". For passphrases
-  and tokens that a program asks for (AT-D3).
+  Enter, with no block, no entry in the recent commands and nothing in the log; "Sent, not recorded"; while it runs,
+  the status bar and Ctrl+Q say "a command sent without recording" in the command's place (until 2026-10-23 the
+  command itself stood there). For passphrases and tokens that a program asks for (AT-D3).
 - AT-3.5 **Keys to the shell.** Ctrl+Shift+C sends Ctrl+C, the interrupt ("Interrupt sent"; Shell → Interrupt);
   Shift+Escape sends Escape ("Escape sent"); Shell → Send key ▸ Up, Down, Ctrl+D, from the menu only. Plain Escape in
   the field sends nothing and announces "Shift+Escape sends Escape, Ctrl+Shift+C interrupts" (AxClaude D20). Nothing
@@ -183,7 +185,8 @@ out of scope; programs that print and ask are in. It works entirely offline (bun
   rewritable until then (AxClaude FR-3.2, §7.5); the classification is the shell's own (AT-4.2) and nothing of
   Claude's: no labels, no headings but the markers, no chrome patterns. A row that fills all 240 columns and is
   followed by a row with text is a hard wrap and is joined to it in the view (`joinWrappedLines`, AxClaude FR-3.2a).
-  Rows below the cursor row are not transcript (a completion menu PSReadLine draws).
+  Every row with text is transcript, the rows below the cursor included (PSReadLine, which draws its completion
+  menu there, is off while a screen reader runs).
 - AT-4.2 **Prompt rows are hidden.** The row that holds an `A` mark is the prompt row: hidden while the shell is idle,
   when it is the cursor row with the prompt on it; hidden still once it holds the command after its `B` mark, the echo
   the block stands for (AT-3.2). Its text between the marks goes to the status bar (AT-2.3). A `D` mark comes before
@@ -250,8 +253,8 @@ out of scope; programs that print and ask are in. It works entirely offline (bun
   Windows Terminal shell integration | Bash manual). Every item has a mnemonic (AX-7.4).
   The first menu is Session, as in AxClaude, since what it holds is the shell in its folder, the thing the window
   is about; Shell takes E, S being Session's.
-- AT-6.2 Keys (AX-8). Bundle-wide: F1, the control keys, Ctrl+F, F3, Shift+F3, Ctrl+S, Ctrl+Plus, Ctrl+Minus, Page
-  Up, Page Down, Ctrl+Up and Ctrl+Down with Shift, Alt+F4. Window-specific (`AxTerminalKeys`): Ctrl+N, Ctrl+Shift+R,
+- AT-6.2 Keys (AX-8). Bundle-wide: F1, Ctrl+Shift+P (the command palette, AX-10), the control keys, Ctrl+F, F3,
+  Shift+F3, Ctrl+S, Ctrl+Plus, Ctrl+Minus, Page Up, Page Down, Ctrl+Up and Ctrl+Down with Shift, Alt+F4. Window-specific (`AxTerminalKeys`): Ctrl+N, Ctrl+Shift+R,
   Ctrl+L, Ctrl+W, Ctrl+1, Ctrl+2, Ctrl+3, Ctrl+Shift+C, Shift+Escape, Ctrl+R, Ctrl+Q, Ctrl+P, Ctrl+Space, Ctrl+Shift+K; in
   the field Enter, Shift+Enter, Ctrl+Enter, Escape; in the view the quick keys `i`, `o`, `h`, `1` to `6`, `p`, `s`,
   `k` with Shift, `m`, `l`, Enter, Escape, Backspace, and Ctrl+Alt with `i`, `o`, `h`, `p`, `s`, `k`. AxClaude's `c`,
@@ -310,7 +313,8 @@ src/AxTerminal/           class library (net10.0-windows): AxTerminalApp (Run, U
                           data), HelpText (F1 text, the embedded guide); references AxTerminal.Core, Axit.Core, Axit.Forms
 tests/AxTerminal.Tests/   fixtures recorded with tools/PtyCapture of powershell, cmd and bash under the launcher's command
                           line (a dir, a failing command, a y/n prompt, a multi-line command, cls, exit): golden
-                          transcripts, the state after each frame, the prompts in the status; ShellLauncherTests,
+                          transcripts, the state at the end and the codes of the commands, the same transcript
+                          whatever the chunk boundaries; TerminalModelTests on hand-written streams; ShellLauncherTests,
                           CommandHistoryTests, TerminalSettingsTests
 docs/axterminal/          this spec, user-guide.md (embedded), nvda-test-plan.md
 ```
@@ -379,7 +383,7 @@ its notes record what moved.
   (`docs/axit/plan.md`).
 - Built the same day as a first draft, in the order of §5: the `LineStore` seam and the moves into the shared
   projects (AxClaude's tests unchanged), the marks as events, the view with its keys as data, `AxTerminal.Core` with
-  the two recorded sessions (Windows PowerShell 5.1 and cmd, `tests/fixtures/shell-*`), the window, the wiring. AT-1
+  the recorded sessions (Windows PowerShell 5.1 and cmd, then Git Bash in 3.0.0, `tests/fixtures/shell-*`), the window, the wiring. AT-1
   to AT-8 as described above, the git exclude left out (AT-4.7). Not yet heard under NVDA:
   `docs/axterminal/nvda-test-plan.md` is to run before a release names it more than a first draft.
 - 2026-10-22: released in 3.3.1 (3.3.0 tagged, not published). The whole NVDA test plan marked passed at the user's word, no step reported failing; the record by step is `docs/axit/nvda-test-record.md`.

@@ -17,7 +17,7 @@ Manual checks with NVDA running, before a release that changes AxTerminal (`docs
 - `cmd /c exit 3`, Enter: "Failed, exit code 3". `Get-ChildItem`, Enter: ticks, "Done"; Ctrl+3 and read down: the listing, no prompt rows.
 - `Read-Host "Continue? (y/n)"`, Enter: after two seconds of quiet, the question chime and "Asks: Continue? (y/n):". Type `y`, Enter: "Sent", then "Done"; the terminal shows the question row with the answer, then `# Input 2` with y.
 - Type `if ($true) {`, Shift+Enter, `"yes"`, Shift+Enter, `}`, Enter: "Done"; Ctrl+3, Down: "yes"; no `>>` rows.
-- Ctrl+Enter with `echo secret`: "Sent, not recorded"; no Input line for it; Ctrl+R does not list it.
+- Ctrl+Enter with `echo secret`: "Sent, not recorded"; no Input line for it; Ctrl+R does not list it. Ctrl+Enter with `Start-Sleep 5`, then NVDA+End: "Running: a command sent without recording"; Ctrl+Q says the same, not the command.
 - Ctrl+R: "Recent commands, list" with the newest first; Down, Enter: the command is in the field ("Command" with the text); Ctrl+R, Escape: back in the field.
 - In the terminal, on a command line, Enter: "Line copied", the focus in the field with the line.
 - `Start-Sleep 30`, Enter; NVDA+End: "Running: Start-Sleep 30"; Ctrl+Q: "Running: Start-Sleep 30, n seconds, …"; Ctrl+Shift+C: "Interrupt sent", then "Done" or "Failed". Shift+Escape: "Escape sent".

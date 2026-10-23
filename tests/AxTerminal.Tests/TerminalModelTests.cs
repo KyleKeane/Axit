@@ -72,6 +72,36 @@ public sealed class TerminalModelTests
         Assert.Equal([3, null], finished);
     }
 
+    /// <summary>AT-3.4: a command sent without recording is not named anywhere, the running command included.</summary>
+    [Fact]
+    public void A_command_sent_without_recording_is_not_named_as_the_running_command()
+    {
+        var model = new TerminalModel(80, 10);
+        Feed(model, Prompt(null));
+        model.EndFrame();
+
+        Assert.False(model.Send("$env:TOKEN = 'secret'", record: false));
+        Assert.True(model.Running);
+        Assert.Equal(TerminalModel.UnrecordedCommand, model.RunningCommand);
+        Assert.DoesNotContain(model.Lines, l => l.Text.Contains("secret"));
+    }
+
+    /// <summary>A B mark without an A since the last prompt (a program marking its own input) hides nothing; it used to hide every row.</summary>
+    [Fact]
+    public void A_B_mark_without_an_A_hides_nothing()
+    {
+        var model = new TerminalModel(80, 10);
+        Feed(model, Prompt(null));
+        model.EndFrame();
+        model.Send("tool");
+        Feed(model, $"tool\r\nline one\r\nline two\r\n{Esc}]133;B{Bel}");
+        model.EndFrame();
+
+        Assert.Equal("PS C:\\src>", model.Prompt);
+        Assert.Contains(model.Lines, l => !l.Hidden && l.Text == "line one");
+        Assert.Contains(model.Lines, l => !l.Hidden && l.Text == "line two");
+    }
+
     [Fact]
     public void An_answer_to_a_running_program_goes_after_its_output()
     {

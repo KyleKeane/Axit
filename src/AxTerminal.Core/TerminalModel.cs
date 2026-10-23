@@ -44,7 +44,10 @@ public sealed class TerminalModel : LineStore
     /// <summary>A command was sent and the prompt has not come back (AT-1.4); false without marks.</summary>
     public bool Running { get; private set; }
 
-    /// <summary>The first line of the running command, for the status bar.</summary>
+    /// <summary>What <see cref="RunningCommand"/> says for a command sent without recording (AT-3.4).</summary>
+    public const string UnrecordedCommand = "a command sent without recording";
+
+    /// <summary>The first line of the running command, for the status bar; <see cref="UnrecordedCommand"/> for one sent without recording.</summary>
     public string? RunningCommand { get; private set; }
 
     public DateTime? RunningSince { get; private set; }
@@ -132,7 +135,8 @@ public sealed class TerminalModel : LineStore
         {
             _commandSent = true;
             Running = HasMarks;
-            RunningCommand = lines.First(l => l.Trim().Length > 0).Trim();
+            // AT-3.4: a command sent without recording leaves no trace, the status bar and Ctrl+Q included.
+            RunningCommand = record ? lines.First(l => l.Trim().Length > 0).Trim() : UnrecordedCommand;
             RunningSince = Clock();
         }
 
@@ -337,13 +341,20 @@ public sealed class TerminalModel : LineStore
                 _lastCode = null;
                 break;
             case 'B':
+                if (_promptStartRow < 0)
+                {
+                    // A B without an A since the last prompt (a program inside the shell that marks its own input,
+                    // Claude Code among them): no prompt rows to hide. Taken for a prompt, it hid the whole screen.
+                    break;
+                }
+
                 _screen.PullRowText();
                 // The continuation rows of the command just run sit under the old prompt row: hidden before it is forgotten.
                 HideContinuationRows();
                 _promptLines.Clear();
                 _promptRow = _screen.CursorRow;
                 var texts = new List<string>();
-                for (var r = Math.Max(0, _promptStartRow); r <= _promptRow; r++)
+                for (var r = _promptStartRow; r <= _promptRow; r++)
                 {
                     if (_screen.LineAt(r) is { } line)
                     {
@@ -356,6 +367,7 @@ public sealed class TerminalModel : LineStore
                     }
                 }
 
+                _promptStartRow = -1;
                 Prompt = string.Join(" ", texts);
                 break;
         }

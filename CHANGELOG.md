@@ -8,6 +8,9 @@
 - Axit: the command palette is the first item of the Axit menu (Alt+A, P), no longer in Help.
 - Axit: a typed text finds accented names again: "cafe" finds "Café" in the command palette, in AxStart and among AxFile's entries. The program runs without the globalization data, where the accents stayed; the tests now run the same way, which is what found it.
 - AxFile: a new name that reads the same as an entry's with its accent written as two characters is refused again, for the same reason.
+- AxTerminal: a command sent without recording (Ctrl+Enter) no longer shows in the status bar and Ctrl+Q while it runs; they say "a command sent without recording".
+- AxTerminal: New session and a change of folder give the new shell a fresh screen, as Restart shell does; the new shell drew on the old one's rows, and its shorter lines showed their tails.
+- AxTerminal: a program inside the shell that marks the end of its own input (Claude Code does) no longer hides the whole transcript as if it were a prompt.
 - Axit: in every notice's text (the keyboard shortcuts of F1, the user guides, About), h and Shift+H move by heading and 1 to 6 by level, in every window now, AxGit, AxFile, AxMedia and AxStart included; AxDown, AxJSON and AxPreview keep their Ctrl+letter keys there as well. Ctrl+F finds a text in a notice: the Find notice takes its place and Find next brings it back with the match selected; F3 and Shift+F3 find the next and the previous match.
 - AxFile: the command palette holds the folder's entries after the commands, "notes.md, file", "docs, folder"; Enter on one opens it as Enter in the list does.
 - AxGit: Push is Ctrl+Shift+H; Ctrl+Shift+P is the command palette's in every window.

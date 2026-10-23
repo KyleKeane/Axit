@@ -189,14 +189,14 @@ internal sealed partial class TerminalForm
     private void Relaunch(string systemLine, bool clearTranscript)
     {
         StopShell();
+        // The next shell draws on a fresh screen either way: the old one's cells and hidden rows are the old shell's,
+        // and a new shell assumes a blank terminal (until 2026-10-23 a new session kept them, and the new shell's
+        // shorter rows showed the old ones' tails).
+        _model.ResetScreen();
         if (clearTranscript)
         {
             _model.Clear();
             _arrivals.Reset();
-        }
-        else
-        {
-            _model.ResetScreen();
         }
 
         _model.AddSystemLine(systemLine);
