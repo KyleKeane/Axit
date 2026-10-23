@@ -83,9 +83,12 @@ opens in the editor for its type (AG-1.4, AG-D1).
   "Branches, 2"); the details text under it, read-only, named "Details" and, after a diff, "Diff of <file>"; the
   status bar. Tab, Shift+Tab, Ctrl+Tab, Ctrl+Shift+Tab and F6 move between the list and the details (AX-8.2); a
   notice takes the place of both while it shows (AX-6.4).
-- AG-2.2 Views: Ctrl+1 Changes, Ctrl+2 Log, Ctrl+3 Branches (View menu). The key names the view when the list already
-  shows it (AxClaude D26). Each view keeps its selection while the window is open; F5 refreshes the view and the
-  status bar, keeping the selection by path, hash or name, and says "Refreshed: <the list's name>".
+- AG-2.2 Views: Ctrl+1 Changes, Ctrl+2 Log, Ctrl+3 Branches (View menu). The key says the list's name and the item
+  the selection is on, also when the list already shows the view (AxClaude D26); while a command runs it says
+  "Working…" and the view stays (2026-10-23: the switch went through with an empty list under the new name). Each
+  view keeps its selection while the window is open, by the item's key (the file's path, the commit's hash, the
+  branch's name), taken before the lists change (2026-10-23: taken after, two views with the same count swapped
+  selections); F5 refreshes the view and the status bar the same way and says "Refreshed: <the list's name>".
 - AG-2.3 The title is `<repository folder name> - AxGit`, "No repository - AxGit" without one. The status bar's left
   label: the branch, then the upstream state when there is an upstream ("main · 2 ahead" / "main · 1 behind" / "main
   · up to date" / "main · no upstream"), then the counts ("3 changed, 1 staged"); "Working: pull…" while a command
@@ -172,16 +175,19 @@ lines", "Switched to <name>", "Already on <name>", "Fetched", "Pulled", "Already
 <list name>", "Changes, N files" and the other view names when the view's key is pressed on the view already shown,
 "Working…" when a command is asked for while one runs, "Nothing to save here. Space stages, Ctrl+Enter commits",
 "Not found" (find), "Text size n", "Windows text size", "Copied diagnostics", "No repository" (a command without
-one), "No file selected". A failure that git explains in one line is announced as "Failed: <line>"; more than one
-line is a notice.
+one), "No file selected", "No commit selected", "No branch selected", "Changes view first: Ctrl+1" (Delete in
+another view), "A conflict: resolve it in the editor or the terminal first" (a pull or a switch that git refuses for
+one). A failure that git explains in one line is announced as "Failed: <line>"; more than one line is a notice.
 
 ### AG-8 Settings, status
 
 - AG-8.1 `%APPDATA%\Axit\axgit.json` (AX-5.3; `GitSettings`): `fontFamily`, `fontSize`, `fontBold`,
   `checkForUpdates`, `recentRepositories` (ten, newest first), `window`. The defaults are the Windows font, the update
   check on, no repositories.
-- AG-8.2 The log is `%LOCALAPPDATA%\Axit\logs\axgit.log`: every git command with its exit code and duration, never
-  its output beyond the first line of an error.
+- AG-8.2 The log is `%LOCALAPPDATA%\Axit\logs\axgit.log`: every git command by its subcommand ("git commit") with its
+  exit code and duration, never its arguments (a commit's message, the paths; until 2026-10-23 the whole argument
+  list was logged) nor its output beyond the first line of an error. A git command that cannot end (a program it
+  started keeps its output open) is cut off at the timeout like one that hangs, with what was read so far (AG-1.5).
 
 ## 5. Architecture
 
@@ -192,8 +198,8 @@ src/AxGit.Core/   class library (net10.0): GitRunner (git.exe as a process: argu
                   records), GitSettings; references Axit.Core
 src/AxGit/        class library (net10.0-windows): AxGitApp (Run, Usage), GitForm (the window), AxGitKeys, HelpText
                   (F1 text, the embedded user guide); references AxGit.Core, Axit.Core, Axit.Forms
-tests/AxGit.Tests/ GitStatusTests, GitLogTests, GitBranchesTests, GitSettingsTests: the parsers and the labels, from
-                  recorded git output, no git process
+tests/AxGit.Tests/ GitStatusTests, GitLogTests, GitBranchesTests, GitRunnerTests (the argument list and the settings):
+                  the parsers and the labels, from recorded git output, no git process
 docs/axgit/       this spec, user-guide.md (embedded), nvda-test-plan.md
 ```
 

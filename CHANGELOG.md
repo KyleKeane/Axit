@@ -11,6 +11,8 @@
 - AxTerminal: a command sent without recording (Ctrl+Enter) no longer shows in the status bar and Ctrl+Q while it runs; they say "a command sent without recording".
 - AxTerminal: New session and a change of folder give the new shell a fresh screen, as Restart shell does; the new shell drew on the old one's rows, and its shorter lines showed their tails.
 - AxTerminal: a program inside the shell that marks the end of its own input (Claude Code does) no longer hides the whole transcript as if it were a prompt.
+- AxGit: a git command whose output a program it started keeps open (a signing agent, a hook's daemon) ends at the timeout instead of leaving the window at "Working" for good.
+- AxGit: switching views keeps each view's selection on the right item when two views hold the same number of items; a view switch while a command runs says "Working" and stays, instead of showing an empty list; the log names the git subcommand only, not a commit's message.
 - Axit: in every notice's text (the keyboard shortcuts of F1, the user guides, About), h and Shift+H move by heading and 1 to 6 by level, in every window now, AxGit, AxFile, AxMedia and AxStart included; AxDown, AxJSON and AxPreview keep their Ctrl+letter keys there as well. Ctrl+F finds a text in a notice: the Find notice takes its place and Find next brings it back with the match selected; F3 and Shift+F3 find the next and the previous match.
 - AxFile: the command palette holds the folder's entries after the commands, "notes.md, file", "docs, folder"; Enter on one opens it as Enter in the list does.
 - AxGit: Push is Ctrl+Shift+H; Ctrl+Shift+P is the command palette's in every window.

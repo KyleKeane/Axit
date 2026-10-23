@@ -503,7 +503,8 @@ public sealed partial class GitForm : AxitForm
         try
         {
             var result = await GitRunner.RunAsync(_root, arguments, timeout);
-            Log.Info($"git {string.Join(" ", arguments)}: exit {result.ExitCode} in {watch.ElapsedMilliseconds} ms{(result.Ok ? string.Empty : ", " + result.FirstLine)}");
+            // The subcommand alone (AG-8.2): the arguments hold the commit message and the paths.
+            Log.Info($"git {arguments[0]}: exit {result.ExitCode} in {watch.ElapsedMilliseconds} ms{(result.Ok ? string.Empty : ", " + result.FirstLine)}");
             return result;
         }
         catch (GitNotFoundException)
@@ -584,6 +585,8 @@ public sealed partial class GitForm : AxitForm
             return;
         }
 
+        // The selection by key, taken before the lists change under it (AG-2.2).
+        _selected[_view] = CurrentKey() ?? _selected.GetValueOrDefault(_view);
         _repo = GitStatus.Parse(result.Output);
         if (_view == View.Log)
         {
@@ -639,7 +642,14 @@ public sealed partial class GitForm : AxitForm
             return;
         }
 
-        _selected[_view] = CurrentKey();
+        if (_busy is not null)
+        {
+            // The view's first load would be refused and the list shown empty under the new name.
+            Announce("Working…", true);
+            return;
+        }
+
+        _selected[_view] = CurrentKey() ?? _selected.GetValueOrDefault(_view);
         _view = view;
         if (view == View.Log && !_logLoaded)
         {
@@ -655,11 +665,10 @@ public sealed partial class GitForm : AxitForm
         Announce(_list.SelectedItem is string item ? $"{name}. {item}" : name, true);
     }
 
-    /// <summary>The list's items for the view, named with the view and the count, the selection kept by its key.</summary>
+    /// <summary>The list's items for the view, named with the view and the count, the selection on the key kept for the view (<see cref="_selected"/>, taken by the caller before the lists changed).</summary>
     private void FillList()
     {
-        _selected[_view] = CurrentKey() ?? _selected.GetValueOrDefault(_view);
-        var wanted = _selected[_view];
+        var wanted = _selected.GetValueOrDefault(_view);
         _list.BeginUpdate();
         _list.Items.Clear();
         string name;
@@ -709,11 +718,12 @@ public sealed partial class GitForm : AxitForm
         _ => _branches.Select(branch => branch.Name).ToList(),
     };
 
+    /// <summary>The key of the selected item, read while the list still shows the view's lists as they are (before a refresh replaces them, before a view switch changes <see cref="_view"/>); null with nothing selected.</summary>
     private string? CurrentKey()
     {
         var keys = ItemKeys();
         var index = _list.SelectedIndex;
-        return index >= 0 && index < keys.Count && _list.Items.Count == keys.Count ? keys[index] : null;
+        return index >= 0 && index < keys.Count ? keys[index] : null;
     }
 
     private ChangedFile? CurrentFile() =>

@@ -95,13 +95,16 @@ public static class GitRunner
         }
 
         process.StandardInput.Close();
-        var output = process.StandardOutput.ReadToEndAsync(cancellation);
-        var error = process.StandardError.ReadToEndAsync(cancellation);
+        // The reads run under the timeout as well as the wait: a program git started that outlives it (an agent, a
+        // hook's daemon) keeps the pipes open after git has exited, and a read with no end would hang the window.
         using var limit = CancellationTokenSource.CreateLinkedTokenSource(cancellation);
         limit.CancelAfter(timeout);
+        var output = process.StandardOutput.ReadToEndAsync(limit.Token);
+        var error = process.StandardError.ReadToEndAsync(limit.Token);
         try
         {
             await process.WaitForExitAsync(limit.Token);
+            return new GitResult(process.ExitCode, await output, await error);
         }
         catch (OperationCanceledException)
         {
@@ -114,10 +117,24 @@ public static class GitRunner
             }
 
             cancellation.ThrowIfCancellationRequested();
-            return new GitResult(-1, await output, $"git did not finish within {timeout.TotalSeconds:0} seconds and was stopped.");
+            var reason = process.HasExited
+                ? "git finished, but a program it started kept its output open; the output read so far is what there is."
+                : $"git did not finish within {timeout.TotalSeconds:0} seconds and was stopped.";
+            return new GitResult(process.HasExited ? process.ExitCode : -1, await ReadSoFar(output), reason);
         }
+    }
 
-        return new GitResult(process.ExitCode, await output, await error);
+    /// <summary>What a cancelled read gave: nothing, since the read throws rather than return a part.</summary>
+    private static async Task<string> ReadSoFar(Task<string> read)
+    {
+        try
+        {
+            return await read;
+        }
+        catch (OperationCanceledException)
+        {
+            return string.Empty;
+        }
     }
 
     /// <summary>
