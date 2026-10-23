@@ -33,6 +33,8 @@ Run so far, by the user with NVDA, 2026-10-23, on `palette` after 0d46e82:
   and 4 (sign-in and an update in place) wait for the release.
 - axClaude section 12 steps 4a, 18, 19, 20 and 21: Passed, in a second window on
   `manual_tests/axclaude/project-for-conversations`.
+- axClaude Session, Open folder in new window and Open recent folder in new window (new, dfe9ec1): Passed.
+- axDown section 6 step 6 (the palette) and section 2 step 6's Alt+Backspace and Shift+F10: Passed.
 
 ## 2026-10-22, Axit 3.3.1
 
