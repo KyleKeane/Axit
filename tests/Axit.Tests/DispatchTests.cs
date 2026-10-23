@@ -97,7 +97,10 @@ public sealed class DispatchTests
             Assert.Equal(Dispatch.Bundle, launch.App);
             Assert.Equal([flag], launch.Arguments);
             Assert.Null(launch.Error);
+            Assert.Equal(flag != "--version", Dispatch.IsHelpFlag(flag));
         }
+
+        Assert.False(Dispatch.IsHelpFlag("help"));
     }
 
     [Fact]

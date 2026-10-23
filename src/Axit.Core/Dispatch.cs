@@ -54,6 +54,9 @@ public static class Dispatch
         The installed console commands axit, axclaude, axdown, axjson, axgit, axterminal, axfile, axmedia, axpreview and axstart stand for Axit, Axit claude, Axit down, Axit json, Axit git, Axit terminal, Axit file, Axit media, Axit preview and Axit start.
         """;
 
+    /// <summary>Whether an argument asks for the usage text: the forms Windows and Unix programs take (the apps' hosts read it too).</summary>
+    public static bool IsHelpFlag(string argument) => argument is "--help" or "-h" or "-?" or "/?";
+
     public static Launch Decide(string[] args)
     {
         if (args.Length == 0)
@@ -67,7 +70,7 @@ public static class Dispatch
             return new Launch(named.Verb, args[1..]);
         }
 
-        if (first is "--help" or "-h" or "-?" or "/?" or "--version")
+        if (IsHelpFlag(first) || first == "--version")
         {
             return new Launch(Bundle, args);
         }

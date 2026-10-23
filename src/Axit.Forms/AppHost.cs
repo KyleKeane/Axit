@@ -25,7 +25,7 @@ public static class AppHost
         // The program path tells a development build from the installed one when both write to the same log.
         Log.Info($"{name} {BundleInfo.Version} starting on .NET {Environment.Version} from {Environment.ProcessPath ?? "(unknown)"} as process {Environment.ProcessId}, arguments: {string.Join(" ", args)}");
 
-        if (args.Length == 1 && args[0] is "--help" or "-h" or "-?" or "/?")
+        if (args.Length == 1 && Dispatch.IsHelpFlag(args[0]))
         {
             MessageBox.Show(usage, name, MessageBoxButtons.OK, MessageBoxIcon.Information);
             return;
