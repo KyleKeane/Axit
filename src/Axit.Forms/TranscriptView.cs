@@ -15,6 +15,10 @@ public sealed class TranscriptView : TextBox
     private const int WM_SETREDRAW = 0x000B;
     private const int EM_SCROLLCARET = 0x00B7;
     private const int EM_GETLINECOUNT = 0x00BA;
+    private const int EM_LINEINDEX = 0x00BB;
+    private const int EM_LINELENGTH = 0x00C1;
+    private const int EM_GETLINE = 0x00C4;
+    private const int EM_LINEFROMCHAR = 0x00C9;
 
     /// <summary>
     /// How long output is held back after a key press while the view has focus. The screen reader reads the caret
@@ -544,12 +548,14 @@ public sealed class TranscriptView : TextBox
 
     /// <summary>
     /// What a jump to a line says: its text (`blank` when empty), a heading with its level, a bookmark with the line
-    /// it marks. <paramref name="whole"/> takes the rows wrapped under the line as well, as the reader sees them.
+    /// it marks. <paramref name="whole"/> takes the rows wrapped under the line as well, as the reader sees them;
+    /// otherwise only the row the caret is on, as the edit control wraps it, which is what Up and Down read, so that
+    /// Down after a jump goes on with the next row instead of repeating it (asked 2026-10-23).
     /// </summary>
     private string SpokenText(int index, bool whole)
     {
         var line = _mirror.LineAt(index);
-        var text = whole ? _mirror.DisplayTextAt(index) : line.Text;
+        var text = whole ? _mirror.DisplayTextAt(index) : RowAt(SelectionStart);
         if (line.HeadingLevel > 0)
         {
             // The # marker is for the eye and the export; the ear gets the level instead.
@@ -569,13 +575,34 @@ public sealed class TranscriptView : TextBox
         if (line.Kind == LineKind.Bookmark && index + 1 < _mirror.LineCount)
         {
             // The bookmark stands in front of the line it marks: say that line too, so one k press tells where it is.
-            var marked = _mirror.DisplayTextAt(index + 1);
+            var marked = whole ? _mirror.DisplayTextAt(index + 1) : RowAt(_mirror.StartAt(index + 1));
             text += ", " + (marked.Length == 0 ? "blank" : marked);
         }
 
         return text;
     }
 
+    /// <summary>The text of the edit control's row that holds <paramref name="position"/>, without its line break.</summary>
+    private string RowAt(int position)
+    {
+        var row = SendMessage(Handle, EM_LINEFROMCHAR, position, IntPtr.Zero);
+        var start = SendMessage(Handle, EM_LINEINDEX, row, IntPtr.Zero);
+        var length = (int)SendMessage(Handle, EM_LINELENGTH, start, IntPtr.Zero);
+        if (length <= 0)
+        {
+            return "";
+        }
+
+        // EM_GETLINE takes the buffer's size in its first character and does not end the text with a null.
+        var buffer = new char[Math.Max(length, 1)];
+        buffer[0] = (char)length;
+        var copied = (int)SendMessage(Handle, EM_GETLINE, row, buffer);
+        return new string(buffer, 0, Math.Clamp(copied, 0, length)).TrimEnd('\r', '\n');
+    }
+
     [DllImport("user32.dll")]
     private static extern IntPtr SendMessage(IntPtr hWnd, int msg, IntPtr wParam, IntPtr lParam);
+
+    [DllImport("user32.dll", CharSet = CharSet.Unicode)]
+    private static extern IntPtr SendMessage(IntPtr hWnd, int msg, IntPtr wParam, [In, Out] char[] buffer);
 }

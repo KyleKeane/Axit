@@ -188,7 +188,7 @@ Everything listed is built.
 
 ### FR-5 Navigation keys in the conversation
 
-Single keys act only when the view has focus and no modifier other than Shift is held. Shift reverses direction. Each jump moves the caret to the start of the target line, scrolls it into view and announces its text (FR-7). No target: "No next input", "No previous heading", and so on; the caret stays.
+Single keys act only when the view has focus and no modifier other than Shift is held. Shift reverses direction. Each jump moves the caret to the start of the target line, scrolls it into view and announces the text of the row the caret is on, as the edit control wraps it (FR-7): what Up and Down would read there, so that Down after a jump goes on with the next row rather than repeating it (2026-10-23; the whole line had been said, often cut short, and then heard again row by row). No target: "No next input", "No previous heading", and so on; the caret stays.
 
 | Key | Target |
 | :-- | :-- |

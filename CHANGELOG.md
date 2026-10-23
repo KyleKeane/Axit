@@ -2,6 +2,7 @@
 
 ## Unreleased
 
+- axClaude, axTerminal: a quick key (h, p, c and the rest) says only the row the caret lands on, what Down Arrow would read there; it said the whole line, often cut short, and Down then read the same text again.
 - axClaude: Session, Open folder in new window and Open recent folder in new window start axClaude in the folder in a window of its own and leave this one's session running; Open folder and Open recent folder still restart Claude in this window.
 - axTerminal: Session, Open recent folder in new window, the same for a shell.
 - Axit: the low note at the end of a list is louder and two notes falling an octave, so that the speech after it no longer drowns it.
