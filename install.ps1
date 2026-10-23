@@ -304,6 +304,9 @@ if ($onPath -notcontains $bin.TrimEnd('\')) {
 if (-not $NoStartMenu) {
     $shell = New-Object -ComObject WScript.Shell
     foreach ($app in $apps) {
+        # Removed first: a file written over one of the same name keeps the old one's capitals, and the shortcut's
+        # name is what the Start menu shows and NVDA reads ("Axit axClaude", once "Axit AxClaude").
+        Remove-Item -LiteralPath $app.Start -ErrorAction SilentlyContinue
         $link = $shell.CreateShortcut($app.Start)
         $link.TargetPath = $exe
         $link.Arguments = $app.Verb
