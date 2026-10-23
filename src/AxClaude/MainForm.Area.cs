@@ -52,11 +52,12 @@ internal sealed partial class MainForm
                 }
             });
         }
-        else if (!focus && !NoticeOpen)
+        else if (!focus && !NoticeOpen && (_transcript.ContainsFocus || !ContainsFocus))
         {
-            // From the conversation, without the interrupting kind, or within three seconds of the user's own answer:
-            // the focus goes to the question after a moment, so that it is not found by Tab, and NVDA reads it there
-            // after what it is reading (asked 2026-10-21; the three-second case was found by the off-screen replay).
+            // From the conversation, or with the window not the active one, without the interrupting kind, or within
+            // three seconds of the user's own answer: the focus goes to the question after a moment, so that it is
+            // not found by Tab, and NVDA reads it there after what it is reading (asked 2026-10-21; the three-second
+            // case was found by the off-screen replay). Not from an open menu, which the move would close (2026-10-23).
             Later(QuestionFocusMs, () =>
             {
                 if (_shownWait == signature && !NoticeOpen && _area.Current is { } current && !current.ContainsFocus)
