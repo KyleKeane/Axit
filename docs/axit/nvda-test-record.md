@@ -21,6 +21,13 @@ The list is `docs/axit/review-2026-10-23.md` section 9, in short:
 - AxGit: steps 4a and 5. AxMedia: steps 1a and 2a. AxDown: step 6. AxPreview: step 9a.
 - AxStart: its whole plan, owed since 3.4.0, with step 5a and section 2 steps 2, 3 and 5.
 
+Run so far, by the user with NVDA, 2026-10-23, on `palette` after 0d46e82:
+
+- axStart section 1 steps 1 to 6 and 5a, section 2 steps 2, 3, 5 and 9: Passed. The first run was against a stale
+  axStart from a scratch build of 2026-10-22, which kept the hotkey; on the current build all passed, but the edge
+  note was "a bit soft and swallowed by the speech". The note was made louder and two notes falling an octave, and
+  the steps passed again with it.
+
 ## 2026-10-22, Axit 3.3.1
 
 - Commit: the `split` branch at its merge into `main` (8504ede), released as 3.3.1; 3.3.0 was tagged from it but not published (a test the Release build refused, fixed in 2b91f7a, no change to the apps).

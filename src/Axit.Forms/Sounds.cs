@@ -187,8 +187,10 @@ public static class Sounds
     private static readonly Sound NoticeChime = new(WaveTone.Notes(0.35, (1046.5, 45), (1318.5, 45), (1046.5, 45), (1318.5, 110)));
 
     // A3 alone, short and low: the edge, nothing there (a list's first or last entry under Up or Down, a typed name no
-    // entry starts with; axFile AF-3.6). An earcon where a sentence would be noise, asked 2026-10-22.
-    private static readonly Sound EdgeTick = new(WaveTone.Notes(0.35, (220, 60)));
+    // entry starts with; axFile AF-3.6). An earcon where a sentence would be noise, asked 2026-10-22. A4 falling to
+    // A3, louder than the chimes: A3 alone at 0.35 was lost under the speech that follows it (2026-10-23), and A4
+    // carries on small speakers where A3 hardly does.
+    private static readonly Sound EdgeTick = new(WaveTone.Notes(0.6, (440, 45), (220, 90)));
 
     // G5, C6 up to a held E6, and once more: longer and louder than the chimes, so that Claude finishing or asking is
     // heard from another window, where the done chime was missed (axClaude FR-7.3).
