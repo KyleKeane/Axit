@@ -25,7 +25,7 @@ Run one:
 
 ```
 dotnet build src\Axit\Axit.csproj -c Release
-dotnet run --project tools\AxitDrive -c Release -- tests\scripts\axclaude\two-questions.txt
+dotnet run --project tools\AxitDrive -c Release -- tests\scripts --build --report report.md
 ```
 
 For the windows' own behaviour: keys, focus, announcements, notices, menus, the control area. Runs any time,
@@ -38,6 +38,14 @@ including while the user works, because nothing takes the foreground.
 - **Its own files.** The runner sets `AXIT_HOME` to a folder of the run's, under which the windows keep their
   settings, their logs and the recently closed list (`AppPaths`), so that a run neither reads nor writes the user's.
 - **One named pipe per window**, `\\.\pipe\<name>-<process id>`, one command per line, one answer per line (JSON).
+- **The timeline** (2026-10-23, the user's ask for full diagnostics): every window records, with the milliseconds
+  since it opened, each announcement (with whether it interrupts), each sound by name (`Sounds.Played`; in a test
+  run the sounds are recorded and not played, so a run is silent on the user's speakers), each move of the focus to
+  another control with its name, role and value, and each change of the focused control's value (the caret's line,
+  the selected item), which is what NVDA reads by itself. The runner's report lists it whole, and an expectation can
+  wait for any of it.
+- **The run's own checks**: after the last step a run fails when a window's process ended by itself or a log of the
+  run holds an ERROR line, so a crash or a logged exception never passes unseen.
 - **Commands**:
   - `keys <keys>`: key presses as a user makes them, `ctrl+shift+p`, `escape`, `down`, posted to the focused
     control through the window's own message queue with the modifiers set for the window's thread, so that

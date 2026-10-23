@@ -207,40 +207,58 @@ public static class Sounds
     private static readonly Device Music = new("working music", WorkingMusic);
 
     /// <summary>A tiny typewriter-like tick: a line from Claude arrived.</summary>
-    public static void Click() => Chimes.Play(LineTick, replace: false);
+    /// <summary>
+    /// Every sound asked for, by its name ("Notice", "Edge", "Ready"): the automation channel's record
+    /// (docs/axit/automation.md). In a test run the sounds are recorded and not played, so that a run on the test
+    /// desktop is silent on the user's speakers.
+    /// </summary>
+    public static event Action<string>? Played;
+
+    private static readonly bool Silent = !string.IsNullOrEmpty(Environment.GetEnvironmentVariable("AXIT_AUTOMATION"));
+
+    private static void Play(string name, Action play)
+    {
+        Played?.Invoke(name);
+        if (!Silent)
+        {
+            play();
+        }
+    }
+
+    public static void Click() => Play("Click", () => Chimes.Play(LineTick, replace: false));
 
     /// <summary>Two lower knocks: a tool call arrived.</summary>
-    public static void Tool() => Chimes.Play(ToolTick, replace: false);
+    public static void Tool() => Play("Tool", () => Chimes.Play(ToolTick, replace: false));
 
     /// <summary>A single high ping: Claude is ready.</summary>
-    public static void Ready() => Chimes.Play(ReadyChime, replace: true);
+    public static void Ready() => Play("Ready", () => Chimes.Play(ReadyChime, replace: true));
 
     /// <summary>A single low note: the message went out.</summary>
-    public static void Sent() => Chimes.Play(SentChime, replace: true);
+    public static void Sent() => Play("Sent", () => Chimes.Play(SentChime, replace: true));
 
     /// <summary>Three rising notes ending on a long one: Claude started replying.</summary>
-    public static void Responding() => Chimes.Play(RespondingChime, replace: true);
+    public static void Responding() => Play("Responding", () => Chimes.Play(RespondingChime, replace: true));
 
     /// <summary>Three falling notes ending on a long one: the turn is done.</summary>
-    public static void Done() => Chimes.Play(DoneChime, replace: true);
+    public static void Done() => Play("Done", () => Chimes.Play(DoneChime, replace: true));
 
     /// <summary>Two equal notes: Claude needs an answer.</summary>
-    public static void Question() => Chimes.Play(QuestionChime, replace: true);
+    public static void Question() => Play("Question", () => Chimes.Play(QuestionChime, replace: true));
 
     /// <summary>A quick high trill: the answer notice opened and waits for an answer.</summary>
-    public static void Notice() => Chimes.Play(NoticeChime, replace: true);
+    public static void Notice() => Play("Notice", () => Chimes.Play(NoticeChime, replace: true));
 
     /// <summary>One short low note: the edge, nothing there (a key that moves nothing, a typed name no entry starts with).</summary>
-    public static void Edge() => Chimes.Play(EdgeTick, replace: true);
+    public static void Edge() => Play("Edge", () => Chimes.Play(EdgeTick, replace: true));
 
     /// <summary>A longer, louder call, three rising notes to a held one and again: Claude is done or asks while the window is in the background.</summary>
-    public static void Alert() => Chimes.Play(AlertChime, replace: true);
+    public static void Alert() => Play("Alert", () => Chimes.Play(AlertChime, replace: true));
 
     /// <summary>Starts the soft music loop that plays while Claude works (AxClaude FR-7.9); nothing while it plays already.</summary>
-    public static void StartMusic() => Music.Play(WorkingMusic, replace: false);
+    public static void StartMusic() => Play("StartMusic", () => Music.Play(WorkingMusic, replace: false));
 
     /// <summary>Stops the music loop at once; nothing when it is not playing.</summary>
-    public static void StopMusic() => Music.Reset();
+    public static void StopMusic() => Play("StopMusic", () => Music.Reset());
 
     [StructLayout(LayoutKind.Sequential)]
     private struct WAVEFORMATEX

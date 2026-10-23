@@ -227,6 +227,8 @@ public abstract partial class AxitForm : Form
     {
         title = Text,
         notice = NoticeOpen ? Overlay.Shown?.Title : null,
+        noticeText = NoticeOpen ? Overlay.Shown?.Text : null,
+        process = Environment.ProcessId,
         status = Controls.OfType<StatusStrip>().SelectMany(strip => strip.Items.Cast<ToolStripItem>()).Select(item => item.Text).ToArray(),
     };
 

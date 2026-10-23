@@ -23,19 +23,54 @@ internal sealed class AutomationChannel
     private const int WM_SYSKEYUP = 0x0105;
 
     private readonly AxitForm _form;
+
+    /// <summary>
+    /// The window's timeline, oldest first, taken by <c>said</c>: each announcement (<c>say</c>, with whether it
+    /// interrupts), each sound (<c>sound</c>, by name), each move of the focus to another control (<c>focus</c>, its
+    /// name, role and value) and each change of the focused control's value (<c>value</c>: the caret's line, the
+    /// selected item), which is what NVDA reads on its own; each with the milliseconds since the channel opened.
+    /// </summary>
     private readonly List<object> _said = [];
     private readonly object _gate = new();
+    private readonly System.Diagnostics.Stopwatch _clock = System.Diagnostics.Stopwatch.StartNew();
+    private readonly System.Windows.Forms.Timer _focusWatch = new() { Interval = 50 };
+    private nint _focused;
+    private string? _value;
 
     private AutomationChannel(AxitForm form)
     {
         _form = form;
-        Announcer.Raised += (text, interrupt) =>
+        Announcer.Raised += (text, interrupt) => Record(new { kind = "say", text, interrupt });
+        Sounds.Played += name => Record(new { kind = "sound", text = name, interrupt = false });
+        _focusWatch.Tick += (_, _) => WatchFocus();
+        _focusWatch.Start();
+    }
+
+    private void Record(object item)
+    {
+        lock (_gate)
         {
-            lock (_gate)
-            {
-                _said.Add(new { text, interrupt });
-            }
-        };
+            _said.Add(new { t = _clock.ElapsedMilliseconds, item });
+        }
+    }
+
+    /// <summary>The focus and its value, compared every 50 ms on the window's thread: a move or a change goes on the timeline.</summary>
+    private void WatchFocus()
+    {
+        var handle = GetFocus();
+        var control = Control.FromChildHandle(handle);
+        var value = control is null ? null : ValueOf(control);
+        if (handle != _focused)
+        {
+            _focused = handle;
+            _value = value;
+            Record(new { kind = "focus", text = $"{control?.AccessibleName} ({control?.AccessibilityObject.Role}): {value}", interrupt = false });
+        }
+        else if (value != _value)
+        {
+            _value = value;
+            Record(new { kind = "value", text = value ?? string.Empty, interrupt = false });
+        }
     }
 
     public static bool Requested => !string.IsNullOrEmpty(Environment.GetEnvironmentVariable("AXIT_AUTOMATION"));
@@ -103,6 +138,8 @@ internal sealed class AutomationChannel
             "type" => Type(argument),
             "focus" => Focus(),
             "text" => Text(),
+            "list" => List(),
+            "commands" => Commands(),
             "said" => Said(),
             "state" => _form.AutomationState(),
             "menu" => Menu(argument),
@@ -157,14 +194,31 @@ internal sealed class AutomationChannel
             return new { name = (string?)null };
         }
 
-        string? value = control switch
-        {
-            ListBox { SelectedItem: { } item } => item.ToString(),
-            TextBoxBase box => CaretLine(box),
-            _ => control.Text,
-        };
-        return new { name = control.AccessibleName, role = control.AccessibilityObject.Role.ToString(), value };
+        return new { name = control.AccessibleName, role = control.AccessibilityObject.Role.ToString(), value = ValueOf(control) };
     }
+
+    /// <summary>What NVDA reads of a control besides its name: the selected item of a list, the caret's line of a text, the text of the rest.</summary>
+    private static string? ValueOf(Control control) => control switch
+    {
+        ListBox { SelectedItem: { } item } => item.ToString(),
+        ListBox => string.Empty,
+        TextBoxBase box => CaretLine(box),
+        _ => control.Text,
+    };
+
+    /// <summary>The focused list's items, or the list named, with the selected index: a question's answers, AxFile's entries, AxGit's views.</summary>
+    private static object List()
+    {
+        if (Control.FromChildHandle(GetFocus()) is not ListBox list)
+        {
+            return new { error = "the focus is not in a list" };
+        }
+
+        return new { name = list.AccessibleName, items = list.Items.Cast<object>().Take(200).Select(item => item.ToString()).ToArray(), selected = list.SelectedIndex, count = list.Items.Count };
+    }
+
+    /// <summary>Every command of the window's menus as the command palette lists it, with its menu and key.</summary>
+    private object Commands() => CommandPalette.Commands(_form.MainMenuStrip, _ => { }).Select(entry => entry.Text).ToArray();
 
     /// <summary>The focused text control's lines, the last 60, for a script that checks what a transcript or an editor holds.</summary>
     private static object Text()
