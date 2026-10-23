@@ -2,23 +2,42 @@ using Axit.Core.Transcript;
 
 namespace AxTerminal.Core;
 
+/// <summary>What the shell's marks say about it (SPEC.md AT-1.4): no mark yet (no state at all), at its prompt, or running a command.</summary>
+public enum ShellState
+{
+    /// <summary>No mark has arrived from this shell: nothing is hidden and nothing is announced (a custom shell, a shell not ready yet).</summary>
+    NoMarks,
+
+    /// <summary>The prompt is up and nothing was sent since.</summary>
+    Idle,
+
+    /// <summary>A command was sent and the prompt has not come back.</summary>
+    Running,
+}
+
 /// <summary>
 /// The shell's output as a transcript (SPEC.md AT-4) and the state its integration marks give (AT-1.4): on the
 /// bundle's <see cref="LineStore"/>, which holds the lines, the screen, the parser, the bookmarks and the cap. Every
 /// row the shell prints is a plain line; the prompt rows, from the A mark to the B mark, are hidden and their text is
 /// <see cref="Prompt"/>; a command sent gets its exchange block above the prompt row (AT-3.2); the A mark after a
 /// command raises <see cref="CommandFinished"/> with the code the D mark carried (AT-5.1). Without marks there is no
-/// state and nothing is hidden. Written against recorded shell sessions, not carved out of Claude's model (AT-D6).
+/// state and nothing is hidden. The prompt rows are found by the lines the screen binds to its rows, never by a row
+/// number kept past the frame (2026-10-23; by row number until then, three bugs came of rows that had scrolled).
+/// Written against recorded shell sessions, not carved out of Claude's model (AT-D6).
 /// </summary>
 public sealed class TerminalModel : LineStore
 {
-    /// <summary>The lines of the current prompt, the A mark's row down to the B mark's row, hidden (AT-4.2); the first is the anchor of a block.</summary>
+    /// <summary>The lines of the current prompt, the A mark's row down to the B mark's row, and the continuation rows of the command after it, hidden (AT-4.2); the first is the anchor of a block.</summary>
     private readonly List<Line> _promptLines = [];
-    private int _promptStartRow = -1;
-    private int _promptRow = -1;
+
+    /// <summary>The line of the row the A mark landed on, until the B mark closes the prompt; null between prompts.</summary>
+    private Line? _promptStart;
+
+    /// <summary>The lines of the last command as sent (trimmed), which the continuation rows under the prompt echo (AT-3.2); kept until the next prompt's B mark, emptied then.</summary>
+    private readonly List<string> _sentLines = [];
+
+    /// <summary>The code the last D mark carried, for the A mark that follows it.</summary>
     private string? _lastCode;
-    private bool _commandSent;
-    private bool _readyRaised;
 
     public TerminalModel(int columns, int rows)
         : base(columns, rows)
@@ -26,11 +45,14 @@ public sealed class TerminalModel : LineStore
         AttachScreen();
     }
 
-    /// <summary>A mark has arrived from this shell: the state below means something (AT-1.4).</summary>
-    public bool HasMarks { get; private set; }
+    /// <summary>What the marks say the shell is doing (AT-1.4): the one state behind <see cref="HasMarks"/> and <see cref="Running"/>.</summary>
+    public ShellState State { get; private set; }
+
+    /// <summary>A mark has arrived from this shell: the state means something (AT-1.4).</summary>
+    public bool HasMarks => State != ShellState.NoMarks;
 
     /// <summary>A command was sent and the prompt has not come back (AT-1.4); false without marks.</summary>
-    public bool Running { get; private set; }
+    public bool Running => State == ShellState.Running;
 
     /// <summary>What <see cref="RunningCommand"/> says for a command sent without recording (AT-3.4).</summary>
     public const string UnrecordedCommand = "a command sent without recording";
@@ -86,14 +108,15 @@ public sealed class TerminalModel : LineStore
 
         // The block of a command sent to an idle shell goes above the prompt row; an answer to a running program
         // goes at the end, after what the program printed so far.
-        var at = _commandSent ? _lines.Count : AnchorIndex();
-        if (!_commandSent)
+        var at = State == ShellState.Running ? _lines.Count : AnchorIndex();
+        if (State == ShellState.Idle)
         {
-            _commandSent = true;
-            Running = HasMarks;
+            State = ShellState.Running;
             // AT-3.4: a command sent without recording leaves no trace, the status bar and Ctrl+Q included.
             RunningCommand = record ? lines.First(l => l.Trim().Length > 0).Trim() : UnrecordedCommand;
             RunningSince = Clock();
+            _sentLines.Clear();
+            _sentLines.AddRange(lines.Select(l => l.Trim()));
         }
 
         if (!record)
@@ -127,7 +150,7 @@ public sealed class TerminalModel : LineStore
     /// <summary>A line of the window's own (<c>System: …</c>, AT-4.3), above the prompt row while the shell is idle.</summary>
     public override void AddSystemLine(string text)
     {
-        _lines.Insert(_commandSent ? _lines.Count : AnchorIndex(), NewLine(LineKind.System, "System: " + text));
+        _lines.Insert(State == ShellState.Running ? _lines.Count : AnchorIndex(), NewLine(LineKind.System, "System: " + text));
         RaiseChanged();
     }
 
@@ -160,10 +183,14 @@ public sealed class TerminalModel : LineStore
     /// </summary>
     public void ShellExited(int code)
     {
-        _commandSent = false;
-        Running = false;
+        if (State == ShellState.Running)
+        {
+            State = ShellState.Idle;
+        }
+
         RunningCommand = null;
         RunningSince = null;
+        _sentLines.Clear();
         // At the very end: the prompt row above holds the shell's last words (the exit typed into it).
         _lines.Add(NewLine(LineKind.System, $"System: The shell ended with code {code}"));
         RaiseChanged();
@@ -179,12 +206,10 @@ public sealed class TerminalModel : LineStore
         _screen.DetachRows();
         AttachScreen();
         _promptLines.Clear();
-        _promptStartRow = _promptRow = -1;
+        _promptStart = null;
+        _sentLines.Clear();
         _lastCode = null;
-        _commandSent = false;
-        _readyRaised = false;
-        HasMarks = false;
-        Running = false;
+        State = ShellState.NoMarks;
         RunningCommand = null;
         RunningSince = null;
         Prompt = null;
@@ -232,47 +257,55 @@ public sealed class TerminalModel : LineStore
         }
     }
 
+    /// <summary>
+    /// A shell integration mark (AT-1.3). D keeps its code for the A that follows. A ends a running command, or raises
+    /// Ready once, and marks the cursor row's line as the start of the prompt (the line is made now, before the prompt
+    /// is printed on it, so that the row is found again by identity whatever scrolls in between). B closes the prompt:
+    /// the rows from that line's row to the cursor row are hidden and their text becomes <see cref="Prompt"/>.
+    /// </summary>
     private void OnMark(char letter, string? code)
     {
-        HasMarks = true;
         switch (letter)
         {
             case 'D':
                 _lastCode = code;
                 break;
             case 'A':
-                _promptStartRow = _screen.CursorRow;
-                if (_commandSent)
+                _promptStart = _screen.EnsureLine(_screen.CursorRow);
+                if (State == ShellState.Running)
                 {
-                    _commandSent = false;
-                    Running = false;
+                    // The sent lines stay until the B mark, which hides the continuation rows under the old prompt first.
+                    State = ShellState.Idle;
                     RunningCommand = null;
                     RunningSince = null;
                     CommandFinished?.Invoke(int.TryParse(_lastCode, out var value) ? value : null);
                 }
-                else if (!_readyRaised)
+                else if (State == ShellState.NoMarks)
                 {
-                    _readyRaised = true;
+                    State = ShellState.Idle;
                     Ready?.Invoke();
                 }
 
                 _lastCode = null;
                 break;
             case 'B':
-                if (_promptStartRow < 0)
+                if (_promptStart is null)
                 {
                     // A B without an A since the last prompt (a program inside the shell that marks its own input,
                     // Claude Code among them): no prompt rows to hide. Taken for a prompt, it hid the whole screen.
+                    State = State == ShellState.NoMarks ? ShellState.Idle : State;
                     break;
                 }
 
                 _screen.PullRowText();
-                // The continuation rows of the command just run sit under the old prompt row: hidden before it is forgotten.
+                // The continuation rows of the command just run sit under the old prompt row: hidden before it is
+                // forgotten, whether or not a frame ended since they were printed (a burst can hold them and the new prompt).
                 HideContinuationRows();
+                _sentLines.Clear();
                 _promptLines.Clear();
-                _promptRow = _screen.CursorRow;
+                var first = Math.Max(0, _screen.RowOf(_promptStart));
                 var texts = new List<string>();
-                for (var r = _promptStartRow; r <= _promptRow; r++)
+                for (var r = first; r <= _screen.CursorRow; r++)
                 {
                     if (_screen.LineAt(r) is { } line)
                     {
@@ -285,7 +318,7 @@ public sealed class TerminalModel : LineStore
                     }
                 }
 
-                _promptStartRow = -1;
+                _promptStart = null;
                 Prompt = string.Join(" ", texts);
                 break;
         }
@@ -305,22 +338,29 @@ public sealed class TerminalModel : LineStore
     }
 
     /// <summary>
-    /// The continuation rows of a multi-line command (the shell's <see cref="ContinuationPrompt"/>: PowerShell's
-    /// <c>&gt;&gt; </c>, bash's <c>&gt; </c>) are the echo's too: hidden while they sit directly under the prompt row
-    /// or under another hidden continuation row (AT-3.2).
+    /// The continuation rows of a multi-line command are the echo's too (AT-3.2): while the command runs, the rows
+    /// directly under the prompt rows (found by their lines, wherever the rows are now) whose text is the shell's
+    /// <see cref="ContinuationPrompt"/> followed by one of the command's lines, or by nothing, are hidden with them.
+    /// An output line that happens to start with the continuation prompt is none of the command's lines and stays.
     /// </summary>
     private void HideContinuationRows()
     {
-        if (_promptLines.Count == 0 || _promptRow < 0 || ContinuationPrompt is null)
+        if (_promptLines.Count == 0 || ContinuationPrompt is null || _sentLines.Count == 0)
+        {
+            return;
+        }
+
+        var row = _screen.RowOf(_promptLines[^1]);
+        if (row < 0)
         {
             return;
         }
 
         var bare = ContinuationPrompt.TrimEnd();
-        for (var r = _promptRow + 1; r < Rows; r++)
+        for (var r = row + 1; r < Rows; r++)
         {
             var line = _screen.LineAt(r);
-            if (line is null || !line.Text.StartsWith(ContinuationPrompt, StringComparison.Ordinal) && line.Text != bare)
+            if (line is null || !IsContinuationRow(line.Text, bare))
             {
                 return;
             }
@@ -331,6 +371,23 @@ public sealed class TerminalModel : LineStore
                 _promptLines.Add(line);
             }
         }
+    }
+
+    /// <summary>Whether a row's text is the continuation prompt with one of the sent lines, or the bare prompt (the host's empty continuation after the last line).</summary>
+    private bool IsContinuationRow(string text, string bare)
+    {
+        if (text == bare)
+        {
+            return true;
+        }
+
+        if (!text.StartsWith(ContinuationPrompt!, StringComparison.Ordinal))
+        {
+            return false;
+        }
+
+        var rest = text[ContinuationPrompt!.Length..].Trim();
+        return rest.Length == 0 || _sentLines.Contains(rest);
     }
 
     /// <summary>A row that fills every column is hard-wrapped by the program; the next row with text continues it (AT-4.1).</summary>
@@ -361,5 +418,4 @@ public sealed class TerminalModel : LineStore
 
         return _lines.Count;
     }
-
 }

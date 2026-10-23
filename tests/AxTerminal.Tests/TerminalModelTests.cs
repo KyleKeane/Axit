@@ -194,6 +194,63 @@ public sealed class TerminalModelTests
         Assert.Equal(["# Input 1", "## Folder", "C:\\src", "## Command", "if ($true) {", "\"yes\"", "}", "", "# Output 1", "", "yes"], model.Lines.Where(l => !l.Hidden).Select(l => l.Text));
     }
 
+    /// <summary>The prompt rows are found by their lines (AT-4.2): a prompt of two rows printed from the bottom row scrolls its first row up before the B mark, and both are hidden all the same.</summary>
+    [Fact]
+    public void A_two_row_prompt_at_the_bottom_row_is_hidden_whole()
+    {
+        var model = new TerminalModel(80, 4);
+        Feed(model, "one\r\ntwo\r\nthree\r\n");
+        Feed(model, $"{Esc}]133;A{Bel}first row of the prompt\r\nPS> {Esc}]133;B{Bel}");
+        model.EndFrame();
+
+        Assert.Equal("first row of the prompt PS>", model.Prompt);
+        Assert.Equal(["one", "two", "three"], model.Lines.Where(l => !l.Hidden).Select(l => l.Text));
+    }
+
+    /// <summary>A continuation row echoes one of the command's lines (AT-3.2): an output line that merely starts with the continuation prompt stays (it vanished until 2026-10-23).</summary>
+    [Fact]
+    public void An_output_line_that_starts_with_the_continuation_prompt_stays()
+    {
+        var model = new TerminalModel(80, 10);
+        Feed(model, Prompt(null));
+        model.EndFrame();
+        model.Send("echo '>> x'");
+        Feed(model, $"echo '>> x'\r\n>> x\r\n{Prompt("0")}");
+        model.EndFrame();
+
+        Assert.Contains(">> x", model.Lines.Where(l => !l.Hidden).Select(l => l.Text));
+        Assert.False(model.Running);
+    }
+
+    /// <summary>The one state behind the marks (AT-1.4): nothing before the first mark, idle at the prompt, running from a send to the next A mark, nothing again after a reset.</summary>
+    [Fact]
+    public void The_state_follows_the_marks()
+    {
+        var model = new TerminalModel(80, 10);
+        var ready = 0;
+        model.Ready += () => ready++;
+        Assert.Equal(ShellState.NoMarks, model.State);
+
+        // Typed before the shell was ready: no state to keep, and the first prompt is still the first prompt.
+        model.Send("early");
+        Assert.Equal(ShellState.NoMarks, model.State);
+        Assert.Null(model.RunningCommand);
+
+        Feed(model, Prompt(null));
+        model.EndFrame();
+        Assert.Equal(ShellState.Idle, model.State);
+        Assert.Equal(1, ready);
+
+        model.Send("echo hello");
+        Assert.Equal(ShellState.Running, model.State);
+        Feed(model, $"echo hello\r\nhello\r\n{Prompt("0")}");
+        model.EndFrame();
+        Assert.Equal(ShellState.Idle, model.State);
+
+        model.ResetScreen();
+        Assert.Equal(ShellState.NoMarks, model.State);
+    }
+
     [Fact]
     public void Bookmarks_and_reset()
     {

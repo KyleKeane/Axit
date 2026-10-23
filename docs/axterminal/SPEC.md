@@ -89,11 +89,14 @@ out of scope; programs that print and ask are in. It works entirely offline (bun
   none until it exits. With a screen reader running, PowerShell turns PSReadLine off at startup and prints a warning
   line saying so, the first line of the transcript: the input is then the console host's own, with `>> ` continuation
   rows printed by the host, which is what the window wants (the recorded fixtures show it).
-- AT-1.4 **State from the marks.** From Enter until the next `A` mark the window counts the command as running: the
-  status bar says `Running: <the command's first line>` and the music plays when it is on (AT-5.5); the `D` mark's
-  code decides between "Done" and "Failed, exit code n" (AT-5.1); the `A` mark's row is the prompt (AT-4.2); the 9;9
-  directory and the shell's name make the title. Without marks the window has no state: the status's left label stays empty, nothing is
-  announced at the end of a command, and the cursor row shows as a line.
+- AT-1.4 **State from the marks.** One state (`TerminalModel.State`): no marks, idle, or running. The first `A`
+  mark makes the shell idle and announces Ready (AT-5.1); from Enter until the next `A` mark the window counts the
+  command as running: the status bar says `Running: <the command's first line>` and the music plays when it is on
+  (AT-5.5); the `D` mark's code decides between "Done" and "Failed, exit code n" (AT-5.1); the `A` mark's row is the
+  prompt (AT-4.2); the 9;9 directory and the shell's name make the title. Without marks the window has no state: the
+  status's left label stays empty, nothing is announced at the end of a command, the cursor row shows as a line, and
+  a command sent before the first mark (a shell still starting) is not counted as running, so the first prompt is
+  still Ready and not Done.
 - AT-1.5 `AxTerminalApp.Run(args)` is the entry point (AX-1.7), one call into `AppHost.Run` with the log name
   `axterminal`, the usage text, the settings (`axterminal.json`) and the window.
 - AT-1.6 Session → **New session…** (Ctrl+N), the shape and the name of AxClaude's New session (AxClaude FR-8.6,
@@ -157,9 +160,11 @@ out of scope; programs that print and ask are in. It works entirely offline (bun
   a jump speaks a heading without its marker, "Input 1 heading level 1" (AxClaude §6.4); *n* counts since the window started or the transcript was cleared; both markers are level 1 headings;
   Options → Text → Time stamps adds the time to both (AxClaude FR-4.6), and Options → Text → Markers in the text (AxClaude FR-4.6a) shows or hides the `#` markers of every heading line in the view, the lines, the keys and the export unchanged. The shell's echo of the command, the prompt
   row holding the command after its prompt, stays hidden: the block stands for it (AxClaude D22), and so do the
-  continuation rows of a multi-line command, the shell's continuation prompt with the line after it (PowerShell's
-  `>> `, bash's `> `, cmd's `More? `; a custom shell has none known, and its rows all stay). Every Enter is an
-  exchange, also one that answers a running program (AT-D3).
+  continuation rows of a multi-line command, the shell's continuation prompt (PowerShell's `>> `, bash's `> `, cmd's
+  `More? `; a custom shell has none known, and its rows all stay) followed by one of the command's lines, or by
+  nothing (the host's empty continuation after the last line), directly under the prompt rows while the command runs;
+  an output line that merely starts with the continuation prompt (`echo '>> x'`) is none of the command's lines and
+  stays (AT-4.2). Every Enter is an exchange, also one that answers a running program (AT-D3).
 - AT-3.3 **No send lock** (AxClaude D12): while a command runs, the text goes at once as input to the running program
   (an answer, or what the shell reads next), with its block; the status keeps the running command's name.
 - AT-3.4 **Send without recording** (Ctrl+Enter in the field; Shell → Send without recording): the text goes as on
@@ -191,7 +196,13 @@ out of scope; programs that print and ask are in. It works entirely offline (bun
 - AT-4.2 **Prompt rows are hidden.** The row that holds an `A` mark is the prompt row: hidden while the shell is idle,
   when it is the cursor row with the prompt on it; hidden still once it holds the command after its `B` mark, the echo
   the block stands for (AT-3.2). Its text between the marks goes to the status bar (AT-2.3). A `D` mark comes before
-  the prompt on the same row and is nothing by itself. Without marks nothing is hidden (AT-1.4).
+  the prompt on the same row and is nothing by itself. Without marks nothing is hidden (AT-1.4). The rows are kept by
+  their lines, which the screen binds to its rows: at the `A` mark the cursor row's line is made and remembered, at
+  the `B` mark the rows from that line's row (wherever a scroll in between has moved it) to the cursor row are the
+  prompt, and the continuation rows of the command (AT-3.2) are looked for under the last prompt line's row at each
+  frame end while the command runs. No row number is kept past the frame it was read in (2026-10-23; until then a
+  two-row prompt printed from the bottom row lost its first row, and an output line that began like a continuation
+  row vanished, since both were judged by row numbers that had scrolled).
 - AT-4.3 **System lines** (`System: …`, found with `s`): the shell started (`Shell started: PowerShell 7 in C:\path`),
   ended, restarted, a new shell, the update's steps (the window base, AX-6.5), a recording started or stopped.
 - AT-4.4 **Clear transcript** (Ctrl+L; Session → Clear transcript): empties the window, the recent commands
@@ -365,6 +376,13 @@ its notes record what moved.
   them otherwise. Other pagers are left alone (`q` and Enter leave them).
 - **AT-D8 Ctrl+Q says what the window is doing.** On demand, from anywhere, like AxClaude's Ctrl+Q for a question:
   the state, the command, how long, the prompt.
+- **AT-D10 The prompt rows are kept by line, not by row number** (2026-10-23). The marks arrive mid-frame while rows
+  are still being written, and the screen scrolls between an `A` and its `B` and between a send and the output: a row
+  number read at a mark names another row a frame later. The screen already binds a line to each row and moves it
+  with the row, so the model remembers lines (`EnsureLine` at the `A` mark, `RowOf` when it needs the row again)
+  and reads a row number only inside the frame that gave it. Three bugs came of the row numbers (a two-row prompt at
+  the bottom losing its first row; an output line starting like a continuation row vanishing, at once and again
+  during a long command); none can come of lines.
 - **AT-D9 Every block names its folder.** The user asked for the directory a command ran in to be on hand in the
   transcript itself: the prompt rows that would say it are hidden, a `cd` between two commands leaves the output's
   place unknown when the text is read back or exported, and the status bar only has the directory of now. A `## Folder`

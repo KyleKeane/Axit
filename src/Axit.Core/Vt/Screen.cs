@@ -116,6 +116,27 @@ public sealed class Screen
 
     public Line? LineAt(int row) => _rows[row].Line;
 
+    /// <summary>The row the line is on now, or -1 when it is not on the screen (scrolled off, let go, or never a row's): a model that keeps a line from an earlier frame finds its row again by identity, since the rows move as the screen scrolls (docs/axterminal/SPEC.md AT-4.2).</summary>
+    public int RowOf(Line line)
+    {
+        for (var r = 0; r < Rows; r++)
+        {
+            if (ReferenceEquals(_rows[r].Line, line))
+            {
+                return r;
+            }
+        }
+
+        return -1;
+    }
+
+    /// <summary>The row's line, made first (with lines for the blank rows above it) when it has none yet: for a model that marks a row before anything is printed on it, the prompt's A mark (AT-4.2).</summary>
+    public Line EnsureLine(int row)
+    {
+        EnsureLines(row);
+        return _rows[row].Line!;
+    }
+
     /// <summary>
     /// At the end of a frame: the text of every row written since the last pull goes to its line through the store
     /// (<see cref="LineStore.TextChanged"/>), where the model decides what a rewritten row means.
@@ -165,7 +186,7 @@ public sealed class Screen
                 LineFeed();
             }
 
-            EnsureLine(_cy);
+            EnsureLines(_cy);
             var row = _rows[_cy];
             ClearCell(row, _cx);
             row.Cells[_cx] = s;
@@ -665,7 +686,7 @@ public sealed class Screen
     }
 
     /// <summary>Gives the row, and every row above it, a transcript line so interior blank rows keep their place.</summary>
-    private void EnsureLine(int index)
+    private void EnsureLines(int index)
     {
         if (_rows[index].Line is not null)
         {
