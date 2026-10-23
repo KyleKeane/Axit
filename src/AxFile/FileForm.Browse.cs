@@ -947,7 +947,8 @@ public sealed partial class FileForm
 
     /// <summary>
     /// The next or the previous completion in the field, "Documents, folder, 2 of 5"; the folder the text names is read
-    /// on a task when the text is new; the edge earcon past either end or when no name starts with the text.
+    /// on a task when the text is new; past either end the edge earcon and then the completion again, as the palette
+    /// and AxStart do at an end (AX-10.4); the earcon alone when no name starts with the text.
     /// </summary>
     private async Task CompleteAsync(int step)
     {
@@ -971,6 +972,11 @@ public sealed partial class FileForm
         if (next < 0 || next >= _completions.Count)
         {
             Sounds.Edge();
+            if (_completionAt >= 0 && _completionAt < _completions.Count)
+            {
+                Announce(PathCompletion.Spoken(_completions[_completionAt], _completionAt, _completions.Count), true);
+            }
+
             return;
         }
 

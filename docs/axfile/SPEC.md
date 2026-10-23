@@ -135,8 +135,9 @@ folder of the file or project in hand, and sends back. It works entirely offline
   path (asked 2026-10-22, AF-D12): the text up to its last backslash is a folder (with environment variables; a
   name without one is in the folder shown; an empty field is the drives), the rest the start of a name; the entries
   of that folder whose names start with it, folders first in natural order and hidden or period-named ones as the
-  list shows them, replace the text one per press, a folder with a backslash at its end, each said as "Documents, folder, 2 of 5" or "notes.md, 3 of 5"; past either end, or when no name
-  starts with the text, the edge earcon. **Right Arrow** at the end of a completed folder lists its own entries, the first one taken, as Right in the
+  list shows them, replace the text one per press, a folder with a backslash at its end, each said as "Documents, folder, 2 of 5" or "notes.md, 3 of 5"; past either end the edge earcon and then the
+  completion again, as the command palette and AxStart do at an end (AX-10.4, 2026-10-23); when no name starts with
+  the text, the edge earcon alone. **Right Arrow** at the end of a completed folder lists its own entries, the first one taken, as Right in the
   list goes into a folder. What is typed in between is what the next Down completes. The folder is
   read on a task (`PathCompletion` in the pure code, tested). **New window** (Ctrl+N, File Explorer's key; Folder →
   New window): another AxFile window on the folder shown, through the bundle's starter (AX-9.2), so that two folders

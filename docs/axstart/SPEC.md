@@ -33,7 +33,7 @@ taskbar. It works entirely offline (bundle G6).
 1. In AxClaude, Ctrl+Shift+Space: "AxStart window, Search programs, edit, blank". `calc`: NVDA echoes the letters, and
    after the typing pauses, "Calculator, 1 of 2". Enter: Calculator starts and is in front; AxStart is gone.
 2. Ctrl+Shift+Space, `note`: "Notepad, 1 of 3". Down: "Notepad++, 2 of 3". Down: "OneNote, 3 of 3". Down: the edge
-   earcon (AX-7, `Sounds.Edge`). Backspace twice: "Notepad, 1 of 9" after the pause, the selection back on the first.
+   earcon (AX-7, `Sounds.Edge`), then "OneNote, 3 of 3" again. Backspace twice: "Notepad, 1 of 9" after the pause, the selection back on the first.
 3. Ctrl+Shift+Space, `xyz`: "No programs match xyz". Escape: AxStart is gone and the program from before has the focus
    again, its own place kept.
 4. Ctrl+Shift+Space, `power`, Down to "Windows PowerShell", Ctrl+Shift+Enter: Windows asks for administrator rights
@@ -101,8 +101,10 @@ taskbar. It works entirely offline (bundle G6).
   with an empty field nothing is said. Options → General → Say the first match while typing (on) turns this off, and
   then Ctrl+I says it on demand.
 - AS-3.3 **The keys in the field** (AS-D2): Down and Up move the selection one match and say it, "Notepad++, 2 of 3";
-  Page Down and Page Up a page of matches; Ctrl+Home and Ctrl+End the first and the last; at an end the edge earcon
-  and nothing said. Left, Right, Home, End, Backspace, Delete, Ctrl+Backspace, Shift with the arrows, Ctrl+A, the
+  Page Down and Page Up a page of matches; Ctrl+Home and Ctrl+End the first and the last; at an end, where nothing
+  moves, the edge earcon and then the match again, "OneNote, 3 of 3" (asked 2026-10-23: with the earcon alone, the
+  last thing heard was NVDA's reading of the field), and with no match the earcon and the list's one line, "No
+  programs match xyz". Left, Right, Home, End, Backspace, Delete, Ctrl+Backspace, Shift with the arrows, Ctrl+A, the
   clipboard keys and the field's own undo stay the field's. Enter starts (AS-2.3); Ctrl+I says the selected match and
   its kind and place, "Notepad++, desktop program, C:\Program Files\Notepad++\notepad++.exe" or "Calculator, Store
   app".

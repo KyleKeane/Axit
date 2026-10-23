@@ -19,10 +19,10 @@ Before starting: install the build (`publish.ps1`), or quit any running AxStart 
 ## 2. Typing and moving
 
 1. Type `calc`: NVDA echoes the letters; after a pause, "Calculator, 1 of n".
-2. Type `note`: "Notepad, 1 of n" (or the most started one). Down: the next match with its place. Up: back. Up at the first: the low note, nothing said.
-3. Ctrl+End: the last match; Down there: the low note. Ctrl+Home: the first. Page Down and Page Up: a page of matches.
+2. Type `note`: "Notepad, 1 of n" (or the most started one). Down: the next match with its place. Up: back. Up at the first: the low note, then "Notepad, 1 of n" again.
+3. Ctrl+End: the last match; Down there: the low note, then the last match again. Ctrl+Home: the first. Page Down and Page Up: a page of matches.
 4. While on the second match, Backspace: the field loses a letter, NVDA reads it, and after the pause the first match of the new text is said. Left and Right move in the text; the caret was never in the list.
-5. Type `xyz`: "No programs match xyz". Down: the low note.
+5. Type `xyz`: "No programs match xyz". Down: the low note, then "No programs match xyz" again.
 6. Type `win power`: "Windows PowerShell" among the matches; `cafe` finds a name with "Café" if one is installed.
 7. Escape with text in the field: hidden at once. Bring it up again: the field is empty.
 8. Tab: the focus stays in the field. A click on the list: the focus comes back to the field.

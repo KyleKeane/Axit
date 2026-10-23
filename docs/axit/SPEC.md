@@ -381,7 +381,10 @@ name, so that a command is reached without knowing its menu or its key, and its 
 - AX-10.4 **The keys in the field** are AxStart's (AS-3.2, AS-3.3): typing refills the list and selects the first
   match, and 300 ms after the last change one notification says it and the count, "Save as, File, Ctrl+Shift+S, 1 of
   3", or "No commands match xyz"; Down and Up, Page Down and Page Up, Ctrl+Home and Ctrl+End move the selection and
-  say it, the edge earcon at an end; the field's editing keys stay its own. **Enter** closes the palette, gives the
+  say it; at an end, where nothing moves, the edge earcon and then the match again, "Save as, File, Ctrl+Shift+S, 1
+  of 1", so that the last thing heard is the position and not the typed text (asked 2026-10-23; the earcon alone had
+  left NVDA's reading of the field as the last thing heard), and with nothing matching the earcon and "No commands
+  match …"; the field's editing keys stay its own. **Enter** closes the palette, gives the
   focus back to the control that had it, and then runs the selected entry as a click on its menu item would, so that
   the command acts where the user was; a checked setting run this way says its new state, "Word wrap, not checked",
   since no menu shows it. Enter with nothing matching says "No commands match …" and the palette stays. **Escape**

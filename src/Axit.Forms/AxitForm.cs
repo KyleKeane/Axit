@@ -627,7 +627,18 @@ public abstract class AxitForm : Form
             return true;
         }
 
-        Overlay.SelectMatch(wanted);
+        wanted = Math.Clamp(wanted, 0, _paletteShown.Count - 1);
+        if (wanted == index)
+        {
+            // At an end nothing moves: the edge earcon, and then the match again, so that the last thing heard is
+            // the position and not the typed text (AX-10.4).
+            Sounds.Edge();
+        }
+        else
+        {
+            Overlay.SelectMatch(wanted);
+        }
+
         Announce(Palette.Spoken(_paletteShown[wanted], wanted, _paletteShown.Count), true);
         return true;
     }

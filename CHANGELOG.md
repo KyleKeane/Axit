@@ -2,7 +2,11 @@
 
 ## Unreleased
 
-- Axit: a command palette in every window. Ctrl+Shift+P, or Help, Command palette, opens one search field over a list of every command in the window's menus, each read with its menu and its key, "Save as, File, Ctrl+Shift+S". Typing narrows the list to the commands holding every typed word, and after a short pause the first match is said with the count; Down and Up, Page Down and Page Up, Ctrl+Home and Ctrl+End move through the matches while the caret stays in the field. Enter runs the command where you were, Escape closes. The recent lists and the window lists of the menus are left out.
+- Axit: a command palette in every window. Ctrl+Shift+P, or Axit, Command palette (the first item of the Axit menu), opens one search field over a list of every command in the window's menus, each read with its menu and its key, "Save as, File, Ctrl+Shift+S". Typing narrows the list to the commands holding every typed word, and after a short pause the first match is said with the count; Down and Up, Page Down and Page Up, Ctrl+Home and Ctrl+End move through the matches while the caret stays in the field. Enter runs the command where you were, Escape closes. At the first or the last match a key that cannot move plays the low note and then says the match again. The recent lists and the window lists of the menus are left out.
+- AxStart: Down or Up at the first or the last match plays the low note and then says the match again; the note alone had left NVDA's reading of the field as the last thing heard.
+- AxFile: in Go to folder, Down or Up past the first or the last completion plays the low note and then says the completion again, as the palette and AxStart do.
+- Axit: the command palette is the first item of the Axit menu (Alt+A, P), no longer in Help.
+- Axit: in every notice's text (the keyboard shortcuts of F1, the user guides, About), h and Shift+H move by heading and 1 to 6 by level, in every window now, AxGit, AxFile, AxMedia and AxStart included; AxDown, AxJSON and AxPreview keep their Ctrl+letter keys there as well. Ctrl+F finds a text in a notice: the Find notice takes its place and Find next brings it back with the match selected; F3 and Shift+F3 find the next and the previous match.
 - AxFile: the command palette holds the folder's entries after the commands, "notes.md, file", "docs, folder"; Enter on one opens it as Enter in the list does.
 - AxGit: Push is Ctrl+Shift+H; Ctrl+Shift+P is the command palette's in every window.
 

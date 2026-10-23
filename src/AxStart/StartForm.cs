@@ -494,24 +494,29 @@ public sealed class StartForm : AxitForm
         Announce(Selected is { } entry ? ProgramMatch.Spoken(entry, _list.SelectedIndex, _matches.Count) : ProgramMatch.NoMatch(_field.Text), true);
     }
 
-    /// <summary>The selection moved to <paramref name="target"/> and said; the edge earcon when it cannot move (AS-3.3).</summary>
+    /// <summary>The selection moved to <paramref name="target"/> and said; at an end the edge earcon first, and the match it stays on said all the same (AS-3.3).</summary>
     private void SelectMatch(int target)
     {
         _speak.Stop();
         if (_matches.Count == 0)
         {
             Sounds.Edge();
+            SayFirstOrNothing();
             return;
         }
 
         target = Math.Clamp(target, 0, _matches.Count - 1);
         if (target == _list.SelectedIndex)
         {
+            // Nothing moves: the earcon, then the match again, so that the last thing heard is the position and not
+            // the typed text.
             Sounds.Edge();
-            return;
+        }
+        else
+        {
+            _list.SelectedIndex = target;
         }
 
-        _list.SelectedIndex = target;
         Announce(ProgramMatch.Spoken(_matches[target], target, _matches.Count), true);
     }
 
