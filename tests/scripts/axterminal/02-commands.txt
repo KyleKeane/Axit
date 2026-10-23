@@ -198,8 +198,9 @@ menu Background music while a command runs
 type Start-Sleep 3
 keys enter
 expect said ♪ StartMusic
+# The music stops with the frame that ends the command, then Done and its chime (Done waits for that frame).
+expect said ♪ StopMusic
 expect said Done
 expect said ♪ Done
-expect said ♪ StopMusic
 keys ctrl+space
 expect said Background music off
