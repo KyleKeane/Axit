@@ -300,10 +300,12 @@ allow it, see B-9).
 ### AX-9 The Axit menu
 
 - AX-9.1 Every window has an **Axit** menu (mnemonic A) between its own menus and Help, the same in every window: one
-  class, `Axit.Forms/AxitMenu`, which the window constructs with its two update items, its latest-release state and
-  its notice method. In order: New window ▸ and Recently closed ▸; a separator; Open windows ▸, Open windows by type ▸
-  and Close all windows; a separator; Check for updates, Update to (while a newer release is known) and About ▸
-  (AX-9.9). The lists are filled each time the menu opens, so that they show the windows and the files of that moment.
+  class, `Axit.Forms/AxitMenu`, which the window constructs with its Command palette item, its two update items, its
+  latest-release state and its notice method. In order: Command palette… (P, AX-10; the bundle's own command, so it
+  sits in the bundle's menu, asked 2026-10-23); a separator; New window ▸ and Recently closed ▸; a separator; Open
+  windows ▸, Open windows by type ▸ and Close all windows; a separator; Check for updates, Update to (while a newer
+  release is known) and About ▸ (AX-9.9). The lists are filled each time the menu opens, so that they show the
+  windows and the files of that moment.
 - AX-9.2 **New window ▸** (N): one item per app of the bundle (`Dispatch.Apps`), "AxClaude", "AxDown", with the letter
   after Ax as the mnemonic. It starts `Axit.exe <verb>` with no arguments: a new process and a new window (B-2), the
   app starting as it does from its Start menu entry.
@@ -364,8 +366,8 @@ name, so that a command is reached without knowing its menu or its key, and its 
 - AX-10.1 **Ctrl+Shift+P** (`BundleKeys.CommandPalette`, AX-8.2) in any window opens the palette as a notice of the
   window (AX-6.4, AX-7.2), titled "Command palette": one field named "Search commands" with the caret in it, and
   under it a list of the matches named "Commands, n" that never takes the focus, AxStart's shape (docs/axstart/SPEC.md
-  AS-3.1, AS-D2). Help → Command palette… (first in Help) opens it too, so that it is found from the menus. While
-  another notice shows, or in menu mode (AX-6.6), the key does nothing.
+  AS-3.1, AS-D2). Axit → Command palette… (the first item of the Axit menu, AX-9.1) opens it too, so that it is found
+  from the menus. While another notice shows, or in menu mode (AX-6.6), the key does nothing.
 - AX-10.2 **The entries** are the window's menu bar as it stands when the palette opens, the Axit menu and Help
   included: every enabled item that does something when chosen, in menu order. An entry reads its name, then its menu
   path, then its key when it has one, then "checked" for a checked item: "Save as, File, Ctrl+Shift+S", "Larger text,

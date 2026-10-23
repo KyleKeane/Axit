@@ -131,8 +131,9 @@ public abstract class AxitForm : Form
 
     // ---- the menu and the window ----
 
-    /// <summary>The bundle's Axit menu (AX-9) with this window's update items; the window puts it before Help.</summary>
-    protected AxitMenu CreateAxitMenu() => new(this, _checkItem, _updateItem, () => _latestState, ShowNotice);
+    /// <summary>The bundle's Axit menu (AX-9) with this window's Command palette and update items; the window puts it before Help.</summary>
+    protected AxitMenu CreateAxitMenu() =>
+        new(this, Item("Command &palette...", ShowCommandPalette, BundleKeys.CommandPalette), _checkItem, _updateItem, () => _latestState, ShowNotice);
 
     /// <summary>A menu item whose key the window handles itself: the item only shows the key (AX-8).</summary>
     protected static ToolStripMenuItem Item(string text, Action action, Keys key)
@@ -195,11 +196,10 @@ public abstract class AxitForm : Form
         return menu;
     }
 
-    /// <summary>Help: Keyboard shortcuts (F1, the base's key), User guide, then a submenu of pages opened in the browser. Updates and About are the Axit menu's.</summary>
+    /// <summary>Help: Keyboard shortcuts (F1, the base's key), User guide, then a submenu of pages opened in the browser. The command palette, updates and About are the Axit menu's.</summary>
     protected ToolStripMenuItem CreateHelpMenu(Func<string> userGuide, string resourcesLabel, IEnumerable<(string Label, string Url)> pages)
     {
         var help = new ToolStripMenuItem("&Help");
-        help.DropDownItems.Add(Item("Command &palette...", ShowCommandPalette, BundleKeys.CommandPalette));
         help.DropDownItems.Add(Item("&Keyboard shortcuts", () => ShowNotice(Notice.Plain("Keyboard shortcuts", Shortcuts)), BundleKeys.Shortcuts));
         help.DropDownItems.Add(new ToolStripMenuItem("User &guide", null, (_, _) => ShowNotice(Notice.Plain("User guide", userGuide()))));
         help.DropDownItems.Add(new ToolStripSeparator());

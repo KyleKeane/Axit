@@ -102,7 +102,7 @@ letter), and a `long.md` with headings and lines longer than the window.
    moment "Word wrap, …, 1 of 1"; Down: the low note, then "Word wrap, …, 1 of 1" again; Enter: the palette closes, NVDA is back in the editor at the same place, and
    "Word wrap, checked" (or "not checked") is said; Options shows the item changed. Ctrl+Shift+P, type `xyz`:
    "No commands match xyz"; Enter says it again and the palette stays; Escape: back in the editor, nothing run.
-   Ctrl+Shift+P, `save as`, Enter: the Save as picker opens. Help, Command palette opens it too. Recent files and the
+   Ctrl+Shift+P, `save as`, Enter: the Save as picker opens. Alt+A, P (Axit, Command palette, the menu's first item) opens it too. Recent files and the
    Axit menu's window lists are not in it; Alt+A, New window, AxDown is ("AxDown, Axit, New window").
 
 ## 7. Updates and uninstall

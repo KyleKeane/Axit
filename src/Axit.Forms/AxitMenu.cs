@@ -7,10 +7,11 @@ using Axit.Core.Updates;
 namespace Axit.Forms;
 
 /// <summary>
-/// The Axit menu every window has (docs/axit/SPEC.md AX-9), one class for every window: New window (one item per app)
-/// and Recently closed (the bundle's list, AX-9.4); Open windows (the other windows of the bundle's apps, most recently
-/// used first), Open windows by type (one submenu per app, the current window checked) and Close all windows; the
-/// window's own Check for updates and Update to items, and About, the bundle's sections (AX-9.9). The lists are filled
+/// The Axit menu every window has (docs/axit/SPEC.md AX-9), one class for every window: the window's Command palette
+/// item (AX-10); New window (one item per app) and Recently closed (the bundle's list, AX-9.4); Open windows (the
+/// other windows of the bundle's apps, most recently used first), Open windows by type (one submenu per app, the
+/// current window checked) and Close all windows; the window's own Check for updates and Update to items, and About,
+/// the bundle's sections (AX-9.9). The lists are filled
 /// each time the menu opens, the windows from what the system lists in Z order, which is Alt+Tab's order, so nothing
 /// about windows is stored. The lists and labels are <see cref="AxitWindows"/> and <see cref="RecentlyClosed"/>, the
 /// About texts <see cref="BundleAbout"/>, tested; the rest is checked with NVDA.
@@ -23,11 +24,12 @@ public sealed class AxitMenu : ToolStripMenuItem
     private readonly List<(App App, ToolStripMenuItem Item)> _perApp = [];
 
     /// <param name="owner">The window, whose own handle is the one checked in the lists and closed last by Close all windows.</param>
+    /// <param name="commandPalette">The window's Command palette item (AX-10.1), the menu's first.</param>
     /// <param name="checkForUpdates">The window's Check for updates item (AX-3.1).</param>
     /// <param name="updateTo">The window's Update to item, visible while a newer release is known.</param>
     /// <param name="latestRelease">The window's latest-release state for About, Version.</param>
     /// <param name="showNotice">Shows an About section as a notice in the window (AX-7.2).</param>
-    public AxitMenu(Form owner, ToolStripMenuItem checkForUpdates, ToolStripMenuItem updateTo, Func<string> latestRelease, Action<Notice> showNotice)
+    public AxitMenu(Form owner, ToolStripMenuItem commandPalette, ToolStripMenuItem checkForUpdates, ToolStripMenuItem updateTo, Func<string> latestRelease, Action<Notice> showNotice)
         : base("&Axit")
     {
         _owner = owner;
@@ -49,6 +51,8 @@ public sealed class AxitMenu : ToolStripMenuItem
         about.DropDownItems.Add(new ToolStripMenuItem("Axit &guide", null, (_, _) => showNotice(Notice.Plain(BundleAbout.GuideTitle, BundleAbout.Guide()))));
         about.DropDownItems.Add(new ToolStripMenuItem("Axit on Git&Hub", null, (_, _) => OpenUrl(UpdateCheck.RepositoryPage)));
 
+        DropDownItems.Add(commandPalette);
+        DropDownItems.Add(new ToolStripSeparator());
         DropDownItems.Add(newWindow);
         // The lists made as the menu opens; the command palette leaves them out (AX-10.2).
         DropDownItems.Add(CommandPalette.FilledOnOpening(_recentlyClosed));
