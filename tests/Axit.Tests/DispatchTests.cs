@@ -171,8 +171,25 @@ public sealed class DispatchTests
     [Fact]
     public void UsageNamesEveryWayToStart()
     {
-        Assert.Contains("Axit claude", Dispatch.Usage);
-        Assert.Contains("Axit down", Dispatch.Usage);
+        foreach (var app in Dispatch.Apps)
+        {
+            Assert.Contains($"Axit {app.Verb}", Dispatch.Usage);
+            Assert.Contains(app.Name, Dispatch.Usage);
+        }
+
         Assert.Contains("--version", Dispatch.Usage);
+    }
+
+    /// <summary>Every app's verb starts it, with the rest of the arguments (AX-1.1); the apps are the one list, so a new one needs no new branch.</summary>
+    [Fact]
+    public void EveryVerbStartsItsApp()
+    {
+        foreach (var app in Dispatch.Apps)
+        {
+            var launch = Dispatch.Decide([app.Verb, "x", "--y"]);
+            Assert.Equal(app.Verb, launch.App);
+            Assert.Equal(["x", "--y"], launch.Arguments);
+            Assert.Null(launch.Error);
+        }
     }
 }

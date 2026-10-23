@@ -64,6 +64,13 @@ public sealed class MediaFilesTests
     }
 
     [Fact]
+    public void A_run_of_digits_too_long_for_a_number_is_not_a_time()
+    {
+        Assert.Null(MediaFiles.ParseTime(new string('9', 25)));
+        Assert.Null(MediaFiles.ParseTime("1:" + new string('9', 25)));
+    }
+
+    [Fact]
     public void Speed_steps_by_a_quarter_between_a_half_and_three()
     {
         Assert.Equal(1.25, MediaFiles.Faster(1));

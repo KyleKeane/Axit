@@ -41,6 +41,10 @@ public sealed class LayoutTests
                 {
                     problems.Add($"{project} references {reference}: a Core project never references its window.");
                 }
+                else if (project.EndsWith(".Core", StringComparison.Ordinal) && reference == "Axit.Forms")
+                {
+                    problems.Add($"{project} references {reference}: a Core project needs no window and references Axit.Core alone.");
+                }
             }
         }
 

@@ -125,7 +125,9 @@ top of the window. It works entirely offline (bundle G6).
   (B-10): Media Foundation through MFPlay (AM-D5). The file is opened synchronously, so that one that cannot be opened
   says so at once; playing starts when the engine reports the item set; its events come back on the window's thread.
   A rate other than 1 keeps the pitch. A rate the engine refuses: "Speed n is not supported here", and the speed
-  stays.
+  stays. A Windows without the media components (an N edition without the Media Feature Pack has no `mfplay.dll`)
+  gives "Cannot play <name>: the media player could not be created: Windows' media components are missing…", not a
+  crash (2026-10-23).
 - AM-4.3 **Keys**, from anywhere in the window: **Space** in the list and **Ctrl+P** anywhere pause or resume
   ("Paused at 12:40" / "Playing"); **Ctrl+Right** and **Ctrl+Left** move 15 seconds forward or back (`seekSeconds`),
   "12:25"; **Ctrl+Shift+Right** and **Ctrl+Shift+Left** the next and the previous file ("Playing <name>"; "First

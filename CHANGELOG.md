@@ -11,6 +11,9 @@
 - AxTerminal: a command sent without recording (Ctrl+Enter) no longer shows in the status bar and Ctrl+Q while it runs; they say "a command sent without recording".
 - AxTerminal: New session and a change of folder give the new shell a fresh screen, as Restart shell does; the new shell drew on the old one's rows, and its shorter lines showed their tails.
 - AxTerminal: a program inside the shell that marks the end of its own input (Claude Code does) no longer hides the whole transcript as if it were a prompt.
+- Axit: F1 while a menu is open stays the menu's, as the palette's key does; it opened the shortcuts over the open menu. An update whose installer cannot be started, or that passes ten minutes, is reported as a failed update instead of an unexpected error. About, Version names all nine apps and their settings files; it named four.
+- AxStart: the close that ends an update installed from its own window closes it, so that the new version starts; it hid.
+- AxMedia: a Windows edition without the media components (an N edition without the Media Feature Pack) gets "Cannot play" with the reason instead of an unexpected error. Go to time with a number too long for a number says it is not a time instead of failing.
 - AxDown, AxJSON, AxPreview: a reload that cannot read the file (another program still holds it) keeps the text and shows the error; it used to empty the window to an Untitled document and say "Reloaded" over the error. Save as renames the document only once the file is written; a write that failed left the window under the old name with the new path.
 - AxGit: a git command whose output a program it started keeps open (a signing agent, a hook's daemon) ends at the timeout instead of leaving the window at "Working" for good.
 - AxFile: an operation that ends while you are in another folder says its result and leaves the list where you are; it used to pull the list back to the folder it ran in, with the selection moved.

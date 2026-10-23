@@ -46,7 +46,16 @@ public static class MediaFiles
             return null;
         }
 
-        var numbers = parts.Select(part => long.Parse(part, System.Globalization.CultureInfo.InvariantCulture)).ToArray();
+        var numbers = new long[parts.Length];
+        for (var i = 0; i < parts.Length; i++)
+        {
+            // A run of digits too long for a number is nonsense too, not an exception (2026-10-23).
+            if (!long.TryParse(parts[i], System.Globalization.NumberStyles.None, System.Globalization.CultureInfo.InvariantCulture, out numbers[i]))
+            {
+                return null;
+            }
+        }
+
         if (numbers.Length == 1)
         {
             return TimeSpan.FromSeconds(numbers[0]);

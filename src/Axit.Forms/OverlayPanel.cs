@@ -334,7 +334,9 @@ public sealed class OverlayPanel : Panel
         _title.Text = title;
         _text.AccessibleName = title;
         _body = WithKeyLine(text, choices);
-        _inputSpec = input;
+        // The field's spec goes in after its text is set, so that Changed does not fire for the filling (the palette
+        // filled its list twice), nor the previous notice's Changed for the new text.
+        _inputSpec = null;
         _sessionSpec = session;
         _session.Visible = session is not null;
         if (session is not null)
@@ -375,6 +377,7 @@ public sealed class OverlayPanel : Panel
             _input.AccessibleName = input.AccessibleName;
             _input.Text = input.Initial;
             _input.SelectAll();
+            _inputSpec = input;
             LayoutInput();
         }
         else

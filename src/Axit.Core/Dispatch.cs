@@ -1,6 +1,6 @@
 namespace Axit.Core;
 
-/// <summary>What a command line starts: an app name (<see cref="Dispatch.AxClaude"/>, <see cref="Dispatch.AxDown"/> or
+/// <summary>What a command line starts: an app's verb (<see cref="Dispatch.AxClaude"/> and the rest, or
 /// <see cref="Dispatch.Bundle"/>), the arguments that app gets, and an error text when the command line names a path
 /// that does not exist.</summary>
 public sealed record Launch(string App, string[] Arguments, string? Error = null);
@@ -10,10 +10,11 @@ public sealed record Launch(string App, string[] Arguments, string? Error = null
 public sealed record App(string Name, string Verb);
 
 /// <summary>
-/// Decides which app <c>Axit.exe</c> starts (docs/axit/SPEC.md AX-1). The first argument may be a verb naming the app;
-/// without one, a folder goes to AxClaude and a file to AxDown; an option (<c>--project</c>, a bare <c>--</c>) or no
-/// argument at all means AxClaude (B-8). <c>--help</c> and <c>--version</c> alone are answered by the bundle itself.
-/// Pure code: it only looks at the arguments and asks the file system whether a path is a folder or a file.
+/// Decides which app <c>Axit.exe</c> starts (docs/axit/SPEC.md AX-1). The first argument may be a verb naming one of
+/// <see cref="Apps"/>; without one, a folder goes to AxClaude and a file to AxDown, AxJSON or AxMedia by its kind; an
+/// option (<c>--project</c>, a bare <c>--</c>) or no argument at all means AxClaude (B-8). <c>--help</c> and
+/// <c>--version</c> alone are answered by the bundle itself. Pure code: it only looks at the arguments and asks the
+/// file system whether a path is a folder or a file.
 /// </summary>
 public static class Dispatch
 {
@@ -61,49 +62,9 @@ public static class Dispatch
         }
 
         var first = args[0];
-        if (string.Equals(first, AxClaude, StringComparison.OrdinalIgnoreCase))
+        if (Apps.FirstOrDefault(app => string.Equals(first, app.Verb, StringComparison.OrdinalIgnoreCase)) is { } named)
         {
-            return new Launch(AxClaude, args[1..]);
-        }
-
-        if (string.Equals(first, AxDown, StringComparison.OrdinalIgnoreCase))
-        {
-            return new Launch(AxDown, args[1..]);
-        }
-
-        if (string.Equals(first, AxJSON, StringComparison.OrdinalIgnoreCase))
-        {
-            return new Launch(AxJSON, args[1..]);
-        }
-
-        if (string.Equals(first, AxGit, StringComparison.OrdinalIgnoreCase))
-        {
-            return new Launch(AxGit, args[1..]);
-        }
-
-        if (string.Equals(first, AxTerminal, StringComparison.OrdinalIgnoreCase))
-        {
-            return new Launch(AxTerminal, args[1..]);
-        }
-
-        if (string.Equals(first, AxFile, StringComparison.OrdinalIgnoreCase))
-        {
-            return new Launch(AxFile, args[1..]);
-        }
-
-        if (string.Equals(first, AxMedia, StringComparison.OrdinalIgnoreCase))
-        {
-            return new Launch(AxMedia, args[1..]);
-        }
-
-        if (string.Equals(first, AxPreview, StringComparison.OrdinalIgnoreCase))
-        {
-            return new Launch(AxPreview, args[1..]);
-        }
-
-        if (string.Equals(first, AxStart, StringComparison.OrdinalIgnoreCase))
-        {
-            return new Launch(AxStart, args[1..]);
+            return new Launch(named.Verb, args[1..]);
         }
 
         if (first is "--help" or "-h" or "-?" or "/?" or "--version")

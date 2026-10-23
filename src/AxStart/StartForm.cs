@@ -239,8 +239,9 @@ public sealed class StartForm : AxitForm
 
     protected override void OnFormClosing(FormClosingEventArgs e)
     {
-        // AS-1.4: Alt+F4 and Close all windows hide the window; Quit AxStart and Windows' own end end the process.
-        if (!_quitting && e.CloseReason == CloseReason.UserClosing)
+        // AS-1.4: Alt+F4 and Close all windows hide the window; Quit AxStart, the update's own close (AX-3.2) and
+        // Windows' own end end the process.
+        if (!_quitting && !ClosingForUpdate && e.CloseReason == CloseReason.UserClosing)
         {
             e.Cancel = true;
             HideLauncher();

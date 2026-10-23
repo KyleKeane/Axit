@@ -74,6 +74,9 @@ public abstract class AxitForm : Form
     /// <summary>Update and restart was chosen and the update is installed: the new version starts when the window closes.</summary>
     protected bool RestartPending => _restartArguments is not null;
 
+    /// <summary>The update is installed and the window is closing for it (AX-3.2): a window that otherwise hides on closing (AxStart) closes.</summary>
+    protected bool ClosingForUpdate { get; private set; }
+
     // ---- what the window fills in ----
 
     /// <summary>The F1 text.</summary>
@@ -298,18 +301,19 @@ public abstract class AxitForm : Form
             return false;
         }
 
+        // In menu mode (Alt, a menu's name selected on the bar) WinForms routes the keys to the menu bar, whose
+        // ProcessCmdKey hands them up to the window: they are the menu's (AX-6.6), or Right in AxFile's list opened
+        // the entry instead of moving to the next menu (2026-10-22); F1 opened the shortcuts over an open menu and
+        // disabled the bar under it (2026-10-23).
+        if (FromHandle(msg.HWnd) is ToolStrip)
+        {
+            return base.ProcessCmdKey(ref msg, keyData);
+        }
+
         if (keyData == BundleKeys.Shortcuts)
         {
             ShowNotice(Notice.Plain("Keyboard shortcuts", Shortcuts));
             return true;
-        }
-
-        // In menu mode (Alt, a menu's name selected on the bar) WinForms routes the keys to the menu bar, whose
-        // ProcessCmdKey hands them up to the window: they are the menu's (AX-6.6), or Right in AxFile's list opened
-        // the entry instead of moving to the next menu (2026-10-22).
-        if (FromHandle(msg.HWnd) is ToolStrip)
-        {
-            return base.ProcessCmdKey(ref msg, keyData);
         }
 
         if (keyData == BundleKeys.CommandPalette)
@@ -1107,6 +1111,7 @@ public abstract class AxitForm : Form
                 ? $"Axit {version} installed. {AppName} closes now and starts again."
                 : $"Axit {version} installed. {AppName} closes now; the next start is the new version.");
             Announce(restart ? "Installed. Restarting" : "Installed. Closing", true);
+            ClosingForUpdate = true;
             Close();
         }
         catch (OperationCanceledException) when (cancelled && !IsDisposed)
@@ -1114,9 +1119,10 @@ public abstract class AxitForm : Form
             UpdateNoted($"The download of Axit {version} was cancelled.");
             Announce("Update cancelled", true);
         }
-        catch (Exception ex) when (ex is HttpRequestException or TaskCanceledException or IOException or InvalidDataException or InvalidOperationException or UnauthorizedAccessException)
+        catch (Exception ex) when (ex is HttpRequestException or OperationCanceledException or IOException or InvalidDataException or InvalidOperationException or UnauthorizedAccessException or System.ComponentModel.Win32Exception)
         {
-            // InvalidDataException: a download that is not a zip.
+            // InvalidDataException: a download that is not a zip; OperationCanceledException here: the ten minutes
+            // ran out; Win32Exception: PowerShell could not be started for the installer (a policy).
             Log.Error("The update failed", ex);
             if (!IsDisposed)
             {

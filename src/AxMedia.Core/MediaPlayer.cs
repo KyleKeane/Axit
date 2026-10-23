@@ -37,7 +37,18 @@ public sealed class MediaPlayer : IDisposable
     {
         _post = post;
         _callback = new Callback(this);
-        var hr = MFPCreateMediaPlayer(null, false, MFP_OPTION_NONE, _callback, videoWindow, out var player);
+        int hr;
+        IMFPMediaPlayer? player;
+        try
+        {
+            hr = MFPCreateMediaPlayer(null, false, MFP_OPTION_NONE, _callback, videoWindow, out player);
+        }
+        catch (Exception ex) when (ex is DllNotFoundException or EntryPointNotFoundException)
+        {
+            // An N edition of Windows without the Media Feature Pack has no mfplay.dll: the window's "Cannot play", not a crash (AM-4.2).
+            throw new InvalidOperationException("The media player could not be created: Windows' media components are missing (the Media Feature Pack on an N edition of Windows).", ex);
+        }
+
         if (hr < 0 || player is null)
         {
             throw new InvalidOperationException("The media player could not be created: " + Reason(hr));

@@ -173,7 +173,11 @@ allow it, see B-9).
   or nothing). A failed installer leaves the running version in place and shows its output in a notice. A download
   counts as complete when it holds `install.ps1` and a program file. Cancel counts until the download is unpacked, a
   download that is not a zip is a failed update like any other, and an installed program file that cannot be
-  started as the window closes is logged (`StartInstalled`), the window closing all the same. Each app's close
+  started as the window closes is logged (`StartInstalled`), the window closing all the same; an installer that
+  cannot be started (PowerShell blocked by a policy) or an update that passes ten minutes is a failed update like
+  any other, a notice and the running version kept (2026-10-23: both escaped as a crash notice over the progress).
+  The window's close for an installed update is a real close in every window, the one that otherwise hides on
+  closing included (AxStart, `ClosingForUpdate`). Each app's close
   question after Update and restart (AxClaude's Keep working, AxDown's Cancel in the save question) keeps the window
   on the old program file and says "Update installed. It starts with the next AxClaude" (or AxDown).
 - AX-3.3 The 1.7.0 bridge (B-6): AxClaude 1.7.0 accepts a download whose program file is not `AxClaude.exe`, so an
@@ -355,8 +359,9 @@ allow it, see B-9).
   `tests/Axit.Tests` scans the sources for the construct. A key that must work inside an open menu goes in a context
   menu subclass (AxFile's `ItemMenu`), which has no owner item. In menu mode WinForms routes the keys to the menu
   bar, which hands the ones it does not use up to the window's `ProcessCmdKey`; the window base gives a key that
-  comes from a `ToolStrip` to the menu alone, never to the window's own keys (AxFile's Right opened the entry in the
-  list instead of moving along the bar, 2026-10-22).
+  comes from a `ToolStrip` to the menu alone, never to the window's keys, F1 and the palette included (AxFile's
+  Right opened the entry in the list instead of moving along the bar, 2026-10-22; F1 opened the shortcuts over an
+  open menu, 2026-10-23).
 
 ### AX-10 The command palette
 

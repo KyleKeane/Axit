@@ -61,7 +61,9 @@ taskbar. It works entirely offline (bundle G6).
   and starts it hidden after an install or an update unless the setting is off (AX-2.3); the removal deletes the
   value.
 - AS-1.4 **Quit AxStart** (AxStart menu) ends the process and frees the hotkey until the next sign-in or start. Alt+F4
-  and Escape only hide the window (AS-3.4); Close all windows (AX-9.8) hides it too.
+  and Escape only hide the window (AS-3.4); Close all windows (AX-9.8) hides it too; the close that ends an update
+  installed from this window (AX-3.2) closes it, so that the new version can start (2026-10-23: it hid, and only
+  the installer's stop ended the old process).
 - AS-1.5 An update in place (AX-3.2) replaces the program file while AxStart runs: the installer stops the background
   process (told by its verb, `start`, on its command line) and starts the new version hidden (AS-1.3).
 

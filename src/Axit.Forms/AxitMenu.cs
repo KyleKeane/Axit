@@ -202,7 +202,15 @@ public sealed class AxitMenu : ToolStripMenuItem
             info.ArgumentList.Add(argument);
         }
 
-        Process.Start(info);
+        try
+        {
+            Process.Start(info)?.Dispose();
+        }
+        catch (System.ComponentModel.Win32Exception ex)
+        {
+            // The program file blocked (a policy, an antivirus): logged, since the menu has closed and the caller is any window.
+            Log.Error($"Axit {verb} could not be started", ex);
+        }
     }
 
     /// <summary>The page in the default browser, one of the system's own windows; a failure is logged, as nothing can be shown while the menu closes.</summary>
