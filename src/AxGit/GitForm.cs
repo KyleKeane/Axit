@@ -54,7 +54,7 @@ public sealed partial class GitForm : AxitForm
     private bool _gitMissing;
 
     public GitForm(string? path, GitSettings settings, string? settingsError)
-        : base(AxGitApp.Name, settings, GitSettings.DefaultPath)
+        : base(AxGitApp.Name, settings, GitSettings.DefaultPath, settingsError)
     {
         _settings = settings;
         _startPath = path;
@@ -79,7 +79,7 @@ public sealed partial class GitForm : AxitForm
         showIn.DropDownItems.Add(new ToolStripMenuItem("Ax&File", null, (_, _) => OpenInAxFile()));
         repository.DropDownItems.Add(showIn);
         repository.DropDownItems.Add(new ToolStripSeparator());
-        repository.DropDownItems.Add(new ToolStripMenuItem("E&xit", null, (_, _) => Close()) { ShortcutKeyDisplayString = "Alt+F4" });
+        repository.DropDownItems.Add(CreateExitItem());
 
         var changes = new ToolStripMenuItem("&Changes");
         changes.DropDownItems.Add(Git(Item("&Stage or unstage", () => Do(StageToggleAsync), AxGitKeys.StageToggle)));
@@ -148,11 +148,6 @@ public sealed partial class GitForm : AxitForm
         ApplyTextFont();
         RestoreWindow();
         UpdateStatusBar();
-
-        if (settingsError is not null)
-        {
-            ShowNotice(Notice.Plain("Settings", $"The settings file could not be read, so the defaults are used.\n{settingsError}") with { Unprompted = true });
-        }
     }
 
     // ---- what the window base asks for ----
@@ -173,8 +168,8 @@ public sealed partial class GitForm : AxitForm
 
     protected override Control FocusTarget => _list;
 
-    /// <summary>The details keep the focus across a notice when they had it.</summary>
-    protected override Control? FocusToKeep() => _details.Focused ? _details : _list;
+    /// <summary>Ctrl+S, the bundle's save key: nothing to save in a git window, and the keys that do something said (AG-6.2).</summary>
+    protected override void SaveCommand() => Announce("Nothing to save here. Space stages, Ctrl+Enter commits", true);
 
     protected override void ApplyFont(Font font)
     {
@@ -230,10 +225,6 @@ public sealed partial class GitForm : AxitForm
                 return true;
             case BundleKeys.FindPrevious:
                 FindNext(_details, -1);
-                return true;
-            case BundleKeys.Save:
-                // The bundle's save key, with nothing here to save (AG-6.2).
-                Announce("Nothing to save here. Space stages, Ctrl+Enter commits", true);
                 return true;
             case AxGitKeys.OpenRepository:
                 OpenRepositoryDialog();
@@ -301,23 +292,6 @@ public sealed partial class GitForm : AxitForm
 
     // ---- the repository (AG-1.2) ----
 
-    /// <summary>Runs a command's task on the UI thread and turns an escaped exception into a notice rather than a crash.</summary>
-    private async void Do(Func<Task> action)
-    {
-        try
-        {
-            await action();
-        }
-        catch (Exception ex) when (ex is not OperationCanceledException)
-        {
-            Log.Error("AxGit command failed", ex);
-            if (!IsDisposed)
-            {
-                Fail(ex.Message);
-            }
-        }
-    }
-
     private async Task StartAsync(string? path)
     {
         var target = path ?? _settings.RecentRepositories.FirstOrDefault(Directory.Exists);
@@ -378,23 +352,15 @@ public sealed partial class GitForm : AxitForm
         UpdateStatusBar();
     }
 
-    /// <summary>Repository → Open repository… (Ctrl+O): the Windows folder picker, one of the system's own windows; any folder inside a repository will do.</summary>
+    /// <summary>Repository → Open repository… (Ctrl+O): the bundle's folder picker, one of the system's own windows; any folder inside a repository will do.</summary>
     private void OpenRepositoryDialog()
     {
-        using var dialog = new FolderBrowserDialog { Description = "Choose a folder inside the repository", UseDescriptionForTitle = true };
-        if (_root is not null)
-        {
-            dialog.InitialDirectory = _root;
-        }
-
-        if (dialog.ShowDialog(this) != DialogResult.OK)
-        {
-            _list.Select();
-            return;
-        }
-
+        var chosen = ChooseFolder("Choose a folder inside the repository", _root);
         _list.Select();
-        Do(() => StartAsync(dialog.SelectedPath));
+        if (chosen is not null)
+        {
+            Do(() => StartAsync(chosen));
+        }
     }
 
     /// <summary>Repository → Open recent repository (AG-6.1): the last ten, those that still exist, "1. name (path)" (AX-9.5).</summary>

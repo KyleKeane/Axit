@@ -114,18 +114,9 @@ internal sealed partial class TerminalForm
         Relaunch($"Switched to {ShellLauncher.Describe(kind)} in {_folder}", clearTranscript: false);
     }
 
-    /// <summary>The standard folder picker (one of the few separate windows, AX-7.2); null when it was cancelled.</summary>
-    private string? PickFolder(string? start)
-    {
-        using var dialog = new FolderBrowserDialog
-        {
-            Description = "Choose the folder the shell starts in",
-            UseDescriptionForTitle = true,
-            InitialDirectory = start ?? Environment.GetFolderPath(Environment.SpecialFolder.UserProfile),
-            ShowNewFolderButton = true,
-        };
-        return dialog.ShowDialog(this) == DialogResult.OK && !string.IsNullOrEmpty(dialog.SelectedPath) ? dialog.SelectedPath : null;
-    }
+    /// <summary>The bundle's folder picker (one of the few separate windows, AX-7.2), on the folder or the user's profile; null when it was cancelled.</summary>
+    private string? PickFolder(string? start) =>
+        ChooseFolder("Choose the folder the shell starts in", start ?? Environment.GetFolderPath(Environment.SpecialFolder.UserProfile));
 
     private void SetFolder(string folder)
     {

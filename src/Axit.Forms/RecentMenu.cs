@@ -17,16 +17,25 @@ public static class RecentMenu
     {
         menu.DropDownItems.Clear();
         var targets = paths.Where(exists).ToList();
-        if (targets.Count == 0)
-        {
-            menu.DropDownItems.Add(new ToolStripMenuItem(noneLabel));
-            return;
-        }
-
         for (var i = 0; i < targets.Count; i++)
         {
             var target = targets[i];
             menu.DropDownItems.Add(new ToolStripMenuItem(AxitWindows.Label(i, $"{name(target)} ({target})"), null, (_, _) => open(target)));
+        }
+
+        NoneWhenEmpty(menu, noneLabel);
+    }
+
+    /// <summary>
+    /// An empty submenu gets one item that says so and does nothing, enabled (AX-9.5): WinForms skips disabled items
+    /// when the keyboard moves through a menu, so a submenu of only a disabled "(none)" opened with nothing selected
+    /// and left the screen reader with nothing to read. The Axit menu's lists use it too.
+    /// </summary>
+    public static void NoneWhenEmpty(ToolStripMenuItem menu, string text)
+    {
+        if (menu.DropDownItems.Count == 0)
+        {
+            menu.DropDownItems.Add(new ToolStripMenuItem(text));
         }
     }
 

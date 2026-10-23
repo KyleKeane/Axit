@@ -14,6 +14,7 @@ public static class HelpText
           F1: this list
           Ctrl+Shift+P: the command palette: type part of a command's name, Down and Up through the matches, Enter runs it
           Ctrl+Plus, Ctrl+Minus: bigger or smaller text
+          Ctrl+S: nothing to save here; AxStart says so
           Alt: the menu. Alt+F4: hide AxStart (AxStart, Quit AxStart ends it)
           Alt+A: the Axit menu: the command palette, a new window of any app, the files and folders closed lately, the open Axit windows, most recent first (Alt+A, O, 1 is the one you were in last) and by type, Close all windows, Check for updates, and About
 

@@ -45,7 +45,7 @@ public sealed class StartForm : AxitForm
     private bool _reading;
 
     public StartForm(bool hidden, StartSettings settings, string? settingsError)
-        : base(AxStartApp.Name, settings, StartSettings.DefaultPath)
+        : base(AxStartApp.Name, settings, StartSettings.DefaultPath, settingsError)
     {
         _settings = settings;
         _showAtStart = !hidden;
@@ -116,11 +116,6 @@ public sealed class StartForm : AxitForm
         Controls.AddRange([Overlay, _list, _field, _status, _menu]);
         ApplyTextFont();
         Fill(null);
-
-        if (settingsError is not null)
-        {
-            ShowNotice(Notice.Plain("Settings", $"The settings file could not be read, so the defaults are used.\n{settingsError}") with { Unprompted = true });
-        }
     }
 
     /// <summary>For the starting process (AS-1.2): this process's hidden window, which a second start hands "show" to.</summary>
@@ -288,19 +283,11 @@ public sealed class StartForm : AxitForm
             return;
         }
 
-        if (AppMessage.Receive(ref m) is { } handOver)
-        {
-            m.Result = 1;
-            if (handOver.Verb == AppMessage.Show)
-            {
-                BeginInvoke(() => ShowLauncher());
-            }
-
-            return;
-        }
-
         base.WndProc(ref m);
     }
+
+    /// <summary>A second start's "show" (AS-1.2), through the base: the window shown with the focus in its field once the sender has its answer.</summary>
+    protected override Action? TakeHandOver(HandOver message) => message.Verb == AppMessage.Show ? () => ShowLauncher() : null;
 
     // ---- keys (AS-3.3, AS-5.3): every key comes from BundleKeys or AxStartKeys, and is handled here only ----
 
@@ -728,23 +715,6 @@ public sealed class StartForm : AxitForm
     }
 
     private static bool WindowsKeyDown() => GetKeyState(0x5B) < 0 || GetKeyState(0x5C) < 0;
-
-    /// <summary>Runs a task on the UI thread and turns an escaped exception into a notice rather than a crash.</summary>
-    private async void Do(Func<Task> action)
-    {
-        try
-        {
-            await action();
-        }
-        catch (Exception ex) when (ex is not OperationCanceledException)
-        {
-            Log.Error("AxStart command failed", ex);
-            if (!IsDisposed)
-            {
-                Fail(ex.Message);
-            }
-        }
-    }
 
     [DllImport("user32.dll", SetLastError = true)]
     private static extern bool RegisterHotKey(nint hWnd, int id, uint modifiers, uint key);

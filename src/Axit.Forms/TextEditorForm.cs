@@ -54,7 +54,7 @@ public sealed class TextEditorForm : AxitForm
     private bool _closeConfirmed;
 
     public TextEditorForm(EditorApp app, string? path, EditorSettings settings, string? settingsError)
-        : base(app.Name, settings, AppPaths.SettingsFile(app.SettingsName))
+        : base(app.Name, settings, AppPaths.SettingsFile(app.SettingsName), settingsError)
     {
         _app = app;
         _settings = settings;
@@ -104,7 +104,7 @@ public sealed class TextEditorForm : AxitForm
         showIn.DropDownItems.Add(new ToolStripMenuItem("Ax&File", null, (_, _) => OpenInAxFile()));
         file.DropDownItems.Add(showIn);
         file.DropDownItems.Add(new ToolStripSeparator());
-        file.DropDownItems.Add(new ToolStripMenuItem("E&xit", null, (_, _) => Close()) { ShortcutKeyDisplayString = "Alt+F4" });
+        file.DropDownItems.Add(CreateExitItem());
 
         // No Edit menu in the viewer (AP-3.1): the control's own Ctrl+A and Ctrl+C still work there.
         ToolStripMenuItem? edit = null;
@@ -216,11 +216,6 @@ public sealed class TextEditorForm : AxitForm
         ApplyTextFont();
         RestoreWindow();
         LoadDocument(path);
-
-        if (settingsError is not null)
-        {
-            ShowNotice(Notice.Plain("Settings", $"The settings file could not be read, so the defaults are used.\n{settingsError}") with { Unprompted = true });
-        }
     }
 
     private string DocumentName => _path is null ? Untitled : Path.GetFileName(_path);
@@ -245,6 +240,18 @@ public sealed class TextEditorForm : AxitForm
     protected override Control FocusTarget => _area.Current ?? _editor;
 
     protected override Control AnnounceSource => _editor;
+
+    /// <summary>Ctrl+S: into the file (AD-3.5); nothing to save in the viewer (AP-3.2), which the base says.</summary>
+    protected override void SaveCommand()
+    {
+        if (_app.ReadOnly)
+        {
+            base.SaveCommand();
+            return;
+        }
+
+        Save();
+    }
 
     protected override void ApplyFont(Font font)
     {
@@ -303,32 +310,17 @@ public sealed class TextEditorForm : AxitForm
         base.OnFormClosing(e);
     }
 
-    /// <summary>AP-1.2, AP-1.3: in the viewer, a start with a file while this window is open hands it here; the message is answered at once and the file loaded after, so that the starting process never waits on a read.</summary>
-    protected override void WndProc(ref Message m)
+    /// <summary>AP-1.2, AP-1.3: in the viewer, a start with a file while this window is open hands it here; the base answers the message at once and the file is loaded after, so that the starting process never waits on a read.</summary>
+    protected override Action? TakeHandOver(HandOver message) =>
+        _app.ReadOnly && message is { Verb: AppMessage.Open, Paths: [var path, ..] } ? () => ShowHandedOver(path) : null;
+
+    private void ShowHandedOver(string path)
     {
-        if (_app.ReadOnly && AppMessage.Receive(ref m) is { } message)
-        {
-            m.Result = 1;
-            if (message.Verb == AppMessage.Open && message.Paths.Count > 0)
-            {
-                var path = message.Paths[0];
-                BeginInvoke(() =>
-                {
-                    if (!IsDisposed)
-                    {
-                        // A notice left from before (a refused file) would be what NVDA reads on activation.
-                        CloseNotice(null);
-                        LoadDocument(path);
-                        // The starting process let this one come to the front (AppMessage); the user asked to read.
-                        AxitMenu.Activate(Handle);
-                    }
-                });
-            }
-
-            return;
-        }
-
-        base.WndProc(ref m);
+        // A notice left from before (a refused file) would be what NVDA reads on activation.
+        CloseNotice(null);
+        LoadDocument(path);
+        // The starting process let this one come to the front (AppMessage); the user asked to read.
+        AxitMenu.Activate(Handle);
     }
 
     // ---- keys (AD-5): every key comes from BundleKeys, EditorKeys or the app's table, and is handled here only ----
@@ -340,9 +332,6 @@ public sealed class TextEditorForm : AxitForm
             // The viewer (AP-3.2): the shell's keys that write do nothing, Ctrl+N is a new window, and the viewer's own keys come first.
             switch (keyData)
             {
-                case BundleKeys.Save:
-                    Announce("Nothing to save here", true);
-                    return true;
                 case EditorKeys.NewDocument:
                     NewWindow();
                     return true;
@@ -381,9 +370,6 @@ public sealed class TextEditorForm : AxitForm
                 return true;
             case BundleKeys.FindPrevious:
                 FindInEditor(-1);
-                return true;
-            case BundleKeys.Save:
-                Save();
                 return true;
             case EditorKeys.NewDocument:
                 NewDocument();

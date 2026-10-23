@@ -25,6 +25,8 @@
 - Axit: in every notice's text (the keyboard shortcuts of F1, the user guides, About), h and Shift+H move by heading and 1 to 6 by level, in every window now, AxGit, AxFile, AxMedia and AxStart included; AxDown, AxJSON and AxPreview keep their Ctrl+letter keys there as well. Ctrl+F finds a text in a notice: the Find notice takes its place and Find next brings it back with the match selected; F3 and Shift+F3 find the next and the previous match.
 - AxFile: the command palette holds the folder's entries after the commands, "notes.md, file", "docs, folder"; Enter on one opens it as Enter in the list does.
 - AxGit: Push is Ctrl+Shift+H; Ctrl+Shift+P is the command palette's in every window.
+- Axit: after a notice the focus goes back to the control it came from in every window, by one rule of the window base: the Actions list of AxFile, the details of AxGit, the conversation or the message field, and the window's main control when that one is gone (a question answered meanwhile). A chain of notices (the update's progress after its offer, an error after a command) counts as one. Ctrl+S in AxStart says "Nothing to save here" like the other windows without a document.
+- For developers: the window base is one class in partial files (the hooks and menus, the notices, find, the fonts, the updates, the palette), and what every window still copied is the base's now: `Do`, the Exit item, Ctrl+S, the settings-not-read notice, the folder picker, the hand-over receiver, one Find notice for the transcripts too; the windows' own `FocusToKeep` and `Announce` are gone (review 5.3 and 6).
 
 ## 3.4.0 - 2026-10-22
 

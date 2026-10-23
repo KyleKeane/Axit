@@ -18,21 +18,20 @@ namespace Axit.Forms;
 /// </summary>
 public sealed class AxitMenu : ToolStripMenuItem
 {
-    private readonly Form _owner;
+    private readonly AxitForm _owner;
     private readonly ToolStripMenuItem _recentlyClosed = new("&Recently closed");
     private readonly ToolStripMenuItem _openWindows = new("&Open windows");
     private readonly List<(App App, ToolStripMenuItem Item)> _perApp = [];
 
-    /// <param name="owner">The window, whose own handle is the one checked in the lists and closed last by Close all windows.</param>
+    /// <param name="owner">The window: its handle is the one checked in the lists and closed last by Close all windows, its notices show the About sections (AX-7.2), and its latest-release state goes into About, Version.</param>
     /// <param name="commandPalette">The window's Command palette item (AX-10.1), the menu's first.</param>
     /// <param name="checkForUpdates">The window's Check for updates item (AX-3.1).</param>
     /// <param name="updateTo">The window's Update to item, visible while a newer release is known.</param>
-    /// <param name="latestRelease">The window's latest-release state for About, Version.</param>
-    /// <param name="showNotice">Shows an About section as a notice in the window (AX-7.2).</param>
-    public AxitMenu(Form owner, ToolStripMenuItem commandPalette, ToolStripMenuItem checkForUpdates, ToolStripMenuItem updateTo, Func<string> latestRelease, Action<Notice> showNotice)
+    public AxitMenu(AxitForm owner, ToolStripMenuItem commandPalette, ToolStripMenuItem checkForUpdates, ToolStripMenuItem updateTo)
         : base("&Axit")
     {
         _owner = owner;
+        void ShowNotice(Notice notice) => owner.ShowNotice(notice);
         var newWindow = new ToolStripMenuItem("&New window");
         var byType = new ToolStripMenuItem("Open windows &by type");
         foreach (var app in Dispatch.Apps)
@@ -45,11 +44,11 @@ public sealed class AxitMenu : ToolStripMenuItem
         }
 
         var about = new ToolStripMenuItem("&About");
-        about.DropDownItems.Add(new ToolStripMenuItem("&Version", null, (_, _) => showNotice(Notice.Plain(BundleAbout.VersionTitle, BundleAbout.Version(latestRelease())))));
-        about.DropDownItems.Add(new ToolStripMenuItem("&Licence", null, (_, _) => showNotice(Notice.Plain(BundleAbout.LicenceTitle, BundleAbout.Licence))));
-        about.DropDownItems.Add(new ToolStripMenuItem("&Attribution", null, (_, _) => showNotice(Notice.Plain(BundleAbout.AttributionTitle, BundleAbout.Attribution))));
-        about.DropDownItems.Add(new ToolStripMenuItem("Axit &guide", null, (_, _) => showNotice(Notice.Plain(BundleAbout.GuideTitle, BundleAbout.Guide()))));
-        about.DropDownItems.Add(new ToolStripMenuItem("Axit on Git&Hub", null, (_, _) => OpenUrl(UpdateCheck.RepositoryPage)));
+        about.DropDownItems.Add(new ToolStripMenuItem("&Version", null, (_, _) => ShowNotice(Notice.Plain(BundleAbout.VersionTitle, BundleAbout.Version(owner.LatestReleaseState)))));
+        about.DropDownItems.Add(new ToolStripMenuItem("&Licence", null, (_, _) => ShowNotice(Notice.Plain(BundleAbout.LicenceTitle, BundleAbout.Licence))));
+        about.DropDownItems.Add(new ToolStripMenuItem("&Attribution", null, (_, _) => ShowNotice(Notice.Plain(BundleAbout.AttributionTitle, BundleAbout.Attribution))));
+        about.DropDownItems.Add(new ToolStripMenuItem("Axit &guide", null, (_, _) => ShowNotice(Notice.Plain(BundleAbout.GuideTitle, BundleAbout.Guide()))));
+        about.DropDownItems.Add(new ToolStripMenuItem("Axit on Git&Hub", null, (_, _) => owner.OpenUrl(UpdateCheck.RepositoryPage)));
 
         DropDownItems.Add(commandPalette);
         DropDownItems.Add(new ToolStripSeparator());
@@ -81,7 +80,7 @@ public sealed class AxitMenu : ToolStripMenuItem
             }
         }
 
-        NoneWhenEmpty(_recentlyClosed, "&Nothing recently closed");
+        RecentMenu.NoneWhenEmpty(_recentlyClosed, "&Nothing recently closed");
 
         var windows = OpenWindows();
         var current = Current();
@@ -108,20 +107,7 @@ public sealed class AxitMenu : ToolStripMenuItem
             });
         }
 
-        NoneWhenEmpty(list, none);
-    }
-
-    /// <summary>
-    /// An empty list gets one item that says so and does nothing, enabled (AX-9.5): WinForms skips disabled items when
-    /// the keyboard moves through a menu, so a submenu of only a disabled "(none)" opened with nothing selected and
-    /// left the screen reader with nothing to read.
-    /// </summary>
-    private static void NoneWhenEmpty(ToolStripMenuItem list, string text)
-    {
-        if (list.DropDownItems.Count == 0)
-        {
-            list.DropDownItems.Add(new ToolStripMenuItem(text));
-        }
+        RecentMenu.NoneWhenEmpty(list, none);
     }
 
     /// <summary>
@@ -210,19 +196,6 @@ public sealed class AxitMenu : ToolStripMenuItem
         {
             // The program file blocked (a policy, an antivirus): logged, since the menu has closed and the caller is any window.
             Log.Error($"Axit {verb} could not be started", ex);
-        }
-    }
-
-    /// <summary>The page in the default browser, one of the system's own windows; a failure is logged, as nothing can be shown while the menu closes.</summary>
-    private static void OpenUrl(string url)
-    {
-        try
-        {
-            Process.Start(new ProcessStartInfo(url) { UseShellExecute = true });
-        }
-        catch (Exception ex) when (ex is System.ComponentModel.Win32Exception or InvalidOperationException)
-        {
-            Log.Error($"The page {url} could not be opened", ex);
         }
     }
 

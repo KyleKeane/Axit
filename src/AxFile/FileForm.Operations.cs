@@ -701,14 +701,7 @@ public sealed partial class FileForm
             return;
         }
 
-        try
-        {
-            Process.Start(new ProcessStartInfo("explorer.exe", $"/select,\"{entry.Path}\"") { UseShellExecute = false });
-        }
-        catch (Exception ex) when (ex is Win32Exception or InvalidOperationException)
-        {
-            Fail("File Explorer could not be started: " + ex.Message);
-        }
+        OpenInExplorer(entry.Path, select: true);
     }
 
     /// <summary>Folder → New window (Ctrl+N, AF-3.3): another AxFile window on the folder shown, as File Explorer's Ctrl+N; without a folder, one that starts as this one did.</summary>

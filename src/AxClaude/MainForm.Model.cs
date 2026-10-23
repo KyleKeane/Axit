@@ -341,8 +341,4 @@ internal sealed partial class MainForm
 
         control.Focus();
     }
-
-    /// <summary>Speaks without moving the focus; from the notice while one shows, since the conversation is hidden then.</summary>
-    protected override bool Announce(string text, bool interrupt) =>
-        NoticeOpen ? Overlay.Announce(text, interrupt) : _transcript.Announce(text, interrupt);
 }

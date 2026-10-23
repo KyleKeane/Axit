@@ -26,6 +26,7 @@ Before starting: install the build (`publish.ps1`), or quit any running AxStart 
 6. Type `win power`: "Windows PowerShell" among the matches; `cafe` finds a name with "Café" if one is installed.
 7. Escape with text in the field: hidden at once. Bring it up again: the field is empty.
 8. Tab: the focus stays in the field. A click on the list: the focus comes back to the field.
+9. Ctrl+S: "Nothing to save here". F1: the Keyboard shortcuts notice, read from its first line; Escape closes it and the focus is back in the field with its text kept.
 
 ## 3. Starting
 

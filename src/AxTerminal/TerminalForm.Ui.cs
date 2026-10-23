@@ -56,7 +56,7 @@ internal sealed partial class TerminalForm
         session.DropDownItems.Add(new ToolStripSeparator());
         session.DropDownItems.Add(new ToolStripMenuItem("&Export transcript...", null, (_, _) => ExportTranscript()) { ShortcutKeyDisplayString = BundleKeys.Text(BundleKeys.Save) });
         session.DropDownItems.Add(new ToolStripSeparator());
-        session.DropDownItems.Add(new ToolStripMenuItem("E&xit", null, (_, _) => Close()) { ShortcutKeyDisplayString = "Alt+F4" });
+        session.DropDownItems.Add(CreateExitItem());
 
         // What goes to the shell itself (AT-3.5), and the field's extras.
         var shell = new ToolStripMenuItem("Sh&ell");
@@ -244,8 +244,4 @@ internal sealed partial class TerminalForm
 
         control.Focus();
     }
-
-    /// <summary>Speaks without moving the focus; from the notice while one shows, since the terminal is hidden then.</summary>
-    protected override bool Announce(string text, bool interrupt) =>
-        NoticeOpen ? Overlay.Announce(text, interrupt) : _transcript.Announce(text, interrupt);
 }

@@ -152,7 +152,8 @@ taskbar. It works entirely offline (bundle G6).
   ✓ | Check for updates at start ✓) | Developer ▸ (Open settings file | Copy diagnostics). **Axit (A)** (AX-9).
   **Help (H):** Keyboard shortcuts F1 | User guide | ─ | Windows resources ▸ (Keyboard shortcuts in Windows). Every
   item has a mnemonic (AX-7.4).
-- AS-5.3 Keys (AX-8). Bundle-wide: F1, Ctrl+Shift+P, Ctrl+Plus, Ctrl+Minus, Page Up and Page Down (in the field,
+- AS-5.3 Keys (AX-8). Bundle-wide: F1, Ctrl+Shift+P, Ctrl+Plus, Ctrl+Minus, Ctrl+S ("Nothing to save here", the
+  window base's answer in a window without a document, AX-8.2), Page Up and Page Down (in the field,
   AS-3.3), Alt+F4 (hides, AS-3.4). Window-specific (`AxStartKeys`): Up, Down, Ctrl+Home, Ctrl+End (in the field,
   AS-3.3), Enter,
   Ctrl+Shift+Enter, Ctrl+O, Ctrl+I, F5, Escape. The hotkey is a setting, not in a table; the collision test covers
@@ -160,7 +161,8 @@ taskbar. It works entirely offline (bundle G6).
 - AS-5.4 Announcements, one UI Automation notification each on the field, or on the notice while one shows (AX-7.3):
   "<name>, n of m", "No programs match <text>", the edge earcon, "<name>, desktop program, <path>" / "<name>, Store
   app", "Programs refreshed, n programs" (F5), "Could not start <name>: …", "Cannot start as administrator", "No file
-  location for <name>", "Hotkey <key>", "<key> is taken by another program", "Text size n". The notices: Hotkey…, the
+  location for <name>", "Hotkey <key>", "<key> is taken by another program", "Text size n", "Nothing to save here"
+  (Ctrl+S). The notices: Hotkey…, the
   hotkey taken at start, Keyboard shortcuts, User guide, About, the update notice.
 - AS-5.5 The log is `%LOCALAPPDATA%\Axit\logs\axstart.log`: the start, the hotkey registered or refused, the count of
   programs read, a start that failed with Windows' message, each showing and each hiding with its reason (Escape, the

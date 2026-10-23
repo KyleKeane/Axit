@@ -23,7 +23,6 @@ internal sealed partial class TerminalForm : AxitForm
     private const int AsksQuietMs = 2000;
 
     private readonly TerminalSettings _settings;
-    private readonly string? _settingsError;
     private readonly TerminalModel _model;
     private readonly TranscriptView _transcript = new(AxTerminalKeys.Transcript, "Terminal");
     private readonly TextBox _input = new();
@@ -68,14 +67,12 @@ internal sealed partial class TerminalForm : AxitForm
     private long _lastOutputTick;
     /// <summary>The cursor row announced as a question, not announced again while it stays.</summary>
     private string? _askedRow;
-    private string _findText = string.Empty;
     private bool _closeConfirmed;
 
     public TerminalForm(string? folder, TerminalSettings settings, string? settingsError)
-        : base(AxTerminalApp.Name, settings, TerminalSettings.DefaultPath)
+        : base(AxTerminalApp.Name, settings, TerminalSettings.DefaultPath, settingsError)
     {
         _settings = settings;
-        _settingsError = settingsError;
         _folder = folder ?? (settings.LastFolder is { } last && Directory.Exists(last) ? last : Environment.CurrentDirectory);
         _shell = settings.ShellKind;
         _customShell = settings.CustomShell;
@@ -112,11 +109,6 @@ internal sealed partial class TerminalForm : AxitForm
         base.OnShown(e);
         // Focus first: a notice shown by what follows (the shell not found) takes the focus from here and gives it back.
         _input.Focus();
-        if (_settingsError is not null)
-        {
-            _model.AddSystemLine("The settings file could not be read, so the defaults are in use: " + _settingsError);
-        }
-
         StartShell();
     }
 
@@ -221,9 +213,6 @@ internal sealed partial class TerminalForm : AxitForm
             case BundleKeys.FindPrevious:
                 FindNext(backward: true);
                 return true;
-            case BundleKeys.Save:
-                ExportTranscript();
-                return true;
         }
 
         // Ctrl+Alt with a quick key letter reads that kind of line to the end, from anywhere (AxClaude D36).
@@ -257,15 +246,22 @@ internal sealed partial class TerminalForm : AxitForm
         _area.Visible = _area.Current is not null;
     }
 
+    /// <summary>The bottom of the window, whichever control is there when the notice closes and the one that had the focus is gone.</summary>
     protected override Control FocusTarget => BottomControl;
 
-    /// <summary>The terminal keeps the focus across a notice when it had it; the bottom of the window is found afresh.</summary>
-    protected override Control? FocusToKeep() => _transcript.Focused ? _transcript : null;
+    /// <summary>Everything is announced on the terminal, the control NVDA reads the window by.</summary>
+    protected override Control AnnounceSource => _transcript;
 
-    /// <summary>A reader keeps their line while the notice hides the terminal (AxClaude FR-3.3).</summary>
-    protected override void OnNoticeOpened(Control? focusBefore) => _transcript.KeepCaret = focusBefore is not null;
+    /// <summary>A reader keeps their line while the notice hides the terminal (AxClaude FR-3.3): the notice opened from the terminal.</summary>
+    protected override void OnNoticeOpened(Control? focusBefore) => _transcript.KeepCaret = ReferenceEquals(focusBefore, _transcript);
 
     protected override void OnNoticeClosed() => _transcript.KeepCaret = false;
+
+    /// <summary>Ctrl+S, the bundle's save key: the transcript exported (AT-4.7), since the window holds no document of its own.</summary>
+    protected override void SaveCommand() => ExportTranscript();
+
+    /// <summary>A settings file that could not be read is a system line in the terminal, not a notice over the start of the shell.</summary>
+    protected override void SettingsNotRead(string error) => _model.AddSystemLine("The settings file could not be read, so the defaults are in use: " + error);
 
     protected override void ApplyFont(Font font)
     {

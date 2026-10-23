@@ -915,16 +915,10 @@ public sealed partial class FileForm
         GoUp();
     }
 
-    /// <summary>Folder → Open folder… (Ctrl+O): the Windows folder picker, one of the system's own windows.</summary>
+    /// <summary>Folder → Open folder… (Ctrl+O): the bundle's folder picker, one of the system's own windows, on the folder shown.</summary>
     private void OpenFolderDialog()
     {
-        using var dialog = new FolderBrowserDialog { Description = "Choose the folder to show", UseDescriptionForTitle = true, ShowNewFolderButton = true };
-        if (_folder is not null)
-        {
-            dialog.InitialDirectory = _folder;
-        }
-
-        var chosen = dialog.ShowDialog(this) == DialogResult.OK && dialog.SelectedPath.Length > 0 ? dialog.SelectedPath : null;
+        var chosen = ChooseFolder("Choose the folder to show", _folder);
         _list.Select();
         if (chosen is not null)
         {

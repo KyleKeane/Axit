@@ -32,7 +32,7 @@ public sealed partial class FileForm : AxitForm
 
     /// <param name="settingsPath">Where the settings are saved; the app's own file unless a probe says otherwise, so that a probe never writes the user's.</param>
     public FileForm(string? path, FileSettings settings, string? settingsError, string? settingsPath = null)
-        : base(AxFileApp.Name, settings, settingsPath ?? FileSettings.DefaultPath)
+        : base(AxFileApp.Name, settings, settingsPath ?? FileSettings.DefaultPath, settingsError)
     {
         _settings = settings;
         _startPath = path;
@@ -86,7 +86,7 @@ public sealed partial class FileForm : AxitForm
         showIn.DropDownItems.Add(new ToolStripMenuItem("Ax&Terminal", null, (_, _) => OpenIn(Dispatch.AxTerminal)));
         folder.DropDownItems.Add(showIn);
         folder.DropDownItems.Add(new ToolStripSeparator());
-        folder.DropDownItems.Add(new ToolStripMenuItem("E&xit", null, (_, _) => Close()) { ShortcutKeyDisplayString = "Alt+F4" });
+        folder.DropDownItems.Add(CreateExitItem());
 
         // Item is the entry's menu (AF-4.6): the bar's drop-down and the list's context menu, filled the same way, so
         // that the two are one menu. The bar's drop-down is the one WinForms makes (AX-6.6): a hand-made one loses
@@ -185,11 +185,6 @@ public sealed partial class FileForm : AxitForm
         RestoreWindow();
         FitPane();
         FillPane(null);
-
-        if (settingsError is not null)
-        {
-            ShowNotice(Notice.Plain("Settings", $"The settings file could not be read, so the defaults are used.\n{settingsError}") with { Unprompted = true });
-        }
     }
 
     /// <summary>
@@ -260,13 +255,11 @@ public sealed partial class FileForm : AxitForm
         _pane.Visible = true;
     }
 
+    /// <summary>The folder list, when the control a notice opened from is gone (the rename box); the Actions list keeps the focus across a notice by the base's rule (AF-9.1).</summary>
     protected override Control FocusTarget => _list;
 
     /// <summary>An announcement is raised on the list that has the focus (AF-7): the Actions list while it does, the folder list otherwise.</summary>
     protected override Control AnnounceSource => _pane.Focused ? _pane : _list;
-
-    /// <summary>A notice opened from the Actions list gives the focus back to it (AF-9.1).</summary>
-    protected override Control? FocusToKeep() => _pane.Focused ? _pane : null;
 
     protected override void ApplyFont(Font font)
     {
@@ -342,10 +335,6 @@ public sealed partial class FileForm : AxitForm
                 return true;
             case BundleKeys.FindPrevious:
                 FindInList(-1);
-                return true;
-            case BundleKeys.Save:
-                // The bundle's save key, with nothing here to save (AF-6.2).
-                Announce("Nothing to save here", true);
                 return true;
             case AxFileKeys.UpAlso:
                 GoUp();
@@ -514,23 +503,6 @@ public sealed partial class FileForm : AxitForm
         }
 
         return false;
-    }
-
-    /// <summary>Runs a task on the UI thread and turns an escaped exception into a notice rather than a crash.</summary>
-    private async void Do(Func<Task> action)
-    {
-        try
-        {
-            await action();
-        }
-        catch (Exception ex) when (ex is not OperationCanceledException)
-        {
-            Log.Error("AxFile command failed", ex);
-            if (!IsDisposed)
-            {
-                Fail(ex.Message);
-            }
-        }
     }
 
     /// <summary>A failed operation is one announcement when the reason is one line, a notice otherwise (AF-4.5).</summary>

@@ -37,7 +37,7 @@ public sealed class MediaForm : AxitForm
     /// <param name="start">What the command line asked for (AM-1.1): a play or an add with its paths; null for an empty queue.</param>
     /// <param name="settingsPath">Where the settings are saved; the app's own file unless a probe says otherwise, so that a probe never writes the user's.</param>
     public MediaForm(HandOver? start, MediaSettings settings, string? settingsError, string? settingsPath = null)
-        : base(AxMediaApp.Name, settings, settingsPath ?? MediaSettings.DefaultPath)
+        : base(AxMediaApp.Name, settings, settingsPath ?? MediaSettings.DefaultPath, settingsError)
     {
         _settings = settings;
         _start = start;
@@ -66,7 +66,7 @@ public sealed class MediaForm : AxitForm
         showIn.DropDownItems.Add(new ToolStripMenuItem("Ax&File", null, (_, _) => OpenInAxFile()));
         queue.DropDownItems.Add(showIn);
         queue.DropDownItems.Add(new ToolStripSeparator());
-        queue.DropDownItems.Add(new ToolStripMenuItem("E&xit", null, (_, _) => Close()) { ShortcutKeyDisplayString = "Alt+F4" });
+        queue.DropDownItems.Add(CreateExitItem());
 
         var play = new ToolStripMenuItem("&Play");
         play.DropDownItems.Add(Item("P&ause or resume", PauseResume, AxMediaKeys.PauseResume));
@@ -131,11 +131,6 @@ public sealed class MediaForm : AxitForm
         ApplyTextFont();
         RestoreWindow();
         UpdateStatusBar();
-
-        if (settingsError is not null)
-        {
-            ShowNotice(Notice.Plain("Settings", $"The settings file could not be read, so the defaults are used.\n{settingsError}") with { Unprompted = true });
-        }
     }
 
     // ---- what the window base asks for ----
@@ -199,24 +194,8 @@ public sealed class MediaForm : AxitForm
         base.OnFormClosing(e);
     }
 
-    /// <summary>AM-1.2, AM-1.3: a start with paths while this window is open hands them here; the message is answered at once and the paths are applied after, nothing read before the answer.</summary>
-    protected override void WndProc(ref Message m)
-    {
-        if (AppMessage.Receive(ref m) is { } message)
-        {
-            m.Result = 1;
-            BeginInvoke(() =>
-            {
-                if (!IsDisposed)
-                {
-                    Apply(message);
-                }
-            });
-            return;
-        }
-
-        base.WndProc(ref m);
-    }
+    /// <summary>AM-1.2, AM-1.3: a start with paths while this window is open hands them here; the base answers the message at once and the paths are applied after, nothing read before the answer.</summary>
+    protected override Action? TakeHandOver(HandOver message) => () => Apply(message);
 
     /// <summary>A hand-over (or the start) applied after the ones before it, in the order they came; an earlier one's failure is its own notice.</summary>
     private void Apply(HandOver message)
@@ -261,10 +240,6 @@ public sealed class MediaForm : AxitForm
                 return true;
             case BundleKeys.FindPrevious:
                 FindInList(_list, Names, -1);
-                return true;
-            case BundleKeys.Save:
-                // The bundle's save key, with nothing here to save (AM-5.2).
-                Announce("Nothing to save here", true);
                 return true;
             case AxMediaKeys.NewWindow:
                 NewWindow();
@@ -328,23 +303,6 @@ public sealed class MediaForm : AxitForm
         }
 
         return false;
-    }
-
-    /// <summary>Runs a task on the UI thread and turns an escaped exception into a notice rather than a crash.</summary>
-    private async void Do(Func<Task> action)
-    {
-        try
-        {
-            await action();
-        }
-        catch (Exception ex) when (ex is not OperationCanceledException)
-        {
-            Log.Error("AxMedia command failed", ex);
-            if (!IsDisposed)
-            {
-                Fail(ex.Message);
-            }
-        }
     }
 
     // ---- the queue (AM-3) ----
@@ -479,11 +437,10 @@ public sealed class MediaForm : AxitForm
         }
     }
 
-    /// <summary>Queue → Open folder… (Ctrl+Shift+O): the Windows folder picker; the folder's media files appended in name order.</summary>
+    /// <summary>Queue → Open folder… (Ctrl+Shift+O): the bundle's folder picker; the folder's media files appended in name order.</summary>
     private void OpenFolder()
     {
-        using var dialog = new FolderBrowserDialog { Description = "Choose the folder whose sound and video files to add", UseDescriptionForTitle = true };
-        var chosen = dialog.ShowDialog(this) == DialogResult.OK && dialog.SelectedPath.Length > 0 ? dialog.SelectedPath : null;
+        var chosen = ChooseFolder("Choose the folder whose sound and video files to add");
         _list.Select();
         if (chosen is not null)
         {

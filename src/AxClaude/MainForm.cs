@@ -17,7 +17,6 @@ internal sealed partial class MainForm : AxitForm
 
     private readonly StartupOptions _options;
     private readonly AppSettings _settings;
-    private readonly string? _settingsError;
     private readonly SessionModel _model;
     private readonly TranscriptView _transcript = new(AxClaudeKeys.Transcript, "Conversation");
     private readonly TextBox _input = new();
@@ -127,16 +126,14 @@ internal sealed partial class MainForm : AxitForm
     private bool _nothingToContinue;
     /// <summary>The folder Claude was last started in: a restart there with --continue replays what the window shows (FR-4.8).</summary>
     private string? _launchedFolder;
-    private string _findText = string.Empty;
     private bool _closeConfirmed;
 
     public MainForm(StartupOptions options, AppSettings settings, string? settingsError)
-        : base("AxClaude", settings, AppSettings.DefaultPath)
+        : base("AxClaude", settings, AppSettings.DefaultPath, settingsError)
     {
         _options = options;
         _claudeArgs = options.ClaudeArgs is { } given ? [.. given] : null;
         _settings = settings;
-        _settingsError = settingsError;
         // The bundle's status bar pair (no AccessibleName, no Spring; StatusLayout keeps both inside the strip).
         (_state, _folderLabel) = StatusLayout.Pair(_status);
         _folder = options.Folder ?? (settings.LastProjectFolder is { } last && Directory.Exists(last) ? last : null);
@@ -199,11 +196,6 @@ internal sealed partial class MainForm : AxitForm
         base.OnShown(e);
         // Focus first: a notice shown by what follows (Claude not found) takes the focus from here and gives it back.
         _input.Focus();
-        if (_settingsError is not null)
-        {
-            _model.AddSystemLine("The settings file could not be read, so the defaults are in use: " + _settingsError);
-        }
-
         if (_options.RecordPath is { } record)
         {
             StartRecording(record);
@@ -315,9 +307,6 @@ internal sealed partial class MainForm : AxitForm
             case BundleKeys.FindPrevious:
                 FindNext(backward: true);
                 return true;
-            case BundleKeys.Save:
-                ExportConversation();
-                return true;
             case AxClaudeKeys.Interrupt:
                 // The interrupt key (FR-2.3). Ctrl+Escape opens the Start menu and never reaches the app.
                 Interrupt();
@@ -355,17 +344,23 @@ internal sealed partial class MainForm : AxitForm
         _area.Visible = _area.Current is not null;
     }
 
-    /// <summary>The bottom of the window, whichever control is there when the notice closes.</summary>
+    /// <summary>The bottom of the window, whichever control is there when the notice closes and the one that had the focus is gone (an answered question's list).</summary>
     protected override Control FocusTarget => BottomControl;
 
-    /// <summary>The conversation keeps the focus across a notice when it had it; the bottom of the window is found afresh.</summary>
-    protected override Control? FocusToKeep() => _transcript.Focused ? _transcript : null;
+    /// <summary>Everything is announced on the conversation, the control NVDA reads the window by.</summary>
+    protected override Control AnnounceSource => _transcript;
 
-    /// <summary>A reader keeps their line while the notice hides the conversation (FR-3.3).</summary>
-    protected override void OnNoticeOpened(Control? focusBefore) => _transcript.KeepCaret = focusBefore is not null;
+    /// <summary>A reader keeps their line while the notice hides the conversation (FR-3.3): the notice opened from the conversation.</summary>
+    protected override void OnNoticeOpened(Control? focusBefore) => _transcript.KeepCaret = ReferenceEquals(focusBefore, _transcript);
 
     /// <summary>Cleared after the notice's action, so that a system line the action adds does not move a reader's caret.</summary>
     protected override void OnNoticeClosed() => _transcript.KeepCaret = false;
+
+    /// <summary>Ctrl+S, the bundle's save key: the conversation exported as text (FR-3.8), since the window holds no document of its own.</summary>
+    protected override void SaveCommand() => ExportConversation();
+
+    /// <summary>A settings file that could not be read is a system line in the conversation, not a notice over the start of Claude.</summary>
+    protected override void SettingsNotRead(string error) => _model.AddSystemLine("The settings file could not be read, so the defaults are in use: " + error);
 
     protected override void ApplyFont(Font font)
     {

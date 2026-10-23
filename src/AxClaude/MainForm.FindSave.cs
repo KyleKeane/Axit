@@ -11,32 +11,19 @@ internal sealed partial class MainForm
 {
     // ---- find and save ----
 
-    /// <summary>Ctrl+F: the Find notice (FR-3.7). Find next closes it and searches from the caret; an empty field keeps it open.</summary>
-    private void FindDialog()
-    {
-        ShowNotice(new Notice("Find", string.Empty,
-        [
-            new OverlayChoice("Find &next", () =>
-            {
-                _findText = Overlay.InputText;
-                _transcript.Find(_findText, backward: false);
-            }, IsDefault: true),
-            new OverlayChoice("Cancel", IsCancel: true),
-        ])
-        {
-            Input = new OverlayInput("&Find:", "Text to find", _findText, "Type the text to find"),
-        });
-    }
+    /// <summary>Ctrl+F: the bundle's Find notice (FR-3.7) over the conversation's search. Find next closes it and searches from the caret; an empty field keeps it open.</summary>
+    private void FindDialog() => ShowFind(text => _transcript.Find(text, backward: false));
 
+    /// <summary>F3 and Shift+F3: the last text again from the caret; the Find notice when there is none yet.</summary>
     private void FindNext(bool backward)
     {
-        if (_findText.Length == 0)
+        if (FindText.Length == 0)
         {
             FindDialog();
             return;
         }
 
-        _transcript.Find(_findText, backward);
+        _transcript.Find(FindText, backward);
     }
 
     /// <summary>

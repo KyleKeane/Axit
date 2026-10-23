@@ -45,16 +45,19 @@ Its own code is the outline and the commands (pure, in its Core, tested), its ke
   name, its usage text and a function from the remaining arguments to the window (`AppHost.OnePath` reads one file
   or folder and reports anything else); the host owns the log, the crash handling, `--help` and `--version`.
   `AxGitApp` is the example.
-- `ThingForm`: the window, derived from `Axit.Forms/AxitForm` (AX-6.5), which already holds the notice flow,
-  `Announce`, the fonts, the window's place, the settings saving, the Axit menu with the update flow, find in a text
-  box, the diagnostics and the common keys. Pass the app's name, its settings (a class derived from
-  `Axit.Core/WindowSettings`) and the settings path to the base; add `Overlay` to the controls first; fill in the
-  hooks (`Shortcuts`, `HideForNotice`, `ShowAfterNotice`, `FocusTarget`, `ApplyFont`, `RestartArguments`,
-  `UpdateRestartText`, `ProcessWindowKey`, and the optional ones `FocusToKeep`, `NoticeChime`, `OnNoticeOpened`,
-  `OnNoticeClosed`, `UpdateNoted`, `DiagnosticsLines`, `AnnounceSource`, `PaletteEntries`). Use the other shared pieces, never a copy: `ControlArea` for
-  a field or a list in the input's place, `EditKeys` for an edit control's page and paragraph keys, `StatusLayout`
-  for two status labels, `Notice` records for every question and text of the window's own. `GitForm` is the
-  smallest example.
+- `ThingForm`: the window, derived from `Axit.Forms/AxitForm` (AX-6.5), which already holds the notice flow with
+  its focus rule, `Announce`, the fonts, the window's place, the settings saving and the settings-not-read notice,
+  the Axit menu with the update flow, find in a text box, a list or a transcript, the folder picker, `Do` for a
+  command's task, the hand-over from a starting process, the diagnostics and the common keys. Pass the app's name,
+  its settings (a class derived from `Axit.Core/WindowSettings`), the settings path and the settings error to the
+  base; add `Overlay` to the controls first; fill in the hooks (`Shortcuts`, `HideForNotice`, `ShowAfterNotice`,
+  `FocusTarget`, `ApplyFont`, `RestartArguments`, `UpdateRestartText`, `ProcessWindowKey`, and the optional ones
+  `NoticeChime`, `OnNoticeOpened`, `OnNoticeClosed`, `UpdateNoted`, `DiagnosticsLines`, `AnnounceSource`,
+  `PaletteEntries`, `SaveCommand`, `TakeHandOver`, `SettingsNotRead`, `Fail`, `CopyDiagnostics`). Use the other
+  shared pieces, never a copy: `ControlArea` for a field or a list in the input's place, `EditKeys` for an edit
+  control's page and paragraph keys, `StatusLayout` for two status labels, `Notice` records for every question and
+  text of the window's own, `CreateExitItem` for the end of the first menu, `ChooseFolder` for the folder picker.
+  `GitForm` is the smallest example.
 - The menu bar gets the bundle's Axit menu before Help, `CreateAxitMenu()` from the base (AX-9), which places the
   window's Check for updates and Update to items and the bundle's About submenu (AX-9.9); Help holds the app's own
   items only; the window's title ends in ` - AxThing`,

@@ -1,44 +1,35 @@
 using System.Diagnostics;
-using System.Net.Http;
 using Axit.Core;
-using Axit.Core.Updates;
 
 namespace Axit.Forms;
 
 /// <summary>
 /// The window every app of the bundle is built on (docs/axit/SPEC.md AX-6.5): what the windows share and no app
-/// copies any more. The notices (<see cref="ShowNotice"/>, <see cref="CloseNotice"/>, <see cref="Fail"/>,
-/// <see cref="ShowError"/>; Alt, F10 and the window's shortcuts swallowed while one shows), <see cref="Announce"/>,
-/// the text font with its size keys and picker, the window's place and size, the settings saving, the Axit menu
-/// with the update check, the update notice and the install in place (AX-3), find in a text box, the diagnostics,
-/// <see cref="OpenUrl"/>, and the common part of the key switch (the text size keys everywhere, F1). A window derives
-/// from it, adds its controls (the <see cref="Overlay"/> first, so that it docks over the rest), and fills in the
-/// hooks: what to hide for a notice, where the focus goes after one, what gets the font, how the new version starts
-/// it again. It grew out of AxDown's window (the editor shell) on the third copy, AxGit (2026-10-18).
+/// copies. One class in partial files, one per section: this file (the hooks a window fills in, the menus every
+/// window has, the keys, the window's place, the settings, the ways out to the system), <c>AxitForm.Notices.cs</c>
+/// (the notice flow with its one focus rule, and <see cref="Announce"/>), <c>AxitForm.Find.cs</c> (find in a text
+/// box, a list, a transcript and a notice's text), <c>AxitForm.Fonts.cs</c> (the text font with its size keys and
+/// picker), <c>AxitForm.Updates.cs</c> (the update check, the update notice and the install in place, AX-3) and
+/// <c>AxitForm.Palette.cs</c> (the command palette, AX-10). A window derives from it, adds its controls (the
+/// <see cref="Overlay"/> first, so that it docks over the rest), and fills in the hooks listed under "what the window
+/// fills in". It grew out of AxDown's window (the editor shell) on the third copy, AxGit (2026-10-18); the notice and
+/// focus core was written again on 2026-10-23 (docs/axit/review-2026-10-23.md, 5.3).
 /// </summary>
-public abstract class AxitForm : Form
+public abstract partial class AxitForm : Form
 {
-    private readonly ToolStripMenuItem _checkItem = new($"Check for &updates (Axit {BundleInfo.Version})...");
-    private readonly ToolStripMenuItem _updateItem = new() { Visible = false };
-    private Control? _focusBeforeNotice;
-    private string _findText = string.Empty;
-    private string _latestState = "not checked yet";
-    private ReleaseInfo? _update;
-    private bool _updateBusy;
-    private IReadOnlyList<PaletteEntry> _paletteAll = [];
-    private IReadOnlyList<PaletteEntry> _paletteShown = [];
+    private const int WM_SYSCOMMAND = 0x0112;
+    private const int SC_KEYMENU = 0xF100;
 
-    /// <summary>The pause after typing in the palette before its first match is said (AX-10.4, AxStart's 300 ms).</summary>
-    private readonly System.Windows.Forms.Timer _paletteSpeak = new() { Interval = 300 };
+    /// <summary>Why the settings file could not be read, reported once the window shows; null when it was read.</summary>
+    private readonly string? _settingsError;
 
-    /// <summary>After Update and restart: how the installed new version is started when this window closes; null when nothing is to start.</summary>
-    private string[]? _restartArguments;
-
-    protected AxitForm(string appName, WindowSettings settings, string settingsPath)
+    /// <param name="settingsError">What the settings loader reported for a file it could not read; the defaults are in use then (AX-5.2).</param>
+    protected AxitForm(string appName, WindowSettings settings, string settingsPath, string? settingsError = null)
     {
         AppName = appName;
         Settings = settings;
         SettingsPath = settingsPath;
+        _settingsError = settingsError;
         // With the role Window, NVDA speaks the window when it opens ("notes.md - AxDown window") before the focused
         // control; without it the window is a nameless pane to NVDA and the app is never named (AX-7.1).
         AccessibleRole = AccessibleRole.Window;
@@ -48,13 +39,7 @@ public abstract class AxitForm : Form
         Overlay.Chosen += OnNoticeChoice;
         _paletteSpeak.Tick += (_, _) => SayFirstPaletteMatch();
         _checkItem.Click += (_, _) => CheckForUpdates(manual: true);
-        _updateItem.Click += (_, _) =>
-        {
-            if (_update is { } known)
-            {
-                ShowUpdateNotice(known);
-            }
-        };
+        _updateItem.Click += (_, _) => OfferKnownUpdate();
     }
 
     /// <summary>The app's name, which ends the title of its windows and names them in the Axit menu.</summary>
@@ -71,12 +56,6 @@ public abstract class AxitForm : Form
     /// <summary>A notice holds the window: the main controls are hidden, the menu and the shortcuts wait.</summary>
     protected bool NoticeOpen { get; private set; }
 
-    /// <summary>Update and restart was chosen and the update is installed: the new version starts when the window closes.</summary>
-    protected bool RestartPending => _restartArguments is not null;
-
-    /// <summary>The update is installed and the window is closing for it (AX-3.2): a window that otherwise hides on closing (AxStart) closes.</summary>
-    protected bool ClosingForUpdate { get; private set; }
-
     // ---- what the window fills in ----
 
     /// <summary>The F1 text.</summary>
@@ -87,24 +66,25 @@ public abstract class AxitForm : Form
 
     protected abstract void ShowAfterNotice();
 
-    /// <summary>The control that takes the focus after a notice closes when nothing else kept it, and that announcements are raised on.</summary>
+    /// <summary>
+    /// The control the focus goes to after a notice when the control that had it before is gone or hidden (an
+    /// answered question's list, the message field behind a question), and the one announcements are raised on
+    /// unless <see cref="AnnounceSource"/> says otherwise.
+    /// </summary>
     protected abstract Control FocusTarget { get; }
 
-    /// <summary>The control <see cref="Announce"/> raises on; the focus target unless the window says otherwise.</summary>
+    /// <summary>The control <see cref="Announce"/> raises on while no notice shows; the focus target unless the window says otherwise (a transcript, the list that has the focus).</summary>
     protected virtual Control AnnounceSource => FocusTarget;
-
-    /// <summary>The control that had the focus as a notice opened and gets it back when it closes; null to use <see cref="FocusTarget"/>.</summary>
-    protected virtual Control? FocusToKeep() => null;
 
     /// <summary>Whether an unprompted notice plays the chime; a window with a sound setting says.</summary>
     protected virtual bool NoticeChime => true;
 
-    /// <summary>A notice opened (or another took the first one's place) with the focus kept at <paramref name="focusBefore"/>.</summary>
+    /// <summary>The first notice of a chain opened, with <paramref name="focusBefore"/> the control that had the focus (null when none had it); the next notice of the same chain does not call here.</summary>
     protected virtual void OnNoticeOpened(Control? focusBefore)
     {
     }
 
-    /// <summary>The last notice closed, before the focus goes back.</summary>
+    /// <summary>The last notice of a chain closed, before the focus goes back.</summary>
     protected virtual void OnNoticeClosed()
     {
     }
@@ -132,11 +112,24 @@ public abstract class AxitForm : Form
     /// <summary>The window's own keys, from its table; true when the key was handled. Called when no notice shows and after the common keys.</summary>
     protected virtual bool ProcessWindowKey(Keys keyData) => false;
 
-    // ---- the menu and the window ----
+    /// <summary>Ctrl+S, the bundle's save key (AX-8.2): the window saves what it holds; a window with nothing to save says so, which is the default.</summary>
+    protected virtual void SaveCommand() => Announce("Nothing to save here", true);
+
+    /// <summary>
+    /// What the window does with a hand-over from a starting process of its app (<see cref="AppMessage"/>, AM-1.3):
+    /// the action, run after the sender has its answer, so that the sender never waits on a read; null when the
+    /// window does not take the message, which is the default (the sender then opens a window of its own).
+    /// </summary>
+    protected virtual Action? TakeHandOver(HandOver message) => null;
+
+    /// <summary>The settings file could not be read and the defaults are in use (AX-5.2): a notice at the first showing, unless the window says it another way (the console windows write a system line).</summary>
+    protected virtual void SettingsNotRead(string error) =>
+        ShowNotice(Notice.Plain("Settings", $"The settings file could not be read, so the defaults are used.\n{error}") with { Unprompted = true });
+
+    // ---- the menus every window has (AX-6.5, AX-9) ----
 
     /// <summary>The bundle's Axit menu (AX-9) with this window's Command palette and update items; the window puts it before Help.</summary>
-    protected AxitMenu CreateAxitMenu() =>
-        new(this, Item("Command &palette...", ShowCommandPalette, BundleKeys.CommandPalette), _checkItem, _updateItem, () => _latestState, ShowNotice);
+    protected AxitMenu CreateAxitMenu() => new(this, Item("Command &palette...", ShowCommandPalette, BundleKeys.CommandPalette), _checkItem, _updateItem);
 
     /// <summary>A menu item whose key the window handles itself: the item only shows the key (AX-8).</summary>
     protected static ToolStripMenuItem Item(string text, Action action, Keys key)
@@ -162,6 +155,9 @@ public abstract class AxitForm : Form
 
         return item;
     }
+
+    /// <summary>The last item of every first menu (AX-6): Exit, closing the window as Alt+F4 does, which is Windows' own key.</summary>
+    protected ToolStripMenuItem CreateExitItem() => new("E&xit", null, (_, _) => Close()) { ShortcutKeyDisplayString = "Alt+F4" };
 
     /// <summary>Options → Text (AX-6.5): the window's own items first, then what every window has: Font…, Larger text, Smaller text, Windows text size.</summary>
     protected ToolStripMenuItem CreateTextMenu(params ToolStripItem[] own)
@@ -216,9 +212,17 @@ public abstract class AxitForm : Form
         return help;
     }
 
+    // ---- the window ----
+
+    /// <summary>The first showing: a settings file that could not be read is reported, then the update check runs when the setting says (AX-3.1).</summary>
     protected override void OnShown(EventArgs e)
     {
         base.OnShown(e);
+        if (_settingsError is { } error)
+        {
+            SettingsNotRead(error);
+        }
+
         if (Settings.CheckForUpdates && !BundleInfo.IsDevelopmentBuild)
         {
             CheckForUpdates(manual: false);
@@ -232,11 +236,7 @@ public abstract class AxitForm : Form
         {
             SaveWindow();
             SaveSettings();
-            if (_restartArguments is { } restart)
-            {
-                // AX-3.2: the update is installed; the new version starts on what this window held as this process ends.
-                Updater.StartInstalled(restart);
-            }
+            StartInstalledVersion();
         }
 
         base.OnFormClosing(e);
@@ -244,9 +244,6 @@ public abstract class AxitForm : Form
 
     /// <summary>The window's client area as its UI Automation rectangle, so that NVDA+End finds the status bar.</summary>
     protected override AccessibleObject CreateAccessibilityInstance() => new WindowAccessibleObject(this);
-
-    private const int WM_SYSCOMMAND = 0x0112;
-    private const int SC_KEYMENU = 0xF100;
 
     protected override void WndProc(ref Message m)
     {
@@ -257,14 +254,28 @@ public abstract class AxitForm : Form
             return;
         }
 
+        if (AppMessage.Receive(ref m) is { } handOver && TakeHandOver(handOver) is { } apply)
+        {
+            // Answered at once and applied after: the starting process waits on the answer, never on a read (AM-1.3).
+            m.Result = 1;
+            BeginInvoke(() =>
+            {
+                if (!IsDisposed)
+                {
+                    apply();
+                }
+            });
+            return;
+        }
+
         base.WndProc(ref m);
     }
 
     /// <summary>
     /// The common keys (AX-8.2): the text size keys work everywhere, a notice included; while a notice shows, its text
     /// takes the find keys (AX-7.2) and every other shortcut waits (not calling the base skips the menu shortcuts;
-    /// Enter and Escape reach the notice's buttons through AcceptButton and CancelButton); F1 shows the shortcuts;
-    /// then the window's own keys.
+    /// Enter and Escape reach the notice's buttons through AcceptButton and CancelButton); F1 shows the shortcuts,
+    /// Ctrl+Shift+P the palette, Ctrl+S saves; then the window's own keys.
     /// </summary>
     protected override bool ProcessCmdKey(ref Message msg, Keys keyData)
     {
@@ -310,494 +321,40 @@ public abstract class AxitForm : Form
             return base.ProcessCmdKey(ref msg, keyData);
         }
 
-        if (keyData == BundleKeys.Shortcuts)
+        switch (keyData)
         {
-            ShowNotice(Notice.Plain("Keyboard shortcuts", Shortcuts));
-            return true;
-        }
-
-        if (keyData == BundleKeys.CommandPalette)
-        {
-            ShowCommandPalette();
-            return true;
+            case BundleKeys.Shortcuts:
+                ShowNotice(Notice.Plain("Keyboard shortcuts", Shortcuts));
+                return true;
+            case BundleKeys.CommandPalette:
+                ShowCommandPalette();
+                return true;
+            case BundleKeys.Save:
+                SaveCommand();
+                return true;
         }
 
         return ProcessWindowKey(keyData) || base.ProcessCmdKey(ref msg, keyData);
     }
 
-    // ---- notices: the window's own dialogs, drawn inside the window (AX-7.2, AX-6.4) ----
-
-    /// <summary>The crash handler's report, shown inside the window like every other notice.</summary>
-    public void ShowError(string title, string message) => ShowNotice(Notice.Plain(title, message) with { Unprompted = true });
-
-    /// <summary>
-    /// The one place a notice is shown; callers pass only its content. It adds the chime of a notice the user did
-    /// not open, the focus in the notice, the hidden main controls, the blocked menu and window shortcuts, and
-    /// Enter and Escape on the default and cancel buttons; the panel's Populate adds the key line made from the
-    /// buttons and the hold of an unprompted notice. A notice shown while another is open replaces it.
-    /// </summary>
-    protected void ShowNotice(Notice notice)
+    /// <summary>Runs a command's task from the UI thread and turns an escaped exception into a notice rather than a crash: an exception out of an awaited task would otherwise be unobserved.</summary>
+    protected async void Do(Func<Task> action)
     {
-        _paletteSpeak.Stop();
-        if (notice.Unprompted && NoticeChime)
-        {
-            Sounds.Notice();
-        }
-
-        if (!NoticeOpen)
-        {
-            _focusBeforeNotice = FocusToKeep();
-            OnNoticeOpened(_focusBeforeNotice);
-        }
-
-        NoticeOpen = true;
-        Overlay.Populate(notice);
-        Overlay.Visible = true;
-        Overlay.BringToFront();
-        AcceptButton = Overlay.DefaultButton;
-        CancelButton = Overlay.CancelButton;
-        Overlay.FocusStart();
-        HideForNotice();
-        if (MainMenuStrip is { } menu)
-        {
-            menu.Enabled = false;
-        }
-
-        PerformLayout();
-    }
-
-    private void OnNoticeChoice(OverlayChoice choice)
-    {
-        if (choice.StaysOpen)
-        {
-            choice.Action?.Invoke();
-            return;
-        }
-
-        CloseNotice(choice.Action);
-    }
-
-    /// <summary>Closes the notice, runs <paramref name="then"/>, and gives the focus back unless the action opened a notice of its own or closed the window.</summary>
-    protected void CloseNotice(Action? then)
-    {
-        if (!NoticeOpen)
-        {
-            return;
-        }
-
-        _paletteSpeak.Stop();
-        var focusBefore = _focusBeforeNotice;
-        NoticeOpen = false;
-        ShowAfterNotice();
-        if (MainMenuStrip is { } menu)
-        {
-            menu.Enabled = true;
-        }
-
-        AcceptButton = null;
-        CancelButton = null;
-        PerformLayout();
-        then?.Invoke();
-        if (IsDisposed)
-        {
-            return;
-        }
-
-        if (NoticeOpen)
-        {
-            // The action opened a notice of its own (the update's progress, an error): that one is showing now, and
-            // the place from before the first notice carries over to it.
-            _focusBeforeNotice = focusBefore;
-            OnNoticeOpened(focusBefore);
-            return;
-        }
-
-        OnNoticeClosed();
-        if (ActiveControl is null || Overlay.Contains(ActiveControl))
-        {
-            (focusBefore ?? FocusTarget).Select();
-        }
-
-        Overlay.Visible = false;
-    }
-
-    /// <summary>An error the user must see: logged and shown as a notice.</summary>
-    protected virtual void Fail(string message)
-    {
-        Log.Error(message);
-        ShowError("Error", message);
-    }
-
-    /// <summary>Speaks without moving the focus (AX-7.3): on the window's control, or on the notice while one shows.</summary>
-    protected virtual bool Announce(string text, bool interrupt)
-    {
-        if (NoticeOpen)
-        {
-            return Overlay.Announce(text, interrupt);
-        }
-
-        return Announcer.Raise(AnnounceSource, text, interrupt);
-    }
-
-    // ---- find in a text box ----
-
-    /// <summary>Ctrl+F: the Find notice; Find next closes it and searches <paramref name="box"/> from the selection; an empty field keeps it open.</summary>
-    protected void ShowFind(TextBox box) =>
-        ShowNotice(new Notice("Find", string.Empty,
-        [
-            new OverlayChoice("&Find next", () =>
-            {
-                _findText = Overlay.InputText;
-                FindNext(box, 1);
-            }, IsDefault: true),
-            new OverlayChoice("&Cancel", IsCancel: true),
-        ])
-        {
-            Input = new OverlayInput("Text to find:", "Text to find", _findText, "Type the text to find"),
-        });
-
-    /// <summary>
-    /// The next match after the selection (or the previous one before it), wrapping once; the match is selected and
-    /// the box takes the focus. False, with "Not found" said, when there is none; the Find notice when nothing was
-    /// searched for yet.
-    /// </summary>
-    protected bool FindNext(TextBox box, int direction)
-    {
-        if (_findText.Length == 0)
-        {
-            ShowFind(box);
-            return false;
-        }
-
-        var text = box.Text;
-        int found;
-        if (direction > 0)
-        {
-            var from = Math.Min(box.SelectionStart + box.SelectionLength, text.Length);
-            found = text.IndexOf(_findText, from, StringComparison.OrdinalIgnoreCase);
-            if (found < 0 && from > 0)
-            {
-                found = text.IndexOf(_findText, 0, StringComparison.OrdinalIgnoreCase);
-            }
-        }
-        else
-        {
-            var from = box.SelectionStart - 1;
-            found = from >= 0 ? text.LastIndexOf(_findText, from, StringComparison.OrdinalIgnoreCase) : -1;
-            if (found < 0)
-            {
-                found = text.LastIndexOf(_findText, StringComparison.OrdinalIgnoreCase);
-            }
-        }
-
-        if (found < 0)
-        {
-            Announce("Not found", true);
-            return false;
-        }
-
-        box.Select(found, _findText.Length);
-        box.ScrollToCaret();
-        box.Select();
-        return true;
-    }
-
-    // ---- find in a notice's text (AX-7.2, 2026-10-23) ----
-
-    /// <summary>
-    /// Ctrl+F in a notice: the Find notice takes its place, and Find next or Cancel show it again, Find next with the
-    /// match selected and the focus in the text (the same find as the window's, on the notice's text). The notice
-    /// comes back as the same record, with its chime not played a second time.
-    /// </summary>
-    private void ShowFindInNotice()
-    {
-        if (Overlay.Shown is not { } notice)
-        {
-            return;
-        }
-
-        var back = notice with { Unprompted = false };
-        var caret = Overlay.Body.SelectionStart;
-        ShowNotice(new Notice("Find", string.Empty,
-        [
-            new OverlayChoice("&Find next", () =>
-            {
-                _findText = Overlay.InputText;
-                ShowNotice(back);
-                Overlay.Body.Select(caret, 0);
-                FindNext(Overlay.Body, 1);
-            }, IsDefault: true, StaysOpen: true),
-            new OverlayChoice("&Cancel", () =>
-            {
-                ShowNotice(back);
-                Overlay.Body.Select(caret, 0);
-            }, IsCancel: true, StaysOpen: true),
-        ])
-        {
-            Input = new OverlayInput("Text to find:", "Text to find", _findText, "Type the text to find"),
-        });
-    }
-
-    /// <summary>F3 and Shift+F3 in a notice: the next or the previous match in its text, selected; the Find notice first when nothing was searched for yet.</summary>
-    private void FindInNotice(int direction)
-    {
-        if (_findText.Length == 0)
-        {
-            ShowFindInNotice();
-            return;
-        }
-
-        FindNext(Overlay.Body, direction);
-    }
-
-    // ---- find in a list (AxFile AF-3.6, AxMedia AM-3.1; shared on the second use, 2026-10-22) ----
-
-    /// <summary>Ctrl+F on a list: the Find notice with the field "Name contains"; Find next closes it and selects the next item of <paramref name="list"/> whose name (from <paramref name="names"/>, one per item) contains the text, wrapping once.</summary>
-    protected void ShowFindInList(ListBox list, Func<IReadOnlyList<string>> names) =>
-        ShowNotice(new Notice("Find", string.Empty,
-        [
-            new OverlayChoice("&Find next", () =>
-            {
-                _findText = Overlay.InputText;
-                FindInList(list, names, 1);
-            }, IsDefault: true),
-            new OverlayChoice("&Cancel", IsCancel: true),
-        ])
-        {
-            Input = new OverlayInput("Name contains:", "Name contains", _findText, "Type the text to find"),
-        });
-
-    /// <summary>F3 and Shift+F3 on a list: the next (or previous) item whose name contains the text, wrapping once, selected; "Not found" otherwise; the Find notice when nothing was searched for yet. The selection is NVDA's own reading.</summary>
-    protected void FindInList(ListBox list, Func<IReadOnlyList<string>> names, int direction)
-    {
-        if (_findText.Length == 0)
-        {
-            ShowFindInList(list, names);
-            return;
-        }
-
-        var items = names();
-        var count = Math.Min(items.Count, list.Items.Count);
-        var from = Math.Max(0, list.SelectedIndex);
-        for (var step = 1; step <= count; step++)
-        {
-            var i = ((from + direction * step) % count + count) % count;
-            if (items[i].Contains(_findText, StringComparison.OrdinalIgnoreCase))
-            {
-                list.SelectedIndex = i;
-                return;
-            }
-        }
-
-        Announce("Not found", true);
-    }
-
-    // ---- fonts and the window's place (AX-7.6) ----
-
-    private static Font SystemTextFont() => SystemFonts.MessageBoxFont ?? DefaultFont;
-
-    /// <summary>The text font from the settings: the Windows font unless a family, a size or bold is set.</summary>
-    // ---- the command palette (AX-10): the window's menu commands by name, in a notice ----
-
-    /// <summary>
-    /// The palette as a notice: one field, the matches under it, Enter runs the selected one with the focus back
-    /// where it was, Escape closes (AX-10.1, AX-10.4). The entries are read from the menu bar now, before the notice
-    /// disables it, so that what the palette offers is what the menus offer at this moment.
-    /// </summary>
-    protected void ShowCommandPalette()
-    {
-        if (NoticeOpen)
-        {
-            return;
-        }
-
-        var before = FocusedControl();
-        _paletteAll = [.. CommandPalette.Commands(MainMenuStrip, text => Announce(text, true)), .. PaletteEntries()];
-        _paletteShown = _paletteAll;
-        ShowNotice(new Notice("Command palette", string.Empty,
-        [
-            new OverlayChoice("&Run", RunPaletteEntry, IsDefault: true, StaysOpen: true),
-            new OverlayChoice("&Close", IsCancel: true),
-        ])
-        {
-            Input = new OverlayInput("&Search commands:", "Search commands", string.Empty, string.Empty, Required: false,
-                KeyHook: OnPaletteKey, Changed: OnPaletteTyped, ListName: "Commands"),
-        });
-        // The control the user was in gets the focus back, unless the window keeps a place of its own.
-        _focusBeforeNotice ??= before;
-        FillPalette();
-    }
-
-    /// <summary>The innermost control with the focus, outside the notice.</summary>
-    private Control? FocusedControl()
-    {
-        var control = ActiveControl;
-        while (control is ContainerControl { ActiveControl: { } inner })
-        {
-            control = inner;
-        }
-
-        return control is null || Overlay.Contains(control) ? null : control;
-    }
-
-    private void OnPaletteTyped()
-    {
-        _paletteSpeak.Stop();
-        FillPalette();
-        if (Overlay.InputText.Trim().Length > 0)
-        {
-            _paletteSpeak.Start();
-        }
-    }
-
-    private void FillPalette()
-    {
-        _paletteShown = Palette.Find(_paletteAll, Overlay.InputText);
-        var lines = _paletteShown.Count > 0 ? _paletteShown.Select(entry => entry.Text).ToList() : [Palette.NoMatch(Overlay.InputText)];
-        Overlay.SetMatches(lines, $"Commands, {_paletteShown.Count}");
-    }
-
-    /// <summary>The first match and the count after the typing paused, or that nothing matches (AX-10.4).</summary>
-    private void SayFirstPaletteMatch()
-    {
-        _paletteSpeak.Stop();
-        if (!NoticeOpen || Overlay.InputText.Trim().Length == 0)
-        {
-            return;
-        }
-
-        Announce(_paletteShown.Count > 0 ? Palette.Spoken(_paletteShown[0], 0, _paletteShown.Count) : Palette.NoMatch(Overlay.InputText), true);
-    }
-
-    /// <summary>Down, Up, Page Down, Page Up, Ctrl+Home and Ctrl+End in the field move through the matches (AX-10.4).</summary>
-    private bool OnPaletteKey(Keys key)
-    {
-        var index = Overlay.MatchIndex;
-        int? target = key switch
-        {
-            CommandPalette.NextMatch => index + 1,
-            CommandPalette.PreviousMatch => index - 1,
-            BundleKeys.PageDown => index + Overlay.MatchPage,
-            BundleKeys.PageUp => index - Overlay.MatchPage,
-            CommandPalette.FirstMatch => 0,
-            CommandPalette.LastMatch => _paletteShown.Count - 1,
-            _ => null,
-        };
-        if (target is not { } wanted)
-        {
-            return false;
-        }
-
-        _paletteSpeak.Stop();
-        if (_paletteShown.Count == 0)
-        {
-            Sounds.Edge();
-            Announce(Palette.NoMatch(Overlay.InputText), true);
-            return true;
-        }
-
-        wanted = Math.Clamp(wanted, 0, _paletteShown.Count - 1);
-        if (wanted == index)
-        {
-            // At an end nothing moves: the edge earcon, and then the match again, so that the last thing heard is
-            // the position and not the typed text (AX-10.4).
-            Sounds.Edge();
-        }
-        else
-        {
-            Overlay.SelectMatch(wanted);
-        }
-
-        Announce(Palette.Spoken(_paletteShown[wanted], wanted, _paletteShown.Count), true);
-        return true;
-    }
-
-    /// <summary>Enter: the palette closes, the focus goes back, and then the entry runs where the user was (AX-10.4).</summary>
-    private void RunPaletteEntry()
-    {
-        _paletteSpeak.Stop();
-        var index = Overlay.MatchIndex;
-        if (index < 0 || index >= _paletteShown.Count)
-        {
-            Announce(Palette.NoMatch(Overlay.InputText), true);
-            return;
-        }
-
-        var entry = _paletteShown[index];
-        CloseNotice(null);
-        BeginInvoke(entry.Run);
-    }
-
-    protected Font TextFont()
-    {
-        var system = SystemTextFont();
-        if (Settings.FontFamily is null && Settings.FontSize <= 0 && !Settings.FontBold)
-        {
-            return system;
-        }
-
-        var size = Settings.FontSize > 0 ? Settings.FontSize : system.SizeInPoints;
-        var style = Settings.FontBold ? FontStyle.Bold : FontStyle.Regular;
         try
         {
-            return new Font(Settings.FontFamily ?? system.FontFamily.Name, size, style);
+            await action();
         }
-        catch (ArgumentException)
+        catch (Exception ex) when (ex is not OperationCanceledException)
         {
-            return new Font(system.FontFamily, size, style);
+            Log.Error($"{AppName} command failed", ex);
+            if (!IsDisposed)
+            {
+                Fail(ex.Message);
+            }
         }
     }
 
-    /// <summary>The settings' font onto the window's controls and the notice.</summary>
-    protected void ApplyTextFont()
-    {
-        var font = TextFont();
-        ApplyFont(font);
-        Overlay.SetTextFont(font);
-    }
-
-    protected void ChangeTextSize(int delta)
-    {
-        var size = Math.Clamp((int)Math.Round(TextFont().SizeInPoints) + delta, 6, 72);
-        Settings.FontSize = size;
-        ApplyTextFont();
-        SaveSettings();
-        Announce($"Text size {size}", true);
-    }
-
-    protected void UseSystemFont()
-    {
-        Settings.FontFamily = null;
-        Settings.FontSize = 0;
-        Settings.FontBold = false;
-        ApplyTextFont();
-        SaveSettings();
-        Announce("Windows text size", true);
-    }
-
-    /// <summary>The Windows font picker, one of the system's own windows; the choice is said.</summary>
-    protected void ChooseFont()
-    {
-        using var dialog = new FontDialog
-        {
-            Font = TextFont(),
-            ShowEffects = false,
-            FontMustExist = true,
-            MinSize = 6,
-            MaxSize = 72,
-        };
-        if (dialog.ShowDialog(this) != DialogResult.OK)
-        {
-            return;
-        }
-
-        Settings.FontFamily = dialog.Font.FontFamily.Name;
-        Settings.FontSize = dialog.Font.SizeInPoints;
-        Settings.FontBold = dialog.Font.Bold;
-        ApplyTextFont();
-        SaveSettings();
-        Announce($"Font {dialog.Font.FontFamily.Name} {Math.Round(dialog.Font.SizeInPoints)} point", true);
-    }
+    // ---- the window's place and the settings (AX-5, AX-7.6) ----
 
     /// <summary>The window where it was last, when that place is still on a screen; the window calls it from its constructor.</summary>
     protected void RestoreWindow()
@@ -847,7 +404,53 @@ public abstract class AxitForm : Form
         }
     }
 
-    // ---- help, diagnostics, updates (AX-3) ----
+    // ---- the ways out to the system (AX-7.2: the only separate windows) ----
+
+    /// <summary>The Windows folder picker, titled with <paramref name="description"/> and opened on <paramref name="start"/>: the folder chosen, or null.</summary>
+    protected string? ChooseFolder(string description, string? start = null)
+    {
+        using var dialog = new FolderBrowserDialog { Description = description, UseDescriptionForTitle = true, ShowNewFolderButton = true };
+        if (start is not null)
+        {
+            dialog.InitialDirectory = start;
+        }
+
+        return dialog.ShowDialog(this) == DialogResult.OK && dialog.SelectedPath.Length > 0 ? dialog.SelectedPath : null;
+    }
+
+    /// <summary>A page in the default browser; a failure is a notice. The Axit menu, in this project, calls it for the repository page.</summary>
+    protected internal void OpenUrl(string url)
+    {
+        try
+        {
+            Process.Start(new ProcessStartInfo(url) { UseShellExecute = true });
+        }
+        catch (Exception ex) when (ex is System.ComponentModel.Win32Exception or IOException)
+        {
+            Fail("The page could not be opened: " + ex.Message);
+        }
+    }
+
+    /// <summary>The path in File Explorer: a folder opened, a file selected in its folder; with <paramref name="select"/> a folder is selected in its parent too (AxFile's Show in File Explorer on an entry).</summary>
+    protected void OpenInExplorer(string path, bool select = false)
+    {
+        var arguments = !select && Directory.Exists(path) ? $"\"{path}\"" : $"/select,\"{path}\"";
+        try
+        {
+            Process.Start(new ProcessStartInfo("explorer.exe", arguments) { UseShellExecute = false })?.Dispose();
+        }
+        catch (Exception ex) when (ex is System.ComponentModel.Win32Exception or InvalidOperationException)
+        {
+            Fail("File Explorer could not be started: " + ex.Message);
+        }
+    }
+
+    /// <summary>Options → Developer → Open settings file: the app's settings, written first, in a new AxJSON window, as any JSON file.</summary>
+    protected void OpenSettingsFile()
+    {
+        SaveSettings();
+        AxitMenu.Start(Dispatch.AxJSON, SettingsPath);
+    }
 
     /// <summary>Options → Developer → Copy diagnostics: the versions, the window's own lines and the end of the log, to the clipboard.</summary>
     protected virtual void CopyDiagnostics()
@@ -870,286 +473,5 @@ public abstract class AxitForm : Form
         {
             Fail("The clipboard could not be written: " + ex.Message);
         }
-    }
-
-    /// <summary>Options → Developer → Open settings file: the app's settings, written first, in a new AxJSON window, as any JSON file.</summary>
-    protected void OpenSettingsFile()
-    {
-        SaveSettings();
-        AxitMenu.Start(Dispatch.AxJSON, SettingsPath);
-    }
-
-    /// <summary>A page in the default browser, one of the system's own windows; a failure is a notice.</summary>
-    protected void OpenUrl(string url)
-    {
-        try
-        {
-            Process.Start(new ProcessStartInfo(url) { UseShellExecute = true });
-        }
-        catch (Exception ex) when (ex is System.ComponentModel.Win32Exception or IOException)
-        {
-            Fail("The page could not be opened: " + ex.Message);
-        }
-    }
-
-    /// <summary>The path in File Explorer, one of the system's own windows (AX-7.2): a folder opened, a file selected in its folder.</summary>
-    protected void OpenInExplorer(string path)
-    {
-        var arguments = Directory.Exists(path) ? $"\"{path}\"" : $"/select,\"{path}\"";
-        try
-        {
-            Process.Start(new ProcessStartInfo("explorer.exe", arguments) { UseShellExecute = false });
-        }
-        catch (Exception ex) when (ex is System.ComponentModel.Win32Exception or InvalidOperationException)
-        {
-            Fail("File Explorer could not be started: " + ex.Message);
-        }
-    }
-
-    /// <summary>
-    /// AX-3: asks GitHub for the latest release, every time. A newer one is offered in a notice (unprompted at
-    /// startup) and noted in the Axit menu; a manual check (Axit → Check for updates) reports the result either
-    /// way, including a failure.
-    /// </summary>
-    protected async void CheckForUpdates(bool manual)
-    {
-        if (_updateBusy)
-        {
-            return;
-        }
-
-        SetUpdateBusy(true);
-        _latestState = "checking...";
-        try
-        {
-            using var cancellation = new CancellationTokenSource(TimeSpan.FromSeconds(30));
-            var release = await Updater.CheckAsync(cancellation.Token);
-            if (IsDisposed)
-            {
-                return;
-            }
-
-            // A check answers for itself: an update known from an earlier one is replaced, or gone.
-            _update = null;
-            _updateItem.Visible = false;
-            if (release is null)
-            {
-                _latestState = "none published yet";
-            }
-            else if (UpdateCheck.IsNewer(release, BundleInfo.Version))
-            {
-                var version = release.Version.ToString(3);
-                _update = release;
-                _latestState = $"Axit {version} (newer than this one)";
-                _updateItem.Text = $"Update &to Axit {version}...";
-                _updateItem.Visible = true;
-                Log.Info($"Update available: {release.Tag}, zip {release.ZipUrl ?? "missing"}");
-                if (!manual)
-                {
-                    UpdateNoted($"Axit {version} is available. Axit menu, Update to Axit {version}.");
-                }
-
-                if (manual || !NoticeOpen)
-                {
-                    // At startup the notice opens by itself: Enter updates, Escape keeps this version.
-                    ShowUpdateNotice(release, unprompted: !manual);
-                }
-                else
-                {
-                    Announce($"Update {version} in the Axit menu", false);
-                }
-
-                return;
-            }
-            else
-            {
-                var same = release.Version == UpdateCheck.ParseVersion(BundleInfo.Version);
-                _latestState = $"Axit {release.Version.ToString(3)} ({(same ? "this version" : "older than this build")})";
-            }
-
-            if (manual)
-            {
-                ShowNotice(Notice.Plain("Check for updates",
-                    $"You have the newest version, Axit {BundleInfo.Version}.\n" +
-                    (release is null ? "No release is published yet.\n" : string.Empty) +
-                    $"Releases: {UpdateCheck.ReleasesPage}"));
-            }
-        }
-        catch (Exception ex) when (ex is HttpRequestException or TaskCanceledException or IOException or InvalidOperationException)
-        {
-            Log.Error("The update check failed", ex);
-            _latestState = "unknown, GitHub could not be reached";
-            if (manual && !IsDisposed)
-            {
-                ShowNotice(new Notice("Check for updates",
-                    $"GitHub could not be reached: {ex.Message}\nThe releases page: {UpdateCheck.ReleasesPage}",
-                [
-                    new OverlayChoice("&Open releases page", () => OpenUrl(UpdateCheck.ReleasesPage), StaysOpen: true),
-                    OverlayChoice.Close,
-                ]));
-            }
-        }
-        finally
-        {
-            SetUpdateBusy(false);
-        }
-    }
-
-    /// <summary>While a check or an install runs, the two update items of the Axit menu are disabled, so that neither starts twice.</summary>
-    private void SetUpdateBusy(bool busy)
-    {
-        _updateBusy = busy;
-        if (!IsDisposed)
-        {
-            _checkItem.Enabled = !busy;
-            _updateItem.Enabled = !busy;
-        }
-    }
-
-    /// <summary>The button that opens a release on GitHub and leaves the notice open.</summary>
-    private OverlayChoice ReleasePageChoice(ReleaseInfo release) => new("&Open release page", () => OpenUrl(release.PageUrl), StaysOpen: true);
-
-    /// <summary>The release notes with Update and restart, Update and close, Open release page and Later; <paramref name="unprompted"/> when the check at startup found it.</summary>
-    private void ShowUpdateNotice(ReleaseInfo release, bool unprompted = false)
-    {
-        var version = release.Version.ToString(3);
-        var size = release.ZipSize > 0 ? $" The download is {release.ZipSize / (1024.0 * 1024.0):0} MB." : string.Empty;
-        var text =
-            $"You have Axit {BundleInfo.Version}. Axit {version} is available.\n\n" +
-            (release.Notes.Length > 0 ? release.Notes + "\n\n" : string.Empty) +
-            $"Update and restart downloads the new version, {UpdateRestartText}. Update and close installs without starting it again. " +
-            $"A progress bar shows the download.{size}\n" +
-            "Later keeps this version; the Axit menu offers the update again.";
-        ShowNotice(new Notice($"Update to Axit {version}", text,
-        [
-            new OverlayChoice("Update and &restart", () => InstallUpdate(release, restart: true), IsDefault: true),
-            new OverlayChoice("Update and &close", () => InstallUpdate(release, restart: false)),
-            ReleasePageChoice(release),
-            new OverlayChoice("&Later", IsCancel: true),
-        ])
-        {
-            Unprompted = unprompted,
-        });
-    }
-
-    /// <summary>
-    /// Update and restart, or Update and close: downloads the release and installs it in place behind one notice with
-    /// one progress bar (the download up to 80 percent, the installer's steps to 100; Cancel stops the download, not
-    /// the install), then closes the window; on the way out, OnFormClosing starts the installed new version when
-    /// <paramref name="restart"/> was chosen (AX-3.2).
-    /// </summary>
-    private async void InstallUpdate(ReleaseInfo release, bool restart)
-    {
-        if (_updateBusy)
-        {
-            return;
-        }
-
-        SetUpdateBusy(true);
-        var version = release.Version.ToString(3);
-        var size = release.ZipSize > 0 ? $" ({release.ZipSize / (1024.0 * 1024.0):0} MB)" : string.Empty;
-        UpdateNoted($"Updating to Axit {version}...");
-        using var cancellation = new CancellationTokenSource(TimeSpan.FromMinutes(10));
-        var cancelled = false;
-        var installing = false;
-        ShowNotice(new Notice($"Updating to Axit {version}",
-            $"The new version is downloaded{size} and installed; the progress bar shows how far it is. Cancel during the download keeps this version.",
-        [
-            new OverlayChoice("&Cancel", () =>
-            {
-                if (installing)
-                {
-                    Announce("Installing, this cannot be cancelled now", true);
-                    return;
-                }
-
-                cancelled = true;
-                cancellation.Cancel();
-                CloseNotice(null);
-            }, IsDefault: true, IsCancel: true, StaysOpen: true),
-        ])
-        {
-            Progress = true,
-        });
-        try
-        {
-            var folder = await Updater.DownloadAsync(release, cancellation.Token, new Progress<int>(percent => Overlay.SetProgress(percent * 80 / 100)));
-            // Cancel pressed while the zip was being unpacked, which the download does not watch the token for.
-            cancellation.Token.ThrowIfCancellationRequested();
-            if (IsDisposed)
-            {
-                return;
-            }
-
-            installing = true;
-            Overlay.SetProgress(80);
-            Announce("Downloaded. Installing", true);
-            var step = 80;
-            var result = await Updater.InstallInPlaceAsync(folder, new Progress<string>(_ => Overlay.SetProgress(step = Math.Min(99, step + 3))));
-            if (IsDisposed)
-            {
-                return;
-            }
-
-            if (result.ExitCode != 0)
-            {
-                Log.Error($"The installer failed with code {result.ExitCode}:\r\n{result.Output}");
-                UpdateNoted($"The installation of Axit {version} failed. This version keeps running.");
-                ShowNotice(new Notice($"Update to Axit {version}",
-                    $"The installer failed; this version keeps running.\n\n{result.Output}\n\nYou can download the zip from the release page and run install.cmd yourself.",
-                [
-                    ReleasePageChoice(release),
-                    OverlayChoice.Close,
-                ]));
-                return;
-            }
-
-            Overlay.SetProgress(100);
-            _restartArguments = restart ? [.. RestartArguments()] : null;
-            Log.Info($"Update {release.Tag} installed in place; restart: {restart}");
-            UpdateNoted(restart
-                ? $"Axit {version} installed. {AppName} closes now and starts again."
-                : $"Axit {version} installed. {AppName} closes now; the next start is the new version.");
-            Announce(restart ? "Installed. Restarting" : "Installed. Closing", true);
-            ClosingForUpdate = true;
-            Close();
-        }
-        catch (OperationCanceledException) when (cancelled && !IsDisposed)
-        {
-            UpdateNoted($"The download of Axit {version} was cancelled.");
-            Announce("Update cancelled", true);
-        }
-        catch (Exception ex) when (ex is HttpRequestException or OperationCanceledException or IOException or InvalidDataException or InvalidOperationException or UnauthorizedAccessException or System.ComponentModel.Win32Exception)
-        {
-            // InvalidDataException: a download that is not a zip; OperationCanceledException here: the ten minutes
-            // ran out; Win32Exception: PowerShell could not be started for the installer (a policy).
-            Log.Error("The update failed", ex);
-            if (!IsDisposed)
-            {
-                UpdateNoted($"The update to Axit {version} failed: {ex.Message}");
-                ShowNotice(new Notice($"Update to Axit {version}",
-                    $"The update failed: {ex.Message}\nThis version keeps running. You can download the zip from the release page and run install.cmd yourself.",
-                [
-                    ReleasePageChoice(release),
-                    OverlayChoice.Close,
-                ]));
-            }
-        }
-        finally
-        {
-            SetUpdateBusy(false);
-        }
-    }
-
-    /// <summary>Keep working after Update and restart: the update is installed already; this window stays, and the new version comes with the next start.</summary>
-    protected void KeepWorkingAfterUpdate()
-    {
-        if (_restartArguments is null)
-        {
-            return;
-        }
-
-        _restartArguments = null;
-        Announce($"Update installed. It starts with the next {AppName}", true);
     }
 }

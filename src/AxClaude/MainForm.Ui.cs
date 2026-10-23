@@ -39,7 +39,7 @@ internal sealed partial class MainForm
         // the editors have Save and Save as, so that the first menu of every window keeps the same order (bundle AX-6).
         session.DropDownItems.Add(new ToolStripMenuItem("&Export conversation...", null, (_, _) => ExportConversation()) { ShortcutKeyDisplayString = BundleKeys.Text(BundleKeys.Save) });
         session.DropDownItems.Add(new ToolStripSeparator());
-        session.DropDownItems.Add(new ToolStripMenuItem("E&xit", null, (_, _) => Close()) { ShortcutKeyDisplayString = "Alt+F4" });
+        session.DropDownItems.Add(CreateExitItem());
 
         // What goes to Claude itself (FR-11); the raw sequences are fixed here and listed in Appendix B.
         var claude = new ToolStripMenuItem("&Claude");

@@ -260,21 +260,36 @@ allow it, see B-9).
 - AX-6.5 **The window base.** Every window of an app derives from `Axit.Forms/AxitForm`, which holds what the
   windows share and no app copies: the notice flow (`ShowNotice`, `CloseNotice`, `Fail`, `ShowError`; Alt, F10 and
   the window's shortcuts swallowed while a notice shows), `Announce`, the text font with its size keys and the
-  Windows font picker (the choice said), the window's place and size, the settings saving, the Axit menu with the
-  update check, the update notice and the install in place (AX-3), find in a text box and in a list, Copy diagnostics, `OpenUrl`, `OpenInExplorer`,
-  the submenus and the menu every window has (Options → Text, General and Developer; Help: `CreateTextMenu`,
+  Windows font picker (the choice said), the window's place and size, the settings saving and the notice for a
+  settings file that could not be read, the Axit menu with the
+  update check, the update notice and the install in place (AX-3), find in a text box, in a list, in a transcript
+  and in a notice's text (one Find notice, one last text), Copy diagnostics, `OpenUrl`, `OpenInExplorer`, the
+  Windows folder picker (`ChooseFolder`), `Do` (a command's task with an escaped exception turned into a notice),
+  the hand-over from a starting process of the app (`AppMessage`, answered at once and applied after), the submenus
+  and the menu every window has (Options → Text, General and Developer; Help: `CreateTextMenu`,
   `CreateGeneralMenu`, `CreateDeveloperMenu`, `CreateHelpMenu`, each with the window's own items in their place;
-  `Toggle` for a checked setting), the window role for NVDA (AX-7.1) and the common part of the key switch (the
-  text size keys everywhere, F1). A
+  `Toggle` for a checked setting; `CreateExitItem` for the last item of the first menu), the window role for NVDA
+  (AX-7.1) and the common part of the key switch (the text size keys everywhere, F1, the palette, Ctrl+S). A
   window adds its controls (the `Overlay` first) and fills in the hooks: the F1 text, what to hide for a notice and
-  what to show after, where the focus goes after one (`FocusTarget`, `FocusToKeep`), whether the chime follows a
+  what to show after, the control the focus falls back to after one (`FocusTarget`), whether the chime follows a
   setting, what gets the font, how the new version starts it again (`RestartArguments`, `UpdateRestartText`), what
   to note of an update (`UpdateNoted`), its diagnostics lines, the control its announcements are raised on
-  (`AnnounceSource`), its own palette entries (`PaletteEntries`, AX-10.5), and its own keys (`ProcessWindowKey`). The
+  (`AnnounceSource`), its own palette entries (`PaletteEntries`, AX-10.5), what Ctrl+S does (`SaveCommand`;
+  "Nothing to save here" by default), what it does with a hand-over (`TakeHandOver`), how it reports a settings file
+  it could not read (`SettingsNotRead`; a notice by default, a system line in the console windows), and its own
+  keys (`ProcessWindowKey`). **The focus across a notice is one rule, the base's** (2026-10-23): when the first
+  notice of a chain opens, the control that has the focus is remembered and `OnNoticeOpened` is called with it; a
+  notice a notice's button opens, or one shown while one is open, continues the chain; when the last one closes,
+  `OnNoticeClosed` is called and that control gets the focus back if it is still there and visible (the Actions
+  list of AxFile, the details of AxGit, a transcript), and `FocusTarget` otherwise (an answered question's list, the
+  message field behind a question). No window decides where the focus goes after a notice. The
   settings each window needs are an abstract class in `Axit.Core`, `WindowSettings` (font, update check, place;
-  `Save`), which every app's settings class derives from while its file keeps its own shape. The base grew out of the editor shell on
-  the third copy, AxGit (2026-10-18); AxClaude's `MainForm` moved onto it the same day, its own extras (the sound
-  setting for the chime, the reader's kept caret, system lines for the update's steps) as hooks.
+  `Save`), which every app's settings class derives from while its file keeps its own shape. The base is one class
+  in partial files, one per section (the hooks and the menus, the notices, find, the fonts, the updates, the palette).
+  It grew out of the editor shell on the third copy, AxGit (2026-10-18); AxClaude's `MainForm` moved onto it the same
+  day, its own extras (the sound setting for the chime, the reader's kept caret, system lines for the update's steps)
+  as hooks; the notice and focus core was written again, and what every window still copied moved in, on 2026-10-23
+  (`docs/axit/review-2026-10-23.md`, 5.3 and 6).
 
 ### AX-8 Keys
 
@@ -284,9 +299,10 @@ allow it, see B-9).
 - AX-8.2 Bundle-wide keys are defined once, in `Axit.Forms/BundleKeys`, a plain static class of constants, and every
   window uses those constants. The list: F1 the keyboard shortcuts; Tab,
   Shift+Tab, Ctrl+Tab, Ctrl+Shift+Tab and F6 move between the window's controls (and between a notice's text, field
-  and buttons); Ctrl+F find, F3 and Shift+F3 next and previous, in a notice's text as well (AX-7.2); Ctrl+S save (what the window holds: the editors' file; AxClaude, which has no
-  document of its own, exports its conversation to a text file with it, from the bottom of its first menu, so that
-  Save and Save as keep their place in the editors' and the first menus share one order); Ctrl+Plus and Ctrl+Minus text size; Enter and Escape on a notice; Page Up and Page Down one screen in an
+  and buttons); Ctrl+F find, F3 and Shift+F3 next and previous, in a notice's text as well (AX-7.2); Ctrl+S save (what the window holds: the editors' file; AxClaude and AxTerminal, which have no
+  document of their own, export their transcript to a text file with it, from the bottom of their first menu, so that
+  Save and Save as keep their place in the editors' and the first menus share one order; a window with nothing to
+  save says "Nothing to save here", AxGit adding the keys that do something, through the base's `SaveCommand`); Ctrl+Plus and Ctrl+Minus text size; Enter and Escape on a notice; Page Up and Page Down one screen in an
   edit control; Ctrl+Up and Ctrl+Down the start of the previous and next paragraph in an edit control, a paragraph
   starting at the first line or at a line with text directly after a blank line, and Ctrl+Shift+Up and
   Ctrl+Shift+Down the selection grown to there, as in Word (`EditParagraphs`; the EDIT control's own keys scroll a

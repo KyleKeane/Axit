@@ -61,18 +61,9 @@ internal sealed partial class MainForm
         OpenInExplorer(_folder);
     }
 
-    /// <summary>The standard folder picker (one of the few separate windows, D23); null when it was cancelled.</summary>
-    private string? PickFolder(string? start)
-    {
-        using var dialog = new FolderBrowserDialog
-        {
-            Description = "Choose the project folder for Claude",
-            UseDescriptionForTitle = true,
-            InitialDirectory = start ?? Environment.GetFolderPath(Environment.SpecialFolder.UserProfile),
-            ShowNewFolderButton = true,
-        };
-        return dialog.ShowDialog(this) == DialogResult.OK && !string.IsNullOrEmpty(dialog.SelectedPath) ? dialog.SelectedPath : null;
-    }
+    /// <summary>The bundle's folder picker (one of the few separate windows, D23), on the folder or the user's profile; null when it was cancelled.</summary>
+    private string? PickFolder(string? start) =>
+        ChooseFolder("Choose the project folder for Claude", start ?? Environment.GetFolderPath(Environment.SpecialFolder.UserProfile));
 
     /// <summary>Makes the folder the project folder: the title and the status bar follow, and the default arguments apply there again (FR-9.1).</summary>
     private void SetFolder(string folder)
