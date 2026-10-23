@@ -51,6 +51,10 @@
 - For developers: AxGit's views are one record each (ViewState); GitRunner.Program lets the tests run a fake git for the output, the timeout and the open pipe, which found that every timeout was reported as a program keeping the output open.
 - AxStart: the launcher stays up while NVDA's own menu or settings are in front; it hid as for any other program.
 - For developers: AxStart hands the foreground back by one rule (GiveForegroundBack) in place of three patches, and tells its first showing by the handle, not a flag; the hotkey setting's property is HotkeyText (the file's key stays hotkey).
+- AxMedia: a speed the engine refuses is no longer kept for the next file, which played at normal speed under a status bar showing the old speed; the status bar and Ctrl+Q say the speed the file plays at.
+- AxMedia: two files played in quick succession no longer let the first one's failure skip the second: an event is matched to the file it is about.
+- AxMedia: Ctrl+Right, Ctrl+Left and Go to time say the position reached, the file's end at most, not the one asked for.
+- For developers: AxMedia's hand-overs are one queue drained in order; the black video area is written into AX-7.7 as the one colour an app sets.
 
 ## 3.4.0 - 2026-10-22
 

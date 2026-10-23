@@ -27,6 +27,9 @@ public sealed class MediaPlayer : IDisposable
     private readonly Callback _callback;
     private readonly IMFPMediaPlayer _player;
     private IMFPMediaItem? _item;
+
+    /// <summary>The native interface pointer of <see cref="_item"/>, which MFPlay names in its events about it: an event of an item replaced since is told from the current item's by it.</summary>
+    private nint _itemPointer;
     private bool _opening;
     private bool _disposed;
     private double _rate = 1;
@@ -127,6 +130,7 @@ public sealed class MediaPlayer : IDisposable
         }
 
         _item = item;
+        _itemPointer = Pointer(item);
         if (item.HasVideo(out var hasVideo, out var selected) >= 0)
         {
             HasVideo = hasVideo != 0 && selected != 0;
@@ -166,12 +170,12 @@ public sealed class MediaPlayer : IDisposable
         }
     }
 
-    /// <summary>Moves to <paramref name="position"/>, clamped to the file; takes effect at once while playing or paused.</summary>
-    public void Seek(TimeSpan position)
+    /// <summary>Moves to <paramref name="position"/>, clamped to the file, and returns where it went (what the window says; until 2026-10-23 it said the position asked for); takes effect at once while playing or paused. Zero when nothing is loaded.</summary>
+    public TimeSpan Seek(TimeSpan position)
     {
         if (_disposed || _item is null)
         {
-            return;
+            return TimeSpan.Zero;
         }
 
         var duration = Duration;
@@ -188,9 +192,15 @@ public sealed class MediaPlayer : IDisposable
         // TimeSpan ticks are 100-nanosecond units, the unit MFPlay takes.
         var value = new PropVariant { vt = VT_I8, value = position.Ticks };
         _player.SetPosition(in MFP_POSITIONTYPE_100NS, in value);
+        return position;
     }
 
-    /// <summary>Sets the rate, kept for the files that follow; false when the engine refuses it (AM-4.3).</summary>
+    /// <summary>
+    /// Sets the rate, kept for the files that follow once the engine has accepted it; false, with the rate before
+    /// kept, when the engine refuses it (AM-4.3). With no file loaded the engine cannot be asked, so the rate is kept
+    /// and tried when the next file is set, which falls back to 1 when that file refuses it (<see cref="Rate"/> says so).
+    /// (Until 2026-10-23 the rate was kept before the engine answered, so a refused rate came back with the next file.)
+    /// </summary>
     public bool SetRate(double rate)
     {
         if (_disposed)
@@ -198,8 +208,13 @@ public sealed class MediaPlayer : IDisposable
             return false;
         }
 
+        if (_item is not null && _player.SetRate((float)rate) < 0)
+        {
+            return false;
+        }
+
         _rate = rate;
-        return _item is null || _player.SetRate((float)rate) >= 0;
+        return true;
     }
 
     /// <summary>The video window was resized or needs painting (AM-2.4).</summary>
@@ -230,13 +245,20 @@ public sealed class MediaPlayer : IDisposable
         ReleaseItem();
     }
 
-    /// <summary>An event from MFPlay, on its thread: only the two numbers are read here; the rest happens on the window's thread.</summary>
-    private void OnEvent(int type, int hr) => _post(() => Handle(type, hr));
+    /// <summary>An event from MFPlay, on its thread: only the two numbers and the item's pointer are read there; the rest happens on the window's thread.</summary>
+    private void OnEvent(int type, int hr, nint item) => _post(() => Handle(type, hr, item));
 
-    private void Handle(int type, int hr)
+    private void Handle(int type, int hr, nint item)
     {
         if (_disposed)
         {
+            return;
+        }
+
+        if (item != 0 && item != _itemPointer)
+        {
+            // An event of an item replaced since by a quicker second Play (2026-10-23): its failure would have been
+            // taken for the new file's and skipped it, its play for the new file's start.
             return;
         }
 
@@ -260,9 +282,10 @@ public sealed class MediaPlayer : IDisposable
                     return;
                 }
 
-                if (_rate != 1)
+                if (_rate != 1 && _player.SetRate((float)_rate) < 0)
                 {
-                    _player.SetRate((float)_rate);
+                    // This file refuses the rate: it plays at 1, and Rate says so (AM-4.2).
+                    _rate = 1;
                 }
 
                 break;
@@ -294,6 +317,7 @@ public sealed class MediaPlayer : IDisposable
         if (_item is { } item)
         {
             _item = null;
+            _itemPointer = 0;
             try
             {
                 Marshal.ReleaseComObject(item);
@@ -305,6 +329,14 @@ public sealed class MediaPlayer : IDisposable
     }
 
     private void ThrowIfDisposed() => ObjectDisposedException.ThrowIf(_disposed, this);
+
+    /// <summary>The interface pointer MFPlay names an item by in its events: the wrapper's own object's, not held here (the wrapper keeps the item alive).</summary>
+    private static nint Pointer(IMFPMediaItem item)
+    {
+        var pointer = Marshal.GetComInterfaceForObject<IMFPMediaItem, IMFPMediaItem>(item);
+        Marshal.Release(pointer);
+        return pointer;
+    }
 
     private static TimeSpan Time(int hr, PropVariant value) => hr < 0 || value.value < 0 ? TimeSpan.Zero : TimeSpan.FromTicks(value.value);
 
@@ -380,12 +412,33 @@ public sealed class MediaPlayer : IDisposable
         public nint rest;
     }
 
-    /// <summary>The events, delivered as a header whose first two fields are the type and the HRESULT; the rest is not read.</summary>
+    /// <summary>
+    /// The events, delivered as a header (the type, the HRESULT, the player, the state, the property store) followed,
+    /// for an event about an item (the item set, playing, ended), by the item's interface pointer; the two numbers and
+    /// that pointer are read here, nothing else.
+    /// </summary>
     [ComVisible(true)]
     private sealed class Callback(MediaPlayer owner) : IMFPMediaPlayerCallback
     {
-        public void OnMediaPlayerEvent(nint header) =>
-            owner.OnEvent(Marshal.ReadInt32(header, 0), Marshal.ReadInt32(header, 4));
+        public void OnMediaPlayerEvent(nint header)
+        {
+            var type = Marshal.ReadInt32(header, 0);
+            var item = type is MFP_EVENT_TYPE_PLAY or MFP_EVENT_TYPE_MEDIAITEM_SET or MFP_EVENT_TYPE_PLAYBACK_ENDED
+                ? Marshal.ReadIntPtr(header, Marshal.SizeOf<EventHeader>())
+                : 0;
+            owner.OnEvent(type, Marshal.ReadInt32(header, 4), item);
+        }
+    }
+
+    /// <summary>MFP_EVENT_HEADER, declared for its size: an event about an item carries the item's pointer right after it.</summary>
+    [StructLayout(LayoutKind.Sequential)]
+    private struct EventHeader
+    {
+        public int Type;
+        public int Result;
+        public nint Player;
+        public int State;
+        public nint PropertyStore;
     }
 
     [ComImport]

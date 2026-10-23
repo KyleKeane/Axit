@@ -72,6 +72,11 @@ public class PlayQueueTests
         Assert.Equal("03 Three.mp3", queue.Remove(1));
         Assert.Equal(-1, queue.Playing);
         Assert.Null(queue.Remove(5));
+        // The last file, playing, taken out: nothing is left to play, and the index is past the end.
+        queue.Set(Three, 2);
+        Assert.Equal("03 Three.mp3", queue.Remove(2));
+        Assert.Equal(-1, queue.Playing);
+        Assert.Null(queue.PlayingPath);
     }
 
     [Fact]

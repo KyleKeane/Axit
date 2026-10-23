@@ -80,6 +80,8 @@ top of the window. It works entirely offline (bundle G6).
   per line; the window answers 1 once it has taken the message, and the starting process, which waits up to five
   seconds for the answer, ends on it (AM-D4). The sending and the receiving are
   one shared piece, `Axit.Forms/AppMessage`, which AxPreview uses the same way. Nothing listens on the network (G6).
+  Hand-overs that arrive while one is being applied wait in a queue and apply in the order they came (one queue
+  drained in turn since 2026-10-23; a chain of tasks before).
 - AM-1.4 Ways out: Show current file in ▸ File Explorer (Ctrl+W: the playing file, or the file under the selection,
   selected in File Explorer) and AxFile (the same file selected in its folder, a new AxFile window; `docs/axfile/SPEC.md`
   AF-1.1). The Axit menu (AX-9).
@@ -97,6 +99,8 @@ top of the window. It works entirely offline (bundle G6).
   window by it (AX-9).
 - AM-2.4 A video's picture is drawn in an area at the top of the window (not focusable; never a window of its own,
   AX-7.2), two fifths of the height while a video plays or is paused, hidden otherwise; its sound goes the same way.
+  The area is black, the colour of a video surface everywhere, so that a picture's letterbox is not the window's
+  colour: the one colour an app sets (AX-7.7; decided 2026-10-23).
 
 ### AM-3 The queue
 
@@ -126,16 +130,21 @@ top of the window. It works entirely offline (bundle G6).
   (B-10): Media Foundation through MFPlay (AM-D5). The file is opened synchronously, so that one that cannot be opened
   says so at once; playing starts when the engine reports the item set; its events come back on the window's thread.
   A rate other than 1 keeps the pitch. A rate the engine refuses: "Speed n is not supported here", and the speed
-  stays. A Windows without the media components (an N edition without the Media Feature Pack has no `mfplay.dll`)
+  stays: the rate is kept only once the engine has accepted it, and a rate accepted for one file and refused by the
+  next falls back to 1 for that file, which the status bar and Ctrl+Q show, since they read the player's rate (until
+  2026-10-23 the refused rate was kept, and the next file played at 1 under a status bar showing the old speed). An
+  event of a file replaced before it was set (two plays in quick succession) is told from the new file's by the item
+  it names, and left alone (2026-10-23; the old file's failure skipped the new one). A Windows without the media components (an N edition without the Media Feature Pack has no `mfplay.dll`)
   gives "Cannot play <name>: the media player could not be created: Windows' media components are missing…", not a
   crash (2026-10-23).
 - AM-4.3 **Keys**, from anywhere in the window: **Space** in the list and **Ctrl+P** anywhere pause or resume
   ("Paused at 12:40" / "Playing"); **Ctrl+Right** and **Ctrl+Left** move 15 seconds forward or back (`seekSeconds`),
-  "12:25"; **Ctrl+Shift+Right** and **Ctrl+Shift+Left** the next and the previous file ("Playing <name>"; "First
+  saying the position reached, "12:25", the file's end at most (until 2026-10-23 the position asked for, past the
+  end included); **Ctrl+Shift+Right** and **Ctrl+Shift+Left** the next and the previous file ("Playing <name>"; "First
   file" and "End of queue" at the ends); **Ctrl+Shift+Period** and **Ctrl+Shift+Comma** faster and slower by 0.25
   between 0.5 and 3 ("Speed 1.25"), Play → Normal speed back to 1, the speed kept in the settings for the next file
   and the next window; **Ctrl+T** Go to time…, the notice with the field "Time" (`12:40`, `1:02:10`, or `750` for
-  seconds), "12:40" when done; **Ctrl+Q** What is playing: "Playing <name>, 12:52 of 45:30, speed 1.25", "Paused …"
+  seconds), the position reached, "12:40", when done; **Ctrl+Q** What is playing: "Playing <name>, 12:52 of 45:30, speed 1.25", "Paused …"
   or "Nothing playing". "Say each file as it starts" (`sayEachFile`, default on; the Play menu) is the one
   unprompted announcement (G5). The volume is Windows' own (AM-D6). Stop as a command is not offered: Space pauses,
   Clear queue stops.

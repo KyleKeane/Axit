@@ -463,7 +463,9 @@ These are the rules of `docs/axclaude/SPEC.md` that are not about Claude; app sp
   the app's test plan before a release.
 - AX-7.7 Colours are the system colours and follow the Windows app theme: the entry point calls
   `Application.SetColorMode(SystemColorMode.System)` before any window exists, so every window is light or dark as
-  Windows is when the app starts, and a high contrast theme applies as it always has. No app sets a colour of its own.
+  Windows is when the app starts, and a high contrast theme applies as it always has. No app sets a colour of its own,
+  with one exception: AxMedia's video area is black (AM-2.4), the colour of a video surface everywhere, so that a
+  picture's letterbox is not the window's colour (decided 2026-10-23).
 
 ## 5. Architecture
 

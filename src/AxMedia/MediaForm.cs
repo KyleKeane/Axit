@@ -31,8 +31,9 @@ public sealed class MediaForm : AxitForm
     /// <summary>How the file now opening was asked for: by the user (said, interrupting), or by the queue moving on (said when the setting says, not interrupting).</summary>
     private bool _prompted;
 
-    /// <summary>The hand-overs applied one after another, in the order they came, each after the folder reads of the one before.</summary>
-    private Task _applying = Task.CompletedTask;
+    /// <summary>The hand-overs waiting to be applied, in the order they came, one at a time (AM-1.3); <see cref="_applying"/> while one is.</summary>
+    private readonly Queue<HandOver> _handOvers = new();
+    private bool _applying;
 
     /// <param name="start">What the command line asked for (AM-1.1): a play or an add with its paths; null for an empty queue.</param>
     /// <param name="settingsPath">Where the settings are saved; the app's own file unless a probe says otherwise, so that a probe never writes the user's.</param>
@@ -112,6 +113,8 @@ public sealed class MediaForm : AxitForm
         _video.Dock = DockStyle.Top;
         _video.Height = 0;
         _video.Visible = false;
+        // The one colour an app sets (AX-7.7, AM-2.4): a video surface is black everywhere, so that a picture's
+        // letterbox is not the window's colour (decided 2026-10-23).
         _video.BackColor = Color.Black;
         _video.TabStop = false;
         _video.AccessibleName = "Video";
@@ -164,7 +167,7 @@ public sealed class MediaForm : AxitForm
     protected override IEnumerable<string> DiagnosticsLines =>
     [
         $"Queue: {_queue.Count} files, playing {_queue.PlayingName ?? "(none)"}",
-        $"Player: {_player?.State.ToString() ?? "not started"}, speed {_settings.Speed}",
+        $"Player: {_player?.State.ToString() ?? "not started"}, speed {Speed}",
     ];
 
     protected override void OnShown(EventArgs e)
@@ -197,27 +200,35 @@ public sealed class MediaForm : AxitForm
     /// <summary>AM-1.2, AM-1.3: a start with paths while this window is open hands them here; the base answers the message at once and the paths are applied after, nothing read before the answer.</summary>
     protected override Action? TakeHandOver(HandOver message) => () => Apply(message);
 
-    /// <summary>A hand-over (or the start) applied after the ones before it, in the order they came; an earlier one's failure is its own notice.</summary>
+    /// <summary>A hand-over (or the start) queued and applied after the ones before it, in the order they came (one queue drained in turn since 2026-10-23; a chain of tasks before); one that fails is its own notice, and the next applies.</summary>
     private void Apply(HandOver message)
     {
-        var previous = _applying;
-        var task = ApplyAfterAsync(previous, message);
-        _applying = task;
-        Do(() => task);
+        _handOvers.Enqueue(message);
+        if (!_applying)
+        {
+            Do(DrainAsync);
+        }
     }
 
-    private async Task ApplyAfterAsync(Task previous, HandOver message)
+    private async Task DrainAsync()
     {
+        _applying = true;
         try
         {
-            await previous;
+            while (_handOvers.TryDequeue(out var message))
+            {
+                await ApplyAsync(message);
+            }
         }
-        catch (Exception)
+        finally
         {
-            // Reported by the Do that owns it.
+            _applying = false;
+            if (_handOvers.Count > 0)
+            {
+                // The one applying failed, which the Do reports; the rest go on.
+                Do(DrainAsync);
+            }
         }
-
-        await ApplyAsync(message);
     }
 
     // ---- keys (AM-5.2): every key comes from BundleKeys or AxMediaKeys, and is handled here only ----
@@ -387,6 +398,9 @@ public sealed class MediaForm : AxitForm
     }
 
     private bool PlayerActive => _player is { State: PlayerState.Playing or PlayerState.Paused or PlayerState.Opening };
+
+    /// <summary>The speed shown: the player's rate once it exists (a file that refuses the rate plays at 1, AM-4.2), the setting before.</summary>
+    private double Speed => _player?.Rate ?? _settings.Speed;
 
     /// <summary>The paths appended (Open files, Open folder, a recent item): "Added n", or why nothing was; each path remembered.</summary>
     private void AddPaths(IReadOnlyList<string> paths, string? noneText)
@@ -682,7 +696,7 @@ public sealed class MediaForm : AxitForm
         }
     }
 
-    /// <summary>Ctrl+Right and Ctrl+Left: <paramref name="seconds"/> forward or back, the new position said.</summary>
+    /// <summary>Ctrl+Right and Ctrl+Left: <paramref name="seconds"/> forward or back, the position reached said (the file's end at most, AM-4.3).</summary>
     private void Seek(int seconds)
     {
         if (_player is not { State: PlayerState.Playing or PlayerState.Paused } player)
@@ -691,15 +705,9 @@ public sealed class MediaForm : AxitForm
             return;
         }
 
-        var target = player.Position + TimeSpan.FromSeconds(seconds);
-        if (target < TimeSpan.Zero)
-        {
-            target = TimeSpan.Zero;
-        }
-
-        player.Seek(target);
+        var reached = player.Seek(player.Position + TimeSpan.FromSeconds(seconds));
         UpdateStatusBar();
-        Announce(MediaFiles.FormatTime(target), true);
+        Announce(MediaFiles.FormatTime(reached), true);
     }
 
     /// <summary>Ctrl+Shift+Right and Ctrl+Shift+Left: the next or the previous file of the queue; "First file" and "End of queue" at the ends.</summary>
@@ -777,9 +785,9 @@ public sealed class MediaForm : AxitForm
 
                 if (_player is { } player)
                 {
-                    player.Seek(time);
+                    var reached = player.Seek(time);
                     UpdateStatusBar();
-                    Announce(MediaFiles.FormatTime(time), true);
+                    Announce(MediaFiles.FormatTime(reached), true);
                 }
             }, IsDefault: true),
             new OverlayChoice("&Cancel", IsCancel: true),
@@ -800,7 +808,7 @@ public sealed class MediaForm : AxitForm
         }
 
         var word = state == PlayerState.Playing ? "Playing" : "Paused";
-        Announce($"{word} {_queue.PlayingName}, {MediaFiles.FormatTime(_player.Position)} of {MediaFiles.FormatTime(_player.Duration)}, {MediaFiles.SpeedText(_settings.Speed).ToLowerInvariant()}", true);
+        Announce($"{word} {_queue.PlayingName}, {MediaFiles.FormatTime(_player.Position)} of {MediaFiles.FormatTime(_player.Duration)}, {MediaFiles.SpeedText(Speed).ToLowerInvariant()}", true);
     }
 
     /// <summary>The title (AM-2.3): "<name> - AxMedia" while a file plays or is paused, "AxMedia" otherwise; the Axit menu names the window by it.</summary>
@@ -824,7 +832,7 @@ public sealed class MediaForm : AxitForm
                 _ => "Opening",
             };
             _stateLabel.Text = $"{word} {_queue.PlayingName} {MediaFiles.FormatTime(_player.Position)} / {MediaFiles.FormatTime(_player.Duration)}";
-            _placeLabel.Text = _queue.PlaceText(_settings.Speed);
+            _placeLabel.Text = _queue.PlaceText(Speed);
         }
 
         StatusLayout.Fit(_status, _stateLabel, _placeLabel);
