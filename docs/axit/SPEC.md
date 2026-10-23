@@ -704,5 +704,10 @@ dialogs) is .NET's, shipped inside the executable, and every project is marked a
 - Unreleased (2026-10-23), developed on `palette`: the command palette in every window (AX-10); the heading letters
   and Ctrl+F in every notice's text (AX-7.2); the review of the code and documents of 2026-10-18 to 2026-10-22
   (`docs/axit/review-2026-10-23.md`) with its fixes, the tests run without the globalization data as the program
-  runs (AX-6.1, `Accents`), and the practices for the years ahead (`docs/axit/longevity.md`). Not yet checked with
-  NVDA.
+  runs (AX-6.1, `Accents`), and the practices for the years ahead (`docs/axit/longevity.md`). The same day, the
+  rewrites the review asked for (one console window for AxClaude and AxTerminal with one settings class, AX-6.1;
+  the notice and focus core of the window base as one rule, AX-6.5; AxClaude's wait as one record; AxFile's
+  operation runner and marks; AxTerminal's prompt rows by identity; the smaller ones), the duplication moved into
+  the shared projects, the tests asked for, and the longevity items that needed no account (the Windows APIs
+  listed in 5.4, the actions pinned, the installer off the GitHub API and putting the commands on the PATH, Claude
+  Code's version logged, the release rules, the lock files). Not yet checked with NVDA (the review's section 9).

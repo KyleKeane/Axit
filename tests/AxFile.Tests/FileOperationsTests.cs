@@ -143,7 +143,7 @@ public sealed class FileOperationsTests : IDisposable
         // A process whose current directory is the folder makes Windows refuse the rename (the sharing violation),
         // which the message explains: a child process here, not this one's current directory, which the other test
         // classes share while they run in parallel (2026-10-23).
-        using var holder = System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo("cmd.exe", "/c pause")
+        using var holder = System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo("cmd.exe", "/c echo ready&pause")
         {
             WorkingDirectory = third,
             UseShellExecute = false,
@@ -153,6 +153,9 @@ public sealed class FileOperationsTests : IDisposable
         })!;
         try
         {
+            // The folder is held once the child runs, which its first line proves: the start alone returns before
+            // the child has opened its current directory, and the rename went through now and then.
+            Assert.Equal("ready", holder.StandardOutput.ReadLine());
             var error = Assert.Throws<IOException>(() => FileOperations.Rename(third, "Docs 5"));
             Assert.Equal(FileOperations.InUse, FileOperations.Message(error));
         }

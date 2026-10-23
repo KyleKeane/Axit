@@ -93,7 +93,11 @@ the restart by the app itself (2.3.0).
   the window base, AxFile's operation runner and marks, AxTerminal's prompt rows by line identity, then the smaller
   ones). `longevity.md` is the plan for keeping the repository a stable resource for decades: what already holds,
   what was adopted that day, the proposals with their cost, what breaks when, and the calendar (every release, every
-  month, every October, every LTS of .NET).
+  month, every October, every LTS of .NET). The same day, in an autonomous turn: every rewrite, fix and test the
+  review asked for (`review-2026-10-23.md` section 10, each item marked) and every longevity item that needed no
+  account (`longevity.md` section 3, each marked), in twenty commits on `palette`. Open: the NVDA checks of all of it
+  (review section 9), the `ApplyChrome` and mirror restructure (review 5.6), and the longevity items for the
+  maintainer (3.2 the organization, 3.13 the archive branch, 3.14 the yearly pass).
 
 ## Later apps (recorded 2026-10-18)
 
