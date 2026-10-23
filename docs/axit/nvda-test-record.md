@@ -35,6 +35,7 @@ Run so far, by the user with NVDA, 2026-10-23, on `palette` after 0d46e82:
   `manual_tests/axclaude/project-for-conversations`.
 - axClaude Session, Open folder in new window and Open recent folder in new window (new, dfe9ec1): Passed.
 - axDown section 6 step 6 (the palette) and section 2 step 6's Alt+Backspace and Shift+F10: Passed.
+- axFile section 3 step 7: Failed at first (Shift+F10 opened no menu, then a context menu silent on its first opening); now Shift+F10, the Applications key and a right click open the bar's Item menu as Alt+I does (AF-D13): Passed, "good enough for now". Alt+F4 on axFile left axClaude's Session menu open: fixed in the window base, Passed.
 
 ## 2026-10-22, Axit 3.3.1
 

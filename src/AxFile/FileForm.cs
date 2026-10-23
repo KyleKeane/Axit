@@ -22,7 +22,6 @@ public sealed partial class FileForm : AxitForm
     private readonly ToolStripMenuItem _favoritesItem = new("Fa&vorites");
     private readonly ToolStripMenuItem _drivesMenu = new("Driv&es");
     private readonly List<(SortBy By, ToolStripMenuItem Item)> _sortItems = [];
-    private readonly ItemMenu _itemMenu;
     private readonly ListBox _list = new();
     private readonly TextBox _renameBox = new();
     private readonly StatusStrip _status = new();
@@ -93,8 +92,6 @@ public sealed partial class FileForm : AxitForm
         // its owner item when it closes, and the bar then opens its neighbours' menus on Left and Right.
         var item = new ToolStripMenuItem("&Item");
         FillItemMenu(item.DropDownItems);
-        _itemMenu = new ItemMenu(SayInformation) { AccessibleName = "Item" };
-        FillItemMenu(_itemMenu.Items);
 
         // Selection (AF-3.7): the marks on the list's entries, which the operations act on; the menu of the whole list
         // rather than of one entry, so it sits beside Item (asked 2026-10-21).
@@ -147,15 +144,20 @@ public sealed partial class FileForm : AxitForm
         _list.DoubleClick += (_, _) => OpenSelected();
         // AF-3.6: File Explorer's type-ahead, several letters into one prefix, in place of the list's one-letter jump.
         _list.KeyPress += OnListKeyPress;
-        // AF-4.6: Shift+F10, the Applications key and a right click open the Item menu as the list's context menu,
-        // the list's own way (the keys are in the table for the collision test and F1, not in the key switch); a
-        // right click first selects the entry under it, as File Explorer does.
-        _list.ContextMenuStrip = _itemMenu;
+        // AF-4.6, AF-D13: a right click opens the menu bar's Item menu on the entry under it, selected first as File
+        // Explorer does; Shift+F10 and the Applications key open the same menu from the key switch.
         _list.MouseDown += (_, e) =>
         {
             if (e.Button == MouseButtons.Right && _list.IndexFromPoint(e.Location) is var index && index >= 0)
             {
                 _list.SelectedIndex = index;
+            }
+        };
+        _list.MouseUp += (_, e) =>
+        {
+            if (e.Button == MouseButtons.Right)
+            {
+                ShowItemMenu();
             }
         };
 
@@ -415,6 +417,15 @@ public sealed partial class FileForm : AxitForm
                 return true;
             case AxFileKeys.CopyPath:
                 CopyPath();
+                return true;
+            case AxFileKeys.ContextMenu:
+            case AxFileKeys.ContextMenuAlso:
+                if (!_list.Focused)
+                {
+                    return false;
+                }
+
+                ShowItemMenu();
                 return true;
         }
 

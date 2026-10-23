@@ -296,15 +296,14 @@ Every operation here is one line of the Actions list (AF-9) as well as its annou
   that a second compress picks the next (AF-4.12). An operation that ends in the folder shown reads the list again
   with its result selected; one that ends while another folder is shown says its result and leaves the list where
   the user is (2026-10-23: it pulled the list back to its own folder, a move the user did not make, AX-7.3).
-- AF-4.6 **The entry's menu** (Shift+F10, the Applications key, a right click): the Item menu as the list's context
+- AF-4.6 **The entry's menu** (Alt+I; Shift+F10, the Applications key and a right click open the same menu bar menu, AF-D13): the Item menu as the list's context
   menu, the same items in the same order, on the selected entry (a right click selects the entry under it first, as
   File Explorer does). It is the window's own menu, fixed, with mnemonics and listed in F1, not the shell's (AF-D8).
   Its shape (AF-6.1; reshaped 2026-10-21 at the user's ask for File Explorer's plain words and one flat list): Open,
   Open with ▸, Open in Axit ▸, Preview, Play folder in axMedia, Add to axMedia's queue | Cut, Copy, Paste | Rename,
   Delete | New folder…, New text file, Move to new folder…, Compress to zip, Extract here | Copy path, Show in File
-  Explorer, Information, Properties | Windows menu…. The list's context menu is an `ItemMenu` (AF-4.10) and the bar's
-  Item menu the standard drop-down, both filled by the same method, so that the bar's menu is an exact copy; the bar's
-  drop-down is never a hand-made one (AX-6.6).
+  Explorer, Information, Properties | Windows menu…. There is one menu, the bar's Item menu, the standard drop-down
+  (AX-6.6); the list has no context menu of its own (AF-D13).
 - AF-4.7 **Windows' own ways**, items of the entry's menu, each one of the system's own windows like the folder picker
   (AX-7.2): Open with ▸ **Windows default** opens the entry with the program Windows has for it (a folder in File Explorer),
   or, when Windows has none, the Windows dialog that picks a program and runs it, as File Explorer does on Enter;
@@ -331,10 +330,8 @@ Every operation here is one line of the Actions list (AF-9) as well as its annou
   media files after it, or on a folder's (axMedia hands them to its open window itself), axGIT on the repository that
   holds the entry, axFile on the folder (or the file in its folder), axClaude and axTerminal on the folder, or on the
   entry's folder for a file; Editor (Ctrl+E), the submenu's first item, is the quick way to the right editor.
-- AF-4.10 **Ctrl+I inside the open context menu** says the entry's information (AF-7) without closing the menu, so
-  that the entry a menu is about can be checked before choosing. WinForms routes the keys of an open menu to the
-  menu, not to the window, so `ItemMenu`, the context menu, takes the key itself. The bar's Item menu is the standard
-  drop-down (AX-6.6) and does not have it, nor does the Windows menu, which is Windows' own.
+- AF-4.10 (Ctrl+I inside the open context menu) went with the context menu on 2026-10-23 (AF-D13): the bar's Item
+  menu is a standard drop-down and does not take it; Ctrl+I in the list says the entry.
 - AF-4.11 **The user's own programs in Open with ▸** (asked 2026-10-21): a list of programs and scripts, kept in the
   settings (`programs`, a name and a path each, AF-8.1), shown under Windows default and Choose a program… (AF-4.7)
   as "1. name (path)" (AX-9.5), or "No programs of your own yet" while the list is empty, then **Add a program…**
@@ -440,9 +437,8 @@ and the started process finds its open window and hands the paths over with the 
   Alt+Enter, Ctrl+Z (AF-4.14), Ctrl+X, Ctrl+C, Ctrl+V. Enter, Shift+Enter, Backspace, Left, Right, Space, Escape, F2, Delete,
   Ctrl+X, Ctrl+C, Ctrl+V, Ctrl+A, Ctrl+Shift+A, Shift+Space, Ctrl+Enter, Ctrl+Shift+Q, the Shift arrows, Shift+F10 and the
   Applications key act only while the folder list has the focus (in the Actions list, Enter, Escape, Ctrl+Z and Ctrl+I
-  act on its line, AF-9.3; in a notice's field or the rename box they are the field's; the two menu keys are the
-  list's own, which shows its context menu itself, so the key switch has no case for them; Ctrl+I has a second
-  handler, the open menu's, AF-4.10). The collision test covers the table and lists the keys other windows use
+  act on its line, AF-9.3; in a notice's field or the rename box they are the field's; the two menu keys open the
+  bar's Item menu once they are up, AF-D13). The collision test covers the table and lists the keys other windows use
   otherwise (Ctrl+N, Ctrl+G, Ctrl+E, Ctrl+C, Ctrl+Shift+C, Ctrl+Shift+F, Ctrl+Enter).
 - AF-6.3 The F1 text (`HelpText.Shortcuts`) names them all; `docs/axfile/user-guide.md` is embedded (Help → User
   guide); About is the bundle's (AX-9.9).
@@ -553,8 +549,7 @@ src/AxFile.Core/    class library (net10.0): FolderListing (a folder's entries a
                     the hand-over counts, NaturalOrder, Dispatch for the editor's verb)
 src/AxFile/         class library (net10.0-windows): AxFileApp (Run, Usage), FileForm (the window, on AxitForm, in
                     four partial files: the controls, menus, hooks and keys; Browse; Operations; Actions), AxFileKeys,
-                    HelpText (F1 text, the embedded guide), ItemMenu (the entry's menu, a context menu that takes
-                    the Information key while open; AF-4.6, AF-4.10), Shell (Windows' own ways with an entry: the
+                    HelpText (F1 text, the embedded guide), Shell (Windows' own ways with an entry: the
                     Open with dialog, the Properties sheet, the shell's context menu through IShellFolder and
                     IContextMenu, Eject, the Recycle Bin's Restore; AF-4.7); references AxFile.Core, Axit.Core, Axit.Forms
 tests/AxFile.Tests/ FolderListingTests, MarksTests, FileOperationsTests, UndoTests, ArchivesTests, PathCompletionTests, ActionLogTests,
@@ -630,6 +625,8 @@ and AxPreview.Core since the split; `MediaFiles` and `NaturalOrder` moved to `Ax
   is rare. The flat list takes the tree's Left and Right instead, and typing a path gets completion where a path is
   typed, the Go to folder field. No separate app: the other windows reach axFile through Show current folder in; if
   an editor wants a quick-open, the completion moves to the shared pieces on its second use.
+
+- **AF-D13 One Item menu, opened by every way.** 2026-10-23: the list's own context menu (Shift+F10, the Applications key, a right click) never read its first item the first time it opened, whether shown from code, with its first item selected, with a Down posted into it, or through the list's own WM_CONTEXTMENU (which leaves nothing selected), while Alt+I read the bar's Item menu every time. At the user's word the three ways open the bar's Item menu: the window posts SC_KEYMENU and then the letter I, as Alt and I typed, once Shift, F10 and the Applications key are up (with them down F10 closed the menu and the letter was Shift+I, a beep). Ctrl+I inside the menu (AF-4.10) went with the context menu.
 
 AF-D4 (the volume) and AF-D6 (the queue fixed at Enter) went to axMedia with the player (AM-D6, AM-D2).
 

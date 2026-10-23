@@ -86,7 +86,7 @@ public static class AxFileKeys
     public const Keys SelectToStart = Keys.Shift | Keys.Home;
     public const Keys SelectToEnd = Keys.Shift | Keys.End;
 
-    /// <summary>In the list: the Item menu on the entry, as the list's own context menu (AF-4.6); the list shows it itself, so the key switch has no case for it.</summary>
+    /// <summary>In the list: the menu bar's Item menu on the entry, opened as Alt and I open it (AF-4.6, AF-D13).</summary>
     public const Keys ContextMenu = Keys.Shift | Keys.F10;
 
     /// <summary>In the list: the same, from the Applications key.</summary>

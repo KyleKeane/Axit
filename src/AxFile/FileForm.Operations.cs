@@ -972,6 +972,62 @@ public sealed partial class FileForm
         }
     }
 
+    /// <summary>
+    /// Shift+F10, the Applications key and a right click in the folder list (AF-4.6, AF-D13): the menu bar's Item menu,
+    /// opened as Alt and I open it, so that NVDA reads its first item. A context menu of its own never read its first
+    /// item the first time it opened, however it was shown (2026-10-23).
+    /// </summary>
+    private void ShowItemMenu()
+    {
+        // Once the keys that asked are up: F10 is itself the menu key, and with Shift down the letter is Shift+I;
+        // sent while they were held, Windows only beeped (2026-10-23). A right click comes with no key down.
+        var waited = 0;
+        var timer = new System.Windows.Forms.Timer { Interval = 20 };
+        timer.Tick += (_, _) =>
+        {
+            waited += timer.Interval;
+            if (IsDown(VK_SHIFT) || IsDown(VK_F10) || IsDown(VK_APPS))
+            {
+                if (waited < 3000)
+                {
+                    return;
+                }
+            }
+
+            timer.Dispose();
+            OpenItemMenu();
+        };
+        timer.Start();
+    }
+
+    /// <summary>
+    /// Alt, then I, as the user would press them: the menu bar in menu mode (Alt alone opens on Folder), then the Item
+    /// menu's letter, which opens it from the keyboard with its first item read. A mnemonic in the Alt message itself
+    /// opened Folder.
+    /// </summary>
+    private void OpenItemMenu()
+    {
+        PostMessage(Handle, WM_SYSCOMMAND, SC_KEYMENU, 0);
+        PostMessage(Handle, WM_KEYDOWN, 'I', 0);
+        PostMessage(Handle, WM_KEYUP, 'I', unchecked((nint)0xC0000001));
+    }
+
+    private static bool IsDown(int key) => (GetAsyncKeyState(key) & 0x8000) != 0;
+
+    private const int WM_KEYDOWN = 0x0100;
+    private const int WM_KEYUP = 0x0101;
+    private const int WM_SYSCOMMAND = 0x0112;
+    private const int SC_KEYMENU = 0xF100;
+    private const int VK_SHIFT = 0x10;
+    private const int VK_F10 = 0x79;
+    private const int VK_APPS = 0x5D;
+
+    [System.Runtime.InteropServices.DllImport("user32.dll")]
+    private static extern bool PostMessage(nint window, int message, nint wParam, nint lParam);
+
+    [System.Runtime.InteropServices.DllImport("user32.dll")]
+    private static extern short GetAsyncKeyState(int key);
+
     /// <summary>Item → Windows menu…: the shell's own menu for the entry, under it in the list, once the Item menu has closed.</summary>
     private void ShowWindowsMenu()
     {

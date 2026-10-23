@@ -19,6 +19,13 @@ public abstract partial class AxitForm : Form
 {
     private const int WM_SYSCOMMAND = 0x0112;
     private const int SC_KEYMENU = 0xF100;
+    private const int VK_MENU = 0x12;
+
+    /// <summary>How long after an activation with Alt held a menu-bar Alt is taken as that Alt's release (see <see cref="WndProc"/>).</summary>
+    private const int AltCarriedOverMs = 1500;
+
+    /// <summary>Until when (<see cref="Environment.TickCount64"/>) a menu-bar Alt is the release of an Alt held as the window was activated; 0 when none was.</summary>
+    private long _altCarriedOverUntil;
 
     /// <summary>Why the settings file could not be read, reported once the window shows; null when it was read.</summary>
     private readonly string? _settingsError;
@@ -259,6 +266,15 @@ public abstract partial class AxitForm : Form
         base.OnFormClosing(e);
     }
 
+    protected override void OnActivated(EventArgs e)
+    {
+        _altCarriedOverUntil = (GetAsyncKeyState(VK_MENU) & 0x8000) != 0 ? Environment.TickCount64 + AltCarriedOverMs : 0;
+        base.OnActivated(e);
+    }
+
+    [System.Runtime.InteropServices.DllImport("user32.dll")]
+    private static extern short GetAsyncKeyState(int key);
+
     /// <summary>The window's client area as its UI Automation rectangle, so that NVDA+End finds the status bar.</summary>
     protected override AccessibleObject CreateAccessibilityInstance() => new WindowAccessibleObject(this);
 
@@ -266,8 +282,13 @@ public abstract partial class AxitForm : Form
     {
         // Alt alone and F10 open the menu bar through SC_KEYMENU; while a notice holds the keyboard they do nothing.
         // Alt+Space (the system menu, lParam is the space character) still works.
-        if (m.Msg == WM_SYSCOMMAND && ((long)m.WParam & 0xFFF0) == SC_KEYMENU && ((long)m.LParam & 0xFFFF) == 0 && NoticeOpen)
+        if (m.Msg == WM_SYSCOMMAND && ((long)m.WParam & 0xFFF0) == SC_KEYMENU && ((long)m.LParam & 0xFFFF) == 0
+            && (NoticeOpen || Environment.TickCount64 < _altCarriedOverUntil))
         {
+            // The second case: the window came to the front while Alt was held, as Alt+F4 on another program leaves
+            // it, and Alt's release then opened this window's menu bar (the user, 2026-10-23, on closing axFile:
+            // "alt+f4 lands me on the session menu"). That Alt was pressed for the other window.
+            _altCarriedOverUntil = 0;
             return;
         }
 

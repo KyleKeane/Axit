@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+- axFile: Shift+F10, the Applications key and a right click open the menu bar's Item menu, as Alt+I does, so that NVDA reads its first item the first time too; the list's own context menu, silent on its first opening, is gone, and with it Ctrl+I inside the menu.
+- Axit: a window that comes to the front while Alt is still held, as Alt+F4 on another window leaves it, no longer opens its menu bar when Alt is let go.
 - axClaude, axTerminal: a quick key (h, p, c and the rest) says only the row the caret lands on, what Down Arrow would read there; it said the whole line, often cut short, and Down then read the same text again.
 - axClaude: Session, Open folder in new window and Open recent folder in new window start axClaude in the folder in a window of its own and leave this one's session running; Open folder and Open recent folder still restart Claude in this window.
 - axTerminal: Session, Open recent folder in new window, the same for a shell.
