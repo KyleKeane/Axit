@@ -87,6 +87,14 @@ the restart by the app itself (2.3.0).
   key table and the collision test knowing the binding. The custom programs list above is what such keys would point
   at; what is open is where a user's bindings live (the settings file, a submenu) and how they show in F1.
 
+- **The review of 2026-10-23 and the years ahead.** `review-2026-10-23.md` is the critical review of the five days
+  from 2026-10-18 (the verdict, the inventory, what was fixed that day, what is verified and open, the rewrites in
+  order: one console window for AxClaude and AxTerminal, AxClaude's question state as one record, the notice core of
+  the window base, AxFile's operation runner and marks, AxTerminal's prompt rows by line identity, then the smaller
+  ones). `longevity.md` is the plan for keeping the repository a stable resource for decades: what already holds,
+  what was adopted that day, the proposals with their cost, what breaks when, and the calendar (every release, every
+  month, every October, every LTS of .NET).
+
 ## Later apps (recorded 2026-10-18)
 
 Each would be one more app of the bundle, a window per thing worked on, added the way `adding-an-app.md` says, with no

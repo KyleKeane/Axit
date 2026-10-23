@@ -27,3 +27,5 @@ Small commits with imperative subject lines; `main` is always releasable, and la
 ## Releases
 
 Releases are made by the maintainer with `release.ps1` (README, Release). The version is one number for the whole bundle.
+
+The practices that keep the repository stable over the years, and the yearly check, are `docs/axit/longevity.md`.

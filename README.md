@@ -58,13 +58,15 @@ gh run watch               # follows the workflow that builds and publishes the 
 
 Add a `## 3.4.0` section to `CHANGELOG.md` first: it becomes the release notes, which the apps show in their update notice. The Release workflow tests, builds the self-contained `Axit.exe`, and publishes the zip and `install.cmd`; the Build workflow tests every push to every branch. `.\publish.ps1` makes the same zip locally and installs it for this user.
 
+Without GitHub Actions (a runner image or an action changed under the workflow, or the workflow is gone): `.\publish.ps1 -NoInstall` builds the zip into `publish\`; `.\tools\release-notes.ps1 -Version 3.4.0 > notes.md` takes the notes from the changelog; `gh release create v3.4.0 publish\Axit-3.4.0-win-x64.zip install.cmd --title "Axit 3.4.0" --notes-file notes.md --draft` and `gh release edit v3.4.0 --draft=false` publish it, the draft first so that no app downloads a half-uploaded zip. The practices that keep the repository stable over the years are `docs/axit/longevity.md`.
+
 ## Where things are
 
 - `src/Axit`: the program. `src/Axit.Core` and `src/Axit.Forms`: the pieces the apps share.
 - `src/<App>` and `src/<App>.Core`: each app's window and its pure code. Each folder has a `CLAUDE.md` with its notes.
 - `tests/`: the unit tests, one project per app, and the recorded console fixtures.
 - `docs/<app>/`: each app's `SPEC.md`, `user-guide.md` (Help, User guide in the app) and `nvda-test-plan.md`. The specifications are the source of truth.
-- `docs/axit/`: the bundle's `SPEC.md` (launch, install, update, release, the accessibility and modularity rules), `plan.md`, `adding-an-app.md` and the test record.
+- `docs/axit/`: the bundle's `SPEC.md` (launch, install, update, release, the accessibility and modularity rules), `plan.md`, `adding-an-app.md`, the test record, `review-2026-10-23.md` (the review of the code and documents, what was fixed and what is proposed) and `longevity.md` (the practices that keep the repository stable for years, with its calendar).
 - `manual_tests/`: the script that makes the files for the NVDA passes.
 - `CLAUDE.md`: the map and the rules for working on this repository with Claude Code.
 
