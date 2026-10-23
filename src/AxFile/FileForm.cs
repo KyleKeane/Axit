@@ -107,7 +107,7 @@ public sealed partial class FileForm : AxitForm
         select.DropDownItems.Add(Item("&Copy", () => OnMarks(() => CopyOrCut(cut: false)), AxFileKeys.Copy));
         select.DropDownItems.Add(Item("De&lete", () => OnMarks(Delete), AxFileKeys.Delete));
         select.DropDownItems.Add(new ToolStripSeparator());
-        select.DropDownItems.Add(new ToolStripMenuItem("Mo&ve to new folder...", null, (_, _) => OnMarks(MoveIntoNewFolder)));
+        select.DropDownItems.Add(new ToolStripMenuItem("Mo&ve to folder...", null, (_, _) => OnMarks(MoveIntoNewFolder)));
         select.DropDownItems.Add(new ToolStripMenuItem("Compress to &zip", null, (_, _) => OnMarks(Compress)));
         select.DropDownItems.Add(Item("Add to axMedia's &queue", () => OnMarks(AddToQueue), AxFileKeys.AddToQueue));
         select.DropDownItems.Add(Item("Copy &paths", () => OnMarks(CopyPath), AxFileKeys.CopyPath));
@@ -233,7 +233,7 @@ public sealed partial class FileForm : AxitForm
         items.Add(new ToolStripSeparator());
         items.Add(Item("&New folder...", NewFolder, AxFileKeys.NewFolder));
         items.Add(Item("New text &file", NewFile, AxFileKeys.NewFile));
-        items.Add(new ToolStripMenuItem("Mo&ve to new folder...", null, (_, _) => MoveIntoNewFolder()));
+        items.Add(new ToolStripMenuItem("Mo&ve to folder...", null, (_, _) => MoveIntoNewFolder()));
         items.Add(new ToolStripMenuItem("Compress to &zip", null, (_, _) => Compress()));
         items.Add(new ToolStripMenuItem("E&xtract here", null, (_, _) => Extract()));
         items.Add(new ToolStripSeparator());

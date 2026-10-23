@@ -1,0 +1,43 @@
+# axFile, test plan section 3 step 1a's second half: Move to folder with Go to folder's completion (AF-4.13, 2026-10-23).
+file home\Axit\axfile.json {"checkForUpdates": false}
+file ops\a.txt A.
+file ops\docs\plan.md Plan.
+file ops\notes\n.txt N.
+start file {temp}\ops
+expect focus docs, folder
+wait 500
+keys down down
+expect focus a.txt
+
+# Down completes among the folders alone (a.txt is left out); Up at the first: the low note, then the same.
+menu Move to folder, Item
+expect state "notice":"Move to folder"
+expect focus "name":"Folder"
+type do
+wait 300
+keys down
+expect said docs, folder, 1 of 1
+keys up
+expect said ♪ Edge
+expect said docs, folder, 1 of 1
+keys enter
+expect said ! Moved a.txt into docs
+expect list "count":2
+
+# Ctrl+Z moves it back, and docs stays: it was not made by the move.
+keys ctrl+z
+expect said ! Undone: moved back
+expect list "count":3
+
+# A folder into itself, and a path elsewhere that does not exist.
+keys home
+expect focus docs, folder
+menu Move to folder, Item
+type docs
+keys enter
+expect said Cannot move a folder into itself
+keys ctrl+a
+type C:\nope\x
+keys enter
+expect said Not found: C:\nope\x
+keys escape

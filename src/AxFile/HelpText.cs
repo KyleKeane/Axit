@@ -41,15 +41,15 @@ public static class HelpText
           Shift+Down, Shift+Up, Shift+Home, Shift+End: select from where you started to there, as in File Explorer, keeping what was selected before
           Shift+Space: select from the nearest selected entry to the one you are on, above or below; with no other selected, as Space
           Ctrl+A: select all. Ctrl+Shift+A, or Escape: deselect all. Ctrl+I says how many are selected
-          Cut, Copy, Delete, Copy path, Move to new folder, Compress to zip and Add to axMedia's queue act on the selected entries, or on the entry you are on when none is selected
-          Alt+S: the Selection menu, the selected entries from anywhere: select all, deselect all, select to here, then Cut, Copy, Delete, Move to new folder, Compress to zip, Add to axMedia's queue and Copy paths on them alone; "None selected" when there are none
+          Cut, Copy, Delete, Copy path, Move to folder, Compress to zip and Add to axMedia's queue act on the selected entries, or on the entry you are on when none is selected
+          Alt+S: the Selection menu, the selected entries from anywhere: select all, deselect all, select to here, then Cut, Copy, Delete, Move to folder, Compress to zip, Add to axMedia's queue and Copy paths on them alone; "None selected" when there are none
           Every change of the selection is a line in the Actions list's Selection section; Ctrl+Z on that line puts the selection back as it was
 
         ## File operations
           Ctrl+Shift+N: a new folder, after its name. Ctrl+Shift+T: a new empty text file, with the rename box open on its whole name: type the name with its extension, Enter
           F2: rename in place, in a box over the entry with the name before the extension selected; Enter renames, Escape keeps the name. Delete: to the Recycle Bin, after a question
           Ctrl+X, Ctrl+C, Ctrl+V: cut, copy or paste as files, to and from File Explorer too; a pasted name already in the folder gets a number. Ctrl+Shift+C: copy the entry's full path, or every selected entry's, one per line
-          In the entry's menu: Move to new folder, Compress to zip, Extract here
+          In the entry's menu: Move to folder, Compress to zip, Extract here
           Ctrl+Z: undo the newest operation that can be undone, one per press, the last twenty: a rename renamed back, a new folder or file removed while still empty, a move moved back, a paste's copies or a zip sent to the Recycle Bin, a delete restored from it. Folder, Undo names what it would undo
           Every operation runs on its own: a second paste, delete or zip can start while the first runs
 

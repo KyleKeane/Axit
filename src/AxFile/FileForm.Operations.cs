@@ -285,9 +285,10 @@ public sealed partial class FileForm
     }
 
     /// <summary>
-    /// Item → Move to new folder… (AF-4.13): the name asked in the notice "Move to new folder", the
-    /// folder made here and the selected entries, or the current one, moved into it; "Moved <what> into <name>",
-    /// the folder selected.
+    /// Item → Move to folder… (AF-4.13): the notice "Move to folder" with Go to folder's completion on Down and Up,
+    /// folders alone (asked 2026-10-23); a folder that exists (a name here or a path) takes the selected entries, or
+    /// the current one, and any other name is a new folder made here first; "Moved <what> into <name>", the folder
+    /// selected when it is here.
     /// </summary>
     private void MoveIntoNewFolder()
     {
@@ -304,30 +305,57 @@ public sealed partial class FileForm
 
         var what = targets.Count == 1 ? targets[0].Name : $"{targets.Count} items";
         var sources = targets.Select(target => target.Path).ToList();
-        ShowNotice(new Notice("Move to new folder", $"{what} will move into the new folder.",
+        ResetCompletion(foldersOnly: true);
+        ShowNotice(new Notice("Move to folder", $"{what} will move into the folder typed: one here or a path, Down and Up completing it, or a new folder of that name made here.",
         [
             new OverlayChoice("&Move", () =>
             {
-                var name = Overlay.InputText.Trim();
-                if (CheckNewName(name) is { } problem)
+                var typed = Environment.ExpandEnvironmentVariables(Overlay.InputText.Trim().Trim('"')).Replace('/', '\\').TrimEnd('\\');
+                if (typed.Length == 0)
+                {
+                    Announce("Type a name", true);
+                    return;
+                }
+
+                var target = Path.IsPathRooted(typed) ? typed : Path.Combine(folder, typed);
+                var exists = Directory.Exists(target);
+                var here = string.Equals(Path.GetDirectoryName(target), folder.TrimEnd('\\'), StringComparison.OrdinalIgnoreCase);
+                var name = Path.GetFileName(target);
+                if (sources.Any(source => string.Equals(source, target, StringComparison.OrdinalIgnoreCase)
+                    || target.StartsWith(source.TrimEnd('\\') + "\\", StringComparison.OrdinalIgnoreCase)))
+                {
+                    Announce("Cannot move a folder into itself", true);
+                    return;
+                }
+
+                if (!exists && !here)
+                {
+                    Announce("Not found: " + typed, true);
+                    return;
+                }
+
+                if (!exists && CheckNewName(name) is { } problem)
                 {
                     Announce(problem, true);
                     return;
                 }
 
+                // The notice stays open on a refusal above (StaysOpen), so that the text can be put right.
+                CloseNotice(null);
                 RunOperation(folder, $"Moving {what} into {name}", "Moving", "Move failed", sources, async _ =>
                 {
-                    var made = await Task.Run(() => FileOperations.CreateFolder(folder, name));
-                    var destinations = await Task.Run(() => FileOperations.Destinations(sources, made));
+                    var made = exists ? null : await Task.Run(() => FileOperations.CreateFolder(folder, name));
+                    var into = made ?? target;
+                    var destinations = await Task.Run(() => FileOperations.Destinations(sources, into));
                     return await FileOperations.CopyOrMoveAsync(sources, destinations, move: true) is { } reason
                         ? Outcome.Failure(reason)
-                        : new Outcome($"Moved {what} into {name}", new Operation(OperationKind.Move, sources, destinations, made), name);
+                        : new Outcome($"Moved {what} into {name}", new Operation(OperationKind.Move, sources, destinations, made), here ? name : null);
                 });
-            }, IsDefault: true),
+            }, IsDefault: true, StaysOpen: true),
             new OverlayChoice("&Cancel", IsCancel: true),
         ])
         {
-            Input = new OverlayInput("Name:", "Name", string.Empty, "Type a name"),
+            Input = new OverlayInput("Folder:", "Folder", string.Empty, "Type a name", KeyHook: OnPathKey),
         });
     }
 

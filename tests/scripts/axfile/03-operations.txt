@@ -44,7 +44,7 @@ expect focus "name":"New name"
 keys escape
 expect focus "value":"New file.txt"
 expect list "New file.txt"
-# Space on both, Move to new folder (Shift+F10, V; here by its menu command): the notice names what moves.
+# Space on both, Move to folder (Shift+F10, V; here by its menu command): the notice names what moves.
 keys space
 expect said ! Selected
 keys down
@@ -53,10 +53,10 @@ keys down down
 expect focus "value":"todo.md"
 keys space
 expect said ! Selected, 2 selected
-menu Move to new folder, Item
-expect state "notice":"Move to new folder"
-expect state 2 items will move into the new folder.
-expect focus "name":"Name"
+menu Move to folder, Item
+expect state "notice":"Move to folder"
+expect state 2 items will move into the folder typed
+expect focus "name":"Folder"
 type bundle
 keys enter
 expect said ! Moved 2 items into bundle
@@ -165,9 +165,9 @@ expect focus "value":"a.txt"
 # 3.7 Manual: the entry's menu as a context menu (Shift+F10, the Applications key) and the menu bar (Alt+I, 3.7a, 3.7b's
 # Alt+S) cannot be opened from the channel; the items and their order are the menu's, checked through the palette's list.
 expect commands "Open, Item, Enter","Editor, Item, Open in Axit, Ctrl\u002BE"
-expect commands "Preview, Item, Shift\u002BEnter","Play folder in axMedia, Item, Ctrl\u002BEnter","Add to axMedia\u0027s queue, Item, Ctrl\u002BShift\u002BQ","Cut, Item, Ctrl\u002BX","Copy, Item, Ctrl\u002BC","Paste, Item, Ctrl\u002BV","Rename, Item, F2","Delete, Item, Delete","New folder, Item, Ctrl\u002BShift\u002BN","New text file, Item, Ctrl\u002BShift\u002BT","Move to new folder, Item","Compress to zip, Item","Extract here, Item","Copy path, Item, Ctrl\u002BShift\u002BC","Show in File Explorer, Item, Ctrl\u002BShift\u002BW","Information, Item, Ctrl\u002BI","Properties, Item, Alt\u002BEnter","Windows menu, Item"
+expect commands "Preview, Item, Shift\u002BEnter","Play folder in axMedia, Item, Ctrl\u002BEnter","Add to axMedia\u0027s queue, Item, Ctrl\u002BShift\u002BQ","Cut, Item, Ctrl\u002BX","Copy, Item, Ctrl\u002BC","Paste, Item, Ctrl\u002BV","Rename, Item, F2","Delete, Item, Delete","New folder, Item, Ctrl\u002BShift\u002BN","New text file, Item, Ctrl\u002BShift\u002BT","Move to folder, Item","Compress to zip, Item","Extract here, Item","Copy path, Item, Ctrl\u002BShift\u002BC","Show in File Explorer, Item, Ctrl\u002BShift\u002BW","Information, Item, Ctrl\u002BI","Properties, Item, Alt\u002BEnter","Windows menu, Item"
 # 3.7b The Selection menu: its items, and its operations never fall back to the current entry.
-expect commands "Select all, Selection, Ctrl\u002BA","Deselect all, Selection, Ctrl\u002BShift\u002BA","Select or deselect this entry, Selection, Space","Select to here, Selection, Shift\u002BSpace","Cut, Selection, Ctrl\u002BX","Copy, Selection, Ctrl\u002BC","Delete, Selection, Delete","Move to new folder, Selection","Compress to zip, Selection","Add to axMedia\u0027s queue, Selection, Ctrl\u002BShift\u002BQ","Copy paths, Selection, Ctrl\u002BShift\u002BC"
+expect commands "Select all, Selection, Ctrl\u002BA","Deselect all, Selection, Ctrl\u002BShift\u002BA","Select or deselect this entry, Selection, Space","Select to here, Selection, Shift\u002BSpace","Cut, Selection, Ctrl\u002BX","Copy, Selection, Ctrl\u002BC","Delete, Selection, Delete","Move to folder, Selection","Compress to zip, Selection","Add to axMedia\u0027s queue, Selection, Ctrl\u002BShift\u002BQ","Copy paths, Selection, Ctrl\u002BShift\u002BC"
 menu Cut, Selection
 expect said ! None selected
 menu Select all, Selection
@@ -308,7 +308,7 @@ expect said ! Not undone: temp has files now
 keys ctrl+z
 expect said ! Undone: renamed back to rename-then-undo.txt
 expect focus "value":"rename-then-undo.txt"
-# Move to new folder, then Ctrl+Z: moved back, the first file selected, the new folder gone.
+# Move to folder, then Ctrl+Z: moved back, the first file selected, the new folder gone.
 keys ctrl+f
 expect focus "name":"Name contains"
 type move-two
@@ -316,8 +316,8 @@ keys enter
 expect focus "value":"move-two-then-undo-1.txt"
 keys space shift+down
 expect focus "value":"move-two-then-undo-2.txt, selected"
-menu Move to new folder, Item
-expect focus "name":"Name"
+menu Move to folder, Item
+expect focus "name":"Folder"
 type bundle
 keys enter
 expect said ! Moved 2 items into bundle
@@ -326,6 +326,7 @@ keys ctrl+z
 expect said ! Undone: moved back
 expect focus "value":"move-two-then-undo-1.txt"
 refuse said ! Not undone
+expect list "count":9
 expect list "count":9
 # Manual (3.14): the paste and its undo (Ctrl+C, Ctrl+V) use the clipboard.
 # Compress a folder, then Ctrl+Z: the zip sent to the Recycle Bin.

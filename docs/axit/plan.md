@@ -192,3 +192,5 @@ library dependency (B-10: `git.exe` and the file system through the APIs already
   Each would keep the same rule: local first (B-15), plain files, clear formats an AI can work with.
 - The order the user set: the spec, then the infrastructure, then the build; axTerminal first, since its
   infrastructure is the moves; axFile next; the two engines verified before their specs are written.
+
+- Path completion (2026-10-23): axFile's Go to folder and Move to folder share one completion (`AxFile.Core.PathCompletion` and the field's key hook in `FileForm.Browse`). The user asked for it as a shared resource for every path field of the bundle; it moves to `Axit.Core` and `Axit.Forms` with the first other app that has a path field (M3), untangled from `FolderListing` then.

@@ -2,6 +2,7 @@
 
 ## Unreleased
 
+- axFile: Move to new folder is Move to folder: Down and Up complete the folder as in Go to folder, a folder that exists (here or by its path) takes the entries, and any other name is a new folder made here.
 - axFile: Shift+F10, the Applications key and a right click open the menu bar's Item menu, as Alt+I does, so that NVDA reads its first item the first time too; the list's own context menu, silent on its first opening, is gone, and with it Ctrl+I inside the menu.
 - Axit: a window that comes to the front while Alt is still held, as Alt+F4 on another window leaves it, no longer opens its menu bar when Alt is let go.
 - axClaude, axTerminal: a quick key (h, p, c and the rest) says only the row the caret lands on, what Down Arrow would read there; it said the whole line, often cut short, and Down then read the same text again.

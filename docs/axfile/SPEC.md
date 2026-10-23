@@ -177,12 +177,12 @@ folder of the file or project in hand, and sends back. It works entirely offline
   from the nearest marked entry to the current one, above or below, the one above when both are as near, "Selected, n
   selected"; with no other entry marked it is Space: the current entry marked, or unmarked again (decided 2026-10-23; it said "1 selected" on the one marked entry and changed nothing). **Ctrl+A** marks every entry, "n selected";
   **Ctrl+Shift+A** unmarks them all, "None selected", and so does **Escape** in the list while any are marked (asked 2026-10-22; a filter in force is cleared by the next Escape). Ctrl+I adds ", n selected" to the entry's information while
-  any are marked (AF-2.4). Cut, Copy, Delete, Copy path, Move to new folder, Compress to zip and Add to axMedia's queue
+  any are marked (AF-2.4). Cut, Copy, Delete, Copy path, Move to folder, Compress to zip and Add to axMedia's queue
   act on the marked entries when there are any, and on the current entry alone otherwise (AF-4.3, AF-4.4, AF-4.8,
   AF-5.2; kept 2026-10-22 over File Explorer's right-click rule, AF-D10); Enter, Rename, the ways to open and the
   Windows items stay on the current entry. The **Selection** menu of the bar (S) is the marks from anywhere, whatever
   entry is current: Select all, Deselect all, Select or deselect this entry, Select to here (Shift+Space), then the
-  operations that take the marked entries, Cut, Copy, Delete, Move to new folder…, Compress to zip, Add to axMedia's
+  operations that take the marked entries, Cut, Copy, Delete, Move to folder…, Compress to zip, Add to axMedia's
   queue, Copy path; its operations never fall back to the current entry: "None selected" when nothing is marked (asked
   2026-10-22: one menu for the entry, Item, one for the marks, Selection, one for the folder, Folder, so that the
   target is the menu's name and no mode is needed). Every change of the marks is a line of the Actions list's
@@ -260,7 +260,7 @@ Every operation here is one line of the Actions list (AF-9) as well as its annou
   that **reads the same** as another entry's without being it, differing only in case plus a trailing or doubled
   space, a different kind of space, an invisible character (a zero-width space, a joiner, a mark) or an accent
   written as one or two characters, is refused with "Reads the same as <that name>, which is already here" and the
-  box stays (`FileOperations.Lookalike`, tested; the same for New folder…, AF-4.1, and Move to new folder…,
+  box stays (`FileOperations.Lookalike`, tested; the same for New folder…, AF-4.1, and Move to folder…,
   AF-4.13): Windows would keep both files, and the list would then read one name twice, which the user met on
   2026-10-21 and took for a rename onto an existing name. A name that is exactly taken is Windows' own refusal,
   "Failed: There is already an entry named <name>".
@@ -286,7 +286,7 @@ Every operation here is one line of the Actions list (AF-9) as well as its annou
   its line from Begin to End, the paths it writes or moves away held in flight while it runs, "<doing>, please
   wait" when it passes a second (Pasting, Deleting, Moving, Compressing, Extracting), its failure on the line and
   said, and its result shown and said; an operation that ends at once (a rename, a new folder or file) goes through
-  `RunAtOnceAsync` the same way (2026-10-23; five hand-written runners before, Delete and Move to new folder without
+  `RunAtOnceAsync` the same way (2026-10-23; five hand-written runners before, Delete and Move to folder without
   the wait notice). Two operations at once are
   kept apart: a paste chooses its names around the paths a running paste is still writing ("notes - 2.md" for the
   same clipboard pasted twice, `FileOperations.Destinations` with the reserved paths), a cut whose files a paste is
@@ -301,7 +301,7 @@ Every operation here is one line of the Actions list (AF-9) as well as its annou
   File Explorer does). It is the window's own menu, fixed, with mnemonics and listed in F1, not the shell's (AF-D8).
   Its shape (AF-6.1; reshaped 2026-10-21 at the user's ask for File Explorer's plain words and one flat list): Open,
   Open with ▸, Open in Axit ▸, Preview, Play folder in axMedia, Add to axMedia's queue | Cut, Copy, Paste | Rename,
-  Delete | New folder…, New text file, Move to new folder…, Compress to zip, Extract here | Copy path, Show in File
+  Delete | New folder…, New text file, Move to folder…, Compress to zip, Extract here | Copy path, Show in File
   Explorer, Information, Properties | Windows menu…. There is one menu, the bar's Item menu, the standard drop-down
   (AX-6.6); the list has no context menu of its own (AF-D13).
 - AF-4.7 **Windows' own ways**, items of the entry's menu, each one of the system's own windows like the folder picker
@@ -358,17 +358,20 @@ Every operation here is one line of the Actions list (AF-9) as well as its annou
   ("Dune", or "Dune - 2" when taken) and extracts into it, so that nothing is written over; "Extracted to <name>",
   the folder selected; "Not a zip file" on anything else. A failure is "Failed: <reason>" (AF-4.5). Other archive
   kinds are the shell's (Windows menu…) or an installed program's (AF-4.11).
-- AF-4.13 **Move to new folder…** (the Item menu; asked 2026-10-21, "like zip but not compressed"): the notice
-  "Move to new folder" with the field "Name" and the buttons Move and Cancel, its text naming what moves ("a.txt
-  will move into the new folder", "3 items will move into the new folder"); Move makes the folder in the current
-  folder (a taken name is "Failed: There is already an entry named …", as New folder) and moves the selected entries,
-  or the current one (AF-3.7), into it through the shell (AF-4.8, undo allowed, names chosen first); "Moved <name>
-  into <folder>" or "Moved n items into <folder>", the new folder selected.
+- AF-4.13 **Move to folder…** (the Item menu; asked 2026-10-21, "like zip but not compressed"; named Move to new
+  folder until 2026-10-23, when the user asked for Go to folder's completion in it): the notice "Move to folder" with
+  the field "Folder" and the buttons Move and Cancel, its text naming what moves ("a.txt will move into the folder
+  typed …"). Down and Up complete the text as in Go to folder (AF-3.3), folders and drives alone, Right going into a
+  completed folder. Move: a folder that exists (a name here, a relative or a full path) takes the selected entries, or
+  the current one (AF-3.7); any other name is a new folder made here first (the name rules and "Reads the same as …"
+  of New folder); a path to a folder that does not exist elsewhere is "Not found: <text>"; a folder moved into itself
+  or its own subfolder is "Cannot move a folder into itself". The move is the shell's (AF-4.8, undo allowed, names
+  chosen first); "Moved <name> into <folder>" or "Moved n items into <folder>", the folder selected when it is here.
 - AF-4.14 **Undo** (asked 2026-10-21). **Ctrl+Z** (Folder → Undo <operation>, named after what it would undo, "Undo
   rename") takes back the newest file operation of the Actions list that can be taken back (AF-9.3; never a change of the
   marks, which is taken back on its own line only, decided 2026-10-22, so that Ctrl+Z after a paste does not unmark
   an entry instead), one per press, and selects the entry it touched: Rename, renamed back; New folder and New text file, deleted while still empty ("Not undone:
-  notes has files now" otherwise); a paste that moved and Move to new folder, moved back where they were, the new
+  notes has files now" otherwise); a paste that moved and Move to folder, moved back where they were, the new
   folder removed when it is empty; a paste that copied, Compress to zip and Extract here, the copies, the zip or the
   extracted folder sent to the Recycle Bin; Delete, brought back from the Recycle Bin, the shell's own undelete on the
   Recycle Bin's item, the one step that needs the shell again (the bin's items are matched by the original path their
@@ -418,10 +421,10 @@ and the started process finds its open window and hands the paths over with the 
   Open in Axit ▸ (Editor Ctrl+E | ─ | axClaude | axDown | axJSON | axGIT | axTerminal | axFile | axMedia | axPreview) |
   Preview Shift+Enter | Play folder in axMedia Ctrl+Enter | Add to axMedia's queue Ctrl+Shift+Q | ─ | Cut Ctrl+X |
   Copy Ctrl+C | Paste Ctrl+V | ─ | Rename F2 | Delete Delete | ─ | New folder… Ctrl+Shift+N | New text file
-  Ctrl+Shift+T | Move to new folder… | Compress to zip | Extract here | ─ | Copy path Ctrl+Shift+C | Show in File
+  Ctrl+Shift+T | Move to folder… | Compress to zip | Extract here | ─ | Copy path Ctrl+Shift+C | Show in File
   Explorer Ctrl+Shift+W | Information Ctrl+I | Properties Alt+Enter | ─ | Windows menu…; the same menu is the list's
   context menu (AF-4.6). **Selection (S):** Select all Ctrl+A | Deselect all Ctrl+Shift+A | Select or deselect this
-  entry Space | Select to here Shift+Space | ─ | Cut Ctrl+X | Copy Ctrl+C | Delete Delete | ─ | Move to new folder… |
+  entry Space | Select to here Shift+Space | ─ | Cut Ctrl+X | Copy Ctrl+C | Delete Delete | ─ | Move to folder… |
   Compress to zip | Add to axMedia's queue Ctrl+Shift+Q | Copy path Ctrl+Shift+C (AF-3.7; the operations on the marks
   alone). **Options (O):** Text ▸ (Font… | Larger text Ctrl+Plus | Smaller text Ctrl+Minus | Windows text size) |
   General ▸ (Check for updates at start ✓ | Show hidden files and folders | Show files and folders starting with a
@@ -650,7 +653,7 @@ AF-D4 (the volume) and AF-D6 (the queue fixed at Enter) went to axMedia with the
 - 2026-10-21, after the release: the one item of an empty folder (AF-2.2), Ctrl+N (AF-3.3), the selection with Space
   (AF-3.7, AF-D9), the user's own programs (AF-4.11), Sort by and the filter (AF-3.8), Favorites (AF-3.9), This PC
   (AF-3.10), Compress to zip and Extract here (AF-4.12), the list named by its count (AF-2.1), the two switches with
-  the not-shown line (AF-2.2), "name - 2" (AF-4.8), New text file (AF-4.1), Move to new folder… (AF-4.13), the entry's
+  the not-shown line (AF-2.2), "name - 2" (AF-4.8), New text file (AF-4.1), Move to folder… (AF-4.13), the entry's
   menu as one flat list (AF-4.6, AX-6.6), the Drives menu (AF-3.11); then the queue pane, Undo (AF-4.14), the preview
   pane, the lookalike guard (AF-4.2) and the Shift range (AF-3.7); released in 3.2.0, 3.2.1 and 3.2.2. Not yet checked
   with NVDA from Ctrl+N on.

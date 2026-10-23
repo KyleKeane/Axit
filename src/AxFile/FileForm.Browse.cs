@@ -835,6 +835,17 @@ public sealed partial class FileForm
     /// <summary>Counts the folder reads, so that a slow read that comes back after a newer one is dropped.</summary>
     private int _completionReads;
 
+    /// <summary>Whether the field completes folders alone (Move to folder, AF-4.13) or every entry (Go to folder); set by the notice that opens.</summary>
+    private bool _completeFoldersOnly;
+
+    /// <summary>A notice's path field starts with no completion in hand.</summary>
+    private void ResetCompletion(bool foldersOnly)
+    {
+        _completed = null;
+        _completions = [];
+        _completeFoldersOnly = foldersOnly;
+    }
+
     /// <summary>The Go to folder field's keys: Down and Up the next and the previous completion, Right at the end of a completed folder its first entry.</summary>
     private bool OnPathKey(Keys key)
     {
@@ -869,7 +880,9 @@ public sealed partial class FileForm
             var (folder, start) = PathCompletion.Split(typed, _folder);
             var read = ++_completionReads;
             var (hidden, dot) = (_settings.ShowHidden, _settings.ShowDotFiles);
-            var found = await Task.Run(() => PathCompletion.Candidates(folder, start, hidden, dot));
+            var foldersOnly = _completeFoldersOnly;
+            var found = await Task.Run(() => PathCompletion.Candidates(folder, start, hidden, dot)
+                .Where(candidate => !foldersOnly || candidate.Text.EndsWith('\\')).ToList());
             if (read != _completionReads || !NoticeOpen || Overlay.InputText != typed)
             {
                 return;
@@ -905,8 +918,7 @@ public sealed partial class FileForm
     /// <summary>Folder → Go to folder… (Ctrl+G): a typed path, environment variables allowed, a file's path selecting the file, with completion on Down and Up (AF-3.3).</summary>
     private void GoToFolder()
     {
-        _completed = null;
-        _completions = [];
+        ResetCompletion(foldersOnly: false);
         ShowNotice(new Notice("Go to folder", "A folder's path, or a file's to select it in its folder. %USERPROFILE%\\Downloads and the other variables work. Down and Up complete the path from what is typed; Right goes into a completed folder.",
         [
             new OverlayChoice("&Go", () =>
