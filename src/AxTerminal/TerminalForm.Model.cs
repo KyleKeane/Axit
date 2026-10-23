@@ -1,4 +1,3 @@
-using System.Runtime.InteropServices;
 using AxTerminal.Core;
 using Axit.Forms;
 
@@ -6,14 +5,11 @@ namespace AxTerminal;
 
 internal sealed partial class TerminalForm
 {
-    // ---- what the model reports (AT-5) ----
+    // ---- what the model reports (AT-5): the console window has synced the view, the status bar and the music first ----
 
-    private void OnModelChanged()
+    protected override void OnTranscriptChanged()
     {
-        _transcript.Sync(_model.Lines);
-        UpdateStatus();
         UpdateTitle();
-        UpdateMusic();
 
         // One pass over the transcript for the tick (AT-5.2) and the spoken output (AT-5.3).
         var arrival = _arrivals.Update(_model.Lines, _model.Running, _settings.OutputSpeech == OutputSpeechMode.All);
@@ -55,7 +51,7 @@ internal sealed partial class TerminalForm
     /// </summary>
     private void CheckForQuestion()
     {
-        if (!_settings.AnnounceQuestions || _host is null || !_model.Running || Environment.TickCount64 - _lastOutputTick < AsksQuietMs)
+        if (!_settings.AnnounceQuestions || !ProcessRunning || !_model.Running || Environment.TickCount64 - LastOutputTick < AsksQuietMs)
         {
             return;
         }
@@ -71,76 +67,11 @@ internal sealed partial class TerminalForm
         Signal(question: true);
     }
 
-    /// <summary>
-    /// The chime (two equal notes for a question, three falling notes for a command done) and the taskbar flash
-    /// that go with an attention announcement (AT-5.5). While the window is in the background the louder alert, when
-    /// it is on, plays in place of the chime: it is the one sound meant to carry into another window.
-    /// </summary>
-    private void Signal(bool question)
-    {
-        var away = !ContainsFocus;
-        if (_settings.BackgroundAlert && away)
-        {
-            Sounds.Alert();
-        }
-        else if (_settings.SoundOnBell)
-        {
-            if (question)
-            {
-                Sounds.Question();
-            }
-            else
-            {
-                Sounds.Done();
-            }
-        }
-
-        if (_settings.FlashTaskbar && away && IsHandleCreated)
-        {
-            var info = new FLASHWINFO
-            {
-                cbSize = (uint)Marshal.SizeOf<FLASHWINFO>(),
-                hwnd = Handle,
-                dwFlags = FLASHW_ALL | FLASHW_TIMERNOFG,
-                uCount = 0,
-                dwTimeout = 0,
-            };
-            FlashWindowEx(ref info);
-        }
-    }
-
-    /// <summary>The working music (AT-5.5) plays exactly while a command runs, and stops at once when the option is turned off.</summary>
-    private void UpdateMusic()
-    {
-        var play = _settings.WorkingMusic && _host is not null && _model.Running;
-        if (play == _musicOn)
-        {
-            return;
-        }
-
-        _musicOn = play;
-        if (play)
-        {
-            Sounds.StartMusic();
-        }
-        else
-        {
-            Sounds.StopMusic();
-        }
-    }
-
-    /// <summary>Ctrl+Space anywhere (AT-5.5): the music option flips through its menu item, which applies and saves it, and the result is said.</summary>
-    private void ToggleMusic()
-    {
-        _musicItem.Checked = !_musicItem.Checked;
-        Announce(!_settings.WorkingMusic ? "Background music off" : _musicOn ? "Background music on" : "Background music on, nothing is running", true);
-    }
-
     /// <summary>Ctrl+Q (AT-2.3, AT-D8): the state, the command and how long it runs, and the prompt, from anywhere.</summary>
     private void SayWhatIsRunning()
     {
         string text;
-        if (_host is null)
+        if (!ProcessRunning)
         {
             text = "Shell ended";
         }

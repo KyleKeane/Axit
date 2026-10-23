@@ -1,4 +1,3 @@
-using System.Runtime.InteropServices;
 using AxClaude.Core.Transcript;
 using Axit.Core;
 using Axit.Forms;
@@ -7,14 +6,10 @@ namespace AxClaude;
 
 internal sealed partial class MainForm
 {
-    // ---- model events ----
+    // ---- what the session model reports (FR-7): the console window has synced the view, the status bar and the music first ----
 
-    private void OnModelChanged()
+    protected override void OnTranscriptChanged()
     {
-        _transcript.Sync(_model.Lines);
-        UpdateStatus();
-        UpdateMusic();
-
         // One pass over the transcript for the tick (FR-7.8) and the spoken reply and tool calls (FR-7.4). Nothing is
         // spoken before Claude is ready in this run: what it prints until then is the replayed conversation, there for
         // reading. The chimes hang on the send, the first reply line and the bell (FR-7.3), never on the working status.
@@ -82,7 +77,7 @@ internal sealed partial class MainForm
             _handledWait = null;
         }
 
-        if (!_readyAnnounced && _host is not null && _model.Mode is not null && !_model.Working && !_model.PromptPending)
+        if (!_readyAnnounced && ProcessRunning && _model.Mode is not null && !_model.Working && !_model.PromptPending)
         {
             _readyAnnounced = true;
             _model.HideReplay = false;
@@ -125,7 +120,7 @@ internal sealed partial class MainForm
         {
             // Nothing waits any more: the message field comes back. Said only when Claude closed it by itself, not
             // right after the user's answer or key.
-            if (_area.Current is not null)
+            if (Area.Current is not null)
             {
                 var byUser = UserActed(Math.Max(_answerAt, _screenKeyAt));
                 CloseArea();
@@ -209,82 +204,10 @@ internal sealed partial class MainForm
         }
     }
 
-    /// <summary>
-    /// The chime (two equal notes for a question, three falling notes when Claude is done, FR-7.3) and the taskbar
-    /// flash that go with an attention announcement; without <paramref name="chime"/> only the flash (ShowInArea
-    /// plays the chime for what the control area shows). While the window is in the background the alert, when it is on, plays in
-    /// place of any chime, the area's included: it is the one sound meant to carry into another window.
-    /// </summary>
-    private void Signal(bool question, bool chime = true)
+    /// <summary>The status bar (FR-10.2): Claude's state with what waits and runs, the mode and the session name on the left; the folder on the right.</summary>
+    protected override void UpdateStatus()
     {
-        var away = !ContainsFocus;
-        if (_settings.BackgroundAlert && away)
-        {
-            Sounds.Alert();
-        }
-        else if (_settings.SoundOnBell && chime)
-        {
-            if (question)
-            {
-                Sounds.Question();
-            }
-            else
-            {
-                Sounds.Done();
-            }
-        }
-
-        if (_settings.FlashTaskbar && away && IsHandleCreated)
-        {
-            var info = new FLASHWINFO
-            {
-                cbSize = (uint)Marshal.SizeOf<FLASHWINFO>(),
-                hwnd = Handle,
-                dwFlags = FLASHW_ALL | FLASHW_TIMERNOFG,
-                uCount = 0,
-                dwTimeout = 0,
-            };
-            FlashWindowEx(ref info);
-        }
-    }
-
-    /// <summary>
-    /// The working music (FR-7.9) plays exactly while the status says working: it starts with the first working
-    /// frame and stops with the frame in which Claude is done, asks, or was stopped, and at once when the option is
-    /// turned off.
-    /// </summary>
-    private void UpdateMusic()
-    {
-        var play = _settings.WorkingMusic && _host is not null && _model.Working && !_model.PromptPending;
-        if (play == _musicOn)
-        {
-            return;
-        }
-
-        _musicOn = play;
-        if (play)
-        {
-            Sounds.StartMusic();
-        }
-        else
-        {
-            Sounds.StopMusic();
-        }
-    }
-
-    /// <summary>
-    /// Ctrl+Space anywhere in the window (FR-7.9): the music option flips through its menu item, which applies and
-    /// saves it, and the result is said; when Claude is not working at that moment nothing is heard yet, which is said too.
-    /// </summary>
-    private void ToggleMusic()
-    {
-        _musicItem.Checked = !_musicItem.Checked;
-        Announce(!_settings.WorkingMusic ? "Background music off" : _musicOn ? "Background music on" : "Background music on, nothing is running", true);
-    }
-
-    private void UpdateStatus()
-    {
-        var state = _host is null ? "stopped"
+        var state = !ProcessRunning ? "stopped"
             : _model.TranscriptViewOpen ? "detailed view on, Ctrl+O turns it off"
             : _model.PromptPending ? "waiting for your answer"
             : _model.Working ? ("working " + (_model.Spinner ?? string.Empty)).Trim()
@@ -311,12 +234,7 @@ internal sealed partial class MainForm
             parts.Add(name);
         }
 
-        var text = string.Join(" | ", parts);
-        if (_state.Text != text)
-        {
-            _state.Text = text;
-            StatusLayout.Fit(_status, _state, _folderLabel);
-        }
+        SetStatus(string.Join(" | ", parts), _folder ?? "No project folder");
     }
 
     private void UpdateFolderUi()
@@ -324,22 +242,6 @@ internal sealed partial class MainForm
         // FR-8.4: the folder's name, then its full path in parentheses, so that the name comes first in speech and
         // two folders of one name are still told apart in Alt+Tab and in the Axit menu; announcements use the name.
         Text = _folder is null ? "AxClaude" : $"{PathName.Of(_folder)} ({_folder}) - AxClaude";
-        _folderLabel.Text = _folder ?? "No project folder";
-        StatusLayout.Fit(_status, _state, _folderLabel);
-    }
-
-    /// <summary>
-    /// Ctrl+1, Ctrl+2 and the Navigate menu (FR-6.5): the control takes the focus, and NVDA announces the change. When it
-    /// has the focus already, its name is spoken instead, so the key also answers "where am I".
-    /// </summary>
-    private void GoTo(Control control)
-    {
-        if (control.Focused)
-        {
-            Announce(control.AccessibleName ?? string.Empty, true);
-            return;
-        }
-
-        control.Focus();
+        SetStatus(StateLabel.Text ?? string.Empty, _folder ?? "No project folder");
     }
 }

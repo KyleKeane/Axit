@@ -7,22 +7,16 @@ namespace AxClaude;
 
 internal sealed partial class MainForm
 {
-    // ---- UI ----
+    // ---- the menus (FR-10): the controls are the console window's ----
 
-    private void BuildUi()
+    private void BuildMenus()
     {
-        Text = "AxClaude";
-        Size = new Size(1000, 700);
-        MinimumSize = new Size(600, 400);
-
         // The menus (FR-10): short, grouped by what the items are about, every mnemonic unique within its menu.
         // Session is the thing worked on, as AxDown's File is: the session, where Claude runs, what the window holds.
         var session = new ToolStripMenuItem("&Session");
         session.DropDownItems.Add(new ToolStripMenuItem("&New session...", null, (_, _) => NewSession()) { ShortcutKeys = AxClaudeKeys.NewSession });
         session.DropDownItems.Add(new ToolStripMenuItem("&Open folder...", null, (_, _) => OpenFolder()));
-        CommandPalette.FilledOnOpening(_recentFoldersItem).DropDownOpening += (_, _) => FillRecentFolders();
-        FillRecentFolders();
-        session.DropDownItems.Add(_recentFoldersItem);
+        session.DropDownItems.Add(RecentFoldersItem);
         // The standard order of a File menu (bundle AX-6): the editors have Save and Save as here; AxClaude has none.
         session.DropDownItems.Add(new ToolStripSeparator());
         // FR-8.2: Show current folder in ▸ File Explorer and the other apps' windows on the project folder.
@@ -64,18 +58,14 @@ internal sealed partial class MainForm
 
         var navigate = new ToolStripMenuItem("&Navigate");
         navigate.DropDownItems.Add(new ToolStripMenuItem("&Message field", null, (_, _) => GoTo(BottomControl)) { ShortcutKeyDisplayString = BundleKeys.Text(AxClaudeKeys.GoToField) });
-        navigate.DropDownItems.Add(new ToolStripMenuItem("&Conversation", null, (_, _) => GoTo(_transcript)) { ShortcutKeyDisplayString = BundleKeys.Text(AxClaudeKeys.GoToConversation) });
+        navigate.DropDownItems.Add(new ToolStripMenuItem("&Conversation", null, (_, _) => GoTo(Transcript)) { ShortcutKeyDisplayString = BundleKeys.Text(AxClaudeKeys.GoToConversation) });
         // Ctrl+3 is a ShortcutKeys key, but drawn through Text like Ctrl+1 and Ctrl+2 so that it ends in the full stop (AX-8.5).
-        navigate.DropDownItems.Add(new ToolStripMenuItem("&Latest response", null, (_, _) => _transcript.JumpToLatestResponse()) { ShortcutKeys = AxClaudeKeys.LatestResponse, ShortcutKeyDisplayString = BundleKeys.Text(AxClaudeKeys.LatestResponse) });
+        navigate.DropDownItems.Add(new ToolStripMenuItem("&Latest response", null, (_, _) => Transcript.JumpToLatestResponse()) { ShortcutKeys = AxClaudeKeys.LatestResponse, ShortcutKeyDisplayString = BundleKeys.Text(AxClaudeKeys.LatestResponse) });
         navigate.DropDownItems.Add(new ToolStripMenuItem("Claude's &question again", null, (_, _) => ReadQuestionAgain()) { ShortcutKeyDisplayString = BundleKeys.Text(AxClaudeKeys.ReadQuestion) });
         navigate.DropDownItems.Add(new ToolStripSeparator());
-        navigate.DropDownItems.Add(new ToolStripMenuItem("&Find...", null, (_, _) => FindDialog()) { ShortcutKeyDisplayString = BundleKeys.Text(BundleKeys.Find) });
-        navigate.DropDownItems.Add(new ToolStripMenuItem("Find &next", null, (_, _) => FindNext(backward: false)) { ShortcutKeyDisplayString = BundleKeys.Text(BundleKeys.FindNext) });
-        navigate.DropDownItems.Add(new ToolStripMenuItem("Find &previous", null, (_, _) => FindNext(backward: true)) { ShortcutKeyDisplayString = BundleKeys.Text(BundleKeys.FindPrevious) });
+        navigate.DropDownItems.AddRange(FindItems());
         navigate.DropDownItems.Add(new ToolStripSeparator());
-        navigate.DropDownItems.Add(new ToolStripMenuItem("&Bookmark this line", null, (_, _) => _transcript.ToggleBookmark()) { ShortcutKeys = AxClaudeKeys.BookmarkLine, ShortcutKeyDisplayString = $"{BundleKeys.Text(AxClaudeKeys.BookmarkLine)}, or {BundleKeys.Text(AxClaudeKeys.BookmarkToggle)} in the conversation" });
-        navigate.DropDownItems.Add(new ToolStripMenuItem("Next bookmar&k", null, (_, _) => _transcript.JumpToBookmark(backward: false)) { ShortcutKeyDisplayString = $"{BundleKeys.Text(AxClaudeKeys.Bookmark)} in the conversation" });
-        navigate.DropDownItems.Add(new ToolStripMenuItem("Pre&vious bookmark", null, (_, _) => _transcript.JumpToBookmark(backward: true)) { ShortcutKeyDisplayString = $"Shift+{BundleKeys.Text(AxClaudeKeys.Bookmark)} in the conversation" });
+        navigate.DropDownItems.AddRange(BookmarkItems());
 
         // The settings: a submenu for each kind, nothing outside one. Each check item is saved as it is toggled.
         var options = new ToolStripMenuItem("&Options");
@@ -83,13 +73,7 @@ internal sealed partial class MainForm
         sounds.DropDownItems.Add(Toggle("&Chimes: ready, sent, replying, done, question", _settings.SoundOnBell, v => _settings.SoundOnBell = v));
         sounds.DropDownItems.Add(Toggle("&Ticks for new lines and tool calls", _settings.ClickOnNewLine, v => _settings.ClickOnNewLine = v));
         // FR-7.9: starts or stops at once when toggled during a turn; Ctrl+Space anywhere flips the same item.
-        _musicItem = Toggle("&Background music while Claude works", _settings.WorkingMusic, v =>
-        {
-            _settings.WorkingMusic = v;
-            UpdateMusic();
-        });
-        _musicItem.ShortcutKeyDisplayString = BundleKeys.Text(AxClaudeKeys.ToggleMusic);
-        sounds.DropDownItems.Add(_musicItem);
+        sounds.DropDownItems.Add(CreateMusicItem("&Background music while Claude works", AxClaudeKeys.ToggleMusic));
         options.DropDownItems.Add(sounds);
 
         // FR-7.4: the reply choices are one of three, shown checked like a radio group; the choice is announced, since
@@ -131,27 +115,14 @@ internal sealed partial class MainForm
         questions.DropDownItems.Add(Toggle("&Review answers before they go to Claude", _settings.ReviewAnswers, v => _settings.ReviewAnswers = v));
         options.DropDownItems.Add(questions);
 
-        options.DropDownItems.Add(CreateTextMenu(
-            Toggle("Time &stamps on Input and Output lines", _settings.MarkerTimeStamps, v =>
-            {
-                _settings.MarkerTimeStamps = v;
-                _model.TimeStamps = v;
-            }),
-            // FR-4.6a: the # markers of the heading lines shown or hidden; the lines, the keys and the export unchanged.
-            Toggle("Mar&kers in the text", _settings.ShowMarkers, v =>
-            {
-                _settings.ShowMarkers = v;
-                _transcript.ShowMarkers = v;
-                _transcript.Sync(_model.Lines);
-            })));
+        options.DropDownItems.Add(CreateTextMenu(TranscriptTextItems()));
         options.DropDownItems.Add(CreateGeneralMenu(Toggle("&Keep recordings and exported conversations out of git", _settings.KeepFilesOutOfGit, v =>
         {
             _settings.KeepFilesOutOfGit = v;
             KeepFilesOutOfGit();
         })));
         // What only a developer or a bug report needs (FR-12.3, FR-13.3, FR-9.2), in one place.
-        _recordItem.Click += (_, _) => ToggleRecording();
-        options.DropDownItems.Add(CreateDeveloperMenu(_recordItem));
+        options.DropDownItems.Add(CreateDeveloperMenu(RecordItem));
 
         var help = CreateHelpMenu(HelpText.UserGuide, "Claude Code &resources",
         [
@@ -165,47 +136,7 @@ internal sealed partial class MainForm
         // The bundle's Axit menu (AX-9) sits before Help in every window and ends with the update items and About
         // (AX-3.1, FR-1.10): Check for updates names the version in use and asks GitHub every time; Update to Axit n
         // stands below it while a newer release is known; About is the bundle's sections, shown as this window's notices.
-        var axit = CreateAxitMenu();
-
-        _menu.Items.AddRange([session, claude, navigate, options, axit, help]);
-        MainMenuStrip = _menu;
-
-        _state.Text = "Claude: starting";
-
-        _input.AccessibleName = "Message to Claude";
-        _input.PlaceholderText = "Message to Claude";
-        _input.Multiline = true;
-        _input.AcceptsReturn = true;
-        _input.AcceptsTab = false;
-        _input.WordWrap = true;
-        _input.ScrollBars = ScrollBars.Vertical;
-        // The control's default of 32 767 characters cut a long paste short without a word (FR-2.1).
-        _input.MaxLength = 0;
-        _input.Dock = DockStyle.Bottom;
-        _input.TabIndex = 0;
-        _input.KeyDown += OnInputKeyDown;
-        // The bundle's page and paragraph keys (FR-2.1): the control's own keys do nothing while the message fits, or scroll a row and leave the caret.
-        _input.KeyDown += EditKeys.Handle;
-
-        _transcript.Dock = DockStyle.Fill;
-        _transcript.TabIndex = 1;
-        _transcript.EscapePressed += () => BottomControl.Focus();
-        _transcript.LineChosen += QuoteLineInMessage;
-        _transcript.BookmarkToggled += ToggleBookmark;
-
-        // The overlay is hidden until a notice shows; it then fills the space of the hidden conversation and field.
-        Controls.Add(Overlay);
-        Controls.Add(_transcript);
-        Controls.Add(_input);
-        // What Claude waits on takes the message field's place (D33), one control at a time.
-        _area.TabIndex = 0;
-        Controls.Add(_area);
-        SizeChanged += (_, _) => _area.FitHeight();
-        Controls.Add(_status);
-        Controls.Add(_menu);
-        _transcript.BringToFront();
-
-        UpdateFolderUi();
+        MenuBar.Items.AddRange([session, claude, navigate, options, CreateAxitMenu(), help]);
     }
 
     /// <summary>Options → Speech → Speak replies: a mode (FR-7.4): speech starts with what arrives next.</summary>
@@ -221,7 +152,4 @@ internal sealed partial class MainForm
         SaveSettings();
         Announce(MenuText.Plain(ReplySpeechChoices.First(c => c.Mode == mode).Text), true);
     }
-
-    private void FillRecentFolders() =>
-        RecentMenu.FillFolders(_recentFoldersItem, _settings.RecentFolders, "&No recent folders", SwitchFolder);
 }

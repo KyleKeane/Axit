@@ -1,14 +1,13 @@
 using AxClaude.Core.Pty;
-using AxClaude.Core.Transcript;
 using Axit.Core;
-using Axit.Forms;
 using Axit.Core.Pty;
+using Axit.Forms;
 
 namespace AxClaude;
 
 internal sealed partial class MainForm
 {
-    // ---- Claude process ----
+    // ---- Claude's process (FR-1): what is Claude's around the console window's StartProcess and StopProcess ----
 
     /// <summary>The arguments Claude gets after --ax-screen-reader: the chosen ones, or the default (FR-9.1).</summary>
     private IReadOnlyList<string> ClaudeArgs => _claudeArgs ?? (_nothingToContinue ? [] : ["--continue"]);
@@ -19,7 +18,7 @@ internal sealed partial class MainForm
     /// </summary>
     private void RestartClaude()
     {
-        if (_host is null)
+        if (!ProcessRunning)
         {
             ForceRestart();
             return;
@@ -76,35 +75,12 @@ internal sealed partial class MainForm
         arguments.AddRange(ClaudeArgs);
         _launchedFolder = _folder;
         KeepFilesOutOfGit();
-
-        // Chunks that arrive while the UI thread is busy are handed over together: one post per burst, not one per
-        // chunk, so a large tool output does not queue up hundreds of window messages ahead of the user's keys. The
-        // handlers go in with Start, so that nothing Claude prints first is missed; they run on background threads
-        // and only post to this one, which gets to the posted work after host is assigned below.
-        var inbox = new List<byte[]>();
-        var posted = false;
-        PtyHost? host = null;
-        try
+        var options = new PtyOptions(ClaudeLauncher.BuildCommandLine(claude, arguments), _folder!, _model.Columns, _model.Rows, ClaudeLauncher.BuildEnvironment());
+        if (!StartProcess(options, "Claude"))
         {
-            host = PtyHost.Start(new PtyOptions(
-                ClaudeLauncher.BuildCommandLine(claude, arguments),
-                _folder!,
-                _model.Columns,
-                _model.Rows,
-                ClaudeLauncher.BuildEnvironment()), OnData, OnExited);
-        }
-        catch (Exception ex)
-        {
-            Log.Error("Claude could not be started", ex);
-            var reason = ex is EntryPointNotFoundException
-                ? "this version of Windows has no pseudo console. Windows 10 version 1809 or later is needed"
-                : ex.Message;
-            Fail("Claude could not be started: " + reason);
             return;
         }
 
-        Log.Info($"Started {claude} (pid {host.ProcessId}) in {_folder}, console {_model.Columns}x{_model.Rows}");
-        _host = host;
         _readyAnnounced = false;
         _promptAnnounced = false;
         // A question of the new Claude belongs to no slash command of the old one (QuestionRouter).
@@ -116,81 +92,11 @@ internal sealed partial class MainForm
         _settings.RememberFolder(_folder!);
         SaveSettings();
         UpdateStatus();
-
-        void OnData(byte[] data)
-        {
-            try
-            {
-                _recorder?.Write(data);
-            }
-            catch (Exception ex) when (ex is IOException or UnauthorizedAccessException)
-            {
-                // A full disk or a locked file must not end the read loop, which would freeze the transcript.
-                Post(() => RecordingFailed(ex.Message));
-            }
-
-            lock (inbox)
-            {
-                inbox.Add(data);
-                if (posted)
-                {
-                    return;
-                }
-
-                posted = true;
-            }
-
-            if (!Post(FeedInbox))
-            {
-                lock (inbox)
-                {
-                    posted = false;
-                }
-            }
-        }
-
-        void FeedInbox()
-        {
-            byte[][] batch;
-            lock (inbox)
-            {
-                batch = [.. inbox];
-                inbox.Clear();
-                posted = false;
-            }
-
-            if (!ReferenceEquals(host, _host))
-            {
-                return;
-            }
-
-            foreach (var chunk in batch)
-            {
-                _model.Feed(chunk);
-            }
-
-            _quiet.Stop();
-            _quiet.Start();
-        }
-
-        void OnExited(int code) => Post(() =>
-        {
-            if (ReferenceEquals(host, _host))
-            {
-                // Let output that is still in the pipe arrive before the exit is reported.
-                _exitCode = code;
-                _exitSettle.Stop();
-                _exitSettle.Start();
-            }
-        });
     }
 
-    private void FinishExit()
+    /// <summary>Claude's process ended, its last output in and the process stopped: the explanation shown, the default --continue retried as a new conversation (FR-9.1), or "Claude stopped".</summary>
+    protected override void OnProcessExited(int code)
     {
-        _quiet.Stop();
-        _model.EndFrame();
-        StopClaude();
-        Log.Info($"Claude exited with code {_exitCode}");
         if (_model.HideReplay)
         {
             // Claude ended before it was ready: whatever it printed is the explanation.
@@ -206,24 +112,15 @@ internal sealed partial class MainForm
             return;
         }
 
-        _model.AddSystemLine($"Claude stopped (exit code {_exitCode}). Press Ctrl+Shift+R to start it again.");
+        _model.AddSystemLine($"Claude stopped (exit code {code}). Press Ctrl+Shift+R to start it again.");
         Announce("Claude stopped", false);
     }
 
-    private void StopClaude()
+    /// <summary>The attention timer stops with Claude; the console window stops the process, the writes and the control area.</summary>
+    protected override void StopProcess()
     {
-        var host = _host;
-        _host = null;
-        _quiet.Stop();
         _attention.Stop();
-        _exitSettle.Stop();
-        _writes.Clear();
-        _writing = false;
-        host?.Dispose();
-        // Nothing waits on an answer any more: the message field comes back.
-        CloseArea();
-        UpdateStatus();
-        UpdateMusic();
+        base.StopProcess();
     }
 
     /// <summary>
@@ -233,7 +130,7 @@ internal sealed partial class MainForm
     /// </summary>
     private void Relaunch(string systemLine, bool clearConversation = false)
     {
-        StopClaude();
+        StopProcess();
         if (clearConversation)
         {
             _model.Clear();
@@ -251,14 +148,5 @@ internal sealed partial class MainForm
         {
             StartClaude();
         }
-    }
-
-    /// <summary>An error the user must see: logged, a system line in the conversation, the status, and the notice.</summary>
-    protected override void Fail(string message)
-    {
-        Log.Error(message);
-        _model.AddSystemLine(message);
-        UpdateStatus();
-        ShowError("Error", message);
     }
 }

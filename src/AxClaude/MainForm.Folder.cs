@@ -88,8 +88,11 @@ internal sealed partial class MainForm
         }
     }
 
+    /// <summary>The project folder, for the bundle's Recently closed list (AX-9.4).</summary>
+    protected override string? FolderInHand => _folder;
+
     /// <summary>Restarts Claude in another folder (Open folder, Open recent folder), with a system line and an announcement.</summary>
-    private void SwitchFolder(string folder)
+    protected override void SwitchFolder(string folder)
     {
         if (!Directory.Exists(folder))
         {

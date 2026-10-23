@@ -37,7 +37,11 @@ A text editor app, one more file type, has no window of its own: it is an `Edito
 file, file filter, F1 text, guide, the `TextJump` pairs of its outline, its resources pages, its commands on the text)
 handed to `Axit.Forms/EditorHost.Run`, as `AxDownApp` and `AxJSONApp` do; the window is `Axit.Forms/TextEditorForm`.
 Its own code is the outline and the commands (pure, in its Core, tested), its key table (the shell's keys through
-`EditorKeys.All` plus its letters) and its texts. The rest of this section is for a window of a new kind.
+`EditorKeys.All` plus its letters) and its texts. An app around a program in a pseudo console derives its window from
+`Axit.Forms/ConsoleForm`, as AxClaude and AxTerminal do: its settings class from `Axit.Core/ConsoleSettings`, its model
+from `Axit.Core/Transcript/LineStore`, and the window fills in the console hooks (`Working`, `OnTranscriptChanged`,
+`UpdateStatus`, `OnProcessExited`, `AskBeforeClosing`, `FolderInHand`, `SwitchFolder`, `ProcessConsoleKey`) besides
+the base's. The rest of this section is for a window of a new kind.
 
 - `AxThing.csproj` (net10.0-windows, WinForms), referencing `AxThing.Core`, `Axit.Core` and `Axit.Forms`, embedding
   the guide as `UserGuide.md`.

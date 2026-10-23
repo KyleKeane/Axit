@@ -406,8 +406,11 @@ src/AxClaude.Core/        class library (net10.0), no WinForms
   AppSettings.cs, StartupOptions.cs (the command line, FR-9)
 src/AxClaude/             class library (net10.0-windows), AxClaude's window inside Axit.exe: AxClaudeApp (the entry point
                           Run, one call into Axit.Forms/AppHost.Run, which owns the crash handler, --help and
-                          --version), MainForm, HelpText, AxClaudeKeys (with Transcript, the
-                          conversation's keys for the bundle's view as data)
+                          --version), MainForm (on Axit.Forms/ConsoleForm since 2026-10-23, the console window shared
+                          with AxTerminal: the view, the field, the control area, the status bar, the pty bridge, the
+                          writes, the recording, the export, find, the signals, the music; MainForm keeps what is
+                          Claude's), HelpText, AxClaudeKeys (with Transcript, the conversation's keys for the bundle's
+                          view as data)
 src/Axit/                 the executable of the bundle (docs/axit/SPEC.md): Program (dispatch), AxClaude.ico (tools/make-icon.ps1)
 src/Axit.Core/            shared pure code: Dispatch, BundleInfo, AppPaths, SettingsFile, WindowPlacement, Log, Paragraphs,
                           Updates/ (UpdateCheck, Updater), Audio/WaveTone; since 2026-10-18, moved from here for AxTerminal
@@ -418,7 +421,8 @@ src/Axit.Forms/           shared window pieces, moved from here unchanged (bundl
                           ControlArea and ListKeys (D33), Sounds (the wave-out devices), EditPaging, EditParagraphs, EditKeys (the page
                           and paragraph keys of a text box), Announcer (the UI Automation notification), StatusLayout,
                           WindowAccessibleObject, BundleKeys; since 2026-10-18 TranscriptView with TranscriptKeys and QuickKey
-                          (§7.7; the keys handed in from AxClaudeKeys.Transcript), moved for AxTerminal
+                          (§7.7; the keys handed in from AxClaudeKeys.Transcript), moved for AxTerminal; since 2026-10-23
+                          ConsoleForm, the console window both apps derive from (bundle AX-6.5)
 tests/AxClaude.Tests/     xunit: FixtureTests, ReplayTests, SessionModelTests, ArrivalsTests, TranscriptMirrorTests, ReadingBreakTests,
                           ScreenTests, QuestionTests, SettingsTests, GitExcludeTests, PrivacyTests, ClaudeLauncherTests, UtteranceTests,
                           StartupOptionsTests; TestHelpers
@@ -436,14 +440,14 @@ publish.ps1, install.ps1, install.cmd  build the zip; install or remove for the 
 ConPTY output pipe ──(reader thread, one BeginInvoke per burst)──> UI thread: LineStore.Feed (the base of SessionModel) = UTF-8 Decoder ──> VtParser ──> Screen
         ──(frame end: ESC[?25h, or 100 ms quiet)──> SessionModel.EndFrame (row text into lines, chrome, classification, echoes, status)
         ──Changed──> TranscriptView.Sync through TranscriptMirror (edits, caret) + announcements + status bar
-Input field / menus ──> MainForm write queue (paced writes) ──> ConPTY input pipe
+Input field / menus ──> ConsoleForm write queue (paced writes, one pump timer) ──> ConPTY input pipe
 ```
 
 ### 7.3 Threading
 
 - Reader thread (`PtyHost`): blocking `Read`; chunks are collected in an inbox and one `BeginInvoke` per burst drains it on the UI thread, so a large output never queues hundreds of window messages ahead of the user's keys; while recording, each chunk is also written to the `.vt` file.
 - UI thread: owns the parser, the screen and the `SessionModel`. A frame ends at `ESC[?25h` or after 100 ms without output; `Changed` applies the view edits with redraw suspended (`WM_SETREDRAW`) and restores the caret (§7.7).
-- Writes: a queue drained on the UI thread with a delay after each write (30 ms between lines, 100 ms before `\r`).
+- Writes: a queue drained on the UI thread with a delay after each write (30 ms between lines, 100 ms before `\r`), one pump timer in the console window; a restart stops it, so that no second pump runs on (two ran, halving the pacing, until 2026-10-23).
 
 ### 7.4 PtyHost
 

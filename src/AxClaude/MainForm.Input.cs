@@ -1,12 +1,11 @@
 using AxClaude.Core.Transcript;
 using Axit.Forms;
-using Axit.Core.Transcript;
 
 namespace AxClaude;
 
 internal sealed partial class MainForm
 {
-    // ---- input ----
+    // ---- the message field and the sending (FR-2); the paced write queue is the console window's ----
 
     private void OnInputKeyDown(object? sender, KeyEventArgs e)
     {
@@ -39,17 +38,17 @@ internal sealed partial class MainForm
     /// </summary>
     private void QuoteLineInMessage(int number, int count, string text)
     {
-        if (_area.Current is not null)
+        if (Area.Current is not null)
         {
             // The field is hidden behind Claude's question: the quote would land unseen and the comment in the list.
             Announce("Answer Claude first; the message field is hidden while it asks", true);
             return;
         }
 
-        var existing = _input.Text.TrimEnd('\r', '\n');
+        var existing = Input.Text.TrimEnd('\r', '\n');
         var quote = $"{QuoteMarker}\r\nLine {number} of {count}:\r\n{text}\r\n{CommentMarker}\r\n";
-        _input.Text = existing.Length == 0 ? quote : existing + "\r\n\r\n" + quote;
-        _input.Select(_input.TextLength, 0);
+        Input.Text = existing.Length == 0 ? quote : existing + "\r\n\r\n" + quote;
+        Input.Select(Input.TextLength, 0);
         Announce($"Line {number} copied", true);
         GoTo(BottomControl);
     }
@@ -66,28 +65,16 @@ internal sealed partial class MainForm
             ? question.Accepts(text)
             : text is "y" or "n" or "Y" or "N" || text.All(char.IsAsciiDigit));
 
-    /// <summary>m, or Navigate → Bookmark this line (FR-3.9): the model adds or removes the bookmark line and the result is spoken.</summary>
-    private void ToggleBookmark(Line line)
-    {
-        if (_model.ToggleBookmark(line) is not ({ } bookmark, var added))
-        {
-            Announce("Line gone", true);
-            return;
-        }
-
-        Announce($"{bookmark.Text} {(added ? "added" : "removed")}", true);
-    }
-
     private void SendInput()
     {
-        if (_host is null)
+        if (!ProcessRunning)
         {
             // The text stays in the field: nothing was sent, and it is wanted again after a restart.
             Announce("Claude stopped. Ctrl+Shift+R starts it", true);
             return;
         }
 
-        var text = _input.Text.Replace("\r\n", "\n").Trim();
+        var text = Input.Text.Replace("\r\n", "\n").Trim();
         if (_settings.QuestionNotices && text.Length > 0 && _model.PromptPending && !IsAnswer(text) && text != _keptMessage)
         {
             // D33: text sent into a question is lost (Claude answers "Please answer y or n." and drops it) or taken
@@ -100,7 +87,7 @@ internal sealed partial class MainForm
         }
 
         _keptMessage = null;
-        _input.Clear();
+        Input.Clear();
         if (text.Length == 0)
         {
             Write("\r");
@@ -145,38 +132,15 @@ internal sealed partial class MainForm
         var lines = text.Split('\n');
         for (var i = 0; i < lines.Length; i++)
         {
-            _writes.Enqueue((lines[i], i == lines.Length - 1 ? 100 : 30));
+            Enqueue(lines[i], i == lines.Length - 1 ? 100 : 30);
             if (i < lines.Length - 1)
             {
-                _writes.Enqueue(("\n", 30));
+                Enqueue("\n", 30);
             }
         }
 
-        _writes.Enqueue(("\r", 50));
+        Enqueue("\r", 50);
         StartWrites();
-    }
-
-    /// <summary>Starts the write pump when it is idle; a pump already running takes what was queued after it.</summary>
-    private void StartWrites()
-    {
-        if (!_writing)
-        {
-            PumpWrites();
-        }
-    }
-
-    private void PumpWrites()
-    {
-        if (_writes.Count == 0)
-        {
-            _writing = false;
-            return;
-        }
-
-        _writing = true;
-        var (text, delay) = _writes.Dequeue();
-        Write(text);
-        Later(delay, PumpWrites);
     }
 
     /// <summary>
@@ -191,13 +155,14 @@ internal sealed partial class MainForm
             return;
         }
 
-        _writes.Enqueue(("\x18", 30));
-        _writes.Enqueue(("\x13", 30));
+        Enqueue("\x18", 30);
+        Enqueue("\x13", 30);
         StartWrites();
 
         Announce("Sending now", false);
     }
 
+    /// <summary>A one-shot timer for the question flow's settles (D33); the write queue has its own pump in the console window.</summary>
     private static void Later(int milliseconds, Action action)
     {
         var timer = new System.Windows.Forms.Timer { Interval = milliseconds };
@@ -210,12 +175,10 @@ internal sealed partial class MainForm
         timer.Start();
     }
 
-    private void Write(string text) => _host?.Write(text);
-
     /// <summary>Escape to Claude (FR-2.3), and what is still queued to type goes: an answer typed out a key at a time must not land after it.</summary>
     private void Interrupt()
     {
-        _writes.Clear();
+        ClearWrites();
         Write("\x1b");
     }
 }

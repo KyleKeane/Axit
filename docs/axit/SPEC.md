@@ -250,7 +250,7 @@ allow it, see B-9).
   `Refuse` make the shell a viewer, AxPreview, docs/axpreview/SPEC.md AP-D4, 2026-10-22: no Edit menu, no Save and
   no history, Reload and Edit in the editor in the File menu, `l` for the line, the hand-over of a file received),
   `EditorKeys` (the shell's keys, the same in every editor window, and `Viewer`, the read-only set) and `EditorHost`
-  (the entry point every editor app's `Run` is one call into); `AppHost` (every app's entry point, AX-1.7); and `AxitForm`, the window base (AX-6.5).
+  (the entry point every editor app's `Run` is one call into); `AppHost` (every app's entry point, AX-1.7); `AxitForm`, the window base (AX-6.5); and `ConsoleForm` (2026-10-23), the window of a console app on it, which AxClaude's and AxTerminal's windows derive from: the transcript view, the field, the control area, the status bar pair, the pty bridge, the paced writes with one pump, the recording, the export, find, the signals and the music, with the hooks for what is the program's (docs/axterminal/SPEC.md AT-2).
 - AX-6.3 A piece moves into a shared project only when a second app needs it, in a commit of its own, with the
   accessibility review; it moves unchanged where possible (B-3).
 - AX-6.4 The notices and the question area are the bundle's one way of asking the user something, so that every

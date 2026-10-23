@@ -312,10 +312,13 @@ src/AxTerminal.Core/      class library (net10.0): ShellLauncher (find the shell
                           again against the shell fixtures rather than carved out of it), CommandHistory, TerminalSettings;
                           references Axit.Core
 src/AxTerminal/           class library (net10.0-windows): AxTerminalApp (Run, Usage), TerminalForm (the window, on
-                          AxitForm, in partial files by section: the base's hooks and the key switch, the menus and the
-                          status, the field and the sending, the process, what the model reports, New session, Switch shell and the
-                          folders, find and export and recording), AxTerminalKeys (with Transcript, the view's keys as
-                          data), HelpText (F1 text, the embedded guide); references AxTerminal.Core, Axit.Core, Axit.Forms
+                          Axit.Forms/ConsoleForm since 2026-10-23, the console window shared with AxClaude, which owns
+                          the view, the field, the control area, the status bar, the pty bridge, the writes, the
+                          recording, the export, find, the signals and the music; in partial files by section: the
+                          hooks and the key switch, the menus and the status, the field and the sending, the process,
+                          what the model reports, New session, Switch shell and the folders), AxTerminalKeys (with
+                          Transcript, the view's keys as data), HelpText (F1 text, the embedded guide); references
+                          AxTerminal.Core, Axit.Core, Axit.Forms
 tests/AxTerminal.Tests/   fixtures recorded with tools/PtyCapture of powershell, cmd and bash under the launcher's command
                           line (a dir, a failing command, a y/n prompt, a multi-line command, cls, exit): golden
                           transcripts, the state at the end and the codes of the commands, the same transcript

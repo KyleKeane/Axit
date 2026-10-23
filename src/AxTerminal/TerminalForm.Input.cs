@@ -1,12 +1,11 @@
 using AxTerminal.Core;
-using Axit.Core.Transcript;
 using Axit.Forms;
 
 namespace AxTerminal;
 
 internal sealed partial class TerminalForm
 {
-    // ---- the command field and the sending (AT-3) ----
+    // ---- the command field and the sending (AT-3); the paced write queue is the console window's ----
 
     private void OnInputKeyDown(object? sender, KeyEventArgs e)
     {
@@ -36,14 +35,14 @@ internal sealed partial class TerminalForm
     /// </summary>
     private void SendInput(bool record)
     {
-        if (_host is null)
+        if (!ProcessRunning)
         {
             Announce("The shell ended. Ctrl+Shift+R starts it again", true);
             return;
         }
 
-        var text = _input.Text.Replace("\r\n", "\n").TrimEnd('\n', ' ');
-        _input.Clear();
+        var text = Input.Text.Replace("\r\n", "\n").TrimEnd('\n', ' ');
+        Input.Clear();
         if (text.Trim().Length == 0)
         {
             Write("\r");
@@ -75,64 +74,28 @@ internal sealed partial class TerminalForm
         var lines = text.Split('\n');
         foreach (var line in lines)
         {
-            _writes.Enqueue((line, 60));
-            _writes.Enqueue(("\r", 120));
+            Enqueue(line, 60);
+            Enqueue("\r", 120);
         }
 
         if (lines.Length > 1 && _shell is ShellKind.PowerShell7 or ShellKind.WindowsPowerShell)
         {
-            _writes.Enqueue(("\r", 120));
+            Enqueue("\r", 120);
         }
 
         StartWrites();
     }
 
-    private void StartWrites()
-    {
-        if (!_writing)
-        {
-            PumpWrites();
-        }
-    }
-
-    private void PumpWrites()
-    {
-        if (_writes.Count == 0)
-        {
-            _writing = false;
-            return;
-        }
-
-        _writing = true;
-        var (text, delay) = _writes.Dequeue();
-        Write(text);
-        Later(delay, PumpWrites);
-    }
-
-    private static void Later(int milliseconds, Action action)
-    {
-        var timer = new System.Windows.Forms.Timer { Interval = milliseconds };
-        timer.Tick += (_, _) =>
-        {
-            timer.Stop();
-            timer.Dispose();
-            action();
-        };
-        timer.Start();
-    }
-
-    private void Write(string text) => _host?.Write(text);
-
     /// <summary>Ctrl+Shift+C (AT-3.5): Ctrl+C to the shell, and what is still queued to type goes.</summary>
     private void Interrupt()
     {
-        if (_host is null)
+        if (!ProcessRunning)
         {
             Announce("The shell ended", true);
             return;
         }
 
-        _writes.Clear();
+        ClearWrites();
         Write("\x03");
         Announce("Interrupt sent", true);
     }
@@ -143,7 +106,7 @@ internal sealed partial class TerminalForm
     /// <summary>Shell → Send key: a key the field cannot type, for a program that wants it.</summary>
     private void SendKey(string sequence, string said)
     {
-        if (_host is null)
+        if (!ProcessRunning)
         {
             Announce("The shell ended", true);
             return;
@@ -159,28 +122,16 @@ internal sealed partial class TerminalForm
     /// </summary>
     private void CopyLineToField(int number, int count, string text)
     {
-        if (_area.Current is not null)
+        if (Area.Current is not null)
         {
             CloseArea();
         }
 
-        var existing = _input.Text.TrimEnd('\r', '\n');
-        _input.Text = existing.Length == 0 ? text : existing + "\r\n" + text;
-        _input.Select(_input.TextLength, 0);
+        var existing = Input.Text.TrimEnd('\r', '\n');
+        Input.Text = existing.Length == 0 ? text : existing + "\r\n" + text;
+        Input.Select(Input.TextLength, 0);
         Announce("Line copied", true);
-        GoTo(_input);
-    }
-
-    /// <summary>m, or Navigate → Bookmark this line: the model adds or removes the bookmark line and the result is spoken.</summary>
-    private void ToggleBookmark(Line line)
-    {
-        if (_model.ToggleBookmark(line) is not ({ } bookmark, var added))
-        {
-            Announce("Line gone", true);
-            return;
-        }
-
-        Announce($"{bookmark.Text} {(added ? "added" : "removed")}", true);
+        GoTo(Input);
     }
 
     /// <summary>
@@ -196,39 +147,22 @@ internal sealed partial class TerminalForm
         }
 
         var items = _history.Items.ToList();
-        _area.ShowList("Recent commands", items, 0, null, focus: true, hold: false, (index, _) =>
+        Area.ShowList("Recent commands", items, 0, null, focus: true, hold: false, (index, _) =>
         {
             CloseArea();
             if (index >= 0 && index < items.Count)
             {
-                _input.Text = items[index];
-                _input.Select(_input.TextLength, 0);
+                Input.Text = items[index];
+                Input.Select(Input.TextLength, 0);
             }
 
-            _input.Focus();
+            Input.Focus();
         }, () =>
         {
             CloseArea();
-            _input.Focus();
+            Input.Focus();
         });
-        _input.Visible = false;
-        _area.Visible = !NoticeOpen;
-    }
-
-    private void CloseArea()
-    {
-        if (_area.Current is null)
-        {
-            return;
-        }
-
-        var focus = _area.ContainsFocus;
-        _input.Visible = !NoticeOpen;
-        if (focus)
-        {
-            _input.Focus();
-        }
-
-        _area.Clear();
+        Input.Visible = false;
+        Area.Visible = !NoticeOpen;
     }
 }

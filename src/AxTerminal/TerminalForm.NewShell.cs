@@ -35,7 +35,7 @@ internal sealed partial class TerminalForm
     {
         var selected = _shell == ShellKind.Custom ? ShellPresets.Length : Array.FindIndex(ShellPresets, p => p.Arguments[0] == ShellLauncher.Key(_shell));
         var text = "Choose the shell and the folder. Starting ends the current shell and starts a new session in the folder.";
-        if (_host is not null && _model.Running)
+        if (ProcessRunning && _model.Running)
         {
             text = $"{_model.RunningCommand} is still running. A new session ends it.\n" + text;
         }
@@ -92,7 +92,7 @@ internal sealed partial class TerminalForm
     /// </summary>
     private void SwitchShell(ShellKind kind)
     {
-        if (_host is not null && _model.Running)
+        if (ProcessRunning && _model.Running)
         {
             ShowNotice(new Notice("Switch the shell?",
                 $"{_model.RunningCommand} is still running. Switching ends it and starts {ShellLauncher.Describe(kind)} in the same folder. The transcript stays in the window.",
@@ -130,7 +130,7 @@ internal sealed partial class TerminalForm
     }
 
     /// <summary>Session → Open recent folder: a shell in that folder, the transcript cleared, with a system line and an announcement.</summary>
-    private void SwitchFolder(string folder)
+    protected override void SwitchFolder(string folder)
     {
         if (!Directory.Exists(folder))
         {

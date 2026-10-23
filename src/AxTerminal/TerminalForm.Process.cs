@@ -1,5 +1,4 @@
 using AxTerminal.Core;
-using Axit.Core;
 using Axit.Core.Pty;
 using Axit.Forms;
 
@@ -7,7 +6,7 @@ namespace AxTerminal;
 
 internal sealed partial class TerminalForm
 {
-    // ---- the shell process (AT-1) ----
+    // ---- the shell process (AT-1): what is the shell's around the console window's StartProcess and StopProcess ----
 
     private void StartShell()
     {
@@ -27,28 +26,11 @@ internal sealed partial class TerminalForm
             return;
         }
 
-        // Chunks that arrive while the UI thread is busy are handed over together: one post per burst, not one per
-        // chunk (AxClaude §7.3). The handlers go in with Start, so that nothing the shell prints first is missed.
-        var inbox = new List<byte[]>();
-        var posted = false;
-        PtyHost? host = null;
-        try
+        if (!StartProcess(new PtyOptions(commandLine, _folder, _model.Columns, _model.Rows, ShellLauncher.BuildEnvironment(_shell)), "The shell"))
         {
-            host = PtyHost.Start(new PtyOptions(commandLine, _folder, _model.Columns, _model.Rows, ShellLauncher.BuildEnvironment(_shell)), OnData, OnExited);
-        }
-        catch (Exception ex)
-        {
-            Log.Error("The shell could not be started", ex);
-            var reason = ex is EntryPointNotFoundException
-                ? "this version of Windows has no pseudo console. Windows 10 version 1809 or later is needed"
-                : ex.Message;
-            Fail("The shell could not be started: " + reason);
             return;
         }
 
-        Log.Info($"Started {commandLine} (pid {host.ProcessId}) in {_folder}, console {_model.Columns}x{_model.Rows}");
-        _host = host;
-        _lastOutputTick = Environment.TickCount64;
         _askedRow = null;
         _model.AddSystemLine($"Shell started: {ShellLauncher.Describe(_shell)} in {_folder}");
         _settings.RememberFolder(_folder);
@@ -58,100 +40,21 @@ internal sealed partial class TerminalForm
         _asks.Start();
         UpdateStatus();
         UpdateTitle();
-
-        void OnData(byte[] data)
-        {
-            try
-            {
-                _recorder?.Write(data);
-            }
-            catch (Exception ex) when (ex is IOException or UnauthorizedAccessException)
-            {
-                Post(() => RecordingFailed(ex.Message));
-            }
-
-            lock (inbox)
-            {
-                inbox.Add(data);
-                if (posted)
-                {
-                    return;
-                }
-
-                posted = true;
-            }
-
-            if (!Post(FeedInbox))
-            {
-                lock (inbox)
-                {
-                    posted = false;
-                }
-            }
-        }
-
-        void FeedInbox()
-        {
-            byte[][] batch;
-            lock (inbox)
-            {
-                batch = [.. inbox];
-                inbox.Clear();
-                posted = false;
-            }
-
-            if (!ReferenceEquals(host, _host))
-            {
-                return;
-            }
-
-            foreach (var chunk in batch)
-            {
-                _model.Feed(chunk);
-            }
-
-            _lastOutputTick = Environment.TickCount64;
-            _quiet.Stop();
-            _quiet.Start();
-        }
-
-        void OnExited(int code) => Post(() =>
-        {
-            if (ReferenceEquals(host, _host))
-            {
-                // Let output that is still in the pipe arrive before the exit is reported.
-                _exitCode = code;
-                _exitSettle.Stop();
-                _exitSettle.Start();
-            }
-        });
     }
 
-    /// <summary>The shell's process ended (AT-1.7): the last output in, the system line, the announcement.</summary>
-    private void FinishExit()
+    /// <summary>The shell's process ended (AT-1.7), its last output in and the process stopped: the system line, the announcement.</summary>
+    protected override void OnProcessExited(int code)
     {
-        _quiet.Stop();
-        _model.EndFrame();
-        StopShell();
-        Log.Info($"The shell exited with code {_exitCode}");
-        _model.ShellExited(_exitCode);
+        _model.ShellExited(code);
         Announce("The shell ended", false);
         UpdateStatus();
     }
 
-    private void StopShell()
+    /// <summary>The question heuristic's timer stops with the shell; the console window stops the process, the writes and the control area.</summary>
+    protected override void StopProcess()
     {
-        var host = _host;
-        _host = null;
-        _quiet.Stop();
-        _exitSettle.Stop();
         _asks.Stop();
-        _writes.Clear();
-        _writing = false;
-        host?.Dispose();
-        CloseArea();
-        UpdateStatus();
-        UpdateMusic();
+        base.StopProcess();
     }
 
     /// <summary>
@@ -160,7 +63,7 @@ internal sealed partial class TerminalForm
     /// </summary>
     private void RestartShell()
     {
-        if (_host is not null && _model.Running)
+        if (ProcessRunning && _model.Running)
         {
             ShowNotice(new Notice("Restart the shell?",
                 $"{_model.RunningCommand} is still running. Restarting ends it and starts the shell again in the same folder. The transcript stays in the window.",
@@ -188,7 +91,7 @@ internal sealed partial class TerminalForm
     /// </summary>
     private void Relaunch(string systemLine, bool clearTranscript)
     {
-        StopShell();
+        StopProcess();
         // The next shell draws on a fresh screen either way: the old one's cells and hidden rows are the old shell's,
         // and a new shell assumes a blank terminal (until 2026-10-23 a new session kept them, and the new shell's
         // shorter rows showed the old ones' tails).
@@ -201,34 +104,5 @@ internal sealed partial class TerminalForm
 
         _model.AddSystemLine(systemLine);
         StartShell();
-    }
-
-    /// <summary>An error the user must see: logged, a system line in the terminal, the status, and the notice.</summary>
-    protected override void Fail(string message)
-    {
-        Log.Error(message);
-        _model.AddSystemLine(message);
-        UpdateStatus();
-        ShowError("Error", message);
-    }
-
-    /// <summary>Runs the action on the UI thread; false when the window is gone.</summary>
-    private bool Post(Action action)
-    {
-        if (IsDisposed || !IsHandleCreated)
-        {
-            return false;
-        }
-
-        try
-        {
-            BeginInvoke(action);
-            return true;
-        }
-        catch (InvalidOperationException)
-        {
-            // The window is closing.
-            return false;
-        }
     }
 }

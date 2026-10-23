@@ -1,6 +1,8 @@
+using System.Runtime.InteropServices;
 using System.Text;
 using AxClaude.Core.Pty;
 using AxClaude.Core.Transcript;
+using Axit.Core;
 using Axit.Forms;
 
 namespace AxClaude;
@@ -11,9 +13,6 @@ internal sealed partial class MainForm
 
     /// <summary>Claude waits on something the control area reads, so its rows are not read as reply lines too.</summary>
     private bool QuestionShown => _settings.QuestionNotices && _model.PromptPending;
-
-    /// <summary>The control at the bottom of the window: the message field, or the control area's list or field in its place.</summary>
-    private Control BottomControl => _area.Current ?? _input;
 
     /// <summary>
     /// Shows what Claude waits on in the control area, in place of the message field (D33). <paramref name="show"/>
@@ -30,20 +29,20 @@ internal sealed partial class MainForm
     {
         _areaText = text;
         var interrupt = unprompted && !NoticeOpen && _settings.InterruptForQuestions;
-        var focus = !NoticeOpen && (interrupt || _input.ContainsFocus || _area.ContainsFocus);
+        var focus = !NoticeOpen && (interrupt || Input.ContainsFocus || Area.ContainsFocus);
         if (unprompted && _settings.SoundOnBell)
         {
             Sounds.Notice();
         }
 
         show(focus, unprompted);
-        _input.Visible = false;
-        _area.Visible = !NoticeOpen;
+        Input.Visible = false;
+        Area.Visible = !NoticeOpen;
         _shownWait = signature;
         if (interrupt)
         {
             // After NVDA has taken the focus change, so that the question comes last: raised at once, it was cut off.
-            var question = (_area.CurrentItem.Length == 0 ? name : name + Stop(name) + _area.CurrentItem).TrimEnd(' ', '.');
+            var question = (Area.CurrentItem.Length == 0 ? name : name + Stop(name) + Area.CurrentItem).TrimEnd(' ', '.');
             Later(FocusSettleMs, () =>
             {
                 if (_shownWait == signature)
@@ -52,7 +51,7 @@ internal sealed partial class MainForm
                 }
             });
         }
-        else if (!focus && !NoticeOpen && (_transcript.ContainsFocus || !ContainsFocus))
+        else if (!focus && !NoticeOpen && (Transcript.ContainsFocus || !ContainsFocus))
         {
             // From the conversation, or with the window not the active one, without the interrupting kind, or within
             // three seconds of the user's own answer: the focus goes to the question after a moment, so that it is
@@ -60,7 +59,7 @@ internal sealed partial class MainForm
             // case was found by the off-screen replay). Not from an open menu, which the move would close (2026-10-23).
             Later(QuestionFocusMs, () =>
             {
-                if (_shownWait == signature && !NoticeOpen && _area.Current is { } current && !current.ContainsFocus)
+                if (_shownWait == signature && !NoticeOpen && Area.Current is { } current && !current.ContainsFocus)
                 {
                     current.Focus();
                 }
@@ -68,22 +67,10 @@ internal sealed partial class MainForm
         }
     }
 
-    /// <summary>The message field comes back in the control area's place, with the focus when the area had it.</summary>
-    private void CloseArea()
+    /// <summary>The message field comes back in the control area's place (the console window's), and nothing is shown or read any more.</summary>
+    protected override void CloseArea()
     {
-        if (_area.Current is null)
-        {
-            return;
-        }
-
-        var focus = _area.ContainsFocus;
-        _input.Visible = !NoticeOpen;
-        if (focus)
-        {
-            _input.Focus();
-        }
-
-        _area.Clear();
+        base.CloseArea();
         _shownWait = null;
         _areaText = null;
     }
@@ -95,13 +82,13 @@ internal sealed partial class MainForm
     /// </summary>
     private void ReadQuestionAgain()
     {
-        if (_area.Current is null || _areaText is not { } text)
+        if (Area.Current is null || _areaText is not { } text)
         {
             Announce("Claude is not asking anything", true);
             return;
         }
 
-        Announce((text + Stop(text) + _area.CurrentItem).TrimEnd(' ', '.'), true);
+        Announce((text + Stop(text) + Area.CurrentItem).TrimEnd(' ', '.'), true);
     }
 
     /// <summary>
@@ -117,7 +104,7 @@ internal sealed partial class MainForm
         var items = options.Select(option => $"{option.Key}. {option.Text}" + (option.Current && !several ? " (current)" : string.Empty)).ToList();
         var start = Math.Max(0, options.ToList().FindIndex(option => startKey is null ? option.Current : option.Key == startKey));
         IReadOnlyList<int>? ticked = several ? Enumerable.Range(0, options.Count).Where(i => options[i].Current).ToList() : null;
-        ShowInArea(signature, name, text, unprompted, (focus, hold) => _area.ShowList(name, items, start, ticked, focus, hold, (focused, ticks) =>
+        ShowInArea(signature, name, text, unprompted, (focus, hold) => Area.ShowList(name, items, start, ticked, focus, hold, (focused, ticks) =>
         {
             if (several && ticks.Count == 0)
             {
@@ -270,7 +257,7 @@ internal sealed partial class MainForm
         var chosen = LineClassifier.TextPromptAnswer(prompt) ?? "an answer that asks for your own words";
         var asked = _askedQuestion is { } question ? QuestionName(question) : null;
         var name = (asked is null ? string.Empty : asked + Stop(asked)) + $"You chose {chosen}. Your answer";
-        ShowInArea(prompt, name, name, !UserActed(_answerAt), (focus, hold) => _area.ShowField(name, focus, hold, typed =>
+        ShowInArea(prompt, name, name, !UserActed(_answerAt), (focus, hold) => Area.ShowField(name, focus, hold, typed =>
         {
             var words = typed.Trim();
             if (words.Length == 0)
@@ -359,7 +346,7 @@ internal sealed partial class MainForm
         }
 
         ShowInArea(screen.Signature, screen.Title, text.ToString(), !UserActed(_screenKeyAt), (focus, hold) =>
-            _area.ShowList(screen.Title, items, 0, null, focus, hold, (index, _) =>
+            Area.ShowList(screen.Title, items, 0, null, focus, hold, (index, _) =>
             {
                 if (index < first)
                 {
@@ -382,7 +369,7 @@ internal sealed partial class MainForm
     /// </summary>
     private void OpenDraftsWhenIdle()
     {
-        if (!_readyAnnounced || _host is null)
+        if (!_readyAnnounced || !ProcessRunning)
         {
             return;
         }
@@ -412,13 +399,13 @@ internal sealed partial class MainForm
     }
 
     /// <summary>Claude runs, waits on nothing, and no write of the user's is on its way to it.</summary>
-    private bool ClaudeIdle => _host is not null && !_model.Working && !_model.PromptPending && !_writing && _writes.Count == 0;
+    private bool ClaudeIdle => ProcessRunning && !_model.Working && !_model.PromptPending && !WritesPending;
 
     /// <summary>Sends /feedback as the user's own command would go, without "Sent": the review of the draft announces itself. Skipped when Claude is no longer idle.</summary>
     private void OpenFeedbackDrafts()
     {
         _openingDrafts = false;
-        if (!ClaudeIdle || _area.Current is not null || !_drafts.Drafted(_model.Working, idle: true, _model.FeedbackDrafts))
+        if (!ClaudeIdle || Area.Current is not null || !_drafts.Drafted(_model.Working, idle: true, _model.FeedbackDrafts))
         {
             return;
         }
@@ -475,7 +462,7 @@ internal sealed partial class MainForm
     private void SendEscape()
     {
         _answerAt = Environment.TickCount64;
-        _area.Hold(UserActionMs);
+        Area.Hold(UserActionMs);
         Write("\x1b");
     }
 
@@ -490,7 +477,7 @@ internal sealed partial class MainForm
     {
         var row = screen.Highlighted?.TrimEnd(':') ?? "Text";
         var name = $"{screen.Title}. {row}, add at the end";
-        ShowInArea(screen.Signature, name, text, !UserActed(_screenKeyAt), (focus, hold) => _area.ShowField(name, focus, hold, typed =>
+        ShowInArea(screen.Signature, name, text, !UserActed(_screenKeyAt), (focus, hold) => Area.ShowField(name, focus, hold, typed =>
         {
             ScreenKeySent();
             TypeAnswer(typed);
@@ -509,7 +496,7 @@ internal sealed partial class MainForm
     {
         _screenKeyAt = Environment.TickCount64;
         _handledWait = null;
-        _area.Hold(UserActionMs);
+        Area.Hold(UserActionMs);
         // A key that changes nothing draws no frame: the timer brings the screen back all the same.
         _attention.Stop();
         _attention.Start();
@@ -521,14 +508,14 @@ internal sealed partial class MainForm
     /// </summary>
     private void SendAnswer(string key)
     {
-        if (_host is null)
+        if (!ProcessRunning)
         {
             return;
         }
 
         TypeAnswer(key);
         _answerAt = Environment.TickCount64;
-        _area.Hold(UserActionMs);
+        Area.Hold(UserActionMs);
         if (_settings.SoundOnBell)
         {
             Sounds.Sent();
@@ -546,10 +533,10 @@ internal sealed partial class MainForm
         var keys = key.EnumerateRunes().Select(rune => rune.ToString()).ToList();
         for (var i = 0; i < keys.Count; i++)
         {
-            _writes.Enqueue((keys[i], i == keys.Count - 1 ? 100 : 60));
+            Enqueue(keys[i], i == keys.Count - 1 ? 100 : 60);
         }
 
-        _writes.Enqueue(("\r", 50));
+        Enqueue("\r", 50);
         StartWrites();
     }
 
@@ -589,11 +576,7 @@ internal sealed partial class MainForm
             $"{state}. {consequence}\n" +
             "What is done so far is saved. Start AxClaude again to carry on.",
         [
-            new OverlayChoice("&Close anyway", () =>
-            {
-                _closeConfirmed = true;
-                Close();
-            }, IsDefault: true),
+            new OverlayChoice("&Close anyway", CloseConfirmed, IsDefault: true),
             new OverlayChoice("&Keep working", KeepWorkingAfterUpdate, IsCancel: true),
         ]));
     }
@@ -639,22 +622,18 @@ internal sealed partial class MainForm
         StartClaude();
     }
 
-    /// <summary>Runs the action on the UI thread; false when the window is gone.</summary>
-    private bool Post(Action action)
+    /// <summary>Another program can hold the clipboard for a moment; that is announced rather than reported as a crash (FR-13.1).</summary>
+    private bool CopyToClipboard(string text)
     {
-        if (IsDisposed || !IsHandleCreated)
-        {
-            return false;
-        }
-
         try
         {
-            BeginInvoke(action);
+            Clipboard.SetText(text);
             return true;
         }
-        catch (InvalidOperationException)
+        catch (ExternalException ex)
         {
-            // The window is closing.
+            Log.Error("The clipboard could not be written", ex);
+            Announce("Could not copy. Try again", true);
             return false;
         }
     }

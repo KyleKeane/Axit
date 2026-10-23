@@ -6,23 +6,17 @@ namespace AxTerminal;
 
 internal sealed partial class TerminalForm
 {
-    // ---- UI ----
+    // ---- the menus (AT-6.1), the title and the status bar (AT-2.3); the controls are the console window's ----
 
-    private void BuildUi()
+    private void BuildMenus()
     {
-        Text = AxTerminalApp.Name;
-        Size = new Size(1000, 700);
-        MinimumSize = new Size(600, 400);
-
-        // The menus (SPEC.md AT-6.1), every mnemonic unique within its menu; the keys are handled in ProcessWindowKey
-        // from the table, the items only show them. Session, the shell in its folder, is the thing worked on, in the standard order of a first
-        // menu (bundle AX-6): New, the recent folders, the slot the editors have Save in, Show current folder in, the
-        // export, Exit.
+        // The menus (SPEC.md AT-6.1), every mnemonic unique within its menu; the keys are handled in ProcessConsoleKey
+        // from the table, the items only show them. Session, the shell in its folder, is the thing worked on, in the
+        // standard order of a first menu (bundle AX-6): New, the recent folders, the slot the editors have Save in,
+        // Show current folder in, the export, Exit.
         var session = new ToolStripMenuItem("&Session");
         session.DropDownItems.Add(Item("&New session...", NewSession, AxTerminalKeys.NewSession));
-        CommandPalette.FilledOnOpening(_recentFoldersItem).DropDownOpening += (_, _) => FillRecentFolders();
-        FillRecentFolders();
-        session.DropDownItems.Add(_recentFoldersItem);
+        session.DropDownItems.Add(RecentFoldersItem);
         // AT-1.6: the shell changed in place, the current one checked when the submenu opens.
         var switchShell = new ToolStripMenuItem("S&witch shell");
         foreach (var (kind, text) in ShellChoices)
@@ -75,29 +69,19 @@ internal sealed partial class TerminalForm
 
         var navigate = new ToolStripMenuItem("&Navigate");
         navigate.DropDownItems.Add(Item("&Command field", () => GoTo(BottomControl), AxTerminalKeys.GoToField));
-        navigate.DropDownItems.Add(Item("&Terminal", () => GoTo(_transcript), AxTerminalKeys.GoToTerminal));
-        navigate.DropDownItems.Add(Item("&Latest output", _transcript.JumpToLatestResponse, AxTerminalKeys.LatestOutput));
+        navigate.DropDownItems.Add(Item("&Terminal", () => GoTo(Transcript), AxTerminalKeys.GoToTerminal));
+        navigate.DropDownItems.Add(Item("&Latest output", Transcript.JumpToLatestResponse, AxTerminalKeys.LatestOutput));
         navigate.DropDownItems.Add(new ToolStripSeparator());
-        navigate.DropDownItems.Add(Item("&Find...", FindDialog, BundleKeys.Find));
-        navigate.DropDownItems.Add(Item("Find &next", () => FindNext(backward: false), BundleKeys.FindNext));
-        navigate.DropDownItems.Add(Item("Find &previous", () => FindNext(backward: true), BundleKeys.FindPrevious));
+        navigate.DropDownItems.AddRange(FindItems());
         navigate.DropDownItems.Add(new ToolStripSeparator());
-        navigate.DropDownItems.Add(new ToolStripMenuItem("&Bookmark this line", null, (_, _) => _transcript.ToggleBookmark()) { ShortcutKeyDisplayString = $"{BundleKeys.Text(AxTerminalKeys.BookmarkLine)}, or {BundleKeys.Text(AxTerminalKeys.BookmarkToggle)} in the terminal" });
-        navigate.DropDownItems.Add(new ToolStripMenuItem("Next bookmar&k", null, (_, _) => _transcript.JumpToBookmark(backward: false)) { ShortcutKeyDisplayString = $"{BundleKeys.Text(AxTerminalKeys.Bookmark)} in the terminal" });
-        navigate.DropDownItems.Add(new ToolStripMenuItem("Pre&vious bookmark", null, (_, _) => _transcript.JumpToBookmark(backward: true)) { ShortcutKeyDisplayString = $"Shift+{BundleKeys.Text(AxTerminalKeys.Bookmark)} in the terminal" });
+        navigate.DropDownItems.AddRange(BookmarkItems());
 
         // The settings: a submenu for each kind, nothing outside one. Each check item is saved as it is toggled.
         var options = new ToolStripMenuItem("&Options");
         var sounds = new ToolStripMenuItem("&Sounds");
         sounds.DropDownItems.Add(Toggle("&Chimes: ready, sent, done, question", _settings.SoundOnBell, v => _settings.SoundOnBell = v));
         sounds.DropDownItems.Add(Toggle("&Ticks for new lines", _settings.ClickOnNewLine, v => _settings.ClickOnNewLine = v));
-        _musicItem = Toggle("&Background music while a command runs", _settings.WorkingMusic, v =>
-        {
-            _settings.WorkingMusic = v;
-            UpdateMusic();
-        });
-        _musicItem.ShortcutKeyDisplayString = BundleKeys.Text(AxTerminalKeys.ToggleMusic);
-        sounds.DropDownItems.Add(_musicItem);
+        sounds.DropDownItems.Add(CreateMusicItem("&Background music while a command runs", AxTerminalKeys.ToggleMusic));
         options.DropDownItems.Add(sounds);
 
         // AT-5.3: one of two, shown checked like a radio group; the choice is announced, since the menu closes on it.
@@ -119,22 +103,9 @@ internal sealed partial class TerminalForm
         done.DropDownItems.Add(Toggle("&Louder alert when the window is in the background", _settings.BackgroundAlert, v => _settings.BackgroundAlert = v));
         options.DropDownItems.Add(done);
 
-        options.DropDownItems.Add(CreateTextMenu(
-            Toggle("Time &stamps on Input and Output lines", _settings.MarkerTimeStamps, v =>
-            {
-                _settings.MarkerTimeStamps = v;
-                _model.TimeStamps = v;
-            }),
-            // AxClaude FR-4.6a: the # markers of the heading lines shown or hidden; the lines, the keys and the export unchanged.
-            Toggle("Mar&kers in the text", _settings.ShowMarkers, v =>
-            {
-                _settings.ShowMarkers = v;
-                _transcript.ShowMarkers = v;
-                _transcript.Sync(_model.Lines);
-            })));
+        options.DropDownItems.Add(CreateTextMenu(TranscriptTextItems()));
         options.DropDownItems.Add(CreateGeneralMenu());
-        _recordItem.Click += (_, _) => ToggleRecording();
-        options.DropDownItems.Add(CreateDeveloperMenu(_recordItem));
+        options.DropDownItems.Add(CreateDeveloperMenu(RecordItem));
 
         var help = CreateHelpMenu(HelpText.UserGuide, "Shell &resources",
         [
@@ -143,46 +114,7 @@ internal sealed partial class TerminalForm
             ("&Bash manual", "https://www.gnu.org/software/bash/manual/"),
         ]);
 
-        var axit = CreateAxitMenu();
-
-        _menu.Items.AddRange([session, shell, navigate, options, axit, help]);
-        MainMenuStrip = _menu;
-
-        _state.Text = "Starting";
-
-        _input.AccessibleName = "Command";
-        _input.PlaceholderText = "Command";
-        _input.Multiline = true;
-        _input.AcceptsReturn = true;
-        _input.AcceptsTab = false;
-        _input.WordWrap = true;
-        _input.ScrollBars = ScrollBars.Vertical;
-        _input.MaxLength = 0;
-        _input.Dock = DockStyle.Bottom;
-        _input.TabIndex = 0;
-        _input.KeyDown += OnInputKeyDown;
-        // The bundle's page and paragraph keys (AT-3.8).
-        _input.KeyDown += EditKeys.Handle;
-
-        _transcript.Dock = DockStyle.Fill;
-        _transcript.TabIndex = 1;
-        _transcript.EscapePressed += () => BottomControl.Focus();
-        _transcript.LineChosen += CopyLineToField;
-        _transcript.BookmarkToggled += ToggleBookmark;
-
-        Controls.Add(Overlay);
-        Controls.Add(_transcript);
-        Controls.Add(_input);
-        // The recent commands list takes the field's place (AT-3.6), one control at a time.
-        _area.TabIndex = 0;
-        Controls.Add(_area);
-        SizeChanged += (_, _) => _area.FitHeight();
-        Controls.Add(_status);
-        Controls.Add(_menu);
-        _transcript.BringToFront();
-
-        UpdateTitle();
-        UpdateStatus();
+        MenuBar.Items.AddRange([session, shell, navigate, options, CreateAxitMenu(), help]);
     }
 
     /// <summary>Options → Speech → Speak output: a mode (AT-5.3): speech starts with what arrives next.</summary>
@@ -200,9 +132,6 @@ internal sealed partial class TerminalForm
         Announce(MenuText.Plain(SpeechChoices.First(c => c.Mode == mode).Text), true);
     }
 
-    private void FillRecentFolders() =>
-        RecentMenu.FillFolders(_recentFoldersItem, _settings.RecentFolders, "&No recent folders", SwitchFolder);
-
     /// <summary>The title is the current directory's name (AT-2.3), which the Axit menu lists the window by.</summary>
     private void UpdateTitle()
     {
@@ -214,34 +143,13 @@ internal sealed partial class TerminalForm
     }
 
     /// <summary>The status bar (AT-2.3): the state on the left, the shell's last prompt (or the directory before the first) on the right.</summary>
-    private void UpdateStatus()
+    protected override void UpdateStatus()
     {
-        var state = _host is null ? "Shell ended"
+        var state = !ProcessRunning ? "Shell ended"
             : !_model.HasMarks ? string.Empty
             : _model.Running ? $"Running: {_model.RunningCommand}"
             : _model.Prompt is null ? "Starting"
             : "Idle";
-        var prompt = _model.Prompt ?? CurrentDirectory;
-        if (_state.Text != state || _promptLabel.Text != prompt)
-        {
-            _state.Text = state;
-            _promptLabel.Text = prompt;
-            StatusLayout.Fit(_status, _state, _promptLabel);
-        }
-    }
-
-    /// <summary>
-    /// Ctrl+1, Ctrl+2 and the Navigate menu (AT-2.2): the control takes the focus, and NVDA announces the change. When it
-    /// has the focus already, its name is spoken instead, so the key also answers "where am I" (AxClaude D26).
-    /// </summary>
-    private void GoTo(Control control)
-    {
-        if (control.Focused)
-        {
-            Announce(control.AccessibleName ?? string.Empty, true);
-            return;
-        }
-
-        control.Focus();
+        SetStatus(state, _model.Prompt ?? CurrentDirectory);
     }
 }

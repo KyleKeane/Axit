@@ -158,5 +158,7 @@ public static class AxClaudeKeys
         JumpBack: JumpBack,
         Enter: Enter,
         Escape: Escape,
-        CopySelection: CopySelection);
+        CopySelection: CopySelection,
+        BookmarkLine: BookmarkLine,
+        ReadToEnd: ReadToEnd);
 }
