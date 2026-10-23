@@ -5,6 +5,8 @@ description: Record a new ConPTY fixture of Claude Code in screen reader mode wi
 
 # Record a fixture
 
+When to record one: a parser bug that needs a reproduction, and every Claude Code release whose notes touch screen reader mode (`--ax-screen-reader`, the questions, the screens), with the version in the fixture's name, so that the parser is checked against each version that changed what it draws (docs/axit/longevity.md 3.10). The version AxClaude runs is in its log (`Claude Code version:`) and in Options, Developer, Copy diagnostics.
+
 1. Write a script in the scratchpad (one command per line): `send`, `mark`, `wait <ms> <text>`, `iffound <command>`, `quiet <ms> <max>`, `sleep <ms>`, `exit <ms>`. Answer startup dialogs conditionally, for example:
 
    ```

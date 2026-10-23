@@ -7,16 +7,19 @@
   Before running it, add a "## <version>" section to CHANGELOG.md: its text becomes the release notes and
   is what the update notice in the app shows. Everything else must be committed. The script then
     1. fetches origin and stops if origin/main has commits that main here does not (skipped with -NoPush),
-    2. runs every test project in Release, as the workflows do (test.ps1),
-    3. sets <Version> in src/Axit/Axit.csproj,
-    4. commits CHANGELOG.md and the project file as "Release <version>",
-    5. tags v<version> and pushes main and the tag.
-  The push starts .github/workflows/release.yml. Follow it with `gh run watch`, or on the Actions page. When it is
+    2. checks the "## <version>" section: it is not empty, and every bullet starts with its app or apps ("- AxFile: ",
+       "- AxDown, AxJSON: ") or with "- For developers: ",
+    3. runs every test project in Release, as the workflows do (test.ps1),
+    4. sets <Version> in src/Axit/Axit.csproj,
+    5. commits CHANGELOG.md and the project file as "Release <version>" and tags v<version>,
+    6. pushes main, waits for its build to pass on GitHub (gh run watch), then pushes the tag: a tag never goes up on
+       a commit whose build failed there.
+  The tag starts .github/workflows/release.yml. Follow it with `gh run watch`, or on the Actions page. When it is
   done, the release is at https://github.com/KyleKeane/Axit/releases and the apps offer it as an update.
 
 .EXAMPLE
   .\release.ps1 1.0.1
-  .\release.ps1 1.0.1 -NoPush     # commit and tag only; push later with: git push origin main v1.0.1
+  .\release.ps1 1.0.1 -NoPush     # commit and tag only; push later with: git push origin main; git push origin v1.0.1
 #>
 [CmdletBinding()]
 param(
@@ -76,6 +79,25 @@ if (-not (Select-String -Path $changelog -Pattern ('^## ' + [regex]::Escape($Ver
     exit 1
 }
 
+# The section is the release notes and the update notice: it says something, and every bullet names its app or apps,
+# or is for developers, so that a reader of the notes knows where a change is (docs/axit/longevity.md 3.11). The
+# apps are the folders of docs/ (axit among them, for the bundle), matched without regard to case; the notes come
+# from tools/release-notes.ps1, the script the release workflow runs, which fails on an empty section.
+try {
+    $notes = & (Join-Path $root 'tools\release-notes.ps1') -Version $Version -Path $changelog
+} catch {
+    Write-Host $_.Exception.Message
+    exit 1
+}
+$apps = @(Get-ChildItem (Join-Path $root 'docs') -Directory | ForEach-Object { $_.Name }) -join '|'
+$prefix = "^- (($apps)(, ($apps))*|For developers): "
+$unnamed = @($notes -split "`n" | Where-Object { $_ -match '^- ' -and $_ -notmatch $prefix })
+if ($unnamed.Count -gt 0) {
+    Write-Host "Every bullet of the '## $Version' section starts with its app or apps ('- AxFile: ', '- AxDown, AxJSON: ') or with '- For developers: '. These do not:"
+    $unnamed | ForEach-Object { Write-Host "  $_" }
+    exit 1
+}
+
 # The tests as GitHub Actions runs them: every test project, in Release (test.ps1).
 Write-Host "Running the tests..."
 & (Join-Path $root 'test.ps1')
@@ -101,11 +123,38 @@ if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
 Write-Host "Committed and tagged $tag."
 
 if ($NoPush) {
-    Write-Host "Not pushed. When ready: git push origin main $tag"
+    Write-Host "Not pushed. When ready: git push origin main; git push origin $tag"
     exit 0
 }
 
-git -C $root push origin main $tag
+# main goes first and the tag only once main's build has passed on GitHub (build.yml, followed with gh): the tag
+# starts the release build, and a tag on a commit whose build fails on the runner (an image or an action moved under
+# the workflow) would be a dangling tag to delete by hand. Without gh the tag follows main at once.
+git -C $root push origin main
 if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
-Write-Host "Pushed. GitHub Actions is building the release: https://github.com/KyleKeane/Axit/actions"
+if (Get-Command gh -ErrorAction SilentlyContinue) {
+    Write-Host "Pushed main. Waiting for its build before pushing the tag..."
+    $sha = (git -C $root rev-parse HEAD).Trim()
+    $run = $null
+    for ($try = 0; -not $run -and $try -lt 24; $try++) {
+        Start-Sleep -Seconds 5
+        $id = gh run list --workflow build.yml --commit $sha --limit 1 --json databaseId --jq '.[0].databaseId'
+        if ($id -and $id -ne 'null') { $run = $id }
+    }
+    if (-not $run) {
+        Write-Host "No build of main's $sha appeared on GitHub within two minutes. The tag was not pushed; once the build has passed: git push origin $tag"
+        exit 1
+    }
+    gh run watch $run --exit-status
+    if ($LASTEXITCODE -ne 0) {
+        Write-Host "The build of main failed; the tag $tag was not pushed. Fix main, delete the tag here (git tag -d $tag) and release the next patch version."
+        exit 1
+    }
+} else {
+    Write-Host "Pushed main. gh is not installed, so the tag follows without waiting for main's build."
+}
+
+git -C $root push origin $tag
+if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+Write-Host "Pushed the tag. GitHub Actions is building the release: https://github.com/KyleKeane/Axit/actions"
 Write-Host "Follow it with: gh run watch    (the release then appears at https://github.com/KyleKeane/Axit/releases)"

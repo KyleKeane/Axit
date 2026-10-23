@@ -36,4 +36,3 @@ dotnet_naming_style.underscore_camel.required_prefix = _
 
 # Nullable and analyzer hygiene
 dotnet_diagnostic.CS8602.severity = warning
-dotnet_diagnostic.CA1416.severity = none

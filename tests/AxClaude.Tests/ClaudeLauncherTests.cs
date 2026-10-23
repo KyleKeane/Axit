@@ -1,9 +1,60 @@
+using System.Diagnostics;
 using AxClaude.Core.Pty;
 
 namespace AxClaude.Tests;
 
 public class ClaudeLauncherTests
 {
+    /// <summary>A fake claude.cmd with the body given, in a folder of its own that goes with the test.</summary>
+    private sealed class FakeClaude : IDisposable
+    {
+        private readonly string _dir = Path.Combine(Path.GetTempPath(), "axclaude-tests-" + Guid.NewGuid().ToString("N"));
+
+        public FakeClaude(string body)
+        {
+            Directory.CreateDirectory(_dir);
+            Command = Path.Combine(_dir, "claude.cmd");
+            File.WriteAllText(Command, "@echo off\r\n" + body + "\r\n");
+        }
+
+        public string Command { get; }
+
+        public void Dispose()
+        {
+            try
+            {
+                Directory.Delete(_dir, recursive: true);
+            }
+            catch (Exception ex) when (ex is IOException or UnauthorizedAccessException)
+            {
+                // A fake just ended holds its folder for a moment; Windows cleans the temp folder.
+            }
+        }
+    }
+
+    [Fact]
+    public async Task The_version_is_the_first_line_claude_prints_for_version()
+    {
+        using var claude = new FakeClaude("echo 2.0.30 %1\r\necho a second line");
+        Assert.Equal("2.0.30 --version", await ClaudeLauncher.VersionAsync(claude.Command, TimeSpan.FromSeconds(30)));
+    }
+
+    [Fact]
+    public async Task A_claude_that_does_not_answer_in_time_gives_no_version_and_is_ended()
+    {
+        using var claude = new FakeClaude("ping -n 30 127.0.0.1 >nul\r\necho 9.9.9");
+        var watch = Stopwatch.StartNew();
+        Assert.Null(await ClaudeLauncher.VersionAsync(claude.Command, TimeSpan.FromSeconds(1)));
+        Assert.True(watch.Elapsed < TimeSpan.FromSeconds(20), $"took {watch.Elapsed}");
+    }
+
+    [Fact]
+    public async Task A_claude_that_cannot_start_gives_no_version()
+    {
+        var nowhere = Path.Combine(Path.GetTempPath(), "axclaude-nowhere-" + Guid.NewGuid().ToString("N"), "claude.exe");
+        Assert.Null(await ClaudeLauncher.VersionAsync(nowhere, TimeSpan.FromSeconds(5)));
+    }
+
     [Fact]
     public void Split_at_whitespace_including_new_lines()
     {

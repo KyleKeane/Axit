@@ -15,4 +15,14 @@
     <TreatWarningsAsErrors Condition="'$(Configuration)' == 'Release'">true</TreatWarningsAsErrors>
   </PropertyGroup>
 
+  <!-- Every project is Windows code: the WinForms ones say so by their framework, and this attribute says it for the
+       pure ones (they call Windows through P/Invoke and COM: ConPTY, the shell, MFPlay) and for the tests. The analyzer
+       then knows it; CA1416 warned on their Marshal and Thread calls and was silenced in .editorconfig until 2026-10-23
+       (docs/axit/longevity.md 3.7). -->
+  <ItemGroup>
+    <AssemblyAttribute Include="System.Runtime.Versioning.SupportedOSPlatformAttribute">
+      <_Parameter1>windows</_Parameter1>
+    </AssemblyAttribute>
+  </ItemGroup>
+
 </Project>

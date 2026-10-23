@@ -298,8 +298,8 @@ The Claude menu and its shortcuts send raw sequences (Appendix B), fixed in code
 ### FR-13 Errors and diagnostics
 
 - FR-13.1: Every failure (Claude not found, `CreatePseudoConsole` failure, process exit, settings unreadable) produces a system line and an announcement; a failure of something the user asked for (start, save, open a page or the settings file, a folder that is gone) also shows the **Error** notice (D23). Also handled plainly: a project folder that no longer exists; a Windows without a pseudo console (a sentence naming Windows 10 1809); a recording file that can no longer be written (the recording stops with a system line; the reader thread never dies); a clipboard held by another program ("Could not copy. Try again").
-- FR-13.2: A rolling log `%LOCALAPPDATA%\Axit\logs\axclaude.log` records lifecycle events. The start line names the version, the executable path and the process id, so lines from an installed copy and a development build sharing the log can be told apart. The parser ignores unknown sequences silently; the raw recording is the parser diagnostic.
-- FR-13.3: Options → Developer → Copy diagnostics copies versions, the executable path and process id, the other paths, the Claude state and the last 200 log lines.
+- FR-13.2: A rolling log `%LOCALAPPDATA%\Axit\logs\axclaude.log` records lifecycle events. The start line names the version, the executable path and the process id, so lines from an installed copy and a development build sharing the log can be told apart. The first start of Claude in a run of the app also logs `Claude Code version: <the first line claude --version prints> (<the path>)`, asked alongside the start, never before it; `(no answer to --version)` when fifteen seconds pass, the claude asked then ended with whatever it started. A transcript bug reported with the log can so be matched to the Claude Code that drew the screens (`docs/axit/longevity.md` 3.10; the `record-fixture` skill says when a version gets a fixture). The parser ignores unknown sequences silently; the raw recording is the parser diagnostic.
+- FR-13.3: Options → Developer → Copy diagnostics copies versions (the program's, and Claude Code's as `claude --version` answered it: `(not answered yet)` before the answer, `(not asked)` while Claude has not been found), the executable path and process id, the other paths, the Claude state and the last 200 log lines.
 - FR-13.4: An unhandled exception on the UI thread is logged and reported in the **Unexpected error** notice, which names the log file (a message box only while no window exists); the app keeps running. Background exceptions are logged.
 
 ## 6. User interface
@@ -398,7 +398,7 @@ While a notice shows: Tab / Shift+Tab between text, field and buttons; Enter the
 
 ```
 src/AxClaude.Core/        class library (net10.0), no WinForms
-  Pty/        ClaudeLauncher (find claude, command line, environment)
+  Pty/        ClaudeLauncher (find claude, command line, environment, claude --version)
   Transcript/ SessionModel (on the bundle's LineStore), LineClassifier, Arrivals (the tick and the spoken replies),
               Question (the Question and QuestionOption records), QuestionReader, ScreenReader (ClaudeScreen, ScreenKey),
               QuestionRouter, SlashCommands (what Claude waits on, D33), ScreenActions (what a screen's keys do in the area), FeedbackDraftWatch
@@ -451,7 +451,7 @@ Input field / menus ──> ConsoleForm write queue (paced writes, one pump time
 
 ### 7.4 PtyHost
 
-The one ConPTY implementation: five kernel32 calls, the std-handle guard (FR-1.4), the graceful stop (FR-1.7; it runs on the UI thread and is bounded, 2 s for the exit and 1 s for each thread, since Claude exits within moments of its console closing and the window takes no input between a stop and the restart or close that follows) and `Kill`, the stop at once for a confirmed restart or close while Claude is busy, a reader thread that hands every chunk to the callback given to `Start` and a wait thread that reports the exit code the same way (both callbacks are in place before the threads start, so nothing the child prints first is missed); `ClaudeLauncher` builds the command line and the environment (FR-1.2, FR-1.3). `tools/PtyCapture` records through both, so a fixture shows what the app sees. The console size is fixed (D9).
+The one ConPTY implementation: five kernel32 calls, the std-handle guard (FR-1.4), the graceful stop (FR-1.7; it runs on the UI thread and is bounded, 2 s for the exit and 1 s for each thread, since Claude exits within moments of its console closing and the window takes no input between a stop and the restart or close that follows) and `Kill`, the stop at once for a confirmed restart or close while Claude is busy, a reader thread that hands every chunk to the callback given to `Start` and a wait thread that reports the exit code the same way (both callbacks are in place before the threads start, so nothing the child prints first is missed); `ClaudeLauncher` builds the command line and the environment (FR-1.2, FR-1.3) and asks `claude --version` for the log (FR-13.2). `tools/PtyCapture` records through both, so a fixture shows what the app sees. The console size is fixed (D9).
 
 ### 7.5 VT parsing and the screen model
 
@@ -562,7 +562,7 @@ Unit tests (xunit, `tests/AxClaude.Tests`; `TestHelpers` holds what they share: 
 - SettingsTests: round trip; a missing or broken file falls back to the defaults; the 1.1 `speakReplies` key.
 - GitExcludeTests: the marked block in `.git\info\exclude` added once and removed, a plain folder left alone, a linked worktree, and the names the app offers matching the patterns (D34).
 - PrivacyTests: `Redaction` on what `/status` prints, and no e-mail address or account path in any file of the repository.
-- ClaudeLauncherTests: splitting and joining the Custom arguments of New session.
+- ClaudeLauncherTests: splitting and joining the Custom arguments of New session; `claude --version` against a fake claude.cmd: the first line, the timeout that ends a claude that does not answer, a claude that cannot start.
 - UtteranceTests: the joining rule of a spoken frame (D32).
 - StartupOptionsTests: the command line (FR-9): the options, their errors, and everything after `--` passed on verbatim.
 

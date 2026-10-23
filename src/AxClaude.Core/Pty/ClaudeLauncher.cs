@@ -1,4 +1,6 @@
 using System.Collections;
+using System.ComponentModel;
+using System.Diagnostics;
 using System.Text;
 
 namespace AxClaude.Core.Pty;
@@ -65,6 +67,62 @@ public static class ClaudeLauncher
         return claudePath.EndsWith(".cmd", StringComparison.OrdinalIgnoreCase)
             ? $"cmd.exe /d /s /c \"\"{claudePath}\" {args}\""
             : $"\"{claudePath}\" {args}";
+    }
+
+    /// <summary>
+    /// What <c>claude --version</c> prints, its first line (<c>2.0.30 (Claude Code)</c>), or null when Claude cannot
+    /// be started or has not answered within <paramref name="timeout"/>, in which case it is ended with whatever it
+    /// started. Asked once per run of the app, logged and named by Copy diagnostics (FR-13.2, FR-13.3), so that a
+    /// transcript bug can be matched to the Claude Code that drew the screens (docs/axit/longevity.md 3.10). A
+    /// <c>.cmd</c> runs through cmd.exe, as the session does (<see cref="BuildCommandLine"/>).
+    /// </summary>
+    public static async Task<string?> VersionAsync(string claudePath, TimeSpan timeout)
+    {
+        var script = claudePath.EndsWith(".cmd", StringComparison.OrdinalIgnoreCase);
+        var start = new ProcessStartInfo
+        {
+            FileName = script ? "cmd.exe" : claudePath,
+            Arguments = script ? $"/d /s /c \"\"{claudePath}\" --version\"" : "--version",
+            UseShellExecute = false,
+            RedirectStandardInput = true,
+            RedirectStandardOutput = true,
+            RedirectStandardError = true,
+            CreateNoWindow = true,
+        };
+        try
+        {
+            using var process = Process.Start(start);
+            if (process is null)
+            {
+                return null;
+            }
+
+            process.StandardInput.Close();
+            // Both pipes are read to their end, so that a full one cannot hold Claude; a program Claude started could
+            // keep them open after it, which the timeout covers as it covers a hang.
+            var both = Task.WhenAll(process.StandardOutput.ReadToEndAsync(), process.StandardError.ReadToEndAsync());
+            if (await Task.WhenAny(both, Task.Delay(timeout)).ConfigureAwait(false) != both)
+            {
+                try
+                {
+                    process.Kill(entireProcessTree: true);
+                }
+                catch (Exception ex) when (ex is InvalidOperationException or Win32Exception)
+                {
+                    // Gone already.
+                }
+
+                return null;
+            }
+
+            var output = await both.ConfigureAwait(false);
+            var first = output[0].Split('\n')[0].Trim();
+            return first.Length > 0 ? first : null;
+        }
+        catch (Exception ex) when (ex is Win32Exception or IOException or InvalidOperationException)
+        {
+            return null;
+        }
     }
 
     /// <summary>

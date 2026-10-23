@@ -65,6 +65,9 @@
 - Axit: the command palette reads a menu item's text and check mark as they would be when its menu opens, AxFile's Undo and AxTerminal's Switch shell among them.
 - AxTerminal: the New session notice's help line names the shell's command line; it named Claude Code's arguments.
 - For developers: the New session controls are a control of their own (SessionControls) that a notice carries (Custom, Accepts, HeadLine), out of OverlayPanel; the control area asks once whether a key may answer; LocalPaths in Axit.Core, tested.
+- Axit: the install puts the console commands' folder, `%USERPROFILE%\.local\bin`, on your PATH when it is not there yet, so `axclaude` and the other commands work in a console without Claude Code installed. `install.cmd` downloaded on its own finds the latest release through the releases page's own address instead of the GitHub API, which refuses a network address after sixty requests an hour. The shipped guide names the Windows requirement: Windows 10 version 1809 or later, or Windows 11.
+- AxClaude: the log and Copy diagnostics name Claude Code's version (`claude --version`, asked once at the first start of a session), so that a report of a transcript bug says which Claude Code drew it.
+- For developers: the longevity plan's items that needed no account are in place (`docs/axit/longevity.md`, section 3): the GitHub actions are pinned by commit and the runner named by its version, every project tells the compiler it is Windows code instead of CA1416 being silenced, the bundle spec's section 5.4 lists every Windows API the apps depend on with its file and its fallback, `release.ps1` checks the changelog section's bullets and pushes `main` and waits for its build before the tag, and the test projects have NuGet lock files.
 
 ## 3.4.0 - 2026-10-22
 

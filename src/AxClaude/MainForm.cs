@@ -274,6 +274,7 @@ internal sealed partial class MainForm : ConsoleForm
     [
         $"Program: {Environment.ProcessPath ?? "(unknown)"} (process {Environment.ProcessId})",
         $"Claude: {ClaudeLauncher.Find(_options.ClaudePath ?? _settings.ClaudePath) ?? "(not found)"}",
+        $"Claude Code version: {_claudeVersion ?? "(not asked)"}",
         $"Project folder: {_folder ?? "(none)"}",
         $"Console size: {_model.Columns}x{_model.Rows}",
         $"Claude state: {StateLabel.Text}",

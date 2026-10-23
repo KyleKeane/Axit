@@ -17,7 +17,8 @@
       writes itself): it is stopped before an install or a removal, and started again, hidden, after an install,
     - the console commands axclaude, axdown, axjson, axgit, axterminal, axfile, axmedia, axpreview, axstart and axit (a folder
       opens AxClaude, a file AxDown, a .json file AxJSON, a sound or video file AxMedia): one-line shims in
-      %USERPROFILE%\.local\bin, the folder that Claude Code's installer already puts on PATH.
+      %USERPROFILE%\.local\bin, put on the user's PATH when it is not there yet (Claude Code's installer uses the same
+      folder; a removal leaves the PATH, since the folder may hold other programs' commands).
   It also lists Axit in Settings, Apps (Add or remove programs), whose Uninstall runs install.cmd -Uninstall.
   -Uninstall removes all of that. The settings in %APPDATA%\Axit and the logs in %LOCALAPPDATA%\Axit stay.
   An installation of AxClaude 1.x, from before the bundle, is removed completely first; its settings file stays in
@@ -279,6 +280,25 @@ New-Item -ItemType Directory -Force $bin | Out-Null
 Set-Content -Path (Join-Path $bin 'axit.cmd') -Value @('@echo off', "`"$exe`" %*") -Encoding ascii
 foreach ($app in $apps) {
     Set-Content -Path $app.Shim -Value @('@echo off', "`"$exe`" $($app.Verb) %*") -Encoding ascii
+}
+
+# The commands work in a console only when their folder is on the PATH. Claude Code's installer puts it there; without
+# Claude Code (docs/axit/SPEC.md G6) this install does, in the user's PATH, which needs no rights. The registry value
+# is read as it is stored (unexpanded) and written back as an expandable string, so that an entry like
+# %USERPROFILE%\... stays one; [Environment]::SetEnvironmentVariable would expand them all into a plain string. The
+# removal leaves the PATH as it is: the folder may hold other programs' commands.
+$environment = Get-Item -LiteralPath 'HKCU:\Environment'
+$userPath = [string]$environment.GetValue('Path', '', 'DoNotExpandEnvironmentNames')
+$onPath = @([Environment]::ExpandEnvironmentVariables($userPath) -split ';' | ForEach-Object { $_.Trim().TrimEnd('\') })
+if ($onPath -notcontains $bin.TrimEnd('\')) {
+    $entry = '%USERPROFILE%\.local\bin'
+    $newPath = if ($userPath.Trim()) { $userPath.TrimEnd(';') + ';' + $entry } else { $entry }
+    Set-ItemProperty -LiteralPath 'HKCU:\Environment' -Name 'Path' -Value $newPath -Type ExpandString
+    # Running programs (Explorer, so that a console opened from the Start menu from now on has the folder) learn of
+    # the change from the settings-change message, which [Environment]::SetEnvironmentVariable sends after any write,
+    # the removal of a value that does not exist included: that is this line's whole effect.
+    [Environment]::SetEnvironmentVariable('AXIT_PATH_CHANGED', $null, 'User')
+    Say "Added $entry to your PATH: a console opened from now on finds the axit commands."
 }
 
 if (-not $NoStartMenu) {

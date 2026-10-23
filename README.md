@@ -52,7 +52,7 @@ The unit tests cover everything that needs no window. What a window does is chec
 ## Release
 
 ```
-.\release.ps1 3.4.0        # tests, sets the version, commits, tags v3.4.0 and pushes
+.\release.ps1 3.4.0        # checks the changelog section, tests, sets the version, commits, tags v3.4.0, pushes main and, once its build has passed, the tag
 gh run watch               # follows the workflow that builds and publishes the release
 ```
 

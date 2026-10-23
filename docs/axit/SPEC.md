@@ -549,6 +549,64 @@ docs/<app>/             SPEC.md, user-guide.md (embedded by the app's project), 
 - M9 Keys live in tables (AX-8): one bundle-wide table in `Axit.Forms`, one table per window; a key is changed in its
   table and nowhere else.
 
+### 5.4 The Windows APIs depended on
+
+Every call into Windows outside WinForms is behind one file, listed here with what it is for and what to do when
+Windows retires it (`docs/axit/longevity.md` 3.6; the list is checked against Windows' deprecation notices once a
+year, section 5 of that page). WinForms itself (the EDIT control, the menus, the status bar, the ListBox, the common
+dialogs) is .NET's, shipped inside the executable, and every project is marked as Windows code for the analyzer
+(`Directory.Build.props`).
+
+- **ConPTY**, `kernel32` (`src/Axit.Core/Pty/PtyHost.cs`): `CreatePseudoConsole`, `ClosePseudoConsole`,
+  `CreatePipe`, `CreateProcess` with a thread attribute list, `GetStdHandle`, `SetStdHandle`, `WaitForSingleObject`,
+  `GetExitCodeProcess`, `TerminateProcess`, `CloseHandle`. The console AxClaude and AxTerminal run their programs
+  in. Windows 10 1809 and later: the one API without a fallback, hence the Windows requirement (AxClaude's FR-13.1
+  names it when it is missing).
+- **`GetACP`**, `kernel32` (`src/Axit.Core/TextDocument.cs`): the system code page, for a text file that is neither
+  UTF-8 nor UTF-16 (AxDown's AD-3.1). Stable; `Encoding.Default` is no replacement, being UTF-8 on .NET.
+- **`StrCmpLogicalW`**, `shlwapi` (`src/Axit.Core/NaturalOrder.cs`): Explorer's order of names, numbers compared as
+  numbers, for AxFile's entries and AxMedia's queue. Stable; the fallback is a comparer of our own under the same
+  tests.
+- **The EDIT control's messages**, `user32` (`SendMessage` and `GetCaretPos` in `src/Axit.Forms/EditPaging.cs`,
+  `EditParagraphs.cs` and `TranscriptView.cs`): line and caret positions and the scrolling of the views. As old as
+  Windows; WinForms' TextBox is the same control.
+- **`FlashWindowEx`**, `user32` (`src/Axit.Forms/ConsoleForm.Signals.cs`): the taskbar flash when Claude or the
+  shell wants attention while the window is in the background. Stable; without it the sounds remain.
+- **The window list**, `user32` (`EnumWindows`, `GetWindow`, `GetWindowText`, `GetWindowTextLength`,
+  `GetWindowThreadProcessId`, `IsIconic`, `IsWindowVisible`, `ShowWindow`, `SetForegroundWindow`, `PostMessage` in
+  `src/Axit.Forms/AxitMenu.cs`): the Axit menu's list of the bundle's windows and the switch to one. Stable.
+- **`WM_COPYDATA`**, `user32` (`SendMessageTimeoutW`, `AllowSetForegroundWindow`, `GetWindowThreadProcessId` in
+  `src/Axit.Forms/AppMessage.cs`): the hand-over from a second start to the open window of AxMedia or AxPreview
+  (AX-7.2). Stable.
+- **`RegisterHotKey`**, `user32` (with `UnregisterHotKey`, `GetForegroundWindow`, `SetForegroundWindow`,
+  `FindWindowExW`, `IsWindow`, `IsWindowVisible`, `GetKeyState`, `GetWindowThreadProcessId` in
+  `src/AxStart/StartForm.cs`): AxStart's system-wide key and the foreground given back (AS-4.1). Stable.
+- **`waveOut`**, `winmm` (`waveOutOpen`, `waveOutPrepareHeader`, `waveOutWrite`, `waveOutReset`,
+  `waveOutUnprepareHeader`, `waveOutClose` in `src/Axit.Forms/Sounds.cs`): the earcons, each a buffer queued behind
+  the one playing. Legacy, kept by Windows for compatibility (`PlaySound` and .NET's `SoundPlayer` rest on it); the
+  fallback is WASAPI through COM in the same file.
+- **`SHFileOperationW`**, `shell32` (`src/AxFile.Core/FileOperations.cs`): copy, move, rename, delete to the Recycle
+  Bin, with the shell's own progress, conflicts and undo (AxFile's AF-4). Superseded by `IFileOperation` (Vista),
+  still shipped; the fallback is `IFileOperation` through COM, in the same file.
+- **The shell's folders and menus**, `shell32`, `shlwapi`, `user32` (`SHGetDesktopFolder`, `SHParseDisplayName`,
+  `SHBindToParent`, `SHGetKnownFolderIDList`, `SHOpenWithDialog`, `ShellExecuteExW`, `StrRetToBufW`, the
+  interfaces `IShellFolder` and `IContextMenu`, and the menu functions `CreatePopupMenu`, `TrackPopupMenuEx`,
+  `GetMenuItemCount`, `GetMenuItemID`, `DestroyMenu`, `PostMessageW` in `src/AxFile/Shell.cs`): an entry's Windows
+  menu, Open with, Properties, Eject (AF-4.7). Stable: the interfaces Explorer itself is built on.
+- **`shell:AppsFolder`**, `shell32` (`SHCreateItemFromParsingName`, `SHGetKnownFolderPath`, the interfaces
+  `IShellItem` and `IEnumShellItems` in `src/AxStart/AppsFolder.cs`): the Start menu's programs for AxStart
+  (AS-2.1). The folder's parsing name is not promised by Microsoft; the fallback is the Start menu's shortcut folders
+  (the user's and the common one), which lose the Store apps.
+- **`SetCurrentProcessExplicitAppUserModelID`**, `shell32` (`src/Axit/Program.cs`): one taskbar group per app
+  (AX-1.6). Stable.
+- **MFPlay**, `mfplay` (`MFPCreateMediaPlayer`, the interfaces `IMFPMediaPlayer`, `IMFPMediaItem` and
+  `IMFPMediaPlayerCallback` in `src/AxMedia.Core/MediaPlayer.cs`): AxMedia's playback. Its documentation carries a
+  deprecation notice while it is still shipped, Windows 11 included; the fallback is the Media Session (AM-D5),
+  behind the same seam.
+- **UI Automation notifications** (`AccessibleObject.RaiseAutomationNotification`, WinForms over
+  `UiaRaiseNotificationEvent`, in `src/Axit.Forms/Announcer.cs`): everything the apps say (AX-7.3). Windows 10
+  1709 and later; NVDA has read them since 2018.
+
 ## 6. Design decisions
 
 - **B-1 One executable with a verb per app.** A self-contained .NET executable carries the runtime, about 70 MB; one

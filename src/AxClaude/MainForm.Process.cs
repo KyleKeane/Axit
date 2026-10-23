@@ -46,6 +46,20 @@ internal sealed partial class MainForm
         Relaunch("Restarting Claude");
     }
 
+    /// <summary>FR-13.2: Claude Code's version, asked once per run of the app; null until Claude has been found once (FR-13.3 names it).</summary>
+    private string? _claudeVersion;
+
+    /// <summary>How long claude --version may take before it is given up on and ended.</summary>
+    private static readonly TimeSpan ClaudeVersionTimeout = TimeSpan.FromSeconds(15);
+
+    private async Task LogClaudeVersionAsync(string claude)
+    {
+        _claudeVersion = "(not answered yet)";
+        var version = await ClaudeLauncher.VersionAsync(claude, ClaudeVersionTimeout);
+        _claudeVersion = version ?? "(no answer to --version)";
+        Log.Info($"Claude Code version: {_claudeVersion} ({claude})");
+    }
+
     private void StartClaude()
     {
         if (!Directory.Exists(_folder))
@@ -64,6 +78,12 @@ internal sealed partial class MainForm
             UpdateStatus();
             ShowClaudeNotFound(ClaudeLauncher.Candidates(configured));
             return;
+        }
+
+        if (_claudeVersion is null)
+        {
+            // Asked alongside the start, never before it: the version is for the log and the diagnostics (FR-13.2).
+            _ = LogClaudeVersionAsync(claude);
         }
 
         var arguments = new List<string>();

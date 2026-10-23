@@ -12,6 +12,9 @@
          defect of the shipped program (TextMatch.Fold relied on string.Normalize, which does nothing without the
          data; found 2026-10-23). -->
     <InvariantGlobalization>true</InvariantGlobalization>
+    <!-- A lock file per test project (packages.lock.json, committed), so that a test run years from now restores
+         exactly the packages that run today (docs/axit/longevity.md 3.12); Dependabot moves the lock files with the packages. -->
+    <RestorePackagesWithLockFile>true</RestorePackagesWithLockFile>
   </PropertyGroup>
 
   <ItemGroup>
