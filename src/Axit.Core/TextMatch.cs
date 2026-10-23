@@ -25,15 +25,19 @@ public static class TextMatch
         return Rank(folded, words.Count > 0 ? words[0] : string.Empty);
     }
 
-    /// <summary>Lower case without accents, so that "cafe" finds "Café" and "Cafe" finds "café".</summary>
+    /// <summary>
+    /// Lower case without accents, so that "cafe" finds "Café" and "Cafe" finds "café": each letter stripped through
+    /// <see cref="Accents"/> (the executable runs without the globalization data, where string.Normalize does
+    /// nothing; found 2026-10-23), a combining mark already in the text dropped.
+    /// </summary>
     public static string Fold(string text)
     {
         var builder = new StringBuilder(text.Length);
-        foreach (var c in text.Normalize(NormalizationForm.FormD))
+        foreach (var c in text)
         {
             if (CharUnicodeInfo.GetUnicodeCategory(c) != UnicodeCategory.NonSpacingMark)
             {
-                builder.Append(char.ToLowerInvariant(c));
+                builder.Append(char.ToLowerInvariant(Accents.Strip(c)));
             }
         }
 

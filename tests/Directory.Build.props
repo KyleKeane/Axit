@@ -8,6 +8,10 @@
     <TargetFramework>net10.0</TargetFramework>
     <IsPackable>false</IsPackable>
     <IsTestProject>true</IsTestProject>
+    <!-- As the executable runs (src/Axit/Axit.csproj): a test that passes only with the globalization data hides a
+         defect of the shipped program (TextMatch.Fold relied on string.Normalize, which does nothing without the
+         data; found 2026-10-23). -->
+    <InvariantGlobalization>true</InvariantGlobalization>
   </PropertyGroup>
 
   <ItemGroup>

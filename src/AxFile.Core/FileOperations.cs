@@ -1,6 +1,7 @@
 using System.Globalization;
 using System.Runtime.InteropServices;
 using System.Text;
+using Axit.Core;
 
 namespace AxFile.Core;
 
@@ -46,23 +47,16 @@ public static class FileOperations
         return names.FirstOrDefault(other => !string.Equals(other, name.Trim(), StringComparison.OrdinalIgnoreCase) && ReadingKey(other) == key);
     }
 
-    /// <summary>How a name is heard: composed, upper-cased, every kind of white space one space, invisible characters dropped, trimmed.</summary>
+    /// <summary>
+    /// How a name is heard: upper-cased, an accent written as a second character joined to its letter (the program
+    /// runs without the globalization data, so <see cref="Accents"/> composes the European letters), every kind of
+    /// white space one space, invisible characters dropped, trimmed.
+    /// </summary>
     private static string ReadingKey(string name)
     {
-        string composed;
-        try
-        {
-            composed = name.Normalize(NormalizationForm.FormKC);
-        }
-        catch (ArgumentException)
-        {
-            // A name with a lone surrogate, which NTFS allows, cannot be normalized: compared as it is.
-            composed = name;
-        }
-
-        var text = new StringBuilder(composed.Length);
+        var text = new StringBuilder(name.Length);
         var space = false;
-        foreach (var c in composed)
+        foreach (var c in name)
         {
             if (char.IsWhiteSpace(c))
             {
@@ -71,6 +65,12 @@ public static class FileOperations
             }
 
             var category = char.GetUnicodeCategory(c);
+            if (category == UnicodeCategory.NonSpacingMark && text.Length > 0 && Accents.Compose(text[^1], c) is { } composed)
+            {
+                text[^1] = composed;
+                continue;
+            }
+
             if (category is UnicodeCategory.Format or UnicodeCategory.Control or UnicodeCategory.NonSpacingMark or UnicodeCategory.EnclosingMark)
             {
                 continue;

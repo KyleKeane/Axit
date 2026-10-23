@@ -27,6 +27,18 @@ public sealed class TextMatchTests
     {
         Assert.Equal(0, Rank("Café Menu", "CAFE"));
         Assert.Equal(0, Rank("Cafe Menu", "café"));
+        Assert.Equal(0, Rank("Łódź", "lodz"));
+        Assert.Equal(0, Rank("Ångström", "ANGSTROM"));
+        Assert.Equal("uber", TextMatch.Fold("Über"));
+        Assert.Equal("cafe", TextMatch.Fold("café"));
+        Assert.Equal(0, Rank("Программа", "ПРОГРАММА"));
+    }
+
+    /// <summary>The tests run without the globalization data, as the executable does (tests/Directory.Build.props), so that the folding above is the table's and not the runtime's.</summary>
+    [Fact]
+    public void The_tests_run_in_invariant_globalization_mode_like_the_program()
+    {
+        Assert.True(AppContext.TryGetSwitch("System.Globalization.Invariant", out var invariant) && invariant);
     }
 
     [Fact]

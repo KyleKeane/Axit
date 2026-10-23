@@ -68,6 +68,15 @@ public sealed class FileOperationsTests : IDisposable
         Assert.Equal(existing, FileOperations.Lookalike(typed, ["a.txt", existing, "b.txt"]));
     }
 
+    /// <summary>An accent is a letter of its own: "cafe" and "café" are two names, however the accent is written.</summary>
+    [Fact]
+    public void A_name_with_another_accent_is_another_name()
+    {
+        Assert.Null(FileOperations.Lookalike("cafe.txt", ["café.txt"]));
+        Assert.Null(FileOperations.Lookalike("cafe.txt", ["café.txt"]));
+        Assert.Null(FileOperations.Lookalike("cafè.txt", ["café.txt"]));
+    }
+
     [Fact]
     public void A_name_with_a_lone_surrogate_is_compared_as_it_is()
     {
