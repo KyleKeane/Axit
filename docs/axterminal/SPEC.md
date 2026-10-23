@@ -280,7 +280,8 @@ file). The speech of output (AT-5.3) and the texts of the notices are the rest.
 
 ### AT-8 Settings, log, status
 
-- AT-8.1 `%APPDATA%\Axit\axterminal.json` (AX-5.3; `TerminalSettings` on `WindowSettings`): `shell` (`pwsh`,
+- AT-8.1 `%APPDATA%\Axit\axterminal.json` (AX-5.3; `TerminalSettings` on the bundle's `ConsoleSettings`, the console
+  fields shared with AxClaude under the same names, on `WindowSettings`): `shell` (`pwsh`,
   `powershell`, `cmd`, `bash`, `custom`), `customShell`, `lastFolder`, `recentFolders` (ten), `ptyColumns` 240, `ptyRows` 50,
   `soundOnBell` on, `clickOnNewLine` on, `workingMusic` off, `backgroundAlert` off, `flashTaskbar` on, `outputSpeech`
   `none`, `announceQuestions` on, `markerTimeStamps` off, `showMarkers` on, `joinWrappedLines` on, `maxTranscriptLines` 20000, and the

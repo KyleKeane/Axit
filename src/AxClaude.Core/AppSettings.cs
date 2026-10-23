@@ -8,31 +8,16 @@ namespace AxClaude.Core;
 /// Everything the app remembers between runs. Stored as JSON in <c>%APPDATA%\Axit\axclaude.json</c> (see SPEC.md
 /// Appendix C) through the bundle's <see cref="SettingsFile"/>; the first start under Axit copies AxClaude 1.x's
 /// <c>%APPDATA%\AxClaude\settings.json</c> there (<see cref="TakeOverOldFile"/>). A missing or unreadable file falls
-/// back to the defaults.
+/// back to the defaults. The console fields (the size, the recent folders, the sounds, the signals, the transcript
+/// options) are <see cref="ConsoleSettings"/>', shared with AxTerminal; the font, the update check and the window's
+/// place are <see cref="WindowSettings"/>' (bundle AX-6.5).
 /// </summary>
-public sealed class AppSettings : WindowSettings
+public sealed class AppSettings : ConsoleSettings
 {
-    public const int MaxRecentFolders = 10;
-
     public string? LastProjectFolder { get; set; }
-    public List<string> RecentFolders { get; set; } = [];
     public string? ClaudePath { get; set; }
-    public int PtyColumns { get; set; } = 240;
-    public int PtyRows { get; set; } = 50;
 
-    // The font, the update check and the window's place are WindowSettings' (bundle AX-6.5).
     public bool AnnounceBell { get; set; } = true;
-
-    /// <summary>The chimes when a message is sent and when Claude replies, finishes and asks (FR-7.3). The key keeps its 1.0 name.</summary>
-    public bool SoundOnBell { get; set; } = true;
-
-    /// <summary>A soft music loop from the moment Claude starts working until it is done or asks (FR-7.9).</summary>
-    public bool WorkingMusic { get; set; }
-
-    public bool FlashTaskbar { get; set; } = true;
-
-    /// <summary>A longer, louder call in place of the done or question chime while the window is in the background (FR-7.3).</summary>
-    public bool BackgroundAlert { get; set; }
 
     /// <summary>How much of a reply is spoken as it arrives (FR-7.4): none, the first line of each message, or all.</summary>
     public ReplySpeechMode ReplySpeech { get; set; }
@@ -43,18 +28,6 @@ public sealed class AppSettings : WindowSettings
 
     /// <summary>Speak the <c>tool:</c> row of each tool call as it arrives, whatever <see cref="ReplySpeech"/> says (FR-7.4).</summary>
     public bool SpeakToolCalls { get; set; }
-
-    /// <summary>A tick whenever a line from Claude arrives (FR-7.8).</summary>
-    public bool ClickOnNewLine { get; set; } = true;
-
-    /// <summary>Time of sending in the Input and Output markers (FR-4.6).</summary>
-    public bool MarkerTimeStamps { get; set; }
-
-    /// <summary>The # markers of the heading lines shown in the view (FR-4.6a); the export keeps them either way.</summary>
-    public bool ShowMarkers { get; set; } = true;
-
-    /// <summary>Show reply rows that Claude wrapped at the console width as one line (FR-3.2a). File only, no menu item.</summary>
-    public bool JoinWrappedLines { get; set; } = true;
 
     /// <summary>
     /// Recognise what Claude waits on and show it in the control area in the message field's place, and keep
@@ -80,8 +53,6 @@ public sealed class AppSettings : WindowSettings
     /// </summary>
     public bool KeepFilesOutOfGit { get; set; } = true;
 
-    public int MaxTranscriptLines { get; set; } = 20000;
-
     public static string DefaultPath => AppPaths.SettingsFile("axclaude");
 
     /// <summary>Where AxClaude 1.x kept the file, before the Axit bundle.</summary>
@@ -106,28 +77,12 @@ public sealed class AppSettings : WindowSettings
     public void RememberFolder(string folder)
     {
         LastProjectFolder = folder;
-        RecentPaths.Remember(RecentFolders, folder, MaxRecentFolders);
+        RememberRecentFolder(folder);
     }
 
     private void Sanitize()
     {
-        SanitizeWindow();
-        RecentFolders = RecentPaths.Sanitize(RecentFolders, MaxRecentFolders);
-        if (PtyColumns is < 20 or > 1000)
-        {
-            PtyColumns = 240;
-        }
-
-        if (PtyRows is < 5 or > 500)
-        {
-            PtyRows = 50;
-        }
-
-        if (MaxTranscriptLines < 1000)
-        {
-            MaxTranscriptLines = 1000;
-        }
-
+        SanitizeConsole();
         if (SpeakReplies && ReplySpeech == ReplySpeechMode.None)
         {
             ReplySpeech = ReplySpeechMode.All;
