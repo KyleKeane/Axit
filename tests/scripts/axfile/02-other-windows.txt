@@ -1,0 +1,16 @@
+# AxFile, test plan section 2: from and to the other windows (docs/axfile/nvda-test-plan.md 2.1 to 2.4; AF-1.3).
+# Every step of this section starts another window (AxClaude, AxDown, AxJSON, AxPreview, AxGit, AxTerminal, AxMedia,
+# AxFile itself) or File Explorer, which the runner cannot reach or close:
+# Manual (2.1): AxClaude's Session, Show current folder in, AxFile starts a new AxFile window.
+# Manual (2.2): Show current file in, AxFile from AxDown, AxJSON and AxPreview starts AxFile with the file selected.
+# Manual (2.3): the same from AxGit, AxTerminal and AxMedia.
+# Manual (2.4): Enter on AxTerminal starts a shell; Ctrl+W and Ctrl+Shift+W start File Explorer.
+# What can be checked from inside: the Folder menu's Show current folder in submenu holds its four items (2.4).
+file home\Axit\axfile.json {"checkForUpdates": false}
+file here\a.txt A file to stand on.
+start file {temp}\here
+expect focus "value":"a.txt"
+# A modifier key sent while the window still settles can lose its modifier (the channel); let it settle.
+wait 500
+expect commands "File Explorer, Folder, Show current folder in, Ctrl\u002BW","AxClaude, Folder, Show current folder in","AxGit, Folder, Show current folder in","AxTerminal, Folder, Show current folder in"
+expect commands "Show in File Explorer, Item, Ctrl\u002BShift\u002BW"

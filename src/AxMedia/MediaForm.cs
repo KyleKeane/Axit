@@ -779,17 +779,19 @@ public sealed class MediaForm : AxitForm
             {
                 if (MediaFiles.ParseTime(Overlay.InputText) is not { } time)
                 {
+                    // The notice stays for another try (plan section 3 step 2; it closed until 2026-10-23).
                     Announce("Not a time", true);
                     return;
                 }
 
+                CloseNotice(null);
                 if (_player is { } player)
                 {
                     var reached = player.Seek(time);
                     UpdateStatusBar();
                     Announce(MediaFiles.FormatTime(reached), true);
                 }
-            }, IsDefault: true),
+            }, IsDefault: true, StaysOpen: true),
             new OverlayChoice("&Cancel", IsCancel: true),
         ])
         {

@@ -1,0 +1,548 @@
+# AxFile, test plan section 3: file operations and the entry's menu (docs/axfile/nvda-test-plan.md 3.1 to 3.14; AF-4).
+# The files are those of manual_tests/prepare.ps1 axfile (file-operations, undo-ctrl-z), made in {temp}.
+# Not here: every step that puts something on the clipboard (Ctrl+X, Ctrl+C, Ctrl+V, Ctrl+Shift+C, the Selection
+# menu's Cut, Copy and Copy paths): the test desktop shares the system clipboard with the user.
+file home\Axit\axfile.json {"checkForUpdates": false}
+file ops\a.txt The a.txt of the rename and copy steps.
+file ops\rename-me.txt F2 on me.
+file ops\move-into-new-folder-1.txt Move me.
+file ops\move-into-new-folder-2.txt Move me too.
+file ops\not-a-zip.txt Extract here on me says Not a zip file.
+# A name with a space: the runner's file step ends the name at the first space.
+run echo A name another can read the same as.> "ops\two words.txt"
+file ops\docs\plan.md # Plan, inside docs.
+file ops\docs\notes.txt Notes, inside docs.
+start file {temp}\ops
+expect focus docs, folder
+# A modifier key sent while the window still settles can lose its modifier (the channel); let it settle.
+wait 500
+
+# 3.1 New folder: the notice "New folder" with the field "Name"; Enter on the empty field: "Type a name", the notice stays.
+keys ctrl+shift+n
+expect state "notice":"New folder"
+expect focus "name":"Name"
+keys enter
+expect said Type a name
+expect state "notice":"New folder"
+type notes
+keys enter
+expect said ! Created notes
+expect focus "value":"notes, folder"
+expect state "status":["Created notes",
+
+# 3.1a New text file: the rename box on the whole name "New file.txt"; the name typed replaces it.
+keys ctrl+shift+t
+expect focus "name":"New name"
+expect focus "value":"New file.txt"
+type todo.md
+keys enter
+expect said ! Renamed to todo.md
+expect focus "value":"todo.md"
+# Ctrl+Shift+T, Escape: the box closes on "New file.txt", which stays.
+keys ctrl+shift+t
+expect focus "name":"New name"
+keys escape
+expect focus "value":"New file.txt"
+expect list "New file.txt"
+# Space on both, Move to new folder (Shift+F10, V; here by its menu command): the notice names what moves.
+keys space
+expect said ! Selected
+keys down
+expect focus "value":"not-a-zip.txt"
+keys down down
+expect focus "value":"todo.md"
+keys space
+expect said ! Selected, 2 selected
+menu Move to new folder, Item
+expect state "notice":"Move to new folder"
+expect state 2 items will move into the new folder.
+expect focus "name":"Name"
+type bundle
+keys enter
+expect said ! Moved 2 items into bundle
+expect focus "value":"bundle, folder"
+keys enter
+expect said ! bundle, 2 items, New file.txt
+expect list "todo.md"
+keys backspace
+expect said ! ops,
+
+# 3.2 F2 on a folder: the whole name in the box; renames as often as wanted.
+keys home
+keys down down
+expect focus "value":"notes, folder"
+keys f2
+expect focus "name":"New name"
+expect focus "value":"notes"
+type Notes
+keys enter
+expect said ! Renamed to Notes
+expect focus "value":"Notes, folder"
+keys f2
+expect focus "name":"New name"
+type Notes2
+keys enter
+expect said ! Renamed to Notes2
+keys f2
+expect focus "name":"New name"
+type Notes
+keys enter
+expect said ! Renamed to Notes
+expect focus "value":"Notes, folder"
+# Manual (3.2): the "In use by another program" failure needs AxTerminal (or another program) started in the folder.
+# F2 on a file: the part before the extension is selected, so typing replaces the name and keeps the extension.
+keys ctrl+f
+expect focus "name":"Name contains"
+type a.txt
+keys enter
+expect focus "value":"a.txt"
+keys f2
+expect focus "name":"New name"
+expect focus "value":"a.txt"
+type b
+expect focus "value":"b.txt"
+keys escape
+expect focus "value":"a.txt"
+expect list "a.txt"
+keys f2
+expect focus "name":"New name"
+keys enter
+expect said ! Name unchanged
+expect focus "value":"a.txt"
+
+# 3.5 Refusals: a name taken, a character Windows refuses, a name that reads the same as another entry's.
+keys ctrl+shift+n
+expect focus "name":"Name"
+type Notes
+keys enter
+expect said ! Failed: There is already an entry named
+keys escape
+keys f2
+expect focus "name":"New name"
+type a?b
+keys enter
+expect said ! A name cannot contain
+expect focus "name":"New name"
+keys escape
+expect focus "value":"a.txt"
+# Another entry's name with a doubled space inside (the plan's trailing space cannot be typed: the runner trims a step's line).
+keys f2
+expect focus "name":"New name"
+type two  words
+keys enter
+expect said ! Reads the same as two words.txt, which is already here
+expect focus "name":"New name"
+keys escape
+expect focus "value":"a.txt"
+
+# 3.6a F2, then F5: the box closes with the name kept.
+keys f2
+expect focus "name":"New name"
+keys f5
+expect said ! Refreshed
+expect focus "value":"a.txt"
+expect list "a.txt"
+# Manual (3.6, 3.6a): cut, copy and paste, the two pastes at once and the Actions list during them: the clipboard.
+
+# 3.3 Delete on Notes (an empty folder this script made): the question, Escape does nothing; Delete, Enter: "Deleted Notes".
+keys home
+keys down down
+expect focus "value":"Notes, folder"
+keys delete
+expect state "notice":"Delete Notes?"
+expect state It goes to the Recycle Bin with everything in it.
+keys escape
+expect state "notice":null
+expect focus "value":"Notes, folder"
+expect list "Notes, folder"
+keys delete
+expect state "notice":"Delete Notes?"
+keys enter
+expect said ! Deleted Notes
+expect focus "value":"a.txt"
+# Manual (3.3): that Notes is in the Recycle Bin is read in File Explorer. Manual (3.4): Copy path writes the clipboard.
+
+# 3.7 Manual: the entry's menu as a context menu (Shift+F10, the Applications key) and the menu bar (Alt+I, 3.7a, 3.7b's
+# Alt+S) cannot be opened from the channel; the items and their order are the menu's, checked through the palette's list.
+expect commands "Open, Item, Enter","Editor, Item, Open in Axit, Ctrl\u002BE"
+expect commands "Preview, Item, Shift\u002BEnter","Play folder in AxMedia, Item, Ctrl\u002BEnter","Add to AxMedia\u0027s queue, Item, Ctrl\u002BShift\u002BQ","Cut, Item, Ctrl\u002BX","Copy, Item, Ctrl\u002BC","Paste, Item, Ctrl\u002BV","Rename, Item, F2","Delete, Item, Delete","New folder, Item, Ctrl\u002BShift\u002BN","New text file, Item, Ctrl\u002BShift\u002BT","Move to new folder, Item","Compress to zip, Item","Extract here, Item","Copy path, Item, Ctrl\u002BShift\u002BC","Show in File Explorer, Item, Ctrl\u002BShift\u002BW","Information, Item, Ctrl\u002BI","Properties, Item, Alt\u002BEnter","Windows menu, Item"
+# 3.7b The Selection menu: its items, and its operations never fall back to the current entry.
+expect commands "Select all, Selection, Ctrl\u002BA","Deselect all, Selection, Ctrl\u002BShift\u002BA","Select or deselect this entry, Selection, Space","Select to here, Selection, Shift\u002BSpace","Cut, Selection, Ctrl\u002BX","Copy, Selection, Ctrl\u002BC","Delete, Selection, Delete","Move to new folder, Selection","Compress to zip, Selection","Add to AxMedia\u0027s queue, Selection, Ctrl\u002BShift\u002BQ","Copy paths, Selection, Ctrl\u002BShift\u002BC"
+menu Cut, Selection
+expect said ! None selected
+menu Select all, Selection
+expect said selected
+expect focus "value":"a.txt, selected"
+menu Deselect all, Selection
+expect said ! None selected
+menu Select or deselect this entry, Selection
+expect said ! Selected
+menu Deselect all, Selection
+expect said ! None selected
+# Manual (3.7b): Alt+S, C "Copied 2 items" writes the clipboard. Manual (3.8): Ctrl+I inside the open context menu.
+
+# 3.9 Open in Axit on a folder: "Not a file" for the apps that take a file (nothing starts).
+keys home
+expect focus "value":"bundle, folder"
+menu AxDown, Item, Open in Axit
+expect said ! Not a file
+menu AxPreview, Item, Open in Axit
+expect said ! Not a file
+# Manual (3.9): D on a .txt file and T on a folder start AxDown and AxTerminal, windows outside this one.
+# Manual (3.10, 3.11, 3.12): Properties, Choose a program, the Windows menu and Open with's own programs are Windows'
+# own windows and the shell's menu; the Open with submenu is filled as it opens (not in the palette).
+
+# 3.13 Compress to zip and Extract here.
+keys down
+expect focus "value":"docs, folder"
+menu Compress to zip, Item
+expect said ! Compressed to docs.zip
+expect focus "value":"docs.zip"
+keys ctrl+f
+expect focus "name":"Name contains"
+type docs
+keys enter
+expect focus "value":"docs, folder"
+menu Compress to zip, Item
+expect said ! Compressed to docs - 2.zip
+expect focus "value":"docs - 2.zip"
+# Two files selected: the zip is named after the folder shown.
+keys ctrl+f
+expect focus "name":"Name contains"
+type move-into
+keys enter
+expect focus "value":"move-into-new-folder-1.txt"
+keys space shift+down
+expect focus "value":"move-into-new-folder-2.txt, selected"
+menu Compress to zip, Item
+expect said ! Compressed to ops.zip
+expect focus "value":"ops.zip"
+keys ctrl+f
+expect focus "name":"Name contains"
+type docs.zip
+keys enter
+expect focus "value":"docs.zip"
+# The plan's "docs - 3" counted the zip "docs - 2.zip"; only a folder takes the name (AF-4.12), so it is "docs - 2".
+menu Extract here, Item
+expect said ! Extracted to docs - 2
+expect focus "value":"docs - 2, folder"
+keys enter
+expect said ! docs - 2, 1 item, docs, folder
+keys enter
+expect said ! docs, 2 items, notes.txt
+keys backspace
+expect said ! docs - 2, 1 item, docs, folder
+keys backspace
+expect said ! ops,
+keys ctrl+f
+expect focus "name":"Name contains"
+type not-a-zip
+keys enter
+expect focus "value":"not-a-zip.txt"
+menu Extract here, Item
+expect said ! Not a zip file
+
+# 3.14 Undo (AF-4.14), in a new window on its own folder.
+close
+file undo\rename-then-undo.txt Rename me, then Ctrl+Z.
+file undo\delete-then-undo.txt Delete me, then Ctrl+Z restores me.
+file undo\delete-two-then-undo-1.txt Delete me with the second.
+file undo\delete-two-then-undo-2.txt Delete me with the first.
+file undo\move-two-then-undo-1.txt Move me with the second.
+file undo\move-two-then-undo-2.txt Move me with the first.
+file undo\rename-here-then-outside.txt Rename in AxFile, then outside, then Ctrl+Z.
+file undo\compress-then-undo\inside.txt Compress the folder, then Ctrl+Z.
+start file {temp}\undo
+expect focus "value":"compress-then-undo, folder"
+# A modifier key sent while the window still settles can lose its modifier (the channel); let it settle.
+wait 500
+expect commands "Undo, Folder, Ctrl\u002BZ"
+keys ctrl+z
+expect said ! Nothing to undo
+# A rename: the Folder menu's item names it; Ctrl+Z renames back and selects it.
+keys ctrl+f
+expect focus "name":"Name contains"
+type rename-then
+keys enter
+expect focus "value":"rename-then-undo.txt"
+keys f2
+expect focus "name":"New name"
+type renamed
+keys enter
+expect said ! Renamed to renamed.txt
+expect commands "Undo rename, Folder, Ctrl\u002BZ"
+keys ctrl+z
+expect said ! Undone: renamed back to rename-then-undo.txt
+expect focus "value":"rename-then-undo.txt"
+# A new folder: removed while empty.
+keys ctrl+shift+n
+expect focus "name":"Name"
+type temp
+keys enter
+expect said ! Created temp
+keys ctrl+z
+expect said ! Undone: temp removed
+refuse said ! Created temp
+expect list "count":8
+# A new folder that has a file now: "Not undone: temp has files now", and the next Ctrl+Z goes on to an older
+# operation. The file is put in temp from outside: made in AxFile (Enter, Ctrl+Shift+T, Escape, Backspace, as the plan
+# says) it is itself the newest operation, and Ctrl+Z takes it back first (AF-4.14, the newest that can be taken back).
+keys ctrl+f
+expect focus "name":"Name contains"
+type rename-then
+keys enter
+expect focus "value":"rename-then-undo.txt"
+keys f2
+expect focus "name":"New name"
+type second-rename
+keys enter
+expect said ! Renamed to second-rename.txt
+keys ctrl+shift+n
+expect focus "name":"Name"
+type temp
+keys enter
+expect said ! Created temp
+file undo\temp\made-outside.txt A file inside temp.
+keys ctrl+z
+expect said ! Not undone: temp has files now
+keys ctrl+z
+expect said ! Undone: renamed back to rename-then-undo.txt
+expect focus "value":"rename-then-undo.txt"
+# Move to new folder, then Ctrl+Z: moved back, the first file selected, the new folder gone.
+keys ctrl+f
+expect focus "name":"Name contains"
+type move-two
+keys enter
+expect focus "value":"move-two-then-undo-1.txt"
+keys space shift+down
+expect focus "value":"move-two-then-undo-2.txt, selected"
+menu Move to new folder, Item
+expect focus "name":"Name"
+type bundle
+keys enter
+expect said ! Moved 2 items into bundle
+expect focus "value":"bundle, folder"
+keys ctrl+z
+expect said ! Undone: moved back
+expect focus "value":"move-two-then-undo-1.txt"
+refuse said ! Not undone
+expect list "count":9
+# Manual (3.14): the paste and its undo (Ctrl+C, Ctrl+V) use the clipboard.
+# Compress a folder, then Ctrl+Z: the zip sent to the Recycle Bin.
+keys home
+expect focus "value":"compress-then-undo, folder"
+menu Compress to zip, Item
+expect said ! Compressed to compress-then-undo.zip
+keys ctrl+z
+expect said ! Undone: compress-then-undo.zip sent to the Recycle Bin
+expect list "count":9
+# Delete a file, then Ctrl+Z: restored from the Recycle Bin and selected.
+keys ctrl+f
+expect focus "name":"Name contains"
+type delete-then
+keys enter
+expect focus "value":"delete-then-undo.txt"
+keys delete
+expect state "notice":"Delete delete-then-undo.txt?"
+expect state It goes to the Recycle Bin.
+keys enter
+expect said ! Deleted delete-then-undo.txt
+keys ctrl+z
+expect said ! Undone: delete-then-undo.txt restored
+expect focus "value":"delete-then-undo.txt"
+# Delete two selected entries, then Ctrl+Z: both restored.
+keys ctrl+f
+expect focus "name":"Name contains"
+type delete-two
+keys enter
+expect focus "value":"delete-two-then-undo-1.txt"
+keys space shift+down
+expect focus "value":"delete-two-then-undo-2.txt, selected"
+keys delete
+expect state "notice":"Delete 2 items?"
+expect state They go to the Recycle Bin.
+keys enter
+expect said ! Deleted 2 items
+expect list "count":7
+keys ctrl+z
+expect said ! Undone: 2 items restored
+expect list "delete-two-then-undo-1.txt","delete-two-then-undo-2.txt"
+# Manual (3.14): that the restored files are gone from the Recycle Bin is read in File Explorer.
+# Renamed here, then renamed outside: "Not undone: <name> has changed".
+keys ctrl+f
+expect focus "name":"Name contains"
+type rename-here
+keys enter
+expect focus "value":"rename-here-then-outside.txt"
+keys f2
+expect focus "name":"New name"
+type renamed-here
+keys enter
+expect said ! Renamed to renamed-here.txt
+run ren "undo\renamed-here.txt" "renamed-outside.txt"
+keys ctrl+z
+expect said ! Not undone: renamed-here.txt has changed
+
+# Twenty-one operations, then Ctrl+Z twenty-one times: the twenty-first says "Nothing to undo"; a new window has none.
+close
+file undo21\r0.txt Renamed twenty-one times.
+start file {temp}\undo21
+expect focus "value":"r0.txt"
+# A modifier key sent while the window still settles can lose its modifier (the channel); let it settle.
+wait 500
+keys f2
+expect focus "name":"New name"
+type r1
+keys enter
+expect said ! Renamed to r1.txt
+keys f2
+expect focus "name":"New name"
+type r2
+keys enter
+expect said ! Renamed to r2.txt
+keys f2
+expect focus "name":"New name"
+type r3
+keys enter
+expect said ! Renamed to r3.txt
+keys f2
+expect focus "name":"New name"
+type r4
+keys enter
+expect said ! Renamed to r4.txt
+keys f2
+expect focus "name":"New name"
+type r5
+keys enter
+expect said ! Renamed to r5.txt
+keys f2
+expect focus "name":"New name"
+type r6
+keys enter
+expect said ! Renamed to r6.txt
+keys f2
+expect focus "name":"New name"
+type r7
+keys enter
+expect said ! Renamed to r7.txt
+keys f2
+expect focus "name":"New name"
+type r8
+keys enter
+expect said ! Renamed to r8.txt
+keys f2
+expect focus "name":"New name"
+type r9
+keys enter
+expect said ! Renamed to r9.txt
+keys f2
+expect focus "name":"New name"
+type r10
+keys enter
+expect said ! Renamed to r10.txt
+keys f2
+expect focus "name":"New name"
+type r11
+keys enter
+expect said ! Renamed to r11.txt
+keys f2
+expect focus "name":"New name"
+type r12
+keys enter
+expect said ! Renamed to r12.txt
+keys f2
+expect focus "name":"New name"
+type r13
+keys enter
+expect said ! Renamed to r13.txt
+keys f2
+expect focus "name":"New name"
+type r14
+keys enter
+expect said ! Renamed to r14.txt
+keys f2
+expect focus "name":"New name"
+type r15
+keys enter
+expect said ! Renamed to r15.txt
+keys f2
+expect focus "name":"New name"
+type r16
+keys enter
+expect said ! Renamed to r16.txt
+keys f2
+expect focus "name":"New name"
+type r17
+keys enter
+expect said ! Renamed to r17.txt
+keys f2
+expect focus "name":"New name"
+type r18
+keys enter
+expect said ! Renamed to r18.txt
+keys f2
+expect focus "name":"New name"
+type r19
+keys enter
+expect said ! Renamed to r19.txt
+keys f2
+expect focus "name":"New name"
+type r20
+keys enter
+expect said ! Renamed to r20.txt
+keys f2
+expect focus "name":"New name"
+type r21
+keys enter
+expect said ! Renamed to r21.txt
+keys ctrl+z
+expect said ! Undone: renamed back to r20.txt
+keys ctrl+z
+expect said ! Undone: renamed back to r19.txt
+keys ctrl+z
+expect said ! Undone: renamed back to r18.txt
+keys ctrl+z
+expect said ! Undone: renamed back to r17.txt
+keys ctrl+z
+expect said ! Undone: renamed back to r16.txt
+keys ctrl+z
+expect said ! Undone: renamed back to r15.txt
+keys ctrl+z
+expect said ! Undone: renamed back to r14.txt
+keys ctrl+z
+expect said ! Undone: renamed back to r13.txt
+keys ctrl+z
+expect said ! Undone: renamed back to r12.txt
+keys ctrl+z
+expect said ! Undone: renamed back to r11.txt
+keys ctrl+z
+expect said ! Undone: renamed back to r10.txt
+keys ctrl+z
+expect said ! Undone: renamed back to r9.txt
+keys ctrl+z
+expect said ! Undone: renamed back to r8.txt
+keys ctrl+z
+expect said ! Undone: renamed back to r7.txt
+keys ctrl+z
+expect said ! Undone: renamed back to r6.txt
+keys ctrl+z
+expect said ! Undone: renamed back to r5.txt
+keys ctrl+z
+expect said ! Undone: renamed back to r4.txt
+keys ctrl+z
+expect said ! Undone: renamed back to r3.txt
+keys ctrl+z
+expect said ! Undone: renamed back to r2.txt
+keys ctrl+z
+expect said ! Undone: renamed back to r1.txt
+# The twenty-first: the oldest rename is past the twenty that can be undone.
+keys ctrl+z
+expect said ! Nothing to undo
+expect focus "value":"r1.txt"
+close
+start file {temp}\undo21
+expect focus "value":"r1.txt"
+# A modifier key sent while the window still settles can lose its modifier (the channel); let it settle.
+wait 500
+keys ctrl+z
+expect said ! Nothing to undo

@@ -1,0 +1,137 @@
+# AxDown, test plan section 3 (Files), driven from inside the window (docs/axdown/nvda-test-plan.md).
+# The files are made here with their encodings, and checked byte by byte after a save through PowerShell.
+# The run's own settings: no update check, whose network call logs an ERROR when GitHub cannot be reached.
+file home\Axit\axdown.json {"checkForUpdates": false}
+file plain.txt Plain text file, line 1.\nLine 2 of the plain text file.\nLine 3: nothing special here.\nLine 4, the last line.
+run powershell -NoProfile -Command "[IO.File]::WriteAllText('bom.md', '# UTF-8 with a byte order mark' + [char]10 + [char]10 + 'LF line endings only.', (New-Object Text.UTF8Encoding $true))"
+run powershell -NoProfile -Command "[IO.File]::WriteAllText('wide.txt', 'UTF-16 little endian text.' + [char]13 + [char]10 + 'Saved, it stays UTF-16.', [Text.Encoding]::Unicode)"
+run powershell -NoProfile -Command "[IO.File]::WriteAllText('ansi.txt', 'Windows-1252 text: caf' + [char]0xE9 + '.' + [char]13 + [char]10 + 'The letter survives a save.', [Text.Encoding]::GetEncoding(1252))"
+
+# 3.1: bom.md, a letter changed, Ctrl+S: "Saved"; the mark kept and LF endings only.
+start down {temp}\bom.md
+expect focus bom.md
+expect state UTF-8 with BOM \u00B7 LF
+keys end
+type !
+keys ctrl+s
+expect said ! Saved
+run powershell -NoProfile -Command "$b = [IO.File]::ReadAllBytes('bom.md'); if ($b[0] -eq 0xEF -and $b[1] -eq 0xBB -and $b[2] -eq 0xBF -and $b -notcontains 13 -and $b[-1] -ne 10) { exit 0 } else { exit 1 }"
+run findstr /c:"mark!" bom.md
+
+# 3.2: wide.txt stays UTF-16 LE with its mark; ansi.txt keeps its accented letter.
+start down {temp}\wide.txt
+expect focus wide.txt
+expect state UTF-16 LE \u00B7 CRLF
+keys ctrl+end
+type  Edited.
+keys ctrl+s
+expect said ! Saved
+run powershell -NoProfile -Command "$b = [IO.File]::ReadAllBytes('wide.txt'); $t = [Text.Encoding]::Unicode.GetString($b, 2, $b.Length - 2); if ($b[0] -eq 0xFF -and $b[1] -eq 0xFE -and $t.EndsWith('UTF-16. Edited.')) { exit 0 } else { exit 1 }"
+start down {temp}\ansi.txt
+expect focus ansi.txt
+expect state Windows-1252
+keys ctrl+end
+type  Edited.
+keys ctrl+s
+expect said ! Saved
+run powershell -NoProfile -Command "$b = [IO.File]::ReadAllBytes('ansi.txt'); if ($b -contains 0xE9 -and $b -notcontains 0xC3) { exit 0 } else { exit 1 }"
+
+# 3.3: plain.txt, Ctrl+S without a change: "Saved", the file the same byte for byte.
+run copy /b plain.txt plain.before
+start down {temp}\plain.txt
+expect focus plain.txt
+keys ctrl+s
+expect said ! Saved
+run fc /b plain.txt plain.before
+
+# 3.4: Ctrl+N with unsaved changes: the question; Escape cancels and the text stays; Enter saves, then Untitled.
+type Added.
+keys ctrl+n
+expect state "notice":"Save changes to plain.txt?"
+keys escape
+expect state "notice":null
+expect focus Added.Plain text file, line 1.
+expect state *plain.txt - AxDown
+keys ctrl+n
+expect state "notice":"Save changes to plain.txt?"
+keys enter
+expect said ! Saved
+expect state Untitled - AxDown
+expect focus {"name":"Untitled","role":"Text","value":""}
+run findstr /c:"Added.Plain text file" plain.txt
+
+# 3.5 manual: Ctrl+S on Untitled opens the Windows Save dialog, a separate window of the system's.
+# 3.6 manual: Ctrl+Shift+S, the same Save dialog.
+
+# 3.7, the part at the save: the file changed by another program while the text has a change.
+# 3.7 manual: the reload and the "changed on disk; Save will ask" on coming back to the window need its activation
+# (Alt+Tab), which a window on the test desktop never gets.
+start down {temp}\plain.txt
+expect focus plain.txt
+type X
+wait 1100
+run echo Another line, added by another program.>> plain.txt
+keys ctrl+s
+expect state "notice":"The file changed on disk"
+expect state was changed by another program since you opened it.
+# Escape keeps both: the character here, the line on disk.
+keys escape
+expect state "notice":null
+expect focus XAdded.Plain text file, line 1.
+run findstr /c:"Another line, added by another program." plain.txt
+# Reload and lose mine: "Reloaded", the character gone and the new line there.
+keys ctrl+s
+expect state "notice":"The file changed on disk"
+keys tab tab
+expect focus Reload and lose mine
+keys enter
+expect said Reloaded
+expect focus Added.Plain text file, line 1.
+expect text Another line, added by another program.
+expect state "title":"plain.txt - AxDown"
+# Changed on disk again, a change here, Ctrl+S, Enter on Write over: "Saved".
+wait 1100
+run echo A second line from another program.>> plain.txt
+type Y
+keys ctrl+s
+expect state "notice":"The file changed on disk"
+keys enter
+expect said ! Saved
+# The caret was kept on its line and column by the reload, after the first letter.
+run findstr /c:"AYdded.Plain text file" plain.txt
+run findstr /c:"A second line from another program." plain.txt && exit 1 || exit 0
+
+# 3.9, the file that is not text: 03-files-not-text.txt, apart, since its notice is logged as an ERROR, which fails a run.
+# 3.9: a missing file opens as an empty document of that name, which Ctrl+S creates.
+start down {temp}\created.md
+expect focus created.md
+type Created by Ctrl+S.
+keys ctrl+s
+expect said ! Saved
+run findstr /c:"Created by Ctrl+S." created.md
+
+# 3.10 manual: File, Open recent file is a submenu filled as it opens, which the palette leaves out, and a real menu needs the foreground.
+
+# 3.11: Show current file in, File Explorer (Ctrl+W) on Untitled: "No file yet".
+# 3.11 manual: with a file, Ctrl+W opens a File Explorer window, which would open on the user's desktop.
+start down
+expect focus Untitled
+keys ctrl+w
+expect said ! No file yet
+
+# 3.8: Alt+F4 with unsaved changes: the question; Cancel stays; Don't save closes.
+use 2
+expect focus wide.txt
+type More.
+close
+expect state "notice":"Save changes to wide.txt?"
+keys escape
+expect state "notice":null
+expect state *wide.txt - AxDown
+close
+expect state "notice":"Save changes to wide.txt?"
+keys tab tab
+expect focus Don\u0027t save
+keys enter
+wait 1500
+run powershell -NoProfile -Command "if ((Get-Content -Raw -Encoding Unicode wide.txt) -match 'More') { exit 1 } else { exit 0 }"

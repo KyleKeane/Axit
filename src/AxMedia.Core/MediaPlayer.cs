@@ -76,6 +76,13 @@ public sealed class MediaPlayer : IDisposable
     /// <summary>The playback rate, 1 being normal; kept across files.</summary>
     public double Rate => _rate;
 
+    /// <summary>
+    /// The state a pause, a resume or a stop asked for, until the engine's event says it is reached: MFPlay applies
+    /// them a moment later, and GetState answered the old state in between, so the status bar said "Playing" after a
+    /// pause, and a key pressed at once acted on the old state (found by tools/AxitDrive, 2026-10-23).
+    /// </summary>
+    private PlayerState? _asked;
+
     public PlayerState State
     {
         get
@@ -88,6 +95,11 @@ public sealed class MediaPlayer : IDisposable
             if (_opening)
             {
                 return PlayerState.Opening;
+            }
+
+            if (_asked is { } asked)
+            {
+                return asked;
             }
 
             return _player.GetState(out var state) < 0 ? PlayerState.Empty : state switch
@@ -116,6 +128,7 @@ public sealed class MediaPlayer : IDisposable
     {
         ThrowIfDisposed();
         _opening = false;
+        _asked = null;
         HasVideo = false;
         if (_item is not null)
         {
@@ -151,6 +164,7 @@ public sealed class MediaPlayer : IDisposable
         if (!_disposed)
         {
             _player.Pause();
+            _asked = PlayerState.Paused;
         }
     }
 
@@ -159,6 +173,7 @@ public sealed class MediaPlayer : IDisposable
         if (!_disposed)
         {
             _player.Play();
+            _asked = PlayerState.Playing;
         }
     }
 
@@ -167,6 +182,7 @@ public sealed class MediaPlayer : IDisposable
         if (!_disposed)
         {
             _player.Stop();
+            _asked = _item is null ? PlayerState.Empty : PlayerState.Stopped;
         }
     }
 
@@ -289,7 +305,11 @@ public sealed class MediaPlayer : IDisposable
                 }
 
                 break;
+            case MFP_EVENT_TYPE_PAUSE or MFP_EVENT_TYPE_STOP:
+                _asked = null;
+                break;
             case MFP_EVENT_TYPE_PLAY:
+                _asked = null;
                 if (hr < 0)
                 {
                     _opening = false;
@@ -380,6 +400,8 @@ public sealed class MediaPlayer : IDisposable
     private const ushort VT_I8 = 20;
 
     private const int MFP_EVENT_TYPE_PLAY = 0;
+    private const int MFP_EVENT_TYPE_PAUSE = 1;
+    private const int MFP_EVENT_TYPE_STOP = 2;
     private const int MFP_EVENT_TYPE_MEDIAITEM_SET = 6;
     private const int MFP_EVENT_TYPE_ERROR = 10;
     private const int MFP_EVENT_TYPE_PLAYBACK_ENDED = 11;

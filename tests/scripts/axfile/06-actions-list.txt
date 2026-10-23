@@ -1,0 +1,570 @@
+# AxFile, test plan section 6: the Actions list (docs/axfile/nvda-test-plan.md 6.1 to 6.9; AF-9).
+# The files are those of manual_tests/prepare.ps1 axfile (actions-list, selection), made in {temp}.
+file home\Axit\axfile.json {"checkForUpdates": false}
+file act\start-here.txt Make temp here.
+file act\subfolder-for-inner\readme.txt Enter here, Ctrl+Shift+N inner.
+file act\zip-two-files-1.txt Select me and the second, Compress to zip.
+file act\zip-two-files-2.txt Select me and the first, Compress to zip.
+file act\delete-two-1.txt Delete me with the second.
+file act\delete-two-2.txt Delete me with the first.
+start file {temp}\act
+expect focus "value":"subfolder-for-inner, folder"
+# A modifier key sent while the window still settles can lose its modifier (the channel); let it settle.
+wait 500
+
+# 6.1 Tab: "Actions, No actions yet"; Enter, Ctrl+Z, Ctrl+I there say the line; Up or Down: the earcon; Escape back.
+keys tab
+expect focus "name":"Actions"
+expect focus "value":"No actions yet"
+keys enter
+expect said ! No actions yet
+keys ctrl+z
+expect said ! No actions yet
+keys ctrl+i
+expect said ! No actions yet
+keys up
+expect said ♪ Edge
+keys down
+expect said ♪ Edge
+keys escape
+expect focus "name":"6 items"
+# Folder, Actions: the focus in the Actions list; Shift+Tab: the folder list.
+menu Actions, Folder
+expect focus "name":"Actions"
+keys shift+tab
+expect focus "name":"6 items"
+# Ctrl+Shift+N temp: "Created temp", the focus stays in the folder list, the status bar's left text the line.
+keys ctrl+shift+n
+expect focus "name":"Name"
+type temp
+keys enter
+expect said ! Created temp
+expect focus "value":"temp, folder"
+expect state "status":["Created temp",
+# Tab: on the newest line, "Created temp, 2 of 2"; Up: the header "Operations"; Escape: back on temp.
+keys tab
+expect focus "name":"Actions"
+expect focus "value":"Created temp"
+expect list "items":["Operations","Created temp"],"selected":1
+keys up
+expect focus "value":"Operations"
+keys escape
+expect focus "value":"temp, folder"
+# F6 and Ctrl+Tab do the same as Tab; Shift+Tab goes back.
+keys f6
+expect focus "name":"Actions"
+keys shift+tab
+expect focus "value":"temp, folder"
+keys ctrl+tab
+expect focus "name":"Actions"
+keys shift+tab
+expect focus "value":"temp, folder"
+
+# 6.2 F2 on temp, notes: the Actions list is on the newest line while the focus was in the folder list.
+keys f2
+expect focus "name":"New name"
+type notes
+keys enter
+expect said ! Renamed to notes
+keys tab
+expect focus "value":"Renamed temp to notes"
+expect list "selected":2,"count":3
+keys up
+expect focus "value":"Created temp"
+keys up
+expect focus "value":"Operations"
+keys up
+expect said ♪ Edge
+expect focus "value":"Operations"
+keys end
+keys down
+expect said ♪ Edge
+# Enter on "Created temp": the folder list on notes, the folder it became; the folder is not said when it is the one shown.
+keys up
+expect focus "value":"Created temp"
+keys enter
+expect focus "value":"notes, folder"
+refuse said ! act,
+# Tab: the Actions list is back on the line the user left; Down to the rename.
+keys tab
+expect focus "value":"Created temp"
+keys down
+expect focus "value":"Renamed temp to notes"
+keys enter
+expect focus "value":"notes, folder"
+
+# 6.3 Ctrl+Z on "Renamed temp to notes" in the Actions list: renamed back, the folder list on temp.
+keys tab
+expect focus "value":"Renamed temp to notes"
+keys ctrl+z
+expect said ! Undone: renamed back to temp
+# The focus stays on the line (the plan's "Tab: the line reads …" assumed it went to the folder list; AF-9.3 says
+# neither); the line reads ", undone", and the folder list is on temp.
+expect focus "value":"Renamed temp to notes, undone"
+keys escape
+expect focus "value":"temp, folder"
+keys tab
+expect focus "value":"Renamed temp to notes, undone"
+keys ctrl+z
+expect said ! Already undone
+keys enter
+expect focus "value":"temp, folder"
+keys tab
+expect focus "value":"Renamed temp to notes, undone"
+keys ctrl+i
+expect said ! Operations, 2 of 2,
+keys home
+expect focus "value":"Operations"
+keys ctrl+i
+expect said ! Operations
+keys escape
+
+# 6.4 and 6.3a A line of another folder: Enter on a folder, Ctrl+Shift+N inner, Backspace; Tab: "Created inner";
+# Enter: the focus goes to the folder list first, then "<folder>, N items, <entry>" is said.
+keys home
+expect focus "value":"subfolder-for-inner, folder"
+keys enter
+expect said ! subfolder-for-inner, 1 item, readme.txt
+keys ctrl+shift+n
+expect focus "name":"Name"
+type inner
+keys enter
+expect said ! Created inner
+keys backspace
+expect said ! act, 7 items, subfolder-for-inner, folder
+keys tab
+expect focus "value":"Created inner"
+keys enter
+# Manual (6.3a): that the focus moves before the announcement, so that NVDA does not cut it short, is NVDA's (tier 3);
+# the timeline's focus watcher polls every 50 ms and records the move before or after the announcement by chance.
+expect said ! subfolder-for-inner, 2 items, inner, folder
+expect focus "value":"inner, folder"
+keys backspace
+expect said ! act, 7 items, subfolder-for-inner, folder
+
+# 6.5 Compress two selected files: the last line "Compressed to act.zip". Delete two: "Deleted 2 items"; Enter on that line.
+# Manual (6.5): the copy of a big folder and its running line use the clipboard; the zip open in another program needs that program.
+keys ctrl+f
+expect focus "name":"Name contains"
+type zip-two
+keys enter
+expect focus "value":"zip-two-files-1.txt"
+keys space shift+down
+expect focus "value":"zip-two-files-2.txt, selected"
+menu Compress to zip, Item
+expect said ! Compressed to act.zip
+keys tab
+expect focus "value":"Compressed to act.zip"
+keys escape
+# The two stay selected after the compress; cleared before the next selection.
+keys ctrl+shift+a
+expect said ! None selected
+keys ctrl+f
+expect focus "name":"Name contains"
+type delete-two
+keys enter
+expect focus "value":"delete-two-1.txt"
+keys space shift+down
+expect focus "value":"delete-two-2.txt, selected"
+keys delete
+expect state "notice":"Delete 2 items?"
+keys enter
+expect said ! Deleted 2 items
+keys home
+keys enter
+expect said ! subfolder-for-inner, 2 items
+keys tab
+expect focus "value":"Deleted 2 items"
+keys enter
+expect said ! act,
+expect focus "name":"6 items"
+# A rename refused before it ran (a name taken) adds no line.
+keys ctrl+f
+expect focus "name":"Name contains"
+type start-here
+keys enter
+expect focus "value":"start-here.txt"
+keys f2
+expect focus "name":"New name"
+type zip-two-files-1
+keys enter
+expect said ! Failed: There is already an entry named zip-two-files-1.txt
+keys escape
+keys tab
+expect focus "value":"Deleted 2 items"
+expect list "count":6
+keys escape
+
+# 6.6 A folder that has files now: "Not undone: temp has files now", the line says so, and again on a second Ctrl+Z.
+file act\temp\made-outside.txt A file in temp.
+keys tab
+keys home
+keys down
+expect focus "value":"Created temp"
+keys ctrl+z
+expect said ! Not undone: temp has files now
+expect focus "value":"Created temp, not undone: temp has files now"
+keys ctrl+z
+expect said ! Not undone: temp has files now
+keys escape
+# Ctrl+Z in the folder list: the newest undoable line, here the delete of two.
+keys ctrl+z
+expect said ! Undone: 2 items restored
+
+# 6.7 F1 in the Actions list, Escape: the focus back in the Actions list.
+keys tab
+expect focus "name":"Actions"
+keys f1
+expect focus "name":"Keyboard shortcuts"
+keys escape
+expect focus "name":"Actions"
+keys escape
+# Nothing is spoken for a line added while the focus is in the folder list: only the operation's own words.
+keys ctrl+shift+n
+expect focus "name":"Name"
+type quiet
+keys enter
+expect said ! Created quiet
+expect quiet 1000
+
+# 6.8 Selection lines: Space on a file, Tab, End: "Selected <name>" under the header "Selection".
+keys ctrl+f
+expect focus "name":"Name contains"
+type start-here
+keys enter
+expect focus "value":"start-here.txt"
+keys space
+expect said ! Selected
+keys tab
+keys end
+expect focus "value":"Selected start-here.txt"
+keys up
+expect focus "value":"Selection"
+keys escape
+keys space
+expect said ! Deselected
+# Shift+Down twice: one line "Selected 3 items", not three.
+keys home
+keys shift+down shift+down
+expect focus "value":"temp, folder, selected"
+keys tab
+keys end
+expect focus "value":"Selected 3 items"
+keys up
+expect focus "value":"Deselected start-here.txt"
+keys escape
+keys ctrl+shift+a
+expect said ! None selected
+keys tab
+keys end
+expect focus "value":"Deselected all, 3 items"
+keys ctrl+z
+expect said ! Undone: 3 selected
+keys escape
+expect focus "name":"9 items"
+expect list "items":["quiet, folder, selected","subfolder-for-inner, folder, selected","temp, folder, selected"
+# Ctrl+Z in the folder list undoes an operation, never the selection.
+keys ctrl+z
+expect said ! Undone: quiet removed
+expect list "subfolder-for-inner, folder, selected","temp, folder, selected"
+# The status bar never reads a selection line.
+expect state "status":["Created quiet, undone",
+# Enter on a folder: the Selection section is gone.
+keys home
+keys enter
+expect said ! subfolder-for-inner, 2 items
+keys tab
+expect list "Created quiet, undone"],"selected"
+keys escape
+keys backspace
+expect said ! act,
+
+# 6.9 Shift+Space: Space on the second entry, Down three times, Shift+Space: entries two to five.
+keys home
+keys down
+keys space
+expect said ! Selected
+keys down down down
+keys shift+space
+expect said ! Selected, 4 selected
+expect list "subfolder-for-inner, folder","temp, folder, selected","act.zip, selected","delete-two-1.txt, selected","delete-two-2.txt, selected","start-here.txt"
+keys ctrl+shift+a
+expect said ! None selected
+keys shift+space
+expect said ! Selected
+keys shift+space
+expect said ! Deselected
+
+# 6.7 Fifty-one operations: the first line is gone, fifty stay; a new window reads "No actions yet".
+close
+file fifty\q0.txt Renamed fifty-one times.
+start file {temp}\fifty
+expect focus "value":"q0.txt"
+# A modifier key sent while the window still settles can lose its modifier (the channel); let it settle.
+wait 500
+keys f2
+expect focus "name":"New name"
+type q1
+keys enter
+expect said ! Renamed to q1.txt
+keys f2
+expect focus "name":"New name"
+type q2
+keys enter
+expect said ! Renamed to q2.txt
+keys f2
+expect focus "name":"New name"
+type q3
+keys enter
+expect said ! Renamed to q3.txt
+keys f2
+expect focus "name":"New name"
+type q4
+keys enter
+expect said ! Renamed to q4.txt
+keys f2
+expect focus "name":"New name"
+type q5
+keys enter
+expect said ! Renamed to q5.txt
+keys f2
+expect focus "name":"New name"
+type q6
+keys enter
+expect said ! Renamed to q6.txt
+keys f2
+expect focus "name":"New name"
+type q7
+keys enter
+expect said ! Renamed to q7.txt
+keys f2
+expect focus "name":"New name"
+type q8
+keys enter
+expect said ! Renamed to q8.txt
+keys f2
+expect focus "name":"New name"
+type q9
+keys enter
+expect said ! Renamed to q9.txt
+keys f2
+expect focus "name":"New name"
+type q10
+keys enter
+expect said ! Renamed to q10.txt
+keys f2
+expect focus "name":"New name"
+type q11
+keys enter
+expect said ! Renamed to q11.txt
+keys f2
+expect focus "name":"New name"
+type q12
+keys enter
+expect said ! Renamed to q12.txt
+keys f2
+expect focus "name":"New name"
+type q13
+keys enter
+expect said ! Renamed to q13.txt
+keys f2
+expect focus "name":"New name"
+type q14
+keys enter
+expect said ! Renamed to q14.txt
+keys f2
+expect focus "name":"New name"
+type q15
+keys enter
+expect said ! Renamed to q15.txt
+keys f2
+expect focus "name":"New name"
+type q16
+keys enter
+expect said ! Renamed to q16.txt
+keys f2
+expect focus "name":"New name"
+type q17
+keys enter
+expect said ! Renamed to q17.txt
+keys f2
+expect focus "name":"New name"
+type q18
+keys enter
+expect said ! Renamed to q18.txt
+keys f2
+expect focus "name":"New name"
+type q19
+keys enter
+expect said ! Renamed to q19.txt
+keys f2
+expect focus "name":"New name"
+type q20
+keys enter
+expect said ! Renamed to q20.txt
+keys f2
+expect focus "name":"New name"
+type q21
+keys enter
+expect said ! Renamed to q21.txt
+keys f2
+expect focus "name":"New name"
+type q22
+keys enter
+expect said ! Renamed to q22.txt
+keys f2
+expect focus "name":"New name"
+type q23
+keys enter
+expect said ! Renamed to q23.txt
+keys f2
+expect focus "name":"New name"
+type q24
+keys enter
+expect said ! Renamed to q24.txt
+keys f2
+expect focus "name":"New name"
+type q25
+keys enter
+expect said ! Renamed to q25.txt
+keys f2
+expect focus "name":"New name"
+type q26
+keys enter
+expect said ! Renamed to q26.txt
+keys f2
+expect focus "name":"New name"
+type q27
+keys enter
+expect said ! Renamed to q27.txt
+keys f2
+expect focus "name":"New name"
+type q28
+keys enter
+expect said ! Renamed to q28.txt
+keys f2
+expect focus "name":"New name"
+type q29
+keys enter
+expect said ! Renamed to q29.txt
+keys f2
+expect focus "name":"New name"
+type q30
+keys enter
+expect said ! Renamed to q30.txt
+keys f2
+expect focus "name":"New name"
+type q31
+keys enter
+expect said ! Renamed to q31.txt
+keys f2
+expect focus "name":"New name"
+type q32
+keys enter
+expect said ! Renamed to q32.txt
+keys f2
+expect focus "name":"New name"
+type q33
+keys enter
+expect said ! Renamed to q33.txt
+keys f2
+expect focus "name":"New name"
+type q34
+keys enter
+expect said ! Renamed to q34.txt
+keys f2
+expect focus "name":"New name"
+type q35
+keys enter
+expect said ! Renamed to q35.txt
+keys f2
+expect focus "name":"New name"
+type q36
+keys enter
+expect said ! Renamed to q36.txt
+keys f2
+expect focus "name":"New name"
+type q37
+keys enter
+expect said ! Renamed to q37.txt
+keys f2
+expect focus "name":"New name"
+type q38
+keys enter
+expect said ! Renamed to q38.txt
+keys f2
+expect focus "name":"New name"
+type q39
+keys enter
+expect said ! Renamed to q39.txt
+keys f2
+expect focus "name":"New name"
+type q40
+keys enter
+expect said ! Renamed to q40.txt
+keys f2
+expect focus "name":"New name"
+type q41
+keys enter
+expect said ! Renamed to q41.txt
+keys f2
+expect focus "name":"New name"
+type q42
+keys enter
+expect said ! Renamed to q42.txt
+keys f2
+expect focus "name":"New name"
+type q43
+keys enter
+expect said ! Renamed to q43.txt
+keys f2
+expect focus "name":"New name"
+type q44
+keys enter
+expect said ! Renamed to q44.txt
+keys f2
+expect focus "name":"New name"
+type q45
+keys enter
+expect said ! Renamed to q45.txt
+keys f2
+expect focus "name":"New name"
+type q46
+keys enter
+expect said ! Renamed to q46.txt
+keys f2
+expect focus "name":"New name"
+type q47
+keys enter
+expect said ! Renamed to q47.txt
+keys f2
+expect focus "name":"New name"
+type q48
+keys enter
+expect said ! Renamed to q48.txt
+keys f2
+expect focus "name":"New name"
+type q49
+keys enter
+expect said ! Renamed to q49.txt
+keys f2
+expect focus "name":"New name"
+type q50
+keys enter
+expect said ! Renamed to q50.txt
+keys f2
+expect focus "name":"New name"
+type q51
+keys enter
+expect said ! Renamed to q51.txt
+keys tab
+expect focus "value":"Renamed q50.txt to q51.txt"
+expect list "items":["Operations","Renamed q1.txt to q2.txt",
+expect list "count":51
+close
+start file {temp}\fifty
+expect focus "value":"q51.txt"
+# A modifier key sent while the window still settles can lose its modifier (the channel); let it settle.
+wait 500
+keys tab
+expect focus "value":"No actions yet"

@@ -1,0 +1,19 @@
+# AxPreview, test plan section 1 step 9a, the second half: a file whose first eight kilobytes are text with a NUL
+# further in: the error notice, and what the window showed is kept. Apart from 01-start-and-the-text.txt: the window
+# logs the refused read as an ERROR, and the runner fails a run with an ERROR in its logs (see the report), so this
+# script fails after its steps.
+# The run's own settings: no update check, whose network call logs an ERROR when GitHub cannot be reached.
+allow error is not a text file
+file home\Axit\axpreview.json {"checkForUpdates": false}
+run powershell -NoProfile -Command "[IO.File]::WriteAllText('nul-later.txt', ('A line of text.' + [char]13 + [char]10) * 700 + [char]0 + 'after the NUL')"
+
+# 9a manual: Ctrl+O is the Windows file picker, so the file is given at the start of a window of its own, which has
+# nothing to keep but Untitled.
+start preview {temp}\nul-later.txt
+expect state "notice":"Error"
+expect state nul-later.txt is not a text file (it holds a NUL character).
+expect state "title":"Untitled - AxPreview"
+wait 1200
+keys escape
+expect state "notice":null
+expect focus Untitled

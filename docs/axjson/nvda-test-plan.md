@@ -32,7 +32,7 @@ and `broken.json`, the same with the comma after `"opus"` removed and a comma ad
 1. In `settings.json` with the caret at the top, Ctrl+K: "model: opus", the caret on the opening quote of `"model"`.
    Ctrl+K again: "permissions, object with 2 keys"; then "allow, array with 2 items"; "deny, empty array"; "count: 3";
    "on: true"; then "No next key", the caret staying. Ctrl+Shift+K goes back the same way; at the top "No previous key".
-2. Ctrl+Home, Ctrl+J: "object with 5 keys" (the whole file, the caret on the first brace); Ctrl+J: "permissions,
+2. Ctrl+Home, Ctrl+J: "permissions, object with 2 keys" (the next object: the caret on the first brace is on the whole file already, as on a heading in AxDown); Ctrl+Shift+J from there: "object with 4 keys" (the whole file); Ctrl+J, Ctrl+J: "permissions,
    object with 2 keys"; Ctrl+J: "No next object".
 3. Ctrl+Home, Ctrl+L: "allow, array with 2 items"; Ctrl+L: "deny, empty array". Ctrl+Home, Ctrl+I: "Item 1 of 2,
    Bash"; Ctrl+I: "Item 2 of 2, Read"; Ctrl+I: "No next item".

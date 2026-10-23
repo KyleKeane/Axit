@@ -239,7 +239,8 @@ public abstract partial class AxitForm : Form
             SettingsNotRead(error);
         }
 
-        if (Settings.CheckForUpdates && !BundleInfo.IsDevelopmentBuild)
+        // Never in a test run (docs/axit/automation.md): a network call, and a logged error when it fails.
+        if (Settings.CheckForUpdates && !BundleInfo.IsDevelopmentBuild && !AutomationChannel.Requested)
         {
             CheckForUpdates(manual: false);
         }

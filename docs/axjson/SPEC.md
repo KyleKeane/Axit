@@ -65,7 +65,7 @@ otherwise. Native fields mean NVDA reads them by itself, and the caret cannot le
   **E** error (AJ-D5). Each jump moves the caret to the element and speaks it through one notification (AX-7.3):
   - a key, at its opening quote: "model: opus" (a string without its quotes, a number or a literal as written, cut at
     60 characters, "empty string" for ""), or for a container "permissions, object with 2 keys", "deny, empty array";
-  - an object, at its brace: "object with 5 keys", or with its key, "permissions, object with 2 keys"; the whole
+  - an object, at its brace: "object with 5 keys", or with its key, "permissions, object with 2 keys"; the next element is the next one after the caret, as NVDA's browse mode and AxDown's headings have it, so the caret on the first brace, already on the whole document, goes on to the object after it and Ctrl+Shift+J reaches the document from inside it; the whole
     document is the first object;
   - an array, at its bracket: "allow, array with 2 items", "empty array";
   - an item of an array, at its first character: "Item 2 of 2, Read";

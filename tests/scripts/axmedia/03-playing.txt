@@ -1,0 +1,171 @@
+# AxMedia: playing (docs/axmedia/nvda-test-plan.md section 3; SPEC.md AM-4, AM-3.3, AM-6).
+# Every sound is the runner's silence. Whether the sound starts, stops, jumps or keeps its pitch is for the ear and
+# stays with the NVDA pass; here the announcements, the list, the title and the status bar are checked.
+
+file home\Axit\axmedia.json {"checkForUpdates":false}
+mkdir p
+silence p\first.wav 60000
+silence p\second.wav 60000
+silence p\third.wav 60000
+
+# Step 1: play, pause and resume with Space and Ctrl+P; Ctrl+P in Go to time's field is the field's own.
+# The waits between the presses are a user's pace: the engine changes its state a moment after a call, and a press
+# within that moment reads the old state (see the report).
+start media {temp}\p
+expect said ! Playing first.wav
+keys space
+expect said ! Paused at 0:0
+wait 300
+keys space
+expect said ! Playing
+wait 300
+keys ctrl+p
+expect said ! Paused at 0:0
+wait 300
+keys ctrl+p
+expect said ! Playing
+wait 300
+keys ctrl+t
+expect state "notice":"Go to time"
+expect focus Time
+keys ctrl+p
+expect quiet 500
+keys escape
+expect focus first.wav (playing)
+
+# Step 2: 15 seconds forward and back, the position reached said; Go to time.
+keys space
+expect said ! Paused at 0:0
+keys ctrl+right
+expect said ! 0:1
+keys ctrl+left
+expect said ! 0:0
+keys ctrl+t
+type 0:30
+keys enter
+expect said ! 0:30
+expect focus first.wav (playing)
+keys space
+expect said ! Playing
+
+# Step 3: the speed in steps of 0.25, Normal speed back to 1 (Ctrl+Shift+Period and Ctrl+Shift+Comma through the
+# menu commands, which run the same code, since the channel has no key name for the period and the comma). That
+# the voice is faster at the same pitch is for the ear.
+menu Faster
+expect said ! Speed 1.25
+menu Faster
+expect said ! Speed 1.5
+menu Faster
+expect said ! Speed 1.75
+menu Slower
+expect said ! Speed 1.5
+menu Normal speed
+expect said ! Speed 1
+menu Faster
+menu Faster
+expect said ! Speed 1.5
+expect state "1 of 3, speed 1.5"
+
+# Step 4: what is playing; the next and the previous file; "First file" at the start. (A Ctrl+Q sent at once after
+# the step before was twice not taken at all; the pause is a user's pace, see the report.)
+wait 300
+keys ctrl+q
+expect said ! Playing first.wav, 0:3
+wait 300
+keys ctrl+q
+expect said of 1:00, speed 1.5
+keys ctrl+shift+right
+expect said ! Playing second.wav
+keys ctrl+shift+left
+expect said ! Playing first.wav
+keys ctrl+shift+left
+expect said ! First file
+expect list "first.wav (playing)","second.wav","third.wav"
+
+# Step 2a: Go to time past the end says the file's length, not a time past it; the file then ends and the next
+# plays, said on its own, the selection where it was (on the first file: Ctrl+Shift+Right and Left move the mark,
+# not the selection) and the mark moved (step 5).
+keys ctrl+shift+right
+expect said ! Playing second.wav
+keys ctrl+t
+type 9:00
+keys enter
+expect said ! 1:00
+refuse said 9:00
+expect said Playing third.wav
+expect list "first.wav","second.wav","third.wav (playing)"],"selected":0
+
+# Step 2a: Ctrl+Right near the end says the file's length. Step 6: then "End of queue" with the done chime, the
+# title and the status bar empty, Ctrl+Q "Nothing playing". Ctrl+Shift+Right on the last file says "End of queue".
+keys ctrl+shift+right
+expect said ! End of queue
+keys ctrl+t
+type 0:50
+keys enter
+expect said ! 0:50
+keys ctrl+right
+expect said ! 1:00
+refuse said 1:05
+expect said ♪ Done
+expect said End of queue
+expect state "title":"AxMedia"
+expect state "status":["",""]
+wait 300
+keys ctrl+q
+expect said ! Nothing playing
+
+# Step 3 (last part): the speed is kept for the next window.
+close
+wait 2000
+mkdir q
+silence q\s1.wav 3000
+silence q\s2.wav 3000
+silence q\s3.wav 3000
+silence q\s4.wav 3000
+start media {temp}\q
+expect said ! Playing s1.wav
+wait 300
+keys ctrl+q
+expect said , speed 1.5
+menu Normal speed
+expect said ! Speed 1
+
+# Step 5: a file ends and the next plays, "Playing <next>" said without interrupting; the selection stays and the
+# mark moves. Say each file as it starts, off: the next one is not said.
+expect said Playing s2.wav
+expect list "s1.wav","s2.wav (playing)","s3.wav","s4.wav"],"selected":0
+menu Say each file as it starts
+expect list "s3.wav (playing)"
+refuse said Playing s3.wav
+expect list "s4.wav (playing)"
+refuse said Playing s4.wav
+
+# Step 6 again from a file ending on its own.
+expect said ♪ Done
+expect said End of queue
+expect state "title":"AxMedia"
+expect state "status":["",""]
+wait 300
+keys ctrl+q
+expect said ! Nothing playing
+close
+wait 2000
+
+# Step 7: a video is not made here (the runner makes silent sound only, and a picture is for the eye); NVDA pass.
+# Step 8: a file Windows cannot decode is in 03b-cannot-play.txt, since its "Cannot play" is logged as an ERROR,
+# which fails the run by the runner's own check.
+# Step 9: Alt+Tab to another program and the background announcement need the foreground (tier 3); Ctrl+W opens
+# File Explorer, a system window outside the test desktop; Show current file in, AxFile starts a window the runner
+# cannot reach or close; that Alt+F4 stops the sound is for the ear. All left to the NVDA pass.
+
+# Step 2: a time that is not one says "Not a time" and the notice stays. Last in the script, since it fails today:
+# the notice closes on Go whatever the field holds.
+start media {temp}\p
+expect said ! Playing first.wav
+keys ctrl+t
+type abc
+keys enter
+expect said ! Not a time
+expect state "notice":"Go to time"
+keys escape
+expect focus first.wav (playing)

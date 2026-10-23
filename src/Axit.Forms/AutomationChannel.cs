@@ -1,6 +1,7 @@
 using System.IO.Pipes;
 using System.Runtime.InteropServices;
 using System.Text;
+using System.Text.Encodings.Web;
 using System.Text.Json;
 using Axit.Core;
 
@@ -14,15 +15,27 @@ namespace Axit.Forms;
 /// control through the window's own message queue with the modifiers set in the thread's keyboard state, so that
 /// <c>ProcessCmdKey</c> and the controls see them as typed; nothing reaches another program.
 /// </summary>
-internal sealed class AutomationChannel
+internal sealed class AutomationChannel : IMessageFilter
 {
+    /// <summary>The scan code in the keys the channel posts: the message filter knows them by it and sets their modifiers as each is handled.</summary>
+    private const int Marker = 0x7F;
+
+    /// <summary>The modifiers of each posted key press, in order, applied when its key down reaches the message loop.</summary>
+    private readonly Queue<Keys> _modifiers = new();
+
     private const int WM_KEYDOWN = 0x0100;
     private const int WM_KEYUP = 0x0101;
     private const int WM_CHAR = 0x0102;
     private const int WM_SYSKEYDOWN = 0x0104;
     private const int WM_SYSKEYUP = 0x0105;
 
+    /// <summary>The answers as plain as JSON allows: "+", "'", "·" and the like as themselves, so that a script's text matches them.</summary>
+    private static readonly JsonSerializerOptions Plain = new() { Encoder = JavaScriptEncoder.UnsafeRelaxedJsonEscaping };
+
     private readonly AxitForm _form;
+
+    /// <summary>Kept alive for the life of the hook: the focus events of the window's thread (EVENT_OBJECT_FOCUS).</summary>
+    private readonly WinEventProc _onFocusEvent;
 
     /// <summary>
     /// The window's timeline, oldest first, taken by <c>said</c>: each announcement (<c>say</c>, with whether it
@@ -40,10 +53,15 @@ internal sealed class AutomationChannel
     private AutomationChannel(AxitForm form)
     {
         _form = form;
+        _formForList = form;
         Announcer.Raised += (text, interrupt) => Record(new { kind = "say", text, interrupt });
         Sounds.Played += name => Record(new { kind = "sound", text = name, interrupt = false });
+        Application.AddMessageFilter(this);
         _focusWatch.Tick += (_, _) => WatchFocus();
         _focusWatch.Start();
+        // Every focus change as it happens, not only what a poll catches: a trip into a field and back is two moves.
+        _onFocusEvent = (_, _, _, _, _, _, _) => WatchFocus();
+        SetWinEventHook(EventObjectFocus, EventObjectFocus, 0, _onFocusEvent, (uint)Environment.ProcessId, 0, 0);
     }
 
     private void Record(object item)
@@ -147,7 +165,7 @@ internal sealed class AutomationChannel
             "activate" => Activate(),
             _ => new { error = $"unknown command {verb}" },
         };
-        return JsonSerializer.Serialize(result);
+        return JsonSerializer.Serialize(result, Plain);
     }
 
     /// <summary>Key presses, separated by spaces: "ctrl+shift+p", "escape", "down down enter".</summary>
@@ -163,15 +181,29 @@ internal sealed class AutomationChannel
             }
 
             var alt = modifiers.HasFlag(System.Windows.Forms.Keys.Alt);
-            SetModifiers(modifiers);
-            PostMessage(target, alt ? WM_SYSKEYDOWN : WM_KEYDOWN, (nint)key, alt ? 1 << 29 : 0);
-            PostMessage(target, alt ? WM_SYSKEYUP : WM_KEYUP, (nint)key, alt ? (1 << 29) | unchecked((int)0xC0000000) : unchecked((int)0xC0000001));
-            // The modifiers are released once the posted keys have been handled: after them in the same queue.
-            _form.BeginInvoke(() => SetModifiers(System.Windows.Forms.Keys.None));
+            var marked = (nint)(1 | (Marker << 16) | (alt ? 1 << 29 : 0));
+            _modifiers.Enqueue(modifiers);
+            PostMessage(target, alt ? WM_SYSKEYDOWN : WM_KEYDOWN, (nint)key, marked);
+            PostMessage(target, alt ? WM_SYSKEYUP : WM_KEYUP, (nint)key, marked | unchecked((nint)0xC0000000));
             Application.DoEvents();
         }
 
         return new { ok = true };
+    }
+
+    /// <summary>
+    /// The modifiers of a posted key, set in the thread's keyboard state just as its key down is handled, and cleared
+    /// as its key up is: set when it was posted, a state the system's own keyboard reset in between (an activation)
+    /// lost them, once in several hundred chords.
+    /// </summary>
+    public bool PreFilterMessage(ref Message m)
+    {
+        if (m.Msg is WM_KEYDOWN or WM_SYSKEYDOWN or WM_KEYUP or WM_SYSKEYUP && ((m.LParam.ToInt64() >> 16) & 0xFF) == Marker)
+        {
+            SetModifiers(m.Msg is WM_KEYDOWN or WM_SYSKEYDOWN && _modifiers.TryDequeue(out var modifiers) ? modifiers : System.Windows.Forms.Keys.None);
+        }
+
+        return false;
     }
 
     /// <summary>Characters into the focused control, as typed.</summary>
@@ -208,11 +240,37 @@ internal sealed class AutomationChannel
     };
 
     /// <summary>The focused list's items, or the list named, with the selected index: a question's answers, AxFile's entries, AxGit's views.</summary>
+    private static AxitForm? _formForList;
+
+    private static ListBox? FirstVisibleList(Control? parent)
+    {
+        if (parent is null)
+        {
+            return null;
+        }
+
+        foreach (Control child in parent.Controls)
+        {
+            if (child is ListBox { Visible: true } list)
+            {
+                return list;
+            }
+
+            if (child.Visible && FirstVisibleList(child) is { } inner)
+            {
+                return inner;
+            }
+        }
+
+        return null;
+    }
+
     private static object List()
     {
-        if (Control.FromChildHandle(GetFocus()) is not ListBox list)
+        // The focused list, or else the window's first visible list (a window shown without activation has no focus).
+        if ((Control.FromChildHandle(GetFocus()) as ListBox ?? FirstVisibleList(_formForList)) is not ListBox list)
         {
-            return new { error = "the focus is not in a list" };
+            return new { error = "no list" };
         }
 
         return new { name = list.AccessibleName, items = list.Items.Cast<object>().Take(200).Select(item => item.ToString()).ToArray(), selected = list.SelectedIndex, count = list.Items.Count };
@@ -230,14 +288,31 @@ internal sealed class AutomationChannel
         }
 
         var lines = box.Lines;
-        return new { lines = lines.Skip(Math.Max(0, lines.Length - 60)).ToArray(), caretLine = box.GetLineFromCharIndex(box.SelectionStart) };
+        return new { lines = lines.Skip(Math.Max(0, lines.Length - 60)).ToArray(), caretLine = LogicalLine(box), count = lines.Length };
+    }
+
+    /// <summary>The caret's line as the text has it (up to a line break), not the wrapped row GetLineFromCharIndex counts.</summary>
+    private static int LogicalLine(TextBoxBase box)
+    {
+        var text = box.Text;
+        var end = Math.Min(box.SelectionStart, text.Length);
+        var line = 0;
+        for (var i = 0; i < end; i++)
+        {
+            if (text[i] == '\n')
+            {
+                line++;
+            }
+        }
+
+        return line;
     }
 
     private static string CaretLine(TextBoxBase box)
     {
-        var line = box.GetLineFromCharIndex(box.SelectionStart);
+        var line = LogicalLine(box);
         var lines = box.Lines;
-        return line >= 0 && line < lines.Length ? lines[line] : string.Empty;
+        return line < lines.Length ? lines[line] : string.Empty;
     }
 
     private object Said()
@@ -252,7 +327,8 @@ internal sealed class AutomationChannel
 
     private object Menu(string name)
     {
-        var entry = CommandPalette.Commands(_form.MainMenuStrip, _ => { })
+        // A checked setting says its new state, as the palette makes it say (AX-10.2).
+        var entry = CommandPalette.Commands(_form.MainMenuStrip, said => Announcer.Raise(_form, said, true))
             .FirstOrDefault(entry => entry.Text.StartsWith(name, StringComparison.OrdinalIgnoreCase));
         if (entry is null)
         {
@@ -311,6 +387,12 @@ internal sealed class AutomationChannel
                 "end" => System.Windows.Forms.Keys.End,
                 "pageup" => System.Windows.Forms.Keys.PageUp,
                 "pagedown" => System.Windows.Forms.Keys.PageDown,
+                "plus" => System.Windows.Forms.Keys.Oemplus,
+                "minus" => System.Windows.Forms.Keys.OemMinus,
+                "period" => System.Windows.Forms.Keys.OemPeriod,
+                "comma" => System.Windows.Forms.Keys.Oemcomma,
+                "insert" => System.Windows.Forms.Keys.Insert,
+                "apps" => System.Windows.Forms.Keys.Apps,
                 _ when name.StartsWith('f') && int.TryParse(name[1..], out var f) && f is >= 1 and <= 12 => System.Windows.Forms.Keys.F1 + (f - 1),
                 _ => throw new ArgumentException($"unknown key {name}"),
             };
@@ -329,6 +411,13 @@ internal sealed class AutomationChannel
 
         static void Set(byte[] state, int key, bool down) => state[key] = (byte)(down ? 0x80 : 0);
     }
+
+    private const uint EventObjectFocus = 0x8005;
+
+    private delegate void WinEventProc(nint hook, uint eventType, nint hwnd, int idObject, int idChild, uint thread, uint time);
+
+    [DllImport("user32.dll")]
+    private static extern nint SetWinEventHook(uint eventMin, uint eventMax, nint module, WinEventProc callback, uint processId, uint threadId, uint flags);
 
     [DllImport("user32.dll")]
     private static extern nint GetFocus();

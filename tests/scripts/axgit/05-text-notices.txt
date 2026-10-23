@@ -1,0 +1,107 @@
+# AxGit: text, notices, the Axit menu (docs/axgit/nvda-test-plan.md section 5; SPEC AG-2.4, AG-6, AG-7).
+# The update check off in the run's own settings (AXIT_HOME): a network call, and its failure is a logged ERROR.
+file home\Axit\axgit.json {"checkForUpdates": false}
+run git init -q -b main repo
+file repo\a.txt start\n\nfirst paragraph\n\nsecond paragraph
+run git -C repo add .
+run git -C repo -c user.name=Test -c user.email=none commit -q -m first
+file repo\a.txt start\n\nfirst paragraph marker\n\nsecond paragraph marker\n\nthird paragraph
+start git {temp}\repo
+expect focus Modified a.txt, unstaged
+
+# 5.1 Find in the details after a diff: the match selected and read, F3 the next, "Not found" at the end.
+keys enter
+expect said Diff of a.txt
+expect focus "value":"diff --git
+keys ctrl+f
+expect state "notice":"Find"
+expect focus "name":"Text to find"
+wait 1200
+type marker
+keys enter
+expect state "notice":null
+expect said → Diff of a.txt (Text): +first paragraph marker
+keys f3
+expect said · +second paragraph marker
+# The bundle's find wraps once (AxitForm.FindNext), so F3 after the last match goes back to the first; "Not found"
+# comes only for a text with no match at all (SPEC AG-2.4). The plan's "Not found at the end" is out of date.
+keys f3
+expect said · +first paragraph marker
+keys ctrl+f
+expect state "notice":"Find"
+wait 1200
+keys ctrl+a
+type absent
+keys enter
+expect said ! Not found
+# Ctrl+Home, Page Down: a screen down (how far depends on the window's height on the test desktop).
+# The focus back in the details from the Find notice, on the match it had.
+expect said → Diff of a.txt (Text): +first paragraph marker
+keys ctrl+home
+expect said · diff --git
+keys pagedown
+expect said ·
+# Ctrl+Down: the next paragraph. A diff has no blank lines (a blank context line is one space), so a commit's
+# details, which have them, stand in: from the top to the message, then to the files.
+keys ctrl+tab
+keys ctrl+2
+expect said ! Log, 1 commit.
+keys enter
+expect said lines
+expect focus "value":"commit 
+keys ctrl+down
+expect said ·     first
+keys ctrl+down
+expect said ·  a.txt
+keys ctrl+tab
+keys ctrl+1
+expect said ! Changes, 1 file.
+
+# 5.2 Larger and smaller text (Ctrl+Plus and Ctrl+Minus: the runner has no names for those keys, so the menu
+# commands they stand for), then Windows text size.
+menu Larger text
+expect said ! Text size
+menu Smaller text
+expect said ! Text size
+menu Windows text size
+expect said ! Windows text size
+
+# 5.3 F1: the Keyboard shortcuts notice; Escape closes it. Help, User guide; Escape.
+keys f1
+expect state "notice":"Keyboard shortcuts"
+# The runner matches the raw JSON, where + is \u002B: a line of the text without one.
+expect state fetch, pull, push
+wait 1200
+keys escape
+expect state "notice":null
+menu User guide
+expect state "notice":"User guide"
+expect state # AxGit user guide
+wait 1200
+keys escape
+expect state "notice":null
+
+# 5.4 The Axit menu's commands; About, Version names the version and AxGit among the apps.
+# (Recently closed and Open windows fill themselves as the menu opens, and the menu bar's menu mode needs the
+# foreground: those two lists are manual.)
+expect commands AxClaude, Axit, New window
+expect commands AxGit, Axit, New window
+expect commands Close all windows, Axit
+expect commands Check for updates
+expect commands Version, Axit, About
+menu Version
+expect state "notice":"Axit 
+expect state AxDown, AxJSON, AxGit, AxTerminal
+wait 1200
+keys escape
+expect state "notice":null
+
+# 5.5 Options, Developer, Copy diagnostics: manual. It writes to the clipboard, which the test desktop shares with
+# the user's, and the check is pasting it somewhere.
+
+# 5.6 Closed and started without a folder: the same repository, the last one opened. (Repository, Open recent
+# repository fills itself as the menu opens: its "1. repo (path)" item is manual.)
+close
+start git
+expect state repo - AxGit
+expect focus Changes, 1 file

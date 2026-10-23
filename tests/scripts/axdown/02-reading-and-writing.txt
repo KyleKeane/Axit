@@ -1,0 +1,158 @@
+# AxDown, test plan section 2 (Reading and writing), driven from inside the window (docs/axdown/nvda-test-plan.md).
+# What NVDA reads by itself (say-all, words) is tier 3; here the caret's line is checked and AxDown's silence.
+file long.md # Long Markdown file for navigation\n\nThe first paragraph, one line.\n\nThis line is longer than the window, so word wrap shows it on several rows and the caret test can tell. This line is longer than the window, so word wrap shows it on several rows and the caret test can tell. This line is longer than the window, so word wrap shows it on several rows and the caret test can tell. This line is longer than the window, so word wrap shows it on several rows and the caret test can tell.\n\n## Second heading, level 2\n\nA paragraph of two lines,\nthe second line of it.\n\n### Third heading, level 3\n\nThe last paragraph of the file.
+# The run's own settings: no update check, whose network call logs an ERROR when GitHub cannot be reached.
+file home\Axit\axdown.json {"checkForUpdates": false}
+file short.md First line.\nSecond line.\nThird line.
+
+start down {temp}\long.md
+expect focus # Long Markdown file for navigation
+
+# 2.1: Down reads one line at a time; Ctrl+Right moves by word; AxDown says nothing on either.
+keys down
+expect focus {"name":"long.md","role":"Text","value":""}
+keys down
+expect focus The first paragraph, one line.
+keys ctrl+right ctrl+right
+expect quiet 1000
+expect state Line 3, Column 11
+
+# 2.3a: Ctrl+Down to the next paragraph, a heading with blank lines around it being one of its own; Ctrl+Up back.
+keys ctrl+home
+keys ctrl+down
+expect focus The first paragraph, one line.
+keys ctrl+down
+expect focus This line is longer than the window
+# Below the wrapped line the focus answer's value is a wrapped row off (see the report); the status bar's middle dot is matched as the JSON spells it, \u00B7, so the status bar's line is checked.
+keys ctrl+down
+expect state Line 7, Column 1 \u00B7
+keys ctrl+down
+expect state Line 9, Column 1 \u00B7
+# From inside a paragraph Ctrl+Up goes to its start first, then to the one before.
+keys down
+expect state Line 10, Column 1 \u00B7
+keys ctrl+up
+expect state Line 9, Column 1 \u00B7
+keys ctrl+up
+expect state Line 7, Column 1 \u00B7
+# From the last paragraph Ctrl+Down goes to the end of the file.
+keys ctrl+end ctrl+up
+expect state Line 14, Column 1 \u00B7
+keys ctrl+down
+expect state Line 14, Column 32 \u00B7
+expect quiet 1000
+# 2.3a: Ctrl+Shift+Down and Ctrl+Shift+Up select and unselect; NVDA reads the selection, AxDown nothing.
+keys ctrl+home ctrl+shift+down
+expect quiet 1000
+keys ctrl+shift+up
+expect quiet 1000
+
+# 2.4: word wrap off and on, the caret on the same character.
+keys ctrl+home ctrl+down ctrl+down right right right
+keys ctrl+shift+w
+expect said ! Word wrap off
+expect focus This line is longer than the window
+expect state Line 5, Column 4 \u00B7
+keys ctrl+shift+w
+expect said ! Word wrap on
+expect state Line 5, Column 4 \u00B7
+
+# 2.3: Page Down reaches the last line in a short file, Page Up the first.
+start down {temp}\short.md
+expect focus short.md
+keys pagedown
+expect focus Third line.
+keys pageup
+expect focus First line.
+expect quiet 1000
+
+# 2.2: typing, Backspace, Enter, Tab (the focus stays in the editor); one Ctrl+Z takes the whole sentence back.
+start down {temp}\new.md
+expect focus new.md
+type A sentence.
+keys backspace
+type !
+keys enter tab
+type Second line.
+expect text A sentence!
+expect focus {"name":"new.md","role":"Text","value":"\tSecond line."}
+expect state *new.md - AxDown
+wait 1500
+keys ctrl+z
+expect said ! Undone
+expect focus {"name":"new.md","role":"Text","value":""}
+keys ctrl+y
+expect said ! Redone
+expect text A sentence!
+
+# 2.5: Ctrl+M, Ctrl+H, Ctrl+I and Ctrl+J insert nothing (Ctrl+H and Ctrl+I are the heading and list item keys).
+start down {temp}\empty.md
+# A key sent before the editor has the focus goes to the form and can arrive as a typed letter (see the report).
+expect focus empty.md
+keys ctrl+m ctrl+h ctrl+i ctrl+j
+expect said No next list item
+expect state "title":"empty.md - AxDown"
+expect focus {"name":"empty.md","role":"Text","value":""}
+
+# 2.6: two words with a pause are two steps; the ends say so.
+type alpha
+wait 1500
+type  beta
+keys ctrl+z
+expect said ! Undone
+expect focus {"name":"empty.md","role":"Text","value":"alpha"}
+keys ctrl+z
+expect said ! Undone
+expect focus {"name":"empty.md","role":"Text","value":""}
+keys ctrl+z
+expect said ! Nothing to undo
+keys ctrl+y
+expect said ! Redone
+keys ctrl+y
+expect said ! Redone
+expect focus {"name":"empty.md","role":"Text","value":"alpha beta"}
+keys ctrl+y
+expect said ! Nothing to redo
+# 2.6 manual: paste a line (Ctrl+V) and type after it; the clipboard is the user's, shared with the test desktop.
+# 2.6: Backspace held over a few words is one step, the caret back after them.
+wait 1500
+keys backspace backspace backspace backspace backspace
+expect focus {"name":"empty.md","role":"Text","value":"alpha"}
+wait 1500
+keys ctrl+z
+expect said ! Undone
+expect focus {"name":"empty.md","role":"Text","value":"alpha beta"}
+expect state Column 11
+# 2.6: typing, Ctrl+S ("Saved"), Ctrl+Z: undone past the save, the star back.
+type  gamma
+keys ctrl+s
+expect said ! Saved
+expect state "title":"empty.md - AxDown"
+keys ctrl+z
+expect said ! Undone
+expect state *empty.md - AxDown
+expect focus {"name":"empty.md","role":"Text","value":"alpha beta"}
+# 2.6: Edit, Undo and Edit, Redo do the same as the keys.
+menu Redo
+expect said ! Redone
+expect focus {"name":"empty.md","role":"Text","value":"alpha beta gamma"}
+menu Undo
+expect said ! Undone
+# 2.6: Alt+Backspace is the window's Undo.
+keys alt+backspace
+expect said ! Undone
+expect focus {"name":"empty.md","role":"Text","value":"alpha"}
+# 2.6 manual: Shift+F10 opens the text's context menu, a real menu, which needs the foreground.
+# 2.6: after another document (New, which ends the history as Open does) Ctrl+Z has nothing to undo.
+keys ctrl+n
+expect state Save changes to empty.md?
+expect focus Enter: Save. Escape: Cancel.
+keys tab tab
+expect focus Don\u0027t save
+keys enter
+expect state Untitled - AxDown
+keys ctrl+z
+expect said ! Nothing to undo
+refuse said Saved
+# What Don't save left on disk: the text of the save.
+run findstr /c:"alpha beta gamma" empty.md

@@ -1,0 +1,28 @@
+# AxDown, test plan section 7 (Updates and uninstall), the part a window shows (docs/axdown/nvda-test-plan.md).
+# 7.2 manual: an older build installed with publish.ps1, the update notice, the download and the restart replace the
+# installed program, which a test run must not touch.
+# 7.3 manual: Settings, Apps, Axit, Uninstall is Windows' own and removes the installation.
+# The run's own settings: no update check at start; the one check below is the one the step asks for.
+file home\Axit\axdown.json {"checkForUpdates": false}
+file a.md # Updates
+
+start down {temp}\a.md
+expect focus a.md
+# 7.1: Axit, "Check for updates (Axit <version>)..." names the version.
+expect commands "Check for updates (Axit 3.
+# 7.1: About, Version names it too, and the latest release once a check has asked GitHub.
+menu Version
+expect state "notice":"Axit 3.
+expect state Latest release on GitHub: not checked yet
+keys escape
+expect focus a.md
+# 7.1: the check reports in a notice either way; then Version names the latest release. This asks GitHub: offline,
+# the notice says GitHub could not be reached and the window logs an ERROR, which fails the run.
+menu Check for updates (Axit
+expect state "notice":"Check for updates"
+keys escape
+expect focus a.md
+menu Version
+expect state Latest release on GitHub: Axit
+expect state Releases: https://github.com/KyleKeane/Axit/releases
+keys escape

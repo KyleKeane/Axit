@@ -1,0 +1,149 @@
+# AxDown, test plan section 6 (Menus and help), driven from inside the window (docs/axdown/nvda-test-plan.md).
+# The run's own settings: no update check, whose network call logs an ERROR when GitHub cannot be reached.
+file home\Axit\axdown.json {"checkForUpdates": false}
+file a.md # A file for the menus\n\nSome text here.\nMore text.
+
+start down {temp}\a.md
+expect focus a.md
+
+# 6.1 manual: Alt opens the menu bar, whose menu mode needs the foreground. Every item with its shortcut, as the
+# palette reads them from the menus:
+expect commands "Word wrap, Options, Text, Ctrl\u002BShift\u002BW, checked"
+expect commands "Go to line, Navigate, Ctrl\u002BG"
+expect commands "Heading level 2, Navigate, Next, Ctrl\u002B2."
+expect commands "Undo, Edit, Ctrl\u002BZ"
+expect commands "Keyboard shortcuts, Help, F1"
+
+# 6.2: F1, the shortcuts notice, its first line naming the text's own keys.
+keys down right right
+keys f1
+expect state "notice":"Keyboard shortcuts"
+expect focus {"name":"Keyboard shortcuts","role":"Text","value":"In this text: h and Shift\u002BH move by heading
+# h and Ctrl+H alike: the next section's heading; Shift+H back.
+keys h
+expect said ! In every window of Axit, heading level 2
+keys ctrl+h
+expect said ! AxDown, heading level 2
+keys shift+h
+expect said ! In every window of Axit, heading level 2
+keys h h
+expect said ! The text, heading level 2
+# Page Down and Page Up move a screen of its text, Ctrl+Down and Ctrl+Up a paragraph; the notice says nothing on them.
+keys pagedown pageup ctrl+down ctrl+up
+expect quiet 1000
+# Ctrl+F, wrap, Enter: the shortcuts text is back, then F3; Ctrl+F then Escape: the text is back.
+keys ctrl+f
+expect focus Text to find
+type wrap
+keys enter
+expect focus Keyboard shortcuts
+# 6.2 not checked here: the line with "wrap" selected; the focus answer's value is a wrapped row off in a wrapped text (see the report).
+keys f3
+expect focus Keyboard shortcuts
+keys ctrl+f
+expect focus Text to find
+keys escape
+expect focus Keyboard shortcuts
+expect state "notice":"Keyboard shortcuts"
+# Escape closes the notice and the focus is back in the editor at the same place.
+keys escape
+expect state "notice":null
+expect focus {"name":"a.md","role":"Text","value":"Some text here."}
+expect state Line 3, Column 2 \u00B7
+
+# 6.3: Help, User guide: this app's guide; the navigation keys move through it, spoken as in the editor.
+menu User guide
+expect state "notice":"User guide","noticeText":"# AxDown user guide
+keys ctrl+h
+expect said heading level 2
+keys ctrl+t
+expect said ! No next table
+keys escape
+expect focus a.md
+# Axit, About, Version names the version of Axit, the nine apps and the folders.
+menu Version
+expect state "notice":"Axit 3.
+expect state : AxClaude, AxDown, AxJSON, AxGit, AxTerminal, AxFile, AxMedia, AxPreview, AxStart.
+expect state Settings: 
+expect state Logs: 
+keys escape
+expect focus a.md
+# About, Licence, Attribution and Axit guide open their notices; Escape closes each.
+menu Licence
+expect state "notice":"Licence"
+keys escape
+expect state "notice":null
+menu Attribution
+expect state "notice":"Attribution"
+keys escape
+expect state "notice":null
+menu Axit guide
+expect state "notice":"Axit guide"
+keys escape
+expect state "notice":null
+expect focus a.md
+
+# 6.4 manual: the Axit menu's Open windows, Open windows by type and Recently closed are submenus filled as they open,
+# which the palette leaves out, and Alt+A needs the foreground; New window and Recently closed start processes the
+# runner does not reach; Close all windows closes every Axit window on the desktop; Axit on GitHub opens the browser.
+
+# 6.5: Options, General, Check for updates at start, a checked item that says its new state.
+# Through the palette, which says the new state; the runner's menu step runs the item without saying it.
+keys ctrl+shift+p
+expect focus Search commands
+type check for updates at start
+expect said Check for updates at start, Options, General, 1 of 1
+keys enter
+expect said Check for updates at start, checked
+keys ctrl+shift+p
+expect focus Search commands
+type check for updates at start
+expect said Check for updates at start, Options, General, checked, 1 of 1
+keys enter
+expect said Check for updates at start, not checked
+expect focus a.md
+# 6.5 manual: Copy diagnostics writes the user's clipboard; Open settings file starts an AxJSON window the runner does
+# not reach; the Markdown resources open the browser.
+
+# 6.6: the command palette, with the caret in the middle of a line.
+keys ctrl+shift+p
+expect state "notice":"Command palette"
+expect focus Search commands
+keys down
+expect said ! Open, File, Ctrl+O, 2 of
+keys down
+expect said ! Save, File, Ctrl+S, 3 of
+keys up
+expect said ! Open, File, Ctrl+O, 2 of
+# Ctrl+Home at the first match: the low note and the first match again.
+keys up ctrl+home
+expect said ! New, File, Ctrl+N, 1 of
+expect said ♪ Edge
+expect said ! New, File, Ctrl+N, 1 of
+type wrap
+expect said ! Word wrap, Options, Text, Ctrl+Shift+W, checked, 1 of 1
+keys down
+expect said ♪ Edge
+expect said ! Word wrap, Options, Text, Ctrl+Shift+W, checked, 1 of 1
+# Enter: the palette closes, the focus back in the editor at the same place, and the item's new state said.
+keys enter
+expect said Word wrap off
+expect focus {"name":"a.md","role":"Text","value":"Some text here."}
+expect state Line 3, Column 2 \u00B7
+expect commands "Word wrap, Options, Text, Ctrl\u002BShift\u002BW","Font
+# No match: "No commands match xyz"; Enter says it again and the palette stays; Escape: back, nothing run.
+keys ctrl+shift+p
+expect focus Search commands
+type xyz
+expect said No commands match xyz
+keys enter
+expect said No commands match xyz
+expect state "notice":"Command palette"
+keys escape
+expect state "notice":null
+expect focus a.md
+expect quiet 1000
+# 6.6 manual: save as, Enter opens the Windows Save as picker; Alt+A, P needs the menu bar's menu mode.
+# Recent files and the Axit menu's window lists are not in the palette; Alt+A, New window, AxDown is.
+# Not checked here: that they are absent, since the runner has no refuse for the commands (see the report).
+expect commands "AxDown, Axit, New window"

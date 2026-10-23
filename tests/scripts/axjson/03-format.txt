@@ -1,0 +1,87 @@
+# AxJSON, test plan section 3 (Format, AJ-2.3), driven from inside the window (docs/axjson/nvda-test-plan.md).
+# The run's own settings: no update check, whose network call logs an ERROR when GitHub cannot be reached.
+file home\Axit\axjson.json {"checkForUpdates": false}
+file one-line.json {"model":"opus","permissions":{"allow":["Bash","Read"],"deny":[]},"count":3,"on":true}
+file broken.json {\n  "model": "opus"\n  "permissions": { "allow": ["Bash", "Read"], "deny": [], },\n  "count": 3,\n  "on": true\n}
+file missing-value.json {\n  "model": "opus",\n  "permissions": { "allow": ["Bash", "Read"], "deny": [] },\n  "count": ,\n  "on": true\n}
+file formatted.json {\n  "name": "formatted",\n  "items": [\n    1,\n    2\n  ]\n}\n
+
+# 3.1: everything on one line, Ctrl+Shift+F: "Formatted"; two spaces per level, one key per line.
+start json {temp}\one-line.json
+expect focus one-line.json
+keys ctrl+shift+f
+expect said ! Formatted
+keys ctrl+home
+expect focus {"name":"one-line.json","role":"Text","value":"{"}
+keys down
+expect focus {"name":"one-line.json","role":"Text","value":"  \u0022model\u0022: \u0022opus\u0022,"}
+expect text     \u0022Bash\u0022,
+expect state *one-line.json - AxJSON
+# 3.1, Ctrl+Z and Ctrl+Y after the Format: at the end of this script, since it fails (see the report).
+
+# 3.2: broken.json: "Formatted, repaired: 1 trailing comma, 1 missing comma"; then Ctrl+E says "No next error".
+start json {temp}\broken.json
+expect focus broken.json
+keys ctrl+shift+f
+expect said ! Formatted, repaired: 1 trailing comma, 1 missing comma
+keys ctrl+e
+expect said ! No next error
+# A single-quoted value typed in, then Ctrl+Shift+F: "Formatted, repaired: 1 single-quoted string".
+keys ctrl+home ctrl+k ctrl+k ctrl+k ctrl+k ctrl+k ctrl+k
+expect said ! on: true
+keys end
+type , "q": 'x'
+keys ctrl+shift+f
+expect said ! Formatted, repaired: 1 single-quoted string
+expect text "  \u0022q\u0022: \u0022x\u0022"
+
+# 3.3: a value deleted, "count": , then Ctrl+Shift+F: "Not valid JSON: line 4, expected a value, found ','"; the text unchanged.
+start json {temp}\missing-value.json
+expect focus missing-value.json
+keys ctrl+shift+f
+expect said ! Not valid JSON: line 4, expected a value, found ','
+expect state "title":"missing-value.json - AxJSON"
+expect text "  \u0022count\u0022: ,"
+# Edit, Format does the same as the key.
+menu Format
+expect said ! Not valid JSON: line 4, expected a value, found ','
+expect state "title":"missing-value.json - AxJSON"
+
+# 3.4: Ctrl+Shift+F on a formatted file: "Already formatted", nothing changes, no star in the title.
+start json {temp}\formatted.json
+expect focus formatted.json
+keys ctrl+shift+f
+expect said ! Already formatted
+expect state "title":"formatted.json - AxJSON"
+keys ctrl+z
+expect said ! Nothing to undo
+
+# 3.1: Ctrl+Z after the Format puts the one line back ("Undone"), one step (SPEC.md AJ-2.3). Fails: the Format is
+# recorded as two steps, the text removed and the text put in, so the first Ctrl+Z leaves an empty document (see the report).
+use 1
+keys ctrl+z
+expect said ! Undone
+expect text {"lines":["{\u0022model\u0022:\u0022opus\u0022,
+keys ctrl+y
+expect said ! Redone
+expect text "  \u0022on\u0022: true"
+# AxDown's section 2, step 6 holds here too: two runs of typing are two steps, the Format a third, and the ends say so.
+keys ctrl+end
+type abc
+wait 1500
+type def
+keys ctrl+z
+expect said ! Undone
+keys ctrl+z
+expect said ! Undone
+keys ctrl+z
+expect said ! Undone
+expect text {"lines":["{\u0022model\u0022:\u0022opus\u0022,
+keys ctrl+z
+expect said ! Nothing to undo
+keys ctrl+y ctrl+y ctrl+y
+expect said ! Redone
+expect text true
+keys ctrl+y
+expect said ! Nothing to redo
+

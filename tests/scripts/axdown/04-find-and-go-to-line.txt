@@ -1,0 +1,59 @@
+# AxDown, test plan section 4 (Find and go to line), driven from inside the window (docs/axdown/nvda-test-plan.md).
+# The run's own settings: no update check, whose network call logs an ERROR when GitHub cannot be reached.
+file home\Axit\axdown.json {"checkForUpdates": false}
+file find.md # Find and go to line\n\nThe first apple is on line 3.\nNothing here.\nThe second apple is on line 5.\nLine 6.\nThe last line, line 7.
+
+start down {temp}\find.md
+expect focus find.md
+
+# 4.1: Ctrl+F, the field "Text to find"; Enter lands on the match and the focus is back in the text there.
+keys ctrl+f
+expect focus Text to find
+type apple
+keys enter
+expect focus {"name":"find.md","role":"Text","value":"The first apple is on line 3."}
+expect state Line 3, Column 11 \u00B7
+# F3 the next match; Shift+F3 back.
+keys f3
+expect focus The second apple is on line 5.
+keys shift+f3
+expect focus The first apple is on line 3.
+expect quiet 1000
+# A word that is not there: "Not found".
+keys ctrl+f
+expect focus Text to find
+type pear
+keys enter
+expect said Not found
+expect focus find.md
+
+# 4.2: Ctrl+G, the field named with the line and column; a number, Enter: "Line n of m", the caret at that line's start.
+keys ctrl+g
+expect focus Go to line (now line 3, column 11)
+type 5
+keys enter
+expect said ! Line 5 of 7
+expect focus {"name":"find.md","role":"Text","value":"The second apple is on line 5."}
+expect state Line 5, Column 1 \u00B7
+# A number past the end lands on the last line.
+keys ctrl+g
+expect focus Go to line (now line 5, column 1)
+type 99
+keys enter
+expect said ! Line 7 of 7
+expect focus The last line, line 7.
+# A word: "Not a line number", the caret where it was.
+keys ctrl+g
+type five
+keys enter
+expect said ! Not a line number
+expect focus The last line, line 7.
+expect state Line 7, Column 1 \u00B7
+# Escape returns to the text where it was.
+keys ctrl+g
+expect focus Go to line (now line 7, column 1)
+keys escape
+expect focus {"name":"find.md","role":"Text","value":"The last line, line 7."}
+
+# 4.3: the status bar holds the name, "Line n, Column m", the encoding and the line ending (NVDA+End reads it).
+expect state "status":["find.md","Line 7, Column 1 \u00B7 UTF-8 \u00B7 CRLF"]

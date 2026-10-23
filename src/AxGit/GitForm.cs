@@ -895,6 +895,14 @@ public sealed partial class GitForm : AxitForm
             return;
         }
 
+        if (_busy is not null)
+        {
+            // A stage or its refresh still runs: the count below is the one before it (found by tools/AxitDrive,
+            // 2026-10-23: Space then Ctrl+Enter said "Nothing staged").
+            Announce("Working…", true);
+            return;
+        }
+
         var staged = _repo.StagedCount;
         if (staged == 0)
         {

@@ -1,0 +1,141 @@
+# AxGit: changes (docs/axgit/nvda-test-plan.md section 3; SPEC AG-3, AG-7).
+# A scratch repository with one commit, then a modified tracked file and an untracked one.
+# The update check off in the run's own settings (AXIT_HOME): a network call, and its failure is a logged ERROR.
+file home\Axit\axgit.json {"checkForUpdates": false}
+run git init -q -b main repo
+# The scratch repository's own identity, for the commit AxGit makes (the user's configuration is never read or changed).
+run git -C repo config user.name Test
+run git -C repo config user.email none
+file repo\a.txt hello\nworld
+run git -C repo add .
+run git -C repo -c user.name=Test -c user.email=none commit -q -m first
+file repo\a.txt hello\nchanged world
+file repo\new.txt one\ntwo\nthree
+start git {temp}\repo
+expect focus Changes, 2 files
+expect focus Modified a.txt, unstaged
+
+# 3.1 Space stages and unstages in place; the status bar's staged count follows.
+keys space
+expect said ! Staged a.txt
+expect focus Modified a.txt, staged
+expect state 1 staged
+keys down
+expect said · Untracked new.txt
+keys up
+expect said · Modified a.txt, staged
+keys space
+expect said ! Unstaged a.txt
+expect focus Modified a.txt, unstaged
+expect state 0 staged
+
+# 3.2 Enter on a changed file: the diff in the details, the focus on its first line, then the name and length said.
+# (The timeline polls the focus every 50 ms, so the announcement can be listed before the focus move it follows.)
+keys enter
+expect said Diff of a.txt, 10 lines
+expect focus "name":"Diff of a.txt","role":"Text","value":"diff --git a/a.txt b/a.txt"
+keys down
+expect said · index
+keys down down down
+expect said · @@
+keys down
+expect said ·  hello
+keys down
+expect said · -world
+keys down
+expect said · \ No newline at end of file
+keys down
+expect said · +changed world
+keys ctrl+tab
+expect said → Changes, 2 files (List): Modified a.txt, unstaged
+
+# 3.3 Enter on the untracked file: "Untracked file, N lines" and its text.
+keys down
+expect said · Untracked new.txt
+keys enter
+expect said Diff of new.txt, 4 lines
+expect focus "name":"Diff of new.txt","role":"Text","value":"Untracked file, 3 lines"
+keys down
+expect said · one
+keys ctrl+tab
+expect said → Changes, 2 files (List): Untracked new.txt
+
+# 3.4 Stage all and unstage all.
+keys ctrl+shift+a
+expect said ! Staged all
+expect list "Modified a.txt, staged","Added new.txt, staged"
+keys ctrl+shift+u
+expect said ! Unstaged all
+expect list "Modified a.txt, unstaged","Untracked new.txt"
+
+# 3.5 Commit: refused with nothing staged; the notice with its Message field; refused empty; then the commit.
+keys ctrl+enter
+expect said ! Nothing staged. Space stages a file
+expect state "notice":null
+keys up
+expect said · Modified a.txt, unstaged
+keys space
+expect said ! Staged a.txt
+# "Staged" is said before the refresh after it ends; Ctrl+Enter pressed at once read the old count and said
+# "Nothing staged" (reported). The script waits for the status bar's count.
+expect state 1 staged
+keys ctrl+enter
+expect state "notice":"Commit 1 staged
+expect focus "name":"Message"
+# The notice holds the answering keys for a second after it appears (KeyHold).
+wait 1200
+keys enter
+expect said ! Type the commit message
+expect state "notice":"Commit 1 staged
+type Test commit
+keys enter
+expect said ! Committed
+expect state "notice":null
+expect focus Changes, 1 file
+expect list "Untracked new.txt"
+keys ctrl+2
+expect said ! Log, 2 commits.
+expect focus Test: Test commit
+keys ctrl+1
+expect said ! Changes, 1 file.
+
+# 3.6 F5 after an edit; Discard asks first; Escape leaves it; Enter discards; an untracked file is not discarded.
+file repo\a.txt hello\nagain
+keys f5
+expect said ! Refreshed: Changes, 2 files
+keys home
+expect focus Modified a.txt, unstaged
+keys delete
+expect state "notice":"Discard the changes to a.txt?"
+expect state They cannot be brought back.
+wait 1200
+keys escape
+expect state "notice":null
+expect focus Modified a.txt, unstaged
+expect quiet 1000
+keys delete
+expect state "notice":"Discard the changes to a.txt?"
+wait 1200
+keys enter
+expect said ! Discarded a.txt
+expect focus Changes, 1 file
+expect list "Untracked new.txt"
+keys delete
+expect said ! Untracked file: delete it in File Explorer
+expect state "notice":null
+
+# 3.7 Ctrl+S has nothing to save.
+keys ctrl+s
+expect said ! Nothing to save here. Space stages, Ctrl+Enter commits
+
+# AG-5.4, AG-7: a command asked for while one runs says "Working…". Space and Ctrl+Enter pressed together: the commit
+# is asked while the stage (or the refresh after it) still runs. Fails today (reported): Ctrl+Enter does not check
+# for a running command, reads the staged count from before the stage and says "Nothing staged. Space stages a file".
+# Kept last, so that the steps above run whatever it says.
+file repo\a.txt hello\nonce more
+keys f5
+expect said ! Refreshed: Changes, 2 files
+keys home
+expect focus Modified a.txt, unstaged
+keys space ctrl+enter
+refuse said Nothing staged

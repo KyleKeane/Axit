@@ -1,0 +1,41 @@
+# AxGit: from and to the other windows (docs/axgit/nvda-test-plan.md section 2; SPEC AG-1.4).
+# What the runner can check is that each way in and out is in its menu. Running one starts a new Axit process that
+# the runner did not start and so can neither drive nor close (it would stay behind on the test desktop), so these
+# steps are manual:
+# 2.1 Enter on AxClaude's Session, Show current folder in, AxGit: a new AxGit window on the repository, focused.
+# 2.2 Alt+A, O, the open windows, most recent first, and Enter back to one: the list fills itself as the menu opens,
+#     and switching windows needs the foreground.
+# 2.3 Enter on AxDown's File, Show current file in, AxGit.
+# 2.4 Enter on AxGit's Repository, Show current repository in, AxClaude.
+# 2.5 Ctrl+E on a .md file (AxDown opens it) and on a .json file (AxJSON).
+# The update check off in the run's own settings (AXIT_HOME): a network call, and its failure is a logged ERROR.
+file home\Axit\axgit.json {"checkForUpdates": false}
+file home\Axit\axdown.json {"checkForUpdates": false}
+file home\Axit\axclaude.json {"checkForUpdates": false}
+run git init -q -b main repo
+file repo\notes.md # Notes
+run git -C repo add .
+run git -C repo -c user.name=Test -c user.email=none commit -q -m first
+
+# 2.4 AxGit's Repository, Show current repository in: File Explorer (Ctrl+W), AxClaude, AxTerminal, AxFile.
+start git {temp}\repo
+expect focus Changes, no changes
+expect commands "File Explorer, Repository, Show current repository in, Ctrl
+expect commands "AxClaude, Repository, Show current repository in"
+expect commands "AxTerminal, Repository, Show current repository in"
+expect commands "AxFile, Repository, Show current repository in"
+# 2.5 Ctrl+E with no file in the list says so and starts nothing.
+keys ctrl+e
+expect said ! No file selected
+expect commands "Open file in editor, Changes, Ctrl
+
+# 2.3 AxDown on a file of the repository: File, Show current file in, AxGit.
+start down {temp}\repo\notes.md
+expect focus notes.md
+expect commands "AxGit, File, Show current file in"
+close
+
+# 2.1 AxClaude on the repository: Session, Show current folder in, AxGit (Claude on Haiku; the trust question is
+# left unanswered, the menu is there from the start).
+start claude {temp}\repo -- --model haiku
+expect commands "AxGit, Session, Show current folder in"

@@ -1,0 +1,137 @@
+# AxJSON, test plan section 2 (Navigation, AJ-2.2), driven from inside the window (docs/axjson/nvda-test-plan.md).
+# The run's own settings: no update check, whose network call logs an ERROR when GitHub cannot be reached.
+file home\Axit\axjson.json {"checkForUpdates": false}
+file settings.json {\n  "model": "opus",\n  "permissions": { "allow": ["Bash", "Read"], "deny": [] },\n  "count": 3,\n  "on": true\n}
+file missing-value.json {\n  "model": "opus",\n  "permissions": { "allow": ["Bash", "Read"], "deny": [] },\n  "count": ,\n  "on": true\n}
+file broken.json {\n  "model": "opus"\n  "permissions": { "allow": ["Bash", "Read"], "deny": [], },\n  "count": 3,\n  "on": true\n}
+
+start json {temp}\settings.json
+expect focus settings.json
+
+# 2.1: Ctrl+K from the top, each key with its value or its container; then "No next key", the caret staying.
+keys ctrl+k
+expect said ! model: opus
+expect state Line 2, Column 3 \u00B7
+keys ctrl+k
+expect said ! permissions, object with 2 keys
+keys ctrl+k
+expect said ! allow, array with 2 items
+keys ctrl+k
+expect said ! deny, empty array
+keys ctrl+k
+expect said ! count: 3
+keys ctrl+k
+expect said ! on: true
+expect state Line 5, Column 3 \u00B7
+keys ctrl+k
+expect said ! No next key
+expect state Line 5, Column 3 \u00B7
+# Ctrl+Shift+K back the same way; at the top "No previous key".
+keys ctrl+shift+k
+expect said ! count: 3
+keys ctrl+shift+k
+expect said ! deny, empty array
+keys ctrl+shift+k
+expect said ! allow, array with 2 items
+keys ctrl+shift+k
+expect said ! permissions, object with 2 keys
+keys ctrl+shift+k
+expect said ! model: opus
+keys ctrl+shift+k
+expect said ! No previous key
+
+# 2.2: Ctrl+J, the object of permissions, then none; Ctrl+Shift+J back to the whole file, the caret on its first brace.
+keys ctrl+home ctrl+j
+expect said ! permissions, object with 2 keys
+keys ctrl+j
+expect said ! No next object
+keys ctrl+shift+j
+expect said ! object with 4 keys
+expect state Line 1, Column 1 \u00B7
+# 2.2, Ctrl+Home then Ctrl+J on the whole file: at the end of this script, since it fails (see the report).
+
+# 2.3: arrays and items.
+keys ctrl+home ctrl+l
+expect said ! allow, array with 2 items
+keys ctrl+l
+expect said ! deny, empty array
+keys ctrl+home ctrl+i
+expect said ! Item 1 of 2, Bash
+keys ctrl+i
+expect said ! Item 2 of 2, Read
+keys ctrl+i
+expect said ! No next item
+
+# 2.4: Ctrl+E in a valid file: "No next error".
+keys ctrl+home ctrl+e
+expect said ! No next error
+
+# 2.6: plain arrow keys speak nothing of AxJSON's own.
+keys down down right right left up end home
+expect quiet 1000
+
+# 2.5: Navigate, Next and Previous list Key, Object, Array, Item and Error with their keys; each item does what its key does.
+expect commands "Key, Navigate, Next, Ctrl\u002BK"
+expect commands "Object, Navigate, Next, Ctrl\u002BJ"
+expect commands "Array, Navigate, Next, Ctrl\u002BL"
+expect commands "Item, Navigate, Next, Ctrl\u002BI"
+expect commands "Error, Navigate, Next, Ctrl\u002BE"
+expect commands "Key, Navigate, Previous, Ctrl\u002BShift\u002BK"
+expect commands "Object, Navigate, Previous, Ctrl\u002BShift\u002BJ"
+expect commands "Array, Navigate, Previous, Ctrl\u002BShift\u002BL"
+expect commands "Item, Navigate, Previous, Ctrl\u002BShift\u002BI"
+expect commands "Error, Navigate, Previous, Ctrl\u002BShift\u002BE"
+keys ctrl+home
+menu Key, Navigate, Next
+expect said ! model: opus
+menu Object, Navigate, Next
+expect said ! permissions, object with 2 keys
+menu Array, Navigate, Next
+expect said ! allow, array with 2 items
+menu Item, Navigate, Next
+expect said ! Item 1 of 2, Bash
+menu Item, Navigate, Previous
+expect said ! No previous item
+menu Array, Navigate, Previous
+expect said ! allow, array with 2 items
+menu Object, Navigate, Previous
+expect said ! permissions, object with 2 keys
+menu Object, Navigate, Previous
+expect said ! object with 4 keys
+menu Key, Navigate, Previous
+expect said ! No previous key
+menu Error, Navigate, Next
+expect said ! No next error
+menu Error, Navigate, Previous
+expect said ! No previous error
+# Help, User guide: Ctrl+K and the other keys move through the guide's text too, "No next key" when there is none.
+menu User guide
+expect state "notice":"User guide"
+keys ctrl+k
+expect said ! No next key
+keys escape
+expect focus settings.json
+
+# 2.4: broken.json. Its two faults are the forgiving outline's repairs (SPEC.md AJ-2.2: a missing comma between members
+# and a trailing comma read as JSON; scenario 2), so Ctrl+E says "No next error" there; the plan's error on line 3 is
+# from before that rule. The error itself is checked on a value that is missing, the spec's other example.
+start json {temp}\broken.json
+expect focus broken.json
+keys ctrl+home ctrl+e
+expect said ! No next error
+start json {temp}\missing-value.json
+expect focus missing-value.json
+keys ctrl+home ctrl+e
+expect said ! Error, line 4: expected a value, found ','
+expect state Line 4, Column 12 \u00B7
+keys ctrl+end ctrl+shift+e
+expect said ! Error, line 4: expected a value, found ','
+expect state Line 4, Column 12 \u00B7
+
+# 2.2: Ctrl+Home, Ctrl+J: the object after the caret, since the caret on the first brace is on the whole file already
+# (AJ-2.2, as AxDown's headings); Ctrl+Shift+J from inside reaches the whole file.
+use 1
+keys ctrl+home ctrl+j
+expect said ! permissions, object with 2 keys
+keys ctrl+shift+j
+expect said ! object with 4 keys

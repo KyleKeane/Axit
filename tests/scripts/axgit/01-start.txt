@@ -1,0 +1,88 @@
+# AxGit: start (docs/axgit/nvda-test-plan.md section 1; SPEC AG-1, AG-2, AG-6.2).
+# A scratch repository with two commits, a second branch and two changes: a modified tracked file and an untracked one.
+# The update check off in the run's own settings (AXIT_HOME): a network call, and its failure is a logged ERROR.
+file home\Axit\axgit.json {"checkForUpdates": false}
+run git init -q -b main repo
+file repo\a.txt hello
+file repo\b.txt second
+run git -C repo add .
+run git -C repo -c user.name=Test -c user.email=none commit -q -m first
+file repo\b.txt second\nmore
+run git -C repo -c user.name=Test -c user.email=none commit -q -am second
+run git -C repo branch other
+file repo\a.txt hello\nchanged
+file repo\new.txt untracked text
+mkdir plain
+
+# 1.1 The window is named after the repository, the Changes list focused on its first item; nothing announced.
+start git {temp}\repo
+expect state repo - AxGit
+expect focus Changes, 2 files
+expect focus Modified a.txt, unstaged
+expect quiet 1500
+
+# 1.2 Down: the next item only. Tab, Shift+Tab, F6, Ctrl+Tab between the list and the details.
+keys down
+expect said · Untracked new.txt
+expect quiet 500
+keys tab
+expect said → Details (Text)
+keys shift+tab
+expect said → Changes, 2 files (List): Untracked new.txt
+keys f6
+expect said → Details (Text)
+keys ctrl+tab
+expect said → Changes, 2 files (List): Untracked new.txt
+
+# 1.3 The status bar: the branch, its upstream state and the counts, then the path.
+# (Plan: "main · up to date"; a repository without a remote reads "no upstream", AG-2.3. The NVDA+End reading itself is manual.)
+# The runner matches "state" against the raw JSON, where the middle dot is ·, so the parts are matched apart.
+expect state "status":["main
+expect state no upstream
+expect state 2 changed, 0 staged
+expect state \\repo"]
+
+# 1.4 The views by Ctrl+1, 2, 3, each said with the item it is on; Ctrl+1 back on the item it had.
+keys ctrl+1
+expect said ! Changes, 2 files. Untracked new.txt
+keys ctrl+2
+expect said ! Log, 2 commits.
+expect said Test: second
+expect focus Log, 2 commits
+keys ctrl+3
+expect said ! Branches, 2. main, current, no upstream
+keys ctrl+1
+expect said ! Changes, 2 files. Untracked new.txt
+expect focus Untracked new.txt
+
+# 1.4a A command of another view says which view first, and the view stays.
+keys ctrl+2
+expect said ! Log, 2 commits.
+keys space
+expect said ! Changes view first: Ctrl+1
+keys delete
+expect said ! Changes view first: Ctrl+1
+menu Show diff
+expect said ! Changes view first: Ctrl+1
+expect focus Log, 2 commits
+keys ctrl+1
+expect said ! Changes, 2 files.
+menu Switch to branch
+expect said ! Branches view first: Ctrl+3
+expect focus Changes, 2 files
+
+# 1.6 Alt+F4 closes the window without a question (the runner's close is Alt+F4's path; that no question came is
+# not checked: the runner has no step that expects a window to be gone).
+close
+
+# 1.5 Started on a folder that is not a repository: the notice naming the folder; Enter closes it; the title.
+start git {temp}\plain
+expect state Not a git repository
+expect state plain is not inside a git repository
+# The notice holds the answering keys for a second after it appears (KeyHold).
+wait 1200
+keys enter
+expect state "notice":null
+expect state No repository - AxGit
+# 1.5 Ctrl+O opens the Windows folder picker, and Ctrl+O on a folder outside any repository with one open: manual,
+# the picker is a system dialog the channel cannot drive.

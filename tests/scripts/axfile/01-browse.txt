@@ -1,0 +1,573 @@
+# AxFile, test plan section 1: start, the list, browsing (docs/axfile/nvda-test-plan.md 1.1 to 1.12b; AF-1, AF-2, AF-3).
+# The folders are those of manual_tests/prepare.ps1 axfile, made in {temp}.
+mkdir nav
+file nav\aardvark.txt The aardvark file.
+file nav\apple.txt The apple file.
+file nav\apricot.txt The apricot file.
+file nav\avocado.txt The avocado file.
+file nav\banana.txt The banana file.
+file nav\blueberry.txt The blueberry file.
+file nav\cherry.txt The cherry file.
+file nav\coconut.txt The coconut file.
+file nav\date.txt The date file.
+file nav\elderberry.txt The elderberry file.
+file nav\fig.txt The fig file.
+file nav\level-1-enter-me\level-2-enter-me\level-3-enter-me\you-reached-the-bottom.txt Three levels down.
+file nav\level-1-enter-me\level-1-file.txt A file on level 1.
+file nav\level-1-enter-me\level-2-enter-me\level-2-file.txt A file on level 2.
+mkdir nav\empty-folder-no-items
+
+# The run's own settings: no update check at the start, which is a network call (bundle G6).
+file home\Axit\axfile.json {"checkForUpdates": false}
+
+# 1.1 The start: the title names the folder, the list its count, the first entry selected; nothing announced.
+start file {temp}\nav
+expect focus "name":"13 items"
+# A modifier key sent while the window still settles can lose its modifier (the channel); let it settle.
+wait 500
+expect focus empty-folder-no-items, folder
+expect state "title":"nav - AxFile"
+expect quiet 1500
+
+# 1.2 Down: the next entry, nothing said. Home, End: the first and the last.
+keys down
+expect focus level-1-enter-me, folder
+expect quiet 500
+keys end
+expect focus fig.txt
+keys home
+expect focus empty-folder-no-items
+# Up and Home at the first: the edge earcon, nothing moves, nothing said.
+keys up
+expect said ♪ Edge
+keys home
+expect said ♪ Edge
+expect focus empty-folder-no-items
+expect quiet 500
+# End, then Down and End at the last: the earcon each time.
+keys end
+keys down
+expect said ♪ Edge
+keys end
+expect said ♪ Edge
+expect focus fig.txt
+keys home
+# Typing a name: the first three letters quickly select it, once.
+type ban
+expect said · banana.txt
+expect focus banana.txt
+refuse said · blueberry.txt
+# The same first letter twice with a pause: the next name starting with it.
+wait 1200
+type c
+expect focus cherry.txt
+wait 1200
+type c
+expect focus coconut.txt
+# zzz: the earcon, the selection unmoved.
+wait 1200
+type zzz
+expect said ♪ Edge
+expect focus coconut.txt
+wait 1200
+# Tab to the Actions list and back; F6 and Ctrl+Tab the same, Escape back.
+keys tab
+expect focus "name":"Actions"
+expect focus No actions yet
+keys shift+tab
+expect focus coconut.txt
+keys f6
+expect focus "name":"Actions"
+keys escape
+expect focus coconut.txt
+keys ctrl+tab
+expect focus "name":"Actions"
+keys escape
+expect focus coconut.txt
+
+# 1.2a A prefix with a doubled letter is searched whole; a run of one letter cycles.
+keys home
+type aar
+expect focus aardvark.txt
+wait 1200
+keys home
+type aa
+expect focus apple.txt
+wait 1200
+
+# 1.3 The status bar: nothing on the left, the folder's full path on the right.
+expect state "status":["",
+expect state \\nav"]
+
+# 1.4 Enter on a folder: "<folder>, N items, <entry>", once; the title names it.
+keys home
+keys down
+keys enter
+expect said ! level-1-enter-me, 2 items, level-2-enter-me, folder
+expect state "title":"level-1-enter-me - AxFile"
+refuse said ! level-2-enter-me, folder
+# Backspace: the folder above, on the folder left; Alt+Up the same.
+keys backspace
+expect said ! nav, 13 items, level-1-enter-me, folder
+expect focus level-1-enter-me, folder
+keys enter
+expect said level-1-enter-me, 2 items
+keys alt+up
+expect said ! nav, 13 items, level-1-enter-me, folder
+# Enter on an empty folder: "<name>, No items in this folder"; Enter, Ctrl+I, F2 on that line say it.
+keys home
+keys enter
+expect said ! empty-folder-no-items, No items in this folder
+keys enter
+expect said ! No items in this folder
+keys ctrl+i
+expect said ! No items in this folder
+keys f2
+expect said ! No items in this folder
+keys backspace
+expect said nav, 13 items, empty-folder-no-items, folder
+# Ctrl+G to another folder says the folder, its count and the entry the same way.
+keys ctrl+g
+expect state "notice":"Go to folder"
+expect focus "name":"Path"
+type {temp}\nav\level-1-enter-me\level-2-enter-me
+keys enter
+expect said ! level-2-enter-me, 2 items, level-3-enter-me, folder
+expect focus level-3-enter-me, folder
+# Manual (1.12a): the Drives submenu (Alt+F, E) is filled as it opens (not in the palette), and Eject and Drive
+# properties are the shell's; Manual (1.12b): Ctrl+N at This PC starts a second window the runner cannot reach.
+# Alt+D: the Go to folder notice, as Ctrl+G (1.12a).
+keys alt+d
+expect state "notice":"Go to folder"
+keys escape
+expect focus level-3-enter-me, folder
+# This PC (1.4): at a drive's root Backspace gives This PC with the drive selected; reading the list only.
+keys ctrl+g
+expect state "notice":"Go to folder"
+expect focus "name":"Path"
+type C:\
+keys enter
+expect said ! C:\,
+keys backspace
+expect said (C:), drive
+expect state "title":"This PC - AxFile"
+expect focus (C:), drive
+keys ctrl+i
+expect said GB free of
+keys ctrl+shift+n
+expect said ! Choose a drive first
+keys backspace
+expect said ! Top
+# Left at This PC: the earcon (1.4b).
+keys left
+expect said ♪ Edge
+# 1.4 Enter on a drive opens its root, "<drive>, N items, <entry>" (reading the list only); Right does the same (1.4b).
+keys enter
+expect said ! C:\,
+keys left
+expect said ! This PC,
+expect focus (C:), drive
+keys right
+expect said ! C:\,
+keys backspace
+expect said ! This PC,
+# Manual (1.4): Alt+D with a drive's number and Alt+F, V with a favorite: the Drives and Favorites submenus are filled as they open and cannot be reached by the channel (no menu mode on the test desktop, not in the command palette).
+
+# 1.4b Left and Right.
+keys ctrl+g
+expect focus "name":"Path"
+type {temp}\nav
+keys enter
+expect said ! nav, 13 items
+keys down
+expect focus level-1-enter-me, folder
+keys right
+expect said ! level-1-enter-me, 2 items, level-2-enter-me, folder
+keys right
+expect said ! level-2-enter-me, 2 items, level-3-enter-me, folder
+keys right
+expect said ! level-3-enter-me, 1 item, you-reached-the-bottom.txt
+keys right
+expect said ♪ Edge
+expect state "title":"level-3-enter-me - AxFile"
+keys left
+expect said ! level-2-enter-me, 2 items, level-3-enter-me, folder
+keys left
+expect said ! level-1-enter-me, 2 items, level-2-enter-me, folder
+keys left
+expect said ! nav, 13 items, level-1-enter-me, folder
+
+# 1.5 Ctrl+I on a folder and on a file.
+keys ctrl+i
+expect said ! level-1-enter-me, folder, modified
+keys end
+keys ctrl+i
+expect said ! fig.txt, 13 bytes, modified
+
+# 1.6 Manual: Enter on a file starts the user's default program for it, and Ctrl+E starts AxDown or AxJSON, windows outside this one.
+
+# 1.7 Go to folder: the field "Path" holds the current folder with a backslash at its end.
+keys ctrl+g
+expect state "notice":"Go to folder"
+expect focus "name":"Path"
+expect focus \\nav\\"
+# An environment variable is expanded (AXIT_HOME is the run's own folder, set by the runner).
+expect focus "name":"Path"
+type %AXIT_HOME%
+keys enter
+expect said ! home,
+expect state "title":"home - AxFile"
+# A file's path: its folder with the file selected.
+keys ctrl+g
+expect focus "name":"Path"
+type {temp}\nav\level-1-enter-me\level-1-file.txt
+keys enter
+expect said ! level-1-enter-me, 2 items, level-1-file.txt
+expect focus level-1-file.txt
+# A place that does not exist: "Not found: <path>".
+keys ctrl+g
+expect focus "name":"Path"
+type C:\nope-axit-test
+keys enter
+expect said ! Not found: C:\nope-axit-test
+keys escape
+# Completion: Down and Up complete the name after the last backslash; past either end the earcon.
+# The field's text is selected when the notice opens, so typing replaces it.
+keys ctrl+g
+expect focus "name":"Path"
+type {temp}\nav\lev
+keys down
+expect said ! level-1-enter-me, folder, 1 of 1
+expect focus level-1-enter-me\\"
+# Right at the end of a completed folder: its first entry.
+keys right
+expect said ! level-2-enter-me, folder, 1 of 2
+keys down
+expect said ! level-1-file.txt, 2 of 2
+keys up
+expect said ! level-2-enter-me, folder, 1 of 2
+keys up
+expect said ♪ Edge
+expect said ! level-2-enter-me, folder, 1 of 2
+# Letters typed after a completion: Down completes from the new text.
+type level-2-f
+keys down
+expect said ! level-2-file.txt, 1 of 1
+expect focus level-2-enter-me\\level-2-file.txt"
+keys escape
+# Several matches in order, and a text nothing starts with: the earcon.
+keys ctrl+g
+expect focus "name":"Path"
+type {temp}\nav\a
+keys down
+expect said ! aardvark.txt, 1 of 4
+keys down
+expect said ! apple.txt, 2 of 4
+keys escape
+keys ctrl+g
+expect focus "name":"Path"
+type {temp}\nav\zzz
+keys down
+expect said ♪ Edge
+keys escape
+# The drives from "C:".
+keys ctrl+g
+expect focus "name":"Path"
+type C:
+keys down
+expect said (C:), drive, 1 of 1
+keys escape
+# Enter on a completed path: the list there.
+keys ctrl+g
+expect focus "name":"Path"
+type {temp}\nav\level-1-enter-me\level-2
+keys down
+expect said level-2-enter-me, folder, 1 of 1
+keys enter
+expect said ! level-2-enter-me, 2 items, level-3-enter-me, folder
+keys backspace
+expect said ! level-1-enter-me, 2 items, level-2-enter-me, folder
+keys backspace
+expect said ! nav, 13 items, level-1-enter-me, folder
+
+# 1.8 Manual: Ctrl+O is the Windows folder picker, the Open recent folder submenu is filled as it opens (not in the palette), Ctrl+N starts a second window the runner cannot reach. Favorites: Ctrl+D adds and removes.
+keys ctrl+d
+expect said ! Added to Favorites
+keys ctrl+d
+expect said ! Removed from Favorites
+
+# 1.9 A file added from outside: F5 reads the folder again, "Refreshed", the entry kept. (Coming back to the window with Alt+Tab is manual: the test window is never activated.)
+keys end
+expect focus fig.txt
+file nav\added-from-outside.txt Added while AxFile shows the folder.
+keys f5
+expect said ! Refreshed
+expect focus fig.txt
+expect list added-from-outside.txt
+
+# 1.3a Hidden and period-named entries: left out and counted on the list's last line.
+file hid\visible-file.txt Always shown.
+file hid\hidden-file.txt Shown only with Show hidden files and folders.
+file hid\.period-file Shown only with Show files and folders starting with a period.
+run attrib +h hid\hidden-file.txt
+keys ctrl+g
+expect focus "name":"Path"
+type {temp}\hid
+keys enter
+expect said ! hid, 1 item, visible-file.txt
+keys end
+expect focus Not shown: 1 hidden, 1 starting with a period
+keys enter
+expect said ! Not shown: 1 hidden, 1 starting with a period
+keys up
+expect focus visible-file.txt
+menu Show files and folders starting with a period
+expect list .period-file
+expect list Not shown: 1 hidden"
+menu Show hidden files and folders
+expect list hidden-file.txt
+expect list "count":3
+menu Show hidden files and folders
+menu Show files and folders starting with a period
+expect list "count":2
+# Manual (1.3a): that the options show unchecked and are read in Options, General, is the menu bar's (no menu mode on the test desktop); the palette's "checked" is checked by commands below.
+expect commands "Show hidden files and folders, Options, General"
+
+# 1.10 Find: Ctrl+F, part of a name further down, Enter: that entry; F3 the next, Shift+F3 back; "Not found".
+file fs\chapter-01-notes.txt Chapter 1 notes.
+file fs\chapter-02-notes.txt Chapter 2 notes.
+file fs\chapter-03-notes.txt Chapter 3 notes.
+file fs\chapter-04-notes.txt Chapter 4 notes.
+file fs\chapter-05-notes.txt Chapter 5 notes.
+file fs\find-me-somewhere-down-the-list.txt Find me.
+file fs\sort-oldest-and-smallest.txt Small.
+wait 1100
+file fs\sort-middle-age-and-size.bin 0123456789012345678901234567890123456789012345678901234567890123456789
+wait 1100
+file fs\sort-newest-and-largest.bin 0123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789
+keys ctrl+g
+expect focus "name":"Path"
+type {temp}\fs
+keys enter
+expect said ! fs, 9 items, chapter-01-notes.txt
+keys ctrl+f
+expect state "notice":"Find"
+expect focus "name":"Name contains"
+type find
+keys enter
+expect focus find-me-somewhere-down-the-list.txt
+keys home
+keys ctrl+f
+expect focus "name":"Name contains"
+type notes
+keys enter
+expect focus chapter-02-notes.txt
+keys f3
+expect focus chapter-03-notes.txt
+keys shift+f3
+expect focus chapter-02-notes.txt
+keys ctrl+f
+expect focus "name":"Name contains"
+type zzz
+keys enter
+expect said ! Not found
+keys escape
+expect focus chapter-02-notes.txt
+
+# 1.10a Filter: Ctrl+Shift+F, the notice "Filter" with the field "Name contains".
+keys home
+keys ctrl+shift+f
+expect state "notice":"Filter"
+expect focus "name":"Name contains"
+type chap
+keys enter
+expect said ! 5 of 9 items, filter chap, chapter-01-notes.txt
+expect list "count":5
+keys down
+expect focus chapter-02-notes.txt
+keys ctrl+i
+expect said ! chapter-02-notes.txt, 
+keys escape
+expect said ! Filter cleared
+expect list "count":9
+expect focus chapter-02-notes.txt
+keys ctrl+shift+f
+expect focus "name":"Name contains"
+type zzz
+keys enter
+expect said ! 0 of 9 items, filter zzz, No names contain zzz
+keys enter
+expect said ! No names contain zzz
+keys escape
+expect said ! Filter cleared
+# Sort by: Name checked; Date: newest first after the folders; Size: largest first; Name again.
+expect commands "Name, Folder, Sort by, checked"
+menu Date, Folder, Sort by
+expect said ! Sorted by date
+keys home
+expect focus sort-newest-and-largest.bin
+keys down
+expect focus sort-middle-age-and-size.bin
+menu Size, Folder, Sort by
+expect said ! Sorted by size
+keys home
+expect focus sort-newest-and-largest.bin
+keys down
+expect focus sort-middle-age-and-size.bin
+menu Name, Folder, Sort by
+expect said ! Sorted by name
+keys home
+expect focus chapter-01-notes.txt
+
+# 1.11 Ctrl+S: "Nothing to save here". F1: the Keyboard shortcuts notice; Escape closes it.
+keys ctrl+s
+expect said ! Nothing to save here
+keys f1
+expect focus "name":"Keyboard shortcuts"
+keys escape
+expect focus chapter-01-notes.txt
+expect state "notice":null
+
+# 1.12 The folder shown is deleted from outside: F5 gives the notice "Folder not found" naming it; Enter: the folder above.
+# (Coming back with Alt+Tab is manual: the test window is never activated.)
+file gone\stand-here.txt Stand in this folder.
+keys ctrl+g
+expect focus "name":"Path"
+type {temp}\gone
+keys enter
+expect said ! gone, 1 item, stand-here.txt
+run rmdir /s /q gone
+keys f5
+expect state "notice":"Folder not found"
+expect state \\gone does not exist
+# A notice that came by itself holds its answering keys for a second (KeyHold).
+wait 1100
+keys enter
+expect state "notice":null
+expect list nav, folder
+expect list "count":4
+
+# 1.13 Selection: Space, the Shift keys, Ctrl+A, Ctrl+Shift+A, Escape (AF-3.7).
+file sel\select-01.txt Entry 1.
+file sel\select-02.txt Entry 2.
+file sel\select-03.txt Entry 3.
+file sel\select-04.txt Entry 4.
+file sel\select-05.txt Entry 5.
+file sel\select-06.txt Entry 6.
+file sel\select-07.txt Entry 7.
+file sel\select-08.txt Entry 8.
+file sel\select-09.txt Entry 9.
+file sel\select-10.txt Entry 10.
+file sel\select-11.txt Entry 11.
+file sel\select-12.txt Entry 12.
+mkdir sel\select-folder-a
+mkdir sel\select-folder-b
+keys ctrl+g
+expect focus "name":"Path"
+type {temp}\sel
+keys enter
+expect said ! sel, 14 items, select-folder-a, folder
+keys down down
+expect focus select-01.txt
+said
+# Space: "Selected" and nothing else. (Whether NVDA reads the rewritten item a second time is tier 3, NVDA's own.)
+keys space
+expect said ! Selected
+refuse said ! select-01
+keys down
+expect focus "value":"select-02.txt"
+keys up
+expect focus "value":"select-01.txt, selected"
+keys down space
+expect said ! Selected, 2 selected
+keys ctrl+i
+# The information with the count: "select-02.txt, 8 bytes, modified <date time>, 2 selected".
+expect said , 2 selected
+keys space
+expect said ! Deselected, 1 selected
+keys ctrl+a
+expect said ! 14 selected
+keys down
+expect focus "value":"select-03.txt, selected"
+keys ctrl+shift+a
+expect said ! None selected
+keys down
+expect focus "value":"select-04.txt"
+# Space on two, Escape: "None selected", both read their names alone; Escape again: nothing.
+keys space down space
+expect said ! Selected, 2 selected
+keys escape
+expect said ! None selected
+expect focus "value":"select-05.txt"
+keys up
+expect focus "value":"select-04.txt"
+keys escape
+expect quiet 1000
+# Under a filter: Escape deselects first, the filter stays; the next Escape clears it.
+keys ctrl+shift+f
+expect focus "name":"Name contains"
+type select-0
+keys enter
+expect said ! 9 of 14 items, filter select-0
+keys space
+expect said ! Selected
+keys escape
+expect said ! None selected
+expect focus "name":"9 of 14 items, filter select-0"
+keys escape
+expect said ! Filter cleared
+# A mark is gone when another folder is shown: Space, Enter on a folder, Backspace.
+keys home
+keys down down
+keys space
+expect said ! Selected
+keys home
+keys enter
+expect said ! select-folder-a, No items in this folder
+keys backspace
+expect said ! sel, 14 items, select-folder-a, folder
+keys down down
+expect focus "value":"select-01.txt"
+# Shift+Down three times: each entry reads ", selected", nothing said; Shift+Up unmarks the last.
+keys shift+down
+expect focus "value":"select-02.txt, selected"
+keys shift+down
+expect focus "value":"select-03.txt, selected"
+keys shift+down
+expect focus "value":"select-04.txt, selected"
+expect quiet 500
+keys shift+up
+expect focus "value":"select-03.txt, selected"
+expect list "select-04.txt",
+keys ctrl+i
+# "select-03.txt, 8 bytes, modified <date time>, 3 selected".
+expect said , 3 selected
+# Down without Shift, then Shift+End: every entry from there to the last, the earlier three kept.
+keys down
+keys shift+end
+expect focus "value":"select-12.txt, selected"
+expect list "select-01.txt, selected","select-02.txt, selected","select-03.txt, selected","select-04.txt, selected"
+keys ctrl+i
+expect said , 12 selected
+keys ctrl+shift+a
+expect said ! None selected
+
+# 1.13a A mark the filter hides is dropped: the count and the entries acted on are one set.
+keys home
+keys down down
+keys space
+keys down
+keys space
+expect said ! Selected, 2 selected
+keys ctrl+shift+f
+expect focus "name":"Name contains"
+type select-01
+keys enter
+expect said ! 1 of 14 items, filter select-01, select-01.txt
+keys ctrl+i
+expect said , 1 selected
+# Manual (1.13a): Ctrl+X "Cut <name>" writes to the system clipboard, which the test desktop shares with the user.
+keys escape
+expect said ! None selected
+keys escape
+expect said ! Filter cleared

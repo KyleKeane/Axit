@@ -1,0 +1,137 @@
+# AxDown, test plan section 8 (Navigation), driven from inside the window (docs/axdown/nvda-test-plan.md, SPEC.md §9).
+# The run's own settings: no update check, whose network call logs an ERROR when GitHub cannot be reached.
+file home\Axit\axdown.json {"checkForUpdates": false}
+# long.md as manual_tests/prepare.ps1 makes it, with a shorter long line.
+file long.md # Long Markdown file for navigation\n\nThe first paragraph, one line.\n\nThis line is longer than the window, so word wrap shows it on several rows and the caret test can tell. This line is longer than the window, so word wrap shows it on several rows.\n\n## Second heading, level 2\n\nA paragraph of two lines,\nthe second line of it.\n\n### Third heading, level 3\n\nLinks: [GitHub](https://github.com), a bare address https://www.example.com, and an angle address <https://example.org>.\nAn image, which is not a link: ![a picture](picture.png).\n\n## Lists\n\n- one\n- two\n  - two, nested\n- three\n\n1. numbered one\n2. numbered two\n\n## Quote and table\n\n> A block quote, line one.\n> Line two of the quote.\n\n| Name | Value |\n| --- | --- |\n| alpha | 1 |\n| beta | 2 |\n\n## Code\n\n```\n# not a heading, inside a fenced code block\n[not a link](https://example.com)\n> not a quote\n- not a list\n```\n\n#### Fourth level heading\n\n##### Fifth level heading\n\n###### Sixth level heading\n\nThe last paragraph of the file.
+
+start down {temp}\long.md
+expect focus long.md
+
+# 8.1: Ctrl+H to each heading, its line spoken; the one in the fenced code block skipped (8.2); at the last, "No next heading".
+keys ctrl+h
+expect said ! Second heading, level 2, heading level 2
+keys ctrl+h
+expect said ! Third heading, level 3, heading level 3
+keys ctrl+h
+expect said ! Lists, heading level 2
+keys ctrl+h
+expect said ! Quote and table, heading level 2
+keys ctrl+h
+expect said ! Code, heading level 2
+keys ctrl+h
+expect said ! Fourth level heading, heading level 4
+keys ctrl+h
+expect said ! Fifth level heading, heading level 5
+keys ctrl+h
+expect said ! Sixth level heading, heading level 6
+keys ctrl+h
+expect said ! No next heading
+expect state Line 50, Column 1 \u00B7
+# Ctrl+Shift+H back, the fenced line skipped again; at the first, "No previous heading".
+keys ctrl+shift+h ctrl+shift+h ctrl+shift+h ctrl+shift+h
+expect said ! Code, heading level 2
+keys ctrl+shift+h ctrl+shift+h ctrl+shift+h ctrl+shift+h
+expect said ! Long Markdown file for navigation, heading level 1
+keys ctrl+shift+h
+expect said ! No previous heading
+expect state Line 1, Column 1 \u00B7
+
+# 8.3: plain arrow keys speak nothing of AxDown's own.
+keys down down down up right left end home
+expect quiet 1000
+
+# 8.4: Ctrl+2, the next level-2 heading, other levels skipped; Ctrl+Shift+2 back; past the last, "No next heading level 2".
+keys ctrl+home ctrl+2
+expect said ! Second heading, level 2, heading level 2
+keys ctrl+2
+expect said ! Lists, heading level 2
+keys ctrl+2 ctrl+2
+expect said ! Code, heading level 2
+keys ctrl+2
+expect said ! No next heading level 2
+keys ctrl+shift+2
+expect said ! Quote and table, heading level 2
+keys ctrl+4
+expect said ! Fourth level heading, heading level 4
+keys ctrl+shift+4
+expect said ! No previous heading level 4
+# Navigate, Next and Previous list Heading and Heading level 1 to 6 with their keys; the items do what the keys do.
+expect commands "Heading, Navigate, Next, Ctrl\u002BH"
+expect commands "Heading level 1, Navigate, Next, Ctrl\u002B1."
+expect commands "Heading level 6, Navigate, Next, Ctrl\u002B6."
+expect commands "Heading, Navigate, Previous, Ctrl\u002BShift\u002BH"
+expect commands "Heading level 1, Navigate, Previous, Ctrl\u002BShift\u002B1."
+expect commands "Heading level 6, Navigate, Previous, Ctrl\u002BShift\u002B6."
+keys ctrl+home
+menu Heading level 3, Navigate, Next
+expect said ! Third heading, level 3, heading level 3
+menu Heading level 1, Navigate, Previous
+expect said ! Long Markdown file for navigation, heading level 1
+menu Heading, Navigate, Next
+expect said ! Second heading, level 2, heading level 2
+menu Heading, Navigate, Previous
+expect said ! Long Markdown file for navigation, heading level 1
+
+# 8.5: Ctrl+K, the caret on the link's first character; a bare and an angle address count, an image does not, nor
+# anything in the fenced code block.
+keys ctrl+home ctrl+k
+expect said ! GitHub, link
+expect state Line 14, Column 8 \u00B7
+keys ctrl+k
+expect said ! https://www.example.com, link
+keys ctrl+k
+expect said ! https://example.org, link
+keys ctrl+k
+expect said ! No next link
+# Ctrl+Shift+K from inside a link: the link before it.
+keys ctrl+shift+k
+expect said ! https://www.example.com, link
+keys right right right
+keys ctrl+shift+k
+expect said ! GitHub, link
+
+# 8.6: Ctrl+L, "List with 3 items, one" at the first item; Ctrl+I, the next item's text, nested items included; a
+# numbered list after a bulleted one is a second list.
+keys ctrl+home ctrl+l
+expect said ! List with 3 items, one
+keys ctrl+i
+expect said ! two
+keys ctrl+i
+expect said ! two, nested
+keys ctrl+i
+expect said ! three
+keys ctrl+i
+expect said ! numbered one
+keys ctrl+home ctrl+l ctrl+l
+expect said ! List with 2 items, numbered one
+keys ctrl+l
+expect said ! No next list
+keys ctrl+shift+l
+expect said ! List with 3 items, one
+
+# 8.7: Ctrl+Q, "Block quote, " and the first line; Ctrl+T, the table at its header line; nothing in the fenced code block.
+keys ctrl+home ctrl+q
+expect said ! Block quote, A block quote, line one.
+keys ctrl+q
+expect said ! No next block quote
+keys ctrl+home ctrl+t
+expect said ! Table with 3 rows and 2 columns
+expect state Line 32, Column 1 \u00B7
+keys ctrl+t
+expect said ! No next table
+# From the header line itself the previous table is none: previous means on a line before the caret's.
+keys ctrl+shift+t
+expect said ! No previous table
+keys ctrl+end ctrl+shift+t
+expect said ! Table with 3 rows and 2 columns
+# Navigate, Next and Previous list Link, List, List item, Block quote and Table with their keys.
+expect commands "Link, Navigate, Next, Ctrl\u002BK"
+expect commands "List, Navigate, Next, Ctrl\u002BL"
+expect commands "List item, Navigate, Next, Ctrl\u002BI"
+expect commands "Block quote, Navigate, Next, Ctrl\u002BQ"
+expect commands "Table, Navigate, Next, Ctrl\u002BT"
+expect commands "Link, Navigate, Previous, Ctrl\u002BShift\u002BK"
+expect commands "List, Navigate, Previous, Ctrl\u002BShift\u002BL"
+expect commands "List item, Navigate, Previous, Ctrl\u002BShift\u002BI"
+expect commands "Block quote, Navigate, Previous, Ctrl\u002BShift\u002BQ"
+expect commands "Table, Navigate, Previous, Ctrl\u002BShift\u002BT"

@@ -1,0 +1,18 @@
+# AxTerminal, section 2 of docs/axterminal/nvda-test-plan.md, step 9: Speak output (AT-5.3), in a script of its own
+# because it fails at present (seen 2026-10-23: the listing's last line comes after "Done", in an utterance of its own),
+# so that 02-commands.txt checks the rest of the section.
+mkdir myproject
+file home\Axit\axterminal.json {"checkForUpdates": false}
+file myproject\listed.txt x
+start terminal {temp}\myproject
+expect said ♪ Ready
+# Options, Speech, Speak output: all lines; Get-ChildItem: the lines as one utterance, then "Done"; back to none.
+menu Speak output: all lines
+expect said Speak output: all lines
+type Get-ChildItem
+keys enter
+expect said listed.txt
+expect said Done
+expect said ♪ Done
+menu Speak output: none
+expect said Speak output: none

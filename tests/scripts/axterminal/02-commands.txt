@@ -1,0 +1,205 @@
+# AxTerminal, section 2 of docs/axterminal/nvda-test-plan.md: commands (AT-3, AT-5), in Windows PowerShell or
+# PowerShell 7, the default shell of a fresh settings file.
+mkdir myproject
+# The run's own settings: no update check (network, and an ERROR in the log when it fails); a small font in a
+# maximized window, so that no line wraps in the view, since the channel reads the caret's line by its visual row
+# (a wrapped line above the caret shifts every "value" below by one).
+file home\Axit\axterminal.json {"checkForUpdates": false, "fontSize": 6, "window": {"x": 0, "y": 0, "width": 1600, "height": 900, "maximized": true}}
+file myproject\listed.txt x
+start terminal {temp}\myproject
+expect said ♪ Ready
+# Clear the transcript first, so that the blocks are the window's first lines (PowerShell's PSReadLine line is long).
+keys ctrl+l
+expect said Cleared
+
+# Step 1: a command, its block and the heading keys.
+type Write-Output hello
+keys enter
+expect said Sent
+expect said ♪ Sent
+expect said Done
+expect said ♪ Done
+keys ctrl+3
+expect said Output 1 heading level 1
+expect focus Terminal
+expect text "# Output 1","","hello"
+keys down
+keys down
+expect focus "value":"hello"}
+keys shift+i
+expect said Input 1 heading level 1
+expect focus "value":"# Input 1"}
+keys down
+expect focus "value":"## Folder"}
+keys down
+expect focus \\myproject"}
+keys down
+expect focus "value":"## Command"}
+keys down
+expect focus "value":"Write-Output hello"}
+keys shift+i
+expect said Input 1 heading level 1
+keys 2
+expect said Folder heading level 2
+keys 2
+expect said Command heading level 2
+# Options, Text, Markers in the text off: the lines read without the hashes; h still says the level.
+menu Markers in the text
+keys shift+i
+expect said Input 1 heading level 1
+expect focus "value":"Input 1"}
+keys down
+expect focus "value":"Folder"}
+keys up
+keys h
+expect said heading level
+menu Markers in the text
+keys shift+i
+expect focus "value":"# Input 1"}
+keys ctrl+1
+expect focus "name":"Command"
+
+# Step 2: a failing command; a listing without prompt rows.
+type cmd /c exit 3
+keys enter
+expect said Failed, exit code 3
+expect said ♪ Done
+type Get-ChildItem
+keys enter
+expect said ♪ Click
+expect said Done
+expect said ♪ Done
+keys ctrl+3
+expect said Output 3 heading level 1
+expect focus "name":"Terminal"
+expect text listed.txt
+keys ctrl+1
+expect focus "name":"Command"
+
+# Step 3: a program that asks; the answer is an exchange of its own.
+type Read-Host "Continue? (y/n)"
+keys enter
+expect said Sent
+expect said Asks: Continue? (y/n):
+expect said ♪ Question
+type y
+keys enter
+expect said Sent
+expect said Done
+expect said ♪ Done
+keys ctrl+2
+expect text Continue? (y/n): y
+expect text "# Input 5","## Folder"
+expect text "## Command","y",""
+keys ctrl+1
+
+# Step 4: a command of several lines with Shift+Enter; no continuation rows in the output.
+type if ($true) {
+keys shift+enter
+type "yes"
+keys shift+enter
+type }
+keys enter
+expect said Done
+expect said ♪ Done
+# "yes" reaches the view only after "Done" here (a tick follows it): a Down pressed at once finds no line below.
+wait 600
+keys ctrl+3
+expect said Output 6 heading level 1
+expect focus "name":"Terminal"
+keys down
+keys down
+expect focus "value":"yes"}
+expect text "# Output 6","","yes"
+keys ctrl+1
+
+# Step 5: Ctrl+Enter sends without a record: no block (the next block is number 7), no recent command.
+type echo secret
+keys ctrl+enter
+expect said Sent, not recorded
+expect said Done
+expect said ♪ Done
+type Start-Sleep 5
+keys ctrl+enter
+expect said Sent, not recorded
+expect state Running: a command sent without recording
+keys ctrl+q
+expect said Running: a command sent without recording,
+refuse said Start-Sleep
+expect said Done
+expect said ♪ Done
+keys ctrl+r
+expect focus "name":"Recent commands"
+expect list "items":["if ($true) {
+keys escape
+expect focus "name":"Command"
+type Write-Output seven
+keys enter
+expect said Done
+expect said ♪ Done
+keys ctrl+3
+expect said Output 7 heading level 1
+expect focus "name":"Terminal"
+keys ctrl+1
+
+# Step 6: Ctrl+R lists the recent commands, the newest first; Enter puts one in the field; Escape goes back.
+keys ctrl+r
+expect focus "name":"Recent commands"
+expect focus "value":"Write-Output seven
+expect list Get-ChildItem
+keys down
+keys enter
+expect focus "name":"Command"
+expect text "if ($true) {",
+keys ctrl+a
+keys delete
+keys ctrl+r
+expect focus "name":"Recent commands"
+keys escape
+expect focus "name":"Command"
+
+# Step 7: Enter on a command line of the terminal copies it into the field.
+keys ctrl+3
+expect said Output 7 heading level 1
+expect focus "name":"Terminal"
+keys shift+i
+expect said Input 7 heading level 1
+keys 2
+keys 2
+expect said Command heading level 2
+keys down
+expect focus "value":"Write-Output seven"}
+keys enter
+expect said Line copied
+expect focus "name":"Command"
+expect focus "value":"Write-Output seven
+keys ctrl+a
+keys delete
+
+# Step 8: a long command, Ctrl+Q while it runs, the interrupt; Shift+Escape.
+type Start-Sleep 30
+keys enter
+expect said Sent
+expect state Running: Start-Sleep 30
+wait 1500
+keys ctrl+q
+expect said Running: Start-Sleep 30,
+keys ctrl+shift+c
+expect said Interrupt sent
+# "Done" or "Failed": the chime comes with either.
+expect said ♪ Done
+keys shift+escape
+expect said Escape sent
+
+# Step 10: the background music while a command runs, until "Done"; Ctrl+Space turns it off. The menu command
+# itself says nothing here: the palette's spoken new state is the palette notice's, which "menu" skips.
+# Step 9, Speak output, is in 02b-speak-output.txt, since it fails at present too.
+menu Background music while a command runs
+type Start-Sleep 3
+keys enter
+expect said ♪ StartMusic
+expect said Done
+expect said ♪ Done
+expect said ♪ StopMusic
+keys ctrl+space
+expect said Background music off

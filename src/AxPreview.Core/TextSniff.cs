@@ -53,7 +53,7 @@ public static class TextSniff
 
     /// <summary>
     /// Why the file at <paramref name="path"/> is not shown, or null when it is: over the editors' limit ("<name> is
-    /// n MB. AxPreview opens files up to 32 MB."), or not text ("<name> is not a text file. AxFile's Enter opens it in
+    /// 33,554,433 bytes, over the 32 MB a window can open.", the editors' wording since 2026-10-23), or not text ("<name> is not a text file. AxFile's Enter opens it in
     /// the program Windows has for it."). A file that cannot be read is left to the reader, which reports it.
     /// </summary>
     public static Refusal? Refuse(string path)
@@ -64,7 +64,7 @@ public static class TextSniff
             using var stream = File.OpenRead(path);
             if (stream.Length > MaxBytes)
             {
-                return new Refusal("Too large", $"{name} is {stream.Length / (1024 * 1024)} MB. AxPreview opens files up to {MaxBytes / (1024 * 1024)} MB.");
+                return new Refusal("Too large", $"{name} is {stream.Length:N0} bytes, over the {MaxBytes / (1024 * 1024)} MB a window can open.");
             }
 
             var bytes = new byte[Math.Min(stream.Length, Sample)];

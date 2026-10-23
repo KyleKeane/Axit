@@ -1,0 +1,73 @@
+# AxFile, test plan section 5: text, notices, the Axit menu, the command palette (docs/axfile/nvda-test-plan.md 5.1 to 5.6; AF-6).
+file home\Axit\axfile.json {"checkForUpdates": false}
+file pal\plan.md # Plan
+file pal\docs\inside.txt Inside docs.
+file pal\docs\second.txt Second.
+mkdir pal\other
+start file {temp}\pal
+expect focus "value":"docs, folder"
+# A modifier key sent while the window still settles can lose its modifier (the channel); let it settle.
+wait 500
+
+# 5.1 Larger and smaller text, Windows text size. Ctrl+Plus and Ctrl+Minus cannot be sent (the channel's keys have no
+# plus or minus), so the menu commands are run; the keys are the same items' shortcuts.
+menu Larger text
+expect said ! Text size
+menu Smaller text
+expect said ! Text size
+menu Windows text size
+expect said ! Windows text size
+
+# 5.2 Help, User guide: the guide as a notice; Escape.
+menu User guide
+expect focus "name":"User guide"
+expect focus # AxFile user guide
+keys escape
+expect state "notice":null
+expect focus "value":"docs, folder"
+
+# 5.3 The Axit menu: New window with AxFile among the apps, Close all windows, About's Version "Axit <version>".
+expect commands "AxFile, Axit, New window"
+expect commands "Close all windows, Axit"
+menu Version, Axit, About
+expect state Axit 3.
+keys escape
+expect focus "value":"docs, folder"
+# Manual (5.3): Recently closed, Open windows and Open windows by type are filled as the menu opens (not in the palette).
+# Manual (5.4): Copy diagnostics writes the clipboard.
+
+# 5.6 The command palette: the start of a folder's name, after a moment "<name>, folder, 1 of …"; Enter opens it.
+keys ctrl+shift+p
+expect focus "role":"Text"
+type oth
+expect said other, folder, 1 of
+keys enter
+expect said ! other, No items in this folder
+expect focus "name":"Empty"
+keys backspace
+expect said ! pal, 3 items, other, folder
+# Manual (5.6): Enter on a file's entry in the palette opens it in its program.
+keys ctrl+shift+p
+type refresh
+expect said Refresh, Folder, F5, 1 of 1
+keys enter
+expect said ! Refreshed
+expect focus "value":"other, folder"
+# From the Actions list, Ctrl+Shift+P, Escape: back on the same Actions line.
+keys tab
+expect focus "name":"Actions"
+keys ctrl+shift+p
+expect focus "role":"Text"
+keys escape
+expect focus "name":"Actions"
+expect focus "value":"No actions yet"
+keys escape
+expect focus "value":"other, folder"
+
+# 5.5 Close the window and start AxFile without a folder: it opens on the same folder, the last one.
+close
+start file
+expect state "title":"pal - AxFile"
+# A modifier key sent while the window still settles can lose its modifier (the channel); let it settle.
+wait 500
+expect focus "value":"docs, folder"

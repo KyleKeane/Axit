@@ -1,0 +1,42 @@
+# AxFile, test plan section 4: sound, video and reading, the hand-overs (docs/axfile/nvda-test-plan.md 4.1 to 4.5; AF-5).
+# Every hand-over starts AxPreview or AxMedia, windows the runner cannot reach or close; only the answers AxFile gives
+# itself without starting anything are checked here.
+# Manual (4.1): Shift+Enter on README.md and plain.txt, Shift+F10, E, and Shift+Enter on a folder or an .exe start AxPreview or a new AxFile window.
+# Manual (4.2): Ctrl+Enter in a folder of chapters starts AxMedia.
+# Manual (4.3): Ctrl+Shift+Q on two folders with media and Shift+F10, Q on a chapter start AxMedia (behind this window).
+# Manual (4.4): Shift+F10, A, M on a chapter or a folder and A, P on README.md start AxMedia or AxPreview.
+# Manual (4.5): Enter with AxMedia or AxPreview made the default program needs Windows' Default apps.
+file home\Axit\axfile.json {"checkForUpdates": false}
+file hand\README.md # Read me\nA text to read.
+file hand\plain.txt A plain text.
+file hand\no-media-here\only-text.txt Ctrl+Enter here says No sound or video files here.
+mkdir hand\a-folder-for-not-a-file
+start file {temp}\hand
+expect focus "value":"a-folder-for-not-a-file, folder"
+# A modifier key sent while the window still settles can lose its modifier (the channel); let it settle.
+wait 500
+
+# 4.2 Ctrl+Enter in a folder without media: "No sound or video files here".
+keys down
+expect focus "value":"no-media-here, folder"
+keys enter
+expect said ! no-media-here, 1 item, only-text.txt
+keys ctrl+enter
+expect said ! No sound or video files here
+keys backspace
+expect said ! hand, 4 items, no-media-here, folder
+
+# 4.3 Ctrl+Shift+Q on a text file: "No sound or video files to add".
+keys end
+expect focus "value":"README.md"
+keys ctrl+shift+q
+expect said ! No sound or video files to add
+# The Item menu's command does the same.
+menu Add to AxMedia's queue, Item
+expect said ! No sound or video files to add
+
+# 4.4 Open in Axit, AxPreview on a folder: "Not a file".
+keys home
+expect focus "value":"a-folder-for-not-a-file, folder"
+menu AxPreview, Item, Open in Axit
+expect said ! Not a file

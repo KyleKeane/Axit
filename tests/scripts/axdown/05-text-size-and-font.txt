@@ -1,0 +1,26 @@
+# AxDown, test plan section 5 (Text size and font), driven from inside the window (docs/axdown/nvda-test-plan.md).
+# The runner's keys have no plus or minus key, so Ctrl+Plus and Ctrl+Minus run as their menu items, Options, Text,
+# Larger text and Smaller text, which the keys stand for.
+# The sizes assume the Windows system font at 9 points, which a run's fresh settings start from.
+# The run's own settings: no update check, whose network call logs an ERROR when GitHub cannot be reached.
+file home\Axit\axdown.json {"checkForUpdates": false}
+file size.md # Text size\n\nA line of text.
+
+start down {temp}\size.md
+expect focus size.md
+# 5.1: larger: "Text size n"; smaller back; the focus stays in the text.
+menu Larger text
+expect said ! Text size 10
+menu Smaller text
+expect said ! Text size 9
+menu Larger text
+expect said ! Text size 10
+expect focus size.md
+close
+wait 1500
+# 5.1: closed and opened again, the size is kept: one step larger than the kept 10.
+start down {temp}\size.md
+expect focus size.md
+menu Larger text
+expect said ! Text size 11
+# 5.2 manual: Options, Text, Font opens the Windows font dialog, a separate window of the system's.

@@ -1,0 +1,116 @@
+# AxTerminal, section 4 of docs/axterminal/nvda-test-plan.md: text, notices, the Axit menu (AT-4, AT-6).
+mkdir myproject
+# The run's own settings: no update check (network, and an ERROR in the log when it fails); a small font in a
+# maximized window, so that no line wraps in the view, since the channel reads the caret's line by its visual row.
+file home\Axit\axterminal.json {"checkForUpdates": false, "fontSize": 6, "window": {"x": 0, "y": 0, "width": 1600, "height": 900, "maximized": true}}
+start terminal {temp}\myproject
+expect said ♪ Ready
+
+# Step 1: cls clears only the shell's screen: the lines before stay, the next output comes at the end. Ctrl+L empties
+# the window, and the next command's block is the first.
+type echo before
+keys enter
+expect said Done
+expect said ♪ Done
+type cls
+keys enter
+expect said Done
+expect said ♪ Done
+type echo after
+keys enter
+expect said Done
+expect said ♪ Done
+keys ctrl+2
+expect focus "name":"Terminal"
+expect text "# Output 1","","before","# Input 2"
+expect text "## Command","cls","","# Output 2","","# Input 3"
+expect text "# Output 3","","after"]
+keys ctrl+l
+expect said Cleared
+expect text "lines":[]
+keys ctrl+1
+type echo first
+keys enter
+expect said Done
+expect said ♪ Done
+keys ctrl+2
+expect text "lines":["# Input 1","## Folder"
+expect text "# Output 1","","first"]
+
+# Step 2: a bookmark with m, found with k from the top; find with Ctrl+F, F3 for the next match, "Not found" otherwise.
+keys ctrl+3
+expect said Output 1 heading level 1
+expect focus "name":"Terminal"
+keys down
+keys down
+expect focus "value":"first"}
+keys m
+expect said Bookmark 1 added
+# The bookmark line reaches the view after the 250 ms the view holds new lines back after a key press.
+wait 400
+keys ctrl+home
+expect focus "value":"# Input 1"}
+keys k
+expect said ! Bookmark 1, first
+keys ctrl+home
+keys ctrl+f
+expect state "notice":"Find"
+expect focus "name":"Text to find"
+type first
+keys enter
+expect said ! echo first
+expect focus "name":"Terminal"
+expect focus "value":"echo first"}
+keys f3
+expect said ! first
+keys ctrl+f
+expect focus "name":"Text to find"
+keys ctrl+a
+type zzzz
+keys enter
+expect said ! Not found
+expect focus "name":"Terminal"
+
+# Step 3, Ctrl+S, stays manual: it opens the Windows file picker, a window of its own outside the channel.
+
+# Step 4: F1, the shortcuts as a notice; h moves by its headings; Escape closes it. Help, User guide likewise.
+keys f1
+expect state "notice":"Keyboard shortcuts"
+expect focus "name":"Keyboard shortcuts"
+keys h
+expect said heading level 2
+keys escape
+expect state "notice":null
+expect focus "name":"Terminal"
+menu User guide
+expect state "notice":"User guide"
+expect focus "name":"User guide"
+keys h
+expect said heading level 2
+keys escape
+expect state "notice":null
+expect focus "name":"Terminal"
+
+# Step 6: the Axit menu's New window lists AxTerminal (Alt+A itself needs menu mode; the palette's list is the same
+# menu). Open windows by type stays manual: it is filled as it opens, so the palette does not list it.
+expect commands AxTerminal, Axit, New window
+
+# Step 5 (last, since it closes the window): Alt+F4 while a command runs asks first; Escape keeps it; Alt+F4 again
+# (here the channel's close, which is Alt+F4's path, so that the runner knows the window closes on purpose), Enter
+# closes.
+keys ctrl+1
+expect focus "name":"Command"
+type ping -n 30 127.0.0.1
+keys enter
+expect said Sent
+expect state Running: ping
+keys alt+f4
+expect state "notice":"A command is still running"
+expect state ping -n 30 127.0.0.1 is still running.
+keys escape
+expect state "notice":null
+expect focus "name":"Command"
+expect state Running: ping
+close
+expect state "notice":"A command is still running"
+keys enter

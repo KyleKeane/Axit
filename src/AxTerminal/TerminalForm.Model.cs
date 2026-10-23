@@ -22,6 +22,25 @@ internal sealed partial class TerminalForm
         {
             Announce(speech, false);
         }
+
+        SayFinished();
+    }
+
+    /// <summary>"Done" or "Failed" of the command that ended, waiting for the frame that ends it to be spoken first.</summary>
+    private string? _finished;
+
+    /// <summary>Half a second at most for that frame; then the word goes anyway.</summary>
+    private readonly System.Windows.Forms.Timer _finishedLate = new() { Interval = 500 };
+
+    private void SayFinished()
+    {
+        _finishedLate.Stop();
+        if (_finished is { } word)
+        {
+            _finished = null;
+            Announce(word, false);
+            Signal(question: false);
+        }
     }
 
     /// <summary>The first prompt of a run (AT-5.1): "Ready" with its ping.</summary>
@@ -40,9 +59,19 @@ internal sealed partial class TerminalForm
     private void OnCommandFinished(int? code)
     {
         _askedRow = null;
-        Announce(code is null or 0 ? "Done" : code == -1 ? "Failed" : $"Failed, exit code {code}", false);
-        Signal(question: false);
+        // The end of a command is reported while its output is still being read, before the frame that makes its last
+        // line final: the word waits for that frame's speech (OnTranscriptChanged), so that Speak output: all lines
+        // says the last line before "Done", not after it (found by tools/AxitDrive, 2026-10-23).
+        _finished = code is null or 0 ? "Done" : code == -1 ? "Failed" : $"Failed, exit code {code}";
+        if (!_finishedLate.Enabled)
+        {
+            _finishedLate.Tick -= OnFinishedLate;
+            _finishedLate.Tick += OnFinishedLate;
+            _finishedLate.Start();
+        }
     }
+
+    private void OnFinishedLate(object? sender, EventArgs e) => SayFinished();
 
     /// <summary>
     /// AT-5.4: while a command runs and output has stopped for two seconds, a cursor row that ends like a question

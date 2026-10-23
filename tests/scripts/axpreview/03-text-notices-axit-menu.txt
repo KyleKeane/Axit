@@ -1,0 +1,46 @@
+# AxPreview, test plan section 3 (Text, notices, the Axit menu, AP-3), driven from inside the window
+# (docs/axpreview/nvda-test-plan.md).
+# The runner's keys have no plus or minus key, so Ctrl+Plus and Ctrl+Minus run as their menu items, Options, Text,
+# Larger text and Smaller text. The sizes assume the Windows system font at 9 points, which fresh settings start from.
+# The run's own settings: no update check, whose network call logs an ERROR when GitHub cannot be reached.
+file home\Axit\axpreview.json {"checkForUpdates": false}
+file README.md # Readme\n\n## Install\n\nRun the installer.\n\n## Last heading\n\nThe last line.
+
+start preview {temp}\README.md
+expect focus README.md
+# 3.1: larger, "Text size 10", the caret where it was; smaller back.
+keys down down
+expect state Line 3, Column 1 \u00B7
+menu Larger text
+expect said ! Text size 10
+expect state Line 3, Column 1 \u00B7
+expect focus {"name":"README.md","role":"Text","value":"## Install"}
+menu Smaller text
+expect said ! Text size 9
+expect state Line 3, Column 1 \u00B7
+# 3.1 manual: Options, Text, Font is the Windows font picker.
+
+# 3.2: Help, User guide: this guide; Ctrl+H moves through its headings; Escape.
+menu User guide
+expect state "notice":"User guide","noticeText":"# AxPreview user guide
+keys ctrl+h
+expect said heading level 2
+keys ctrl+h
+expect said heading level 2
+keys escape
+expect state "notice":null
+expect focus {"name":"README.md","role":"Text","value":"## Install"}
+
+# 3.3: the Axit menu as the palette reads it: New window with AxPreview among the apps, Close all windows, Check for
+# updates, About.
+# 3.3 manual: Alt+A needs the menu bar's menu mode; Recently closed, Open windows and Open windows by type are
+# submenus filled as they open, which the palette leaves out.
+expect commands "AxPreview, Axit, New window"
+expect commands "Close all windows, Axit"
+expect commands "Check for updates (Axit
+expect commands "Version, Axit, About"
+
+# 3.4 manual: Copy diagnostics writes the user's clipboard. Alt+F4 closes without a question: the runner cannot see a
+# window close, so here only no question shows after it.
+close
+wait 500

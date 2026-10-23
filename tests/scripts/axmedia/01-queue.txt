@@ -1,0 +1,145 @@
+# AxMedia: start and the queue (docs/axmedia/nvda-test-plan.md section 1; SPEC.md AM-1, AM-2, AM-3).
+# Every sound is the runner's silence; nothing reaches the speakers. The names start with letters so that a typed
+# letter has something to jump to; the queue's order is name order: alpha, beta, delta, gamma.
+
+# The run's own settings (AXIT_HOME): no update check at start, which goes to the network and logs an ERROR when
+# the network cannot be reached, failing the run.
+file home\Axit\axmedia.json {"checkForUpdates":false}
+
+# Step 1: no path, an empty queue; the list reads "Queue is empty", and every command on that line says so.
+start media
+expect focus Queue is empty
+expect state "title":"AxMedia"
+keys enter
+expect said ! Queue is empty
+keys delete
+expect said ! Queue is empty
+keys ctrl+i
+expect said ! Queue is empty
+keys ctrl+q
+expect said ! Nothing playing
+keys space
+expect said ! Nothing playing
+expect quiet 500
+close
+wait 1500
+
+# Step 2: Ctrl+O and Ctrl+Shift+O open the Windows file and folder pickers, system windows the channel cannot drive
+# (the picker would block the window's thread on the test desktop); left to the NVDA pass. "Added n" and
+# "No sound or video files in <folder>" are reached here through a start on a path instead (step 2a below).
+# Step 3: Alt+Q, R is the menu bar's menu mode, which needs the foreground, and Open recent is a submenu filled on
+# opening, which the command palette (and so the channel's menu step) leaves out; left to the NVDA pass.
+
+# Step 2a (AM-1.1, AM-6): a start on a folder without media says so.
+mkdir empty
+file empty\readme.txt nothing to play
+start media {temp}\empty
+expect said No sound or video files in empty
+expect focus Queue is empty
+close
+wait 1500
+
+# Steps 4 to 7 on a folder of four silent files and a text file, which is not queued.
+mkdir ch
+silence ch\alpha.wav 30000
+silence ch\beta.wav 30000
+silence ch\gamma.wav 30000
+silence ch\delta.wav 30000
+file ch\notes.txt not a sound
+start media {temp}\ch
+expect said ! Playing alpha.wav
+expect focus Queue, 4 items
+expect list alpha.wav (playing)","beta.wav","delta.wav","gamma.wav"]
+keys space
+expect said ! Paused at
+expect quiet 300
+
+# Step 4: the list's own keys move the selection and nothing is spoken (AM-2.1, AX-7.3).
+keys down
+expect said · beta.wav
+keys end
+expect said · gamma.wav
+keys home
+expect said · alpha.wav (playing)
+type g
+expect said · gamma.wav
+type b
+expect said · beta.wav
+expect quiet 300
+# One control: Tab, Shift+Tab, F6 and Ctrl+Tab keep the focus in the list and say nothing.
+keys tab
+keys shift+tab
+keys f6
+keys ctrl+tab
+expect focus beta.wav
+refuse said →
+# Ctrl+F, part of a name, Enter: that file is selected (NVDA reads the selection); F3 goes on; "Not found".
+# (The focus moves to the Find field and back within the channel's 50 ms watch, so the timeline may record the
+# found item as a focus move or as a value: the focus answer is checked instead.)
+keys ctrl+f
+expect focus Name contains
+type elt
+keys enter
+expect focus delta.wav
+keys ctrl+f
+expect focus Name contains
+type ta.w
+keys enter
+expect focus beta.wav
+keys f3
+expect focus delta.wav
+keys f3
+expect focus beta.wav
+keys ctrl+f
+type zzz
+keys enter
+expect said ! Not found
+expect focus Queue, 4 items
+
+# Step 5: Enter on the second file plays it; Down then Up reads it with its mark; the title and the status bar.
+keys home
+keys down
+keys enter
+expect said ! Playing beta.wav
+expect list "beta.wav (playing)"
+keys down
+keys up
+expect focus beta.wav (playing)
+expect state "title":"beta.wav - AxMedia"
+expect state Playing beta.wav 0:0
+expect state / 0:30","2 of 4, speed 1"]
+
+# Step 6: Ctrl+I on the playing file, with its position; on another, its place only.
+keys ctrl+i
+expect said ! beta.wav, 2 of 4, playing, 0:0
+keys down
+keys ctrl+i
+expect said ! delta.wav, 3 of 4
+refuse said playing,
+
+# Step 7: Delete on another file; the mark stays. Delete on the playing file: the next plays, said (not
+# interrupting) since Say each file is on. Clear queue empties and stops; the title is AxMedia again.
+keys delete
+expect said ! Removed delta.wav
+expect list "name":"Queue, 3 items"
+expect list beta.wav (playing)
+keys up
+keys delete
+expect said ! Removed beta.wav
+expect said Playing gamma.wav
+expect list ["alpha.wav","gamma.wav (playing)"]
+menu Clear queue
+expect said ! Queue cleared
+expect list ["Queue is empty"]
+expect focus Queue is empty
+expect state "title":"AxMedia"
+keys ctrl+q
+expect said ! Nothing playing
+
+# Step 8: Ctrl+N starts a second AxMedia process the runner did not start and so cannot reach or close (it would be
+# left running on the test desktop), and Alt+A, O, 1 is menu mode; left to the NVDA pass. A second window by
+# --new is in 02-hand-over.txt.
+
+# AM-2.2: with nothing playing both status labels are empty. Last in the script, since it fails today: the label
+# keeps the state read just before the engine stopped ("Playing  0:00 / 0:30").
+expect state "status":["",""]

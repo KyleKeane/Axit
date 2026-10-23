@@ -88,7 +88,7 @@ rather than a new one (AP-1.2). It works entirely offline (bundle G6).
   `Preview.IsText`, moved) up to 32 MB (AxDown AD-3.1's limit), decoded as the editors decode (`TextDocument`: the
   mark, the code page, the line endings). Anything else: the notice "Not a text file" ("tool.exe is not a text file.
   AxFile's Enter opens it in the program Windows has for it."), the window keeping what it had; a file over the limit:
-  the notice "Too large", "<name> is n MB. AxPreview opens files up to 32 MB."; a reload of a file that cannot be read
+  the notice "Too large", "<name> is 33,554,433 bytes, over the 32 MB a window can open." (the editors' wording, AD-3.7; until 2026-10-23 "is n MB", which said 32 MB for a file just over); a reload of a file that cannot be read
   (held by another program): the error notice, the text kept (AxDown AD-3.6); a file whose first eight kilobytes pass
   and which the reader refuses (a NUL further in): the error notice, the text kept as well (2026-10-23; the window
   emptied). A reload (AP-2.4) of a file that has

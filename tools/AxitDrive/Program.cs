@@ -21,6 +21,10 @@
 //   silence <name> <ms>       a silent WAV file {temp}\<name> of that length, for AxMedia without a sound
 //   run <command line>        a command through cmd.exe in {temp}, waited for up to 60 s (git init, git commit ...)
 //   start <arguments>         Axit.exe with these arguments, on the test desktop; the window becomes the current one
+//   launch <arguments>        Axit.exe on the test desktop without waiting for a window: a start that hands over to an
+//                             open window (AxMedia, AxPreview) and ends; waits up to 30 s for the process to end
+//   adopt                     waits up to 15 s for an Axit window the app itself started (Ctrl+N, New window, Show
+//                             in) and makes it the current one; it is closed at the end like the others
 //   use <n>                   the n-th window started in the script (from 1) becomes the current one
 //   keys <key> ...            key presses: ctrl+shift+p, escape, down, enter, f1, alt+f4 ...
 //   type <text>               characters into the focused control
@@ -32,6 +36,10 @@
 //                             sound, "→ Conversation" for a focus move); takes it and what came before it
 //   expect focus|state|list|text|commands <text>   waits up to 10 s until that answer holds the text
 //   refuse said <text>        fails when the timeline holds the text within 2 s (what must not be said)
+//   refuse focus|state|list|text|commands <text>   fails when that answer holds the text after 2 s
+//   expect closed             waits up to 10 s for the current window's process to end (a close without a question)
+//   allow error <text>        a log's ERROR line that holds the text does not fail the run (a refused file the spec
+//                             wants reported)
 //   expect quiet <ms>         fails when anything is announced within the time (sounds and values aside)
 //   try said <text>           as expect said, up to 15 s, and never fails: it records whether the text came
 //   expect spoken <text>      (--nvda) waits up to 15 s until NVDA has spoken the text; takes it and what came before
@@ -82,12 +90,9 @@ internal static class Program
             }
         }
 
-        var root = Path.Combine(Path.GetTempPath(), "axit-drive", Environment.ProcessId.ToString());
-        if (Directory.Exists(root))
-        {
-            Directory.Delete(root, recursive: true);
-        }
-
+        // The process id and the time: a reused process id never meets an old folder (git's read-only objects in it
+        // stopped a run once).
+        var root = Path.Combine(Path.GetTempPath(), "axit-drive", $"{Environment.ProcessId}-{DateTime.Now:HHmmss}");
         Directory.CreateDirectory(root);
         var repository = FindRepository();
         if (build)
@@ -182,7 +187,8 @@ internal static class Program
                     continue;
                 }
 
-                line = line.Replace("{temp}", temp);
+                // {temp}, and \uXXXX escapes, which a script may use for a character it cannot type (· + > ").
+                line = System.Text.RegularExpressions.Regex.Replace(line.Replace("{temp}", temp), @"\\u([0-9A-Fa-f]{4})", match => ((char)Convert.ToInt32(match.Groups[1].Value, 16)).ToString());
                 (bool Ok, string? Detail) result;
                 try
                 {
@@ -279,7 +285,8 @@ internal sealed record Event(long Ms, string Kind, string Text, bool Interrupt)
 /// <summary>The windows of one script, on the test desktop, each with its pipe.</summary>
 internal sealed class Run(string exe, string temp)
 {
-    private const string DesktopName = "axit-tests";
+    /// <summary>A desktop of the run's own: runs side by side never share one (a window closing in another run could activate one of this run's).</summary>
+    private static readonly string DesktopName = $"axit-tests-{Environment.ProcessId}";
 
     /// <summary>The NVDA tier: the user's own desktop, the foreground, real keyboard input, NVDA's speech.</summary>
     public static bool Nvda { get; set; }
@@ -287,6 +294,7 @@ internal sealed class Run(string exe, string temp)
     private readonly List<Window> _windows = [];
     private readonly nint _desktop = Nvda ? 0 : Native.CreateDesktopW(DesktopName, 0, 0, 0, 0x10000000, 0);
     private readonly Speech _speech = new();
+    private readonly List<string> _allowed = [];
     private readonly string _home = Path.Combine(temp, "home");
     private Window? _current;
     private bool _found;
@@ -316,6 +324,7 @@ internal sealed class Run(string exe, string temp)
             case "start":
                 _current = Window.Start(exe, rest, Nvda ? null : DesktopName, _home);
                 _windows.Add(_current);
+                _current.WaitForFocus();
                 if (Nvda)
                 {
                     Native.AllowSetForegroundWindow(_current.ProcessId);
@@ -325,6 +334,13 @@ internal sealed class Run(string exe, string temp)
                 return (true, $"process {_current.ProcessId}");
             case "use":
                 _current = _windows[int.Parse(rest) - 1];
+                return (true, null);
+            case "launch":
+                return Window.Launch(exe, rest, Nvda ? null : DesktopName, _home);
+            case "adopt":
+                return Adopt();
+            case "allow":
+                _allowed.Add(rest.StartsWith("error ", StringComparison.Ordinal) ? rest[6..] : rest);
                 return (true, null);
             case "wait":
                 Thread.Sleep(int.Parse(rest));
@@ -352,7 +368,26 @@ internal sealed class Run(string exe, string temp)
             case "type" when Nvda:
                 Native.Type(rest);
                 return (true, null);
-            case "keys" or "type" or "menu" or "close":
+            case "keys":
+                // One press at a time: each goes to the control that has the focus after the one before.
+                foreach (var press in rest.Split(' ', StringSplitOptions.RemoveEmptyEntries))
+                {
+                    if (press.Equals("alt+f4", StringComparison.OrdinalIgnoreCase))
+                    {
+                        Current.Closing();
+                    }
+
+                    var pressed = Current.Send("keys " + press);
+                    if (pressed.Contains("\"error\""))
+                    {
+                        return (false, pressed);
+                    }
+
+                    Thread.Sleep(60);
+                }
+
+                return (true, null);
+            case "type" or "menu" or "close":
                 var reply = Current.Send(line);
                 return (!reply.Contains("\"error\""), reply.Contains("\"error\"") ? reply : null);
             default:
@@ -387,7 +422,7 @@ internal sealed class Run(string exe, string temp)
     /// <summary>A silent 8 kHz mono 16-bit WAV file.</summary>
     private static void WriteSilence(string path, int milliseconds)
     {
-        var samples = 8000 * milliseconds / 1000;
+        var samples = (int)(8000L * milliseconds / 1000);
         using var writer = new BinaryWriter(File.Create(path));
         writer.Write("RIFF"u8);
         writer.Write(36 + samples * 2);
@@ -412,6 +447,11 @@ internal sealed class Run(string exe, string temp)
         var what = space < 0 ? rest : rest[..space];
         var text = space < 0 ? string.Empty : rest[(space + 1)..];
         var window = Current;
+        if (what == "closed")
+        {
+            return Current.WaitClosed(10_000) ? (true, null) : (false, "the window is still open after 10 s");
+        }
+
         if (what == "spoken")
         {
             var until = Stopwatch.StartNew();
@@ -453,7 +493,7 @@ internal sealed class Run(string exe, string temp)
             else if (what is "focus" or "state" or "list" or "text" or "commands")
             {
                 var answer = window.Send(what);
-                if (answer.Contains(text, StringComparison.OrdinalIgnoreCase) || JsonUnescaped(answer).Contains(text, StringComparison.OrdinalIgnoreCase))
+                if (Matches(answer, text))
                 {
                     return (true, answer);
                 }
@@ -476,6 +516,13 @@ internal sealed class Run(string exe, string temp)
         var space = rest.IndexOf(' ');
         var text = rest[(space + 1)..];
         Thread.Sleep(2000);
+        var verb = rest[..space];
+        if (verb is "focus" or "state" or "list" or "text" or "commands")
+        {
+            var answer = Current.Send(verb);
+            return Matches(answer, text) ? (false, answer) : (true, null);
+        }
+
         if (rest.StartsWith("spoken", StringComparison.Ordinal))
         {
             var spoken = _speech.Pending().FirstOrDefault(said => said.Contains(text, StringComparison.OrdinalIgnoreCase));
@@ -486,17 +533,83 @@ internal sealed class Run(string exe, string temp)
         return bad is null ? (true, null) : (false, $"said at {bad.Ms} ms: {bad.Spoken}");
     }
 
-    /// <summary>A JSON answer with its escapes read, so that "·" or "\\" in it match the text a script holds.</summary>
-    private static string JsonUnescaped(string json)
+    /// <summary>
+    /// A JSON answer as plain text: every value, its escapes read, joined with " | ", the members as "name: value", so
+    /// that a path with backslashes or quotes in it matches the text a script holds.
+    /// </summary>
+    private static string Flattened(string json)
     {
         try
         {
-            return JsonSerializer.Deserialize<JsonElement>(json).ToString();
+            var text = new StringBuilder();
+            Flatten(JsonSerializer.Deserialize<JsonElement>(json), text);
+            return text.ToString();
         }
         catch (JsonException)
         {
             return json;
         }
+
+        static void Flatten(JsonElement element, StringBuilder text)
+        {
+            switch (element.ValueKind)
+            {
+                case JsonValueKind.Object:
+                    foreach (var member in element.EnumerateObject())
+                    {
+                        text.Append(member.Name).Append(": ");
+                        Flatten(member.Value, text);
+                    }
+
+                    break;
+                case JsonValueKind.Array:
+                    foreach (var item in element.EnumerateArray())
+                    {
+                        Flatten(item, text);
+                    }
+
+                    break;
+                case JsonValueKind.String:
+                    text.Append(element.GetString()).Append(" | ");
+                    break;
+                default:
+                    text.Append(element.ToString()).Append(" | ");
+                    break;
+            }
+        }
+    }
+
+    /// <summary>Whether an answer holds the text: as sent, with its quote and backslash escapes read, or flattened to its values.</summary>
+    private static bool Matches(string answer, string text) =>
+        answer.Contains(text, StringComparison.OrdinalIgnoreCase)
+        || answer.Replace("\\\"", "\"").Replace("\\\\", "\\").Contains(text, StringComparison.OrdinalIgnoreCase)
+        || Flattened(answer).Contains(text, StringComparison.OrdinalIgnoreCase);
+
+    /// <summary>A window the app started (it inherits the run's automation variables): the newest Axit process with a pipe that is not one of the run's.</summary>
+    private (bool, string?) Adopt()
+    {
+        var clock = Stopwatch.StartNew();
+        var known = _windows.Select(window => window.ProcessId).ToHashSet();
+        var name = Path.GetFileNameWithoutExtension(exe);
+        while (clock.ElapsedMilliseconds < 15_000)
+        {
+            foreach (var process in Process.GetProcessesByName(name).OrderByDescending(p => p.Id))
+            {
+                if (known.Contains(process.Id) || Window.Attach(process) is not { } window)
+                {
+                    continue;
+                }
+
+                _windows.Add(window);
+                _current = window;
+                window.WaitForFocus();
+                return (true, $"process {window.ProcessId}");
+            }
+
+            Thread.Sleep(200);
+        }
+
+        return (false, "no new Axit window within 15 s");
     }
 
     /// <summary>Every window's whole timeline, for the report.</summary>
@@ -557,7 +670,7 @@ internal sealed class Run(string exe, string temp)
         {
             foreach (var file in Directory.GetFiles(logs, "*.log"))
             {
-                foreach (var line in File.ReadAllLines(file).Where(line => line.Contains(" ERROR ", StringComparison.Ordinal)))
+                foreach (var line in File.ReadAllLines(file).Where(line => line.Contains(" ERROR ", StringComparison.Ordinal) && !_allowed.Any(allowed => line.Contains(allowed, StringComparison.OrdinalIgnoreCase))))
                 {
                     problems.Add($"{Path.GetFileName(file)}: {line}");
                 }
@@ -629,12 +742,12 @@ internal sealed class Window : IDisposable
     private int _taken;
     private bool _closing;
 
-    private Window(Process process)
+    private Window(Process process, int connectMs = 30_000)
     {
         _process = process;
         _pipe = new NamedPipeClientStream(".", $"axit-auto-{process.Id}", PipeDirection.InOut);
         // The window opens its pipe when it first shows.
-        _pipe.Connect(30_000);
+        _pipe.Connect(connectMs);
         _reader = new StreamReader(_pipe, new UTF8Encoding(false));
         _writer = new StreamWriter(_pipe, new UTF8Encoding(false)) { AutoFlush = true };
     }
@@ -643,9 +756,77 @@ internal sealed class Window : IDisposable
 
     public bool EndedByItself => !_closing && _process.HasExited;
 
-    public int ExitCode => _process.HasExited ? _process.ExitCode : 0;
+    public string ExitCode
+    {
+        get
+        {
+            try
+            {
+                return _process.ExitCode.ToString();
+            }
+            catch (InvalidOperationException)
+            {
+                return "unknown";
+            }
+        }
+    }
 
-    public static Window Start(string exe, string arguments, string? desktop, string home)
+    /// <summary>A close the script asked for (Alt+F4): the process ending is no failure.</summary>
+    public void Closing() => _closing = true;
+
+    public bool WaitClosed(int milliseconds)
+    {
+        _closing = true;
+        return _process.WaitForExit(milliseconds);
+    }
+
+    /// <summary>Waits up to 5 s for the window's first focus, so that the first keys go where a user's would; a window shown without activation has none, which is no error.</summary>
+    public void WaitForFocus()
+    {
+        var clock = Stopwatch.StartNew();
+        while (clock.ElapsedMilliseconds < 5000 && !_process.HasExited)
+        {
+            if (!Send("focus").Contains("\"name\":null", StringComparison.Ordinal))
+            {
+                return;
+            }
+
+            Thread.Sleep(100);
+        }
+    }
+
+    /// <summary>An Axit process the run did not start, joined through its pipe; null when it has none (yet).</summary>
+    public static Window? Attach(Process process)
+    {
+        try
+        {
+            return new Window(process, 500);
+        }
+        catch (Exception ex) when (ex is TimeoutException or IOException)
+        {
+            return null;
+        }
+    }
+
+    /// <summary>A start that hands over to an open window and ends (AxMedia, AxPreview): run on the desktop and waited for.</summary>
+    public static (bool, string?) Launch(string exe, string arguments, string? desktop, string home)
+    {
+        var id = Create(exe, arguments, desktop, home);
+        try
+        {
+            using var process = Process.GetProcessById(id);
+            return process.WaitForExit(30_000) ? (true, $"process {id} ended") : (false, $"process {id} still running after 30 s");
+        }
+        catch (ArgumentException)
+        {
+            return (true, $"process {id} ended");
+        }
+    }
+
+    public static Window Start(string exe, string arguments, string? desktop, string home) =>
+        new(Process.GetProcessById(Create(exe, arguments, desktop, home)));
+
+    private static int Create(string exe, string arguments, string? desktop, string home)
     {
         Environment.SetEnvironmentVariable("AXIT_AUTOMATION", "1");
         // The run's own settings, logs and recently closed list, never the user's (AppPaths).
@@ -659,7 +840,7 @@ internal sealed class Window : IDisposable
 
         Native.CloseHandle(info.hThread);
         Native.CloseHandle(info.hProcess);
-        return new Window(Process.GetProcessById(info.dwProcessId));
+        return info.dwProcessId;
     }
 
     public string Send(string command)

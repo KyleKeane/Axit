@@ -1,0 +1,51 @@
+# AxMedia: text, notices, the Axit menu (docs/axmedia/nvda-test-plan.md section 4; SPEC.md AM-5, AM-6).
+
+file home\Axit\axmedia.json {"checkForUpdates":false}
+mkdir ch
+silence ch\alpha.wav 30000
+start media {temp}\ch
+expect said ! Playing alpha.wav
+keys space
+expect said ! Paused at
+
+# Step 1: the text size (Ctrl+Plus and Ctrl+Minus through the menu commands that run the same code, since the
+# channel has no key name for plus and minus); Windows text size.
+menu Larger text
+expect said ! Text size
+menu Smaller text
+expect said ! Text size
+menu Windows text size
+expect said ! Windows text size
+
+# Step 2: F1, the Keyboard shortcuts notice; Escape gives the focus back to the list. Help, User guide the same.
+# Ctrl+S: "Nothing to save here".
+keys f1
+expect state "notice":"Keyboard shortcuts"
+# (a text with "+" cannot be matched in a state answer: the runner matches the escaped JSON, see the report)
+expect state faster or slower by a quarter, the voice
+keys escape
+expect focus alpha.wav (playing)
+expect state "notice":null
+menu User guide
+expect state "notice":"User guide"
+keys escape
+expect focus alpha.wav (playing)
+keys ctrl+s
+expect said ! Nothing to save here
+
+# Step 3: the Axit menu's commands (its submenus filled on opening, New window's apps aside, are not in the
+# command palette's list, and menu mode needs the foreground): New window with AxMedia among the apps, Close all
+# windows, About. Recently closed, Open windows and Open windows by type, and choosing a recently closed file, are
+# left to the NVDA pass; New window would start a window the runner cannot reach or close.
+expect commands AxMedia, Axit, New window
+expect commands Close all windows, Axit
+expect commands Version, Axit, About
+expect commands Check for updates at start, Options, General
+
+# Step 4: Copy diagnostics writes to the clipboard, which is the user's (the test desktop shares the window
+# station's clipboard), so it is not run here; left to the NVDA pass.
+
+# AM-2.2: the status bar's left label says the state, here paused since step 1's Space. Last in the script, since it
+# fails today: the label keeps "Playing alpha.wav 0:00 / 0:30", made in the moment after Pause was asked of the
+# engine and before the engine had paused, and the clock that would make it again is stopped while paused.
+expect state "status":["Paused alpha.wav

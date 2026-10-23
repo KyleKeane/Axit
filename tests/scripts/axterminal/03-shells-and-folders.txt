@@ -1,0 +1,147 @@
+# AxTerminal, section 3 of docs/axterminal/nvda-test-plan.md: shells and folders (AT-1.2, AT-1.6, AT-1.7). Alt+S, W
+# (the Switch shell submenu) needs menu mode, which only the foreground window enters: "menu" runs the same items.
+mkdir work\myproject
+# The run's own settings: no update check, which would go to the network and log an ERROR when it fails.
+file home\Axit\axterminal.json {"checkForUpdates": false}
+start terminal {temp}\work\myproject
+expect said ♪ Ready
+
+# Step 1: Ctrl+N, the New session notice: its text and controls; Command Prompt chosen and started.
+keys ctrl+n
+expect state "notice":"New session"
+expect state Choose the shell and the folder.
+expect focus "name":"New session"
+expect focus "value":"Folder:
+keys tab
+expect focus folder..."}
+keys tab
+expect focus "role":"RadioButton"
+expect focus "value":"Windows PowerShell"}
+keys tab
+expect focus Start session"}
+keys tab
+expect focus "value":"Cancel"}
+keys tab
+expect focus "name":"New session"
+keys tab
+expect focus folder..."}
+keys tab
+expect focus "role":"RadioButton"
+keys down
+expect focus "value":"Command Prompt"}
+keys enter
+expect said New session in myproject
+expect said Ready
+expect state - Command Prompt - AxTerminal"
+keys ctrl+2
+expect focus "name":"Terminal"
+expect text "System: New session: Command Prompt in
+keys ctrl+1
+type echo hello
+keys enter
+expect said Done
+expect said ♪ Done
+# Command Prompt gives no exit code: "Done", never "Failed".
+refuse said Failed
+# The Switch shell submenu with Command Prompt checked (the palette's list carries the check), then Windows PowerShell.
+expect commands Command Prompt, Session, Switch shell, checked
+menu Windows PowerShell
+expect said Windows PowerShell
+expect said Ready
+keys ctrl+2
+expect text "System: Switched to Windows PowerShell in
+expect text "echo hello"
+keys ctrl+1
+
+# Step 2: Git Bash: the status bar shows $, the title names the folder and Git Bash; ls; a failing command; cd ..
+# follows in the title; Ctrl+Q; back to Windows PowerShell. Fails at once where Git for Windows is not installed.
+menu Git Bash
+expect said Git Bash
+expect said Ready
+expect state "myproject - Git Bash - AxTerminal"
+# The prompt in the status bar is the user's PS1 with its rows joined (user, host, MINGW64, the path), ending in $.
+expect state "status":["Idle",
+expect state $"]}
+type ls
+keys enter
+expect said Done
+expect said ♪ Done
+type (exit 3)
+keys enter
+expect said Failed, exit code 3
+expect said ♪ Done
+keys ctrl+q
+expect said Idle, Git Bash,
+type cd ..
+keys enter
+expect said Done
+expect said ♪ Done
+expect state "work - Git Bash - AxTerminal"
+type cd myproject
+keys enter
+expect said Done
+expect said ♪ Done
+menu Windows PowerShell
+expect said Windows PowerShell
+expect said Ready
+expect state "myproject - Windows PowerShell - AxTerminal"
+
+# Step 3: cd .. in PowerShell: the title and the status bar name the parent folder; Ctrl+P says its full path.
+type cd ..
+keys enter
+expect said Done
+expect said ♪ Done
+expect state "work - Windows PowerShell - AxTerminal"
+expect state \\work\u003E"]
+keys ctrl+p
+expect said {temp}\work
+# Ctrl+W (File Explorer) and Alt+S, I, C (AxClaude on the folder) stay manual: both start a program of their own
+# outside the test desktop's control, and the Alt keys need menu mode.
+type cd myproject
+keys enter
+expect said Done
+expect said ♪ Done
+
+# Step 4: Ctrl+Shift+R while idle restarts at once, keeping the transcript; while a command runs, a notice asks first.
+keys ctrl+shift+r
+expect said Restarting
+expect said Ready
+keys ctrl+2
+# The view's text answer holds the last 60 lines: the transcript kept is checked by the last command before.
+expect text "cd myproject"
+expect text "System: Restarting the shell","System: Shell started:
+keys ctrl+1
+type ping -n 30 127.0.0.1
+keys enter
+expect said Sent
+expect state Running: ping
+keys ctrl+shift+r
+expect state "notice":"Restart the shell?"
+keys escape
+expect focus "name":"Command"
+expect state "notice":null
+expect state Running: ping
+keys ctrl+shift+r
+expect state "notice":"Restart the shell?"
+keys enter
+expect said Restarting
+expect said Ready
+expect state "status":["Idle"
+
+# Step 5: Session, Open recent folder stays manual: the submenu is filled as it opens, so the palette (and "menu")
+# does not list its folders, and opening it needs menu mode.
+
+# Step 6: exit ends the shell; Enter in the field says so; Ctrl+Shift+R starts it again.
+type exit
+keys enter
+expect said The shell ended
+expect state "status":["Shell ended"
+keys ctrl+2
+expect text "System: The shell ended with code 0"
+keys ctrl+1
+type echo kept
+keys enter
+expect said The shell ended. Ctrl+Shift+R starts it again
+expect focus "value":"echo kept"}
+keys ctrl+shift+r
+expect said Ready

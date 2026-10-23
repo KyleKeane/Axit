@@ -849,8 +849,17 @@ public sealed partial class TextEditorForm : AxitForm
         if (result.Text != _editor.Text)
         {
             var caret = _editor.SelectionStart;
+            var before = _editor.Text;
+            // One undo step for the whole command (AJ-2.3): the control reports the replacement as two changes, the
+            // text removed and the text put in, which were two steps, the first leaving an empty document (found by
+            // tools/AxitDrive, 2026-10-23); so the change is recorded here, once.
+            _replaying = true;
             _editor.SelectAll();
             _editor.SelectedText = result.Text;
+            _replaying = false;
+            _history.Record(before, _editor.Text, _editor.SelectionStart, -1);
+            _text = _editor.Text;
+            _editor.ClearUndo();
             _editor.Select(Math.Min(caret, result.Text.Length), 0);
             _editor.ScrollToCaret();
             UpdateStatus();

@@ -73,6 +73,6 @@ public sealed class TextSniffTests : IDisposable
 
         var refusal = TextSniff.Refuse(path);
         Assert.Equal("Too large", refusal!.Title);
-        Assert.Equal("huge.log is 32 MB. AxPreview opens files up to 32 MB.", refusal.Text);
+        Assert.Equal("huge.log is 33,554,433 bytes, over the 32 MB a window can open.", refusal.Text);
     }
 }
