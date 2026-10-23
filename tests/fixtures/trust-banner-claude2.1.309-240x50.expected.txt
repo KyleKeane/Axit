@@ -1,0 +1,9 @@
+[Screen Reader Mode: on via flag]
+Claude Code v2.1.309
+Haiku 5.5 · Claude Max
+C:\Temp\axit-trust-c25620
+you: Reply with the single word hello.
+claude: hello
+Worked for 2s · done 10:27 AM
+Resume this session with:
+claude --resume 66a8f7c9-fc58-4473-b0d0-91efb697eae1

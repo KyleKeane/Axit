@@ -118,6 +118,10 @@ public static partial class LineClassifier
 
     public static string? SpinnerText(string text) => SpinnerRegex().Match(text) is { Success: true } m ? m.Groups[1].Value + "…" : null;
 
+    /// <summary>The first row of Claude's banner, "Claude Code v2.1.309".</summary>
+    public static bool IsBannerTop(string text) =>
+        text.StartsWith("Claude Code v", StringComparison.Ordinal) && text.Length > 13 && char.IsAsciiDigit(text[13]);
+
     /// <summary>The prompt row, or the draft being typed on it.</summary>
     public static bool IsPromptRow(string text) =>
         text.Length == 0 || (text[0] is '$' or '>' or '!' && (text.Length == 1 || char.IsWhiteSpace(text[1])));

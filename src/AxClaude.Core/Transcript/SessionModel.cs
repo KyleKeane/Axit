@@ -36,6 +36,9 @@ public sealed partial class SessionModel : LineStore
     /// (<see cref="EndFrame"/>), not with the frame that started it.
     /// </summary>
     private bool _repainting;
+
+    /// <summary>The first row of this run's banner ("Claude Code v2.1.309", then the model and the folder); null until Claude draws it.</summary>
+    private Line? _banner;
     private Line? _responseStartedFor;
 
     public SessionModel(int columns, int rows)
@@ -122,6 +125,42 @@ public sealed partial class SessionModel : LineStore
         _repainting = false;
     }
 
+    /// <summary>
+    /// Claude draws its banner once per run, and again under the prompt when it redraws its screen in place, as it does
+    /// when it strips an invisible character from a message sent in its first moments ("Removed 1 invisible character ·
+    /// review and press Enter to send", Claude Code 2.1.309; the trust-banner-fast fixture). The copy is a repaint:
+    /// the banner row and the rows after it that repeat the first banner's are hidden, as a repaint from the top is.
+    /// A restart is a new run, with a banner of its own.
+    /// </summary>
+    private void HideRepeatedBanner()
+    {
+        for (var r = 0; r < Rows; r++)
+        {
+            if (_screen.LineAt(r) is not { } line || !LineClassifier.IsBannerTop(line.Text))
+            {
+                continue;
+            }
+
+            if (_banner is null || !_lines.Contains(_banner))
+            {
+                _banner = line;
+                continue;
+            }
+
+            if (line == _banner)
+            {
+                continue;
+            }
+
+            line.RepaintHidden = true;
+            var first = _lines.IndexOf(_banner);
+            for (var k = 1; k <= 2 && first + k < _lines.Count && _screen.LineAt(r + k) is { } next && next.Text == _lines[first + k].Text; k++)
+            {
+                next.RepaintHidden = true;
+            }
+        }
+    }
+
     /// <summary>Recomputes chrome, classification, echo handling and status from the current screen.</summary>
     protected override void CompleteFrame()
     {
@@ -140,6 +179,7 @@ public sealed partial class SessionModel : LineStore
 
         _screen.PullRowText();
         _anchor = ApplyChrome(out var spinner, out var mode, out var background, out var drafts, out var working);
+        HideRepeatedBanner();
         Spinner = spinner;
         if (mode is not null)
         {
@@ -436,6 +476,7 @@ public sealed partial class SessionModel : LineStore
     private void StartRun()
     {
         AttachScreen();
+        _banner = null;
         Working = false;
         Spinner = null;
         PromptPending = false;

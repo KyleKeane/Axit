@@ -10,7 +10,7 @@ namespace Axit.Forms;
 /// The automation channel of a window (docs/axit/automation.md, tier 2): on only when the environment variable
 /// <c>AXIT_AUTOMATION</c> is set, as the test runner sets it for the processes it starts on its own desktop. One named
 /// pipe, <c>axit-auto-&lt;process id&gt;</c>, one command per line and one JSON answer per line: <c>keys</c>,
-/// <c>type</c>, <c>focus</c>, <c>said</c>, <c>state</c>, <c>menu</c>, <c>close</c>. Keys are posted to the focused
+/// <c>type</c>, <c>focus</c>, <c>text</c>, <c>said</c>, <c>state</c>, <c>menu</c>, <c>close</c>. Keys are posted to the focused
 /// control through the window's own message queue with the modifiers set in the thread's keyboard state, so that
 /// <c>ProcessCmdKey</c> and the controls see them as typed; nothing reaches another program.
 /// </summary>
@@ -102,6 +102,7 @@ internal sealed class AutomationChannel
             "keys" => Keys(argument),
             "type" => Type(argument),
             "focus" => Focus(),
+            "text" => Text(),
             "said" => Said(),
             "state" => _form.AutomationState(),
             "menu" => Menu(argument),
@@ -163,6 +164,18 @@ internal sealed class AutomationChannel
             _ => control.Text,
         };
         return new { name = control.AccessibleName, role = control.AccessibilityObject.Role.ToString(), value };
+    }
+
+    /// <summary>The focused text control's lines, the last 60, for a script that checks what a transcript or an editor holds.</summary>
+    private static object Text()
+    {
+        if (Control.FromChildHandle(GetFocus()) is not TextBoxBase box)
+        {
+            return new { error = "the focus is not in a text control" };
+        }
+
+        var lines = box.Lines;
+        return new { lines = lines.Skip(Math.Max(0, lines.Length - 60)).ToArray(), caretLine = box.GetLineFromCharIndex(box.SelectionStart) };
     }
 
     private static string CaretLine(TextBoxBase box)

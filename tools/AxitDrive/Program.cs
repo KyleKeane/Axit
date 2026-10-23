@@ -5,7 +5,7 @@
 // Usage:
 //   AxitDrive <script> [--exe <Axit.exe>] [--keep]
 //   (the default exe is the scratch build next to this tool's output, or src\Axit\bin\Release; {temp} in a script is
-//   the run's folder, %TEMP%\axit-drive, made new for each run and removed afterwards unless --keep)
+//   the run's folder, %TEMP%\axit-drive\<process id>, so that runs go side by side, made new for each run and removed afterwards unless --keep)
 //
 // Script steps, one per line, '#' starts a comment:
 //   mkdir <name>              a fresh folder {temp}\<name>
@@ -15,6 +15,7 @@
 //   type <text>               characters into the focused control
 //   menu <name>               a menu command by the command palette's name ("Force Claude to restart")
 //   said                      prints what the window announced since the last look
+//   text                      prints the focused text control's last 60 lines and the caret's line
 //   expect said <text>        waits up to 60 s until an announcement holds the text
 //   expect focus <text>       waits up to 10 s until the focused control's name or value holds the text
 //   expect state <text>       waits up to 10 s until the title, the notice or the status bar holds the text
@@ -65,7 +66,8 @@ internal static class Program
             return 2;
         }
 
-        var temp = Path.Combine(Path.GetTempPath(), "axit-drive");
+        var temp = Path.Combine(Path.GetTempPath(), "axit-drive", Environment.ProcessId.ToString());
+        Run.Home = Path.Combine(temp, "home");
         if (Directory.Exists(temp))
         {
             Directory.Delete(temp, recursive: true);
@@ -116,6 +118,9 @@ internal static class Program
 internal sealed class Run(string exe, string temp) : IDisposable
 {
     private const string DesktopName = "axit-tests";
+
+    /// <summary>The run's own settings and logs folder (AXIT_HOME), inside the run's folder.</summary>
+    public static string Home { get; set; } = string.Empty;
     private readonly List<Window> _windows = [];
     private readonly nint _desktop = Native.CreateDesktopW(DesktopName, 0, 0, 0, 0x10000000, 0);
     private Window? _current;
@@ -154,6 +159,9 @@ internal sealed class Run(string exe, string temp) : IDisposable
                 return (true, found ? "found: " + seen : "not found");
             case "iffound":
                 return _found ? Step(rest) : (true, "skipped");
+            case "text":
+                var text = _current!.Send("text");
+                return (!text.Contains("\"error\""), text);
             case "keys" or "type" or "menu" or "close":
                 var answer = _current!.Send(line);
                 return (!answer.Contains("\"error\""), answer.Contains("\"error\"") ? answer : null);
@@ -252,7 +260,7 @@ internal sealed class Window : IDisposable
     {
         Environment.SetEnvironmentVariable("AXIT_AUTOMATION", "1");
         // The run's own settings, logs and recently closed list, never the user's (AppPaths).
-        Environment.SetEnvironmentVariable("AXIT_HOME", Path.Combine(Path.GetTempPath(), "axit-drive", "home"));
+        Environment.SetEnvironmentVariable("AXIT_HOME", Run.Home);
         var startup = new Native.STARTUPINFO { cb = Marshal.SizeOf<Native.STARTUPINFO>(), lpDesktop = "WinSta0\\" + desktop };
         var commandLine = new StringBuilder($"\"{exe}\" {arguments}");
         if (!Native.CreateProcessW(null, commandLine, 0, 0, false, 0, 0, null, ref startup, out var info))

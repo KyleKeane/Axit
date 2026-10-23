@@ -1,0 +1,39 @@
+[?9001h[?1004h[?25l[2J[m[H]0;claude[?25h[Screen Reader Mode: on via flag]
+[?2004h[?2031h[?1004h[>0q[?u]7501;?[?25lPermission Required: Accessing workspace:
+C:\Temp\axit-trust-c25620
+Quick safety check: Is this a project you created or one you trust? (Like your own code, a well-known open source project, or work from your team). If not, take a moment to review what's in this folder first.
+Claude Code'll be able to read, edit, and execute files here.
+Security guide
+y. Yes, I trust this folder
+n. No, exit
+Enter y/n:
+Enter to confirm · Esc to cancel[9;12H[?25h y[>4m[?2031l[?2004l[?25l[2;1H[K
+[K
+[K
+[K
+[K
+[K
+[K
+[K
+[K[2;1H[?25h
+[?2004h[?2031h[?1004h[>0q[?25l[2;1H[?25h[>4m[?2031l[?2004l
+[?2004h[?2031h[?1004h[?25l[2;1H]0;✳ Claude Code[?25hClaude Code v2.1.309
+Haiku 5.5 · Claude Max
+C:\Temp\axit-trust-c25620
+auto mode on (shift+tab to cycle)
+effort: medium · /effort
+$[>0q  Reply with the single word hello.]133;A;redraw=0]0;◐ Claude Code[?25l[5;1Hyou: Reply with the single word hello.[K
+Fluttering…[K
+auto mode on (shift+tab to cycle)  ·  esc to interrupt[K
+effort: medium · /effort
+$[?25h]0;◐ Hello greeting]0;◑ Hello greeting]0;◐ Hello greeting[?25l[6;1HPouncing…[K
+auto mode on (shift+tab to cycle)  ·  esc to interrupt[K
+effort: medium · /effort[K
+$[K[?25h]133;C]133;D]0;✳ Hello greeting[?25l[6;1Hclaude: hello[K
+Worked for 2s · done 10:27 AM[K
+auto mode on (shift+tab to cycle)[K
+effort: medium · /effort[K
+$[?25h[?1006l[?1003l[?1002l[?1000l[>4m[?2031l[?2004l[?1016l
+Resume this session with:
+claude --resume 66a8f7c9-fc58-4473-b0d0-91efb697eae1
+]0;[?9001l[?1004l

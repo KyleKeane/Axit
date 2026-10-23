@@ -1,0 +1,11 @@
+[Screen Reader Mode: on via flag]
+Claude Code v2.1.309
+Haiku 5.5 · Claude Max
+C:\Temp\axit-trust-bc7512
+auto mode on (shift+tab to cycle)
+effort: medium · /effort
+you: Reply with the single word hello.
+claude: hello
+Crunched for 2s · done 10:30 AM
+Resume this session with:
+claude --resume 09bb2e6f-7276-4020-be8d-34716678d3bd
