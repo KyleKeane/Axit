@@ -57,7 +57,7 @@ The terminal is an ordinary read-only text: arrows, Home and End, Page Up and Pa
 - Ctrl+F finds text; F3 and Shift+F3 the next and previous match.
 - Escape clears a selection, or goes to the field.
 
-Options, Speech, Speak output: all lines reads each line as it arrives, joined into one utterance per burst. The default is none: the ticks tell you that output comes, and you read it when you want.
+Options, Speech, Speak output: all lines, the default, reads each line as it arrives, joined into one utterance per burst. Speak output: none leaves only the ticks, and you read the output when you want.
 
 ## The shell
 

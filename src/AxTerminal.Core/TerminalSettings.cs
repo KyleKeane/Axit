@@ -26,7 +26,8 @@ public sealed class TerminalSettings : ConsoleSettings
 
     public string? LastFolder { get; set; }
 
-    public OutputSpeechMode OutputSpeech { get; set; }
+    /// <summary>All lines by default since 2026-10-23 (AT-5.3): the user, at the NVDA pass, "axTerminal should speak the output of any command".</summary>
+    public OutputSpeechMode OutputSpeech { get; set; } = OutputSpeechMode.All;
 
     /// <summary>"Asks: …" when a running program seems to wait on a question (AT-5.4).</summary>
     public bool AnnounceQuestions { get; set; } = true;
@@ -62,7 +63,7 @@ public sealed class TerminalSettings : ConsoleSettings
 
         if (!Enum.IsDefined(OutputSpeech))
         {
-            OutputSpeech = OutputSpeechMode.None;
+            OutputSpeech = OutputSpeechMode.All;
         }
     }
 }

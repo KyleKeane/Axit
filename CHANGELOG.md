@@ -2,6 +2,7 @@
 
 ## Unreleased
 
+- axTerminal: Speak output is all lines by default, so a command's output is read as it arrives; a settings file that already says none keeps none (Options, Speech, Speak output: all lines changes it).
 - axFile: Cut and Copy put the paths on the clipboard as text as well, so that a text field pastes them; File Explorer and Paste still take the files.
 - axFile: Move to new folder is Move to folder: Down and Up complete the folder as in Go to folder, a folder that exists (here or by its path) takes the entries, and any other name is a new folder made here.
 - axFile: Shift+F10, the Applications key and a right click open the menu bar's Item menu, as Alt+I does, so that NVDA reads its first item the first time too; the list's own context menu, silent on its first opening, is gone, and with it Ctrl+I inside the menu.

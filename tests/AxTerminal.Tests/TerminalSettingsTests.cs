@@ -18,7 +18,7 @@ public sealed class TerminalSettingsTests
         Assert.True(settings.ClickOnNewLine);
         Assert.False(settings.WorkingMusic);
         Assert.True(settings.AnnounceQuestions);
-        Assert.Equal(OutputSpeechMode.None, settings.OutputSpeech);
+        Assert.Equal(OutputSpeechMode.All, settings.OutputSpeech);
         Assert.Equal(20000, settings.MaxTranscriptLines);
         Assert.True(settings.CheckForUpdates);
     }
@@ -39,7 +39,7 @@ public sealed class TerminalSettingsTests
             Assert.Equal(50, settings.PtyRows);
             Assert.Equal(20000, settings.MaxTranscriptLines);
             Assert.Equal(["C:\\src"], settings.RecentFolders);
-            Assert.Equal(OutputSpeechMode.None, settings.OutputSpeech);
+            Assert.Equal(OutputSpeechMode.All, settings.OutputSpeech);
 
             settings.Shell = "cmd";
             settings.OutputSpeech = OutputSpeechMode.All;

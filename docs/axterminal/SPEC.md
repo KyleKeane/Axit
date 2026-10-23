@@ -232,10 +232,10 @@ out of scope; programs that print and ask are in. It works entirely offline (bun
   (`soundOnBell`, axClaude FR-7.3), the ready ping with "Ready" when the first prompt appears after a start.
 - AT-5.2 **Tick** (`clickOnNewLine`, axClaude FR-7.8): one tick for a frame that adds a visible line; no tool tick,
   since nothing here is a tool call.
-- AT-5.3 **Speak output** (`outputSpeech`: `none` (default) or `all`; Options → Speech → Speak output: none | all
+- AT-5.3 **Speak output** (`outputSpeech`: `none` or `all` (default); Options → Speech → Speak output: none | all
   lines, checked like a radio group): the lines that became final in a frame, as one notification (axClaude FR-7.4,
-  D32), the markers and the hidden rows left out. The default stays none (axClaude D10); whether a terminal wants all
-  lines by default is for the NVDA pass (§7).
+  D32), the markers and the hidden rows left out. All lines by default since 2026-10-23, decided at the NVDA pass: "axTerminal
+  should speak the output of any command" (axClaude's default stays none, D10, since Claude's replies have Speak replies).
 - AT-5.4 **A program asks** (`announceQuestions`, default on; Options → Speech → Say when a program asks): while a
   command runs, when output has stopped for two seconds and the cursor row has text that ends in `:`, `?`, `]` or
   `)`, with or without a trailing space, "Asks: <the row's text>" is announced once for that text, with the question
