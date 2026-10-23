@@ -102,22 +102,17 @@ public sealed class AppSettings : WindowSettings
     /// <summary>Writes the file atomically: a temporary file next to it is moved into place.</summary>
     public override void Save(string path) => SettingsFile.Save(path, this);
 
+    /// <summary>The folder Claude starts in: the last one, and the front of the recent list (FR-8.1).</summary>
     public void RememberFolder(string folder)
     {
         LastProjectFolder = folder;
-        RecentFolders.RemoveAll(f => string.Equals(f, folder, StringComparison.OrdinalIgnoreCase));
-        RecentFolders.Insert(0, folder);
-        if (RecentFolders.Count > MaxRecentFolders)
-        {
-            RecentFolders.RemoveRange(MaxRecentFolders, RecentFolders.Count - MaxRecentFolders);
-        }
+        RecentPaths.Remember(RecentFolders, folder, MaxRecentFolders);
     }
 
     private void Sanitize()
     {
         SanitizeWindow();
-        RecentFolders ??= [];
-        RecentFolders.RemoveAll(string.IsNullOrWhiteSpace);
+        RecentFolders = RecentPaths.Sanitize(RecentFolders, MaxRecentFolders);
         if (PtyColumns is < 20 or > 1000)
         {
             PtyColumns = 240;

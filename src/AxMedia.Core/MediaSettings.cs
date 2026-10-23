@@ -36,20 +36,7 @@ public sealed class MediaSettings : WindowSettings
     public override void Save(string path) => SettingsFile.Save(path, this);
 
     /// <summary>Puts the path at the front of <see cref="Recent"/>, once, and keeps the list to <see cref="MaxRecent"/>.</summary>
-    public void Remember(string path)
-    {
-        Recent.RemoveAll(r => string.Equals(r, path, StringComparison.OrdinalIgnoreCase));
-        Recent.Insert(0, path);
-        Trim();
-    }
-
-    private void Trim()
-    {
-        if (Recent.Count > MaxRecent)
-        {
-            Recent.RemoveRange(MaxRecent, Recent.Count - MaxRecent);
-        }
-    }
+    public void Remember(string path) => RecentPaths.Remember(Recent, path, MaxRecent);
 
     private void Sanitize()
     {
@@ -60,8 +47,6 @@ public sealed class MediaSettings : WindowSettings
             SeekSeconds = 15;
         }
 
-        Recent ??= [];
-        Recent.RemoveAll(string.IsNullOrWhiteSpace);
-        Trim();
+        Recent = RecentPaths.Sanitize(Recent, MaxRecent);
     }
 }

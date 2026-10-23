@@ -26,26 +26,11 @@ public sealed class EditorSettings : WindowSettings
     public override void Save(string path) => SettingsFile.Save(path, this);
 
     /// <summary>Puts the file at the front of <see cref="RecentFiles"/>, once, and keeps the list to <see cref="MaxRecentFiles"/>.</summary>
-    public void RememberFile(string path)
-    {
-        RecentFiles.RemoveAll(f => string.Equals(f, path, StringComparison.OrdinalIgnoreCase));
-        RecentFiles.Insert(0, path);
-        Trim();
-    }
-
-    private void Trim()
-    {
-        if (RecentFiles.Count > MaxRecentFiles)
-        {
-            RecentFiles.RemoveRange(MaxRecentFiles, RecentFiles.Count - MaxRecentFiles);
-        }
-    }
+    public void RememberFile(string path) => RecentPaths.Remember(RecentFiles, path, MaxRecentFiles);
 
     private void Sanitize()
     {
         SanitizeWindow();
-        RecentFiles ??= [];
-        RecentFiles.RemoveAll(string.IsNullOrWhiteSpace);
-        Trim();
+        RecentFiles = RecentPaths.Sanitize(RecentFiles, MaxRecentFiles);
     }
 }

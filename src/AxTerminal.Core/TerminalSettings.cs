@@ -68,28 +68,17 @@ public sealed class TerminalSettings : WindowSettings
     /// <summary>The shell the settings name, or the machine's default.</summary>
     public ShellKind ShellKind => ShellLauncher.Parse(Shell);
 
+    /// <summary>The folder the shell starts in: the last one, and the front of the recent list (AT-1.5).</summary>
     public void RememberFolder(string folder)
     {
         LastFolder = folder;
-        RecentFolders.RemoveAll(f => string.Equals(f, folder, StringComparison.OrdinalIgnoreCase));
-        RecentFolders.Insert(0, folder);
-        TrimRecent();
-    }
-
-    private void TrimRecent()
-    {
-        if (RecentFolders.Count > MaxRecentFolders)
-        {
-            RecentFolders.RemoveRange(MaxRecentFolders, RecentFolders.Count - MaxRecentFolders);
-        }
+        RecentPaths.Remember(RecentFolders, folder, MaxRecentFolders);
     }
 
     private void Sanitize()
     {
         SanitizeWindow();
-        RecentFolders ??= [];
-        RecentFolders.RemoveAll(string.IsNullOrWhiteSpace);
-        TrimRecent();
+        RecentFolders = RecentPaths.Sanitize(RecentFolders, MaxRecentFolders);
         if (Shell is not null && Shell is not ("pwsh" or "powershell" or "cmd" or "bash" or "custom"))
         {
             Shell = null;

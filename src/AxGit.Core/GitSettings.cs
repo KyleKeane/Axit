@@ -26,26 +26,11 @@ public sealed class GitSettings : WindowSettings
     public override void Save(string path) => SettingsFile.Save(path, this);
 
     /// <summary>Puts the repository at the front of <see cref="RecentRepositories"/>, once, and keeps the list to <see cref="MaxRecentRepositories"/>.</summary>
-    public void RememberRepository(string root)
-    {
-        RecentRepositories.RemoveAll(r => string.Equals(r, root, StringComparison.OrdinalIgnoreCase));
-        RecentRepositories.Insert(0, root);
-        Trim();
-    }
-
-    private void Trim()
-    {
-        if (RecentRepositories.Count > MaxRecentRepositories)
-        {
-            RecentRepositories.RemoveRange(MaxRecentRepositories, RecentRepositories.Count - MaxRecentRepositories);
-        }
-    }
+    public void RememberRepository(string root) => RecentPaths.Remember(RecentRepositories, root, MaxRecentRepositories);
 
     private void Sanitize()
     {
         SanitizeWindow();
-        RecentRepositories ??= [];
-        RecentRepositories.RemoveAll(string.IsNullOrWhiteSpace);
-        Trim();
+        RecentRepositories = RecentPaths.Sanitize(RecentRepositories, MaxRecentRepositories);
     }
 }

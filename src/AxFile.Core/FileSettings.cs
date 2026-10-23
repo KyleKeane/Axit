@@ -49,25 +49,13 @@ public sealed class FileSettings : WindowSettings
     public void RememberFolder(string folder)
     {
         LastFolder = folder;
-        RecentFolders.RemoveAll(r => string.Equals(r, folder, StringComparison.OrdinalIgnoreCase));
-        RecentFolders.Insert(0, folder);
-        Trim();
-    }
-
-    private void Trim()
-    {
-        if (RecentFolders.Count > MaxRecentFolders)
-        {
-            RecentFolders.RemoveRange(MaxRecentFolders, RecentFolders.Count - MaxRecentFolders);
-        }
+        RecentPaths.Remember(RecentFolders, folder, MaxRecentFolders);
     }
 
     private void Sanitize()
     {
         SanitizeWindow();
-        RecentFolders ??= [];
-        RecentFolders.RemoveAll(string.IsNullOrWhiteSpace);
-        Trim();
+        RecentFolders = RecentPaths.Sanitize(RecentFolders, MaxRecentFolders);
         if (string.IsNullOrWhiteSpace(LastFolder))
         {
             LastFolder = null;
