@@ -15,6 +15,8 @@
 // Script steps, one per line, '#' starts a comment:
 //   mkdir <name>              a fresh folder {temp}\<name>
 //   file <name> <text>        a file {temp}\<name> holding the text (\n for a new line)
+//   silence <name> <ms>       a silent WAV file {temp}\<name> of that length, for AxMedia without a sound
+//   run <command line>        a command through cmd.exe in {temp}, waited for up to 60 s (git init, git commit ...)
 //   start <arguments>         Axit.exe with these arguments, on the test desktop; the window becomes the current one
 //   use <n>                   the n-th window started in the script (from 1) becomes the current one
 //   keys <key> ...            key presses: ctrl+shift+p, escape, down, enter, f1, alt+f4 ...
@@ -280,6 +282,12 @@ internal sealed class Run(string exe, string temp)
                 Directory.CreateDirectory(Path.GetDirectoryName(path)!);
                 File.WriteAllText(path, at < 0 ? string.Empty : rest[(at + 1)..].Replace("\\n", "\r\n"), new UTF8Encoding(false));
                 return (true, null);
+            case "silence":
+                var parts = rest.Split(' ', 2);
+                WriteSilence(Path.Combine(temp, parts[0]), int.Parse(parts[1]));
+                return (true, null);
+            case "run":
+                return RunCommand(rest);
             case "start":
                 _current = Window.Start(exe, rest, DesktopName, _home);
                 _windows.Add(_current);
@@ -311,6 +319,50 @@ internal sealed class Run(string exe, string temp)
             default:
                 return (false, $"unknown step {verb}");
         }
+    }
+
+    /// <summary>A command through cmd.exe in the run's folder; its output is the step's detail.</summary>
+    private (bool, string?) RunCommand(string commandLine)
+    {
+        var start = new ProcessStartInfo("cmd.exe", "/d /s /c \"" + commandLine + "\"")
+        {
+            WorkingDirectory = temp,
+            UseShellExecute = false,
+            RedirectStandardOutput = true,
+            RedirectStandardError = true,
+            CreateNoWindow = true,
+        };
+        using var process = Process.Start(start)!;
+        var output = process.StandardOutput.ReadToEndAsync();
+        var error = process.StandardError.ReadToEndAsync();
+        if (!process.WaitForExit(60_000))
+        {
+            process.Kill(entireProcessTree: true);
+            return (false, "did not finish within 60 s");
+        }
+
+        var text = (output.Result + error.Result).Trim().Replace("\r\n", " / ");
+        return (process.ExitCode == 0, $"exit {process.ExitCode}: {text[..Math.Min(text.Length, 300)]}");
+    }
+
+    /// <summary>A silent 8 kHz mono 16-bit WAV file.</summary>
+    private static void WriteSilence(string path, int milliseconds)
+    {
+        var samples = 8000 * milliseconds / 1000;
+        using var writer = new BinaryWriter(File.Create(path));
+        writer.Write("RIFF"u8);
+        writer.Write(36 + samples * 2);
+        writer.Write("WAVEfmt "u8);
+        writer.Write(16);
+        writer.Write((short)1);
+        writer.Write((short)1);
+        writer.Write(8000);
+        writer.Write(16000);
+        writer.Write((short)2);
+        writer.Write((short)16);
+        writer.Write("data"u8);
+        writer.Write(samples * 2);
+        writer.Write(new byte[samples * 2]);
     }
 
     private Window Current => _current ?? throw new InvalidOperationException("no window started yet");
