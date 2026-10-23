@@ -27,6 +27,10 @@ Run so far, by the user with NVDA, 2026-10-23, on `palette` after 0d46e82:
   axStart from a scratch build of 2026-10-22, which kept the hotkey; on the current build all passed, but the edge
   note was "a bit soft and swallowed by the speech". The note was made louder and two notes falling an octave, and
   the steps passed again with it.
+- axStart section 2 steps 1, 4, 6, 7 and 8, section 3 steps 1 to 8: Passed. Section 1 step 7 (the Start menu
+  shortcut) waits for the release, since the shortcut starts the installed copy.
+- axStart section 4 steps 1 to 4 and 6 (step 5 with Windows+E), section 5 steps 3 and 5: Passed. Section 5 steps 1, 2
+  and 4 (sign-in and an update in place) wait for the release.
 
 ## 2026-10-22, Axit 3.3.1
 
