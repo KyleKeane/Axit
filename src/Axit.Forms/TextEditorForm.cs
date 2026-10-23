@@ -466,7 +466,13 @@ public sealed class TextEditorForm : AxitForm
 
     // ---- the document (AD-3) ----
 
-    /// <summary>The file read into the editor, or an empty document; the history ends with it unless <paramref name="keepHistory"/> (a reload, AD-2.5). A file the app refuses (the viewer's AP-2.2) is a notice, the window keeps what it had, and the answer is false.</summary>
+    /// <summary>
+    /// The file read into the editor, or an empty document; the history ends with it unless <paramref name="keepHistory"/>
+    /// (a reload, AD-2.5). A file the app refuses (the viewer's AP-2.2), or one that cannot be read on a reload, is a
+    /// notice, the window keeps what it had, and the answer is false; one that cannot be read on an open is the notice
+    /// and Untitled (AD-3.7). Until 2026-10-23 a failed read answered true with the editor emptied, so a reload on
+    /// coming back to the window could leave an empty Untitled with "Reloaded" said over the error.
+    /// </summary>
     private bool LoadDocument(string? path, bool keepHistory = false)
     {
         if (_app.Refuse is { } refuse && path is not null && File.Exists(path) && refuse(path) is { } refusal)
@@ -478,34 +484,47 @@ public sealed class TextEditorForm : AxitForm
             return false;
         }
 
+        var document = TextDocument.Empty();
+        DateTime? writeTime = null;
+        if (path is not null && File.Exists(path))
+        {
+            try
+            {
+                document = TextDocument.Read(path);
+                writeTime = File.GetLastWriteTimeUtc(path);
+            }
+            catch (Exception ex) when (ex is InvalidOperationException or IOException or UnauthorizedAccessException)
+            {
+                Fail($"{path} could not be {(keepHistory ? "reloaded" : "opened")}: {ex.Message}");
+                if (keepHistory)
+                {
+                    // The text stays (AD-3.6); the file is not compared again until it is read or saved.
+                    _lastWriteTime = null;
+                    return false;
+                }
+
+                // Untitled, so that Save cannot write the empty editor over the file (AD-3.7).
+                path = null;
+            }
+        }
+
         if (_path is { } old && !string.Equals(old, path, StringComparison.OrdinalIgnoreCase))
         {
             // AX-9.4: the file left behind joins the bundle's Recently closed list.
             RecentlyClosed.Remember(_app.Name, old);
         }
 
-        _path = path;
-        _document = TextDocument.Empty();
-        _lastWriteTime = null;
-        _changeNoticed = null;
-        if (path is not null && File.Exists(path))
+        if (path is not null && !keepHistory)
         {
-            try
-            {
-                _document = TextDocument.Read(path);
-                _lastWriteTime = File.GetLastWriteTimeUtc(path);
-                // AD-4.1: Open recent file, written at once so that another window of the app lists it too.
-                _settings.RememberFile(path);
-                SaveSettings();
-            }
-            catch (Exception ex) when (ex is InvalidOperationException or IOException or UnauthorizedAccessException)
-            {
-                // Untitled, so that Save cannot write the empty editor over the file (AD-3.7).
-                _path = null;
-                Fail($"{path} could not be opened: {ex.Message}");
-            }
+            // AD-4.1: Open recent file, written at once so that another window of the app lists it too.
+            _settings.RememberFile(path);
+            SaveSettings();
         }
 
+        _path = path;
+        _document = document;
+        _lastWriteTime = writeTime;
+        _changeNoticed = null;
         _loading = true;
         _editor.Text = _document.Text;
         _editor.Select(0, 0);
@@ -779,30 +798,38 @@ public sealed class TextEditorForm : AxitForm
             return;
         }
 
-        _path = dialog.FileName;
-        _settings.RememberFile(_path);
-        SaveSettings();
-        WriteFile(_path, then);
+        // The document is renamed once the write has succeeded (AD-3.5): until 2026-10-23 the new path was taken
+        // first, so a failed write left the window under the old name with the new path.
+        if (WriteFile(dialog.FileName, then))
+        {
+            _settings.RememberFile(dialog.FileName);
+            SaveSettings();
+        }
     }
 
-    private void WriteFile(string path, Action? then)
+    /// <summary>The text written to <paramref name="path"/>, which becomes the document's; false, with the error as a notice and nothing changed, when it cannot be written.</summary>
+    private bool WriteFile(string path, Action? then)
     {
         try
         {
             _document.Write(path, _editor.Text);
-            _lastWriteTime = File.GetLastWriteTimeUtc(path);
-            _changeNoticed = null;
-            _changed = false;
-            UpdateTitle();
-            UpdateStatus();
-            Log.Info($"Saved {path}");
-            Announce("Saved", true);
-            then?.Invoke();
         }
         catch (Exception ex) when (ex is IOException or UnauthorizedAccessException)
         {
             Fail($"{path} could not be saved: {ex.Message}");
+            return false;
         }
+
+        _path = path;
+        _lastWriteTime = File.GetLastWriteTimeUtc(path);
+        _changeNoticed = null;
+        _changed = false;
+        UpdateTitle();
+        UpdateStatus();
+        Log.Info($"Saved {path}");
+        Announce("Saved", true);
+        then?.Invoke();
+        return true;
     }
 
     private bool ChangedOnDisk() =>

@@ -118,13 +118,16 @@ UTF-8, UTF-16 and the system code page; files that are not text; files over 32 M
   save; a file with none keeps `\r\n`. The status bar shows it ("CRLF", "LF").
 - AD-3.5 Save writes the file in place (as Notepad does) and then reads its last write time, which Ctrl+S and the
   close check compare against (AD-3.6). Save as asks for a path with the Windows file picker, then saves and renames
-  the document (title, editor name, status bar).
+  the document (title, editor name, status bar) once the write has succeeded; a write that fails is the error notice
+  and the document stays as it was (until 2026-10-23 it was renamed first).
 - AD-3.6 Changed on disk: the file's last write time is compared with the one remembered when the window becomes
   active again (`OnActivated`; nothing is watched or polled while it stays active, since the user leaves it to let
   another program, Claude, work and comes back) and at the moment of saving. Back in the window with no unsaved
   changes and a changed file, the editor reloads it, keeps the caret on its line and column, and says "Reloaded,
-  <name> changed on disk"; with unsaved changes it says once, until the file changes again, "<name> changed on disk;
-  Save will ask". Save with a changed file asks through a notice ("<name> was changed by another program since you
+  <name> changed on disk"; a reload that cannot read the file (another program still holds it) is the error notice
+  with the text kept, and the file is not compared again until the next read or save (until 2026-10-23 the editor
+  was emptied and "Reloaded" said over the error); with unsaved changes it says once, until the file changes again,
+  "<name> changed on disk; Save will ask". Save with a changed file asks through a notice ("<name> was changed by another program since you
   opened it. Write over it, or reload it and lose your changes?") with Write over (Enter), Reload and lose mine, and
   Cancel (Escape); Reload drops the unsaved text and reloads with the caret kept, saying "Reloaded". No merging,
   which is git's work, and no deleted-file case (a file that is gone is simply not compared). Asked for on
