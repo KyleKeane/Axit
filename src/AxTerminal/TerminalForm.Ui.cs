@@ -17,6 +17,7 @@ internal sealed partial class TerminalForm
         var session = new ToolStripMenuItem("&Session");
         session.DropDownItems.Add(Item("&New session...", NewSession, AxTerminalKeys.NewSession));
         session.DropDownItems.Add(RecentFoldersItem);
+        session.DropDownItems.Add(RecentFoldersInNewWindowItem);
         // AT-1.6: the shell changed in place, the current one checked when the submenu opens.
         var switchShell = new ToolStripMenuItem("S&witch shell");
         foreach (var (kind, text) in ShellChoices)

@@ -73,6 +73,8 @@ public abstract partial class ConsoleForm : AxitForm
         RecordItem.Click += (_, _) => ToggleRecording();
         CommandPalette.FilledOnOpening(RecentFoldersItem).DropDownOpening += (_, _) => FillRecentFolders();
         FillRecentFolders();
+        CommandPalette.FilledOnOpening(RecentFoldersInNewWindowItem).DropDownOpening += (_, _) => FillRecentFoldersInNewWindow();
+        FillRecentFoldersInNewWindow();
 
         _quiet.Tick += (_, _) =>
         {
@@ -134,6 +136,9 @@ public abstract partial class ConsoleForm : AxitForm
     /// <summary>The first menu's Open recent folder submenu, filled from the settings as it opens; a folder chosen goes to <see cref="SwitchFolder"/>.</summary>
     protected ToolStripMenuItem RecentFoldersItem { get; } = new("Open &recent folder");
 
+    /// <summary>The same list, each folder opened in a new window of the app with this one left as it is (<see cref="OpenInNewWindow"/>).</summary>
+    protected ToolStripMenuItem RecentFoldersInNewWindowItem { get; } = new("Open recent &folder in new window");
+
     /// <summary>The control at the bottom of the window: the field, or the control area's list or field in its place.</summary>
     protected Control BottomControl => Area.Current ?? Input;
 
@@ -159,6 +164,9 @@ public abstract partial class ConsoleForm : AxitForm
 
     /// <summary>Open recent folder (axClaude FR-8.1, axTerminal AT-1.5): the program again in that folder.</summary>
     protected abstract void SwitchFolder(string folder);
+
+    /// <summary>The app's verb on the command line (<c>Dispatch.AxClaude</c>, <c>Dispatch.AxTerminal</c>), for a folder opened in a new window.</summary>
+    protected abstract string Verb { get; }
 
     /// <summary>The window's own keys, from its table, after the console's shared ones (the focus keys, find, the bookmark, read to the end).</summary>
     protected virtual bool ProcessConsoleKey(Keys keyData) => false;
@@ -429,4 +437,19 @@ public abstract partial class ConsoleForm : AxitForm
     }
 
     private void FillRecentFolders() => RecentMenu.FillFolders(RecentFoldersItem, ConsoleSettings.RecentFolders, "&No recent folders", SwitchFolder);
+
+    private void FillRecentFoldersInNewWindow() => RecentMenu.FillFolders(RecentFoldersInNewWindowItem, ConsoleSettings.RecentFolders, "&No recent folders", OpenInNewWindow);
+
+    /// <summary>The program in <paramref name="folder"/> in a window of its own, this one left as it is (axClaude FR-8.5, axTerminal AT-1.5).</summary>
+    protected void OpenInNewWindow(string folder)
+    {
+        if (!Directory.Exists(folder))
+        {
+            Fail("The folder no longer exists: " + folder);
+            return;
+        }
+
+        AxitMenu.Start(Verb, folder);
+        Announce($"Opening {PathName.Of(folder)} in a new window", false);
+    }
 }

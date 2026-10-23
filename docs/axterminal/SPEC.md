@@ -250,7 +250,7 @@ out of scope; programs that print and ask are in. It works entirely offline (bun
 ### AT-6 Menus, keys, texts
 
 - AT-6.1 Menus, in the standard order of a first menu (AX-6): **Session (S):** New session… Ctrl+N | Open recent
-  folder ▸ (ten, "1. name (path)", AX-9.5) | Switch shell ▸ (PowerShell 7 | Windows PowerShell | Command Prompt |
+  folder ▸ (ten, "1. name (path)", AX-9.5) | Open recent folder in new window ▸ (the same list, a new axTerminal window on the one chosen, this one left as it is) | Switch shell ▸ (PowerShell 7 | Windows PowerShell | Command Prompt |
   Git Bash | Custom…) | ─ | Restart shell Ctrl+Shift+R | Clear transcript Ctrl+L | ─ | Say current folder Ctrl+P |
   Show current folder in ▸ (File Explorer Ctrl+W | axClaude | axGIT | axFile), on the shell's current directory | ─ |
   Export transcript… Ctrl+S | Exit Alt+F4. **Shell (E):** Interrupt Ctrl+Shift+C | Send Escape Shift+Escape | Send

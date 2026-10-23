@@ -16,7 +16,10 @@ internal sealed partial class MainForm
         var session = new ToolStripMenuItem("&Session");
         session.DropDownItems.Add(new ToolStripMenuItem("&New session...", null, (_, _) => NewSession()) { ShortcutKeys = AxClaudeKeys.NewSession });
         session.DropDownItems.Add(new ToolStripMenuItem("&Open folder...", null, (_, _) => OpenFolder()));
+        // FR-8.3, FR-8.5: Open replaces this window's session; in new window leaves it running.
+        session.DropDownItems.Add(new ToolStripMenuItem("Open folder in new &window...", null, (_, _) => OpenFolderInNewWindow()));
         session.DropDownItems.Add(RecentFoldersItem);
+        session.DropDownItems.Add(RecentFoldersInNewWindowItem);
         // The standard order of a File menu (bundle AX-6): the editors have Save and Save as here; axClaude has none.
         session.DropDownItems.Add(new ToolStripSeparator());
         // FR-8.2: Show current folder in ▸ File Explorer and the other apps' windows on the project folder.

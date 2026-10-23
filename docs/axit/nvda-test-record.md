@@ -31,6 +31,8 @@ Run so far, by the user with NVDA, 2026-10-23, on `palette` after 0d46e82:
   shortcut) waits for the release, since the shortcut starts the installed copy.
 - axStart section 4 steps 1 to 4 and 6 (step 5 with Windows+E), section 5 steps 3 and 5: Passed. Section 5 steps 1, 2
   and 4 (sign-in and an update in place) wait for the release.
+- axClaude section 12 steps 4a, 18, 19, 20 and 21: Passed, in a second window on
+  `manual_tests/axclaude/project-for-conversations`.
 
 ## 2026-10-22, Axit 3.3.1
 

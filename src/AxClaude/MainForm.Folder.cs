@@ -88,6 +88,17 @@ internal sealed partial class MainForm
         }
     }
 
+    /// <summary>Session → Open folder in new window… (FR-8.3): the picker, then Claude in that folder in a window of its own; this session goes on.</summary>
+    private void OpenFolderInNewWindow()
+    {
+        if (PickFolder(_folder) is { } folder)
+        {
+            OpenInNewWindow(folder);
+        }
+    }
+
+    protected override string Verb => Dispatch.AxClaude;
+
     /// <summary>The project folder, for the bundle's Recently closed list (AX-9.4).</summary>
     protected override string? FolderInHand => _folder;
 

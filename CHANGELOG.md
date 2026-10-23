@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+- axClaude: Session, Open folder in new window and Open recent folder in new window start axClaude in the folder in a window of its own and leave this one's session running; Open folder and Open recent folder still restart Claude in this window.
+- axTerminal: Session, Open recent folder in new window, the same for a shell.
 - Axit: the low note at the end of a list is louder and two notes falling an octave, so that the speech after it no longer drowns it.
 - Axit: the apps are named axClaude, axDown, axJSON, axGIT, axTerminal, axFile, axMedia, axPreview and axStart, the ax in lower case, so that a screen reader says each as ax and a word. The case does not matter anywhere a name is typed or found, and the Recently closed list keeps its entries.
 - Axit: a command palette in every window. Ctrl+Shift+P, or Axit, Command palette (the first item of the Axit menu), opens one search field over a list of every command in the window's menus, each read with its menu and its key, "Save as, File, Ctrl+Shift+S". Typing narrows the list to the commands holding every typed word, and after a short pause the first match is said with the count; Down and Up, Page Down and Page Up, Ctrl+Home and Ctrl+End move through the matches while the caret stays in the field. Enter runs the command where you were, Escape closes. At the first or the last match a key that cannot move plays the low note and then says the match again. The recent lists and the window lists of the menus are left out.
