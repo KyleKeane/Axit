@@ -17,6 +17,26 @@ public class TrustBannerTests
 
     private const string Message = "Reply with the single word hello.";
 
+    /// <summary>A two-line message sent the moment the mode line shows (2.1.309): Claude's warning row stays under the mode line for the rest of the session.</summary>
+    private const string EarlyTwoLines = "early-two-lines-claude2.1.309-240x50.vt";
+
+    [Theory]
+    [InlineData(false)]
+    [InlineData(true)]
+    public void An_early_two_line_message_leaves_no_draft_warning_or_mode_line_in_the_conversation(bool quietFrameDuringDraft)
+    {
+        var (columns, rows) = FixtureSize(EarlyTwoLines);
+        var model = new SessionModel(columns, rows);
+        Replay(model, EarlyTwoLines, ["What is 2 plus 2?\nAnswer in one line."], quietFrameDuringDraft);
+        var texts = Visible(model);
+
+        Assert.Single(texts, text => text == "Claude Code v2.1.309");
+        Assert.True(texts.Count(text => text == "Answer in one line.") == 1, string.Join(" | ", texts));
+        var output = texts.IndexOf("# Output 1 Reply from Claude");
+        Assert.Equal("claude: 4", texts[output + 2]);
+        Assert.DoesNotContain(texts, text => text.StartsWith('$') || text.StartsWith("you:", StringComparison.Ordinal) || text.Contains("invisible character", StringComparison.Ordinal) || text.StartsWith("auto mode on", StringComparison.Ordinal) || text.Contains("ctrl+g", StringComparison.Ordinal));
+    }
+
     [Theory]
     [InlineData(Fixture, false)]
     [InlineData(Fixture, true)]

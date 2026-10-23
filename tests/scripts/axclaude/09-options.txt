@@ -1,0 +1,256 @@
+# axClaude, docs/axclaude/nvda-test-plan.md section 9: options and diagnostics; with it the sounds of section 8
+# steps 6 to 8, by name on the timeline (the run records sounds and plays none: how they sound is for the ear).
+# The update check off (GitHub's limit for unsigned requests made it fail and log an ERROR in runs).
+file home\Axit\axclaude.json {"checkForUpdates":false}
+mkdir opts
+# Step 3: the raw stream recorded from the start (--record, the command line's form of Options, Developer, Record raw
+# stream; the menu item's file picker is a Windows dialog, left manual).
+start claude {temp}\opts --record {temp}\raw.vt -- --model haiku
+expect said trust
+wait 1500
+keys enter
+# Section 8 step 6: a single high ping with "Ready".
+expect said Ready
+expect said ♪ Ready
+wait 3000
+# Step 1: Larger text and Smaller text (Ctrl+Plus and Ctrl+Minus: the channel has no names for those keys, so the
+# menu items run; they are the same commands): "Text size 10", one more than the default 9, then back. Windows text size.
+# The font dialog is a Windows dialog (manual).
+menu Larger text
+expect said Text size 10
+menu Smaller text
+expect said Text size 9
+menu Larger text
+expect said Text size 10
+# Section 8 step 6: a message that needs a tool: the low note with "Sent", the rising notes with "Responding", ticks
+# for lines, the tool tick for the tool, the falling notes with "Done".
+type Use the Bash tool to run: echo hi. Then reply with the single word finished.
+keys enter
+expect said Sent
+expect said ♪ Sent
+expect said Responding
+expect said ♪ Responding
+expect said ♪ Tool
+expect said ♪ Click
+expect said Done
+expect said ♪ Done
+wait 1000
+# Ticks for new lines and tool calls off: no tick and no tool tick in the next reply; the chimes stay.
+menu Ticks for new lines and tool calls
+type Use the Bash tool to run: echo hi. Then reply with the single word again.
+keys enter
+expect said ♪ Sent
+expect said Done
+refuse said ♪ Click
+refuse said ♪ Tool
+menu Ticks for new lines and tool calls
+said
+# Chimes off: no chimes, the ticks still there.
+menu Chimes
+type Reply with the single word quiet.
+keys enter
+expect said ♪ Click
+expect said Done
+refuse said ♪ Sent
+refuse said ♪ Done
+menu Chimes
+said
+# Section 8 step 7: Ctrl+Space in the field with Claude idle: "Background music on, nothing is running"; a turn: the
+# music starts as the status turns to working and stops before the falling notes; Ctrl+Space: "Background music off".
+keys ctrl+space
+expect said Background music on, nothing is running
+type Use the Bash tool to run: echo hi. Then reply with the single word music.
+keys enter
+expect said ♪ StartMusic
+expect said ♪ StopMusic
+expect said ♪ Done
+keys ctrl+space
+expect said Background music off
+# Ctrl+Space from the conversation during a turn: the music starts with "Background music on"; again: it stops.
+type Write a story of 1500 words about a lighthouse keeper.
+keys enter
+expect said Sent
+expect state Claude: working
+keys ctrl+2
+keys ctrl+space
+expect said ♪ StartMusic
+expect said ! Background music on
+refuse said nothing is running
+keys ctrl+space
+expect said ♪ StopMusic
+expect said Background music off
+expect said Done
+# Plain Space in the conversation does nothing.
+said
+keys space
+expect quiet 1000
+# Section 8 step 8: the louder alert replaces the done chime only while the window is in the background; switching
+# away with Alt+Tab and the taskbar flash need the real desktop (manual). In this window, which the run keeps active,
+# the next turn ends with the falling notes, no alert.
+menu Louder alert when the window is in the background
+keys ctrl+1
+type Reply with the single word alert.
+keys enter
+expect said ♪ Done
+refuse said ♪ Alert
+menu Louder alert when the window is in the background
+# Step 3: Options, Developer, Stop recording: "Recording stopped" and a system line with the size; the .vt file and
+# its .chunks.txt exist.
+menu Stop recording
+expect said Recording stopped
+run dir /b raw.vt raw.vt.chunks.txt
+keys ctrl+2
+expect text System: Recording stopped:
+expect text bytes in
+# Step 4, Copy diagnostics, writes the Windows clipboard, which the test desktop shares with the user's: left manual.
+# Step 2: Speak replies. Options, Speech: choosing "all lines" says it; a markdown answer is spoken in one piece without
+# moving the caret; the ticks still sound.
+menu Speak replies: all lines
+expect said Speak replies: all lines
+keys ctrl+1
+type Markdown only: ## Alpha, a five-word sentence, ## Beta, three one-word bullets.
+keys enter
+expect said claude: Alpha
+expect said Done
+# First lines: only the first line of each of Claude's messages.
+menu Speak replies: first lines
+expect said Speak replies: first lines
+type Reply with two lines: the word first, then on the next line the word second.
+keys enter
+expect said first
+refuse said second
+expect said Done
+# Ctrl+Shift+R: nothing of the conversation is spoken again, "Ready", and the next reply is spoken.
+keys ctrl+shift+r
+expect state "notice":"Force Claude to restart?"
+keys enter
+expect said Restarting
+expect said Ready
+refuse said Alpha
+wait 2000
+type Reply with the single word after.
+keys enter
+expect said claude:
+expect said Done
+# An error from Claude spoken in both modes needs Claude started with a bad API key in its environment, which the
+# runner cannot set for one window: left manual.
+# Speak each tool call: the tool: row spoken as it appears, tool output not spoken.
+menu Speak replies: none
+expect said Speak replies: none
+menu Speak each tool call
+type Use the Bash tool to run: echo hi. Then reply with the single word tooled.
+keys enter
+expect said tool: Bash
+refuse said tooled
+expect said Done
+menu Speak each tool call
+# Step 5: F1, the shortcuts in the window's place: the text's first line names its own keys; h: "Anywhere, heading
+# level 2", h: "Message field, heading level 2", Shift+H back, 2: the next level-2 heading.
+keys f1
+expect state "notice":"Keyboard shortcuts"
+expect focus "name":"Keyboard shortcuts","role":"Text","value":"In this text: h and Shift
+keys h
+expect said ! Anywhere, heading level 2
+keys h
+expect said ! Message field, heading level 2
+keys shift+h
+expect said ! Anywhere, heading level 2
+keys 2
+expect said ! Message field, heading level 2
+# Ctrl+F: the Find notice in its place; "palette", Enter: the shortcuts are back with the line read; F3 the next line
+# with "palette", Shift+F3 back; Ctrl+F, Escape: the shortcuts back.
+keys ctrl+f
+expect state "notice":"Find"
+keys ctrl+a
+type palette
+keys enter
+expect state "notice":"Keyboard shortcuts"
+# (The match is selected and NVDA reads it at the caret; the app says nothing, and the channel's caret line is wrong
+# in this wrapped text, so only the focus is checked here.)
+expect focus "name":"Keyboard shortcuts"
+keys f3
+expect focus "name":"Keyboard shortcuts"
+keys shift+f3
+expect focus "name":"Keyboard shortcuts"
+keys ctrl+f
+expect state "notice":"Find"
+keys escape
+expect state "notice":"Keyboard shortcuts"
+expect focus Keyboard shortcuts
+# Tab: the Close button; Tab again: the text. NVDA+End reading the status bar is NVDA's (manual). Escape closes it and
+# the focus is back in the message field, where F1 was pressed.
+keys tab
+expect focus Close
+keys tab
+expect focus Keyboard shortcuts
+keys escape
+expect state "notice":null
+expect focus Message to Claude
+# F1 from the conversation, then close: the focus is back on the same line.
+keys ctrl+2 ctrl+home down
+expect focus "value":"[Screen Reader Mode
+keys f1
+expect state "notice":"Keyboard shortcuts"
+keys escape
+expect focus "value":"[Screen Reader Mode
+# Step 6: Help, User guide: "axClaude user guide" first; h moves by heading, "No next heading" at the end; Escape.
+menu User guide
+expect state "notice":"User guide"
+expect focus axClaude user guide
+keys h
+expect said heading level 2
+keys shift+h
+expect said heading level
+keys ctrl+end h
+expect said ! No next heading
+keys escape
+expect state "notice":null
+# Axit, About, Version: "Axit <version>", the nine apps, the latest release, the folders; Licence; Attribution; the
+# Axit guide with h by heading (Install, Start, Update, Remove, About).
+menu Version
+expect state "noticeText":"Axit 3.
+expect state axClaude
+expect state axStart
+expect state Latest release on GitHub
+keys escape
+expect state "notice":null
+menu Licence
+expect state "notice":"Licence"
+keys escape
+menu Attribution
+expect state "notice":"Attribution"
+keys escape
+menu Axit guide
+expect focus "value":"# Axit
+keys h
+expect said Install, heading level 2
+keys h
+expect said Start
+keys h
+expect said Update
+keys escape
+expect state "notice":null
+# Step 7, the web pages, open the browser on the user's desktop (manual). Step 8, Export conversation, goes through the
+# Save dialog (manual). Step 10, dark mode, is a sighted check (manual).
+# Step 9: Options, Text, Time stamps on Input and Output lines: the next markers carry the time; earlier ones are
+# unchanged; off again.
+menu Time stamps on Input and Output lines
+keys ctrl+1
+type Reply with the single word stamped.
+keys enter
+expect said Done
+keys ctrl+2 ctrl+end
+keys shift+i
+expect said Input 11 (
+keys shift+o
+expect said Output 10 Reply from Claude heading level 1
+keys o
+expect said Output 11 Reply from Claude (
+menu Time stamps on Input and Output lines
+# Step 1, the end: close and start again: the larger text is still in use (Larger text says 11).
+close
+wait 2000
+start claude {temp}\opts -- --model haiku --continue
+expect said Ready
+menu Larger text
+expect said Text size 11

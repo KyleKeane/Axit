@@ -1,0 +1,36 @@
+# axClaude, docs/axclaude/nvda-test-plan.md section 11: updates. This script asks GitHub (the update check at start is
+# on, as it is by default); GitHub's limit for unsigned requests, sixty an hour, can make the check fail, and the
+# window then logs an ERROR, which fails the run after its steps.
+mkdir upd
+start claude {temp}\upd -- --model haiku
+expect said trust
+wait 1500
+keys enter
+expect said Ready
+# Step 1, on the newest version: Axit, Check for updates: the notice "Check for updates" says this is the newest
+# version and names it; Escape closes it. The Axit menu's item names the version in use and no Update item follows it.
+# About, Version: "Axit <version>" first and "Latest release on GitHub: Axit <version> (this version)".
+expect commands Check for updates (Axit 3.
+# (That no "Update to Axit" item follows it cannot be checked: the runner has no refuse for the command list.)
+menu Check for updates (Axit
+expect state "notice":"Check for updates"
+expect state newest
+expect state Axit 3.
+keys escape
+expect state "notice":null
+menu Version
+expect state "noticeText":"Axit 3.
+expect state (this version)
+keys escape
+# Step 2, with the network off (flight mode), changes the user's machine: left manual.
+# Steps 3 to 6 install an older build and update it in place: they change the installed Axit, left manual. Options,
+# General, "Check for updates at start" off, then a start: nothing said, About, Version says "not checked yet":
+menu Check for updates at start
+close
+wait 2000
+start claude {temp}\upd -- --model haiku
+expect said Ready
+wait 3000
+menu Version
+expect state Latest release on GitHub: not checked yet
+keys escape

@@ -1,0 +1,357 @@
+# axClaude, docs/axclaude/nvda-test-plan.md section 12: Claude's questions and screens, the control area (D33).
+# The update check off (GitHub's limit for unsigned requests made it fail and log an ERROR in runs). Every question
+# the window shows on its own is answered after 1.5 s: its keys are held for a second (KeyHold).
+# Steps 2, 3, 11, 12 and 20 of the plan use /model or /config, and step 7 /status: this run never sends them (/model and
+# /config save their choices as the user's settings; /status prints the account). Steps 3, 12, 17 and 20 run on a
+# question Claude asks with its AskUserQuestion tool instead.
+file home\Axit\axclaude.json {"checkForUpdates":false}
+mkdir ask
+start claude {temp}\ask -- --model haiku
+# Step 1: a folder Claude has not seen, the focus in the message field: the trill, then "Permission Required:
+# Accessing workspace. <folder>, list, y. Yes, I trust this folder, 1 of 2" (the app's part: the question and the
+# answer the focus is on, interrupting); the message field is gone; y, Enter: "Sent: y, Yes, I trust this folder",
+# the message field comes back, then "Ready".
+expect said → Message to Claude
+expect said ♪ Notice
+expect said → Permission Required: Accessing workspace.
+expect said ! Permission Required: Accessing workspace.
+expect focus "role":"List","value":"y. Yes, I trust this folder"
+wait 1500
+keys y enter
+expect said Sent: y, Yes, I trust this folder
+expect said → Message to Claude
+expect said Ready
+wait 3000
+# Step 3, on a question of Claude's: Ctrl+Tab, the conversation, where the question is; Ctrl+Tab again: the list,
+# its name the question; Tab from the list: the conversation; Shift+Tab back; Escape in the list: "Cancelled", the
+# message field comes back.
+type Use your AskUserQuestion tool once to ask me which flower I like: rose, tulip or daisy.
+keys enter
+expect said ♪ Notice
+expect said !
+expect focus "role":"List"
+wait 1500
+keys ctrl+tab
+expect focus Conversation
+keys ctrl+tab
+expect focus "role":"List"
+expect focus flower
+keys tab
+expect focus Conversation
+keys shift+tab
+expect focus "role":"List"
+# Step 17: Down twice, then Ctrl+Q: the question and the answer the focus is on, the focus unchanged; from the
+# conversation the same, the caret unchanged.
+keys down down
+expect focus "value":"3.
+said
+keys ctrl+q
+expect said 3. Daisy
+expect focus "role":"List","value":"3.
+keys ctrl+tab
+expect focus Conversation
+keys ctrl+q
+expect said 3.
+expect focus Conversation
+# Step 14: Enter on a conversation line while the question shows: "Answer Claude first; the message field is hidden
+# while it asks", the focus stays in the conversation.
+keys enter
+expect said ! Answer Claude first; the message field is hidden while it asks
+expect focus Conversation
+# Step 12: Ctrl+Shift+M while the list shows: the focus stays. (The plan's list is /model's, where Claude changes its
+# mode; on a question of the AskUserQuestion tool, Claude Code 2.1.309 keeps its mode and says nothing, as seen in
+# this run, so the mode change itself is left to the manual pass.)
+keys ctrl+tab
+expect focus "role":"List"
+keys ctrl+shift+m
+wait 1500
+expect focus "role":"List"
+# Step 3: Escape in the list: "Cancelled", the message field comes back.
+keys escape
+expect said Cancelled
+expect focus Message to Claude
+expect said Done
+wait 2000
+expect state | auto mode on
+# Step 17: Ctrl+Q with the message field back: "Claude is not asking anything".
+keys ctrl+q
+expect said ! Claude is not asking anything
+# Step 4: a reply followed by a question, the focus in the conversation: the trill, the question and its answer
+# interrupt, the focus on the list; Ctrl+Tab: the conversation, where the reply is.
+type Write two sentences about gardens, then use your AskUserQuestion tool to ask me which flower I like: rose, tulip or daisy.
+keys enter
+expect said Sent
+keys ctrl+2
+expect said ♪ Notice
+expect said !
+expect focus "role":"List"
+wait 1500
+keys ctrl+tab
+expect focus Conversation
+keys ctrl+tab
+keys 1 enter
+expect said Sent: 1
+expect said Done
+wait 2000
+# Options, Questions, "Go to them at once, interrupting speech" off, the same again: nothing interrupts, and about a
+# second after the trill the focus moves from the conversation to the list by itself.
+menu Go to them at once, interrupting speech
+keys ctrl+1
+type Write two sentences about gardens, then use your AskUserQuestion tool to ask me which flower I like: rose, tulip or daisy.
+keys enter
+expect said Sent
+keys ctrl+2
+expect said ♪ Notice
+refuse said !
+expect focus "role":"List"
+wait 1500
+keys 1 enter
+expect said Sent: 1
+expect said Done
+menu Go to them at once, interrupting speech
+wait 2000
+# Step 4a, a question arriving while the Session menu is open, needs a real menu opened with Alt (the foreground):
+# left manual.
+# Step 5: a question that comes while a message is being typed: the keys typed in the first second after the list
+# appears do nothing (the list's selection stays on its first answer); the field keeps what was typed before.
+type Use your AskUserQuestion tool once to ask me which flower I like: rose, tulip or daisy.
+keys enter
+expect said Sent
+type draft
+expect said ♪ Notice
+keys 2 3
+expect list "selected":0
+wait 1500
+keys escape
+expect said Cancelled
+expect focus "value":"draft"
+keys ctrl+a delete
+expect said Done
+wait 2000
+# Step 6: /tasks: the trill and the list "Background" with "No tasks currently running", then its keys (with no task,
+# Claude Code 2.1.309 offers "Close (Escape)" alone, not the plan's Select and View); the status bar
+# says "waiting for your answer"; Enter on "No tasks currently running": "Closed", the message field back. Again with
+# Escape: the same.
+type /tasks
+keys enter
+expect said ♪ Notice
+expect focus "role":"List"
+expect list No tasks currently running
+expect list Close (Escape)
+expect state waiting for your answer
+wait 1500
+keys home enter
+expect said Closed
+expect focus Message to Claude
+wait 2000
+type /tasks
+keys enter
+expect said ♪ Notice
+wait 1500
+keys escape
+expect said Closed
+expect focus Message to Claude
+wait 2000
+# Step 9: Other: 4, Enter: "Sent: 4, Other. Your words next", then the field "<question>. You chose Other. Your
+# answer"; tulip, Enter: "Sent: tulip"; Claude's reply names tulips. Again, Other, Escape in the field: the list back.
+type Use the AskUserQuestion tool to ask me which flower I enjoy thinking about, with three options.
+keys enter
+expect said ♪ Notice
+wait 1500
+keys 4 enter
+expect said Sent: 4, Other. Your words next
+expect focus You chose Other. Your answer
+type tulip
+keys enter
+expect said Sent: tulip
+expect said Done
+keys ctrl+2 ctrl+end
+expect text ulip
+keys ctrl+1
+wait 2000
+type Use the AskUserQuestion tool to ask me which flower I enjoy thinking about, with three options.
+keys enter
+expect said ♪ Notice
+wait 1500
+keys 4 enter
+expect focus You chose Other. Your answer
+keys escape
+expect focus "role":"List"
+wait 1500
+keys 1 enter
+expect said Done
+wait 2000
+# Step 10: q from the top: "Question: <title>" for each question, in order; Shift+Q back; "No next question".
+keys ctrl+2 ctrl+home
+keys q
+expect said ! Question: Permission Required: Accessing workspace
+keys q
+expect said ! Question:
+keys ctrl+end
+keys q
+expect said ! No next question
+keys shift+q
+expect said ! Question:
+# Step 13: Shift+Escape with a question in the list closes it without an answer and the field comes back.
+keys ctrl+1
+type Use your AskUserQuestion tool once to ask me which flower I like: rose, tulip or daisy.
+keys enter
+expect said ♪ Notice
+wait 1500
+keys shift+escape
+expect focus Message to Claude
+wait 3000
+# Step 13, a permission prompt in the list while Claude works: Shift+Escape interrupts Claude (its interruption line,
+# the status ready). Claude's manual mode is one Ctrl+Shift+M from auto, and three more bring auto back.
+keys ctrl+shift+m
+expect said manual mode on
+wait 1000
+type Use your Bash tool to run: ping -n 30 127.0.0.1 then reply with the word pinged.
+keys enter
+expect said ♪ Notice
+expect focus Permission Required
+wait 1500
+keys shift+escape
+expect state Claude: ready
+expect focus Message to Claude
+keys ctrl+shift+m ctrl+shift+m ctrl+shift+m
+expect said auto mode on
+wait 2000
+# Step 15: two questions, the first left unanswered for a minute while its answers are arrowed through: one trill and
+# one reading; the focus stays on the answer moved to; both answered, each comes once.
+type Use your AskUserQuestion tool once with two questions of three options each: a colour and a season.
+keys enter
+expect said ♪ Notice
+wait 1500
+said
+keys down
+wait 20000
+keys down
+wait 20000
+keys up
+wait 20000
+refuse said ♪ Notice
+refuse said !
+expect focus "role":"List","value":"2.
+keys enter
+expect said Next question
+wait 1500
+keys enter
+expect said Done
+refuse said ♪ Notice
+# (On this build the second question's list stays after Claude is done, and Escape in it says "Cancelled" but leaves
+# it: see step 8 at the end. Force Claude to restart clears it, so that the steps after this one can run.)
+wait 1500
+keys ctrl+shift+r
+expect state "notice":"Force Claude to restart?"
+keys enter
+expect said Ready
+expect focus Message to Claude
+wait 2000
+# Step 19: a sentence, then two questions: the trill and the first question; its answer: the second interrupts and
+# reads itself, nothing of the first read again (tests/scripts/axclaude/two-questions.txt covers the same).
+type Reply with one sentence about tulips, then use the AskUserQuestion tool to ask me two questions, which colour I prefer and which season.
+keys enter
+expect said ♪ Notice
+expect said !
+wait 1500
+keys enter
+expect said Next question
+expect said !
+wait 1500
+keys enter
+expect said Done
+# (The same: the list stays, and a restart clears it.)
+wait 1500
+keys ctrl+shift+r
+expect state "notice":"Force Claude to restart?"
+keys enter
+expect said Ready
+expect focus Message to Claude
+wait 2000
+# Step 20: Escape as soon as the trill sounds: "Cancelled", the message field back, the question not spoken after it.
+# SPEC D33 holds Escape, Enter, Space and typed keys for a second after a question the user did not cause appears, so
+# an Escape at the trill does nothing (the plan's step predates the hold or overlooks it); the Escape goes as soon as
+# the hold allows, and nothing of the question is spoken after "Cancelled".
+type Use your AskUserQuestion tool once to ask me which flower I like: rose, tulip or daisy.
+keys enter
+expect said ♪ Notice
+wait 1100
+said
+keys escape
+expect said Cancelled
+refuse said !
+expect focus Message to Claude
+wait 3000
+# Step 21: /permissions. The plan has its panel stay in Claude with the message field in place, for the guard "Not
+# sent, Claude asks: <title>. Enter again sends" (FR-2.10). This build reads the panel as a screen: the trill and the
+# list "Tabs: Permissions, Recently denied, Allow, Ask, Deny, Auto mode, Workspace" in the field's place; Escape:
+# "Closed", the field back. The guard needs a panel the window does not read, which this run has no way to bring up:
+# left manual.
+type /permissions
+keys enter
+expect said ♪ Notice
+expect focus "name":"Tabs: Permissions
+wait 1500
+keys escape
+expect said Closed
+expect focus Message to Claude
+wait 2000
+# Step 16, the feedback drafts: sending a draft sends a report to Anthropic, and the review's other paths need drafts of
+# other sessions: left manual.
+# Step 18, the louder alert in the background and the taskbar flash, needs the window in the background on the real
+# desktop: left manual.
+# Step 8, last because it fails on this build: two questions, the second with several answers. The first: "Question 1
+# of 2: ..."; 2, Enter: "Sent: 2, Green. Next question". The second has check boxes: Down to Apple, Space, Down twice to
+# Cherry, Space, Enter: "Sent: 1, Apple, 3, Cherry", no review; Claude's reply names green, apple and cherry, and the
+# message field is back. Observed: Claude is done and ready, and the second question's list still holds the place of
+# the message field, with the focus; the next message typed went into it as an answer. The same after any set of two
+# questions (steps 15 and 19 above restart Claude to clear it). Escape in that list says "Cancelled" and leaves it.
+keys ctrl+1
+type Use the AskUserQuestion tool once with two questions: my favourite colour (red, green, blue), and, with multiSelect, which fruits I like (apple, banana, cherry).
+keys enter
+expect said ♪ Notice
+expect focus Question 1 of 2:
+wait 1500
+keys 2 enter
+expect said Sent: 2, Green. Next question
+expect focus Question 2 of 2:
+wait 1500
+keys home space down down space enter
+expect said Sent: 1, Apple, 3, Cherry
+refuse said Review
+expect said Done
+keys ctrl+2 ctrl+end
+expect text green
+expect text apple
+expect text cherry
+keys ctrl+1
+expect focus Message to Claude
+wait 2000
+# With Options, Questions, "Review answers before they go to Claude" on: the second answer says "Review next", the
+# review comes as a question; y, Enter. Off again.
+menu Review answers before they go to Claude
+type Use the AskUserQuestion tool once with two questions: my favourite colour (red, green, blue), and, with multiSelect, which fruits I like (apple, banana, cherry).
+keys enter
+expect said ♪ Notice
+expect focus Question 1 of 2:
+wait 1500
+keys 2 enter
+expect said Next question
+wait 1500
+keys home space enter
+expect said Review next
+expect focus Review
+wait 1500
+keys y enter
+expect said Done
+menu Review answers before they go to Claude
+wait 2000
+# Step 10, the records of a set of two questions (not reached while step 8 above fails): q reads "Question: <the
+# question>". Observed on this build: the records of a set carry the quote marker Claude draws in front of each
+# question, "Question: > What is your favourite colour?", while a single question's record is "Question: Flower".
+keys ctrl+2 ctrl+end
+keys shift+q
+expect said ! Question: Review your answers
+keys shift+q
+expect said ! Question: Which fruits do you like?

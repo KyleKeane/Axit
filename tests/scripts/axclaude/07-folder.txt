@@ -1,0 +1,169 @@
+# axClaude, docs/axclaude/nvda-test-plan.md section 7: project folder.
+# The update check off (GitHub's limit for unsigned requests made it fail and log an ERROR in runs).
+file home\Axit\axclaude.json {"checkForUpdates":false}
+# Step 1, Show current folder in File Explorer (Ctrl+W): it opens a File Explorer window, which would come up on the
+# user's desktop and take the foreground: left manual.
+# Steps 2 and 3, Session, Open folder: the Windows folder picker, a dialog the channel cannot drive: left manual.
+# Step 4, Session, Open recent folder: the submenu is filled as it opens, and the command list leaves such submenus
+# out, so its items cannot be run with "menu": left manual.
+# Step 6 chooses a folder with the picker and starts a "New conversation" preset, which passes Claude no --model (the
+# runs keep Claude on Haiku through the command line): left manual.
+# Step 7 opens an empty folder with the picker and relies on the --continue that a start without "--" adds, again
+# without --model: left manual.
+#
+# Step 8 needs a folder with two earlier exchanges: made first, in a window that is then closed.
+mkdir proj
+start claude {temp}\proj -- --model haiku
+expect said trust
+wait 1500
+keys enter
+expect said Ready
+wait 3000
+type Reply with the single word one.
+keys enter
+expect said Done
+wait 1000
+type Reply with the single word two.
+keys enter
+expect said Done
+wait 1000
+close
+wait 2000
+# Step 8: the app started on that folder (with --continue, which the runs pass after --model): "Ready" with its ping,
+# no "Responding" and no chime of a reply at startup; the replay has its blocks "from previous session".
+start claude {temp}\proj -- --model haiku --continue
+expect said Ready
+refuse said Responding
+keys ctrl+2 ctrl+home
+keys i
+expect said ! Input 1 from previous session heading level 1
+keys down
+expect focus "value":"you: Reply with the single word one."
+keys down
+expect focus "value":""
+keys down
+expect focus "value":"# Output 1 from previous session Reply from Claude"
+keys down
+expect focus "value":""
+keys down
+expect focus "value":"claude: one"
+keys i
+expect said ! Input 2 from previous session heading level 1
+keys i
+expect said ! No next input
+# A message now: "# Input 1" of this run.
+keys ctrl+1
+wait 2000
+type Reply with the single word three.
+keys enter
+expect said Done
+wait 1000
+keys ctrl+2 ctrl+end
+keys shift+i
+expect said ! Input 1 heading level 1
+# Ctrl+Shift+R: the notice (Claude runs), Enter: "Restarting", then "Ready"; nothing new under the system line (no
+# replay, no copy of the conversation: from the end, Shift+I finds this run's "# Input 1" and then the replay's last
+# input, no second copy of either; the text is printed for the report); another message: "# Input 2".
+keys ctrl+shift+r
+expect state "notice":"Force Claude to restart?"
+keys enter
+expect said Restarting
+expect said Ready
+refuse said Responding
+keys ctrl+2 ctrl+end
+text
+keys shift+i
+expect said ! Input 1 heading level 1
+keys shift+i
+expect said ! Input 2 from previous session heading level 1
+keys ctrl+1
+wait 2000
+type Reply with the single word four.
+keys enter
+expect said Done
+wait 1000
+keys ctrl+2 ctrl+end
+keys shift+i
+expect said ! Input 2 heading level 1
+# Step 5: Ctrl+N, the New session notice: its text starts "Folder: <path>", then the line about Enter and Escape;
+# Tab: Choose folder (its picker is a Windows dialog, not opened here); Tab: the group "How Claude starts". The run's
+# arguments (--model haiku --continue) match no preset, so Custom is selected, its field holding them (FR-8.6; the
+# plan's "Continue the last conversation" is the selection of a start without arguments). Up and Down move through the
+# choices; Tab from Custom: "Custom arguments".
+keys ctrl+n
+expect state "notice":"New session"
+expect focus "value":"Folder:
+expect focus \\proj
+keys down
+expect focus Choose how Claude starts.
+keys down
+expect focus "value":"Enter: Start session. Escape: Cancel."
+keys tab
+expect focus "role":"PushButton","value":"Choose
+keys tab
+expect focus "role":"RadioButton","value":"Custom"
+keys tab
+expect focus "name":"Custom arguments","role":"Text","value":"--model haiku --continue"
+keys shift+tab
+expect focus "role":"RadioButton","value":"Custom"
+keys up
+expect focus edits accepted without asking
+keys up
+expect focus New conversation in plan mode
+keys up
+expect focus Choose a conversation to resume
+keys up
+expect focus Continue the last conversation
+keys down down down down
+expect focus "role":"RadioButton","value":"Custom"
+keys tab
+expect focus Custom arguments
+keys ctrl+a delete
+# The arguments, on two lines (Shift+Enter), the model first, as every run keeps Claude on Haiku; Enter starts:
+# "New session in proj", the conversation emptied, the system line first, "starting" until "Ready", and the replay of
+# the last conversation under it with its "from previous session" blocks.
+# Fails on this build: with --name demo, "Ready" never comes; the status stays "Claude: starting | demo", the replay
+# gets no blocks, and Claude's mode line ("auto mode on (shift+tab to cycle)") and a row " demo" are left in the
+# conversation as lines. (The steps after it are not reached while it fails.)
+type --model haiku
+keys shift+enter
+type --continue --name demo
+keys enter
+expect said New session in proj
+expect state "notice":null
+expect said Ready
+keys ctrl+2 ctrl+home
+expect focus "value":"System: New session in
+expect focus with --model haiku --continue --name demo
+keys i
+expect said from previous session heading level 1
+# A message: "# Input 1".
+keys ctrl+1
+wait 2000
+type Reply with the single word five.
+keys enter
+expect said Done
+wait 1000
+keys ctrl+2 ctrl+end
+keys shift+i
+expect said ! Input 1 heading level 1
+# Ctrl+N again: Custom selected, the field holding the arguments on one line; Escape: the notice closes, the focus is
+# back where it was and Claude keeps running.
+keys ctrl+n
+expect state "notice":"New session"
+keys tab tab
+expect focus Custom
+keys tab
+expect focus "value":"--model haiku --continue --name demo"
+keys escape
+expect state "notice":null
+expect focus Conversation
+expect state Claude: ready
+# Ctrl+Shift+R: "Restarting", and the same conversation comes back: Restart kept the arguments (the session's name in
+# the status bar, the conversation without a copy).
+keys ctrl+shift+r
+expect state "notice":"Force Claude to restart?"
+keys enter
+expect said Restarting
+expect said Ready
+expect state demo

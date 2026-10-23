@@ -76,6 +76,21 @@ public class SessionModelTests
     }
 
     [Fact]
+    public void The_row_of_the_name_claude_was_started_with_is_chrome_and_the_mode_line_is_read()
+    {
+        // Claude 2.1.309 started with --name demo draws " demo" between the effort row and the prompt.
+        const string screen = "\u001b[?25lClaude Code v2.1.309\r\nHaiku 5.5 · Claude Max\r\nC:\\Temp\\x\r\nauto mode on (shift+tab to cycle)\r\neffort: medium · /effort\r\n demo\r\n$ \u001b[?25h";
+        var unnamed = new SessionModel(80, 10);
+        Feed(unnamed, screen);
+        Assert.Null(unnamed.Mode);
+
+        var named = new SessionModel(80, 10) { StartName = "demo" };
+        Feed(named, screen);
+        Assert.NotNull(named.Mode);
+        Assert.DoesNotContain(Visible(named), text => text.Trim() == "demo" || text.StartsWith("auto mode", StringComparison.Ordinal));
+    }
+
+    [Fact]
     public void The_prompt_row_holding_a_sent_message_is_told_from_an_empty_one()
     {
         // FR-2.1: an Enter Claude dropped leaves the message on the prompt row, where the cursor is.

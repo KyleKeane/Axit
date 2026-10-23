@@ -1,0 +1,43 @@
+# axClaude, docs/axclaude/nvda-test-plan.md section 10: Claude Code missing, and the installer.
+# The update check off (GitHub's limit for unsigned requests made it fail and log an ERROR in runs).
+allow error Claude Code was not found
+file home\Axit\axclaude.json {"checkForUpdates":false}
+mkdir gone
+# Step 1: a claude.exe that does not exist: the notice "Claude Code was not found" in the conversation's place, the
+# focus in its text, read from its first line; Down: the path tried, the install command, the way back.
+# (The notice comes up on its own, so its keys are held for a second: the run waits before answering it.)
+start claude {temp}\gone --claude C:\nowhere\claude.exe -- --model haiku
+expect state "notice":"Claude Code was not found"
+wait 1500
+expect focus "name":"Claude Code was not found","role":"Text"
+expect state C:\\nowhere\\claude.exe
+expect state irm https://claude.ai/install.ps1 | iex
+# Tab reaches Copy install command, Open install instructions, Locate claude.exe... and Close. (Copy install command
+# writes the Windows clipboard, which the test desktop shares with the user's; Open install instructions opens the
+# browser on the user's desktop; Locate opens the Windows file picker: those three are left manual.)
+keys tab
+expect focus "value":"Copy install
+keys tab
+expect focus install instructions"
+keys tab
+expect focus claude.exe..."
+keys tab
+expect focus Close"
+# Close: the notice goes, the message field has the focus, the status says stopped, and a "System:" line says Claude
+# Code was not found.
+keys enter
+expect state "notice":null
+expect focus Message to Claude
+expect state Claude: stopped
+keys ctrl+2
+expect text System:
+expect text not found
+# Ctrl+Shift+R shows the notice again.
+keys ctrl+shift+r
+expect state "notice":"Claude Code was not found"
+keys escape
+expect state "notice":null
+# Steps 2 and 3, publish.ps1, the installer, the Start menu, Explorer's "Open with Axit" and the uninstaller change
+# the user's machine: left manual.
+# (This run ends with a failure after its steps: the window logs "Claude Code was not found" as an ERROR, which the
+# runner counts as a failure of any run; the runner has no way to expect a logged error.)

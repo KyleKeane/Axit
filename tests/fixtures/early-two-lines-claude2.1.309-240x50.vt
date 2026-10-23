@@ -1,0 +1,51 @@
+[?9001h[?1004h[?25l[2J[m[H]0;claude[?25h[Screen Reader Mode: on via flag]
+[?2004h[?2031h[?1004h[>0q[?u]7501;?[?25lPermission Required: Accessing workspace:
+C:\Temp\axit-trust-af0af9
+Quick safety check: Is this a project you created or one you trust? (Like your own code, a well-known open source project, or work from your team). If not, take a moment to review what's in this folder first.
+Claude Code'll be able to read, edit, and execute files here.
+Security guide
+y. Yes, I trust this folder
+n. No, exit
+Enter y/n:
+Enter to confirm · Esc to cancel[9;12H[?25h y[>4m[?2031l[?2004l[?25l[2;1H[K
+[K
+[K
+[K
+[K
+[K
+[K
+[K
+[K[2;1H[?25h
+[?2004h[?2031h[?1004h[>0q[?25l[2;1H[?25h[>4m[?2031l[?2004l
+[?2004h[?2031h[?1004h[?25l[2;1H]0;✳ Claude Code[?25hClaude Code v2.1.309
+Haiku 5.5 · Claude Max
+C:\Temp\axit-trust-af0af9
+auto mode on (shift+tab to cycle)
+effort: medium · /effort
+$[>0q[?25l[6;1Hctrl+g to edit in Notepad[K
+$  What is 2 plus 2?[K
+Answer in one line.
+[?25hClaude Code v2.1.309
+Haiku 5.5 · Claude Max
+C:\Temp\axit-trust-af0af9
+auto mode on (shift+tab to cycle)
+Removed 1 invisible character · review and press Enter to send
+$  What is 2 plus 2?
+Answer in one line.
+]133;A;redraw=0]0;◐ Claude Code[?25l[12;1Hyou: What is 2 plus 2?[K
+Answer in one line.[K
+Infusing…[K
+auto mode on (shift+tab to cycle)  ·  esc to interrupt[K
+Removed 1 invisible character · review and press Enter to send[K
+$[?25h]0;◐ Basic addition question]0;◑ Basic addition question[?25l[14;1HDrizzling…[K
+auto mode on (shift+tab to cycle)  ·  esc to interrupt[K
+Removed 1 invisible character · review and press Enter to send[K
+$[K[?25h]0;◐ Basic addition question]133;C]133;D]0;✳ Basic addition question[?25l[14;1Hclaude: 4[K
+Churned for 2s · done 1:20 PM[K
+auto mode on (shift+tab to cycle)[K
+Removed 1 invisible character · review and press Enter to send[K
+$[?25h[?25l[17;1Heffort: medium · /effort[K
+$[K[?25h[?1006l[?1003l[?1002l[?1000l[>4m[?2031l[?2004l[?1016l
+Resume this session with:
+claude --resume 3b328a9f-fa75-4a10-aaf6-96ea147e6d30
+]0;[?9001l[?1004l

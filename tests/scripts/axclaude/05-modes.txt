@@ -1,0 +1,108 @@
+# axClaude, docs/axclaude/nvda-test-plan.md section 5: permission mode, prompts and interruption.
+# Options, Questions, "Answer from a list" off for steps 2, 3 and 7, set in the run's own settings file; the update
+# check off (GitHub's limit for unsigned requests made it fail and log an ERROR in runs). Claude starts in its manual
+# (default) permission mode, so that creating a file and running a command ask first.
+file home\Axit\axclaude.json {"checkForUpdates":false,"questionNotices":false}
+mkdir modes
+start claude {temp}\modes -- --model haiku --permission-mode default
+expect said Claude asks
+wait 1500
+type y
+keys enter
+expect said Ready
+wait 3000
+# Step 1: Ctrl+Shift+M in the message field: the focus stays, the new mode is said, the status bar shows it; again
+# until the mode it started with comes back (manual, accept edits, plan, auto, manual).
+expect state Claude: ready | manual mode on
+keys ctrl+shift+m
+expect said accept edits on
+expect focus Message to Claude
+expect state Claude: ready | accept edits on
+keys ctrl+shift+m
+expect said plan mode on
+expect state | plan mode on
+keys ctrl+shift+m
+expect said auto mode on
+expect state | auto mode on
+keys ctrl+shift+m
+expect said manual mode on
+expect state Claude: ready | manual mode on
+expect focus Message to Claude
+# Step 2: Claude asked to create a file: "Claude asks"; in the conversation from the end, Up reaches the select line,
+# the numbered options and "Permission Required:".
+type Create a file named a.txt containing hi, with the Write tool.
+keys enter
+expect said Sent
+expect said Claude asks
+expect said ♪ Question
+expect state waiting for your answer
+keys ctrl+2 ctrl+end
+expect focus "value":"Select with numbers
+keys up
+expect focus "value":"3. No"
+keys up up
+expect focus "value":"1. Yes"
+keys up up up
+expect focus "value":"a.txt"
+keys up
+expect focus "value":"Permission Required: Create file"
+# Step 3: 1 and Enter: "Sent", then "Done" when the tool has run.
+keys ctrl+tab
+type 1
+keys enter
+expect said Sent
+expect said Done
+wait 1000
+# Step 4: Ctrl+O on an idle prompt: the reminder, nothing else; the conversation unchanged (l the same before and
+# after) and the status as it was.
+keys ctrl+2 ctrl+end
+keys l
+expect said ! Line
+said
+keys ctrl+o
+expect said Ctrl+O is off. For tool output, start with --verbose
+expect quiet 1000
+expect state Claude: ready | manual mode on
+keys ctrl+1
+# Step 5: something slow, then Escape in the field while Claude works (Claude Code 2.1.309 blocks "sleep 20"
+# and "sleep 30 && echo ok", asking for a waiting tool instead, so the command is a ping of 30 seconds, allowed with 1):
+# "Shift+Escape interrupts", the status still working. Ctrl+O while it works: the reminder again. Shift+Escape: the
+# interruption, the status ready.
+type Use your Bash tool to run: ping -n 30 127.0.0.1 then reply with the single word pinged.
+keys enter
+expect said Claude asks
+wait 1500
+expect focus Message to Claude
+type 1
+keys enter
+expect said Sent
+wait 2000
+expect state Claude: working
+keys escape
+expect said ! Shift+Escape interrupts
+expect state Claude: working
+keys ctrl+o
+expect said Ctrl+O is off. For tool output, start with --verbose
+expect state Claude: working
+keys shift+escape
+expect state Claude: ready
+keys ctrl+2 ctrl+end
+expect text Interrupted
+# Step 6: Claude, Send key, Ctrl+C from the menu, and Ctrl+Shift+C from the field: the same as Shift+Escape. Each
+# interrupts Claude while it writes a long story (after the interruptions above, Claude did not always call a tool
+# again; a reply is printed in its final frame, so the story is interrupted while the status says working).
+keys ctrl+1
+type Write a story of 1500 words about a lighthouse keeper.
+keys enter
+expect said Sent
+expect state Claude: working
+menu Ctrl+C
+expect state Claude: ready
+wait 2000
+type Write a story of 1500 words about a lighthouse keeper.
+keys enter
+expect said Sent
+expect state Claude: working
+keys ctrl+shift+c
+expect state Claude: ready
+# Step 7 sends /model, which this run never does (choosing a model there saves it as the user's default): left manual.

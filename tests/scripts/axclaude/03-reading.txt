@@ -1,0 +1,86 @@
+# axClaude, docs/axclaude/nvda-test-plan.md section 3: reading while output arrives.
+# The update check off (GitHub's limit for unsigned requests made it fail and log an ERROR in runs).
+file home\Axit\axclaude.json {"checkForUpdates":false}
+mkdir read
+start claude {temp}\read -- --model haiku
+expect said trust
+wait 1500
+keys enter
+expect said Ready
+wait 3000
+# Steps 1 and 2: a long answer; the conversation at once, read with Up and Down while Claude streams. The caret never
+# moves on its own (no value change on the timeline without a key) and nothing is announced but the status words.
+type Write the numbers 1 to 100, one per line, nothing else.
+keys enter
+expect said Sent
+keys ctrl+tab
+expect focus Conversation
+keys ctrl+home down
+wait 300
+said
+refuse said ·
+keys down
+wait 300
+said
+refuse said ·
+expect said Done
+# Step 3: after "Done", Ctrl+3: the newest output marker, focus in the conversation; Ctrl+1 and Ctrl+3 again: the same
+# line; Down: the blank line, then the first line of the reply.
+keys ctrl+3
+expect said ! Output 1 Reply from Claude heading level 1
+expect focus "value":"# Output 1 Reply from Claude"
+keys ctrl+1
+expect focus Message to Claude
+keys ctrl+3
+expect said ! Output 1 Reply from Claude heading level 1
+expect focus "value":"# Output 1 Reply from Claude"
+keys down
+expect focus "value":""
+keys down
+expect focus "value":"claude: 1"
+# Step 4: one long paragraph, read with Down while it grows. Each press reading only new text from a whole word, and
+# the reading breaks, are what NVDA reads at the caret; the channel's caret line counts the view's wrapped rows, so it
+# cannot follow a wrapped paragraph (left manual). Checked: l gives one line number for the paragraph, before and after
+# it is done, and Enter quotes it as one line.
+keys ctrl+1
+type Write one paragraph of 120 words about rivers, with no line breaks.
+keys enter
+expect said Done
+keys ctrl+3
+expect said Output 2
+keys down down
+keys l
+expect said ! Line
+keys enter
+expect said copied
+expect focus Message to Claude
+expect text _ start of copied line from conversation history _
+expect text claude:
+expect text _ start of comment on the copied line _
+keys ctrl+a delete
+# Step 5: selection. Shift+Down twice from the first reply line of the numbers; Ctrl+C and Ctrl+V go through the
+# Windows clipboard, which the test desktop shares with the user's desktop, so copying is left manual. Escape with a
+# selection: "Selection cleared"; Escape again: the message field.
+keys ctrl+2
+keys ctrl+home
+keys o
+expect said Output 1
+keys down down
+keys shift+down shift+down
+keys escape
+expect said ! Selection cleared
+keys escape
+expect focus Message to Claude
+# Step 5, a selection made while Claude writes stays as it is, and Ctrl+Shift+End then Down leaves the conversation
+# usable: NVDA's "selected" and "unselected" readings are NVDA's (left manual); the app's part, that nothing is said
+# and the focus stays in the conversation:
+type Write the numbers 1 to 30, one per line, nothing else.
+keys enter
+expect said Sent
+keys ctrl+2
+keys ctrl+end
+keys shift+up
+expect said Done
+keys ctrl+shift+end down
+keys escape
+expect focus Message to Claude

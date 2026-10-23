@@ -109,6 +109,14 @@ public sealed partial class SessionModel : LineStore
 
     public string? SessionName { get; private set; }
 
+    /// <summary>
+    /// The name Claude was started with (<c>--name demo</c>, FR-8.6), which the window sets: Claude draws it on a row
+    /// of its own above the prompt (" demo", 2.1.309), chrome like the mode line; unknown to the model, it closed the
+    /// chrome block there, the mode line was never read and "Ready" never came (found by tools/AxitDrive, 2026-10-23).
+    /// The title is no help: Claude replaces it with a summary of the conversation.
+    /// </summary>
+    public string? StartName { get; set; }
+
     /// <summary>Raised once per response marker when the first reply, thinking or tool line appears after it.</summary>
     public event Action? ResponseStarted;
 
@@ -161,6 +169,58 @@ public sealed partial class SessionModel : LineStore
         }
     }
 
+    /// <summary>
+    /// The lines of a message's draft under its prompt row (<c>$  What is 2 plus 2?</c>, then <c>Answer in one line.</c>),
+    /// while the message waits for its echo: the prompt row is chrome, and the rows under it are below the cursor and
+    /// chrome too, until Claude draws something under them, as it does when it refuses an early Enter and draws its
+    /// screen again below (the early-two-lines fixture, 2026-10-23); the second line then showed in the conversation.
+    /// A row that continues a pending message's text after such a prompt row is hidden as a copy.
+    /// </summary>
+    private void HideDraftRows()
+    {
+        if (_pending.Count == 0)
+        {
+            return;
+        }
+
+        for (var r = 0; r < Rows; r++)
+        {
+            if (_screen.LineAt(r) is not { ChromeHidden: true } prompt || !prompt.Text.StartsWith('$') || prompt.Text.Length < 2)
+            {
+                continue;
+            }
+
+            var draft = Squeeze(prompt.Text[1..]);
+            if (draft.Length == 0)
+            {
+                continue;
+            }
+
+            foreach (var send in _pending)
+            {
+                var target = Squeeze(send.Text);
+                if (!target.StartsWith(draft, StringComparison.Ordinal))
+                {
+                    continue;
+                }
+
+                for (var next = r + 1; next < Rows && draft.Length < target.Length && _screen.LineAt(next) is { } row && row.Text.Length > 0; next++)
+                {
+                    var longer = draft + Squeeze(row.Text);
+                    if (!target.StartsWith(longer, StringComparison.Ordinal))
+                    {
+                        break;
+                    }
+
+                    draft = longer;
+                    row.RepaintHidden = true;
+                }
+
+                break;
+            }
+        }
+    }
+
     /// <summary>Recomputes chrome, classification, echo handling and status from the current screen.</summary>
     protected override void CompleteFrame()
     {
@@ -180,6 +240,7 @@ public sealed partial class SessionModel : LineStore
         _screen.PullRowText();
         _anchor = ApplyChrome(out var spinner, out var mode, out var background, out var drafts, out var working);
         HideRepeatedBanner();
+        HideDraftRows();
         Spinner = spinner;
         if (mode is not null)
         {
@@ -295,7 +356,8 @@ public sealed partial class SessionModel : LineStore
             return;
         }
 
-        var text = "Question: " + title;
+        // Without the quote marker Claude draws in front of a set's question ("> What is your favourite colour?").
+        var text = "Question: " + (title.StartsWith("> ", StringComparison.Ordinal) ? title[2..] : title);
         var first = _screen.LineAt(row);
         var index = first is null ? -1 : _lines.LastIndexOf(first);
         index = index >= 0 ? index : AnchorIndex();
@@ -653,7 +715,8 @@ public sealed partial class SessionModel : LineStore
             else
             {
                 chrome = line.Text.Length == 0 || LineClassifier.IsChrome(line.Text)
-                    || (underAnnouncement && LineClassifier.IsBarePrompt(line.Text));
+                    || (underAnnouncement && LineClassifier.IsBarePrompt(line.Text))
+                    || (StartName is { Length: > 0 } startName && line.Text.Length > 1 && line.Text[0] == ' ' && line.Text.Trim() == startName);
                 underAnnouncement = false;
                 inQueued = chrome && LineClassifier.IsQueuedHint(line.Text);
                 if (inQueued)

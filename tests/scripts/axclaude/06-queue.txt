@@ -1,0 +1,89 @@
+# axClaude, docs/axclaude/nvda-test-plan.md section 6: sending while Claude works.
+# The update check off (GitHub's limit for unsigned requests made it fail and log an ERROR in runs). Claude starts in
+# its manual permission mode, so that the slow command asks first. Claude Code 2.1.309 blocks "sleep 20" (it asks for
+# a waiting tool instead), so the slow command is a ping of about 20 seconds, allowed with 1 in the question's list.
+file home\Axit\axclaude.json {"checkForUpdates":false}
+mkdir queue
+start claude {temp}\queue -- --model haiku --permission-mode default
+expect said trust
+wait 1500
+keys enter
+expect said Ready
+wait 3000
+# Step 1: while Claude works, a second message: "Queued"; the status bar says "1 message waiting"; the conversation has
+# only "# Input 1"; the field is empty and Up puts nothing into it.
+type Use your Bash tool to run: ping -n 20 127.0.0.1 then reply with the words OK DONE.
+keys enter
+expect said Sent
+expect said ♪ Notice
+wait 1500
+keys 1 enter
+expect said Sent: 1
+wait 2000
+expect state Claude: working
+type Reply with the single word second.
+keys enter
+expect said Queued
+expect said ♪ Sent
+expect state 1 message waiting
+keys ctrl+tab ctrl+end
+keys shift+i
+expect said ! Input 1 heading level 1
+keys shift+i
+expect said ! No previous input
+keys ctrl+tab
+expect focus "name":"Message to Claude","role":"Text","value":""
+keys up
+expect focus "name":"Message to Claude","role":"Text","value":""
+# Step 2: once Claude has taken the message up and is done: "# Input 2", the message, a blank line, "# Output 2 Reply
+# from Claude", a blank line, the reply to it; Shift+I back to "# Input 2", then again: "# Input 1"; no "you:" or "ctrl+x ctrl+s" line.
+expect said Done
+wait 2000
+expect state Claude: ready |
+keys ctrl+2 ctrl+end
+keys shift+i
+expect said ! Input 2 heading level 1
+keys down
+expect focus "value":"Reply with the single word second."
+keys down
+expect focus "value":""
+keys down
+expect focus "value":"# Output 2 Reply from Claude"
+keys down
+expect focus "value":""
+keys down
+expect focus "value":"claude:
+keys shift+i
+expect said ! Input 2 heading level 1
+keys shift+i
+expect said ! Input 1 heading level 1
+keys ctrl+home down down down down down down down down down down down down down down down down down down down down
+refuse said · you:
+refuse said ctrl+x ctrl+s
+# Step 3: again a slow command and a second message; Ctrl+Shift+S: "Sending now", and within a few seconds "# Input 4"
+# is in the conversation while the status still says working. Ctrl+Shift+S with nothing waiting: "Nothing queued".
+# (Ctrl+Shift+S goes once the status bar shows the waiting message: pressed at once after "Queued", before Claude has
+# drawn it, it says "Nothing queued", as FR-2.8 has it.)
+keys ctrl+1
+type Use your Bash tool to run: ping -n 20 127.0.0.1 then reply with the words OK DONE.
+keys enter
+expect said Sent
+expect said ♪ Notice
+wait 1500
+keys 1 enter
+expect said Sent: 1
+wait 2000
+expect state Claude: working
+type Reply with the single word fourth.
+keys enter
+expect said Queued
+expect state 1 message waiting
+keys ctrl+shift+s
+expect said Sending now
+keys ctrl+2
+expect text # Input 4
+expect state Claude: working
+expect said Done
+expect state Claude: ready |
+keys ctrl+shift+s
+expect said Nothing queued

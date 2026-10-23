@@ -1,0 +1,65 @@
+# axClaude, docs/axclaude/nvda-test-plan.md section 13: the Axit menu (bundle AX-9).
+# The update check off (GitHub's limit for unsigned requests made it fail and log an ERROR in runs).
+file home\Axit\axclaude.json {"checkForUpdates":false}
+file home\Axit\axdown.json {"checkForUpdates":false}
+file notes.md # Notes\n\nA line.\n
+mkdir menu
+start claude {temp}\menu -- --model haiku
+expect said trust
+wait 1500
+keys enter
+expect said Ready
+# Step 1: the Axit menu opened with Alt+A and read item by item needs a real menu (the foreground): left manual. What
+# it holds, through the command list: New window with an item per app, Close all windows, Check for updates naming the
+# version, and About with Version, Licence, Attribution, Axit guide and Axit on GitHub (which opens the browser on the
+# user's desktop: manual). Open windows, Open windows by type and Recently closed fill themselves as the menu opens,
+# and the command list leaves such submenus out: their steps (2, 4 and 5) are left manual.
+expect commands axDown, Axit, New window
+expect commands axClaude, Axit, New window
+expect commands Close all windows, Axit
+expect commands Check for updates (Axit 3.
+expect commands Version, Axit, About
+expect commands Licence, Axit, About
+expect commands Attribution, Axit, About
+expect commands Axit guide, Axit, About
+expect commands Axit on GitHub, Axit, About
+# Step 3, New window, axDown and axClaude: the new windows are started by the window, not the runner, so the run could
+# neither drive nor close them, and a new axClaude would start Claude without --model: left manual.
+# Step 6: an axDown window with unsaved changes and Claude working here; Axit, Close all windows: the axDown window
+# asks "Save changes?" and stays until answered; this window asks "Close axClaude?" (section 8). Answering both closes
+# every window. (The runner counts a window that closes without its own close step as ended by itself, so each
+# window gets the runner's close step before its question is answered; the step asks the same question again.)
+start down {temp}\notes.md
+expect focus Text
+keys ctrl+end
+type more
+use 1
+keys ctrl+1
+type Use your Bash tool to run: ping -n 30 127.0.0.1 then reply with the word pinged.
+keys enter
+expect said Sent
+try said ♪ Notice
+iffound wait 1500
+iffound keys 1 enter
+wait 2000
+expect state Claude: working
+menu Close all windows
+expect state "notice":"Close axClaude?"
+use 2
+expect state "notice":"Save changes to notes.md?"
+close
+expect state "notice":"Save changes to notes.md?"
+keys tab
+expect focus Save"
+keys tab
+expect focus t save"
+keys enter
+wait 2000
+use 1
+expect state "notice":"Close axClaude?"
+close
+expect state "notice":"Close axClaude?"
+keys enter
+wait 2000
+# With nothing to ask, Close all windows closes every window at once: the runner counts a window that closes without
+# its own close step as ended by itself and fails the run, so this half is left manual (see the report).

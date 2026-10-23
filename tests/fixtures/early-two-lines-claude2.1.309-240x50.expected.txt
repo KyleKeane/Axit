@@ -1,0 +1,12 @@
+[Screen Reader Mode: on via flag]
+Claude Code v2.1.309
+Haiku 5.5 · Claude Max
+C:\Temp\axit-trust-af0af9
+auto mode on (shift+tab to cycle)
+Answer in one line.
+you: What is 2 plus 2?
+Answer in one line.
+claude: 4
+Churned for 2s · done 1:20 PM
+Resume this session with:
+claude --resume 3b328a9f-fa75-4a10-aaf6-96ea147e6d30

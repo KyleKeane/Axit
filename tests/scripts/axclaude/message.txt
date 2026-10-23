@@ -1,4 +1,4 @@
-﻿# AxClaude: a fresh session with Haiku, a message, its reply and Done (docs/axclaude/nvda-test-plan.md sections 1 and 2).
+# axClaude: a fresh session with Haiku, a message, its reply and Done (docs/axclaude/nvda-test-plan.md sections 1 and 2).
 mkdir a
 start claude {temp}\a -- --model haiku
 try said trust

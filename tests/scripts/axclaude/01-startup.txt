@@ -1,0 +1,90 @@
+# axClaude, docs/axclaude/nvda-test-plan.md section 1: startup and focus.
+# The update check is off: GitHub's limit for unsigned requests made it fail and log an ERROR in runs (section 11 checks it).
+file home\Axit\axclaude.json {"checkForUpdates":false}
+# Step 1: a folder never used with Claude; the title names the folder and its path, the focus starts in the field.
+mkdir fresh
+start claude {temp}\fresh -- --model haiku
+expect said → Message to Claude (Text)
+expect state fresh (
+expect state ) - axClaude
+# Step 5 with a question's list in the field's place: Claude's trust question is the list; Tab and Shift+Tab move
+# between the conversation and the list, never to the hidden message field.
+expect said trust
+wait 1500
+expect focus "role":"List"
+keys tab
+expect focus Conversation
+keys tab
+expect focus "role":"List"
+keys shift+tab
+expect focus Conversation
+keys shift+tab
+expect focus "role":"List"
+keys enter
+expect said Ready
+expect focus Message to Claude
+# Step 2: Ctrl+Tab, the conversation. Step 3: Ctrl+Tab again, the message field.
+keys ctrl+tab
+expect focus Conversation
+keys ctrl+tab
+expect focus Message to Claude
+# Step 4: F6 twice, then Ctrl+Shift+Tab twice.
+keys f6
+expect focus Conversation
+keys f6
+expect focus Message to Claude
+keys ctrl+shift+tab
+expect focus Conversation
+keys ctrl+shift+tab
+expect focus Message to Claude
+# Step 4a: Ctrl+2 moves to the conversation and says nothing itself; Ctrl+2 again says "Conversation" and the caret
+# stays (no value change on the timeline).
+said
+keys ctrl+2
+expect said → Conversation (Text)
+expect quiet 1000
+keys ctrl+2
+expect said ! Conversation
+refuse said ·
+keys ctrl+1
+expect said → Message to Claude (Text)
+keys ctrl+1
+expect said ! Message to Claude
+# Ctrl+3 before the first reply: "No response yet", the focus in the conversation.
+keys ctrl+3
+expect said No response yet
+expect focus Conversation
+# Step 4a, the Navigate menu's Conversation item from the conversation: NVDA reading the control again after the menu
+# closes needs a real menu opened with Alt, which needs the foreground (left manual). The command itself:
+menu Conversation
+expect said ! Conversation
+# Step 5: Tab and Shift+Tab between the field and the conversation.
+keys ctrl+1
+expect focus Message to Claude
+keys tab
+expect focus Conversation
+keys tab
+expect focus Message to Claude
+keys shift+tab
+expect focus Conversation
+keys shift+tab
+expect focus Message to Claude
+# Step 6, the menu bar opened with Alt, its mnemonics and the spoken shortcuts: a real menu needs the foreground
+# (left manual). What the menus hold is checked through the command list instead: the Options items stand in their
+# submenus, and Navigate's items carry the full stop after the number that makes NVDA pause before "1 of 9"
+# (the command list comes back as JSON with + escaped as \u002B, so the script spells it that way).
+expect commands Message field, Navigate, Ctrl\u002B1.
+expect commands Conversation, Navigate, Ctrl\u002B2.
+expect commands Latest response, Navigate, Ctrl\u002B3.
+expect commands Options, Sounds,
+expect commands Options, Speech,
+expect commands Options, When Claude is done,
+expect commands Options, Questions,
+expect commands Options, Text,
+expect commands Options, General,
+expect commands Options, Developer
+# Step 7: the status bar holds the state, the mode and the project path. Reading it with NVDA+End and the narrow
+# window's clipping are NVDA's and a sighted check (left manual); the session name after a reply is in section 2.
+expect state Claude: ready |
+expect state mode on
+expect state \\fresh"

@@ -5,7 +5,22 @@ The files for this plan are in `manual_tests/axclaude`, made and reset by `.\man
 Start NVDA before the app. Use the default NVDA settings unless a step says otherwise. Note the app build, the Claude Code version (`claude --version`) and the NVDA version at the top of each run.
 
 Each step says what to do and what NVDA must say or do. A step fails if NVDA says nothing, says the wrong thing, or the caret ends up somewhere else.
+
+## Corrections from the automated run (2026-10-23)
 
+The scripts in `tests/scripts/axclaude` follow this plan; where the plan and the app or Claude Code 2.1.309 disagreed and
+the app follows its spec, the plan's step reads as below.
+
+- 4.10: the Find notice's Tab order follows the screen, the field above its text: from the field, Tab reaches the text,
+  then Find next and Cancel; Shift+Tab from the field reaches Cancel.
+- 4.11: before the comment is sent, Ctrl+2 returns to the copied line (FR-2.9); once it is sent and Claude replies, the
+  conversation's caret has followed the newest line, since the focus was not there (FR-3.3).
+- 4.9: in a wrapped paragraph Down moves by row, not to the next paragraph; Ctrl+Down moves by paragraph.
+- 5.5, 6, 8.4: Claude Code 2.1.309 refuses `sleep 20`; ask for `ping -n 20 127.0.0.1` and allow it at the permission question.
+- 7.5: arguments that match no preset select Custom in New session (FR-8.6).
+- 12.6: `/tasks` with nothing running lists only "Close (Escape)".
+- 12.20: Escape is held for a second like the other answering keys; press it after the trill has ended.
+- 12.21: `/permissions` is a screen with tabs now; reach the "Not sent, Claude asks" guard with a question instead.
 ## 1. Startup and focus
 
 1. Start the app on a folder that has never been used with Claude. NVDA reads the window title (`<folder> (<full path>) - axClaude`), then "Message to Claude edit multi line", and no description.

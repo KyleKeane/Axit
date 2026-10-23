@@ -1,4 +1,4 @@
-﻿# AxClaude: a set of two questions (docs/axclaude/nvda-test-plan.md section 12 step 19). The first question reads
+# axClaude: a set of two questions (docs/axclaude/nvda-test-plan.md section 12 step 19). The first question reads
 # itself; after its answer the second cuts in and reads itself, with nothing of the first read again.
 mkdir q
 start claude {temp}\q -- --model haiku
@@ -8,11 +8,14 @@ iffound keys enter
 expect said Ready
 type Use your AskUserQuestion tool once, with two questions: which colour I prefer, red or blue, and which season I prefer, summer or winter.
 keys enter
-expect said colour
+expect said ! Question 1 of 2
 wait 1500
 keys enter
-expect said season
+expect said ! Question 2 of 2
 said
 wait 1500
 keys enter
 said
+# After the last answer the app submits Claude's review itself, and the message field comes back (the set's last
+# question stayed in its place until 2026-10-23 and took the next message as its answer).
+expect focus Message to Claude

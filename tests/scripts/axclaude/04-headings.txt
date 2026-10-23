@@ -1,0 +1,446 @@
+# axClaude, docs/axclaude/nvda-test-plan.md section 4: headings and quick keys.
+# The update check off (GitHub's limit for unsigned requests made it fail and log an ERROR in runs).
+file home\Axit\axclaude.json {"checkForUpdates":false}
+mkdir keys
+start claude {temp}\keys -- --model haiku
+expect said trust
+wait 1500
+keys enter
+expect said Ready
+wait 3000
+# Step 1: a markdown answer with two level-2 headings and a bulleted list (exchange 1); then a turn with a tool call
+# (exchange 2); the reply longer than the window (exchange 3) comes before step 7. Messages and replies are kept
+# shorter than a row of the window: the channel's caret line counts wrapped rows (see the report of section 2 step 8).
+type Markdown only: ## Alpha, a five-word sentence, ## Beta, three one-word bullets.
+keys enter
+expect said Sent
+expect said Done
+wait 1000
+type Use the Bash tool to run: echo hi. Then reply with the single word finished.
+keys enter
+expect said Sent
+expect said Done
+wait 1000
+# Step 2: Ctrl+Home, then h: the markers without the hash as level 1, Claude's headings as level 2, in order; Shift+H
+# goes back; 1: only the markers.
+keys ctrl+2
+keys ctrl+home
+said
+# Step 12, the end of the jump history: before any jump, Backspace says "Nothing to go back to".
+keys backspace
+expect said ! Nothing to go back to
+keys h
+expect said ! Input 1 heading level 1
+keys h
+expect said ! Output 1 Reply from Claude heading level 1
+keys h
+expect said Alpha heading level 2
+keys h
+expect said ! Beta heading level 2
+keys h
+expect said ! Input 2 heading level 1
+keys shift+h
+expect said ! Beta heading level 2
+keys ctrl+home
+keys 1
+expect said ! Input 1 heading level 1
+keys 1
+expect said ! Output 1 Reply from Claude heading level 1
+keys 1
+expect said ! Input 2 heading level 1
+# Step 3: 2, only Claude's level 2 headings; 3: none.
+keys ctrl+home
+keys 2
+expect said Alpha heading level 2
+keys 2
+expect said ! Beta heading level 2
+keys 3
+expect said ! No next heading level 3
+# Step 3, Options, Text, Markers in the text off: h still says "Input 1 heading level 1", the line reads without the
+# hash, the caret stays on its line; on again. The export keeping "# Input 1" goes through the Save dialog (manual).
+menu Markers in the text
+keys ctrl+home
+keys h
+expect said ! Input 1 heading level 1
+expect focus "value":"Input 1"
+menu Markers in the text
+expect focus "value":"# Input 1"
+# Step 4: p, the first line of the next paragraph; Shift+P back; past the last one "No next paragraph".
+# (the startup lines and "# Input 1" have no blank line between them, so the first stop is the output marker)
+keys ctrl+home
+keys p
+expect said ! Output 1 Reply from Claude
+keys shift+p
+expect said ! [Screen Reader Mode
+keys ctrl+end
+keys p
+expect said ! No next paragraph
+# Step 4, after the turn with a tool call: from its output marker p stops at Claude's message, never at the tool line;
+# Ctrl+Alt+P from the marker reads the same stops, and the tool line is not among them.
+keys ctrl+home
+keys o o
+expect said ! Output 2 Reply from Claude heading level 1
+keys p
+expect said ! claude:
+refuse said tool:
+keys o
+keys shift+o
+expect said ! Output 2 Reply from Claude heading level 1
+keys ctrl+alt+p
+expect said claude:
+refuse said tool:
+# Step 5: o / Shift+O, r / Shift+R, i / Shift+I, c, t, e, d, s, each as SPEC 6.4 says.
+keys ctrl+home
+keys o
+expect said ! Output 1 Reply from Claude heading level 1
+keys r
+expect said ! Output 2 Reply from Claude heading level 1
+keys shift+r
+expect said ! Output 1 Reply from Claude heading level 1
+keys shift+o
+expect said ! No previous response
+keys i
+expect said ! Input 2 heading level 1
+keys shift+i
+expect said ! Input 1 heading level 1
+keys c
+expect said ! claude:
+keys t
+expect said hi
+keys e
+expect said ! No next error
+keys d
+expect said done
+keys s
+expect said ! No next system line
+# Step 6: Escape in the conversation: the message field, nothing sent, the status still ready.
+said
+keys ctrl+2
+keys escape
+expect focus Message to Claude
+refuse said Sent
+expect state Claude: ready
+# Step 7: the long reply. Ctrl+Tab: the newest line; Page Up a screen higher, Page Down back to the last line, which
+# then repeats; Page Up from the first line stays there. The app says nothing itself.
+type Write 60 numbered lines, 1. to 60., each with just its number, nothing else.
+keys enter
+expect said Sent
+expect said Done
+wait 1000
+keys ctrl+tab
+expect focus done
+said
+keys pageup
+expect focus "value":"
+keys pagedown
+expect focus done
+keys pagedown
+expect focus done
+keys ctrl+home pageup
+expect focus [Screen Reader Mode
+expect quiet 500
+# Step 7a: from the output marker of the long reply, Ctrl+Down: the first reply line; the next Ctrl+Down goes past the
+# numbered lines to the end of the conversation; Ctrl+Up back to the first reply line, then the marker.
+keys ctrl+3
+expect said ! Output 3 Reply from Claude heading level 1
+keys ctrl+down
+expect focus "value":"claude: 1."
+keys ctrl+down
+expect focus done
+keys ctrl+up
+expect focus "value":"claude: 1."
+keys ctrl+up
+expect focus "value":"# Output 3 Reply from Claude"
+# Ctrl+Shift+Down selects (NVDA reports it, manual); Escape: "Selection cleared".
+keys ctrl+shift+down
+keys escape
+expect said ! Selection cleared
+# Ctrl+Up and Ctrl+Down are not jumps: Backspace goes back to the line before the last quick key (here Ctrl+3's).
+keys ctrl+2
+keys ctrl+down
+keys backspace
+expect said Back to
+# Step 8: l, "Line N of M"; Ctrl+Home: "Line 1 of M"; Ctrl+End: the last number equals the total.
+keys l
+expect said ! Line
+keys ctrl+home
+keys l
+expect said ! Line 1 of
+keys ctrl+end
+keys l
+said
+# Step 10: Ctrl+F, the Find notice in the window's place with "Text to find" focused; Shift+Tab reaches the text with
+# the key line; a word, Enter: the notice closes and the line with the word is said, focus in the conversation.
+# (Shift+Tab to the text is checked at the end of this script.)
+keys ctrl+f
+expect state "notice":"Find"
+expect focus Text to find
+type single word
+keys enter
+expect said ! From the top, Use the Bash tool
+expect focus Conversation
+expect state "notice":null
+# F3: the only match again, with "From the top" after the wrap; Shift+F3 with "From the end".
+keys f3
+expect said ! From the top,
+keys shift+f3
+expect said ! From the end,
+# Ctrl+F again: the field holds the word, selected; zzqqx: "Not found: zzqqx", the caret stays.
+keys ctrl+f
+expect focus "value":"single word"
+type zzqqx
+keys enter
+expect said ! Not found: zzqqx
+# An empty field: "Type the text to find", the field keeps the focus (the Tab order is checked at the end of this
+# script). Alt not opening the menu needs the foreground (manual). Escape: the notice closes, the focus returns.
+keys ctrl+f
+keys delete
+keys enter
+expect said Type the text to find
+expect focus Text to find
+keys escape
+expect state "notice":null
+expect focus Conversation
+# F3 in the message field works too and moves the focus to the conversation.
+keys ctrl+1
+keys ctrl+f
+type single word
+keys enter
+keys ctrl+1
+keys f3
+expect said Use the Bash tool
+expect focus Conversation
+# Step 12: Ctrl+Home, h three times, p twice; Backspace: "Back to" the line before the last p; four more back to the
+# first line; one more: "Nothing to go back to".
+keys ctrl+home
+keys h h h p p
+said
+keys backspace
+expect said ! Back to
+keys backspace
+expect said ! Back to
+keys backspace
+expect said ! Back to
+keys backspace
+expect said ! Back to
+keys backspace
+expect said ! Back to [Screen Reader Mode
+# (The history holds the earlier jumps of this script too, so "Nothing to go back to" is checked in step 2, before
+# the first jump.)
+# Page Down, Backspace: back to the line before the page.
+keys pagedown backspace
+expect said ! Back to [Screen Reader Mode
+# Step 13: m on a reply line: "Bookmark 1 added", the caret stays; Up reads the bookmark line, Down the line again.
+# (A wait after each bookmark: the view applies its edits 250 ms after the last key, FR-3.3, which a person's
+# next key never beats and the runner's does.)
+keys ctrl+3
+keys down down down
+keys m
+expect said ! Bookmark 1 added
+wait 400
+expect focus "value":"2."
+keys up
+expect focus "value":"Bookmark 1"
+keys down
+expect focus "value":"2."
+keys down down down
+keys m
+expect said ! Bookmark 2 added
+wait 400
+keys ctrl+home
+keys k
+expect said ! Bookmark 1, 2.
+keys k
+expect said ! Bookmark 2, 5.
+keys k
+expect said ! No next bookmark
+keys shift+k
+expect said ! Bookmark 1, 2.
+keys down
+expect focus "value":"2."
+keys m
+expect said ! Bookmark 1 removed
+wait 400
+keys up
+expect focus "value":"claude: 1."
+keys k
+expect said ! Bookmark 2, 5.
+keys m
+expect said ! Bookmark 2 removed
+wait 400
+# Ctrl+Shift+K from the message field: the focus moves to the conversation and the bookmark is added.
+keys ctrl+1
+keys ctrl+shift+k
+expect said ! Bookmark 3 added
+wait 400
+expect focus Conversation
+# The Navigate menu's items do the same as m, k and Shift+K.
+keys down
+menu Bookmark this line
+expect said ! Bookmark 4 added
+wait 400
+keys ctrl+home
+menu Next bookmark
+expect said ! Bookmark 3,
+menu Next bookmark
+expect said ! Bookmark 4,
+menu Previous bookmark
+expect said ! Bookmark 3,
+# Ctrl+S saving the bookmark lines goes through the Save dialog (manual).
+# Step 14: Ctrl+3 on the first reply... the newest reply here is the numbered one; Ctrl+Alt+P reads its paragraphs
+# without moving the caret; Ctrl+Alt+H its headings (none after it: "No next heading"); from the first output marker
+# Ctrl+Alt+H reads the headings with their levels; Ctrl+Alt+C from the field the claude: lines, the focus staying;
+# Ctrl+Alt+K the bookmarks; Ctrl+End, Ctrl+Alt+P: "No next paragraph"; Ctrl+Alt+O the output markers; Ctrl+Alt+L and
+# Ctrl+Alt+M: nothing. Control stopping NVDA is NVDA's (manual).
+keys ctrl+3
+keys ctrl+alt+p
+expect said claude: 1.
+expect focus "value":"# Output 3 Reply from Claude"
+keys ctrl+home o
+keys ctrl+alt+h
+expect said Beta heading level 2
+keys ctrl+1
+keys ctrl+alt+c
+expect said finished
+expect focus Message to Claude
+keys ctrl+alt+k
+expect said Bookmark 3
+keys ctrl+2 ctrl+end
+keys ctrl+alt+p
+expect said ! No next paragraph
+keys ctrl+home
+keys ctrl+alt+o
+expect said Output 1 Reply from Claude heading level 1
+said
+keys ctrl+alt+l ctrl+alt+m
+expect quiet 1000
+# Step 15: Ctrl+End, Shift+I: the last input; Shift+H: the last heading. Ctrl+Shift+S, Ctrl+Shift+R keep their jobs;
+# Ctrl+Shift+O does nothing; Ctrl+Shift+P opens the command palette.
+keys ctrl+end
+keys shift+i
+expect said ! Input 3 heading level 1
+keys ctrl+end
+keys shift+h
+expect said ! Output 3 Reply from Claude heading level 1
+keys ctrl+shift+s
+expect said Nothing queued
+keys ctrl+shift+r
+expect state "notice":"Force Claude to restart?"
+keys escape
+expect state "notice":null
+said
+keys ctrl+shift+o
+expect quiet 1000
+keys ctrl+shift+p
+expect state "notice":"Command palette"
+keys escape
+expect state "notice":null
+# Step 12, the second half: Enter on two lines with text already in the field: each quote is a block of its own under
+# a blank line; sent, the message shows in full between "# Input 4" and "# Output 4 Reply from Claude".
+keys ctrl+1
+type Reply with the single word ok.
+keys ctrl+2 ctrl+home
+keys i
+keys enter
+expect said ! Line 6 copied
+keys ctrl+2 ctrl+home
+keys c
+keys enter
+expect text Reply with the single word ok.
+expect focus Message to Claude
+keys ctrl+home
+expect focus "value":"Reply with the single word ok."
+keys down
+expect focus "value":""
+keys down
+expect focus "value":"_ start of copied line from conversation history _"
+keys enter
+expect said Sent
+expect said Done
+wait 1000
+keys ctrl+3
+keys shift+i
+expect said ! Input 4 heading level 1
+keys down
+expect focus "value":"Reply with the single word ok."
+keys down
+expect focus "value":""
+keys down
+expect focus "value":"_ start of copied line from conversation history _"
+keys down
+expect focus "value":"Line 6 of
+keys down
+expect focus "value":"# Input 1"
+keys down
+expect focus "value":"_ start of comment on the copied line _"
+keys down
+expect focus "value":""
+keys down
+expect focus "value":"_ start of copied line from conversation history _"
+refuse said · you:
+# Step 9: one paragraph of about 120 words is one line: l on the blank line under its marker, on its first row and on
+# its second row: the last two say the same number (the view wraps it, so Down moves by rows; the runner cannot
+# compare two answers, so the numbers are printed for the report; the channel's caret line
+# is wrong below a wrapped line, so only announcements and lines above it are checked from here).
+keys ctrl+1
+type Write one paragraph of 120 words about rivers, with no line breaks.
+keys enter
+expect said Sent
+expect said Done
+wait 1000
+keys ctrl+3
+keys down
+keys l
+expect said ! Line
+keys down
+keys l
+expect said ! Line
+keys down
+keys l
+expect said ! Line
+# Step 13, on the long paragraph: m, then Up: the bookmark line sits above the whole paragraph, Down reads it as one
+# line still.
+keys up
+expect focus "value":"claude: Rivers
+keys m
+expect said ! Bookmark 5 added
+wait 400
+keys up
+expect focus "value":"Bookmark 5"
+keys down
+expect focus "value":"claude: Rivers
+# Step 11: Enter on the paragraph quotes it whole in the field, "Line N copied", with the marker lines.
+keys enter
+expect said copied
+expect focus Message to Claude
+expect text _ start of copied line from conversation history _
+expect text Line 
+expect text claude: Rivers
+expect text _ start of comment on the copied line _
+# Step 10: the Find notice's Tab order follows the screen, the field above the text: from the field, Tab: the text,
+# "Enter: Find next. Escape: Cancel.", Tab: Find next, Tab: Cancel; Shift+Tab from the field: Cancel (the plan's
+# order was text first; corrected 2026-10-23).
+keys ctrl+f
+expect focus Text to find
+keys tab
+expect focus "value":"Enter: Find next. Escape: Cancel."
+keys tab
+expect focus Find next"
+keys tab
+expect focus Cancel"
+keys tab
+expect focus Text to find
+keys shift+tab
+expect focus Cancel"
+keys escape
+# Step 11, the comment: sent with the quote, Claude answers; then, without the focus, the conversation's caret has
+# followed the newest line (FR-3.3), so Ctrl+2 lands on the reply; before the comment is sent, Ctrl+2 returns to the
+# copied line (FR-2.9, checked above).
+keys ctrl+1
+type Reply with the single word yes.
+keys enter
+expect said Sent
+expect said Done
+wait 1000
+keys ctrl+2
+expect focus Conversation

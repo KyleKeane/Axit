@@ -1,0 +1,201 @@
+# axClaude, docs/axclaude/nvda-test-plan.md section 2: dialogs and plain conversation.
+# Options, Questions, "Answer from a list" off for steps 1 and 2, set in the run's own settings file before the start;
+# the update check off (GitHub's limit for unsigned requests made it fail and log an ERROR in runs).
+file home\Axit\axclaude.json {"checkForUpdates":false,"questionNotices":false}
+mkdir plain
+start claude {temp}\plain -- --model haiku
+# Step 1: the trust prompt as plain lines in the conversation, read with Down Arrow.
+expect said Claude asks
+keys ctrl+2
+keys ctrl+home
+expect focus [Screen Reader Mode
+# The app's record of the question comes first (it stays with the option off, SPEC D33), then Claude's lines.
+keys down
+expect focus "value":"Question: Permission Required: Accessing workspace"
+keys down
+expect focus "value":"Permission Required: Accessing workspace:"
+keys down
+expect focus \\plain
+expect text y. Yes, I trust this folder
+expect text n. No, exit
+expect text Enter y/n:
+# Step 2: y and Enter from the field: "Sent", then Claude comes up ("Ready"; a second dialog would say "Claude asks").
+keys ctrl+tab
+expect focus Message to Claude
+type y
+keys enter
+expect said Sent
+expect said Ready
+# Step 3: a two-line message; Enter: "Sent" with its note, the field empties and keeps the focus, then "Responding"
+# with its chime and "Done" with its chime. Sent a few seconds after "Ready", as a user does (the end of this script
+# sends one at once).
+wait 4000
+type What is 2+2?
+keys shift+enter
+type Answer in one line.
+expect focus Answer in one line.
+said
+keys enter
+expect said Sent
+expect said ♪ Sent
+expect focus "name":"Message to Claude","role":"Text","value":""
+expect said Responding
+expect said ♪ Responding
+expect said Done
+expect said ♪ Done
+# Step 1, section 1 step 7: once Claude has named the session, the status bar shows the state, the mode and the path.
+expect state Claude: ready |
+# Step 4: Shift+O from the end: the output marker, spoken without the hash; Down reads the blank line, then the reply;
+# Up from the marker reads the blank line, the message's two lines and the input marker. No "you:" line.
+keys ctrl+tab
+keys shift+o
+expect said ! Output 1 Reply from Claude heading level 1
+expect focus "value":"# Output 1 Reply from Claude"
+keys down
+expect focus "value":""
+keys down
+expect focus "value":"claude:
+keys down
+expect focus done
+keys up up up up
+expect focus "value":""
+keys up
+expect focus "value":"Answer in one line."
+keys up
+expect focus "value":"What is 2
+keys up
+expect focus "value":"# Input 1"
+refuse said · you:
+# Step 5: i past the last input, then Shift+I (from the end: the caret on the "# Input 1" line itself has no previous one).
+keys ctrl+end
+keys i
+expect said ! No next input
+keys shift+i
+expect said ! Input 1 heading level 1
+# Step 6: Up and Down in the empty field: nothing goes into it and the app says nothing.
+keys ctrl+tab
+expect focus Message to Claude
+said
+keys up down up
+expect quiet 1000
+expect focus "name":"Message to Claude","role":"Text","value":""
+# Step 7: page keys in the field. One line: Page Down and Page Up keep the caret on it.
+type alpha
+keys pagedown
+expect focus "value":"alpha"
+keys pageup
+expect focus "value":"alpha"
+keys ctrl+a delete
+# Five short lines: Page Down from the first reaches the fourth, the fifth, the fifth again; Page Up the third, the
+# first, the first again. End and Home stay on the line; Ctrl+End after the fifth, Ctrl+Home before the first.
+type l1
+keys shift+enter
+type l2
+keys shift+enter
+type l3
+keys shift+enter
+type l4
+keys shift+enter
+type l5
+said
+keys ctrl+home
+expect focus "value":"l1"
+keys pagedown
+expect focus "value":"l4"
+keys pagedown
+expect focus "value":"l5"
+keys pagedown
+expect focus "value":"l5"
+keys pageup
+expect focus "value":"l3"
+keys pageup
+expect focus "value":"l1"
+keys pageup
+expect focus "value":"l1"
+keys end
+expect focus "value":"l1"
+keys home
+expect focus "value":"l1"
+keys ctrl+end
+expect focus "value":"l5"
+keys ctrl+home
+expect focus "value":"l1"
+expect quiet 500
+keys ctrl+a delete
+# Step 7a: paragraph keys in the field: one / blank / two, three / blank / four.
+type one
+keys shift+enter shift+enter
+type two
+keys shift+enter
+type three
+keys shift+enter shift+enter
+type four
+keys ctrl+home
+expect focus "value":"one"
+said
+keys ctrl+down
+expect focus "value":"two"
+keys ctrl+down
+expect focus "value":"four"
+keys ctrl+down
+expect focus "value":"four"
+keys ctrl+up
+expect focus "value":"four"
+keys ctrl+up
+expect focus "value":"two"
+keys ctrl+up
+expect focus "value":"one"
+keys ctrl+up
+expect focus "value":"one"
+# End, then Ctrl+Shift+Up and Ctrl+Shift+Down: NVDA's "selected four" / "unselected four" is NVDA's own reading of the
+# selection (left manual); the app says nothing.
+keys ctrl+end ctrl+shift+up ctrl+shift+down
+expect quiet 1000
+keys ctrl+a delete
+expect focus "name":"Message to Claude","role":"Text","value":""
+# Step 8: F1, the shortcuts in a notice; Page Down and Page Up move a screen; Ctrl+Down and Ctrl+Up go by section
+# heading; Escape closes the notice and the focus is back in the field.
+keys f1
+expect state "notice":"Keyboard shortcuts"
+expect focus Keyboard shortcuts
+# Ctrl+Down, Ctrl+Up, Page Down and Page Up in the notice's text say nothing of the app's own and are read by NVDA at
+# the caret; the channel's caret line counts the wrapped rows of the text as lines (EM_LINEFROMCHAR against
+# TextBox.Lines), so in this wrapped text it names the wrong line and cannot check them (left manual). The heading
+# letters, which announce, show the same sections in order:
+keys h
+expect said ! Anywhere, heading level 2
+keys h
+expect said ! Message field, heading level 2
+keys h
+expect said ! Conversation, heading level 2
+keys shift+h
+expect said ! Message field, heading level 2
+keys escape
+expect state "notice":null
+expect focus Message to Claude
+# Step 3 again, the same two-line message sent the moment "Ready" is said, in a second window on a fresh folder (the
+# list on: settings are read at start, and this window's questions use the list). Claude refuses the first Enter and
+# strips an invisible character (SPEC 4.4 item 23, FR-2.1); the window sends Enter again. The conversation must hold
+# the same block as above: the reply directly after the blank line under the marker, no line of the echo, and no
+# chrome row (the mode line, Claude's "Removed 1 invisible character" row) as a line of the conversation.
+# Fails on this build: the second line of the message ("Answer in one line.") stands between the blank line and the
+# reply, and the mode line and "Removed 1 invisible character · review and press Enter to send" end the conversation.
+close
+file home\Axit\axclaude.json {"checkForUpdates":false}
+mkdir fast
+start claude {temp}\fast -- --model haiku
+expect said trust
+wait 1500
+keys enter
+expect said Ready
+type What is 2+2?
+keys shift+enter
+type Answer in one line.
+keys enter
+expect said Done
+keys ctrl+3
+expect said ! Output 1 Reply from Claude heading level 1
+keys down down
+expect focus "value":"claude:
+keys ctrl+end
+expect focus done

@@ -93,6 +93,9 @@ internal sealed partial class MainForm
         }
 
         arguments.AddRange(ClaudeArgs);
+        // The name Claude draws above its prompt (--name or -n), so that the model knows that row for chrome.
+        var nameAt = ClaudeArgs.ToList().FindIndex(argument => argument is "--name" or "-n");
+        _model.StartName = nameAt >= 0 && nameAt + 1 < ClaudeArgs.Count ? ClaudeArgs[nameAt + 1] : null;
         _launchedFolder = _folder;
         KeepFilesOutOfGit();
         var options = new PtyOptions(ClaudeLauncher.BuildCommandLine(claude, arguments), _folder!, _model.Columns, _model.Rows, ClaudeLauncher.BuildEnvironment());

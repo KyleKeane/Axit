@@ -1,0 +1,120 @@
+# axClaude, docs/axclaude/nvda-test-plan.md section 8: lifecycle.
+# The update check off (GitHub's limit for unsigned requests made it fail and log an ERROR in runs). Claude starts in
+# its manual permission mode, so that the slow command asks first; Claude Code 2.1.309 blocks "sleep 20" and asks for
+# a waiting tool instead, so the slow command is a ping, allowed with 1 in the question's list.
+file home\Axit\axclaude.json {"checkForUpdates":false}
+mkdir life
+start claude {temp}\life -- --model haiku --permission-mode default
+expect said trust
+wait 1500
+keys enter
+expect said Ready
+wait 3000
+# Step 1: /exit: "Claude stopped", the status stopped; the field still works: a word and Enter: "Claude stopped.
+# Ctrl+Shift+R starts it", the word still in the field.
+type /exit
+keys enter
+expect said Claude stopped
+expect state Claude: stopped
+expect focus Message to Claude
+type hello
+keys enter
+expect said Claude stopped. Ctrl+Shift+R starts it
+expect focus "name":"Message to Claude","role":"Text","value":"hello"
+keys ctrl+a delete
+# Step 2: Ctrl+Shift+R restarts a stopped Claude at once, without a notice: "Ready" again.
+keys ctrl+shift+r
+expect state "notice":null
+expect said Ready
+wait 3000
+# Step 2a: with Claude running, Ctrl+Shift+R: the "Force Claude to restart?" notice, its text ending with the key line;
+# Escape: the focus is back in the field and Claude still runs; again, Enter: "Restarting", then "Ready".
+keys ctrl+shift+r
+expect state "notice":"Force Claude to restart?"
+# (The key line "Enter: Restart now. Escape: Keep Claude running." is added when the notice is shown; the channel's
+# state gives the notice's own text without it, and the caret line is wrong in the wrapped text: not checkable.)
+expect state The conversation stays in the window.
+keys escape
+expect state "notice":null
+expect focus Message to Claude
+expect state Claude: ready
+keys ctrl+shift+r
+expect state "notice":"Force Claude to restart?"
+keys enter
+expect said Restarting
+expect said Ready
+wait 3000
+# Step 4: Alt+F4 while Claude works: the window stays; the notice "Close axClaude?" with its first line "Claude is
+# still working. If you close now, Claude stops in the middle of its work.", then the line about carrying on and the
+# key line (not checkable, as above); Tab: Close anyway, Tab: Keep working; Escape: the notice goes, the focus is back
+# in the field, still working.
+type Use your Bash tool to run: ping -n 30 127.0.0.1 then reply with the word pinged.
+keys enter
+expect said ♪ Notice
+wait 1500
+keys 1 enter
+wait 2000
+expect state Claude: working
+keys alt+f4
+expect state "notice":"Close axClaude?"
+expect focus "name":"Close axClaude?","role":"Text","value":"Claude is still working. If you close now, Claude stops in the middle of its work."
+expect state What is done so far is saved. Start axClaude again to carry on.
+keys tab
+expect focus Close anyway
+keys tab
+expect focus Keep working
+keys escape
+expect state "notice":null
+expect focus Message to Claude
+expect state Claude: working
+# A second message, then Alt+F4 again: the first line ends "and a message you sent is still waiting for it".
+type Reply with the single word later.
+keys enter
+expect said Queued
+expect state 1 message waiting
+keys alt+f4
+expect state "notice":"Close axClaude?"
+expect focus and a message you sent is still waiting for it
+# Enter: the window closes. (The runner counts a window that closes on a key as ended by itself, so the runner's
+# close step comes first: it asks the same question again, and Enter then answers it.)
+close
+expect state "notice":"Close axClaude?"
+keys enter
+wait 3000
+# Start it again (with --continue after the run's --model): the conversation is back.
+start claude {temp}\life -- --model haiku --continue
+expect said Ready
+keys ctrl+2 ctrl+home
+keys i
+expect said from previous session heading level 1
+wait 2000
+# Step 2a, with a command running in the background: the notice starts "Claude has work running in the background
+# (1 shell)."; Escape keeps it; Enter restarts Claude, which ends the background work. (The permission question for the
+# command comes or not, as Claude words it.)
+keys ctrl+1
+type Use your Bash tool with run_in_background true to run: ping -n 120 127.0.0.1 then reply with the word started.
+keys enter
+try said ♪ Notice
+iffound wait 1500
+iffound keys 1 enter
+expect state 1 shell in the background
+expect said Done
+wait 1000
+keys ctrl+shift+r
+expect state "notice":"Force Claude to restart?"
+expect state "noticeText":"Claude has work running in the background (1 shell).
+keys escape
+expect state "notice":null
+expect state 1 shell in the background
+keys ctrl+shift+r
+keys enter
+expect said Restarting
+expect said Ready
+# Step 3: Alt+F4 while the status says ready: the app closes within two seconds, and Claude with it. That no
+# claude.exe is left is a Task Manager check (manual); the runner fails a run whose window does not close in 5 s.
+expect state Claude: ready
+close
+# Step 5, a start from a shortcut without a folder: a start without arguments has no --model for Claude (and would
+# open the runner's own current folder), so it is left manual.
+# Steps 6 to 8, the sounds' quality, the music heard under NVDA and the taskbar flash are for the ear and the eye
+# (manual); which sound plays when is checked in section 9's script (09-options.txt).
