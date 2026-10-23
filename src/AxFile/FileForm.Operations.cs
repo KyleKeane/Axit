@@ -163,10 +163,7 @@ public sealed partial class FileForm
                         return;
                     }
 
-                    if (await ShowFolderAsync(folder, name, remember: false))
-                    {
-                        Announce($"Created {name}", true);
-                    }
+                    await ShowResultAsync(folder, name, $"Created {name}");
                 });
             }, IsDefault: true),
             new OverlayChoice("C&ancel", IsCancel: true),
@@ -205,6 +202,13 @@ public sealed partial class FileForm
 
             var name = Path.GetFileName(path);
             Record($"Created {name}", new Operation(OperationKind.NewFile, [], [path]));
+            if (!string.Equals(folder, _folder, StringComparison.OrdinalIgnoreCase))
+            {
+                // Gone to another folder meanwhile (AF-4.5): said, the list left alone.
+                Announce($"Created {name}", true);
+                return;
+            }
+
             if (!await ShowFolderAsync(folder, name, remember: false))
             {
                 return;
@@ -294,10 +298,7 @@ public sealed partial class FileForm
                     }
 
                     End(action, $"Moved {what} into {name}", new Operation(OperationKind.Move, sources, destinations, made));
-                    if (await ShowFolderAsync(folder, name, remember: false))
-                    {
-                        Announce($"Moved {what} into {name}", true);
-                    }
+                    await ShowResultAsync(folder, name, $"Moved {what} into {name}");
                 });
             }, IsDefault: true),
             new OverlayChoice("&Cancel", IsCancel: true),
@@ -462,10 +463,7 @@ public sealed partial class FileForm
                 }
 
                 End(action, done, new Operation(OperationKind.Delete, targets.Select(target => target.Path).ToList(), []));
-                if (await ShowFolderAsync(folder, next, remember: false))
-                {
-                    Announce(done, true);
-                }
+                await ShowResultAsync(folder, next, done);
             }), IsDefault: true),
             new OverlayChoice("&Cancel", IsCancel: true),
         ]));
@@ -655,10 +653,7 @@ public sealed partial class FileForm
             }
 
             var first = Path.GetFileName(destinations[0]);
-            if (await ShowFolderAsync(folder, first, remember: false))
-            {
-                Announce(paths.Count == 1 ? $"Pasted {first}" : $"Pasted {paths.Count} items", true);
-            }
+            await ShowResultAsync(folder, first, paths.Count == 1 ? $"Pasted {first}" : $"Pasted {paths.Count} items");
         });
     }
 
@@ -745,7 +740,7 @@ public sealed partial class FileForm
 
         switch (verb)
         {
-            case Dispatch.AxDown or Dispatch.AxJSON when entry.IsFolder:
+            case Dispatch.AxDown or Dispatch.AxJSON or Dispatch.AxPreview when entry.IsFolder:
                 Announce("Not a file", true);
                 return;
             case Dispatch.AxClaude or Dispatch.AxTerminal when !entry.IsFolder:
@@ -889,10 +884,7 @@ public sealed partial class FileForm
 
         var name = Path.GetFileName(result);
         End(action, $"{done} {name}", new Operation(kind, [], [result]));
-        if (await ShowFolderAsync(folder, name, remember: false))
-        {
-            Announce($"{done} {name}", true);
-        }
+        await ShowResultAsync(folder, name, $"{done} {name}");
     });
 
     // ---- the user's own programs (AF-4.11): a list in the settings, each run on the entries as its arguments ----

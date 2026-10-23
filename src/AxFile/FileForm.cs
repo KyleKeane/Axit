@@ -208,7 +208,8 @@ public sealed partial class FileForm : AxitForm
         var axit = new ToolStripMenuItem("Open in &Axit");
         axit.DropDownItems.Add(Item("&Editor", OpenInEditor, AxFileKeys.OpenInEditor));
         axit.DropDownItems.Add(new ToolStripSeparator());
-        foreach (var app in Dispatch.Apps)
+        // Every app that takes a path (AF-4.9): AxStart takes none and refuses one with a message box.
+        foreach (var app in Dispatch.Apps.Where(app => app.Verb != Dispatch.AxStart))
         {
             axit.DropDownItems.Add(new ToolStripMenuItem("Ax&" + app.Name[2..], null, (_, _) => OpenInAxit(app.Verb)));
         }

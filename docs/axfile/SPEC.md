@@ -245,8 +245,9 @@ Every operation here is one line of the Actions list (AF-9) as well as its annou
 - AF-4.2 **Rename** (F2): in place, as in File Explorer: a box ("New name") opens over the entry holding its name, the
   part before the extension selected (the whole name for a folder), so that typing replaces the name and keeps the
   extension; Enter renames, "Renamed to <new name>", the entry selected under its new name; Escape, or leaving the box
-  (a click elsewhere, a notice opening), keeps the name with no announcement, the list's reading of the entry being
-  the feedback; the same name again, "Name unchanged". A change of case alone is a rename too. The box is a text box
+  (a click elsewhere, a notice opening, a change of folder or a refresh, which until 2026-10-23 left the box open over
+  the new list), keeps the name with no announcement, the list's reading of the entry being the feedback; the same
+  name again, "Name unchanged". A change of case alone is a rename too. The box is a text box
   that is a child of the list, shown only while a rename runs; the first build (2026-10-19) asked in a notice. A name
   that **reads the same** as another entry's without being it, differing only in case plus a trailing or doubled
   space, a different kind of space, an invisible character (a zero-width space, a joiner, a mark) or an accent
@@ -277,7 +278,9 @@ Every operation here is one line of the Actions list (AF-9) as well as its annou
   kept apart: a paste chooses its names around the paths a running paste is still writing ("notes - 2.md" for the
   same clipboard pasted twice, `FileOperations.Destinations` with the reserved paths), a cut whose files a paste is
   still moving says "Already pasting" rather than moving them twice, and a compress takes its zip's name at once so
-  that a second compress picks the next (AF-4.12). The list refreshes after each operation.
+  that a second compress picks the next (AF-4.12). An operation that ends in the folder shown reads the list again
+  with its result selected; one that ends while another folder is shown says its result and leaves the list where
+  the user is (2026-10-23: it pulled the list back to its own folder, a move the user did not make, AX-7.3).
 - AF-4.6 **The entry's menu** (Shift+F10, the Applications key, a right click): the Item menu as the list's context
   menu, the same items in the same order, on the selected entry (a right click selects the entry under it first, as
   File Explorer does). It is the window's own menu, fixed, with mnemonics and listed in F1, not the shell's (AF-D8).
@@ -308,8 +311,8 @@ Every operation here is one line of the Actions list (AF-9) as well as its annou
   longer than a second; after a move the clipboard is cleared, as File Explorer does. "Nothing to paste" without
   files on the clipboard; "Already in this folder" for a cut entry pasted where it is; "Already pasting" for a cut
   whose files a paste is still moving (AF-4.5).
-- AF-4.9 **Open in Axit ▸**: one item per app of the bundle, from `Dispatch.Apps`, a new window of that app on the
-  entry: AxDown, AxJSON and AxPreview on the file ("Not a file" on a folder), AxMedia on the file with its folder's
+- AF-4.9 **Open in Axit ▸**: one item per app of the bundle that takes a path (`Dispatch.Apps` without AxStart, which
+  takes none and until 2026-10-23 answered with a message box), a new window of that app on the entry: AxDown, AxJSON and AxPreview on the file ("Not a file" on a folder), AxMedia on the file with its folder's
   media files after it, or on a folder's (AxMedia hands them to its open window itself), AxGit on the repository that
   holds the entry, AxFile on the folder (or the file in its folder), AxClaude and AxTerminal on the folder, or on the
   entry's folder for a file; Editor (Ctrl+E), the submenu's first item, is the quick way to the right editor.

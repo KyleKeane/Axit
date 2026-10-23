@@ -246,20 +246,23 @@ public sealed class ActionLog
     /// <summary>The list's lines (AF-9.2): each section that has lines, its header first, running first, then the operations, then the selection.</summary>
     public IReadOnlyList<string> Lines() => Rows().Select(row => row.Line).ToList();
 
+    /// <summary>The list's rows (AF-9.2): each line with its entry, null for a header line; what the window fills its list from and keeps, so that a line moved between rows is told from one changed in place.</summary>
+    public IReadOnlyList<(string Line, ActionEntry? Entry)> Rows() => BuildRows();
+
     /// <summary>The entry on a line of the list; null on a header line and beyond the list.</summary>
     public ActionEntry? EntryAt(int index)
     {
-        var rows = Rows();
+        var rows = BuildRows();
         return index >= 0 && index < rows.Count ? rows[index].Entry : null;
     }
 
     /// <summary>An entry's line in the list; -1 once it has fallen off.</summary>
-    public int IndexOf(ActionEntry entry) => Rows().FindIndex(row => row.Entry == entry);
+    public int IndexOf(ActionEntry entry) => BuildRows().FindIndex(row => row.Entry == entry);
 
     /// <summary>Ctrl+I on a line: its section, its number in it and its time, "Operations, 3 of 12, 21:04"; a header line, its name.</summary>
     public string Information(int index)
     {
-        var row = Rows()[index];
+        var row = BuildRows()[index];
         if (row.Entry is not { } entry)
         {
             return row.Line;
@@ -272,7 +275,7 @@ public sealed class ActionLog
     /// <summary>The Folder menu's item, named after what Undo would take back: "Un&amp;do rename", or "Un&amp;do" with nothing to undo.</summary>
     public string MenuText => Newest() is { Operation: { } operation } ? $"Un&do {operation.Label}" : "Un&do";
 
-    private List<(string Line, ActionEntry? Entry)> Rows()
+    private List<(string Line, ActionEntry? Entry)> BuildRows()
     {
         var rows = new List<(string, ActionEntry?)>();
         foreach (var section in Sections)

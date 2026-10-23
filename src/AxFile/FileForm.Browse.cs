@@ -78,6 +78,8 @@ public sealed partial class FileForm
     /// </summary>
     private async Task<bool> ShowFolderAsync(string folder, string? select, bool remember, bool announce = true)
     {
+        // A rename box left open over the list that is about to change renames the wrong entry (AF-4.2).
+        CancelRename();
         var read = ++_reads;
         var changed = !string.Equals(folder, _folder, StringComparison.OrdinalIgnoreCase);
         Listing listing;
@@ -229,14 +231,38 @@ public sealed partial class FileForm
             return false;
         }
 
-        var first = key is Keys.Up or Keys.Home && index == 0;
-        var last = key is Keys.Down or Keys.End && index == list.Items.Count - 1;
+        var first = key is AxFileKeys.FirstItem or AxFileKeys.FirstItemAlso && index == 0;
+        var last = key is AxFileKeys.LastItem or AxFileKeys.LastItemAlso && index == list.Items.Count - 1;
         if (!first && !last)
         {
             return false;
         }
 
         Sounds.Edge();
+        return true;
+    }
+
+    /// <summary>
+    /// An operation's end (AF-4.5): in the folder it ran in, when that is still the one shown, the list read again with
+    /// the result selected and <paramref name="said"/> announced; when the user has gone to another folder meanwhile
+    /// (the window never waits for an operation), the result is said and the list is left where the user is, since a
+    /// list that jumps back is a move the user did not make (AX-7.3; 2026-10-23). True when the result is in view, for
+    /// a caller that goes on with it (New text file's rename box).
+    /// </summary>
+    private async Task<bool> ShowResultAsync(string folder, string? select, string said)
+    {
+        if (!string.Equals(folder, _folder, StringComparison.OrdinalIgnoreCase))
+        {
+            Announce(said, true);
+            return false;
+        }
+
+        if (!await ShowFolderAsync(folder, select, remember: false))
+        {
+            return false;
+        }
+
+        Announce(said, true);
         return true;
     }
 

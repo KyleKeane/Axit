@@ -21,6 +21,9 @@ public sealed partial class FileForm
     private readonly ListBox _pane = new();
     private readonly ActionLog _actions = new();
 
+    /// <summary>The entry on each row of the list as last filled (null on a header line), so that a line moved to another row is told from one changed in place.</summary>
+    private IReadOnlyList<ActionEntry?> _paneRows = [];
+
     private void SetUpActions()
     {
         _pane.IntegralHeight = false;
@@ -44,20 +47,31 @@ public sealed partial class FileForm
     /// </summary>
     private void FillPane(ActionEntry? keep)
     {
-        IReadOnlyList<string> lines = _actions.Count == 0 ? [NoActionsText] : _actions.Lines();
-        var kept = keep is null ? -1 : _actions.IndexOf(keep);
-        if (lines.Count == _pane.Items.Count)
+        IReadOnlyList<(string Line, ActionEntry? Entry)> rows = _actions.Count == 0 ? [(NoActionsText, null)] : _actions.Rows();
+        var kept = -1;
+        for (var i = 0; i < rows.Count; i++)
         {
-            for (var i = 0; i < lines.Count; i++)
+            if (keep is not null && rows[i].Entry == keep)
             {
-                if (i == kept && keep!.State == ActionState.Running)
+                kept = i;
+            }
+        }
+
+        if (rows.Count == _pane.Items.Count)
+        {
+            for (var i = 0; i < rows.Count; i++)
+            {
+                // The running line the user is on is left alone while it is the same line on the same row; a line
+                // that moved to this row is written (until 2026-10-23 the row was skipped by its number, and showed
+                // another operation's old text when a line ended and the rows shifted).
+                if (i == kept && keep!.State == ActionState.Running && i < _paneRows.Count && _paneRows[i] == keep)
                 {
                     continue;
                 }
 
-                if (!string.Equals(_pane.Items[i].ToString(), lines[i], StringComparison.Ordinal))
+                if (!string.Equals(_pane.Items[i].ToString(), rows[i].Line, StringComparison.Ordinal))
                 {
-                    _pane.Items[i] = lines[i];
+                    _pane.Items[i] = rows[i].Line;
                 }
             }
         }
@@ -65,12 +79,13 @@ public sealed partial class FileForm
         {
             _pane.BeginUpdate();
             _pane.Items.Clear();
-            _pane.Items.AddRange(lines.Cast<object>().ToArray());
+            _pane.Items.AddRange(rows.Select(row => (object)row.Line).ToArray());
             _pane.EndUpdate();
         }
 
+        _paneRows = rows.Select(row => row.Entry).ToList();
         var index = kept >= 0 ? kept
-            : _pane.Focused ? Math.Clamp(_pane.SelectedIndex, 0, lines.Count - 1)
+            : _pane.Focused ? Math.Clamp(_pane.SelectedIndex, 0, rows.Count - 1)
             : _actions.Latest is { } latest ? Math.Max(0, _actions.IndexOf(latest))
             : 0;
         if (_pane.SelectedIndex != index)
