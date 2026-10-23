@@ -105,7 +105,10 @@ public static class JsonScanner
                     i++;
                 }
 
-                tokens.Add(new Token(TokenKind.Number, start, i, text[start..i]));
+                // A run that is not a JSON number ("1abc", "12-5", "1.") is a word, which the parser reports as what
+                // it found in a value's place; until 2026-10-23 it passed as a number and Format wrote it back.
+                var run = text[start..i];
+                tokens.Add(new Token(IsNumber(run) ? TokenKind.Number : TokenKind.Word, start, i, run));
                 continue;
             }
 
@@ -126,6 +129,67 @@ public static class JsonScanner
 
         tokens.Add(new Token(TokenKind.End, text.Length, text.Length, string.Empty));
         return (tokens, repairs);
+    }
+
+    /// <summary>JSON's number grammar: an optional minus, an integer without leading zeros, an optional fraction, an optional exponent.</summary>
+    private static bool IsNumber(string run)
+    {
+        var i = 0;
+        if (i < run.Length && run[i] == '-')
+        {
+            i++;
+        }
+
+        var digits = 0;
+        while (i < run.Length && char.IsAsciiDigit(run[i]))
+        {
+            i++;
+            digits++;
+        }
+
+        if (digits == 0 || (digits > 1 && run[i - digits] == '0'))
+        {
+            return false;
+        }
+
+        if (i < run.Length && run[i] == '.')
+        {
+            i++;
+            var fraction = 0;
+            while (i < run.Length && char.IsAsciiDigit(run[i]))
+            {
+                i++;
+                fraction++;
+            }
+
+            if (fraction == 0)
+            {
+                return false;
+            }
+        }
+
+        if (i < run.Length && run[i] is 'e' or 'E')
+        {
+            i++;
+            if (i < run.Length && run[i] is '+' or '-')
+            {
+                i++;
+            }
+
+            var exponent = 0;
+            while (i < run.Length && char.IsAsciiDigit(run[i]))
+            {
+                i++;
+                exponent++;
+            }
+
+            if (exponent == 0)
+            {
+                return false;
+            }
+        }
+
+        return i == run.Length;
     }
 
     /// <summary>The index after the closing quote, or the end of the text (or line) for a string left open.</summary>

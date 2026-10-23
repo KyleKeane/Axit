@@ -15,6 +15,19 @@ public sealed class JsonOutlineTests
         }
         """;
 
+    /// <summary>A run of digits and letters that is not a JSON number is the first error, not a number (2026-10-23: "1abc" passed, and Format wrote it back).</summary>
+    [Theory]
+    [InlineData("{\"a\": 1abc}", true)]
+    [InlineData("{\"a\": 12-5}", true)]
+    [InlineData("{\"a\": 1.}", true)]
+    [InlineData("{\"a\": 01}", true)]
+    [InlineData("{\"a\": 1e}", true)]
+    [InlineData("{\"a\": -1.5e+3, \"b\": 0, \"c\": 12E-2}", false)]
+    public void Only_a_json_number_is_a_number(string text, bool error)
+    {
+        Assert.Equal(error, JsonOutline.Errors(text).Count > 0);
+    }
+
     [Fact]
     public void Keys_in_document_order_with_their_values_or_sizes()
     {
