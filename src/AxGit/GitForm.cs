@@ -335,7 +335,7 @@ public sealed partial class GitForm : AxitForm
         _branches = [];
         _logLoaded = false;
         _branchesLoaded = false;
-        Text = $"{RecentMenu.FolderName(root)} - {AxGitApp.Name}";
+        Text = $"{PathName.Of(root)} - {AxGitApp.Name}";
         _settings.RememberRepository(root);
         SaveSettings();
         Log.Info($"Opened {root}");
@@ -365,7 +365,7 @@ public sealed partial class GitForm : AxitForm
 
     /// <summary>Repository → Open recent repository (AG-6.1): the last ten, those that still exist, "1. name (path)" (AX-9.5).</summary>
     private void FillRecent() =>
-        RecentMenu.Fill(_recentItem, _settings.RecentRepositories, Directory.Exists, RecentMenu.FolderName, "&No recent repositories", target => Do(() => StartAsync(target)));
+        RecentMenu.FillFolders(_recentItem, _settings.RecentRepositories, "&No recent repositories", target => Do(() => StartAsync(target)));
 
     /// <summary>Repository → Show current repository in → File Explorer (Ctrl+W): the folder opened in File Explorer, one of the system's own windows.</summary>
     private void ShowInExplorer()

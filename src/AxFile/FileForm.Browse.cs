@@ -134,7 +134,7 @@ public sealed partial class FileForm
         _hidden = listing.Hidden;
         _dot = listing.Dot;
         _folderStamp = Stamp(folder);
-        Text = $"{FolderListing.FolderName(folder)} - {AxFileApp.Name}";
+        Text = $"{PathName.Of(folder)} - {AxFileApp.Name}";
         Rearrange(select);
         if (FolderListing.IsThisPC(folder))
         {
@@ -166,7 +166,7 @@ public sealed partial class FileForm
     /// </summary>
     private string FolderAnnouncement()
     {
-        var name = FolderListing.IsThisPC(_folder) ? FolderListing.ThisPC : FolderListing.FolderName(_folder ?? string.Empty);
+        var name = FolderListing.IsThisPC(_folder) ? FolderListing.ThisPC : PathName.Of(_folder ?? string.Empty);
         var item = _list.SelectedItem?.ToString() ?? string.Empty;
         return _shown.Count == 0 ? $"{name}, {item}" : $"{name}, {_list.AccessibleName}, {item}";
     }
@@ -761,7 +761,7 @@ public sealed partial class FileForm
     /// <summary>Folder → Favorites ▸: the pinned folders that still exist as "1. name (path)", or "No favorites yet", then the key's item.</summary>
     private void FillFavorites()
     {
-        RecentMenu.Fill(_favoritesItem, _settings.Favorites, Directory.Exists, RecentMenu.FolderName, "&No favorites yet", target => Do(() => ShowFolderAsync(target, null, remember: true)));
+        RecentMenu.FillFolders(_favoritesItem, _settings.Favorites, "&No favorites yet", target => Do(() => ShowFolderAsync(target, null, remember: true)));
         _favoritesItem.DropDownItems.Add(new ToolStripSeparator());
         _favoritesItem.DropDownItems.Add(Item("&Add or remove this folder", ToggleFavorite, AxFileKeys.Favorite));
     }
@@ -887,7 +887,7 @@ public sealed partial class FileForm
             return;
         }
 
-        var left = FolderListing.FolderName(from);
+        var left = PathName.Of(from);
         Do(() => ShowFolderAsync(parent, left, remember: false));
     }
 
@@ -928,7 +928,7 @@ public sealed partial class FileForm
 
     /// <summary>Folder → Open recent folder (AF-3.3): the last ten opened by command, those that still exist, "1. name (path)" (AX-9.5).</summary>
     private void FillRecent() =>
-        RecentMenu.Fill(_recentItem, _settings.RecentFolders, Directory.Exists, RecentMenu.FolderName, "&No recent folders", target => Do(() => ShowFolderAsync(target, null, remember: true)));
+        RecentMenu.FillFolders(_recentItem, _settings.RecentFolders, "&No recent folders", target => Do(() => ShowFolderAsync(target, null, remember: true)));
 
     // ---- completion in the Go to folder field (AF-3.3, AF-D12) ----
 

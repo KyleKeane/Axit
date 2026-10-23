@@ -1,4 +1,5 @@
 using AxClaude.Core.Pty;
+using Axit.Core;
 using Axit.Forms;
 
 namespace AxClaude;
@@ -68,7 +69,7 @@ internal sealed partial class MainForm
         SetFolder(folder);
         _claudeArgs = [.. arguments];
         var with = arguments.Count > 0 ? " with " + ClaudeLauncher.JoinArguments(arguments) : " with no extra arguments";
-        Announce($"New session in {RecentMenu.FolderName(folder)}", false);
+        Announce($"New session in {PathName.Of(folder)}", false);
         // A new session is a new conversation (or a resumed one): the window is cleared first, and what Claude prints
         // then, a replay with its blocks included, arrives as at the first start of the app.
         Relaunch($"New session in {folder}{with}", clearConversation: true);

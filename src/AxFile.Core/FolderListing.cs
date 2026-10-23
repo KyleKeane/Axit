@@ -178,13 +178,6 @@ public static class FolderListing
         };
     }
 
-    /// <summary>A folder's name for the title and the list: the last part of the path, or the path itself for a drive's root.</summary>
-    public static string FolderName(string folder)
-    {
-        var name = System.IO.Path.GetFileName(System.IO.Path.TrimEndingDirectorySeparator(folder));
-        return name.Length == 0 ? folder : name;
-    }
-
     /// <summary>"report.pdf, 1.2 MB, modified 2026-10-18 14:02" or "docs, folder, modified 2026-10-18 14:02" (AF-2.4); a drive: "Local Disk (C:), 120 GB free of 476 GB".</summary>
     public static string Information(Entry entry)
     {

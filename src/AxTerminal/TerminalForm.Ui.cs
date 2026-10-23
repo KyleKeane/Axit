@@ -201,12 +201,12 @@ internal sealed partial class TerminalForm
     }
 
     private void FillRecentFolders() =>
-        RecentMenu.Fill(_recentFoldersItem, _settings.RecentFolders, Directory.Exists, RecentMenu.FolderName, "&No recent folders", SwitchFolder);
+        RecentMenu.FillFolders(_recentFoldersItem, _settings.RecentFolders, "&No recent folders", SwitchFolder);
 
     /// <summary>The title is the current directory's name (AT-2.3), which the Axit menu lists the window by.</summary>
     private void UpdateTitle()
     {
-        var text = $"{RecentMenu.FolderName(CurrentDirectory)} - {ShellLauncher.Describe(_shell)} - {AxTerminalApp.Name}";
+        var text = $"{PathName.Of(CurrentDirectory)} - {ShellLauncher.Describe(_shell)} - {AxTerminalApp.Name}";
         if (Text != text)
         {
             Text = text;

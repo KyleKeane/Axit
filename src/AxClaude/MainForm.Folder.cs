@@ -98,7 +98,7 @@ internal sealed partial class MainForm
         }
 
         SetFolder(folder);
-        Announce($"Folder {RecentMenu.FolderName(folder)}", false);
+        Announce($"Folder {PathName.Of(folder)}", false);
         // Another folder is another conversation (FR-8.3): the window is cleared, and what Claude prints there, a
         // replay with its blocks when the folder has one, arrives as at the first start of the app.
         Relaunch($"Project folder changed to {folder}", clearConversation: true);

@@ -21,7 +21,7 @@ public static class Archives
     /// </summary>
     public static string Compress(IReadOnlyList<string> sources, string folder, Action<int, int>? progress = null)
     {
-        var stem = sources.Count == 1 ? System.IO.Path.GetFileNameWithoutExtension(sources[0]) : FolderListing.FolderName(folder);
+        var stem = sources.Count == 1 ? System.IO.Path.GetFileNameWithoutExtension(sources[0]) : Axit.Core.PathName.Of(folder);
         var zip = FileOperations.FreeName(folder, stem.Length == 0 ? "archive" : stem, ".zip");
         File.WriteAllBytes(zip, []);
         var temporary = zip + ".tmp";

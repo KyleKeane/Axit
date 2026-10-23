@@ -49,8 +49,8 @@ public static class RecentlyClosed
     /// <summary>"notes.md (C:\notes\notes.md) - AxDown", "myproject (C:\src\myproject) - AxClaude": the name, the full path in parentheses, the app (AX-9.5).</summary>
     public static string Title(ClosedItem item)
     {
-        var name = System.IO.Path.GetFileName(System.IO.Path.TrimEndingDirectorySeparator(item.Path));
-        return (name.Length == 0 ? item.Path : $"{name} ({item.Path})") + " - " + item.App;
+        var name = PathName.Of(item.Path);
+        return (name == item.Path ? item.Path : $"{name} ({item.Path})") + " - " + item.App;
     }
 
     private static bool Same(ClosedItem a, ClosedItem b) =>

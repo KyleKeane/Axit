@@ -222,5 +222,5 @@ internal sealed partial class MainForm
     }
 
     private void FillRecentFolders() =>
-        RecentMenu.Fill(_recentFoldersItem, _settings.RecentFolders, Directory.Exists, RecentMenu.FolderName, "&No recent folders", SwitchFolder);
+        RecentMenu.FillFolders(_recentFoldersItem, _settings.RecentFolders, "&No recent folders", SwitchFolder);
 }

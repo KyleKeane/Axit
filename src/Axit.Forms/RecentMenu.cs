@@ -26,6 +26,10 @@ public static class RecentMenu
         NoneWhenEmpty(menu, noneLabel);
     }
 
+    /// <summary><see cref="Fill"/> for the folders of a recent list: Directory.Exists and the folder's name (<see cref="PathName.Of"/>).</summary>
+    public static void FillFolders(ToolStripMenuItem menu, IEnumerable<string> folders, string noneLabel, Action<string> open) =>
+        Fill(menu, folders, Directory.Exists, PathName.Of, noneLabel, open);
+
     /// <summary>
     /// An empty submenu gets one item that says so and does nothing, enabled (AX-9.5): WinForms skips disabled items
     /// when the keyboard moves through a menu, so a submenu of only a disabled "(none)" opened with nothing selected
@@ -37,12 +41,5 @@ public static class RecentMenu
         {
             menu.DropDownItems.Add(new ToolStripMenuItem(text));
         }
-    }
-
-    /// <summary>A folder's name for a label or a title: the last part of the path, or the path itself for a drive's root.</summary>
-    public static string FolderName(string path)
-    {
-        var name = Path.GetFileName(Path.TrimEndingDirectorySeparator(path));
-        return name.Length == 0 ? path : name;
     }
 }

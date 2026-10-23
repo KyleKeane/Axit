@@ -1,5 +1,6 @@
 using System.Runtime.InteropServices;
 using AxClaude.Core.Transcript;
+using Axit.Core;
 using Axit.Forms;
 
 namespace AxClaude;
@@ -322,7 +323,7 @@ internal sealed partial class MainForm
     {
         // FR-8.4: the folder's name, then its full path in parentheses, so that the name comes first in speech and
         // two folders of one name are still told apart in Alt+Tab and in the Axit menu; announcements use the name.
-        Text = _folder is null ? "AxClaude" : $"{RecentMenu.FolderName(_folder)} ({_folder}) - AxClaude";
+        Text = _folder is null ? "AxClaude" : $"{PathName.Of(_folder)} ({_folder}) - AxClaude";
         _folderLabel.Text = _folder ?? "No project folder";
         StatusLayout.Fit(_status, _state, _folderLabel);
     }

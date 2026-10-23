@@ -82,7 +82,7 @@ internal sealed partial class TerminalForm
         }
 
         SetFolder(folder);
-        Announce($"New session in {RecentMenu.FolderName(folder)}", false);
+        Announce($"New session in {PathName.Of(folder)}", false);
         Relaunch($"New session: {ShellLauncher.Describe(_shell)} in {folder}", clearTranscript: true);
     }
 
@@ -139,7 +139,7 @@ internal sealed partial class TerminalForm
         }
 
         SetFolder(folder);
-        Announce($"Folder {RecentMenu.FolderName(folder)}", false);
+        Announce($"Folder {PathName.Of(folder)}", false);
         Relaunch($"New session: {ShellLauncher.Describe(_shell)} in {folder}", clearTranscript: true);
     }
 

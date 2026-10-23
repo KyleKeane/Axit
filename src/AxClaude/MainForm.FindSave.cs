@@ -58,7 +58,7 @@ internal sealed partial class MainForm
             Title = "Export the conversation as text",
             Filter = "Text files (*.txt)|*.txt|All files (*.*)|*.*",
             // Outside the project, and named axclaude-… so the exclude patterns catch it wherever it goes (D34).
-            FileName = $"axclaude-{(_folder is null ? "conversation" : RecentMenu.FolderName(_folder))}-{DateTime.Now:yyyyMMdd-HHmm}.txt",
+            FileName = $"axclaude-{(_folder is null ? "conversation" : PathName.Of(_folder))}-{DateTime.Now:yyyyMMdd-HHmm}.txt",
             AddExtension = true,
             DefaultExt = "txt",
             InitialDirectory = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments),

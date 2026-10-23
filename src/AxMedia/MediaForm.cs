@@ -353,8 +353,7 @@ public sealed class MediaForm : AxitForm
         }
     }
 
-    private static string Describe(IReadOnlyList<string> paths) =>
-        paths.Count == 1 ? Path.GetFileName(Path.TrimEndingDirectorySeparator(paths[0])) is { Length: > 0 } name ? name : paths[0] : $"{paths.Count} paths";
+    private static string Describe(IReadOnlyList<string> paths) => paths.Count == 1 ? PathName.Of(paths[0]) : $"{paths.Count} paths";
 
     /// <summary>
     /// The list's lines made again from the queue (AM-2.1): each line changed in place while the count is the same,
@@ -444,14 +443,14 @@ public sealed class MediaForm : AxitForm
         _list.Select();
         if (chosen is not null)
         {
-            AddPaths([chosen], $"No sound or video files in {RecentMenu.FolderName(chosen)}");
+            AddPaths([chosen], $"No sound or video files in {PathName.Of(chosen)}");
         }
     }
 
     /// <summary>Queue → Open recent (AM-3.2): the last ten files and folders added or handed over, those that still exist, "1. name (path)" (AX-9.5); one chosen is appended again.</summary>
     private void FillRecent() =>
-        RecentMenu.Fill(_recentItem, _settings.Recent, path => File.Exists(path) || Directory.Exists(path), RecentMenu.FolderName, "&No recent files or folders",
-            target => AddPaths([target], Directory.Exists(target) ? $"No sound or video files in {RecentMenu.FolderName(target)}" : null));
+        RecentMenu.Fill(_recentItem, _settings.Recent, path => File.Exists(path) || Directory.Exists(path), PathName.Of, "&No recent files or folders",
+            target => AddPaths([target], Directory.Exists(target) ? $"No sound or video files in {PathName.Of(target)}" : null));
 
     /// <summary>Queue → New window (Ctrl+N): another AxMedia window, empty; the Axit menu's New window does the same (AX-9).</summary>
     private void NewWindow() => AxitMenu.Start(Dispatch.AxMedia, null);
