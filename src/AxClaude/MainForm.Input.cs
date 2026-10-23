@@ -1,4 +1,5 @@
 using AxClaude.Core.Transcript;
+using Axit.Core;
 using Axit.Forms;
 
 namespace AxClaude;
@@ -116,6 +117,11 @@ internal sealed partial class MainForm
         _model.Send(text, evenWhilePrompting: true);
         _messageSent = true;
         QueueWrites(text);
+        if (!queued)
+        {
+            ResendEnterWhileHeld(text, attempt: 1);
+        }
+
         Announce(queued && !answer ? "Queued" : "Sent", false);
         if (_settings.SoundOnBell)
         {
@@ -142,6 +148,36 @@ internal sealed partial class MainForm
 
         Enqueue("\r", 50);
         StartWrites();
+    }
+
+    /// <summary>How long a sent message may sit on Claude's prompt row before its Enter counts as dropped, and how often it is sent again.</summary>
+    private const int EnterCheckMs = 1500;
+
+    private const int EnterAttempts = 3;
+
+    /// <summary>
+    /// FR-2.1: Claude drops an Enter in its first seconds after the prompt shows, even a second after the text, and
+    /// the message stays typed and unsent on its prompt row (found by tools/QaRun on 2026-10-23: four sessions of five).
+    /// While the row still holds the text and Claude neither works nor asks, Enter goes again, three times at most,
+    /// silently, with a log line.
+    /// </summary>
+    private void ResendEnterWhileHeld(string text, int attempt)
+    {
+        Later(EnterCheckMs, () =>
+        {
+            if (!ProcessRunning || _model.Working || _model.PromptPending || !_model.PromptHolds(text))
+            {
+                return;
+            }
+
+            Log.Info($"Enter sent again ({attempt}): the message was still on Claude's prompt row");
+            Enqueue("\r", 50);
+            StartWrites();
+            if (attempt < EnterAttempts)
+            {
+                ResendEnterWhileHeld(text, attempt + 1);
+            }
+        });
     }
 
     /// <summary>

@@ -208,6 +208,31 @@ public sealed partial class SessionModel : LineStore
         return true;
     }
 
+    /// <summary>
+    /// Whether Claude's prompt row still holds the text sent: the nearest row starting with <c>$</c> at or above the
+    /// cursor, within four rows (the cursor sits under the prompt row, and a long draft wraps), holding the text's first
+    /// line, up to forty characters. Claude drops an Enter in its first seconds after the prompt shows, leaving the
+    /// message typed and unsent (found by tools/QaRun, 2026-10-23); the window sends Enter again while this holds (FR-2.1).
+    /// </summary>
+    public bool PromptHolds(string text)
+    {
+        var first = text.Trim().Replace("\r\n", "\n").Split('\n')[0].Trim();
+        if (first.Length == 0)
+        {
+            return false;
+        }
+
+        for (var row = _screen.CursorRow; row >= 0 && row >= _screen.CursorRow - 4; row--)
+        {
+            if (_screen.LineAt(row) is { } line && line.Text.StartsWith('$'))
+            {
+                return line.Text.Contains(first[..Math.Min(first.Length, 40)], StringComparison.Ordinal);
+            }
+        }
+
+        return false;
+    }
+
     /// <summary>A line of the app's own (<c>System: …</c>, FR-4.5), above Claude's live block.</summary>
     public override void AddSystemLine(string text)
     {

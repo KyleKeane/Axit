@@ -181,21 +181,23 @@ internal sealed class Session(int number, string folder, string claude, string m
         Write("\r");
         // Claude drops an Enter in the first moments after its prompt first shows (found by this tool, 2026-10-23):
         // the text stays on the prompt row. The Enter is sent again once, and the report says so.
+        // The window's rule for a dropped Enter (FR-2.1, SessionModel.PromptHolds): while the prompt row still holds
+        // the message 1.5 s later and Claude neither works nor asks, Enter again, three times at most.
         for (var attempt = 1; attempt <= 3; attempt++)
         {
-            Thread.Sleep(2000);
-            bool stuck;
+            Thread.Sleep(1500);
+            bool held;
             lock (_gate)
             {
-                stuck = !Replied && _model.Lines.Any(line => line.Text.StartsWith('$') && line.Text.Contains(message, StringComparison.Ordinal));
+                held = !_model.Working && !_model.PromptPending && _model.PromptHolds(message);
             }
 
-            if (!stuck)
+            if (!held)
             {
                 break;
             }
 
-            Step($"Enter dropped, sent again ({attempt})");
+            Step($"Enter sent again ({attempt})");
             Write("\r");
         }
         if (!WaitFor("reply", 120_000, () => Replied && Ready))

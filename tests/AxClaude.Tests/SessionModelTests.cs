@@ -76,6 +76,26 @@ public class SessionModelTests
     }
 
     [Fact]
+    public void The_prompt_row_holding_a_sent_message_is_told_from_an_empty_one()
+    {
+        // FR-2.1: an Enter Claude dropped leaves the message on the prompt row, where the cursor is.
+        var model = new SessionModel(80, 6);
+        Feed(model, $"{Esc}[?25lclaude: Hi.\r\n\r\n$  Reply with the single word hello.{Esc}[?25h");
+        Assert.True(model.PromptHolds("Reply with the single word hello."));
+        Assert.True(model.PromptHolds("Reply with the single word hello.\nand a second line"));
+        Assert.False(model.PromptHolds("Something else"));
+
+        // As Claude draws it: the cursor on the blank row under the prompt row.
+        var under = new SessionModel(80, 6);
+        Feed(under, $"{Esc}[?25lclaude: Hi.\r\n$  Reply with the single word hello.\r\n{Esc}[?25h");
+        Assert.True(under.PromptHolds("Reply with the single word hello."));
+
+        var empty = new SessionModel(80, 6);
+        Feed(empty, $"{Esc}[?25lclaude: Reply with the single word hello.\r\n\r\n$ {Esc}[?25h");
+        Assert.False(empty.PromptHolds("Reply with the single word hello."));
+    }
+
+    [Fact]
     public void A_replay_printed_while_hiding_stays_hidden_and_live_rows_show_again()
     {
         var model = new SessionModel(80, 12);
