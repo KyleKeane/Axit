@@ -554,6 +554,9 @@ public sealed partial class FileForm
         files.AddRange(targets.Select(target => target.Path).ToArray());
         var data = new DataObject();
         data.SetFileDropList(files);
+        // The paths as text too, one per line (2026-10-23): a text field pastes them, where the files alone gave nothing;
+        // File Explorer and Paste here take the files.
+        data.SetText(string.Join("\r\n", targets.Select(target => target.Path)));
         data.SetData(DropEffectFormat, new MemoryStream(BitConverter.GetBytes(cut ? DropEffectMove : DropEffectCopy)));
         try
         {

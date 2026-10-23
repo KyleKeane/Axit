@@ -315,7 +315,7 @@ Every operation here is one line of the Actions list (AF-9) as well as its annou
   A refusal by Windows is "Failed: <reason>"; closing the dialog or the menu is not one.
 - AF-4.8 **Cut, Copy, Paste** (Ctrl+X, Ctrl+C, Ctrl+V, in the list; the Item menu): the entry, or the marked
   entries (AF-3.7), go on the clipboard as files in File Explorer's own formats (`CF_HDROP` and "Preferred
-  DropEffect", move for a cut, copy otherwise), "Cut <name>" or "Copied <name>", "Cut n items" or "Copied n items",
+  DropEffect", move for a cut, copy otherwise), with the paths as text too, one per line, so that a text field pastes them, 2026-10-23), "Cut <name>" or "Copied <name>", "Cut n items" or "Copied n items",
   so that File Explorer can paste them and axFile can paste what File Explorer cut or copied (cut and copy touch no
   disk and have no line, AF-9). Paste copies the clipboard's files into the folder shown, or moves them after a cut,
   through the shell (`SHFileOperationW`, undo allowed; the names are chosen first, `FileOperations.Destinations`, a

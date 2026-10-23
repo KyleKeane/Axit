@@ -2,6 +2,7 @@
 
 ## Unreleased
 
+- axFile: Cut and Copy put the paths on the clipboard as text as well, so that a text field pastes them; File Explorer and Paste still take the files.
 - axFile: Move to new folder is Move to folder: Down and Up complete the folder as in Go to folder, a folder that exists (here or by its path) takes the entries, and any other name is a new folder made here.
 - axFile: Shift+F10, the Applications key and a right click open the menu bar's Item menu, as Alt+I does, so that NVDA reads its first item the first time too; the list's own context menu, silent on its first opening, is gone, and with it Ctrl+I inside the menu.
 - Axit: a window that comes to the front while Alt is still held, as Alt+F4 on another window leaves it, no longer opens its menu bar when Alt is let go.
