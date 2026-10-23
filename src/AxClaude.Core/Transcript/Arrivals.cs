@@ -15,8 +15,13 @@ public enum ReplySpeechMode
     All,
 }
 
-/// <summary>What a frame brought from Claude: a new visible line (the tick, FR-7.8), a tool call row that is new or rewritten (the tool tick, FR-7.8), and the reply and tool call text that became final (speech, FR-7.4).</summary>
-public readonly record struct Arrival(bool NewLine, bool ToolCall, string? Speech);
+/// <summary>
+/// What a frame brought from Claude: a new visible line (the tick, FR-7.8), a tool call row that is new or rewritten
+/// (the tool tick, FR-7.8), the reply and tool call text that became final (speech, FR-7.4), and the lines behind
+/// that text in order (the window holds them while Claude may turn out to be asking, D33; the list is reused by the
+/// next pass, so it is read at once).
+/// </summary>
+public readonly record struct Arrival(bool NewLine, bool ToolCall, string? Speech, IReadOnlyList<Line> SpokenLines);
 
 /// <summary>
 /// One pass over the transcript at the end of every frame, shared by the tick and by speaking replies. The tick
@@ -42,6 +47,7 @@ public sealed class Arrivals
     private readonly HashSet<int> _present = [];
     private Line? _first;
     private readonly List<Line> _candidates = [];
+    private readonly List<Line> _spokenNow = [];
     private readonly StringBuilder _text = new();
     private int _contentLines;
 
@@ -144,7 +150,14 @@ public sealed class Arrivals
 
         var newLine = content > _contentLines;
         _contentLines = content;
-        return new Arrival(newLine, toolCall, Speech(lines, lastVisible, working));
+        return new Arrival(newLine, toolCall, Speech(lines, lastVisible, working), _spokenNow);
+    }
+
+    /// <summary>A line's text as spoken: a tool row loses its expand hint.</summary>
+    public static string SpokenText(Line line)
+    {
+        var text = line.Text;
+        return line.Kind == LineKind.Tool && text.EndsWith(ExpandHint, StringComparison.Ordinal) ? text[..^ExpandHint.Length].TrimEnd() : text;
     }
 
     /// <summary>The lines remembered as spoken or seen; for the test that keeps the memory bounded.</summary>
@@ -176,6 +189,7 @@ public sealed class Arrivals
 
     private string? Speech(IReadOnlyList<Line> lines, int lastVisible, bool working)
     {
+        _spokenNow.Clear();
         if (_candidates.Count == 0)
         {
             return null;
@@ -193,23 +207,13 @@ public sealed class Arrivals
                 // A reprint of a line already spoken in this exchange is not spoken again.
                 if (_spokenInExchange.Add(line.Text))
                 {
-                    Append(line);
+                    // The lines join as one utterance (Utterance).
+                    Utterance.Append(_text, SpokenText(line), line.JoinedToPrevious);
+                    _spokenNow.Add(line);
                 }
             }
         }
 
         return _text.Length == 0 ? null : _text.ToString();
-    }
-
-    /// <summary>A tool row loses its expand hint; the lines join as one utterance (<see cref="Utterance"/>).</summary>
-    private void Append(Line line)
-    {
-        var text = line.Text;
-        if (line.Kind == LineKind.Tool && text.EndsWith(ExpandHint, StringComparison.Ordinal))
-        {
-            text = text[..^ExpandHint.Length].TrimEnd();
-        }
-
-        Utterance.Append(_text, text, line.JoinedToPrevious);
     }
 }

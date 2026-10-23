@@ -64,6 +64,23 @@ public class ArrivalsTests
     }
 
     [Fact]
+    public void The_lines_behind_the_speech_come_with_it_and_a_tool_row_loses_its_hint()
+    {
+        var arrivals = new Arrivals();
+        var lines = new List<Line>
+        {
+            new(1, LineKind.OutputMarker, "claude"),
+            new(2, LineKind.ClaudeReply, "claude: Hello."),
+            new(3, LineKind.Tool, "tool: Bash (ls) (ctrl+o to expand)"),
+        };
+        var arrival = arrivals.Update(lines, working: false, ReplySpeechMode.All, toolCalls: true);
+        Assert.NotNull(arrival.Speech);
+        Assert.Equal([2, 3], arrival.SpokenLines.Select(line => line.Id));
+        Assert.Equal("claude: Hello.", Arrivals.SpokenText(lines[1]));
+        Assert.Equal("tool: Bash (ls)", Arrivals.SpokenText(lines[2]));
+    }
+
+    [Fact]
     public void What_was_remembered_about_trimmed_lines_is_forgotten()
     {
         var arrivals = new Arrivals();

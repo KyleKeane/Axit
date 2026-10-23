@@ -172,12 +172,13 @@ public sealed partial class SessionModel : LineStore
     /// hidden). While Claude works the message is held outside the conversation: Claude queues it and draws it
     /// inside its working block, and the block is printed only when Claude takes the message up and echoes it
     /// (FR-4.7), so the message and its response arrive together. Nothing is moved afterwards (D22).
-    /// Returns false when no block applies (empty text, a slash command, or an answer to a waiting prompt).
+    /// Returns false when no block applies (empty text, a slash command, or an answer to a waiting prompt; a message
+    /// the user sends into a question on purpose, FR-2.10, gets its block with <paramref name="evenWhilePrompting"/>).
     /// </summary>
-    public bool Send(string text)
+    public bool Send(string text, bool evenWhilePrompting = false)
     {
         var trimmed = text.Trim();
-        if (trimmed.Length == 0 || trimmed.StartsWith('/') || PromptPending)
+        if (trimmed.Length == 0 || trimmed.StartsWith('/') || (PromptPending && !evenWhilePrompting))
         {
             return false;
         }
@@ -212,6 +213,23 @@ public sealed partial class SessionModel : LineStore
     {
         _lines.Insert(AnchorIndex(), NewLine(LineKind.System, "System: " + text));
         RaiseChanged();
+    }
+
+    /// <summary>
+    /// Whether the line is one of the rows of what Claude waits on, from the question's or the screen's first row down
+    /// to the cursor row (the text prompt's row alone after Other): reply speech leaves them to the control area, which
+    /// reads the question whole (D33). False for a line that is off the screen.
+    /// </summary>
+    public bool IsWaitRow(Line line)
+    {
+        var first = PendingQuestion?.FirstRow ?? PendingScreen?.FirstRow ?? (TextPrompt is not null ? _screen.CursorRow : -1);
+        if (first < 0)
+        {
+            return false;
+        }
+
+        var row = _screen.RowOf(line);
+        return row >= first && row <= _screen.CursorRow;
     }
 
     /// <summary>

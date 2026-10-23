@@ -32,6 +32,12 @@
 - AxClaude, AxTerminal: after a restart of Claude or the shell, what is typed goes out at the paced speed again. A restart while an answer was being typed out left a second write pump running, which halved the pacing and could drop characters.
 - For developers: AxClaude's and AxTerminal's windows derive from one console window in the shared project (`Axit.Forms/ConsoleForm`: the view, the field, the control area, the status bar, the pty bridge, the writes, the recording, the export, find, the signals and the music), their settings from one `ConsoleSettings`, and their models' common parts (the decoder, the parser, the screen, the bookmarks, the cap) are the line store's; about six hundred lines that existed twice exist once (review 5.1).
 - For developers: the window base is one class in partial files (the hooks and menus, the notices, find, the fonts, the updates, the palette), and what every window still copied is the base's now: `Do`, the Exit item, Ctrl+S, the settings-not-read notice, the folder picker, the hand-over receiver, one Find notice for the transcripts too; the windows' own `FocusToKeep` and `Announce` are gone (review 5.3 and 6).
+- AxClaude: a question that comes while the window is in the background plays the louder alert, when it is on, in place of the trill; the trill played first and the alert cut it off.
+- AxClaude: a reply line that comes right before a question is spoken; it was dropped with the question's rows, which the list reads.
+- AxClaude: a question answered or dismissed within a moment of its arrival is no longer spoken after it has gone.
+- AxClaude: the review the app submits itself and its own list of drafts no longer flash the taskbar.
+- AxClaude: a message sent into a question on purpose, Enter again on the kept message, gets its Input and Output lines in the conversation like any message.
+- For developers: AxClaude's wait on Claude is one record and one stamp in the window (MainForm.Area.cs), with the timings of the flow as constants; what a screen's keys do in the control area is pure code (ScreenActions in AxClaude.Core), tested.
 
 ## 3.4.0 - 2026-10-22
 

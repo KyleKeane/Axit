@@ -111,8 +111,9 @@ internal sealed partial class MainForm
             _lastCommand = SlashCommands.Find(text);
         }
 
+        // A message sent into a question on purpose (the kept message sent again, or the guard off) gets its block too (FR-2.10).
         var queued = _model.Working;
-        _model.Send(text);
+        _model.Send(text, evenWhilePrompting: true);
         _messageSent = true;
         QueueWrites(text);
         Announce(queued && !answer ? "Queued" : "Sent", false);

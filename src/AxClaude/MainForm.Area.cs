@@ -1,8 +1,5 @@
-using System.Runtime.InteropServices;
 using System.Text;
-using AxClaude.Core.Pty;
 using AxClaude.Core.Transcript;
-using Axit.Core;
 using Axit.Forms;
 
 namespace AxClaude;
@@ -10,27 +7,92 @@ namespace AxClaude;
 internal sealed partial class MainForm
 {
     // ---- the control area: what Claude waits on, in the message field's place (D33) ----
+    //
+    // The state is one record, _wait: what the window did about what Claude waits on. OnFrameSettled
+    // (MainForm.Model.cs), 400 ms after the screen last changed, compares it with what the model says Claude waits
+    // on and does one thing: shows the wait in the area, replaces what the area shows, closes the area, or announces
+    // "Claude asks". One stamp, _userActedAt, says whether what Claude shows is the user's doing. The timings of the
+    // flow are the constants here. (Sixteen fields and three timers until 2026-10-23.)
+
+    /// <summary>What Claude's screen must settle for before what it waits on is acted on (FR-7.2): a question's rows can be blank for a frame while Claude redraws it.</summary>
+    private const int SettleMs = 400;
+
+    /// <summary>How long reply speech waits for Claude's prompt row, which comes after a question's rows (D33).</summary>
+    private const int SpeechHoldMs = 250;
+
+    /// <summary>D33: the interrupting speech of a question waits this long after the focus moved, so that NVDA's reading of the new control does not cut it off.</summary>
+    private const int FocusSettleMs = 300;
+
+    /// <summary>The moment before a question takes the focus from the conversation without the interrupting kind (D33).</summary>
+    private const int QuestionFocusMs = 1000;
+
+    /// <summary>
+    /// How long after the user's answer or key what Claude shows next counts as the user's doing: no chime, no
+    /// "Question closed", and the control area holds its keys that long so that a second Escape does not reach Claude.
+    /// </summary>
+    private const int UserActionMs = 3000;
+
+    /// <summary>The settle before /feedback is opened for a draft Claude queued (D33).</summary>
+    private const int DraftSettleMs = 500;
+
+    /// <summary>
+    /// What the window did about what Claude waits on (D33): the signature of the question, screen or text prompt;
+    /// whether the control area shows it (false: "Claude asks" was announced, or the app answered it itself); the
+    /// text Ctrl+Q speaks while it is shown; and <see cref="Stale"/> once a key of the user's went to a screen, so
+    /// that the screen shown next replaces it even when it looks the same (a moved selection, another tab).
+    /// </summary>
+    private sealed record Wait(string Signature, bool Shown, string? Text)
+    {
+        public bool Stale { get; init; }
+    }
+
+    /// <summary>Where the app is in bringing up a feedback draft Claude queued (D33): about to send /feedback, waiting for Claude's list of drafts to answer it with the draft, or reviewing, until the list Claude shows after the review is closed for the user.</summary>
+    private sealed record Draft(DraftStep Step, string? Title, long At);
+
+    private enum DraftStep
+    {
+        Opening,
+        Listing,
+        Reviewing,
+    }
+
+    private Wait? _wait;
+    private Draft? _draft;
+
+    /// <summary>When the user last answered, pressed a screen key or dismissed a question, or the app did so for them: what Claude shows within <see cref="UserActionMs"/> is the user's doing.</summary>
+    private long _userActedAt;
+
+    private bool UserActed() => Environment.TickCount64 - _userActedAt < UserActionMs;
+
+    private void UserActedNow() => _userActedAt = Environment.TickCount64;
 
     /// <summary>Claude waits on something the control area reads, so its rows are not read as reply lines too.</summary>
     private bool QuestionShown => _settings.QuestionNotices && _model.PromptPending;
 
+    /// <summary>What Claude waits on now, as a signature: the question, the screen, or the row for the user's own words; null when it waits on nothing.</summary>
+    private string? WaitSignature => _model.PendingQuestion?.Signature ?? _model.PendingScreen?.Signature ?? _model.TextPrompt;
+
+    /// <summary>Whether the control area still shows the wait with this signature.</summary>
+    private bool AreaShows(string signature) => _wait is { Shown: true } wait && wait.Signature == signature;
+
     /// <summary>
     /// Shows what Claude waits on in the control area, in place of the message field (D33). <paramref name="show"/>
     /// puts the control there, given whether it takes the focus and whether it holds its answering keys for a moment
-    /// (when the user did not cause it, since they may be typing). Such a control also plays the notice chime. With
-    /// Go to them at once, interrupting speech (the default) it takes the focus wherever it was, and the question
-    /// with the answer the focus is on is spoken as an interrupting notification 300 ms after the focus moved: it cuts off
-    /// what NVDA was reading, a reply included, and comes last (raised before the focus, or at once after it, it was
-    /// cut off). Without the option, the focus moves at once from the bottom of the window and after a moment from
-    /// the conversation, and nothing interrupts: NVDA reads the question when the focus reaches it, after what it was
-    /// reading (a focus change alone does not cut NVDA off).
+    /// (when the user did not cause it, since they may be typing). Such a control also plays the notice chime, unless
+    /// the window is in the background with the louder alert on, which the signal then plays in its place (FR-7.3).
+    /// With Go to them at once, interrupting speech (the default) it takes the focus wherever it was, and the question
+    /// with the answer the focus is on is spoken as an interrupting notification 300 ms after the focus moved: it cuts
+    /// off what NVDA was reading, a reply included, and comes last (raised before the focus, or at once after it, it
+    /// was cut off); not when the user answered or dismissed it in those 300 ms. Without the option, the focus moves
+    /// at once from the bottom of the window and after a moment from the conversation, and nothing interrupts: NVDA
+    /// reads the question when the focus reaches it, after what it was reading (a focus change alone does not cut
+    /// NVDA off).
     /// </summary>
     private void ShowInArea(string signature, string name, string text, bool unprompted, Action<bool, bool> show)
     {
-        _areaText = text;
         var interrupt = unprompted && !NoticeOpen && _settings.InterruptForQuestions;
         var focus = !NoticeOpen && (interrupt || Input.ContainsFocus || Area.ContainsFocus);
-        if (unprompted && _settings.SoundOnBell)
+        if (unprompted && _settings.SoundOnBell && !(_settings.BackgroundAlert && !ContainsFocus))
         {
             Sounds.Notice();
         }
@@ -38,14 +100,15 @@ internal sealed partial class MainForm
         show(focus, unprompted);
         Input.Visible = false;
         Area.Visible = !NoticeOpen;
-        _shownWait = signature;
+        _wait = new Wait(signature, Shown: true, text);
+        var actedBefore = _userActedAt;
         if (interrupt)
         {
             // After NVDA has taken the focus change, so that the question comes last: raised at once, it was cut off.
             var question = (Area.CurrentItem.Length == 0 ? name : name + Stop(name) + Area.CurrentItem).TrimEnd(' ', '.');
             Later(FocusSettleMs, () =>
             {
-                if (_shownWait == signature)
+                if (AreaShows(signature) && _userActedAt == actedBefore)
                 {
                     Announce(question, true);
                 }
@@ -59,7 +122,7 @@ internal sealed partial class MainForm
             // case was found by the off-screen replay). Not from an open menu, which the move would close (2026-10-23).
             Later(QuestionFocusMs, () =>
             {
-                if (_shownWait == signature && !NoticeOpen && Area.Current is { } current && !current.ContainsFocus)
+                if (AreaShows(signature) && _userActedAt == actedBefore && !NoticeOpen && Area.Current is { } current && !current.ContainsFocus)
                 {
                     current.Focus();
                 }
@@ -67,12 +130,14 @@ internal sealed partial class MainForm
         }
     }
 
-    /// <summary>The message field comes back in the control area's place (the console window's), and nothing is shown or read any more.</summary>
+    /// <summary>The message field comes back in the control area's place (the console window's); what was shown stays handled, so that it is not shown again while Claude waits on it.</summary>
     protected override void CloseArea()
     {
         base.CloseArea();
-        _shownWait = null;
-        _areaText = null;
+        if (_wait is { Shown: true } wait)
+        {
+            _wait = wait with { Shown = false, Text = null };
+        }
     }
 
     /// <summary>
@@ -82,7 +147,7 @@ internal sealed partial class MainForm
     /// </summary>
     private void ReadQuestionAgain()
     {
-        if (Area.Current is null || _areaText is not { } text)
+        if (_wait is not { Shown: true, Text: { } text })
         {
             Announce("Claude is not asking anything", true);
             return;
@@ -144,29 +209,30 @@ internal sealed partial class MainForm
     /// <summary>
     /// One of Claude's questions (D33): the answers as a list in the control area. Enter answers, Escape cancels the
     /// question. Other, like any answer, is sent as its key; Claude then asks for the words, and
-    /// <see cref="ShowOwnAnswer"/> follows.
+    /// <see cref="ShowOwnAnswer"/> follows. False when the app answered the question itself (a review it submits).
     /// </summary>
-    private void ShowClaudeQuestion(Question question)
+    private bool ShowClaudeQuestion(Question question)
     {
         if (question.IsSettings)
         {
             ShowSettings(question);
-            return;
+            return true;
         }
 
         if (SubmitsReview(question))
         {
             // The last answer's "Sent" said nothing about a review; y goes as the user's own answer would.
             SendAnswer("y");
-            return;
+            return false;
         }
 
         _askedQuestion = question;
-        ShowQuestionList(question.Signature, QuestionName(question), QuestionName(question, int.MaxValue), question, null, !UserActed(_answerAt), AnswerQuestion, () =>
+        ShowQuestionList(question.Signature, QuestionName(question), QuestionName(question, int.MaxValue), question, null, !UserActed(), AnswerQuestion, () =>
         {
             SendEscape();
             Announce("Cancelled", false);
         });
+        return true;
     }
 
     /// <summary>
@@ -176,7 +242,7 @@ internal sealed partial class MainForm
     /// back on the setting just chosen. Escape saves and closes.
     /// </summary>
     private void ShowSettings(Question settings, bool back = false) =>
-        ShowQuestionList(settings.Signature, "Claude's settings", "Claude's settings", settings, _settingKey, !back && !UserActed(_answerAt), chosen =>
+        ShowQuestionList(settings.Signature, "Claude's settings", "Claude's settings", settings, _settingKey, !back && !UserActed(), chosen =>
         {
             var setting = chosen[0];
             _settingKey = setting.Key;
@@ -245,7 +311,7 @@ internal sealed partial class MainForm
         && question.OptionFor("y") is not null
         && !question.Text.Any(line => line.StartsWith("warning:", StringComparison.Ordinal))
         && _askedQuestion?.Step is (int number, int count) && number == count
-        && UserActed(_answerAt);
+        && UserActed();
 
     /// <summary>
     /// The follow-up of a question when Claude asks for the user's own words ("Enter text for option 4 (Other), or
@@ -257,7 +323,7 @@ internal sealed partial class MainForm
         var chosen = LineClassifier.TextPromptAnswer(prompt) ?? "an answer that asks for your own words";
         var asked = _askedQuestion is { } question ? QuestionName(question) : null;
         var name = (asked is null ? string.Empty : asked + Stop(asked)) + $"You chose {chosen}. Your answer";
-        ShowInArea(prompt, name, name, !UserActed(_answerAt), (focus, hold) => Area.ShowField(name, focus, hold, typed =>
+        ShowInArea(prompt, name, name, !UserActed(), (focus, hold) => Area.ShowField(name, focus, hold, typed =>
         {
             var words = typed.Trim();
             if (words.Length == 0)
@@ -271,60 +337,49 @@ internal sealed partial class MainForm
         }, SendEscape));
     }
 
-    /// <summary>What Claude waits on now, as a signature: the question, the screen, or the row for the user's own words; null when it waits on nothing.</summary>
-    private string? WaitSignature => _model.PendingQuestion?.Signature ?? _model.PendingScreen?.Signature ?? _model.TextPrompt;
-
     /// <summary>
     /// A screen of Claude's that waits on its hint row (/status, /tasks, /help …; D33) as a list: its lines, which the
     /// conversation does not show for a tab screen, then an item for every key the hint row names ("View (Enter)",
     /// "Close (Escape)"). Enter on a key's item sends the key, Escape sends Escape; the screen Claude shows next takes
-    /// the list's place, without the chime since the user caused it.
+    /// the list's place, without the chime since the user caused it. What the keys do is <see cref="ScreenActions"/>,
+    /// tested: the screen's keys work from anywhere in the list, as in Claude, where only its highlight counts; Enter
+    /// on one of the screen's lines does what the hint row says Enter does, or leaves a screen whose Escape closes
+    /// it, or names the actions; a letter the hint row names (d to discard) goes to Claude from any item.
     /// </summary>
     private void ShowClaudeScreen(ClaudeScreen screen)
     {
-        var items = screen.Lines.ToList();
-        var first = items.Count;
-        items.AddRange(screen.Keys.Select(key => $"{char.ToUpperInvariant(key.Action[0])}{key.Action[1..]} ({key.Name})"));
-        // The key that leaves the screen: Escape, or the one key of "Any key to continue".
-        var escape = screen.Keys.FirstOrDefault(key => key.Send == "\x1b") ?? screen.Keys[0];
-        var closes = escape.Action.ToLowerInvariant() is "close" or "dismiss" or "cancel" or "exit";
-        var leaves = closes || escape.Action == "continue";
+        var items = ScreenActions.Items(screen);
+        var first = screen.Lines.Count;
+        var leave = ScreenActions.LeaveKey(screen);
         void Leave()
         {
-            SendScreenKey(escape.Send);
-            if (closes)
+            SendScreenKey(leave.Send);
+            if (ScreenActions.Closes(leave))
             {
                 Announce("Closed", false);
             }
         }
 
-        // The screen's keys work from anywhere in the list, as in Claude, where only its highlight counts (D33). Enter
-        // on one of the screen's lines does what the hint row says Enter does (send on the review of a draft, next on
-        // one of its switches, view in /tasks); a screen whose hint names no Enter is left when Escape closes it, and
-        // otherwise the actions are named, since Escape would put the screen off. Until 2.11.0 Enter on a line meant
-        // Escape, here Later, so Enter on the line "❯  Send feedback", taken for the button, put the draft off.
-        var enter = screen.Keys.FirstOrDefault(key => key.Send == "\r");
         void EnterOnLine()
         {
-            if (enter is not null)
+            var key = ScreenActions.EnterOnLine(screen);
+            if (key is null)
             {
-                SendScreenKey(enter.Send);
+                Announce(ScreenActions.ActionsText(screen), true);
             }
-            else if (leaves)
+            else if (ReferenceEquals(key, leave))
             {
                 Leave();
             }
             else
             {
-                Announce("Actions at the end of the list: " + string.Join(", ", items.Skip(first)), true);
+                SendScreenKey(key.Send);
             }
         }
 
-        // A letter the hint row names (d to discard, x to stop) goes to Claude from anywhere in the list; any other
-        // letter is the list's own jump to the item that starts with it.
         bool Letter(char letter)
         {
-            if (screen.Keys.FirstOrDefault(key => key.Send.Length == 1 && key.Send[0] == letter) is not { } key)
+            if (ScreenActions.LetterKey(screen, letter) is not { } key)
             {
                 return false;
             }
@@ -345,7 +400,7 @@ internal sealed partial class MainForm
             return;
         }
 
-        ShowInArea(screen.Signature, screen.Title, text.ToString(), !UserActed(_screenKeyAt), (focus, hold) =>
+        ShowInArea(screen.Signature, screen.Title, text.ToString(), !UserActed(), (focus, hold) =>
             Area.ShowList(screen.Title, items, 0, null, focus, hold, (index, _) =>
             {
                 if (index < first)
@@ -359,114 +414,6 @@ internal sealed partial class MainForm
     }
 
     /// <summary>
-    /// A feedback draft Claude has queued in the turn that just ended, counted on its mode line ("1 feedback draft",
-    /// D33, <see cref="FeedbackDraftWatch"/>): /feedback opens for it once Claude is idle, after a short settle, and
-    /// Claude's list of drafts is answered with the draft's title (<see cref="AnswerDraftsList"/>), so that its
-    /// review comes straight up as a screen in the control area, like a question. The card Claude prints for the
-    /// draft has keys that do nothing in screen reader mode; its rows are chrome. Drafts counted at startup or left
-    /// by other sessions, and a draft put off with Later, wait for /feedback by hand. Not with Answer from a list off,
-    /// when the card stays in the conversation and /feedback is typed.
-    /// </summary>
-    private void OpenDraftsWhenIdle()
-    {
-        if (!_readyAnnounced || !ProcessRunning)
-        {
-            return;
-        }
-
-        var idle = ClaudeIdle;
-        if (idle && !UserActed(Math.Max(_screenKeyAt, _draftOpenedAt)))
-        {
-            // The list never came, or the review ended without the list: nothing of the draft's is on its way.
-            _draftToReview = null;
-            _reviewing = false;
-        }
-
-        if (!_drafts.Drafted(_model.Working, idle, _model.FeedbackDrafts))
-        {
-            return;
-        }
-
-        if (!_settings.QuestionNotices)
-        {
-            _drafts.Opened(_model.FeedbackDrafts);
-        }
-        else if (!_openingDrafts)
-        {
-            _openingDrafts = true;
-            Later(DraftSettleMs, OpenFeedbackDrafts);
-        }
-    }
-
-    /// <summary>Claude runs, waits on nothing, and no write of the user's is on its way to it.</summary>
-    private bool ClaudeIdle => ProcessRunning && !_model.Working && !_model.PromptPending && !WritesPending;
-
-    /// <summary>Sends /feedback as the user's own command would go, without "Sent": the review of the draft announces itself. Skipped when Claude is no longer idle.</summary>
-    private void OpenFeedbackDrafts()
-    {
-        _openingDrafts = false;
-        if (!ClaudeIdle || Area.Current is not null || !_drafts.Drafted(_model.Working, idle: true, _model.FeedbackDrafts))
-        {
-            return;
-        }
-
-        _drafts.Opened(_model.FeedbackDrafts);
-        _draftToReview = _model.DraftTitle;
-        _draftOpenedAt = Environment.TickCount64;
-        _lastCommand = SlashCommands.Find("/feedback");
-        QueueWrites("/feedback");
-    }
-
-    /// <summary>
-    /// Claude's list of drafts when the app opened /feedback itself (D33): answered with the draft's number, so that
-    /// the review comes straight up, or, when the review is over (Send, Discard or Later brings the list back),
-    /// closed with Escape, back to the message field. False when the list is the user's own, or the draft is not on
-    /// it: the list is shown.
-    /// </summary>
-    private bool AnswerDraftsList(Question question)
-    {
-        if (question.Title != FeedbackDraftWatch.ListTitle)
-        {
-            return false;
-        }
-
-        if (_reviewing)
-        {
-            _reviewing = false;
-            MarkHandled(question.Signature, mark: false);
-            Write("\x1b");
-            return true;
-        }
-
-        if (_draftToReview is not { } title)
-        {
-            return false;
-        }
-
-        _draftToReview = null;
-        if (FeedbackDraftWatch.Find(question, title) is not { } draft)
-        {
-            return false;
-        }
-
-        _reviewing = true;
-        MarkHandled(question.Signature, mark: false);
-        TypeAnswer(draft.Key);
-        return true;
-    }
-
-    /// <summary>
-    /// Escape from the control area: the question closes, or goes back a step. What Claude shows next is the user's
-    /// doing, and the area holds its keys until then, so that a second Escape does not reach Claude as an interrupt.
-    /// </summary>
-    private void SendEscape()
-    {
-        _answerAt = Environment.TickCount64;
-        Area.Hold(UserActionMs);
-        Write("\x1b");
-    }
-
-    /// <summary>
     /// A text row of a draft's review that Claude has opened for editing (D33, <see cref="ClaudeScreen.Editing"/>):
     /// a field in the control area named with the row. Enter sends what was typed to the end of Claude's text, a
     /// keystroke at a time, then Enter, which keeps it and moves the highlight on; an empty field only moves on;
@@ -477,7 +424,7 @@ internal sealed partial class MainForm
     {
         var row = screen.Highlighted?.TrimEnd(':') ?? "Text";
         var name = $"{screen.Title}. {row}, add at the end";
-        ShowInArea(screen.Signature, name, text, !UserActed(_screenKeyAt), (focus, hold) => Area.ShowField(name, focus, hold, typed =>
+        ShowInArea(screen.Signature, name, text, !UserActed(), (focus, hold) => Area.ShowField(name, focus, hold, typed =>
         {
             ScreenKeySent();
             TypeAnswer(typed);
@@ -491,15 +438,30 @@ internal sealed partial class MainForm
         Write(key);
     }
 
-    /// <summary>The bookkeeping of a key sent from a screen, or of text typed into one of its rows: what Claude shows next is the user's doing, and the area holds its keys meanwhile.</summary>
+    /// <summary>The bookkeeping of a key sent from a screen, or of text typed into one of its rows: what Claude shows next is the user's doing, the area holds its keys meanwhile, and the screen shown next replaces this one even when it looks the same.</summary>
     private void ScreenKeySent()
     {
-        _screenKeyAt = Environment.TickCount64;
-        _handledWait = null;
+        UserActedNow();
+        if (_wait is { } wait)
+        {
+            _wait = wait with { Stale = true };
+        }
+
         Area.Hold(UserActionMs);
         // A key that changes nothing draws no frame: the timer brings the screen back all the same.
         _attention.Stop();
         _attention.Start();
+    }
+
+    /// <summary>
+    /// Escape from the control area: the question closes, or goes back a step. What Claude shows next is the user's
+    /// doing, and the area holds its keys until then, so that a second Escape does not reach Claude as an interrupt.
+    /// </summary>
+    private void SendEscape()
+    {
+        UserActedNow();
+        Area.Hold(UserActionMs);
+        Write("\x1b");
     }
 
     /// <summary>
@@ -514,7 +476,7 @@ internal sealed partial class MainForm
         }
 
         TypeAnswer(key);
-        _answerAt = Environment.TickCount64;
+        UserActedNow();
         Area.Hold(UserActionMs);
         if (_settings.SoundOnBell)
         {
@@ -540,101 +502,103 @@ internal sealed partial class MainForm
         StartWrites();
     }
 
+    // ---- a feedback draft Claude queued (D33) ----
+
     /// <summary>
-    /// FR-1.7: a close while Claude is in the middle of a turn, or runs work in the background, is confirmed first.
-    /// Enter closes, Escape keeps the window.
+    /// A feedback draft Claude has queued in the turn that just ended, counted on its mode line ("1 feedback draft",
+    /// D33, <see cref="FeedbackDraftWatch"/>): /feedback opens for it once Claude is idle, after a short settle, and
+    /// Claude's list of drafts is answered with the draft's title (<see cref="AnswerDraftsList"/>), so that its
+    /// review comes straight up as a screen in the control area, like a question. The card Claude prints for the
+    /// draft has keys that do nothing in screen reader mode; its rows are chrome. Drafts counted at startup or left
+    /// by other sessions, and a draft put off with Later, wait for /feedback by hand. Not with Answer from a list off,
+    /// when the card stays in the conversation and /feedback is typed.
     /// </summary>
-    private void ConfirmClose()
+    private void OpenDraftsWhenIdle()
     {
-        var background = ClaudeBackground;
-        string state;
-        if (ClaudeBusy)
-        {
-            state = _model.PromptPending ? "Claude is waiting for your answer" : "Claude is still working";
-            if (_model.QueuedMessages > 0)
-            {
-                state += _model.QueuedMessages == 1
-                    ? " and a message you sent is still waiting for it"
-                    : $" and {_model.QueuedMessages} messages you sent are still waiting for it";
-            }
-
-            if (background is not null)
-            {
-                state += $", and it has work running in the background ({background})";
-            }
-        }
-        else
-        {
-            state = $"Claude has work running in the background ({background})";
-        }
-
-        var stops = ClaudeBusy ? "Claude stops in the middle of its work" : "the background work stops";
-        var consequence = !RestartPending
-            ? $"If you close now, {stops}."
-            : $"If you close now, {stops} and the updated AxClaude starts again.";
-        ShowNotice(new Notice("Close AxClaude?",
-            $"{state}. {consequence}\n" +
-            "What is done so far is saved. Start AxClaude again to carry on.",
-        [
-            new OverlayChoice("&Close anyway", CloseConfirmed, IsDefault: true),
-            new OverlayChoice("&Keep working", KeepWorkingAfterUpdate, IsCancel: true),
-        ]));
-    }
-
-    /// <summary>FR-1.9: where the app looked, the install command with a button that copies it, the install page, and Locate claude.exe.</summary>
-    private void ShowClaudeNotFound(IReadOnlyList<string> candidates)
-    {
-        ShowNotice(new Notice("Claude Code was not found", HelpText.ClaudeNotFound(candidates),
-        [
-            new OverlayChoice("Copy install &command", () =>
-            {
-                if (CopyToClipboard(ClaudeLauncher.InstallCommand))
-                {
-                    Announce("Copied. Paste it into PowerShell", true);
-                }
-            }, StaysOpen: true),
-            new OverlayChoice("&Open install instructions", () => OpenUrl(ClaudeLauncher.InstallUrl), StaysOpen: true),
-            new OverlayChoice("&Locate claude.exe...", LocateClaude, StaysOpen: true),
-            OverlayChoice.Close,
-        ])
-        {
-            Unprompted = true,
-        });
-    }
-
-    /// <summary>The standard file picker; a choice closes the notice, is saved as claudePath and started at once. Cancel keeps the notice.</summary>
-    private void LocateClaude()
-    {
-        using var dialog = new OpenFileDialog
-        {
-            Title = "Locate claude.exe",
-            Filter = "Claude Code (claude.exe;claude.cmd)|claude.exe;claude.cmd|Programs (*.exe;*.cmd)|*.exe;*.cmd|All files (*.*)|*.*",
-            CheckFileExists = true,
-        };
-        if (dialog.ShowDialog(this) != DialogResult.OK)
+        if (!_readyAnnounced || !ProcessRunning)
         {
             return;
         }
 
-        CloseNotice(null);
-        _settings.ClaudePath = dialog.FileName;
-        SaveSettings();
-        StartClaude();
+        var idle = ClaudeIdle;
+        if (idle && !UserActed() && _draft is { Step: not DraftStep.Opening } draft && Environment.TickCount64 - draft.At >= UserActionMs)
+        {
+            // The list never came, or the review ended without the list: nothing of the draft's is on its way.
+            _draft = null;
+        }
+
+        if (!_drafts.Drafted(_model.Working, idle, _model.FeedbackDrafts))
+        {
+            return;
+        }
+
+        if (!_settings.QuestionNotices)
+        {
+            _drafts.Opened(_model.FeedbackDrafts);
+        }
+        else if (_draft is null)
+        {
+            _draft = new Draft(DraftStep.Opening, null, Environment.TickCount64);
+            Later(DraftSettleMs, OpenFeedbackDrafts);
+        }
     }
 
-    /// <summary>Another program can hold the clipboard for a moment; that is announced rather than reported as a crash (FR-13.1).</summary>
-    private bool CopyToClipboard(string text)
+    /// <summary>Claude runs, waits on nothing, and no write of the user's is on its way to it.</summary>
+    private bool ClaudeIdle => ProcessRunning && !_model.Working && !_model.PromptPending && !WritesPending;
+
+    /// <summary>Sends /feedback as the user's own command would go, without "Sent": the review of the draft announces itself. Skipped when Claude is no longer idle.</summary>
+    private void OpenFeedbackDrafts()
     {
-        try
+        if (!ClaudeIdle || Area.Current is not null || !_drafts.Drafted(_model.Working, idle: true, _model.FeedbackDrafts))
         {
-            Clipboard.SetText(text);
-            return true;
+            _draft = null;
+            return;
         }
-        catch (ExternalException ex)
+
+        _drafts.Opened(_model.FeedbackDrafts);
+        _draft = new Draft(DraftStep.Listing, _model.DraftTitle, Environment.TickCount64);
+        _lastCommand = SlashCommands.Find("/feedback");
+        QueueWrites("/feedback");
+    }
+
+    /// <summary>
+    /// Claude's list of drafts when the app opened /feedback itself (D33): answered with the draft's number, so that
+    /// the review comes straight up, or, when the review is over (Send, Discard or Later brings the list back),
+    /// closed with Escape, back to the message field; neither flashes the taskbar nor is followed by "Question
+    /// closed", being the app's doing. False when the list is the user's own, or the draft is not on it: the list is shown.
+    /// </summary>
+    private bool AnswerDraftsList(Question question)
+    {
+        if (question.Title != FeedbackDraftWatch.ListTitle || _draft is null)
         {
-            Log.Error("The clipboard could not be written", ex);
-            Announce("Could not copy. Try again", true);
             return false;
         }
+
+        if (_draft.Step == DraftStep.Reviewing)
+        {
+            _draft = null;
+            Handled(question.Signature, mark: false);
+            UserActedNow();
+            Write("\x1b");
+            return true;
+        }
+
+        if (_draft.Step != DraftStep.Listing)
+        {
+            return false;
+        }
+
+        var title = _draft.Title;
+        _draft = null;
+        if (title is null || FeedbackDraftWatch.Find(question, title) is not { } draft)
+        {
+            return false;
+        }
+
+        // The review that follows is new to the user: it comes with the trill, so the stamp is not touched here.
+        _draft = new Draft(DraftStep.Reviewing, title, Environment.TickCount64);
+        Handled(question.Signature, mark: false);
+        TypeAnswer(draft.Key);
+        return true;
     }
 }

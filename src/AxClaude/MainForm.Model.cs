@@ -1,5 +1,7 @@
+using System.Text;
 using AxClaude.Core.Transcript;
 using Axit.Core;
+using Axit.Core.Transcript;
 using Axit.Forms;
 
 namespace AxClaude;
@@ -27,32 +29,43 @@ internal sealed partial class MainForm
             }
         }
 
-        // The rows of a question are not read as reply lines while the control area reads the question (D33): new
-        // rows only, repeats left out, they gave "→ Tea. → Dinner" before the review was read whole. Claude draws a
-        // question's rows before its prompt row, so reply speech waits a moment (_speechHold) and goes only when
-        // Claude has not turned out to be waiting.
-        if (arrival.Speech is { } speech)
+        // Claude draws a question's rows before its prompt row, so reply speech waits a moment (_speechHold) and goes
+        // only when Claude has not turned out to be waiting; once it has, the question's rows are dropped from what
+        // waits (the control area reads the question whole, D33) and the rest, a reply line finalized just before the
+        // question, is spoken at once (until 2026-10-23 all of it was dropped).
+        if (arrival.Speech is not null)
         {
-            _heldSpeech = _heldSpeech is null ? speech : _heldSpeech + " " + speech;
+            _heldLines.AddRange(arrival.SpokenLines);
             _speechHold.Stop();
             _speechHold.Start();
         }
 
-        if (QuestionShown)
+        if (QuestionShown && _heldLines.Count > 0)
         {
-            _heldSpeech = null;
+            _heldLines.RemoveAll(_model.IsWaitRow);
+            SpeakHeld();
         }
 
-        // What Claude waits on is acted on once the screen has settled for the attention timer (AnnounceAttention):
-        // showing it in the control area, and putting the message field back when it went away, since Claude redraws
-        // a question in passing.
+        // What Claude waits on is acted on once the screen has settled for the attention timer (OnFrameSettled):
+        // shown in the control area, and the message field put back when it went away, since Claude redraws a
+        // question in passing.
         var waiting = WaitSignature;
-        if (_shownWait is { } shown && waiting != shown && !_attention.Enabled)
+        if (waiting is null)
         {
-            _attention.Start();
+            if (_wait is { Shown: false })
+            {
+                // Announced and gone: the same question asked again later is new. The control area's own wait is
+                // left to the settle, since a frame can end with the cursor off the prompt row (a repaint from the
+                // top, the quiet timer cutting a redraw); forgetting it here rebuilt the list, replayed the chime and
+                // announced the same question again (the refiring of 2026-10-02).
+                _wait = null;
+            }
+            else if (_wait is not null && !_attention.Enabled)
+            {
+                _attention.Start();
+            }
         }
-
-        if (_model.PromptPending)
+        else
         {
             if (_model.HideReplay)
             {
@@ -61,20 +74,15 @@ internal sealed partial class MainForm
             }
 
             // A new question or screen, or the next step of one, waits for the screen to settle like the first.
-            if (!_promptAnnounced || (waiting != _handledWait && !_attention.Enabled && _shownWait is null))
+            if (_wait is null)
             {
                 _attention.Stop();
                 _attention.Start();
             }
-        }
-        else if (_shownWait is null)
-        {
-            // Claude redraws a question in passing, and a frame can end with the cursor off the prompt row (a repaint
-            // from the top, the quiet timer cutting a redraw). While the control area shows the question it stays
-            // handled; AnnounceAttention forgets it when nothing waits any more. Forgetting it here made the next frame
-            // rebuild the list, replay the chime and announce the same question again (the refiring of 2026-10-02).
-            _promptAnnounced = false;
-            _handledWait = null;
+            else if (waiting != _wait.Signature && !_attention.Enabled)
+            {
+                _attention.Start();
+            }
         }
 
         if (!_readyAnnounced && ProcessRunning && _model.Mode is not null && !_model.Working && !_model.PromptPending)
@@ -94,45 +102,68 @@ internal sealed partial class MainForm
         OpenDraftsWhenIdle();
     }
 
-    private void AnnounceAttention()
+    /// <summary>The held reply lines go out as one notification (D32), and the hold ends.</summary>
+    private void SpeakHeld()
     {
-        var waiting = WaitSignature;
-        if (_model.PromptPending && _settings.QuestionNotices && waiting != _handledWait && ShowWaiting())
+        _speechHold.Stop();
+        if (_heldLines.Count > 0)
         {
-            // In the control area, which replaced what it showed before (the next question of a set) in place.
-        }
-        else if (_model.PromptPending)
-        {
-            // Claude moved on from what the control area shows to something it cannot show (D33).
-            if (_shownWait is { } shown && waiting != shown)
+            var text = new StringBuilder();
+            foreach (var line in _heldLines)
             {
-                CloseArea();
+                Utterance.Append(text, Arrivals.SpokenText(line), line.JoinedToPrevious);
             }
 
-            if (!_promptAnnounced || waiting != _handledWait)
+            Announce(text.ToString(), false);
+        }
+
+        _heldLines.Clear();
+    }
+
+    /// <summary>
+    /// The screen has settled (the attention timer, 400 ms after the bell or the last change of what waits): what
+    /// the model says Claude waits on is compared with the one record of what the window did about it, and exactly
+    /// one thing happens. Something new waits: it is shown in the control area, replacing what is there, or, when the
+    /// area cannot show it, "Claude asks" is announced. Nothing waits any more: the area closes and the message field
+    /// comes back, "Question closed" when Claude closed it by itself, and a bell that rang is "Done".
+    /// </summary>
+    private void OnFrameSettled()
+    {
+        var waiting = WaitSignature;
+        if (waiting is not null)
+        {
+            if (_wait is null || _wait.Stale || _wait.Signature != waiting)
             {
-                MarkHandled(waiting);
-                Announce("Claude asks", false);
-                Signal(question: true);
+                if (!(_settings.QuestionNotices && ShowWaiting()))
+                {
+                    // Claude moved on from what the control area shows to something it cannot show (D33).
+                    if (_wait is { Shown: true })
+                    {
+                        CloseArea();
+                    }
+
+                    Handled(waiting);
+                    Announce("Claude asks", false);
+                    Signal(question: true);
+                }
             }
         }
         else
         {
-            // Nothing waits any more: the message field comes back. Said only when Claude closed it by itself, not
-            // right after the user's answer or key.
-            if (Area.Current is not null)
+            if (_wait is { Shown: true })
             {
-                var byUser = UserActed(Math.Max(_answerAt, _screenKeyAt));
+                // Nothing waits any more: the message field comes back. Said only when Claude closed it by itself, not
+                // right after the user's answer or key.
+                var byUser = UserActed();
                 CloseArea();
-                // The question is over: the same one asked again later is new.
-                _promptAnnounced = false;
-                _handledWait = null;
                 if (!byUser)
                 {
                     Announce("Question closed", false);
                 }
             }
 
+            // The question is over: the same one asked again later is new.
+            _wait = null;
             if (_bellPending)
             {
                 if (_settings.AnnounceBell)
@@ -150,7 +181,8 @@ internal sealed partial class MainForm
     /// <summary>
     /// Shows what Claude waits on in the control area (D33): a list of answers unless the slash command sent last
     /// leaves its lists to the message field, a screen waiting on its hint row, or the row for the user's own words
-    /// after Other. False when it is none of these.
+    /// after Other. True when it was shown, or answered by the app itself (a review it submits, its own list of drafts),
+    /// which signals nothing; false when the area cannot show it.
     /// </summary>
     private bool ShowWaiting()
     {
@@ -166,17 +198,20 @@ internal sealed partial class MainForm
                 return true;
             }
 
-            MarkHandled(question.Signature);
-            ShowClaudeQuestion(question);
+            Handled(question.Signature);
+            if (!ShowClaudeQuestion(question))
+            {
+                return true;
+            }
         }
         else if (_model.PendingScreen is { } screen)
         {
-            MarkHandled(screen.Signature);
+            Handled(screen.Signature);
             ShowClaudeScreen(screen);
         }
         else if (_model.TextPrompt is { } prompt)
         {
-            MarkHandled(prompt);
+            Handled(prompt);
             ShowOwnAnswer(prompt);
         }
         else
@@ -190,14 +225,13 @@ internal sealed partial class MainForm
     }
 
     /// <summary>
-    /// What Claude waits on is handled, announced or shown once, and recorded for q (nothing for the text row after
-    /// Other, which belongs to the question before); without <paramref name="mark"/> it is handled by the app on the
-    /// user's behalf and not recorded.
+    /// What Claude waits on is handled: announced, shown or answered once, and recorded for q (nothing for the text
+    /// row after Other, which belongs to the question before); without <paramref name="mark"/> it is handled by the
+    /// app on the user's behalf and not recorded. <see cref="ShowInArea"/> then says that the area shows it.
     /// </summary>
-    private void MarkHandled(string? signature, bool mark = true)
+    private void Handled(string signature, bool mark = true)
     {
-        _promptAnnounced = true;
-        _handledWait = signature;
+        _wait = new Wait(signature, Shown: false, Text: null);
         if (mark)
         {
             _model.MarkQuestion();

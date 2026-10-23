@@ -2,6 +2,7 @@ using AxClaude.Core;
 using AxClaude.Core.Pty;
 using AxClaude.Core.Transcript;
 using Axit.Core;
+using Axit.Core.Transcript;
 using Axit.Forms;
 
 namespace AxClaude;
@@ -21,13 +22,15 @@ internal sealed partial class MainForm : ConsoleForm
     private readonly StartupOptions _options;
     private readonly AppSettings _settings;
     private readonly SessionModel _model;
-    private readonly System.Windows.Forms.Timer _attention = new() { Interval = 400 };
 
-    /// <summary>How long reply speech waits for Claude's prompt row, which comes after a question's rows (D33).</summary>
-    private readonly System.Windows.Forms.Timer _speechHold = new() { Interval = 250 };
+    /// <summary>The settle after which what Claude waits on is acted on (FR-7.2, D33): started by the bell and by a change of what waits; <see cref="OnFrameSettled"/> on its tick.</summary>
+    private readonly System.Windows.Forms.Timer _attention = new() { Interval = SettleMs };
 
-    /// <summary>Reply speech waiting for <see cref="_speechHold"/>; dropped when it turns out to be a question's rows.</summary>
-    private string? _heldSpeech;
+    /// <summary>Reply speech waits this long for Claude's prompt row, which comes after a question's rows (D33); <see cref="SpeakHeld"/> on its tick.</summary>
+    private readonly System.Windows.Forms.Timer _speechHold = new() { Interval = SpeechHoldMs };
+
+    /// <summary>The reply lines waiting for <see cref="_speechHold"/>; a question's rows among them are dropped once Claude turns out to be waiting, the rest is spoken.</summary>
+    private readonly List<Line> _heldLines = [];
 
     /// <summary>The per-frame pass behind the tick and the spoken replies (FR-7.8, FR-7.4).</summary>
     private readonly Arrivals _arrivals = new();
@@ -42,60 +45,17 @@ internal sealed partial class MainForm : ConsoleForm
     ];
 
     private string? _folder;
+
+    /// <summary>The bell rang (FR-7.2): "Done" or "Claude asks" once the screen has settled.</summary>
     private bool _bellPending;
-    private bool _promptAnnounced;
-
-    /// <summary>The signature of the question or screen the control area shows (D33); null while the message field is in its place.</summary>
-    private string? _shownWait;
-
-    /// <summary>What Ctrl+Q speaks while the control area shows (D33): the title and every line of the question or screen, uncut.</summary>
-    private string? _areaText;
-
-    /// <summary>The signature of the question or screen that was shown in the control area or announced: it is not shown again while Claude waits on it.</summary>
-    private string? _handledWait;
 
     /// <summary>Whether a feedback draft Claude queued in the turn that just ended waits (D33): the mode line's count against the count before the turn.</summary>
     private readonly FeedbackDraftWatch _drafts = new();
 
-    /// <summary>/feedback is about to open for a draft, once the screen has settled.</summary>
-    private bool _openingDrafts;
-
-    /// <summary>When /feedback was last sent for a draft: the list that follows within <see cref="UserActionMs"/> is the app's doing.</summary>
-    private long _draftOpenedAt;
-
-    /// <summary>The title of the draft /feedback was opened for: Claude's list of drafts is answered with it, so that the review comes straight up. Null when the list is the user's own.</summary>
-    private string? _draftToReview;
-
-    /// <summary>The review of a draft the app opened is up: the list of drafts Claude shows after Send, Discard or Later is closed for the user, back to the message field.</summary>
-    private bool _reviewing;
-
-    private const int DraftSettleMs = 500;
-
-    /// <summary>When a key was last sent from a screen of Claude's: the screen that follows is the user's doing and comes without the chime.</summary>
-    private long _screenKeyAt;
-
-    /// <summary>When an answer was last sent: the question that follows is the user's doing and opens without the chime.</summary>
-    private long _answerAt;
-
-    /// <summary>
-    /// How long after the user's answer or key what Claude shows next counts as the user's doing: no chime, no
-    /// "Question closed", and the control area holds its keys that long so that a second Escape does not reach Claude.
-    /// </summary>
-    private const int UserActionMs = 3000;
-
-    /// <summary>D33: the interrupting speech of a question waits this long after the focus moved, so that NVDA's reading of the new control does not cut it off.</summary>
-    private const int FocusSettleMs = 300;
-
-    /// <summary>The moment before a question takes the focus from the conversation without the interrupting kind (D33).</summary>
-    private const int QuestionFocusMs = 1000;
-
-    /// <summary>Whether the user's answer or key at <paramref name="at"/> came less than <see cref="UserActionMs"/> ago: what follows it is prompted, not a surprise.</summary>
-    private static bool UserActed(long at) => Environment.TickCount64 - at < UserActionMs;
-
     /// <summary>The /config setting last chosen, where the list of settings starts when Claude's list comes back.</summary>
     private string? _settingKey;
 
-    /// <summary>The question the control area showed last, which a follow-up for the user's own words repeats.</summary>
+    /// <summary>The question Claude asked last (shown or not), which the text prompt after Other names and whose step says what comes next.</summary>
     private Question? _askedQuestion;
 
     /// <summary>The slash command sent last, which the question that follows belongs to (QuestionRouter); null after a message.</summary>
@@ -145,18 +105,9 @@ internal sealed partial class MainForm : ConsoleForm
         _attention.Tick += (_, _) =>
         {
             _attention.Stop();
-            AnnounceAttention();
+            OnFrameSettled();
         };
-        _speechHold.Tick += (_, _) =>
-        {
-            _speechHold.Stop();
-            if (_heldSpeech is { } speech && !QuestionShown)
-            {
-                Announce(speech, false);
-            }
-
-            _heldSpeech = null;
-        };
+        _speechHold.Tick += (_, _) => SpeakHeld();
         Input.KeyDown += OnInputKeyDown;
         Transcript.LineChosen += QuoteLineInMessage;
         BuildMenus();
@@ -200,6 +151,44 @@ internal sealed partial class MainForm : ConsoleForm
 
         ConfirmClose();
         return true;
+    }
+
+    /// <summary>The Close AxClaude? notice (FR-1.7): what Claude is doing, what closing does to it. Enter closes, Escape keeps the window.</summary>
+    private void ConfirmClose()
+    {
+        var background = ClaudeBackground;
+        string state;
+        if (ClaudeBusy)
+        {
+            state = _model.PromptPending ? "Claude is waiting for your answer" : "Claude is still working";
+            if (_model.QueuedMessages > 0)
+            {
+                state += _model.QueuedMessages == 1
+                    ? " and a message you sent is still waiting for it"
+                    : $" and {_model.QueuedMessages} messages you sent are still waiting for it";
+            }
+
+            if (background is not null)
+            {
+                state += $", and it has work running in the background ({background})";
+            }
+        }
+        else
+        {
+            state = $"Claude has work running in the background ({background})";
+        }
+
+        var stops = ClaudeBusy ? "Claude stops in the middle of its work" : "the background work stops";
+        var consequence = !RestartPending
+            ? $"If you close now, {stops}."
+            : $"If you close now, {stops} and the updated AxClaude starts again.";
+        ShowNotice(new Notice("Close AxClaude?",
+            $"{state}. {consequence}\n" +
+            "What is done so far is saved. Start AxClaude again to carry on.",
+        [
+            new OverlayChoice("&Close anyway", CloseConfirmed, IsDefault: true),
+            new OverlayChoice("&Keep working", KeepWorkingAfterUpdate, IsCancel: true),
+        ]));
     }
 
     /// <summary>Claude is in the middle of a turn: working, waiting for an answer, or holding a message sent while it worked.</summary>

@@ -82,16 +82,73 @@ internal sealed partial class MainForm
         }
 
         _readyAnnounced = false;
-        _promptAnnounced = false;
+        // Nothing of the old Claude's is handled: its question, if any, is gone with it.
+        _wait = null;
         // A question of the new Claude belongs to no slash command of the old one (QuestionRouter).
         _lastCommand = null;
         // Its drafts are counted afresh when it is ready: none of them is a draft of a turn of this run.
         _drafts.Opened(0);
-        _draftToReview = null;
-        _reviewing = false;
+        _draft = null;
         _settings.RememberFolder(_folder!);
         SaveSettings();
         UpdateStatus();
+    }
+
+    /// <summary>FR-1.9: where the app looked, the install command with a button that copies it, the install page, and Locate claude.exe.</summary>
+    private void ShowClaudeNotFound(IReadOnlyList<string> candidates)
+    {
+        ShowNotice(new Notice("Claude Code was not found", HelpText.ClaudeNotFound(candidates),
+        [
+            new OverlayChoice("Copy install &command", () =>
+            {
+                if (CopyToClipboard(ClaudeLauncher.InstallCommand))
+                {
+                    Announce("Copied. Paste it into PowerShell", true);
+                }
+            }, StaysOpen: true),
+            new OverlayChoice("&Open install instructions", () => OpenUrl(ClaudeLauncher.InstallUrl), StaysOpen: true),
+            new OverlayChoice("&Locate claude.exe...", LocateClaude, StaysOpen: true),
+            OverlayChoice.Close,
+        ])
+        {
+            Unprompted = true,
+        });
+    }
+
+    /// <summary>The standard file picker; a choice closes the notice, is saved as claudePath and started at once. Cancel keeps the notice.</summary>
+    private void LocateClaude()
+    {
+        using var dialog = new OpenFileDialog
+        {
+            Title = "Locate claude.exe",
+            Filter = "Claude Code (claude.exe;claude.cmd)|claude.exe;claude.cmd|Programs (*.exe;*.cmd)|*.exe;*.cmd|All files (*.*)|*.*",
+            CheckFileExists = true,
+        };
+        if (dialog.ShowDialog(this) != DialogResult.OK)
+        {
+            return;
+        }
+
+        CloseNotice(null);
+        _settings.ClaudePath = dialog.FileName;
+        SaveSettings();
+        StartClaude();
+    }
+
+    /// <summary>Another program can hold the clipboard for a moment; that is announced rather than reported as a crash (FR-13.1).</summary>
+    private bool CopyToClipboard(string text)
+    {
+        try
+        {
+            Clipboard.SetText(text);
+            return true;
+        }
+        catch (System.Runtime.InteropServices.ExternalException ex)
+        {
+            Log.Error("The clipboard could not be written", ex);
+            Announce("Could not copy. Try again", true);
+            return false;
+        }
     }
 
     /// <summary>Claude's process ended, its last output in and the process stopped: the explanation shown, the default --continue retried as a new conversation (FR-9.1), or "Claude stopped".</summary>

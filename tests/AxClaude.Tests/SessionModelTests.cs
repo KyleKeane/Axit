@@ -232,6 +232,24 @@ public class SessionModelTests
         Feed(menu, $"{Esc}[?25lEffort\r\n1. low\r\n2. (selected) high\r\nSelect with numbers [1-2]. Then Enter to submit or Escape to cancel:{Esc}[?25h");
         Assert.True(menu.PromptPending);
         Assert.False(menu.Send("2"));
+        // Sent into the question on purpose, Enter again on the kept message (FR-2.10): the block, as for any message.
+        Assert.True(menu.Send("hello", evenWhilePrompting: true));
+    }
+
+    [Fact]
+    public void The_rows_of_what_claude_waits_on_are_told_from_the_reply_before_them()
+    {
+        // Reply speech holds a reply line and a question's rows alike until Claude's prompt row shows which they are
+        // (D33): the question's rows go to the control area, the reply line is spoken.
+        var model = new SessionModel(80, 12);
+        Feed(model, $"{Esc}[?25lclaude: Pick one.\r\n\r\n\r\nEffort\r\n1. low\r\n2. (selected) high\r\nSelect with numbers [1-2]. Then Enter to submit or Escape to cancel:{Esc}[?25h");
+        Assert.True(model.PromptPending);
+        var reply = model.Lines.Single(line => line.Text == "claude: Pick one.");
+        var title = model.Lines.Single(line => line.Text == "Effort");
+        var answer = model.Lines.Single(line => line.Text == "2. (selected) high");
+        Assert.False(model.IsWaitRow(reply));
+        Assert.True(model.IsWaitRow(title));
+        Assert.True(model.IsWaitRow(answer));
     }
 
     [Fact]
