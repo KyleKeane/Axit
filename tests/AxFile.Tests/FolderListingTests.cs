@@ -97,11 +97,20 @@ public sealed class FolderListingTests : IDisposable
     }
 
     [Fact]
-    public void Enter_opens_a_folder_here_and_a_file_in_the_program_Windows_has()
+    public void Typing_builds_a_prefix_and_a_run_of_one_letter_cycles()
     {
-        Assert.Equal(OpenWay.Folder, FolderListing.WayOf(new Entry("notes.md", "C:\\x\\notes.md", true, 0, DateTime.Now)));
-        Assert.Equal(OpenWay.Windows, FolderListing.WayOf(new Entry("notes.md", "C:\\x\\notes.md", false, 0, DateTime.Now)));
-        Assert.Equal(OpenWay.Windows, FolderListing.WayOf(new Entry("01 Chapter 1.mp3", "C:\\x\\01 Chapter 1.mp3", false, 0, DateTime.Now)));
+        var shown = new[] { "aardvark", "apple", "apricot", "banana" }.Select(name => new Entry(name, "C:\\x\\" + name, false, 0, DateTime.Now)).ToList();
+        // One letter: the next name starting with it, round the end.
+        Assert.Equal(1, FolderListing.TypeAhead(shown, "a", 0));
+        Assert.Equal(0, FolderListing.TypeAhead(shown, "A", 3));
+        // The letter again: the cycle goes on.
+        Assert.Equal(2, FolderListing.TypeAhead(shown, "aa", 1));
+        // Another letter: the prefix whole, from the entry in hand.
+        Assert.Equal(1, FolderListing.TypeAhead(shown, "ap", 1));
+        Assert.Equal(2, FolderListing.TypeAhead(shown, "apr", 1));
+        Assert.Equal(0, FolderListing.TypeAhead(shown, "aar", 2));
+        Assert.Equal(-1, FolderListing.TypeAhead(shown, "z", 0));
+        Assert.Equal(-1, FolderListing.TypeAhead([], "a", 0));
     }
 
     [Fact]

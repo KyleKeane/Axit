@@ -1,3 +1,4 @@
+using System.Diagnostics.CodeAnalysis;
 using AxFile.Core;
 using Axit.Core;
 using Axit.Forms;
@@ -22,13 +23,8 @@ public sealed partial class FileForm
     private int _hidden;
     private int _dot;
 
-    /// <summary>The paths selected with Space (AF-3.7), kept while the same folder shows; their items read ", selected".</summary>
-    private readonly HashSet<string> _selected = new(StringComparer.OrdinalIgnoreCase);
-
-    /// <summary>Where a Shift range began (AF-3.7), where it has reached, and the marks there were before it; the anchor is null while no range is being made.</summary>
-    private int? _anchor;
-    private int _anchorEnd = -1;
-    private HashSet<string> _anchorBase = new(StringComparer.OrdinalIgnoreCase);
+    /// <summary>The marks on the shown entries (AF-3.7), which the operations act on, and the Shift range being made; a marked item reads ", selected". Kept while the same folder shows.</summary>
+    private readonly Marks _marks = new();
 
     /// <summary>The folder's last write time at the last read, so that coming back to the window knows whether to read again (AF-3.4).</summary>
     private DateTime _folderStamp;
@@ -40,6 +36,52 @@ public sealed partial class FileForm
     private string _typed = string.Empty;
     private long _typedAt;
     private const int TypeAheadMs = 1000;
+
+    /// <summary>The folder shown when it is one on disk; null before one is shown and at This PC, which is no path a window can start on (AF-3.10).</summary>
+    private string? RealFolder => _folder is { } folder && !FolderListing.IsThisPC(folder) ? folder : null;
+
+    // ---- the guards of a command (AF-7) ----
+
+    /// <summary>The folder a command needs, or why there is none said: "No folder" before any is shown, "Choose a drive first" at This PC (AF-3.10).</summary>
+    private bool TryFolder([NotNullWhen(true)] out string? folder)
+    {
+        folder = RealFolder;
+        if (folder is null)
+        {
+            Announce(_folder is null ? "No folder" : "Choose a drive first", true);
+        }
+
+        return folder is not null;
+    }
+
+    /// <summary>Whether a command that needs a real folder has none, which is said (<see cref="TryFolder"/>).</summary>
+    private bool NoFolderHere() => !TryFolder(out _);
+
+    /// <summary>The entry under the selection, or the line the selection is on said: an empty folder's, the filter's, the not-shown line, "Nothing selected", or "No folder".</summary>
+    private bool TryEntry([NotNullWhen(true)] out Entry? entry)
+    {
+        entry = CurrentEntry();
+        if (entry is null)
+        {
+            SayNoEntry();
+        }
+
+        return entry is not null;
+    }
+
+    /// <summary>The guard of every command on an entry (AF-7): "No folder", the line the selection is on when it is not an entry (the empty folder's, the filter's, the not-shown line), or "Nothing selected".</summary>
+    private void SayNoEntry()
+    {
+        var index = _list.SelectedIndex;
+        var line = index >= _shown.Count && index < _list.Items.Count ? _list.Items[index].ToString() : null;
+        Announce(_folder is null ? "No folder" : line ?? "Nothing selected", true);
+    }
+
+    /// <summary>The entry under the selection; null on the lines after the entries (an empty list's, the not-shown line), which are not entries.</summary>
+    private Entry? CurrentEntry() =>
+        _list.SelectedIndex is var i && i >= 0 && i < _shown.Count ? _shown[i] : null;
+
+    // ---- the folder (AF-2.2, AF-3.1) ----
 
     /// <summary>The start (AF-1.1): the path given, or the last folder, or the user's profile folder; a file selects itself in its folder.</summary>
     private async Task StartAsync(string? path)
@@ -74,7 +116,8 @@ public sealed partial class FileForm
     /// not found" notice and the nearest parent that exists (AF-3.5); any other failure is one announcement and the
     /// list stays. With <paramref name="remember"/> the folder joins the recent list (AF-3.3). Another folder than the
     /// one shown is announced with its count and the entry landed on, "docs, 5 items, plan.md" (AF-3.1), unless
-    /// <paramref name="announce"/> is off: the start, which NVDA reads itself, and an undo, which says what it undid.
+    /// <paramref name="announce"/> is off: the start, which NVDA reads itself, an undo, which says what it undid, and
+    /// the Actions list's Enter, which moves the focus first.
     /// </summary>
     private async Task<bool> ShowFolderAsync(string folder, string? select, bool remember, bool announce = true)
     {
@@ -115,18 +158,13 @@ public sealed partial class FileForm
             return false;
         }
 
-        // AF-3.7, AF-3.8: the selection and the filter live in one folder: another folder starts with none, the same
-        // one keeps the marks still there and the filter.
-        if (!string.Equals(folder, _folder, StringComparison.OrdinalIgnoreCase))
+        // AF-3.7, AF-3.8: the marks and the filter live in one folder: another folder starts with none; the same one
+        // keeps the filter, and the marks on the entries still shown (Rearrange).
+        if (changed)
         {
-            _selected.Clear();
+            _marks.Clear();
             DropSelectionLines();
-            _anchor = null;
             _filter = string.Empty;
-        }
-        else
-        {
-            _selected.IntersectWith(listing.Entries.Select(entry => entry.Path));
         }
 
         _folder = folder;
@@ -173,10 +211,9 @@ public sealed partial class FileForm
 
     /// <summary>
     /// Letters typed in the folder list (AF-3.6), as File Explorer takes them: typed within a second of each other
-    /// they build one prefix, "cha", and the first entry whose name starts with it is selected, searched from the
-    /// entry in hand and round the end; a new prefix starts after a second's pause and is searched from the next
-    /// entry on, and the same letter typed again cycles through the names starting with it. The edge earcon when no
-    /// name starts with it. The list's own one-letter jump gives way to this. NVDA reads the entry selected.
+    /// they build one prefix, "cha", which <see cref="FolderListing.TypeAhead"/> finds among the shown entries (a run
+    /// of one letter cycles through the names starting with it); a new prefix starts after a second's pause. The edge
+    /// earcon when no name starts with it. The list's own one-letter jump gives way to this. NVDA reads the entry selected.
     /// </summary>
     private void OnListKeyPress(object? sender, KeyPressEventArgs e)
     {
@@ -188,34 +225,18 @@ public sealed partial class FileForm
 
         e.Handled = true;
         var now = Environment.TickCount64;
-        var letter = e.KeyChar.ToString();
-        var current = Math.Max(0, Math.Min(_list.SelectedIndex, _shown.Count - 1));
-        int from;
-        if (now - _typedAt > TypeAheadMs || _typed.Length == 0 || _typed.All(c => char.ToUpperInvariant(c) == char.ToUpperInvariant(e.KeyChar)))
+        _typed = now - _typedAt > TypeAheadMs ? e.KeyChar.ToString() : _typed + e.KeyChar;
+        _typedAt = now;
+        var index = FolderListing.TypeAhead(_shown, _typed, _list.SelectedIndex);
+        if (index >= 0)
         {
-            // A new prefix, or the same letter again: the next entry starting with it.
-            _typed = letter;
-            from = current + 1;
+            _list.SelectedIndex = index;
         }
         else
         {
-            _typed += letter;
-            from = current;
+            // No name starts with it: the edge earcon, not a sentence (AF-3.6).
+            Sounds.Edge();
         }
-
-        _typedAt = now;
-        for (var step = 0; step < _shown.Count; step++)
-        {
-            var i = (from + step) % _shown.Count;
-            if (_shown[i].Name.StartsWith(_typed, StringComparison.OrdinalIgnoreCase))
-            {
-                _list.SelectedIndex = i;
-                return;
-            }
-        }
-
-        // No name starts with it: the edge earcon, not a sentence (AF-3.6).
-        Sounds.Edge();
     }
 
     /// <summary>
@@ -244,12 +265,13 @@ public sealed partial class FileForm
 
     /// <summary>
     /// An operation's end (AF-4.5): in the folder it ran in, when that is still the one shown, the list read again with
-    /// the result selected and <paramref name="said"/> announced; when the user has gone to another folder meanwhile
-    /// (the window never waits for an operation), the result is said and the list is left where the user is, since a
-    /// list that jumps back is a move the user did not make (AX-7.3; 2026-10-23). True when the result is in view, for
-    /// a caller that goes on with it (New text file's rename box).
+    /// the result selected and <paramref name="said"/> announced (unless <paramref name="sayInView"/> is off: a caller
+    /// that goes on with the result, New text file's rename box, says its own); when the user has gone to another
+    /// folder meanwhile (the window never waits for an operation), the result is said and the list is left where the
+    /// user is, since a list that jumps back is a move the user did not make (AX-7.3; 2026-10-23). True when the
+    /// result is in view.
     /// </summary>
-    private async Task<bool> ShowResultAsync(string folder, string? select, string said)
+    private async Task<bool> ShowResultAsync(string folder, string? select, string said, bool sayInView = true)
     {
         if (!string.Equals(folder, _folder, StringComparison.OrdinalIgnoreCase))
         {
@@ -262,7 +284,11 @@ public sealed partial class FileForm
             return false;
         }
 
-        Announce(said, true);
+        if (sayInView)
+        {
+            Announce(said, true);
+        }
+
         return true;
     }
 
@@ -272,14 +298,13 @@ public sealed partial class FileForm
     /// <summary>The one item of a folder whose entries all fail the filter (AF-3.8).</summary>
     private string NoMatchText => "No names contain " + _filter;
 
-    /// <summary>The shown entries made again from the folder's entries, the order and the filter (AF-3.8), and the list refilled.</summary>
+    /// <summary>The shown entries made again from the folder's entries, the order and the filter (AF-3.8), and the list refilled; the marks on entries no longer shown go with them (AF-3.7).</summary>
     private void Rearrange(string? select)
     {
-        // A Shift range is indices into the shown entries: a new order or filter, or a read, ends it (AF-3.7).
-        _anchor = null;
-        _rangeLine = null;
         // The drives of This PC stay in letter order (AF-3.10).
         _shown = FolderListing.IsThisPC(_folder) ? FolderListing.Filter(_entries, _filter) : FolderListing.Arrange(_entries, _settings.SortBy, _filter);
+        // A Shift range is rows of the shown entries: a new order or filter, or a read, ends it; the items are made anew below.
+        _marks.Keep(_shown);
         FillList(select);
     }
 
@@ -306,14 +331,6 @@ public sealed partial class FileForm
         _list.AccessibleName = FolderListing.ListName(_shown.Count, _entries.Count, _filter);
         var index = select is null ? -1 : IndexOfName(select);
         _list.SelectedIndex = Math.Max(0, index);
-    }
-
-    /// <summary>The guard of every command on an entry (AF-7): "No folder", the line the selection is on when it is not an entry (the empty folder's, the filter's, the not-shown line), or "Nothing selected".</summary>
-    private void SayNoEntry()
-    {
-        var index = _list.SelectedIndex;
-        var line = index >= _shown.Count && index < _list.Items.Count ? _list.Items[index].ToString() : null;
-        Announce(_folder is null ? "No folder" : line ?? "Nothing selected", true);
     }
 
     // ---- the order and the filter (AF-3.8) ----
@@ -373,7 +390,7 @@ public sealed partial class FileForm
     /// <summary>Escape in the list: the selection cleared, as Ctrl+Shift+A, while entries are selected (AF-3.7); otherwise the filter cleared; false, the key left alone, when there is neither.</summary>
     private bool ClearSelectionOrFilter()
     {
-        if (_selected.Count > 0)
+        if (_marks.Count > 0)
         {
             SelectNone();
             return true;
@@ -389,31 +406,65 @@ public sealed partial class FileForm
     }
 
     /// <summary>The list item of an entry (AF-2.2): its label, with ", selected" while it is (AF-3.7).</summary>
-    private string ItemText(Entry entry) => _selected.Contains(entry.Path) ? entry.Label + ", selected" : entry.Label;
+    private string ItemText(Entry entry) => _marks.Contains(entry.Path) ? entry.Label + ", selected" : entry.Label;
 
-    // ---- the selection (AF-3.7): marks on entries, which the operations act on instead of the current entry ----
+    // ---- the selection (AF-3.7): the marks, one pure piece (Marks), applied here to the items and the Actions list ----
     // Every change of the marks is a line of the Actions list's Selection section (AF-9.2), which Ctrl+Z on the line
     // takes back (AF-9.3); a Shift range is one line, rewritten while the range goes on.
 
-    /// <summary>The line of the Shift range going on, rewritten as it grows or shrinks; null once it has ended.</summary>
+    /// <summary>The line made last for a change of the marks, which is the Shift range's while one is being made (<see cref="RangeLine"/>).</summary>
     private ActionEntry? _rangeLine;
 
-    /// <summary>The marks as a list, taken before a change, for the change's line to put back.</summary>
-    private List<string> MarksNow() => [.. _selected];
+    /// <summary>The line of the Shift range being made, rewritten as it goes on; null once the range has ended (AF-9.2).</summary>
+    private ActionEntry? RangeLine => _marks.RangeOn ? _rangeLine : null;
 
-    /// <summary>A change of the marks as a line of the Actions list, in the folder shown, leading to <paramref name="select"/>.</summary>
-    private ActionEntry MarkLine(string text, string? select, IReadOnlyList<string> before)
+    /// <summary>
+    /// One change of the marks applied (AF-3.7): the items whose mark flipped rewritten, so that the list is not made
+    /// again under NVDA; its line recorded in the Actions list, a Shift range's rewritten while the range goes on; and
+    /// what the key says said.
+    /// </summary>
+    private void ApplyMarks(MarkChange change)
     {
-        var keep = Keep();
-        var entry = _actions.Mark(text, _folder ?? string.Empty, select, before);
-        FillPane(keep);
-        return entry;
+        if (change.Changed.Count > 1)
+        {
+            _list.BeginUpdate();
+        }
+
+        foreach (var row in change.Changed)
+        {
+            _list.Items[row] = ItemText(_shown[row]);
+        }
+
+        if (change.Changed.Count > 1)
+        {
+            _list.EndUpdate();
+        }
+
+        if (change.Line is { } text)
+        {
+            if (!change.RangeBegins && RangeLine is { } line)
+            {
+                _actions.Rewrite(line, text);
+                line.Select = change.Select;
+            }
+            else
+            {
+                _rangeLine = _actions.Mark(text, _folder ?? string.Empty, change.Select, change.Before);
+            }
+
+            FillPane();
+        }
+
+        if (change.Said.Length > 0)
+        {
+            Announce(change.Said, true);
+        }
     }
 
     /// <summary>A Selection menu operation (AF-3.7): on the marked entries alone, "None selected" when there are none, never the current entry.</summary>
     private void OnMarks(Action operation)
     {
-        if (SelectedEntries().Count == 0)
+        if (_marks.Count == 0)
         {
             Announce("None selected", true);
             return;
@@ -422,52 +473,30 @@ public sealed partial class FileForm
         operation();
     }
 
-    /// <summary>Another folder shown: the marks are gone, and their lines with them (AF-9.2).</summary>
+    /// <summary>Another folder shown: the marks are gone (<see cref="Marks.Clear"/>), and their lines with them (AF-9.2).</summary>
     private void DropSelectionLines()
     {
-        _rangeLine = null;
-        var keep = Keep();
         _actions.DropSelection();
-        FillPane(keep);
+        FillPane();
     }
 
     /// <summary>Ctrl+Z on a selection line (AF-9.3): the marks as they were before it, entries gone since skipped; "Undone: 3 selected".</summary>
     private void UndoMarks(ActionEntry entry)
     {
-        var present = new HashSet<string>(_entries.Select(item => item.Path), StringComparer.OrdinalIgnoreCase);
-        _selected.Clear();
-        _selected.UnionWith((entry.Before ?? []).Where(present.Contains));
-        _anchor = null;
-        _rangeLine = null;
         _actions.Undone(entry);
-        FillList(CurrentEntry()?.Name);
-        RefreshPane();
-        Announce(_selected.Count > 0 ? $"Undone: {_selected.Count} selected" : "Undone: none selected", true);
+        FillPane();
+        ApplyMarks(_marks.Restore(entry.Before ?? [], _shown));
     }
 
     /// <summary>Space in the list: the entry selected, or deselected again, its item reading ", selected" while it is; "Selected" or "Deselected", with the count when more are.</summary>
     private void ToggleSelection()
     {
-        if (CurrentEntry() is not { } entry)
+        if (!TryEntry(out _))
         {
-            SayNoEntry();
             return;
         }
 
-        var before = MarksNow();
-        var on = _selected.Add(entry.Path);
-        if (!on)
-        {
-            _selected.Remove(entry.Path);
-        }
-
-        _anchor = null;
-        _rangeLine = null;
-        _list.Items[_list.SelectedIndex] = ItemText(entry);
-        var word = on ? "Selected" : "Deselected";
-        MarkLine($"{word} {entry.Name}", entry.Name, before);
-        var count = _selected.Count;
-        Announce(count > (on ? 1 : 0) ? $"{word}, {count} selected" : word, true);
+        ApplyMarks(_marks.Toggle(_shown, _list.SelectedIndex));
     }
 
     /// <summary>Ctrl+A in the list, Selection → Select all: every entry shown, "n selected".</summary>
@@ -479,155 +508,44 @@ public sealed partial class FileForm
             return;
         }
 
-        var before = MarksNow();
-        foreach (var entry in _shown)
-        {
-            _selected.Add(entry.Path);
-        }
-
-        _anchor = null;
-        _rangeLine = null;
-        FillList(CurrentEntry()?.Name);
-        if (_selected.Count != before.Count)
-        {
-            MarkLine($"Selected all, {ActionLog.Items(_selected.Count)}", CurrentEntry()?.Name, before);
-        }
-
-        Announce($"{_selected.Count} selected", true);
+        ApplyMarks(_marks.All(_shown, _list.SelectedIndex));
     }
 
     /// <summary>Ctrl+Shift+A in the list, Selection → Deselect all: the marks cleared, "None selected".</summary>
-    private void SelectNone()
-    {
-        _anchor = null;
-        _rangeLine = null;
-        if (_selected.Count > 0)
-        {
-            var before = MarksNow();
-            _selected.Clear();
-            FillList(CurrentEntry()?.Name);
-            MarkLine($"Deselected all, {ActionLog.Items(before.Count)}", CurrentEntry()?.Name, before);
-        }
+    private void SelectNone() => ApplyMarks(_marks.None(_shown, _list.SelectedIndex));
 
-        Announce("None selected", true);
-    }
-
-    /// <summary>
-    /// Shift+Space in the list (AF-3.7): every entry from the nearest marked entry to the current one marked, the one
-    /// above when both are as near, "Selected, n selected"; with no other entry marked, the current one alone, as Space.
-    /// </summary>
+    /// <summary>Shift+Space in the list (AF-3.7): every entry from the nearest marked entry to the current one marked, "Selected, n selected"; with no other entry marked, Space.</summary>
     private void SelectToHere()
     {
-        var current = _list.SelectedIndex;
-        if (current < 0 || current >= _shown.Count)
+        if (!TryEntry(out _))
         {
-            SayNoEntry();
             return;
         }
 
-        var nearest = -1;
-        for (var distance = 1; nearest < 0 && (current - distance >= 0 || current + distance < _shown.Count); distance++)
-        {
-            if (current - distance >= 0 && _selected.Contains(_shown[current - distance].Path))
-            {
-                nearest = current - distance;
-            }
-            else if (current + distance < _shown.Count && _selected.Contains(_shown[current + distance].Path))
-            {
-                nearest = current + distance;
-            }
-        }
-
-        if (nearest < 0)
-        {
-            if (!_selected.Contains(_shown[current].Path))
-            {
-                ToggleSelection();
-            }
-            else
-            {
-                Announce($"{_selected.Count} selected", true);
-            }
-
-            return;
-        }
-
-        var before = MarksNow();
-        for (var i = Math.Min(nearest, current); i <= Math.Max(nearest, current); i++)
-        {
-            if (_selected.Add(_shown[i].Path))
-            {
-                _list.Items[i] = ItemText(_shown[i]);
-            }
-        }
-
-        _anchor = null;
-        _rangeLine = null;
-        MarkLine($"Selected {ActionLog.Items(Math.Abs(current - nearest) + 1)}", _shown[current].Name, before);
-        Announce($"Selected, {_selected.Count} selected", true);
+        ApplyMarks(_marks.ToHere(_shown, _list.SelectedIndex));
     }
 
     /// <summary>
     /// Shift with Up, Down, Home or End in the list (AF-3.7): the current entry moves to <paramref name="target"/>
-    /// and every entry between where the range began and there is marked, as in File Explorer; a range begins where
-    /// the first Shift key finds the current entry and keeps the marks made before it, and moving back shrinks it.
-    /// Each entry passed reads ", selected" on its own; nothing else is said. The range is one line of the Actions
-    /// list, "Selected 5 items", rewritten as it goes on.
+    /// and every entry between where the range began and there is marked, as in File Explorer (<see cref="Marks.Extend"/>).
+    /// Each entry passed reads ", selected" on its own; nothing else is said. On a line after the entries (an empty
+    /// folder's, the not-shown line) the keys say that line.
     /// </summary>
     private void ExtendSelection(int target)
     {
-        var current = _list.SelectedIndex;
-        if (current < 0 || current >= _shown.Count)
+        if (!TryEntry(out _))
         {
-            // No entry, or one of the lines after the entries (the empty folder's, the not-shown line).
-            SayNoEntry();
             return;
         }
 
-        var begins = _anchor is null || current != _anchorEnd || _rangeLine is null;
-        if (begins)
-        {
-            _anchor = current;
-            _anchorBase = new HashSet<string>(_selected, StringComparer.OrdinalIgnoreCase);
-        }
-
-        var anchor = _anchor!.Value;
         target = Math.Clamp(target, 0, _shown.Count - 1);
-        _anchorEnd = target;
-        var before = new HashSet<string>(_selected, StringComparer.OrdinalIgnoreCase);
-        _selected.Clear();
-        _selected.UnionWith(_anchorBase);
-        for (var i = Math.Min(anchor, target); i <= Math.Max(anchor, target); i++)
-        {
-            _selected.Add(_shown[i].Path);
-        }
-
-        // Only the items whose mark changed are rewritten, so that the list is not rebuilt under NVDA on every key.
-        for (var i = 0; i < _shown.Count; i++)
-        {
-            if (before.Contains(_shown[i].Path) != _selected.Contains(_shown[i].Path))
-            {
-                _list.Items[i] = ItemText(_shown[i]);
-            }
-        }
-
+        // The items first, the move after: the entry reached is read once, with its mark.
+        ApplyMarks(_marks.Extend(_shown, _list.SelectedIndex, target));
         _list.SelectedIndex = target;
-        var text = $"Selected {ActionLog.Items(Math.Abs(target - anchor) + 1)}";
-        if (begins || _rangeLine is not { } line)
-        {
-            _rangeLine = MarkLine(text, _shown[target].Name, [.. _anchorBase]);
-        }
-        else
-        {
-            var keep = Keep();
-            _actions.Rewrite(line, text);
-            line.Select = _shown[target].Name;
-            FillPane(keep);
-        }
     }
 
     /// <summary>The selected entries among those shown, in the list's order; none when nothing is selected.</summary>
-    private List<Entry> SelectedEntries() => _shown.Where(entry => _selected.Contains(entry.Path)).ToList();
+    private List<Entry> SelectedEntries() => _shown.Where(entry => _marks.Contains(entry.Path)).ToList();
 
     /// <summary>What an operation acts on (AF-3.7): the selected entries, or the current entry alone when none is selected; empty, and said, when there is no entry.</summary>
     private List<Entry> Targets()
@@ -658,27 +576,6 @@ public sealed partial class FileForm
         }
 
         return -1;
-    }
-
-    /// <summary>
-    /// Whether a command that needs a real folder has none: "No folder" before any is shown, "Choose a drive first"
-    /// at This PC (AF-3.10), each said; false when there is one.
-    /// </summary>
-    private bool NoFolderHere()
-    {
-        if (_folder is null)
-        {
-            Announce("No folder", true);
-            return true;
-        }
-
-        if (FolderListing.IsThisPC(_folder))
-        {
-            Announce("Choose a drive first", true);
-            return true;
-        }
-
-        return false;
     }
 
     // ---- the Drives menu (AF-3.11) ----
@@ -735,7 +632,7 @@ public sealed partial class FileForm
         }
 
         Announce($"Ejecting {drive.Name}", true);
-        if (_folder is { } folder && !FolderListing.IsThisPC(folder))
+        if (RealFolder is not null)
         {
             Do(() => ShowFolderAsync(FolderListing.ThisPC, null, remember: false));
         }
@@ -769,7 +666,7 @@ public sealed partial class FileForm
     /// <summary>Ctrl+D: the folder shown pinned, "Added to Favorites", or unpinned again, "Removed from Favorites".</summary>
     private void ToggleFavorite()
     {
-        if (NoFolderHere() || _folder is not { } folder)
+        if (!TryFolder(out var folder))
         {
             return;
         }
@@ -778,10 +675,6 @@ public sealed partial class FileForm
         SaveSettings();
         Announce(added ? "Added to Favorites" : "Removed from Favorites", true);
     }
-
-    /// <summary>The entry under the selection; null on the lines after the entries (an empty list's, the not-shown line), which are not entries.</summary>
-    private Entry? CurrentEntry() =>
-        _list.SelectedIndex is var i && i >= 0 && i < _shown.Count ? _shown[i] : null;
 
     /// <summary>The folder above a folder that is gone, the first one that exists; null when none is.</summary>
     private static string? NearestExisting(string folder)
@@ -837,13 +730,12 @@ public sealed partial class FileForm
     /// <summary>Enter in the list (G2): a folder opens here, a file in the program the user has made its default in Windows, as in File Explorer (AF-3.2, AF-D2).</summary>
     private void OpenSelected()
     {
-        if (CurrentEntry() is not { } entry)
+        if (!TryEntry(out var entry))
         {
-            SayNoEntry();
             return;
         }
 
-        if (FolderListing.WayOf(entry) == OpenWay.Folder)
+        if (entry.IsFolder)
         {
             Do(() => ShowFolderAsync(entry.Path, null, remember: false));
         }
@@ -856,9 +748,8 @@ public sealed partial class FileForm
     /// <summary>Shift+Enter in the list, Item → Preview (AF-3.2): a file read in AxPreview, which hands it to its open window itself; a folder in a new AxFile window, File Explorer's Shift+Enter.</summary>
     private void OpenInPreview()
     {
-        if (CurrentEntry() is not { } entry)
+        if (!TryEntry(out var entry))
         {
-            SayNoEntry();
             return;
         }
 
@@ -1009,7 +900,7 @@ public sealed partial class FileForm
 
     /// <summary>The field's first text: the folder shown with a backslash at its end, so that the first Down completes among its own entries; empty at This PC.</summary>
     private string PathToComplete() =>
-        _folder is null || FolderListing.IsThisPC(_folder) ? string.Empty : _folder.EndsWith('\\') ? _folder : _folder + "\\";
+        RealFolder is not { } folder ? string.Empty : folder.EndsWith('\\') ? folder : folder + "\\";
 
     /// <summary>Folder → Go to folder… (Ctrl+G): a typed path, environment variables allowed, a file's path selecting the file, with completion on Down and Up (AF-3.3).</summary>
     private void GoToFolder()
@@ -1073,13 +964,12 @@ public sealed partial class FileForm
     /// <summary>Item → Information (Ctrl+I): the entry's size, or that it is a folder, and its date, on demand (AF-D7); and how many entries are selected, when any are (AF-3.7).</summary>
     private void SayInformation()
     {
-        if (CurrentEntry() is not { } entry)
+        if (!TryEntry(out var entry))
         {
-            SayNoEntry();
             return;
         }
 
-        var count = _selected.Count;
+        var count = _marks.Count;
         Announce(FolderListing.Information(entry) + (count > 0 ? $", {count} selected" : string.Empty), true);
     }
 }

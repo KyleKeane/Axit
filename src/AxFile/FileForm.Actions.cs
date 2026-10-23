@@ -21,7 +21,7 @@ public sealed partial class FileForm
     private readonly ListBox _pane = new();
     private readonly ActionLog _actions = new();
 
-    /// <summary>The entry on each row of the list as last filled (null on a header line), so that a line moved to another row is told from one changed in place.</summary>
+    /// <summary>The entry on each row of the list as last filled (null on a header line), so that a line moved to another row is told from one changed in place, and the line the user is on is known once the log has changed.</summary>
     private IReadOnlyList<ActionEntry?> _paneRows = [];
 
     private void SetUpActions()
@@ -37,16 +37,18 @@ public sealed partial class FileForm
     private void FitPane() => _pane.Height = Math.Max(_pane.ItemHeight * 3 + 4, ClientSize.Height / 3);
 
     /// <summary>
-    /// The list's lines made again from the log (AF-9.2): the sections under their headers, "No actions yet" while the
-    /// log is empty. Each line is changed in place while the count is the same, so that nothing but the changed line
-    /// moves under NVDA (the running line the user is on is left until it ends, since rewriting the selected item
-    /// re-selects it, which NVDA may read again, four times a second for a zip's count); the whole list otherwise. The
-    /// newest line is selected while the focus is in the folder list, so that Tab lands on it; while the focus is here
-    /// the line the user is on stays selected (<paramref name="keep"/>, taken before the log changed, since lines move
-    /// between the sections and fall off at the limits). The status bar follows.
+    /// The list's lines made again from the log (AF-9.2), after the log changed: the sections under their headers,
+    /// "No actions yet" while the log is empty. Each line is changed in place while the count is the same, so that
+    /// nothing but the changed line moves under NVDA (the running line the user is on is left until it ends, since
+    /// rewriting the selected item re-selects it, which NVDA may read again, four times a second for a zip's count);
+    /// the whole list otherwise. The newest line is selected while the focus is in the folder list, so that Tab lands
+    /// on it; while the focus is here the line the user is on stays selected, found in the rows as last filled, since
+    /// lines move between the sections and fall off at the limits (until 2026-10-23 every caller took it before the
+    /// change and passed it in). The status bar follows.
     /// </summary>
-    private void FillPane(ActionEntry? keep)
+    private void FillPane()
     {
+        var keep = _pane.Focused && _pane.SelectedIndex >= 0 && _pane.SelectedIndex < _paneRows.Count ? _paneRows[_pane.SelectedIndex] : null;
         IReadOnlyList<(string Line, ActionEntry? Entry)> rows = _actions.Count == 0 ? [(NoActionsText, null)] : _actions.Rows();
         var kept = -1;
         for (var i = 0; i < rows.Count; i++)
@@ -96,9 +98,6 @@ public sealed partial class FileForm
         UpdateStatusBar();
     }
 
-    /// <summary>The line the user is on while the Actions list has the focus, taken before the log changes; null otherwise.</summary>
-    private ActionEntry? Keep() => _pane.Focused ? SelectedAction() : null;
-
     /// <summary>Tab, Shift+Tab, Ctrl+Tab, Ctrl+Shift+Tab and F6 (AX-8.2): between the folder list and the Actions list, the two controls of the window.</summary>
     private void SwitchPane()
     {
@@ -115,52 +114,44 @@ public sealed partial class FileForm
     /// <summary>Folder → Actions: the focus in the Actions list (AF-9.1).</summary>
     private void ShowActions() => _pane.Focus();
 
-    // ---- the lines (AF-9.2): what the operations call ----
+    // ---- the lines (AF-9.2): what the operations call; each changes the log and fills the list again ----
 
     /// <summary>A running operation's line, "Copying 3 items", in the folder shown.</summary>
     private ActionEntry Begin(string text)
     {
-        var keep = Keep();
         var entry = _actions.Begin(text, _folder ?? string.Empty);
-        FillPane(keep);
+        FillPane();
         return entry;
     }
 
     /// <summary>A running line's count, "Compressing, 40 of 120 files".</summary>
     private void Progress(ActionEntry entry, string text)
     {
-        var keep = Keep();
         _actions.Progress(entry, text);
-        FillPane(keep);
+        FillPane();
     }
 
     /// <summary>The operation done: its line says what it did and, with an operation, can be undone and leads to its result.</summary>
     private void End(ActionEntry entry, string text, Operation? operation)
     {
-        var keep = Keep();
         _actions.End(entry, text, operation);
-        FillPane(keep);
+        FillPane();
     }
 
     /// <summary>The operation failed: "Failed: <reason>" in the list, and the failure said as every failure is (AF-4.5).</summary>
     private void FailAction(ActionEntry entry, string title, string reason)
     {
-        var keep = Keep();
         _actions.Fail(entry, reason);
-        FillPane(keep);
+        FillPane();
         Failed(title, reason);
     }
 
     /// <summary>An operation that ran at once (a rename, a new folder): its line, done.</summary>
     private void Record(string text, Operation operation)
     {
-        var keep = Keep();
         _actions.Add(text, operation);
-        FillPane(keep);
+        FillPane();
     }
-
-    /// <summary>A line's state changed by an undo (undone, or refused): the list made again with the user's line kept.</summary>
-    private void RefreshPane() => FillPane(Keep());
 
     // ---- the list's own keys (AF-9.3): Enter, Ctrl+Z and Ctrl+I on the line, Escape back to the folder list ----
 
@@ -170,7 +161,12 @@ public sealed partial class FileForm
     /// <summary>A header line or "No actions yet", said again by Enter, Ctrl+Z and Ctrl+I (AF-9.3).</summary>
     private void SayPaneLine() => Announce(_pane.SelectedItem?.ToString() ?? NoActionsText, true);
 
-    /// <summary>Enter in the Actions list: the folder list shows where the action left things, the entry it made or moved selected, and takes the focus; a running line says it is still running; the empty line is read again.</summary>
+    /// <summary>
+    /// Enter in the Actions list: the folder list shows where the action left things, the entry it made or moved
+    /// selected, and takes the focus, which moves before the folder is said, so that NVDA's reading of the list does
+    /// not cut the announcement off (AF-3.1; the other way round until 2026-10-23); a running line says it is still
+    /// running; the empty line is read again.
+    /// </summary>
     private void GoToAction()
     {
         if (SelectedAction() is not { } entry)
@@ -192,12 +188,19 @@ public sealed partial class FileForm
             return;
         }
 
+        var changes = !string.Equals(folder, _folder, StringComparison.OrdinalIgnoreCase);
         // A folder that is gone is ShowFolderAsync's "Folder not found" notice and the nearest parent (AF-3.5).
         Do(async () =>
         {
-            if (await ShowFolderAsync(folder, select, remember: false))
+            if (!await ShowFolderAsync(folder, select, remember: false, announce: false))
             {
-                _list.Focus();
+                return;
+            }
+
+            _list.Focus();
+            if (changes)
+            {
+                Announce(FolderAnnouncement(), true);
             }
         });
     }
@@ -238,7 +241,7 @@ public sealed partial class FileForm
     /// <summary>Item → Play folder in AxMedia (Ctrl+Enter): AxMedia on the folder shown, its media files from the first; "No sound or video files here" without any.</summary>
     private void PlayFolder()
     {
-        if (NoFolderHere() || _folder is not { } folder)
+        if (!TryFolder(out var folder))
         {
             return;
         }

@@ -39,7 +39,7 @@ public static class HelpText
         ## Selecting
           Space: select the entry, or deselect it; it reads "selected" after its name while it is
           Shift+Down, Shift+Up, Shift+Home, Shift+End: select from where you started to there, as in File Explorer, keeping what was selected before
-          Shift+Space: select from the nearest selected entry to the one you are on, above or below; with none selected, this entry
+          Shift+Space: select from the nearest selected entry to the one you are on, above or below; with no other selected, as Space
           Ctrl+A: select all. Ctrl+Shift+A, or Escape: deselect all. Ctrl+I says how many are selected
           Cut, Copy, Delete, Copy path, Move to new folder, Compress to zip and Add to AxMedia's queue act on the selected entries, or on the entry you are on when none is selected
           Alt+S: the Selection menu, the selected entries from anywhere: select all, deselect all, select to here, then Cut, Copy, Delete, Move to new folder, Compress to zip, Add to AxMedia's queue and Copy paths on them alone; "None selected" when there are none

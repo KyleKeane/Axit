@@ -151,8 +151,10 @@ folder of the file or project in hand, and sends back. It works entirely offline
 - AF-3.6 The list's own keys stay native: arrows, Home, End, Page Up and Page Down. **Typing a name** jumps to it as
   in File Explorer (asked 2026-10-22): letters typed within a second of each other build one prefix, "cha", and the
   first entry whose name starts with it is selected, searched from the entry in hand and round the end, NVDA reading
-  it; a new prefix begins after a second's pause and is searched from the next entry on; the same letter typed again
-  cycles through the names starting with it; the edge earcon when no name starts with it. The list box's own
+  it; a new prefix begins after a second's pause and is searched from the next entry on; a run of the same letter ("a",
+  "aa") cycles through the names starting with it, from the next entry on, as File Explorer does, while any other
+  prefix is searched whole, so that a name with a doubled letter inside it ("aab") is found (`FolderListing.TypeAhead`,
+  tested; until 2026-10-23 the doubled letter made the one-letter cycle); the edge earcon when no name starts with it. The list box's own
   one-letter jump gives way to this (`OnListKeyPress`); Space is the selection's key (AF-3.7), so a name is typed up
   to its first space. At the ends, where a key moves nothing, the window sounds the **edge earcon** rather than
   nothing (asked 2026-10-22, an earcon rather than words, since "First item" and the entry again were noise): one
@@ -173,7 +175,7 @@ folder of the file or project in hand, and sends back. It works entirely offline
   the keys say nothing more (only the items whose mark changed are rewritten); on a line after the entries (an
   empty folder's, the not-shown line) the keys say that line. **Shift+Space** (asked 2026-10-22) marks every entry
   from the nearest marked entry to the current one, above or below, the one above when both are as near, "Selected, n
-  selected"; with nothing marked it marks the current entry, as Space does. **Ctrl+A** marks every entry, "n selected";
+  selected"; with no other entry marked it is Space: the current entry marked, or unmarked again (decided 2026-10-23; it said "1 selected" on the one marked entry and changed nothing). **Ctrl+A** marks every entry, "n selected";
   **Ctrl+Shift+A** unmarks them all, "None selected", and so does **Escape** in the list while any are marked (asked 2026-10-22; a filter in force is cleared by the next Escape). Ctrl+I adds ", n selected" to the entry's information while
   any are marked (AF-2.4). Cut, Copy, Delete, Copy path, Move to new folder, Compress to zip and Add to AxMedia's queue
   act on the marked entries when there are any, and on the current entry alone otherwise (AF-4.3, AF-4.4, AF-4.8,
@@ -186,7 +188,11 @@ folder of the file or project in hand, and sends back. It works entirely offline
   target is the menu's name and no mode is needed). Every change of the marks is a line of the Actions list's
   Selection section, which Ctrl+Z on the line takes back (AF-9.2, AF-9.3). The marks live in one
   folder: showing another folder drops them, a refresh of the same folder keeps those still there, and a renamed or
-  deleted entry loses its mark. A mouse click chooses the current entry as before and marks nothing. The marks are
+  deleted entry loses its mark. The marks are on the entries the list shows: a filter, a new order or a read drops
+  the marks on the entries it leaves out, with no line, so that the count said and the entries acted on are one set
+  (until 2026-10-23 a mark hidden by the filter was counted and not acted on). The marks are one pure piece, `Marks`
+  in AxFile.Core (each key one method over the shown entries, returning the rows whose mark flipped, the line and
+  the words; tested), which the window applies to its items and the Actions list (`FileForm.ApplyMarks`). A mouse click chooses the current entry as before and marks nothing. The marks are
   text in the items rather than the list box's own multiple selection (AF-D9).
 - AF-3.8 **Sort and filter** (asked 2026-10-21). **Folder → Sort by ▸** Name, Date, Size, one checked: folders first
   in every order, then by name (the natural order), by date newest first, or by size largest first, ties by name
@@ -197,7 +203,7 @@ folder of the file or project in hand, and sends back. It works entirely offline
   and says the name and the entry at once, "3 of 24 items, filter chap, Chapter 1.mp3"; an empty field clears it,
   "Filter cleared", as does **Escape** in the list while a filter is on and no entry is marked (Escape clears the marks first, AF-3.7, and does nothing when there is neither). A filter that nothing passes shows the one item "No names contain <text>", and a command on
   it says the same. The filter lives in the folder: another folder drops it, a refresh keeps it. What the list shows
-  is what the commands see: Select all marks the shown entries, find moves among the shown entries. Find (AF-3.6)
+  is what the commands see: Select all marks the shown entries, find moves among the shown entries, and a mark on an entry the filter hides is gone (AF-3.7). Find (AF-3.6)
   jumps, the filter narrows; both are kept. Play folder (AF-5.1) hands the folder itself to AxMedia, filter or not.
 - AF-3.9 **Favorites** (asked 2026-10-21). **Ctrl+D** (Folder → Favorites ▸ → Add or remove this folder) pins the
   folder shown, "Added to Favorites", or unpins it when it is one, "Removed from Favorites"; the browsers' bookmark
@@ -209,8 +215,10 @@ folder of the file or project in hand, and sends back. It works entirely offline
   the drive just left selected; its entries are the ready drives in letter order, "Local Disk (C:), drive" (the
   volume's label, or the kind's name, Local Disk, Removable Disk, CD Drive, Network Drive, when it has none;
   `FolderListing.Drives`, tested), each a folder entry marked as a drive; Enter opens the drive's root; Ctrl+I says
-  "Local Disk (C:), 120 GB free of 476 GB"; the title and the list are named "This PC"; Backspace there, "Top". It
-  is not a folder: the last folder, the recent list and the Recently closed list keep the folder before it, the sort
+  "Local Disk (C:), 120 GB free of 476 GB"; the title is "This PC" and the list is named by its count, as everywhere (AF-2.1); Backspace there, "Top". It
+  is not a folder: the last folder, the recent list and the Recently closed list keep the folder before it (and Ctrl+N and the restart after an
+  update start the new window on the last folder, since This PC is no path; until 2026-10-23 the new window said
+  it does not exist), the sort
   order leaves the letter order alone, and the commands that need a folder say "Choose a drive first" (New folder,
   Paste, Rename, Delete, Cut, Copy, Ctrl+D, Play folder, Add to queue, Show current folder in ▸ the other apps); Show
   current folder in ▸ File Explorer opens File Explorer's own This PC. The other items of the entry's menu work on a
@@ -274,10 +282,17 @@ Every operation here is one line of the Actions list (AF-9) as well as its annou
   file inside is open in another program, or Windows protects the place". **Every operation runs on a thread of its
   own** (a task for the reads, the rename and the new folder; a single-threaded-apartment thread per shell operation
   for copy, move, delete and the Recycle Bin's Restore) and the window never waits for one: a second paste, delete or
-  zip starts while the first runs, each with its own line in the Actions list (AF-9.2). Two operations at once are
+  zip starts while the first runs, each with its own line in the Actions list (AF-9.2). One runner, `FileForm.RunOperation`, runs each of them:
+  its line from Begin to End, the paths it writes or moves away held in flight while it runs, "<doing>, please
+  wait" when it passes a second (Pasting, Deleting, Moving, Compressing, Extracting), its failure on the line and
+  said, and its result shown and said; an operation that ends at once (a rename, a new folder or file) goes through
+  `RunAtOnceAsync` the same way (2026-10-23; five hand-written runners before, Delete and Move to new folder without
+  the wait notice). Two operations at once are
   kept apart: a paste chooses its names around the paths a running paste is still writing ("notes - 2.md" for the
   same clipboard pasted twice, `FileOperations.Destinations` with the reserved paths), a cut whose files a paste is
-  still moving says "Already pasting" rather than moving them twice, and a compress takes its zip's name at once so
+  still moving says "Already pasting" rather than moving them twice, and when only some of its files are still
+  on their way the others are pasted and the ones left out are counted, "Pasted 2 items, 1 already pasting" (until
+  2026-10-23 they were left out without a word), and a compress takes its zip's name at once so
   that a second compress picks the next (AF-4.12). An operation that ends in the folder shown reads the list again
   with its result selected; one that ends while another folder is shown says its result and leaves the list where
   the user is (2026-10-23: it pulled the list back to its own folder, a move the user did not make, AX-7.3).
@@ -442,7 +457,7 @@ One UI Automation notification each, on the list that has the focus, or on the n
 <order>", "Filter cleared" (AF-3.8), "Added to Favorites", "Removed from Favorites" (AF-3.9), "Top" (This PC,
 AF-3.10), "Ejecting <name>" (AF-3.11), "Added <name>", "Removed <name>", "Started <name>" (AF-4.11), "Compressed to
 <name>", "Extracted to <name>", "Compressing, please wait", "Extracting, please wait" (AF-4.12), "Pasted <name>",
-"Pasted n items", "Pasting, please wait" (a paste longer than a second), "Added n to AxMedia's queue", "No sound or
+"Pasted n items", "Pasted n items, m already pasting" (AF-4.5), "Pasting, please wait" (a paste longer than a second), "Deleting, please wait", "Moving, please wait" (the same, AF-4.5), "Added n to AxMedia's queue", "No sound or
 video files here", "No sound or video files to add" (AF-5), "Undone: …", "Not undone: …", "Nothing to undo", "Undo is
 still running" (AF-4.14), "Undone: n selected", "Undone: none selected" (a selection line, AF-9.3), "No actions yet",
 "Still running", "Already undone", "Nothing to undo here", "<section>, n of m, hh:mm", "Running", "Operations", "Selection" (a header line),
@@ -506,7 +521,8 @@ and a typed name no entry starts with (AF-3.6).
   disk and have no line. The status bar shows the newest operation's line, never a selection's (AF-2.3).
 - AF-9.3 **On a line.** **Enter** goes where the action left things: the folder list shows the folder and selects the
   entry the action made, renamed or moved (the new folder for a move into one, the first entry for a paste; the folder
-  alone for a delete), and takes the focus; once the line is undone, where the undo put things back; "Still running"
+  alone for a delete), and takes the focus, before the folder is said (AF-3.1), so that NVDA's reading of the list
+  does not cut the announcement short (2026-10-23); once the line is undone, where the undo put things back; "Still running"
   on a running line, "Folder not found" when the place is gone. **Ctrl+Z** takes that line back, whatever its place,
   with AF-4.14's checks and texts; a line that cannot be says why: "Still running", "Already undone", "Not undone:
   <reason>" again, or "Nothing to undo here" (a failed line, or one older than the twenty undoable). Ctrl+Z in the
@@ -525,12 +541,13 @@ and a typed name no entry starts with (AF-3.6).
 
 ```
 src/AxFile.Core/    class library (net10.0): FolderListing (a folder's entries as records, folders first in natural
-                    order, hidden left out; what Enter does with an entry, the editor for a file; the list's name, the
+                    order, hidden left out; where a typed name jumps, the editor for a file; the list's name, the
                     information line, the parent, a typed path, the drives of This PC), FileOperations (the name
                     check, new folder, rename, delete to the Recycle Bin, copy and move into a folder, the last three
                     through SHFileOperationW, the undo checks and inverses, the messages), Operation and
                     OperationKind (one operation with what its undo needs and where it left things), ActionLog and
-                    ActionEntry (the Actions list's lines and states, the limits), RecycleBin (the $I records),
+                    ActionEntry (the Actions list's lines and states, the limits), Marks and MarkChange (the marks on the
+                    shown entries and the Shift range, each key one change; AF-3.7), RecycleBin (the $I records),
                     UserPrograms and UserProgram (the user's own programs; AF-4.11), Archives (a zip from entries, a
                     zip into a new folder, free names; AF-4.12), FileSettings; references Axit.Core (MediaFiles for
                     the hand-over counts, NaturalOrder, Dispatch for the editor's verb)
@@ -540,7 +557,7 @@ src/AxFile/         class library (net10.0-windows): AxFileApp (Run, Usage), Fil
                     the Information key while open; AF-4.6, AF-4.10), Shell (Windows' own ways with an entry: the
                     Open with dialog, the Properties sheet, the shell's context menu through IShellFolder and
                     IContextMenu, Eject, the Recycle Bin's Restore; AF-4.7); references AxFile.Core, Axit.Core, Axit.Forms
-tests/AxFile.Tests/ FolderListingTests, FileOperationsTests, UndoTests, ArchivesTests, PathCompletionTests, ActionLogTests,
+tests/AxFile.Tests/ FolderListingTests, MarksTests, FileOperationsTests, UndoTests, ArchivesTests, PathCompletionTests, ActionLogTests,
                     UserProgramsTests and FileSettingsTests over temporary folders (the
                     Recycle Bin is not exercised), ActionLogTests, UserProgramsTests, FileSettingsTests
 docs/axfile/        this spec, user-guide.md (embedded), nvda-test-plan.md

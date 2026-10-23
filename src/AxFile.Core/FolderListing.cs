@@ -12,16 +12,6 @@ public sealed record Entry(string Name, string Path, bool IsFolder, long Size, D
 /// <summary>A folder as read (AF-2.2): the entries shown, and how many hidden ones and how many starting with a period were left out.</summary>
 public sealed record Listing(IReadOnlyList<Entry> Entries, int Hidden, int Dot);
 
-/// <summary>What Enter does with an entry (AF-3.1, AF-3.2): a folder opens in the list, any file in the program the user has made its default in Windows, as in File Explorer.</summary>
-public enum OpenWay
-{
-    /// <summary>A folder: the list shows it.</summary>
-    Folder,
-
-    /// <summary>A file: the program Windows has for it (the Axit apps among the choices once installed, AF-D2).</summary>
-    Windows,
-}
-
 /// <summary>The order of the list (AF-3.8): folders first in each; then by name, by date (newest first) or by size (largest first).</summary>
 public enum SortBy
 {
@@ -156,7 +146,34 @@ public static class FolderListing
     /// <summary>"name", "date", "size": the order's word for the announcement and the menu.</summary>
     public static string SortName(SortBy by) => by.ToString().ToLowerInvariant();
 
-    public static OpenWay WayOf(Entry entry) => entry.IsFolder ? OpenWay.Folder : OpenWay.Windows;
+    /// <summary>
+    /// Where a typed name jumps (AF-3.6), as File Explorer takes it: the first shown entry whose name starts with
+    /// <paramref name="typed"/>, searched from the entry in hand and round the end. A run of one letter ("a", "aa")
+    /// cycles instead through the names starting with that letter, from the next entry on, while any other prefix is
+    /// searched whole, so that a name with a doubled letter inside it ("aab") is found (until 2026-10-23 the doubled
+    /// letter made the one-letter cycle); -1 when no name starts with it.
+    /// </summary>
+    public static int TypeAhead(IReadOnlyList<Entry> shown, string typed, int current)
+    {
+        if (shown.Count == 0 || typed.Length == 0)
+        {
+            return -1;
+        }
+
+        var cycling = typed.All(letter => char.ToUpperInvariant(letter) == char.ToUpperInvariant(typed[0]));
+        var prefix = cycling ? typed[..1] : typed;
+        var from = Math.Clamp(current, 0, shown.Count - 1) + (cycling ? 1 : 0);
+        for (var step = 0; step < shown.Count; step++)
+        {
+            var i = (from + step) % shown.Count;
+            if (shown[i].Name.StartsWith(prefix, StringComparison.OrdinalIgnoreCase))
+            {
+                return i;
+            }
+        }
+
+        return -1;
+    }
 
     /// <summary>The editor Ctrl+E opens a file in (AF-1.3): AxJSON's verb for .json, AxDown's for anything else.</summary>
     public static string EditorOf(string path) =>

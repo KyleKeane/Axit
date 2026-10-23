@@ -12,7 +12,9 @@ namespace AxFile;
 /// <summary>
 /// The operations (SPEC.md AF-4), each one announcement or one notice: the folder, the rename in place, the delete,
 /// the path, the clipboard, the last three on the selected entries when there are any (AF-3.7); and the ways out of
-/// the window (AF-1.3, AF-3.2, AF-4.7, AF-4.9).
+/// the window (AF-1.3, AF-3.2, AF-4.7, AF-4.9). Every operation that changes the disk runs through one of two
+/// runners: <see cref="RunOperation"/> for one on a task with a running line in the Actions list, <see cref="RunAtOnceAsync"/>
+/// for one that ends at once.
 /// </summary>
 public sealed partial class FileForm
 {
@@ -22,6 +24,12 @@ public sealed partial class FileForm
     private const string DropEffectFormat = "Preferred DropEffect";
     private const int DropEffectCopy = 1;
     private const int DropEffectMove = 2;
+
+    /// <summary>How long an operation runs before "<doing>, please wait" is said (AF-4.5).</summary>
+    private const int WaitNoticeMs = 1000;
+
+    /// <summary>How often at most a zip's count is written into its line (AF-9.2).</summary>
+    private const int ProgressMs = 250;
 
     /// <summary>The entry being renamed in place (AF-4.2) while the box over it shows; null otherwise.</summary>
     private Entry? _renaming;
@@ -35,6 +43,89 @@ public sealed partial class FileForm
     /// first's, and a cut whose files are already on their way is not pasted twice.
     /// </summary>
     private readonly HashSet<string> _inFlight = new(StringComparer.OrdinalIgnoreCase);
+
+    // ---- the runners (AF-4.5): what every operation shares ----
+
+    /// <summary>
+    /// What an operation ended with: its line in the Actions list ("Moved 3 items"), the operation for its undo and
+    /// for Enter on the line, the entry to select in the folder it ran in, and what is said when that differs from the
+    /// line ("Pasted 3 items"); or why it failed, when the shell refused it (<see cref="Failure"/>).
+    /// </summary>
+    private sealed record Outcome(string Line, Operation? Operation, string? Select, string? Said = null, string? Failed = null)
+    {
+        public static Outcome Failure(string reason) => new(string.Empty, null, null, Failed: reason);
+    }
+
+    /// <summary>
+    /// Runs one operation on a task (AF-4.5): its line in the Actions list from <paramref name="doing"/> until it ends
+    /// (AF-9.2), <paramref name="busy"/>, the paths it writes or moves away, held in <see cref="_inFlight"/> meanwhile,
+    /// "<waiting>, please wait" when it passes a second, its failure on the line and said (<see cref="FailAction"/>),
+    /// and its result: the line done, then the folder it ran in read again with the result selected and the outcome
+    /// said while that is still the folder shown, the outcome said alone otherwise (<see cref="ShowResultAsync"/>).
+    /// The window waits for none of them. (Until 2026-10-23 five hand-written runners repeated this.)
+    /// </summary>
+    private void RunOperation(string folder, string doing, string waiting, string failTitle, IReadOnlyCollection<string> busy, Func<ActionEntry, Task<Outcome>> work) => Do(async () =>
+    {
+        var action = Begin(doing);
+        _inFlight.UnionWith(busy);
+        Outcome outcome;
+        try
+        {
+            var task = work(action);
+            if (await Task.WhenAny(task, Task.Delay(WaitNoticeMs)) != task)
+            {
+                Announce($"{waiting}, please wait", true);
+            }
+
+            outcome = await task;
+        }
+        catch (Exception ex) when (ex is IOException or UnauthorizedAccessException or InvalidDataException or NotSupportedException)
+        {
+            outcome = Outcome.Failure(FileOperations.Message(ex));
+        }
+        finally
+        {
+            _inFlight.ExceptWith(busy);
+        }
+
+        if (outcome.Failed is { } reason)
+        {
+            FailAction(action, failTitle, reason);
+            return;
+        }
+
+        End(action, outcome.Line, outcome.Operation);
+        await ShowResultAsync(folder, outcome.Select, outcome.Said ?? outcome.Line);
+    });
+
+    /// <summary>
+    /// An operation that ends at once (a rename, a new folder or file; AF-4.5), <paramref name="work"/> on a task: its
+    /// line recorded done, then the folder read again with the result selected and the outcome said (<see cref="ShowResultAsync"/>;
+    /// without <paramref name="sayInView"/> the caller says its own once the result is in view); "Failed: …" when it
+    /// throws. True when the result is in view.
+    /// </summary>
+    private async Task<bool> RunAtOnceAsync(string folder, string failTitle, Func<Outcome> work, bool sayInView = true)
+    {
+        Outcome outcome;
+        try
+        {
+            outcome = await Task.Run(work);
+        }
+        catch (Exception ex) when (ex is IOException or UnauthorizedAccessException)
+        {
+            Failed(failTitle, FileOperations.Message(ex));
+            return false;
+        }
+
+        if (outcome.Operation is { } operation)
+        {
+            Record(outcome.Line, operation);
+        }
+
+        return await ShowResultAsync(folder, outcome.Select, outcome.Said ?? outcome.Line, sayInView);
+    }
+
+    // ---- undo (AF-4.14) ----
 
     /// <summary>Folder → Undo <operation> (Ctrl+Z, AF-4.14): the newest line of the Actions list that can be taken back; "Nothing to undo" when none can.</summary>
     private void Undo()
@@ -85,7 +176,7 @@ public sealed partial class FileForm
                 {
                     // "Not undone: …": the line keeps the reason without the prefix.
                     _actions.NotUndone(entry, problem.StartsWith("Not undone: ", StringComparison.Ordinal) ? problem["Not undone: ".Length..] : problem);
-                    RefreshPane();
+                    FillPane();
                     Announce(problem, true);
                     return;
                 }
@@ -99,7 +190,7 @@ public sealed partial class FileForm
                 {
                     // Emptied meanwhile: a retry can never succeed, so the line says so and Ctrl+Z moves on (AF-4.14).
                     _actions.NotUndone(entry, reason);
-                    RefreshPane();
+                    FillPane();
                     Announce("Not undone: " + reason, true);
                     return;
                 }
@@ -111,7 +202,7 @@ public sealed partial class FileForm
                 }
 
                 _actions.Undone(entry);
-                RefreshPane();
+                FillPane();
                 // The undo's own words are what is heard, the folder's name among them when it is another (AF-4.14).
                 if (await ShowFolderAsync(operation.Folder, operation.Select ?? CurrentEntry()?.Name, remember: false, announce: false))
                 {
@@ -125,10 +216,12 @@ public sealed partial class FileForm
         });
     }
 
+    // ---- new entries (AF-4.1, AF-4.13) ----
+
     /// <summary>Item → New folder… (Ctrl+Shift+N, AF-4.1): the name in a notice, the folder made and selected, "Created <name>".</summary>
     private void NewFolder()
     {
-        if (NoFolderHere() || _folder is not { } folder)
+        if (!TryFolder(out var folder))
         {
             return;
         }
@@ -138,33 +231,14 @@ public sealed partial class FileForm
             new OverlayChoice("&Create", () =>
             {
                 var name = Overlay.InputText.Trim();
-                if (FileOperations.CheckName(name) is { } problem)
+                if (CheckNewName(name) is { } problem)
                 {
                     Announce(problem, true);
                     return;
                 }
 
-                if (Lookalike(name) is { } twin)
-                {
-                    Announce($"Reads the same as {twin}, which is already here", true);
-                    return;
-                }
-
-                Do(async () =>
-                {
-                    try
-                    {
-                        var made = await Task.Run(() => FileOperations.CreateFolder(folder, name));
-                        Record($"Created {name}", new Operation(OperationKind.NewFolder, [], [made]));
-                    }
-                    catch (Exception ex) when (ex is IOException or UnauthorizedAccessException)
-                    {
-                        Failed("New folder failed", FileOperations.Message(ex));
-                        return;
-                    }
-
-                    await ShowResultAsync(folder, name, $"Created {name}");
-                });
+                Do(() => RunAtOnceAsync(folder, "New folder failed", () =>
+                    new Outcome($"Created {name}", new Operation(OperationKind.NewFolder, [], [FileOperations.CreateFolder(folder, name)]), name)));
             }, IsDefault: true),
             new OverlayChoice("C&ancel", IsCancel: true),
         ])
@@ -173,8 +247,6 @@ public sealed partial class FileForm
         });
     }
 
-    // ---- the rename in place (AF-4.2): a box over the entry, Enter renames, Escape or leaving the box keeps the name ----
-
     /// <summary>
     /// Item → New text file (Ctrl+Shift+T, AF-4.1): an empty "New file.txt" made and selected, and the
     /// rename box opened on it with the whole name selected, so that the name typed, extension included, replaces
@@ -182,34 +254,21 @@ public sealed partial class FileForm
     /// </summary>
     private void NewFile()
     {
-        if (NoFolderHere() || _folder is not { } folder)
+        if (!TryFolder(out var folder))
         {
             return;
         }
 
         Do(async () =>
         {
-            string path;
-            try
+            var path = string.Empty;
+            var inView = await RunAtOnceAsync(folder, "New file failed", () =>
             {
-                path = await Task.Run(() => FileOperations.CreateFile(folder));
-            }
-            catch (Exception ex) when (ex is IOException or UnauthorizedAccessException)
-            {
-                Failed("New file failed", FileOperations.Message(ex));
-                return;
-            }
-
-            var name = Path.GetFileName(path);
-            Record($"Created {name}", new Operation(OperationKind.NewFile, [], [path]));
-            if (!string.Equals(folder, _folder, StringComparison.OrdinalIgnoreCase))
-            {
-                // Gone to another folder meanwhile (AF-4.5): said, the list left alone.
-                Announce($"Created {name}", true);
-                return;
-            }
-
-            if (!await ShowFolderAsync(folder, name, remember: false))
+                path = FileOperations.CreateFile(folder);
+                var name = Path.GetFileName(path);
+                return new Outcome($"Created {name}", new Operation(OperationKind.NewFile, [], [path]), name);
+            }, sayInView: false);
+            if (!inView)
             {
                 return;
             }
@@ -220,7 +279,7 @@ public sealed partial class FileForm
             }
             else
             {
-                Announce($"Created {name}", true);
+                Announce($"Created {Path.GetFileName(path)}", true);
             }
         });
     }
@@ -232,7 +291,7 @@ public sealed partial class FileForm
     /// </summary>
     private void MoveIntoNewFolder()
     {
-        if (NoFolderHere() || _folder is not { } folder)
+        if (!TryFolder(out var folder))
         {
             return;
         }
@@ -244,61 +303,25 @@ public sealed partial class FileForm
         }
 
         var what = targets.Count == 1 ? targets[0].Name : $"{targets.Count} items";
+        var sources = targets.Select(target => target.Path).ToList();
         ShowNotice(new Notice("Move to new folder", $"{what} will move into the new folder.",
         [
             new OverlayChoice("&Move", () =>
             {
                 var name = Overlay.InputText.Trim();
-                if (FileOperations.CheckName(name) is { } problem)
+                if (CheckNewName(name) is { } problem)
                 {
                     Announce(problem, true);
                     return;
                 }
 
-                if (Lookalike(name) is { } twin)
+                RunOperation(folder, $"Moving {what} into {name}", "Moving", "Move failed", sources, async _ =>
                 {
-                    Announce($"Reads the same as {twin}, which is already here", true);
-                    return;
-                }
-
-                Do(async () =>
-                {
-                    string made;
-                    try
-                    {
-                        made = await Task.Run(() => FileOperations.CreateFolder(folder, name));
-                    }
-                    catch (Exception ex) when (ex is IOException or UnauthorizedAccessException)
-                    {
-                        Failed("Move failed", FileOperations.Message(ex));
-                        return;
-                    }
-
-                    var sources = targets.Select(target => target.Path).ToList();
+                    var made = await Task.Run(() => FileOperations.CreateFolder(folder, name));
                     var destinations = await Task.Run(() => FileOperations.Destinations(sources, made));
-                    // AF-9.2: the operation's line in the Actions list, replaced when it ends.
-                    var action = Begin($"Moving {what} into {name}");
-                    _inFlight.UnionWith(sources);
-                    _inFlight.UnionWith(destinations);
-                    string? reason;
-                    try
-                    {
-                        reason = await FileOperations.CopyOrMoveAsync(sources, destinations, move: true);
-                    }
-                    finally
-                    {
-                        _inFlight.ExceptWith(sources);
-                        _inFlight.ExceptWith(destinations);
-                    }
-
-                    if (reason is not null)
-                    {
-                        FailAction(action, "Move failed", reason);
-                        return;
-                    }
-
-                    End(action, $"Moved {what} into {name}", new Operation(OperationKind.Move, sources, destinations, made));
-                    await ShowResultAsync(folder, name, $"Moved {what} into {name}");
+                    return await FileOperations.CopyOrMoveAsync(sources, destinations, move: true) is { } reason
+                        ? Outcome.Failure(reason)
+                        : new Outcome($"Moved {what} into {name}", new Operation(OperationKind.Move, sources, destinations, made), name);
                 });
             }, IsDefault: true),
             new OverlayChoice("&Cancel", IsCancel: true),
@@ -308,17 +331,24 @@ public sealed partial class FileForm
         });
     }
 
+    /// <summary>Why a name typed for a new entry cannot be used (AF-4.1, AF-4.2): the name check, or an entry here that reads the same; null when it can.</summary>
+    private string? CheckNewName(string name, Entry? self = null) =>
+        FileOperations.CheckName(name) ?? (Lookalike(name, self) is { } twin ? $"Reads the same as {twin}, which is already here" : null);
+
+    /// <summary>
+    /// The entry of the folder whose name reads the same as <paramref name="name"/> without being it (AF-4.2), the
+    /// entry being renamed left out; null when none. Every entry read is compared, the hidden ones too.
+    /// </summary>
+    private string? Lookalike(string name, Entry? self = null) =>
+        FileOperations.Lookalike(name, _entries.Where(entry => entry != self).Select(entry => entry.Name));
+
+    // ---- the rename in place (AF-4.2): a box over the entry, Enter renames, Escape or leaving the box keeps the name ----
+
     /// <summary>Item → Rename (F2): the box over the entry with its name, the part before the extension selected; the whole name for a folder, or when asked (a new file, AF-4.1).</summary>
     private void Rename(bool wholeName = false)
     {
-        if (_renaming is not null || NoFolderHere())
+        if (_renaming is not null || NoFolderHere() || !TryEntry(out var entry))
         {
-            return;
-        }
-
-        if (CurrentEntry() is not { } entry)
-        {
-            SayNoEntry();
             return;
         }
 
@@ -356,15 +386,9 @@ public sealed partial class FileForm
         }
 
         var name = _renameBox.Text.Trim();
-        if (FileOperations.CheckName(name) is { } problem)
+        if (CheckNewName(name, entry) is { } problem)
         {
             Announce(problem, true);
-            return;
-        }
-
-        if (Lookalike(name, entry) is { } twin)
-        {
-            Announce($"Reads the same as {twin}, which is already here", true);
             return;
         }
 
@@ -375,32 +399,9 @@ public sealed partial class FileForm
             return;
         }
 
-        Do(async () =>
-        {
-            try
-            {
-                var renamed = await Task.Run(() => FileOperations.Rename(entry.Path, name));
-                Record($"Renamed {entry.Name} to {name}", new Operation(OperationKind.Rename, [entry.Path], [renamed]));
-            }
-            catch (Exception ex) when (ex is IOException or UnauthorizedAccessException)
-            {
-                Failed("Rename failed", FileOperations.Message(ex));
-                return;
-            }
-
-            if (await ShowFolderAsync(folder, name, remember: false))
-            {
-                Announce($"Renamed to {name}", true);
-            }
-        });
+        Do(() => RunAtOnceAsync(folder, "Rename failed", () =>
+            new Outcome($"Renamed {entry.Name} to {name}", new Operation(OperationKind.Rename, [entry.Path], [FileOperations.Rename(entry.Path, name)]), name, $"Renamed to {name}")));
     }
-
-    /// <summary>
-    /// The entry of the folder whose name reads the same as <paramref name="name"/> without being it (AF-4.2), the
-    /// entry being renamed left out; null when none. Every entry read is compared, the hidden ones too.
-    /// </summary>
-    private string? Lookalike(string name, Entry? self = null) =>
-        FileOperations.Lookalike(name, _entries.Where(entry => entry != self).Select(entry => entry.Name));
 
     /// <summary>The box closed with the name kept; the list's reading of the entry is the feedback.</summary>
     private void CancelRename()
@@ -425,6 +426,8 @@ public sealed partial class FileForm
         _renameBox.Visible = false;
     }
 
+    // ---- delete (AF-4.3) and the path (AF-4.4) ----
+
     /// <summary>
     /// Item → Delete… (Delete, AF-4.3): a question, then the shell sends the selected entries, or the
     /// current one, to the Recycle Bin in one operation; "Deleted <name>" or "Deleted n items", the entry after them
@@ -432,7 +435,7 @@ public sealed partial class FileForm
     /// </summary>
     private void Delete()
     {
-        if (NoFolderHere() || _folder is not { } folder)
+        if (!TryFolder(out var folder))
         {
             return;
         }
@@ -445,26 +448,17 @@ public sealed partial class FileForm
 
         var next = NameAfter(targets);
         var one = targets.Count == 1 ? targets[0] : null;
-        var title = one is null ? $"Delete {targets.Count} items?" : $"Delete {one.Name}?";
+        var what = one?.Name ?? $"{targets.Count} items";
         var text = one is null
             ? targets.Any(target => target.IsFolder) ? "They go to the Recycle Bin, the folders with everything in them." : "They go to the Recycle Bin."
             : one.IsFolder ? "It goes to the Recycle Bin with everything in it." : "It goes to the Recycle Bin.";
-        var done = one is null ? $"Deleted {targets.Count} items" : $"Deleted {one.Name}";
-        ShowNotice(new Notice(title, text,
+        var paths = targets.Select(target => target.Path).ToList();
+        ShowNotice(new Notice($"Delete {what}?", text,
         [
-            new OverlayChoice("&Delete", () => Do(async () =>
-            {
-                // AF-9.2: the operation's line in the Actions list, replaced when it ends.
-                var action = Begin(one is null ? $"Deleting {targets.Count} items" : $"Deleting {one.Name}");
-                if (await FileOperations.DeleteToRecycleBinAsync(targets.Select(target => target.Path).ToList()) is { } reason)
-                {
-                    FailAction(action, "Delete failed", reason);
-                    return;
-                }
-
-                End(action, done, new Operation(OperationKind.Delete, targets.Select(target => target.Path).ToList(), []));
-                await ShowResultAsync(folder, next, done);
-            }), IsDefault: true),
+            new OverlayChoice("&Delete", () => RunOperation(folder, $"Deleting {what}", "Deleting", "Delete failed", paths, async _ =>
+                await FileOperations.DeleteToRecycleBinAsync(paths) is { } reason
+                    ? Outcome.Failure(reason)
+                    : new Outcome($"Deleted {what}", new Operation(OperationKind.Delete, paths, []), next)), IsDefault: true),
             new OverlayChoice("&Cancel", IsCancel: true),
         ]));
     }
@@ -548,11 +542,13 @@ public sealed partial class FileForm
 
     /// <summary>
     /// Item → Paste (Ctrl+V): the clipboard's files copied, or moved after a cut, into the folder shown
-    /// by the shell; "Pasted <name>" or "Pasted n items", with "Pasting, please wait" when it takes longer than a second.
+    /// by the shell; "Pasted <name>" or "Pasted n items", with "Pasting, please wait" when it takes longer than a
+    /// second. A cut file still on its way from an earlier paste is left to it: "Already pasting" when they all are,
+    /// "Pasted 2 items, 1 already pasting" when some are (AF-4.5; until 2026-10-23 those went unmentioned).
     /// </summary>
     private void Paste()
     {
-        if (NoFolderHere() || _folder is not { } folder)
+        if (!TryFolder(out var folder))
         {
             return;
         }
@@ -577,6 +573,7 @@ public sealed partial class FileForm
             return;
         }
 
+        var stillMoving = 0;
         if (move)
         {
             // A cut entry already in this folder has nowhere to go.
@@ -588,7 +585,8 @@ public sealed partial class FileForm
             }
 
             // A cut whose files a paste is still moving (AF-4.5): a second paste would race the first.
-            if (paths.RemoveAll(_inFlight.Contains) > 0 && paths.Count == 0)
+            stillMoving = paths.RemoveAll(_inFlight.Contains);
+            if (paths.Count == 0)
             {
                 Announce("Already pasting", true);
                 return;
@@ -601,59 +599,42 @@ public sealed partial class FileForm
             return;
         }
 
+        // The names are chosen first, on a task: a name already in the folder, or one a running paste is writing, becomes "name - 2" (AF-4.8, AF-4.5).
+        var reserved = _inFlight.ToList();
         Do(async () =>
         {
-            // The names are chosen first: a name already in the folder, or one a running paste is writing, becomes "name - 2" (AF-4.8, AF-4.5).
-            var reserved = _inFlight.ToList();
             var destinations = await Task.Run(() => FileOperations.Destinations(paths, folder, reserved));
-            var what = paths.Count == 1 ? Path.GetFileName(destinations[0]) : $"{paths.Count} items";
-            // AF-9.2: the operation's line in the Actions list; the shell gives no count, so the line waits until it ends.
-            var action = Begin((move ? "Moving " : "Copying ") + what);
-            _inFlight.UnionWith(destinations);
-            if (move)
-            {
-                _inFlight.UnionWith(paths);
-            }
-
-            string? reason;
-            try
-            {
-                var operation = FileOperations.CopyOrMoveAsync(paths, destinations, move);
-                if (await Task.WhenAny(operation, Task.Delay(1000)) != operation)
-                {
-                    Announce("Pasting, please wait", true);
-                }
-
-                reason = await operation;
-            }
-            finally
-            {
-                _inFlight.ExceptWith(destinations);
-                _inFlight.ExceptWith(paths);
-            }
-
-            if (reason is not null)
-            {
-                FailAction(action, "Paste failed", reason);
-                return;
-            }
-
-            End(action, (move ? "Moved " : "Copied ") + what, new Operation(move ? OperationKind.Move : OperationKind.Copy, paths, destinations));
-
-            if (move)
-            {
-                // The files are gone from where they were; a second paste would find nothing, as in File Explorer.
-                try
-                {
-                    Clipboard.Clear();
-                }
-                catch (ExternalException)
-                {
-                }
-            }
-
             var first = Path.GetFileName(destinations[0]);
-            await ShowResultAsync(folder, first, paths.Count == 1 ? $"Pasted {first}" : $"Pasted {paths.Count} items");
+            var what = paths.Count == 1 ? first : $"{paths.Count} items";
+            var said = $"Pasted {what}" + (stillMoving > 0 ? $", {stillMoving} already pasting" : string.Empty);
+            var busy = new List<string>(destinations);
+            if (move)
+            {
+                busy.AddRange(paths);
+            }
+
+            // The shell gives no count, so the line waits as it is until the operation ends (AF-9.2).
+            RunOperation(folder, (move ? "Moving " : "Copying ") + what, "Pasting", "Paste failed", busy, async _ =>
+            {
+                if (await FileOperations.CopyOrMoveAsync(paths, destinations, move) is { } reason)
+                {
+                    return Outcome.Failure(reason);
+                }
+
+                if (move)
+                {
+                    // The files are gone from where they were; a second paste would find nothing, as in File Explorer.
+                    try
+                    {
+                        Clipboard.Clear();
+                    }
+                    catch (ExternalException)
+                    {
+                    }
+                }
+
+                return new Outcome((move ? "Moved " : "Copied ") + what, new Operation(move ? OperationKind.Move : OperationKind.Copy, paths, destinations), first, said);
+            });
         });
     }
 
@@ -663,6 +644,68 @@ public sealed partial class FileForm
         stream.Position = 0;
         return stream.Read(bytes, 0, bytes.Length) == bytes.Length ? BitConverter.ToInt32(bytes, 0) : 0;
     }
+
+    // ---- zip files (AF-4.12): the entries into a new zip, a zip into a new folder, nothing written over ----
+
+    /// <summary>Item → Compress to zip: the selected entries, or the current one, into a new zip in the folder; "Compressed to <name>", the zip selected; "Compressing, please wait" after a second.</summary>
+    private void Compress()
+    {
+        if (!TryFolder(out var folder))
+        {
+            return;
+        }
+
+        var targets = Targets();
+        if (targets.Count == 0)
+        {
+            return;
+        }
+
+        var sources = targets.Select(target => target.Path).ToList();
+        RunArchiveWork(folder, "Compressing", "Compress failed", progress => Archives.Compress(sources, folder, progress), "Compressed to", OperationKind.Compress);
+    }
+
+    /// <summary>Item → Extract here: the zip's contents into a new folder named after it, next to it; "Extracted to <name>", the folder selected; "Not a zip file" on anything else.</summary>
+    private void Extract()
+    {
+        if (!TryFolder(out var folder) || !TryEntry(out var entry))
+        {
+            return;
+        }
+
+        if (entry.IsFolder || !Archives.IsZip(entry.Path))
+        {
+            Announce("Not a zip file", true);
+            return;
+        }
+
+        RunArchiveWork(folder, "Extracting", "Extract failed", progress => Archives.Extract(entry.Path, folder, progress), "Extracted to", OperationKind.Extract);
+    }
+
+    /// <summary>
+    /// Runs a zip operation (<see cref="RunOperation"/>) with its count in the Actions list's line, "Compressing, 40
+    /// of 120 files" (AF-9.2, at most a few times a second), then shows the folder with the result selected and says
+    /// "<done> <name>", the line saying the same.
+    /// </summary>
+    private void RunArchiveWork(string folder, string doing, string failTitle, Func<Action<int, int>, string> work, string done, OperationKind kind) =>
+        RunOperation(folder, doing, doing, failTitle, [], async action =>
+        {
+            var reported = Environment.TickCount64;
+            var result = await Task.Run(() => work((count, total) =>
+            {
+                var now = Environment.TickCount64;
+                if (count == total || now - reported >= ProgressMs)
+                {
+                    reported = now;
+                    if (!IsDisposed)
+                    {
+                        BeginInvoke(() => Progress(action, $"{doing}, {count} of {total} files"));
+                    }
+                }
+            }));
+            var name = Path.GetFileName(result);
+            return new Outcome($"{done} {name}", new Operation(kind, [], [result]), name);
+        });
 
     // ---- the ways out (AF-1.3, AF-3.2, AF-4.9) ----
 
@@ -695,27 +738,24 @@ public sealed partial class FileForm
     /// <summary>Item → Show in File Explorer (Ctrl+Shift+W): File Explorer on the folder with the entry selected, a folder entry too.</summary>
     private void ShowItemInExplorer()
     {
-        if (CurrentEntry() is not { } entry)
+        if (!TryEntry(out var entry))
         {
-            SayNoEntry();
             return;
         }
 
         OpenInExplorer(entry.Path, select: true);
     }
 
-    /// <summary>Folder → New window (Ctrl+N, AF-3.3): another AxFile window on the folder shown, as File Explorer's Ctrl+N; without a folder, one that starts as this one did.</summary>
-    private void NewWindow() => AxitMenu.Start(Dispatch.AxFile, _folder);
+    /// <summary>Folder → New window (Ctrl+N, AF-3.3): another AxFile window on the folder shown, as File Explorer's Ctrl+N; without a folder, and at This PC, one that starts as this one did (AF-3.10).</summary>
+    private void NewWindow() => AxitMenu.Start(Dispatch.AxFile, RealFolder);
 
     /// <summary>Folder → Show current folder in → AxClaude, AxGit, AxTerminal (AF-1.3): a new window of that app on the folder shown.</summary>
     private void OpenIn(string verb)
     {
-        if (NoFolderHere() || _folder is not { } folder)
+        if (TryFolder(out var folder))
         {
-            return;
+            AxitMenu.Start(verb, folder);
         }
-
-        AxitMenu.Start(verb, folder);
     }
 
     /// <summary>
@@ -725,9 +765,8 @@ public sealed partial class FileForm
     /// </summary>
     private void OpenInAxit(string verb)
     {
-        if (CurrentEntry() is not { } entry)
+        if (!TryEntry(out var entry))
         {
-            SayNoEntry();
             return;
         }
 
@@ -748,9 +787,8 @@ public sealed partial class FileForm
     /// <summary>Item → Open in editor (Ctrl+E): the file in AxJSON for .json and AxDown for anything else, whatever Enter would do with it.</summary>
     private void OpenInEditor()
     {
-        if (CurrentEntry() is not { } entry)
+        if (!TryEntry(out var entry))
         {
-            SayNoEntry();
             return;
         }
 
@@ -766,13 +804,10 @@ public sealed partial class FileForm
     /// <summary>Item → Open with → Windows default (AF-4.7): the program Windows has for the entry, a folder in File Explorer, or the dialog that picks one.</summary>
     private void OpenSelectedWithWindows()
     {
-        if (CurrentEntry() is not { } entry)
+        if (TryEntry(out var entry))
         {
-            SayNoEntry();
-            return;
+            OpenWithWindows(entry);
         }
-
-        OpenWithWindows(entry);
     }
 
     /// <summary>Enter on any other file (AF-3.2), and Open with Windows: the program Windows has for it; when there is none, the Windows dialog that picks one, as File Explorer does.</summary>
@@ -794,91 +829,6 @@ public sealed partial class FileForm
             Failed("Open failed", ex.Message);
         }
     }
-
-    // ---- zip files (AF-4.12): the entries into a new zip, a zip into a new folder, nothing written over ----
-
-    /// <summary>Item → Compress to zip: the selected entries, or the current one, into a new zip in the folder; "Compressed to <name>", the zip selected; "Compressing, please wait" after a second.</summary>
-    private void Compress()
-    {
-        if (NoFolderHere() || _folder is not { } folder)
-        {
-            return;
-        }
-
-        var targets = Targets();
-        if (targets.Count == 0)
-        {
-            return;
-        }
-
-        var sources = targets.Select(target => target.Path).ToList();
-        RunArchiveWork(folder, "Compressing", "Compress failed", progress => Archives.Compress(sources, folder, progress), "Compressed to", OperationKind.Compress);
-    }
-
-    /// <summary>Item → Extract here: the zip's contents into a new folder named after it, next to it; "Extracted to <name>", the folder selected; "Not a zip file" on anything else.</summary>
-    private void Extract()
-    {
-        if (NoFolderHere() || _folder is not { } folder)
-        {
-            return;
-        }
-
-        if (CurrentEntry() is not { } entry)
-        {
-            SayNoEntry();
-            return;
-        }
-
-        if (entry.IsFolder || !Archives.IsZip(entry.Path))
-        {
-            Announce("Not a zip file", true);
-            return;
-        }
-
-        RunArchiveWork(folder, "Extracting", "Extract failed", progress => Archives.Extract(entry.Path, folder, progress), "Extracted to", OperationKind.Extract);
-    }
-
-    /// <summary>
-    /// Runs a zip operation on a task with its count in the Actions list's line, "Compressing, 40 of 120 files"
-    /// (AF-9.2, at most a few times a second), says "<doing>, please wait" when it passes a second, then shows the
-    /// folder with the result selected and says "<done> <name>", the line saying the same.
-    /// </summary>
-    private void RunArchiveWork(string folder, string doing, string failTitle, Func<Action<int, int>, string> work, string done, OperationKind kind) => Do(async () =>
-    {
-        var action = Begin(doing);
-        var reported = Environment.TickCount64;
-        var task = Task.Run(() => work((count, total) =>
-        {
-            var now = Environment.TickCount64;
-            if (count == total || now - reported >= 250)
-            {
-                reported = now;
-                if (!IsDisposed)
-                {
-                    BeginInvoke(() => Progress(action, $"{doing}, {count} of {total} files"));
-                }
-            }
-        }));
-        if (await Task.WhenAny(task, Task.Delay(1000)) != task)
-        {
-            Announce($"{doing}, please wait", true);
-        }
-
-        string result;
-        try
-        {
-            result = await task;
-        }
-        catch (Exception ex) when (ex is IOException or UnauthorizedAccessException or InvalidDataException or NotSupportedException)
-        {
-            FailAction(action, failTitle, FileOperations.Message(ex));
-            return;
-        }
-
-        var name = Path.GetFileName(result);
-        End(action, $"{done} {name}", new Operation(kind, [], [result]));
-        await ShowResultAsync(folder, name, $"{done} {name}");
-    });
 
     // ---- the user's own programs (AF-4.11): a list in the settings, each run on the entries as its arguments ----
 
@@ -991,9 +941,8 @@ public sealed partial class FileForm
     /// <summary>Item → Open with → Choose a program…: the Windows dialog that picks a program for the file, and runs it.</summary>
     private void OpenWith()
     {
-        if (CurrentEntry() is not { } entry)
+        if (!TryEntry(out var entry))
         {
-            SayNoEntry();
             return;
         }
 
@@ -1012,9 +961,8 @@ public sealed partial class FileForm
     /// <summary>Item → Properties (Alt+Enter): the Windows Properties sheet of the entry, a file or a folder.</summary>
     private void ShowProperties()
     {
-        if (CurrentEntry() is not { } entry)
+        if (!TryEntry(out var entry))
         {
-            SayNoEntry();
             return;
         }
 
@@ -1027,9 +975,8 @@ public sealed partial class FileForm
     /// <summary>Item → Windows menu…: the shell's own menu for the entry, under it in the list, once the Item menu has closed.</summary>
     private void ShowWindowsMenu()
     {
-        if (CurrentEntry() is not { } entry)
+        if (!TryEntry(out var entry))
         {
-            SayNoEntry();
             return;
         }
 

@@ -260,7 +260,7 @@ The last paragraph of the file.
 function Build-AxFile([string]$d) {
     # Moving around: type-ahead names, three levels down, an empty folder.
     $nav = New-Folder (Join-Path $d 'navigate-arrows-type-ahead-and-levels')
-    foreach ($n in 'apple', 'apricot', 'avocado', 'banana', 'blueberry', 'cherry', 'coconut', 'date', 'elderberry', 'fig') {
+    foreach ($n in 'aardvark', 'apple', 'apricot', 'avocado', 'banana', 'blueberry', 'cherry', 'coconut', 'date', 'elderberry', 'fig') {
         Write-Text (Join-Path $nav "$n.txt") "The $n file, for typing the start of a name."
     }
     Write-Text (Join-Path $nav 'level-1-enter-me\level-2-enter-me\level-3-enter-me\you-reached-the-bottom.txt') 'Three levels down. Backspace three times goes back up.'

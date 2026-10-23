@@ -38,6 +38,13 @@
 - AxClaude: the review the app submits itself and its own list of drafts no longer flash the taskbar.
 - AxClaude: a message sent into a question on purpose, Enter again on the kept message, gets its Input and Output lines in the conversation like any message.
 - For developers: AxClaude's wait on Claude is one record and one stamp in the window (MainForm.Area.cs), with the timings of the flow as constants; what a screen's keys do in the control area is pure code (ScreenActions in AxClaude.Core), tested.
+- AxFile: a filter, a new order or a read of the folder drops the marks on the entries it leaves out, so that the count said and the entries acted on agree; a mark on an entry the filter hid was counted and not acted on.
+- AxFile: Shift+Space with no other entry selected is Space: it selects the entry you are on, or deselects it again; it said "1 selected" and changed nothing on the one selected entry.
+- AxFile: typing a name with a doubled letter inside it ("aab") finds it; the doubled letter started a cycle of one letter.
+- AxFile: a paste of cut files of which some are still on their way from an earlier paste pastes the others and says so, "Pasted 2 items, 1 already pasting"; the others went without a word.
+- AxFile: Ctrl+N and the restart after an update at This PC open the new window on the last folder; the new window said that This PC does not exist.
+- AxFile: Enter on a line of the Actions list moves the focus to the folder list before the folder is said, so that the announcement is not cut short. Delete and Move to new folder say "Deleting, please wait" and "Moving, please wait" after a second, as Paste and the zip operations do.
+- For developers: AxFile runs every operation through one runner (RunOperation, RunAtOnceAsync) and keeps its marks in one pure piece (Marks in AxFile.Core, tested); the type-ahead rule is FolderListing.TypeAhead, tested; the Actions list finds the line the user is on itself; OpenWay is gone.
 
 ## 3.4.0 - 2026-10-22
 
