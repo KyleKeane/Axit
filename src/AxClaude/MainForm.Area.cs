@@ -90,7 +90,10 @@ internal sealed partial class MainForm
     /// </summary>
     private void ShowInArea(string signature, string name, string text, bool unprompted, Action<bool, bool> show)
     {
-        var interrupt = unprompted && !NoticeOpen && _settings.InterruptForQuestions;
+        // The next question of a set, after the user's answer, interrupts too: the focus is in the area, or in the
+        // message field when the area closed between two questions, and what NVDA was still reading (the answer just
+        // sent) is cut off by the question now under the user's fingers (the user's rule of 2026-10-23).
+        var interrupt = !NoticeOpen && _settings.InterruptForQuestions && (unprompted || Area.ContainsFocus || Input.ContainsFocus);
         var focus = !NoticeOpen && (interrupt || Input.ContainsFocus || Area.ContainsFocus);
         if (unprompted && _settings.SoundOnBell && !(_settings.BackgroundAlert && !ContainsFocus))
         {

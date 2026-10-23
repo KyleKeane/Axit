@@ -215,7 +215,8 @@ allow it, see B-9).
 ### AX-5 Settings, logs and paths
 
 - AX-5.1 Each app has its own settings file, `%APPDATA%\Axit\<app>.json` (`axclaude.json`, `axdown.json`), and its own
-  log, `%LOCALAPPDATA%\Axit\logs\<app>.log`. The updater's log is `%LOCALAPPDATA%\Axit\logs\update.log`. The bundle
+  log, `%LOCALAPPDATA%\Axit\logs\<app>.log`, each line with the time, the level and the process id in brackets, so
+  that two windows of one app writing one log can be told apart (2026-10-23). The updater's log is `%LOCALAPPDATA%\Axit\logs\update.log`. The bundle
   has one file of its own, `%APPDATA%\Axit\recently-closed.json`, the Recently closed list of the Axit menu (AX-9.4).
 - AX-5.2 On its first start under Axit, AxClaude copies `%APPDATA%\AxClaude\settings.json` to `axclaude.json` when the
   new file does not exist; the old file is left alone.

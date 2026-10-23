@@ -216,23 +216,6 @@ public sealed partial class SessionModel : LineStore
     }
 
     /// <summary>
-    /// Whether the line is one of the rows of what Claude waits on, from the question's or the screen's first row down
-    /// to the cursor row (the text prompt's row alone after Other): reply speech leaves them to the control area, which
-    /// reads the question whole (D33). False for a line that is off the screen.
-    /// </summary>
-    public bool IsWaitRow(Line line)
-    {
-        var first = PendingQuestion?.FirstRow ?? PendingScreen?.FirstRow ?? (TextPrompt is not null ? _screen.CursorRow : -1);
-        if (first < 0)
-        {
-            return false;
-        }
-
-        var row = _screen.RowOf(line);
-        return row >= first && row <= _screen.CursorRow;
-    }
-
-    /// <summary>
     /// Records the question or screen Claude waits on (D33): the line <c>Question: title</c> in front of its first row,
     /// found again with q. Claude redraws an answered question as a one-line result, so the record is what stays. The
     /// same question shown again (the next key of a screen) is not recorded twice.

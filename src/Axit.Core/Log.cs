@@ -56,7 +56,7 @@ public static class Log
                     File.Move(FilePath, Path.ChangeExtension(FilePath, ".old.log"), overwrite: true);
                 }
 
-                File.AppendAllText(FilePath, $"{DateTime.Now:yyyy-MM-dd HH:mm:ss.fff} {level} {message}\r\n");
+                File.AppendAllText(FilePath, $"{DateTime.Now:yyyy-MM-dd HH:mm:ss.fff} {level} [{Environment.ProcessId}] {message}\r\n");
             }
         }
         catch (Exception ex) when (ex is IOException or UnauthorizedAccessException)

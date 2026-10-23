@@ -30,9 +30,10 @@ internal sealed partial class MainForm
         }
 
         // Claude draws a question's rows before its prompt row, so reply speech waits a moment (_speechHold) and goes
-        // only when Claude has not turned out to be waiting; once it has, the question's rows are dropped from what
-        // waits (the control area reads the question whole, D33) and the rest, a reply line finalized just before the
-        // question, is spoken at once (until 2026-10-23 all of it was dropped).
+        // only when Claude has not turned out to be waiting; once it has, everything that waits is dropped: a question
+        // stops all other speech and reads itself (D33, the user's rule of 2026-10-23). For a few hours that day the
+        // lines before the question were spoken, and in a set of questions they were Claude's record of the question
+        // just answered and its answer, read before the next question.
         if (arrival.Speech is not null)
         {
             _heldLines.AddRange(arrival.SpokenLines);
@@ -42,8 +43,8 @@ internal sealed partial class MainForm
 
         if (QuestionShown && _heldLines.Count > 0)
         {
-            _heldLines.RemoveAll(_model.IsWaitRow);
-            SpeakHeld();
+            _speechHold.Stop();
+            _heldLines.Clear();
         }
 
         // What Claude waits on is acted on once the screen has settled for the attention timer (OnFrameSettled):
