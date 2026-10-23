@@ -12,10 +12,8 @@ namespace Axit.Forms;
 /// </summary>
 public sealed class ControlArea : Panel
 {
-    private const int HoldMs = 1000;
-
     private readonly Label _name = new();
-    private long _holdUntil;
+    private readonly KeyHold _hold = new();
 
     public ControlArea()
     {
@@ -120,7 +118,7 @@ public sealed class ControlArea : Panel
     }
 
     /// <summary>The answering keys do nothing for this long: an answer is on its way, and a second Enter would send it twice.</summary>
-    public void Hold(int milliseconds) => _holdUntil = Environment.TickCount64 + milliseconds;
+    public void Hold(int milliseconds) => _hold.Start(milliseconds);
 
     /// <summary>The height for the rows the control shows, from the message field's height up to half the window.</summary>
     public void FitHeight()
@@ -143,7 +141,7 @@ public sealed class ControlArea : Panel
     private bool Answering(KeyEventArgs e)
     {
         var answering = e.KeyCode is Keys.Enter or Keys.Escape && e.Modifiers == Keys.None;
-        if (Environment.TickCount64 < _holdUntil && (answering || e.KeyCode == Keys.Space || (e.Modifiers == Keys.None && e.KeyCode is >= Keys.A and <= Keys.Z or >= Keys.D0 and <= Keys.D9)))
+        if (_hold.Holding && (answering || e.KeyCode == Keys.Space || (e.Modifiers == Keys.None && e.KeyCode is >= Keys.A and <= Keys.Z or >= Keys.D0 and <= Keys.D9)))
         {
             e.Handled = e.SuppressKeyPress = true;
             return false;
@@ -177,7 +175,15 @@ public sealed class ControlArea : Panel
     /// <summary>The new control takes the focus before the old one goes, so the focus never passes through the conversation on the way.</summary>
     private void Finish(Control control, Control? old, bool focus, bool hold)
     {
-        _holdUntil = hold ? Environment.TickCount64 + HoldMs : 0;
+        if (hold)
+        {
+            _hold.Start();
+        }
+        else
+        {
+            _hold.Clear();
+        }
+
         if (focus)
         {
             control.Focus();

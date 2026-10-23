@@ -83,11 +83,8 @@ public sealed class OverlayPanel : Panel
     private const string NoFolder = "(none chosen yet)";
     private const string ChooseFolderFirst = "Choose a folder first";
 
-    /// <summary>
-    /// How long a notice the user did not open ignores the keys that answer (Enter, Space): it can open while the user
-    /// is typing a message, and the next keys were meant for the message field.
-    /// </summary>
-    private const int HoldMs = 1000;
+    /// <summary>A notice the user did not open ignores the keys that answer (Enter, Space) for a moment: it can open while the user is typing a message, and the next keys were meant for the message field.</summary>
+    private readonly KeyHold _hold = new();
 
     private readonly Label _title = new();
     private readonly TextBox _text = new();
@@ -107,7 +104,6 @@ public sealed class OverlayPanel : Panel
     private readonly ListBox _matches = new();
     private OverlayInput? _inputSpec;
     private OverlaySession? _sessionSpec;
-    private long _holdUntil;
     private string? _sessionFolder;
     private string _body = string.Empty;
 
@@ -330,7 +326,15 @@ public sealed class OverlayPanel : Panel
         Shown = notice;
         var (title, text, choices) = (notice.Title, notice.Text, notice.Choices);
         var (input, session) = (notice.Input, notice.Session);
-        _holdUntil = notice.Unprompted ? Environment.TickCount64 + HoldMs : 0;
+        if (notice.Unprompted)
+        {
+            _hold.Start();
+        }
+        else
+        {
+            _hold.Clear();
+        }
+
         _title.Text = title;
         _text.AccessibleName = title;
         _body = WithKeyLine(text, choices);
@@ -463,7 +467,7 @@ public sealed class OverlayPanel : Panel
     protected override bool ProcessCmdKey(ref Message msg, Keys keyData)
     {
         // Keys typed for the message field just before a notice the user did not open must not answer it.
-        if (Environment.TickCount64 < _holdUntil && keyData is Keys.Enter or Keys.Space)
+        if (_hold.Holding && keyData is Keys.Enter or Keys.Space)
         {
             return true;
         }
