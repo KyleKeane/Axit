@@ -194,8 +194,9 @@ internal sealed partial class MainForm
     /// </summary>
     private static string QuestionName(Question question, int limit = 1000)
     {
-        var name = new StringBuilder(question.Step is (int number, int count) ? $"Question {number} of {count}: {question.Title}" : question.Title);
-        foreach (var line in question.Text)
+        var title = Unquoted(question.Title);
+        var name = new StringBuilder(question.Step is (int number, int count) ? $"Question {number} of {count}: {title}" : title);
+        foreach (var line in question.Text.Select(Unquoted))
         {
             if (name.Length + line.Length > limit)
             {
@@ -207,6 +208,9 @@ internal sealed partial class MainForm
 
         return name.ToString();
     }
+
+    /// <summary>A line without the quote marker Claude Code draws in front of a question's text ("> Which colour …"), which NVDA read as "greater" (found by the speech capture, 2026-10-23).</summary>
+    private static string Unquoted(string line) => line.StartsWith("> ", StringComparison.Ordinal) ? line[2..] : line;
 
     /// <summary>What goes between two sentences: a space after a text that ends in its own punctuation, else a full stop and a space; nothing after an empty text.</summary>
     private static string Stop(string before) => before.Length == 0 ? string.Empty : before[^1] is '.' or '?' or '!' or ':' ? " " : ". ";

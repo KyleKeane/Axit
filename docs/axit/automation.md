@@ -61,6 +61,11 @@ For what only NVDA can show: what it reads on a focus change, whether a notifica
 speech. NVDA follows the foreground window and the real keyboard, so this tier takes the machine: it runs when the
 user says so and steps away, never on its own.
 
+The add-on was installed and its capture checked on 2026-10-23: NVDA's speech and its cancellations were
+recorded, and the first capture found a quote marker NVDA was given in every question's name (fixed the same day).
+NVDA refuses to be started from the assistant's process ("Access is denied"), so the user installs it: the folder
+`tools/nvda-capture` copied to `%APPDATA%\nvda\addons\axitCapture`, then NVDA restarted.
+
 - **An NVDA add-on of the bundle's**, `tools/nvda-capture`, which records every speech sequence NVDA speaks to
   `%TEMP%\axit-nvda-speech.log`, only while the file `%TEMP%\axit-nvda-capture.on` exists, so that nothing the user
   hears in daily use is recorded. Installed once with the user's consent through NVDA's add-on store dialog.
