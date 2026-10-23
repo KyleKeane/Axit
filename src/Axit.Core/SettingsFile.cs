@@ -38,15 +38,11 @@ public static class SettingsFile
         catch (JsonException ex)
         {
             error = $"{path}: {ex.Message}";
-            try
+            if (KeepBadCopy(path))
             {
-                // The app saves its settings soon after loading, which would write the defaults over the one typo: the
-                // file is kept next to itself for mending.
-                File.Copy(path, path + ".bad", overwrite: true);
                 error += $" A copy is kept as {path}.bad.";
-            }
-            catch (Exception copyError) when (copyError is IOException or UnauthorizedAccessException)
-            {
+                // Logged here once per file, for every app, when the copy is made; the window says it too, as a notice.
+                Log.Error("Settings not readable, using defaults: " + error);
             }
 
             return new T();
@@ -54,15 +50,33 @@ public static class SettingsFile
         catch (Exception ex) when (ex is IOException or UnauthorizedAccessException)
         {
             error = $"{path}: {ex.Message}";
+            Log.Error("Settings not readable, using defaults: " + error);
             return new T();
         }
-        finally
+    }
+
+    /// <summary>
+    /// The unreadable file copied next to itself as .bad for mending, since the app saves its settings soon after
+    /// loading, which would write the defaults over the one typo. Once: not again while the copy is as new as the
+    /// file (the Axit menu reads the recently closed list at every opening; until 2026-10-23 it copied and logged
+    /// each time). False when the copy is there already or cannot be made.
+    /// </summary>
+    private static bool KeepBadCopy(string path)
+    {
+        var bad = path + ".bad";
+        try
         {
-            if (error is not null)
+            if (File.Exists(bad) && File.GetLastWriteTimeUtc(bad) >= File.GetLastWriteTimeUtc(path))
             {
-                // Logged here once, for every app; the window says it too, as a notice.
-                Log.Error("Settings not readable, using defaults: " + error);
+                return false;
             }
+
+            File.Copy(path, bad, overwrite: true);
+            return true;
+        }
+        catch (Exception ex) when (ex is IOException or UnauthorizedAccessException)
+        {
+            return false;
         }
     }
 

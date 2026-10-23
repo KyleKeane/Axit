@@ -20,37 +20,27 @@ public sealed record OverlayChoice(string Text, Action? Action = null, bool IsDe
 /// </summary>
 public sealed record OverlayInput(string Label, string AccessibleName, string Initial, string EmptyMessage, bool Required = true, Func<Keys, bool>? KeyHook = null, Action? Changed = null, string? ListName = null);
 
-/// <summary>A recommended way to start Claude in the New session notice (FR-8.6): the radio button's text and the arguments it stands for.</summary>
-public sealed record OverlayPreset(string Text, IReadOnlyList<string> Arguments);
-
-/// <summary>
-/// The New session part of a notice (FR-8.6): the folder (null when none is chosen yet) with a Choose folder button
-/// under it, the presets as radio buttons with Custom last (<paramref name="Selected"/> equal to the number of
-/// presets selects Custom), and the argument field that shows while Custom is selected.
-/// </summary>
-public sealed record OverlaySession(string? Folder, Action ChooseFolder, IReadOnlyList<OverlayPreset> Presets, int Selected, string CustomArguments)
-{
-    /// <summary>The caption of the radio button group: AxClaude's "How Claude starts", AxTerminal's "Shell".</summary>
-    public string PresetsCaption { get; init; } = "How Claude starts";
-
-    /// <summary>The accessible name of the free field under Custom.</summary>
-    public string CustomLabel { get; init; } = "Custom arguments";
-
-    /// <summary>The help line above the free field.</summary>
-    public string CustomHelp { get; init; } = "Arguments for Claude Code, one or more on each line. Enter starts the session, Shift+Enter starts a new line.";
-}
-
 /// <summary>
 /// What a notice says and offers, and nothing about how it is shown (D23): the title, the text, the buttons, at most
-/// one of the text field and the New session controls, and whether the user opened it. Every notice goes through
-/// the window base's <c>AxitForm.ShowNotice</c>, which adds what all notices share: the key line made from the
-/// buttons, the chime and the hold of a notice the user did not open, the focus, and the blocked window.
+/// one of the text field and a control of the window's own, and whether the user opened it. Every notice goes
+/// through the window base's <c>AxitForm.ShowNotice</c>, which adds what all notices share: the key line made from
+/// the buttons, the chime and the hold of a notice the user did not open, the focus, and the blocked window.
 /// </summary>
 public sealed record Notice(string Title, string Text, IReadOnlyList<OverlayChoice> Choices)
 {
     public OverlayInput? Input { get; init; }
 
-    public OverlaySession? Session { get; init; }
+    /// <summary>
+    /// A control of the window's own under the text, which the window makes, reads and keeps (the New session
+    /// controls, <see cref="SessionControls"/>); the panel shows it in the text's place below a strip of a few lines.
+    /// </summary>
+    public Control? Custom { get; init; }
+
+    /// <summary>Asked before the default button acts, when given: false keeps the notice open, the window having said why (no folder chosen yet).</summary>
+    public Func<bool>? Accepts { get; init; }
+
+    /// <summary>A first line of the text that the window changes while the notice shows (the folder of New session, <see cref="OverlayPanel.SetHeadLine"/>); null for none.</summary>
+    public string? HeadLine { get; init; }
 
     /// <summary>
     /// Opened by something other than the user's own command: an update offer or an error at startup. It plays the
@@ -73,16 +63,13 @@ public sealed record Notice(string Title, string Text, IReadOnlyList<OverlayChoi
 /// The window's own dialogs, drawn inside the window (D23). A notice or a help text takes the place of the
 /// conversation and the bottom of the window until it is answered, so there is never a second window to lose. (What
 /// Claude waits on goes to the control area instead, D33.) The panel holds a title, a read-only text, an optional
-/// text field or the optional New session controls, and a row of buttons; it shows a <see cref="Notice"/>, which says
-/// what, and the window decides the rest. The window hides the controls underneath, blocks its own shortcuts and the
-/// menu, and routes Enter and Escape to the default and cancel buttons through its AcceptButton and CancelButton; Tab
-/// moves between the text, the field or the session controls, and the buttons.
+/// text field or an optional control of the window's own, and a row of buttons; it shows a <see cref="Notice"/>,
+/// which says what, and the window decides the rest. The window hides the controls underneath, blocks its own
+/// shortcuts and the menu, and routes Enter and Escape to the default and cancel buttons through its AcceptButton
+/// and CancelButton; Tab moves between the text, the field or the window's control, and the buttons.
 /// </summary>
 public sealed class OverlayPanel : Panel
 {
-    private const string NoFolder = "(none chosen yet)";
-    private const string ChooseFolderFirst = "Choose a folder first";
-
     /// <summary>A notice the user did not open ignores the keys that answer (Enter, Space) for a moment: it can open while the user is typing a message, and the next keys were meant for the message field.</summary>
     private readonly KeyHold _hold = new();
 
@@ -91,20 +78,12 @@ public sealed class OverlayPanel : Panel
     private readonly Panel _inputRow = new();
     private readonly Label _inputLabel = new();
     private readonly TextBox _input = new();
-    private readonly FlowLayoutPanel _session = new();
-    private readonly Button _chooseFolder = new();
-    private readonly GroupBox _presetGroup = new();
-    private readonly FlowLayoutPanel _presetList = new();
-    private readonly FlowLayoutPanel _customRow = new();
-    private readonly Label _customLabel = new();
-    private readonly TextBox _custom = new();
-    private readonly List<RadioButton> _presets = [];
     private readonly FlowLayoutPanel _buttons = new();
     private readonly ProgressBar _progress = new();
     private readonly ListBox _matches = new();
     private OverlayInput? _inputSpec;
-    private OverlaySession? _sessionSpec;
-    private string? _sessionFolder;
+    private Control? _custom;
+    private string? _headLine;
     private string _body = string.Empty;
 
     public OverlayPanel()
@@ -154,59 +133,6 @@ public sealed class OverlayPanel : Panel
         _matches.Visible = false;
         _matches.GotFocus += (_, _) => _input.Focus();
 
-        // The New session controls (FR-8.6), top to bottom under the text: the Choose folder button, the presets
-        // in a named group (arrow keys move between them, Tab lands on the selected one), the Custom field.
-        _session.Dock = DockStyle.Fill;
-        _session.FlowDirection = FlowDirection.TopDown;
-        _session.WrapContents = false;
-        _session.AutoScroll = true;
-        _session.Padding = new Padding(0, 6, 0, 0);
-        _session.Visible = false;
-        _session.TabIndex = 3;
-        _session.SizeChanged += (_, _) => LayoutSession();
-
-        _chooseFolder.Text = "Choose &folder...";
-        _chooseFolder.AutoSize = true;
-        _chooseFolder.Height = 32;
-        _chooseFolder.Margin = new Padding(0, 0, 0, 8);
-        _chooseFolder.UseVisualStyleBackColor = true;
-        _chooseFolder.TabIndex = 0;
-        _chooseFolder.Click += (_, _) => _sessionSpec?.ChooseFolder();
-
-        _presetGroup.Text = "How Claude starts";
-        _presetGroup.AutoSize = true;
-        _presetGroup.AutoSizeMode = AutoSizeMode.GrowAndShrink;
-        _presetGroup.Margin = new Padding(0, 0, 0, 8);
-        _presetGroup.TabIndex = 1;
-        _presetList.FlowDirection = FlowDirection.TopDown;
-        _presetList.WrapContents = false;
-        _presetList.AutoSize = true;
-        _presetList.AutoSizeMode = AutoSizeMode.GrowAndShrink;
-        _presetList.Location = new Point(8, 20);
-        _presetList.Padding = new Padding(0, 0, 8, 4);
-        _presetGroup.Controls.Add(_presetList);
-
-        _customRow.FlowDirection = FlowDirection.TopDown;
-        _customRow.WrapContents = false;
-        _customRow.AutoSize = true;
-        _customRow.AutoSizeMode = AutoSizeMode.GrowAndShrink;
-        _customRow.Margin = new Padding(0);
-        _customRow.TabIndex = 2;
-        _customLabel.AutoSize = true;
-        _customLabel.Text = "Arguments for Claude Code, one or more on each line. Enter starts the session, Shift+Enter starts a new line.";
-        _customLabel.Margin = new Padding(0, 0, 0, 4);
-        _custom.Multiline = true;
-        _custom.AcceptsReturn = true;
-        _custom.WordWrap = true;
-        _custom.ScrollBars = ScrollBars.Vertical;
-        _custom.AccessibleName = "Custom arguments";
-        _custom.Margin = new Padding(0);
-        _custom.KeyDown += OnCustomKeyDown;
-        _custom.KeyDown += EditKeys.Handle;
-        _customRow.Controls.Add(_customLabel);
-        _customRow.Controls.Add(_custom);
-        _session.Controls.AddRange([_chooseFolder, _presetGroup, _customRow]);
-
         _buttons.Dock = DockStyle.Bottom;
         _buttons.FlowDirection = FlowDirection.LeftToRight;
         _buttons.WrapContents = true;
@@ -225,9 +151,9 @@ public sealed class OverlayPanel : Panel
 
         // Docked controls are laid out from the last in the collection to the first: the buttons take the bottom,
         // the progress bar the strip above them, the title the top, the field the strip under the title, then the
-        // text takes what is left, or, in a New session notice, a strip of a few lines with the session controls
-        // filling the rest under it.
-        Controls.AddRange([_matches, _session, _text, _inputRow, _title, _progress, _buttons]);
+        // text takes what is left, or, with a control of the window's own, a strip of a few lines with that control
+        // filling the rest under it (it is put first in the collection when a notice brings one).
+        Controls.AddRange([_matches, _text, _inputRow, _title, _progress, _buttons]);
     }
 
     /// <summary>A button was pressed. The window closes the notice (unless the choice stays open) and runs its action.</summary>
@@ -247,8 +173,8 @@ public sealed class OverlayPanel : Panel
     /// <summary>The notice's read-only text, for the window's find in it (AX-7.2): the caret kept and the match selected there.</summary>
     public TextBox Body => _text;
 
-    /// <summary>Whether the text can be searched: a notice with text and neither a field nor the New session controls, since the text holds the focus then.</summary>
-    public bool HasSearchableText => _text.Visible && _inputSpec is null && _sessionSpec is null;
+    /// <summary>Whether the text can be searched: a notice with text and neither a field nor a control of the window's own, since the text holds the focus then.</summary>
+    public bool HasSearchableText => _text.Visible && _inputSpec is null && _custom is null;
 
     /// <summary>The button Enter presses: the window's AcceptButton while the notice shows. Null when there is none.</summary>
     public IButtonControl? DefaultButton { get; private set; }
@@ -289,28 +215,22 @@ public sealed class OverlayPanel : Panel
     /// <summary>The lines the list shows at once, for Page Up and Page Down.</summary>
     public int MatchPage => Math.Max(1, _matches.ClientSize.Height / Math.Max(1, _matches.ItemHeight));
 
-    /// <summary>The folder shown in the New session notice; null while none is chosen.</summary>
-    public string? SessionFolder => _sessionFolder;
-
-    /// <summary>The preset selected in the New session notice; null when Custom is selected.</summary>
-    public OverlayPreset? SelectedPreset
+    /// <summary>The first line of the text changed while the notice shows (<see cref="Notice.HeadLine"/>): the folder of New session.</summary>
+    public void SetHeadLine(string? line)
     {
-        get
-        {
-            var index = _presets.FindIndex(radio => radio.Checked);
-            return _sessionSpec is { } session && index >= 0 && index < session.Presets.Count ? session.Presets[index] : null;
-        }
+        _headLine = line;
+        SetText();
     }
 
-    /// <summary>The text of the Custom field in the New session notice.</summary>
-    public string CustomArguments => _custom.Text;
+    /// <summary>The default button pressed, as Enter presses it: a control of the window's own asks for it (Enter in the session controls' free field).</summary>
+    public void PressDefault() => DefaultButton?.PerformClick();
 
     /// <summary>The font of the text, kept in step with the conversation's by the window.</summary>
     public void SetTextFont(Font font)
     {
         _text.Font = font;
         _matches.Font = font;
-        if (_sessionSpec is not null)
+        if (_custom is not null)
         {
             _text.Height = TextStripHeight();
         }
@@ -325,7 +245,7 @@ public sealed class OverlayPanel : Panel
     {
         Shown = notice;
         var (title, text, choices) = (notice.Title, notice.Text, notice.Choices);
-        var (input, session) = (notice.Input, notice.Session);
+        var input = notice.Input;
         if (notice.Unprompted)
         {
             _hold.Start();
@@ -338,20 +258,16 @@ public sealed class OverlayPanel : Panel
         _title.Text = title;
         _text.AccessibleName = title;
         _body = WithKeyLine(text, choices);
+        _headLine = notice.HeadLine;
         // The field's spec goes in after its text is set, so that Changed does not fire for the filling (the palette
         // filled its list twice), nor the previous notice's Changed for the new text.
         _inputSpec = null;
-        _sessionSpec = session;
-        _session.Visible = session is not null;
-        if (session is not null)
+        ShowCustom(notice.Custom);
+        if (_custom is not null)
         {
-            // The captions are the window's: AxClaude's ways to start Claude, AxTerminal's shells.
-            _presetGroup.Text = session.PresetsCaption;
-            _custom.AccessibleName = session.CustomLabel;
-            _customLabel.Text = session.CustomHelp;
+            // The text in a strip of a few lines, the window's control filling the rest under it.
             _text.Dock = DockStyle.Top;
             _text.Height = TextStripHeight();
-            FillSession(session);
         }
         else if (input?.ListName is not null)
         {
@@ -436,14 +352,6 @@ public sealed class OverlayPanel : Panel
         _progress.Value = Math.Clamp(percent, 0, 100);
     }
 
-    /// <summary>The folder chosen through the Choose folder button: the first line of the text changes and is spoken.</summary>
-    public void SetSessionFolder(string folder)
-    {
-        _sessionFolder = folder;
-        SetText();
-        Announce("Folder: " + folder, true);
-    }
-
     /// <summary>Puts the focus where reading starts: in the text field when there is one, otherwise at the top of the text.</summary>
     public void FocusStart()
     {
@@ -475,6 +383,29 @@ public sealed class OverlayPanel : Panel
         return base.ProcessCmdKey(ref msg, keyData);
     }
 
+    /// <summary>The window's control shown under the text in place of the one before, which the window keeps (it reads the choice from it); none for a plain notice.</summary>
+    private void ShowCustom(Control? custom)
+    {
+        if (ReferenceEquals(_custom, custom))
+        {
+            return;
+        }
+
+        if (_custom is not null)
+        {
+            Controls.Remove(_custom);
+        }
+
+        _custom = custom;
+        if (custom is not null)
+        {
+            custom.Dock = DockStyle.Fill;
+            Controls.Add(custom);
+            // First in the collection: laid out last, so it takes what the others leave.
+            Controls.SetChildIndex(custom, 0);
+        }
+    }
+
     private void Choose(OverlayChoice choice)
     {
         if (choice.IsDefault && _inputSpec is { Required: true } spec && _input.Text.Length == 0)
@@ -485,10 +416,9 @@ public sealed class OverlayPanel : Panel
             return;
         }
 
-        if (choice.IsDefault && _sessionSpec is not null && _sessionFolder is null)
+        if (choice.IsDefault && Shown?.Accepts is { } accepts && !accepts())
         {
-            Announce(ChooseFolderFirst, true);
-            _chooseFolder.Select();
+            // The window's control is not ready (no folder chosen yet): it said so and took the focus.
             return;
         }
 
@@ -514,47 +444,10 @@ public sealed class OverlayPanel : Panel
     private void SetText()
     {
         var body = _body.Replace("\r\n", "\n").Replace("\n", "\r\n");
-        _text.Text = _sessionSpec is null
+        _text.Text = _headLine is null
             ? body
-            : "Folder: " + (_sessionFolder ?? NoFolder) + (body.Length > 0 ? "\r\n" + body : string.Empty);
+            : _headLine + (body.Length > 0 ? "\r\n" + body : string.Empty);
         _text.Visible = _text.Text.Length > 0;
-    }
-
-    private void FillSession(OverlaySession session)
-    {
-        _sessionFolder = session.Folder;
-        foreach (var old in _presets)
-        {
-            _presetList.Controls.Remove(old);
-            old.Dispose();
-        }
-
-        _presets.Clear();
-        for (var i = 0; i <= session.Presets.Count; i++)
-        {
-            var custom = i == session.Presets.Count;
-            var radio = new RadioButton
-            {
-                Text = custom ? "Custom" : session.Presets[i].Text,
-                AutoSize = true,
-                Margin = new Padding(0, 2, 0, 2),
-                TabIndex = i,
-                UseVisualStyleBackColor = true,
-            };
-            if (custom)
-            {
-                radio.CheckedChanged += (_, _) => _customRow.Visible = radio.Checked;
-            }
-
-            _presets.Add(radio);
-            _presetList.Controls.Add(radio);
-        }
-
-        _custom.Text = session.CustomArguments.Replace("\r\n", "\n").Replace("\n", "\r\n");
-        var selected = Math.Clamp(session.Selected, 0, session.Presets.Count);
-        _customRow.Visible = selected == session.Presets.Count;
-        _presets[selected].Checked = true;
-        LayoutSession();
     }
 
     /// <summary>A navigation key in the text (AX-7.2): the shared jump with the window's pairs.</summary>
@@ -575,30 +468,11 @@ public sealed class OverlayPanel : Panel
         }
     }
 
-    private void OnCustomKeyDown(object? sender, KeyEventArgs e)
-    {
-        // Enter starts the session and Shift+Enter is a new line, as in the message field.
-        if (e.KeyCode == Keys.Enter && e.Modifiers == Keys.None)
-        {
-            e.Handled = true;
-            e.SuppressKeyPress = true;
-            DefaultButton?.PerformClick();
-        }
-    }
-
     private int TextStripHeight() => _text.Font.Height * 4 + 10;
 
     private void LayoutInput()
     {
         _input.Left = _inputLabel.Right + 6;
         _input.Width = Math.Max(100, _inputRow.ClientSize.Width - _input.Left);
-    }
-
-    private void LayoutSession()
-    {
-        var width = Math.Max(200, _session.ClientSize.Width - 24);
-        _customLabel.MaximumSize = new Size(width, 0);
-        _custom.Width = width;
-        _custom.Height = _custom.Font.Height * 4 + 8;
     }
 }

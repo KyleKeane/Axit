@@ -630,9 +630,19 @@ public sealed partial class TextEditorForm : AxitForm
 
     private void NewDocument() => AskToSave(() => LoadDocument(null));
 
-    /// <summary>File → Open recent file (AD-4.1): the last ten files opened or saved under a name, from the settings; one that no longer exists is left out.</summary>
+    /// <summary>File → Open recent file (AD-4.1): the last ten files opened or saved under a name, from the settings; one that no longer exists is left out, or, on a share listed without the check (AX-9.5), said when chosen rather than opened as a new file.</summary>
     private void FillRecentFiles() =>
-        RecentMenu.Fill(_recentFilesItem, _settings.RecentFiles, File.Exists, Path.GetFileName, "&No recent files", target => AskToSave(() => LoadDocument(target)));
+        RecentMenu.Fill(_recentFilesItem, _settings.RecentFiles, File.Exists, Path.GetFileName, "&No recent files", target => AskToSave(() =>
+        {
+            if (File.Exists(target))
+            {
+                LoadDocument(target);
+            }
+            else
+            {
+                Fail($"{target} no longer exists.");
+            }
+        }));
 
     /// <summary>File → Show current file in → File Explorer, Ctrl+W (AD-4.1): the file selected in File Explorer, one of the system's own windows (AX-7.2).</summary>
     private void ShowInExplorer()

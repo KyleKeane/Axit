@@ -9,14 +9,14 @@ namespace Axit.Forms;
 /// </summary>
 public static class RecentMenu
 {
-    /// <param name="paths">Newest first; those that do not exist any more are left out.</param>
+    /// <param name="paths">Newest first; those on a local drive that do not exist any more are left out (a path on a share is listed without the check, which could wait for the network, <see cref="LocalPaths"/>).</param>
     /// <param name="exists">Whether a path is still there: <see cref="File.Exists"/> for files, <see cref="Directory.Exists"/> for folders.</param>
     /// <param name="name">The short name shown before the path.</param>
     /// <param name="noneLabel">The one item when nothing is left, with its mnemonic ("&amp;No recent files").</param>
     public static void Fill(ToolStripMenuItem menu, IEnumerable<string> paths, Func<string, bool> exists, Func<string, string> name, string noneLabel, Action<string> open)
     {
         menu.DropDownItems.Clear();
-        var targets = paths.Where(exists).ToList();
+        var targets = paths.Where(path => LocalPaths.ExistsQuickly(path, exists)).ToList();
         for (var i = 0; i < targets.Count; i++)
         {
             var target = targets[i];

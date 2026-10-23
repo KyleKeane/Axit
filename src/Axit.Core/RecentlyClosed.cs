@@ -37,9 +37,9 @@ public static class RecentlyClosed
         }
     }
 
-    /// <summary>The list for the menu: the entries whose file or folder still exists, the newest first.</summary>
+    /// <summary>The list for the menu: the entries whose file or folder still exists, the newest first; one on a share is listed without the check, which could wait for the network (<see cref="LocalPaths"/>).</summary>
     public static IReadOnlyList<ClosedItem> Load() =>
-        Read(AppPaths.RecentlyClosedFile).Where(i => File.Exists(i.Path) || Directory.Exists(i.Path)).ToList();
+        Read(AppPaths.RecentlyClosedFile).Where(i => LocalPaths.ExistsQuickly(i.Path, path => File.Exists(path) || Directory.Exists(path))).ToList();
 
     public static IReadOnlyList<ClosedItem> Read(string file) => SettingsFile.Load<RecentlyClosedList>(file, out _).Items;
 

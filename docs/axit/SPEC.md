@@ -343,8 +343,11 @@ allow it, see B-9).
   "AxClaude (2)", "AxDown (1)", the number being its open windows: that app's windows in the same order, this window
   included and checked, so that the list also says where the user is.
 - AX-9.4 **Recently closed ▸** (R): the last ten files and folders a window of any app held when it closed or replaced
-  them (AxDown's file, AxClaude's project folder), the newest first, each app and path once, those that still exist;
-  Enter starts that app on it in a new window. The list is one file for the bundle, `%APPDATA%\Axit\recently-closed.json`
+  them (AxDown's file, AxClaude's project folder), the newest first, each app and path once, those that still exist
+  (checked as the menu opens for a path on a drive of this computer only, since a share or a mapped network drive
+  can take the network's timeout to answer, which no menu may wait for; a path elsewhere is listed as it is and
+  found missing when chosen; `Axit.Core/LocalPaths`, tested, 2026-10-23; the apps' recent lists follow the same
+  rule, AX-9.5); Enter starts that app on it in a new window. The list is one file for the bundle, `%APPDATA%\Axit\recently-closed.json`
   (AX-5.1), written whole by the window that closes or swaps (`Axit.Core/RecentlyClosed`, through `SettingsFile`; two
   windows closing in the same instant leave the last writer's list). Nothing else about windows is stored.
 - AX-9.5 A window's or a file's item is its number, a full stop and a title, "1. notes.md (C:\notes\notes.md) - AxDown":
@@ -405,8 +408,10 @@ name, so that a command is reached without knowing its menu or its key, and its 
   the lists a menu fills only as it opens (Open recent, Open windows, Recently closed), whose state the palette would
   have to guess; a window marks such a submenu where it attaches its filling (`CommandPalette.FilledOnOpening`), and
   the fixed items such a submenu also holds (AxFile's Add or remove this folder under Favorites, This PC and Eject
-  under Drives) are left out with it, their keys still working. A menu item whose text or check mark changes only as
-  its menu opens (AxFile's Undo, AxTerminal's Switch shell) reads in the palette as it last stood. The palette reads
+  under Drives) are left out with it, their keys still working. A menu whose items change their text or check mark as
+  it opens (AxFile's Undo named after what it would undo, AxTerminal's Switch shell with the shell in use checked)
+  is marked where its refreshing is attached (`CommandPalette.RefreshedOnOpening`), and the palette runs the
+  refresh before reading (until 2026-10-23 such an item read as it last stood). The palette reads
   the menus and keeps no list of its own: a command added to a menu is in the palette.
 - AX-10.3 **Matching** is AxStart's (AS-2.2), moved to `Axit.Core` on this second use: the typed text, trimmed, case
   and accents ignored, against the entry's whole line; an entry matches when its line holds every typed word (`text

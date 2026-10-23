@@ -61,6 +61,10 @@
 - AxPreview: a file whose first eight kilobytes are text but which holds a NUL further in keeps the text shown, with the error, instead of emptying the window; a hand-over during an update's progress leaves the progress notice; a path that does not exist is the notice "File not found", not an empty window under its name that Edit in AxDown then created.
 - AxFile: coming back from one of the Windows dialogs no longer reads the folder again.
 - For developers: the viewer's own code is TextEditorForm.Viewer.cs and LoadDocument is the read and the showing; TextLines in Axit.Core holds the caret arithmetic, tested; every Windows dialog goes through AxitForm.ShowSystemDialog, which marks the window while one is up (DialogShowing); EditHistory tells its size, tested.
+- Axit: a recent file or folder on a network share no longer stalls a menu while Windows looks for it; it is listed as it is and said to be gone when chosen. A settings file that cannot be read is copied to its .bad file once, not at every opening of the Axit menu.
+- Axit: the command palette reads a menu item's text and check mark as they would be when its menu opens, AxFile's Undo and AxTerminal's Switch shell among them.
+- AxTerminal: the New session notice's help line names the shell's command line; it named Claude Code's arguments.
+- For developers: the New session controls are a control of their own (SessionControls) that a notice carries (Custom, Accepts, HeadLine), out of OverlayPanel; the control area asks once whether a key may answer; LocalPaths in Axit.Core, tested.
 
 ## 3.4.0 - 2026-10-22
 

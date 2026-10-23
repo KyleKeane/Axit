@@ -4,8 +4,8 @@ namespace Axit.Forms;
 
 /// <summary>
 /// The command palette's window side (docs/axit/SPEC.md AX-10): the window's menu bar read into entries, and the
-/// marker of the submenus it leaves out. The notice and its keys are the window base's (<see cref="AxitForm"/>); the
-/// lines and the search are <see cref="Palette"/>, tested.
+/// marks on the submenus it leaves out or refreshes first. The notice and its keys are the window base's
+/// (<see cref="AxitForm"/>); the lines and the search are <see cref="Palette"/>, tested.
 /// </summary>
 public static class CommandPalette
 {
@@ -16,7 +16,8 @@ public static class CommandPalette
     public const Keys FirstMatch = Keys.Control | Keys.Home;
     public const Keys LastMatch = Keys.Control | Keys.End;
 
-    private const string FilledOnOpeningTag = "Axit.FilledOnOpening";
+    /// <summary>A menu's mark for the palette, kept in the item's Tag: left out, since its items are made as it opens; or refreshed before it is read, since its items change as it opens.</summary>
+    private sealed record Mark(bool LeftOut, Action? Refresh);
 
     /// <summary>
     /// Marks a submenu whose items are made each time it opens (Open recent, Open windows, the drives): the palette
@@ -24,7 +25,20 @@ public static class CommandPalette
     /// </summary>
     public static ToolStripMenuItem FilledOnOpening(ToolStripMenuItem item)
     {
-        item.Tag = FilledOnOpeningTag;
+        item.Tag = new Mark(true, null);
+        return item;
+    }
+
+    /// <summary>
+    /// Attaches <paramref name="refresh"/> to a menu whose items change their text or check mark as it opens (AxFile's
+    /// Undo named after what it would undo, AxTerminal's Switch shell with the shell in use checked), and marks the
+    /// menu so that the palette runs it before reading (AX-10.2; until 2026-10-23 the palette read such an item as it
+    /// last stood). Returns the item.
+    /// </summary>
+    public static ToolStripMenuItem RefreshedOnOpening(ToolStripMenuItem item, Action refresh)
+    {
+        item.DropDownOpening += (_, _) => refresh();
+        item.Tag = new Mark(false, refresh);
         return item;
     }
 
@@ -48,7 +62,7 @@ public static class CommandPalette
     {
         foreach (ToolStripItem item in items)
         {
-            if (item is not ToolStripMenuItem menuItem || !menuItem.Available || !menuItem.Enabled || Equals(menuItem.Tag, FilledOnOpeningTag))
+            if (item is not ToolStripMenuItem menuItem || !menuItem.Available || !menuItem.Enabled || menuItem.Tag is Mark { LeftOut: true })
             {
                 continue;
             }
@@ -56,6 +70,8 @@ public static class CommandPalette
             var name = MenuText.Plain(menuItem.Text ?? string.Empty);
             if (menuItem.HasDropDownItems)
             {
+                // What the menu would show on opening, before its items are read.
+                (menuItem.Tag as Mark)?.Refresh?.Invoke();
                 path.Add(name);
                 Collect(menuItem.DropDownItems, path, entries, say);
                 path.RemoveAt(path.Count - 1);

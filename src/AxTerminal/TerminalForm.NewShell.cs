@@ -9,7 +9,7 @@ internal sealed partial class TerminalForm
     // ---- New session and Switch shell (AT-1.6), folders (AT-1.5) ----
 
     /// <summary>The shells of the New session notice, in its order; Custom comes after them. The argument is the settings' word for the shell.</summary>
-    private static readonly OverlayPreset[] ShellPresets =
+    private static readonly SessionPreset[] ShellPresets =
     [
         new(ShellLauncher.Describe(ShellKind.PowerShell7), [ShellLauncher.Key(ShellKind.PowerShell7)]),
         new(ShellLauncher.Describe(ShellKind.WindowsPowerShell), [ShellLauncher.Key(ShellKind.WindowsPowerShell)]),
@@ -28,8 +28,9 @@ internal sealed partial class TerminalForm
 
     /// <summary>
     /// Session → New session… (Ctrl+N): the folder with a Choose folder button under it, the shells as radio buttons,
-    /// Custom with a command line field. Enter ends the current shell and starts the chosen one in the folder, the
-    /// transcript cleared; Escape keeps the current shell.
+    /// Custom with a command line field (<see cref="SessionControls"/>, the window's own control in the notice, with
+    /// the shell's wording). Enter ends the current shell and starts the chosen one in the folder, the transcript
+    /// cleared; Escape keeps the current shell.
     /// </summary>
     private void NewSession()
     {
@@ -40,45 +41,39 @@ internal sealed partial class TerminalForm
             text = $"{_model.RunningCommand} is still running. A new session ends it.\n" + text;
         }
 
+        var controls = new SessionControls(CurrentDirectory, ShellPresets, selected < 0 ? ShellPresets.Length : selected, _customShell ?? string.Empty,
+            "Shell", "Command line",
+            "The command line of the shell to start, as typed at a prompt. Enter starts the session, Shift+Enter starts a new line.",
+            start => PickFolder(start ?? CurrentDirectory), said => Announce(said, true), Overlay.SetHeadLine, Overlay.PressDefault);
         ShowNotice(new Notice("New session", text,
         [
-            new OverlayChoice("&Start session", StartSession, IsDefault: true),
+            new OverlayChoice("&Start session", () => StartSession(controls), IsDefault: true),
             new OverlayChoice("Cancel", IsCancel: true),
         ])
         {
-            Session = new OverlaySession(CurrentDirectory, ChooseShellFolder, ShellPresets, selected < 0 ? ShellPresets.Length : selected, _customShell ?? string.Empty)
-            {
-                PresetsCaption = "Shell",
-                CustomLabel = "Command line",
-            },
+            Custom = controls,
+            Accepts = controls.Ready,
+            HeadLine = controls.FolderLine,
         });
     }
 
-    private void ChooseShellFolder()
+    private void StartSession(SessionControls controls)
     {
-        if (PickFolder(Overlay.SessionFolder ?? CurrentDirectory) is { } folder)
-        {
-            Overlay.SetSessionFolder(folder);
-        }
-    }
-
-    private void StartSession()
-    {
-        var folder = Overlay.SessionFolder;
+        var folder = controls.Folder;
         if (folder is null || !Directory.Exists(folder))
         {
             Fail("The folder no longer exists: " + folder);
             return;
         }
 
-        if (Overlay.SelectedPreset is { } preset)
+        if (controls.SelectedPreset is { } preset)
         {
             _shell = ShellLauncher.Parse(preset.Arguments[0]);
         }
         else
         {
             _shell = ShellKind.Custom;
-            _customShell = Overlay.CustomArguments.Trim();
+            _customShell = controls.CustomArguments.Trim();
         }
 
         SetFolder(folder);

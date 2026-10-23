@@ -68,11 +68,16 @@ public sealed class ControlArea : Panel
 
         list.KeyDown += (_, e) =>
         {
-            if (Answering(e) && e.KeyCode == Keys.Enter && list.SelectedIndex >= 0)
+            // Asked once: it marks the key handled and decides whether it may act (asked twice until 2026-10-23).
+            var answering = Answering(e);
+            if (answering && e.KeyCode == Keys.Enter)
             {
-                choose(list.SelectedIndex, list is CheckedListBox checkedList ? checkedList.CheckedIndices.Cast<int>().ToList() : []);
+                if (list.SelectedIndex >= 0)
+                {
+                    choose(list.SelectedIndex, list is CheckedListBox checkedList ? checkedList.CheckedIndices.Cast<int>().ToList() : []);
+                }
             }
-            else if (Answering(e) && e.KeyCode == Keys.Escape)
+            else if (answering && e.KeyCode == Keys.Escape)
             {
                 escape();
             }
@@ -97,11 +102,12 @@ public sealed class ControlArea : Panel
         var field = new TextBox { AccessibleName = name, Dock = DockStyle.Top };
         field.KeyDown += (_, e) =>
         {
-            if (Answering(e) && e.KeyCode == Keys.Enter)
+            var answering = Answering(e);
+            if (answering && e.KeyCode == Keys.Enter)
             {
                 enter(field.Text);
             }
-            else if (Answering(e) && e.KeyCode == Keys.Escape)
+            else if (answering && e.KeyCode == Keys.Escape)
             {
                 escape();
             }

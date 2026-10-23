@@ -60,9 +60,9 @@ public sealed partial class FileForm : AxitForm
         folder.DropDownItems.Add(new ToolStripSeparator());
         folder.DropDownItems.Add(Item("&Up one level", GoUp, AxFileKeys.Up));
         folder.DropDownItems.Add(Item("Re&fresh", () => Do(() => RefreshAsync(announce: true)), AxFileKeys.Refresh));
-        // AF-4.14: named after what it would undo each time the menu opens, "Undo rename".
+        // AF-4.14: named after what it would undo each time the menu opens, "Undo rename"; the palette refreshes it the same way (AX-10.2).
         _undoItem = Item(_actions.MenuText, Undo, AxFileKeys.Undo);
-        folder.DropDownOpening += (_, _) => _undoItem.Text = _actions.MenuText;
+        CommandPalette.RefreshedOnOpening(folder, () => _undoItem.Text = _actions.MenuText);
         folder.DropDownItems.Add(_undoItem);
         folder.DropDownItems.Add(new ToolStripMenuItem("&Actions", null, (_, _) => ShowActions()));
         folder.DropDownItems.Add(new ToolStripSeparator());

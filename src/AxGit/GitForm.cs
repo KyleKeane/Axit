@@ -328,6 +328,13 @@ public sealed partial class GitForm : AxitForm
             return;
         }
 
+        if (!Directory.Exists(target))
+        {
+            // A recent repository on a share that is gone, listed without the check (AX-9.5): said, the open one kept.
+            Fail($"{target} no longer exists.");
+            return;
+        }
+
         string? root;
         try
         {

@@ -9,7 +9,7 @@ internal sealed partial class MainForm
     // ---- New session (FR-8.6) ----
 
     /// <summary>The recommended ways to start Claude, in the order of the notice; Custom comes after them.</summary>
-    private static readonly OverlayPreset[] SessionPresets =
+    private static readonly SessionPreset[] SessionPresets =
     [
         new("New conversation", []),
         new("Continue the last conversation", ["--continue"]),
@@ -20,8 +20,9 @@ internal sealed partial class MainForm
 
     /// <summary>
     /// Session → New session… (Ctrl+N): the folder with a Choose folder button under it, the recommended argument
-    /// sets as radio buttons, Custom with a free argument field. Enter stops the current session and starts a new
-    /// one in the folder with those arguments; Escape keeps the current session.
+    /// sets as radio buttons, Custom with a free argument field (<see cref="SessionControls"/>, the window's own
+    /// control in the notice). Enter stops the current session and starts a new one in the folder with those
+    /// arguments; Escape keeps the current session.
     /// </summary>
     private void NewSession()
     {
@@ -38,34 +39,32 @@ internal sealed partial class MainForm
             text = $"Claude has work running in the background ({background}). A new session stops it.\n" + text;
         }
 
+        var controls = new SessionControls(_folder, SessionPresets, selected < 0 ? SessionPresets.Length : selected, custom,
+            "How Claude starts", "Custom arguments",
+            "Arguments for Claude Code, one or more on each line. Enter starts the session, Shift+Enter starts a new line.",
+            start => PickFolder(start ?? _folder), said => Announce(said, true), Overlay.SetHeadLine, Overlay.PressDefault);
         ShowNotice(new Notice("New session", text,
         [
-            new OverlayChoice("&Start session", StartNewSession, IsDefault: true),
+            new OverlayChoice("&Start session", () => StartNewSession(controls), IsDefault: true),
             new OverlayChoice("Cancel", IsCancel: true),
         ])
         {
-            Session = new OverlaySession(_folder, ChooseSessionFolder, SessionPresets, selected < 0 ? SessionPresets.Length : selected, custom),
+            Custom = controls,
+            Accepts = controls.Ready,
+            HeadLine = controls.FolderLine,
         });
     }
 
-    private void ChooseSessionFolder()
+    private void StartNewSession(SessionControls controls)
     {
-        if (PickFolder(Overlay.SessionFolder ?? _folder) is { } folder)
-        {
-            Overlay.SetSessionFolder(folder);
-        }
-    }
-
-    private void StartNewSession()
-    {
-        var folder = Overlay.SessionFolder;
+        var folder = controls.Folder;
         if (folder is null || !Directory.Exists(folder))
         {
             Fail("The folder no longer exists: " + folder);
             return;
         }
 
-        var arguments = Overlay.SelectedPreset?.Arguments ?? ClaudeLauncher.SplitArguments(Overlay.CustomArguments);
+        var arguments = controls.SelectedPreset?.Arguments ?? ClaudeLauncher.SplitArguments(controls.CustomArguments);
         SetFolder(folder);
         _claudeArgs = [.. arguments];
         var with = arguments.Count > 0 ? " with " + ClaudeLauncher.JoinArguments(arguments) : " with no extra arguments";

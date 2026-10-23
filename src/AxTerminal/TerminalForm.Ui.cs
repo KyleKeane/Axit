@@ -27,13 +27,14 @@ internal sealed partial class TerminalForm
         }
 
         switchShell.DropDownItems.Add(new ToolStripMenuItem("C&ustom...", null, (_, _) => NewSession()));
-        switchShell.DropDownOpening += (_, _) =>
+        // The shell in use checked as the menu opens; the palette refreshes it the same way (AX-10.2).
+        CommandPalette.RefreshedOnOpening(switchShell, () =>
         {
             foreach (var (kind, item) in _shellItems)
             {
                 item.Checked = kind == _shell;
             }
-        };
+        });
         session.DropDownItems.Add(switchShell);
         session.DropDownItems.Add(new ToolStripSeparator());
         session.DropDownItems.Add(Item("Res&tart shell", RestartShell, AxTerminalKeys.RestartShell));
