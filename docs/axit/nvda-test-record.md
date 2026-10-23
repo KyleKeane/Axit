@@ -36,6 +36,7 @@ Run so far, by the user with NVDA, 2026-10-23, on `palette` after 0d46e82:
 - axClaude Session, Open folder in new window and Open recent folder in new window (new, dfe9ec1): Passed.
 - axDown section 6 step 6 (the palette) and section 2 step 6's Alt+Backspace and Shift+F10: Passed.
 - axFile section 3 step 7: Failed at first (Shift+F10 opened no menu, then a context menu silent on its first opening); now Shift+F10, the Applications key and a right click open the bar's Item menu as Alt+I does (AF-D13): Passed, "good enough for now". Alt+F4 on axFile left axClaude's Session menu open: fixed in the window base, Passed.
+- axFile, by ear: the menu bar walk (3.7a), Open in Axit (3.9), Copy and Paste (3.6, with the paths as text and File Explorer both ways), two copies side by side (3.6), Move to folder with completion (3.1a, new), the palette (5.6): Passed.
 
 ## 2026-10-22, Axit 3.3.1
 
