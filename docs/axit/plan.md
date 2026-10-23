@@ -162,5 +162,18 @@ library dependency (B-10: `git.exe` and the file system through the APIs already
   rest) is never reimplemented. To verify before the spec: the current release's Windows support and mount options,
   and how it lives beside a running desktop app. Local first (B-15): the vault's cloud copy is the user's sync client's
   business.
+- **AxList and AxTask** (asked 2026-10-23; placeholder names, no spec; the user may or may not pursue them). AxList: a
+  list manager for things to remember, with bullet, numbered and checkbox lists; later, links between items for
+  mind maps, curriculum planning, recall in plain language and structured storage. AxTask: the checkbox lists as a
+  task manager, with reminders, automations and smart lists (saved filters). Perhaps one app at first, split when the
+  task side grows. Other names considered: AxNotes, AxTodo. The rule the user set for both: plain text files on disk
+  (Markdown lists, one file per list) with a clear, documented format, so that an AI system or a script can read and
+  change them as easily as the app does; no database the user cannot open in AxDown.
+- **Other everyday utilities, on record only** (2026-10-23): **AxWeb**, a simple browser for reading the web as a
+  transcript of headings, links and text (the hard part is the engine: WebView2 is a web view, which B-10 rules out,
+  so a reader over fetched HTML is the likely shape); **AxMail**, a mail reader and writer over IMAP and SMTP;
+  **AxCalendar**, dates and reminders (shared with AxTask's reminders); **AxCalc**, a calculator as a field with a
+  history; **AxClip**, a clipboard history; **AxSettings**, a plain list of the Windows settings a user changes most.
+  Each would keep the same rule: local first (B-15), plain files, clear formats an AI can work with.
 - The order the user set: the spec, then the infrastructure, then the build; AxTerminal first, since its
   infrastructure is the moves; AxFile next; the two engines verified before their specs are written.
