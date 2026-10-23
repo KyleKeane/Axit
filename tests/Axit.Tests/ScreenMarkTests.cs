@@ -13,8 +13,16 @@ public sealed class ScreenMarkTests
 {
     private const string Esc = "\x1b";
 
+    /// <summary>A store with no screen of its own: the test drives a screen by hand, so the frame's work and the system lines are nothing here.</summary>
     private sealed class Store : LineStore
     {
+        public override void AddSystemLine(string text)
+        {
+        }
+
+        protected override void CompleteFrame()
+        {
+        }
     }
 
     [Fact]

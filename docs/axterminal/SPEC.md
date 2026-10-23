@@ -298,7 +298,10 @@ src/Axit.Core/Pty, Vt, Transcript  from AxClaude.Core, moved on this second use 
                           Vt/Screen (gains the OSC 133 and 9;9 events, and PullRowText), Vt/Wcwidth; Transcript/Line,
                           LineKind, TranscriptMirror, Utterance; and LineStore, the part of SessionModel that holds the
                           lines (the list, CreateLine, Commit, Remove, TextChanged), which Screen writes to; SessionModel
-                          keeps that part by deriving from it. Tested where they were (AxClaude's fixtures).
+                          keeps that part by deriving from it. Since 2026-10-23 LineStore also holds what both models
+                          had copied: the UTF-8 decoder and Feed, the parser and the screen (NewScreen, to which each
+                          model attaches its own handlers), EndFrame, the bookmarks, the cap and the Changed and Bell
+                          events. Tested where they were (AxClaude's fixtures, the shell fixtures).
 src/Axit.Forms/TranscriptView  from AxClaude, its quick-key table given by the window as data (the QuickKey records with
                           the window's keys) instead of read from AxClaudeKeys; AxClaude hands it its own table.
 src/AxTerminal.Core/      class library (net10.0): ShellLauncher (find the shells, the command line with the prompt

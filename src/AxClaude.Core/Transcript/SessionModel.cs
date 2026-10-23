@@ -1,13 +1,12 @@
-using System.Text;
 using System.Text.RegularExpressions;
-using Axit.Core.Vt;
 using Axit.Core.Transcript;
 
 namespace AxClaude.Core.Transcript;
 
 /// <summary>
 /// Owns the transcript: the ordered list of lines built from the screen plus the marker and system lines the app
-/// inserts. Feed it the raw console bytes; it raises <see cref="Changed"/> at the end of every frame.
+/// inserts, on the bundle's <see cref="LineStore"/>, which holds the lines, the screen, the parser, the bookmarks and
+/// the cap. Feed it the raw console bytes; it raises <see cref="LineStore.Changed"/> at the end of every frame.
 /// Single threaded: call everything from one thread.
 /// </summary>
 public sealed partial class SessionModel : LineStore
@@ -29,10 +28,6 @@ public sealed partial class SessionModel : LineStore
     private readonly List<PendingSend> _pending = [];
     /// <summary>The last line of the previous run in this window, set by <see cref="ResetScreen"/>: the replay marking starts after it (FR-4.8).</summary>
     private Line? _runBoundary;
-    private readonly Decoder _decoder = Encoding.UTF8.GetDecoder();
-    private char[] _chars = new char[4096];
-    private Screen _screen = null!;
-    private VtParser _parser = null!;
     private Line? _anchor;
 
     /// <summary>
@@ -42,20 +37,12 @@ public sealed partial class SessionModel : LineStore
     /// </summary>
     private bool _repainting;
     private Line? _responseStartedFor;
-    private int _bookmarkCount;
 
     public SessionModel(int columns, int rows)
+        : base(columns, rows)
     {
-        Columns = columns;
-        Rows = rows;
-        NewScreen();
+        AttachScreen();
     }
-
-    public int Columns { get; }
-    public int Rows { get; }
-
-    /// <summary>Messages sent since the start, or since <see cref="Clear"/>: the n of the last exchange block (FR-4.1).</summary>
-    public int ExchangeCount { get; private set; }
 
     /// <summary>Claude's cursor sits on a prompt row, so it is waiting for an answer (FR-7.2).</summary>
     public bool PromptPending { get; private set; }
@@ -119,52 +106,24 @@ public sealed partial class SessionModel : LineStore
 
     public string? SessionName { get; private set; }
 
-    /// <summary>Above this many lines the oldest tenth of the transcript is dropped (FR-3.6).</summary>
-    public int MaxLines { get; set; } = 20000;
-
-    /// <summary>Show reply rows that Claude hard-wrapped at the console width as one line (FR-3.2a).</summary>
-    public bool JoinWrappedLines { get; set; } = true;
-
-    /// <summary>Put the time of sending into the markers: <c># Input 3 (14:32)</c> and <c># Output 3 Reply from Claude (14:32)</c> (FR-4.6).</summary>
-    public bool TimeStamps { get; set; }
-
-    /// <summary>The clock the time stamps use; tests replace it.</summary>
-    public Func<DateTime> Clock { get; set; } = () => DateTime.Now;
-
-    /// <summary>Raised after every frame and after every marker or system line insertion.</summary>
-    public event Action? Changed;
-
-    public event Action? Bell;
-
     /// <summary>Raised once per response marker when the first reply, thinking or tool line appears after it.</summary>
     public event Action? ResponseStarted;
 
     /// <summary>Raised with the text of one of Claude's own bracketed announcement rows, such as "accept edits on".</summary>
     public event Action<string>? Announcement;
 
-    public void Feed(ReadOnlySpan<byte> bytes)
-    {
-        if (_chars.Length < bytes.Length + 4)
-        {
-            _chars = new char[Math.Max(bytes.Length + 4, _chars.Length * 2)];
-        }
-
-        var count = _decoder.GetChars(bytes, _chars, false);
-        _parser.Feed(_chars.AsSpan(0, count));
-    }
-
     /// <summary>
     /// The output went quiet (the app calls this after 100 ms without output, and at exit): the frame work of
     /// <see cref="CompleteFrame"/>, and the end of a repaint, which arrives as one burst of frames.
     /// </summary>
-    public void EndFrame()
+    public override void EndFrame()
     {
         CompleteFrame();
         _repainting = false;
     }
 
     /// <summary>Recomputes chrome, classification, echo handling and status from the current screen.</summary>
-    private void CompleteFrame()
+    protected override void CompleteFrame()
     {
         if (!Working && QueuedMessages == 0)
         {
@@ -203,7 +162,7 @@ public sealed partial class SessionModel : LineStore
         PromptPending |= PendingScreen is not null;
         CheckResponseStarted();
         Trim();
-        Changed?.Invoke();
+        RaiseChanged();
     }
 
     /// <summary>
@@ -242,16 +201,17 @@ public sealed partial class SessionModel : LineStore
         if (!Working)
         {
             InsertBlock(send, AnchorIndex());
-            Changed?.Invoke();
+            RaiseChanged();
         }
 
         return true;
     }
 
-    public void AddSystemLine(string text)
+    /// <summary>A line of the app's own (<c>System: …</c>, FR-4.5), above Claude's live block.</summary>
+    public override void AddSystemLine(string text)
     {
         _lines.Insert(AnchorIndex(), NewLine(LineKind.System, "System: " + text));
-        Changed?.Invoke();
+        RaiseChanged();
     }
 
     /// <summary>
@@ -286,58 +246,7 @@ public sealed partial class SessionModel : LineStore
         }
 
         _lines.Insert(index, NewLine(LineKind.Question, text));
-        Changed?.Invoke();
-    }
-
-    /// <summary>
-    /// The m key (FR-3.9): drops a bookmark in front of <paramref name="line"/>, or takes it away again when the line
-    /// has one, or is one. A bookmark is an app line, <c>Bookmark 3</c>, so it is read in place, found with k and
-    /// saved with the conversation. It goes in front of the first row of the line as the reader sees it: a
-    /// continuation row (FR-3.2a) joins the visible row before it. Returns the bookmark line and whether it was
-    /// added, or null when the line is no longer in the transcript.
-    /// </summary>
-    public (Line Bookmark, bool Added)? ToggleBookmark(Line line)
-    {
-        var first = _lines.LastIndexOf(line);
-        if (first < 0)
-        {
-            return null;
-        }
-
-        var before = VisibleBefore(first);
-        while (_lines[first].JoinedToPrevious && before >= 0)
-        {
-            first = before;
-            before = VisibleBefore(first);
-        }
-
-        var existing = line.Kind == LineKind.Bookmark ? line
-            : before >= 0 && _lines[before].Kind == LineKind.Bookmark ? _lines[before]
-            : null;
-        if (existing is not null)
-        {
-            _lines.Remove(existing);
-            Changed?.Invoke();
-            return (existing, false);
-        }
-
-        var bookmark = NewLine(LineKind.Bookmark, $"Bookmark {++_bookmarkCount}");
-        _lines.Insert(first, bookmark);
-        Changed?.Invoke();
-        return (bookmark, true);
-    }
-
-    private int VisibleBefore(int index)
-    {
-        for (var i = index - 1; i >= 0; i--)
-        {
-            if (!_lines[i].Hidden)
-            {
-                return i;
-            }
-        }
-
-        return -1;
+        RaiseChanged();
     }
 
     /// <summary>
@@ -388,7 +297,7 @@ public sealed partial class SessionModel : LineStore
 
         if (changed)
         {
-            Changed?.Invoke();
+            RaiseChanged();
         }
     }
 
@@ -442,7 +351,7 @@ public sealed partial class SessionModel : LineStore
 
         if (changed)
         {
-            Changed?.Invoke();
+            RaiseChanged();
         }
     }
 
@@ -493,14 +402,14 @@ public sealed partial class SessionModel : LineStore
         _runBoundary = null;
         _responseStartedFor = null;
         ExchangeCount = 0;
-        _bookmarkCount = 0;
+        ResetBookmarks();
         QueuedMessages = 0;
         StartRun();
     }
 
     private void StartRun()
     {
-        NewScreen();
+        AttachScreen();
         Working = false;
         Spinner = null;
         PromptPending = false;
@@ -513,7 +422,7 @@ public sealed partial class SessionModel : LineStore
         Mode = null;
         Background = null;
         SessionName = null;
-        Changed?.Invoke();
+        RaiseChanged();
     }
 
     // ---- The screen's line store (LineStore): what the lines it creates, commits or rewrites mean here ----
@@ -557,16 +466,13 @@ public sealed partial class SessionModel : LineStore
 
     // ---- internals ----
 
-    private void NewScreen()
+    /// <summary>The base's fresh screen with Claude's handlers on it: the repaint on a home, the session name from the title.</summary>
+    private void AttachScreen()
     {
-        _screen = new Screen(Columns, Rows, this);
-        _screen.FrameEnd += CompleteFrame;
-        _screen.Homed += OnHomed;
+        var screen = NewScreen();
+        screen.Homed += OnHomed;
+        screen.TitleChanged += OnTitle;
         _repainting = false;
-        _screen.Bell += () => Bell?.Invoke();
-        _screen.TitleChanged += OnTitle;
-        _parser = new VtParser(_screen);
-        _decoder.Reset();
         _anchor = null;
     }
 
@@ -1091,27 +997,6 @@ public sealed partial class SessionModel : LineStore
                 ResponseStarted?.Invoke();
                 return;
             }
-        }
-    }
-
-    /// <summary>Drops the oldest tenth of the transcript once it exceeds <see cref="MaxLines"/>; rows still on screen stay.</summary>
-    private void Trim()
-    {
-        if (_lines.Count <= MaxLines)
-        {
-            return;
-        }
-
-        var wanted = _lines.Count / 10;
-        var count = 0;
-        while (count < wanted && !_lines[count].OnScreen)
-        {
-            count++;
-        }
-
-        if (count > 0)
-        {
-            _lines.RemoveRange(0, count);
         }
     }
 

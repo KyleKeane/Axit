@@ -433,7 +433,7 @@ publish.ps1, install.ps1, install.cmd  build the zip; install or remove for the 
 ### 7.2 Data flow
 
 ```
-ConPTY output pipe ──(reader thread, one BeginInvoke per burst)──> UI thread: SessionModel.Feed = UTF-8 Decoder ──> VtParser ──> Screen
+ConPTY output pipe ──(reader thread, one BeginInvoke per burst)──> UI thread: LineStore.Feed (the base of SessionModel) = UTF-8 Decoder ──> VtParser ──> Screen
         ──(frame end: ESC[?25h, or 100 ms quiet)──> SessionModel.EndFrame (row text into lines, chrome, classification, echoes, status)
         ──Changed──> TranscriptView.Sync through TranscriptMirror (edits, caret) + announcements + status bar
 Input field / menus ──> MainForm write queue (paced writes) ──> ConPTY input pipe
