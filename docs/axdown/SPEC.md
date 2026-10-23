@@ -114,15 +114,19 @@ UTF-8, UTF-16 and the system code page; files that are not text; files over 32 M
 - AD-3.3 Writing: the text goes back in the remembered encoding, with the mark when there was one. A new document is
   UTF-8 without a mark.
 - AD-3.4 Line endings: the file's first line ending (`\r\n`, `\n` or `\r`) is remembered and used for every line on
-  save; a file with none keeps `\r\n`. The status bar shows it ("CRLF", "LF").
+  save; a file with none keeps `\r\n`. The status bar shows it ("CRLF", "LF"). A lone LF or CR in the text (pasted
+  from a Unix clipboard) goes out as the file's ending too (`TextDocument.ToBytes`, tested; until 2026-10-23 a CRLF
+  file gained bare LFs).
 - AD-3.5 Save writes the file in place (as Notepad does) and then reads its last write time, which Ctrl+S and the
   close check compare against (AD-3.6). Save as asks for a path with the Windows file picker, then saves and renames
   the document (title, editor name, status bar) once the write has succeeded; a write that fails is the error notice
   and the document stays as it was (until 2026-10-23 it was renamed first).
 - AD-3.6 Changed on disk: the file's last write time is compared with the one remembered when the window becomes
-  active again (`OnActivated`; nothing is watched or polled while it stays active, since the user leaves it to let
+  active again (`OnActivated`, but not as one of the Windows dialogs closes, which activates the window before Save as has
+  written, 2026-10-23; nothing is watched or polled while it stays active, since the user leaves it to let
   another program, Claude, work and comes back) and at the moment of saving. Back in the window with no unsaved
-  changes and a changed file, the editor reloads it, keeps the caret on its line and column, and says "Reloaded,
+  changes and a changed file, the editor reloads it, keeps the caret on its line and column (on a line that got shorter, at its end, never
+  between a CR and its LF: `TextLines`, tested, 2026-10-23), and says "Reloaded,
   <name> changed on disk"; a reload that cannot read the file (another program still holds it) is the error notice
   with the text kept, and the file is not compared again until the next read or save (until 2026-10-23 the editor
   was emptied and "Reloaded" said over the error); with unsaved changes it says once, until the file changes again,
@@ -134,7 +138,9 @@ UTF-8, UTF-16 and the system code page; files that are not text; files over 32 M
 - AD-3.7 A file over 32 MB is refused with a notice, since the EDIT control stops being usable long before that, and
   so is a file that is not text: one whose decoded text holds a NUL character (a PNG, UTF-16 without a mark), since
   the EDIT control keeps only the text before the first NUL and a save would write that truncation back. A file that
-  cannot be opened (over the limit, not text, locked, no permission) is reported in a notice and the window stays
+  cannot be opened (over the limit, not text, locked, no permission) is reported in a notice (the limit's names the
+  size in bytes and the limit, without an app's name, since the reader is every editor's; until 2026-10-23 it said
+  AxDown in AxJSON, and a file one byte over said it was 32 MB) and the window stays
   open with an empty, untitled document, so that Save cannot write the empty editor over the file (Save as names a
   new one). A missing file opens as an empty document of that name, created by the first save.
 - AD-3.8 Open, New and Exit check for unsaved changes first (AD-6.1).
@@ -290,7 +296,10 @@ are read and written on the UI thread (a 32 MB file is the ceiling, AD-3.7).
 
 - **AD-D1 The EDIT control, not RichTextBox.** It is the control AxClaude already proved with NVDA; RichEdit reads
   differently, wraps differently and would invite formatting. The known costs (re-wrap near the top of a large text,
-  one-level undo) are accepted for a document editor; the undo has been the window's own history since AD-2.5 (2026-10-21).
+  one-level undo) are accepted for a document editor; the undo has been the window's own history since AD-2.5 (2026-10-21), and the control's own undo is out of
+  reach since 2026-10-23: its buffer is emptied after each change, Alt+Backspace is the window's Undo, and the text's
+  context menu is the window's own (Undo, Redo, Cut, Copy, Paste, Select all; the control's menu undid through its
+  buffer, which the history then recorded as another step).
 - **AD-D2 Barebones first.** Version one has what section 4 lists and nothing more, so that the window is simple
   to learn and the code simple to change (AX B-10); the navigation keys come second (section 9); collaborative and
   AI-assisted editing are other apps of the bundle, not features of this one.

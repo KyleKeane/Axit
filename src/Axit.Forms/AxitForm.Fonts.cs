@@ -67,7 +67,7 @@ public abstract partial class AxitForm
             MinSize = 6,
             MaxSize = 72,
         };
-        if (dialog.ShowDialog(this) != DialogResult.OK)
+        if (ShowSystemDialog(dialog) != DialogResult.OK)
         {
             return;
         }

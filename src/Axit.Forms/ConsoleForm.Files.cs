@@ -42,7 +42,7 @@ public abstract partial class ConsoleForm
             DefaultExt = extension,
             InitialDirectory = folder,
         };
-        if (dialog.ShowDialog(this) != DialogResult.OK)
+        if (ShowSystemDialog(dialog) != DialogResult.OK)
         {
             return;
         }
@@ -80,7 +80,7 @@ public abstract partial class ConsoleForm
             // A recording holds everything on screen, account details and paths included: outside the project (AxClaude D34).
             InitialDirectory = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments),
         };
-        if (dialog.ShowDialog(this) == DialogResult.OK)
+        if (ShowSystemDialog(dialog) == DialogResult.OK)
         {
             StartRecording(dialog.FileName);
         }

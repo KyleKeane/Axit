@@ -55,6 +55,12 @@
 - AxMedia: two files played in quick succession no longer let the first one's failure skip the second: an event is matched to the file it is about.
 - AxMedia: Ctrl+Right, Ctrl+Left and Go to time say the position reached, the file's end at most, not the one asked for.
 - For developers: AxMedia's hand-overs are one queue drained in order; the black video area is written into AX-7.7 as the one colour an app sets.
+- AxDown, AxJSON: the EDIT control's own undo is out of reach: Alt+Backspace is the window's Undo, the text's context menu is the window's own, and the control's buffer is emptied after each change; its undo was recorded as another step, so Ctrl+Z then undid the control's undo.
+- AxDown, AxJSON: a file reloaded while a line got shorter keeps the caret on its line, never between the CR and the LF of a line end; text pasted with Unix line endings is saved with the file's line ending, where a CRLF file gained bare LFs.
+- AxDown, AxJSON: "Reloaded" is no longer said while the Open or Save as picker closes, which counted as coming back to the window; the notice for a file over 32 MB names its size in bytes and no longer names AxDown in AxJSON.
+- AxPreview: a file whose first eight kilobytes are text but which holds a NUL further in keeps the text shown, with the error, instead of emptying the window; a hand-over during an update's progress leaves the progress notice; a path that does not exist is the notice "File not found", not an empty window under its name that Edit in AxDown then created.
+- AxFile: coming back from one of the Windows dialogs no longer reads the folder again.
+- For developers: the viewer's own code is TextEditorForm.Viewer.cs and LoadDocument is the read and the showing; TextLines in Axit.Core holds the caret arithmetic, tested; every Windows dialog goes through AxitForm.ShowSystemDialog, which marks the window while one is up (DialogShowing); EditHistory tells its size, tested.
 
 ## 3.4.0 - 2026-10-22
 

@@ -441,7 +441,10 @@ These are the rules of `docs/axclaude/SPEC.md` that are not about Claude; app sp
   (`OverlayPanel`), never a `Form` or a `MessageBox` once a window exists. A notice's button may open the next notice
   (the update's progress, an error, AxDown's changed-on-disk question after Save), which then stays in view. The
   Windows folder, file and font pickers, and the shell's own dialogs and menu an app hands an entry to (AxFile's Open
-  with, Properties and Windows menu, docs/axfile/SPEC.md AF-4.7), are the only separate windows.
+  with, Properties and Windows menu, docs/axfile/SPEC.md AF-4.7), are the only separate windows. The pickers are
+  shown through the window base's `ShowSystemDialog`, which marks the window while one is up (`DialogShowing`),
+  since a dialog's closing activates the window before the command that opened it has gone on (2026-10-23: the
+  editors said "Reloaded" in the middle of Save as, and AxFile read its folder again).
   A notice's text takes the heading letters in every window (`TextJump.HeadingLetters`, the default of
   `OverlayPanel.Jumps`; the letters of AxClaude's transcript): h and Shift+H the next and the previous heading, 1 to 6
   and Shift with them a heading of that level, by the text's Markdown headings; an editor's notices take the editor's

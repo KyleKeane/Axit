@@ -442,7 +442,7 @@ public sealed class MediaForm : AxitForm
             dialog.InitialDirectory = folder;
         }
 
-        var chosen = dialog.ShowDialog(this) == DialogResult.OK ? dialog.FileNames : [];
+        var chosen = ShowSystemDialog(dialog) == DialogResult.OK ? dialog.FileNames : [];
         _list.Select();
         if (chosen.Length > 0)
         {

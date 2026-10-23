@@ -899,7 +899,7 @@ public sealed partial class FileForm
             Filter = "Programs and scripts (*.exe;*.cmd;*.bat;*.ps1;*.py)|*.exe;*.cmd;*.bat;*.ps1;*.py|All files (*.*)|*.*",
             CheckFileExists = true,
         };
-        var chosen = dialog.ShowDialog(this) == DialogResult.OK ? dialog.FileName : null;
+        var chosen = ShowSystemDialog(dialog) == DialogResult.OK ? dialog.FileName : null;
         _list.Select();
         if (chosen is null)
         {

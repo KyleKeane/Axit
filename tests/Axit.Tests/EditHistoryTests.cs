@@ -151,6 +151,28 @@ public class EditHistoryTests
     }
 
     [Fact]
+    public void The_size_counts_the_deltas_held_once_merges_and_drops_included()
+    {
+        var history = new EditHistory();
+        history.Record(string.Empty, "a", 1, 0);
+        history.Record("a", "ab", 2, 1);
+        history.Record("ab", "abc", 3, 2);
+        // One run of typing: one step of three characters, not three steps.
+        Assert.Equal(3, history.Size);
+        history.Record("abc", "abc" + new string('x', 10), 13, NotTyped);
+        Assert.Equal(13, history.Size);
+
+        // An undone step still counts, on the redo side, until a new change drops it.
+        Assert.NotNull(history.Undo());
+        Assert.Equal(13, history.Size);
+        history.Record("abc", "abcd", 4, 3);
+        Assert.Equal(4, history.Size);
+
+        history.Clear();
+        Assert.Equal(0, history.Size);
+    }
+
+    [Fact]
     public void The_oldest_steps_are_dropped_beyond_the_limit()
     {
         var history = new EditHistory();

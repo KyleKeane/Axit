@@ -38,7 +38,8 @@ public sealed record TextDocument(string Text, Encoding Encoding, bool ByteOrder
         var length = new FileInfo(path).Length;
         if (length > MaxBytes)
         {
-            throw new InvalidOperationException($"{Path.GetFileName(path)} is {length / (1024 * 1024)} MB. AxDown opens files up to {MaxBytes / (1024 * 1024)} MB.");
+            // Exact and without an app's name: the reader is every editor's (until 2026-10-23 it named AxDown in AxJSON, and a file one byte over said it was 32 MB).
+            throw new InvalidOperationException($"{Path.GetFileName(path)} is {length:N0} bytes, over the {MaxBytes / (1024 * 1024)} MB a window can open.");
         }
 
         var document = FromBytes(File.ReadAllBytes(path));
@@ -92,7 +93,10 @@ public sealed record TextDocument(string Text, Encoding Encoding, bool ByteOrder
     /// <summary>The bytes of <paramref name="text"/> in this document's encoding, with its mark and its line ending (AD-3.3, AD-3.4).</summary>
     public byte[] ToBytes(string text)
     {
-        var body = Encoding.GetBytes(LineEnding == "\r\n" ? text : text.Replace("\r\n", LineEnding));
+        // Every line ending becomes the document's, a lone LF or CR pasted into the edit control included (a Unix
+        // clipboard; until 2026-10-23 only \r\n was replaced, and a CRLF file gained bare LFs).
+        var normalized = NormalizeLineEndings(text);
+        var body = Encoding.GetBytes(LineEnding == "\r\n" ? normalized : normalized.Replace("\r\n", LineEnding));
         if (!ByteOrderMark)
         {
             return body;

@@ -57,7 +57,8 @@ rather than a new one (AP-1.2). It works entirely offline (bundle G6).
 ### AP-1 Launch and the hand-over
 
 - AP-1.1 `Axit.exe preview [<file>] [--new]`: the file shown; no path opens the window empty, named "Untitled" (Ctrl+O
-  then). Start menu entry `Axit AxPreview`, console command `axpreview`, File Explorer's Open with Axit ▸ AxPreview on
+  then); a path that does not exist is the notice "File not found" naming it, the window empty or keeping what it
+  showed (decided 2026-10-23; it opened an empty window under the missing name, and Edit in AxDown created the file). Start menu entry `Axit AxPreview`, console command `axpreview`, File Explorer's Open with Axit ▸ AxPreview on
   every file, AxPreview under Windows' own Open with for text kinds (`.txt`, `.md`, `.markdown`, `.log`, `.json`,
   type name "Text file (AxPreview)"), so that the user can make it the default program for a kind in Windows'
   settings (AP-D2), the Axit menu's New window (AX-9). A file alone on the command line keeps going to its editor
@@ -88,9 +89,12 @@ rather than a new one (AP-1.2). It works entirely offline (bundle G6).
   mark, the code page, the line endings). Anything else: the notice "Not a text file" ("tool.exe is not a text file.
   AxFile's Enter opens it in the program Windows has for it."), the window keeping what it had; a file over the limit:
   the notice "Too large", "<name> is n MB. AxPreview opens files up to 32 MB."; a reload of a file that cannot be read
-  (held by another program): the error notice, the text kept (AxDown AD-3.6). A reload (AP-2.4) of a file that has
+  (held by another program): the error notice, the text kept (AxDown AD-3.6); a file whose first eight kilobytes pass
+  and which the reader refuses (a NUL further in): the error notice, the text kept as well (2026-10-23; the window
+  emptied). A reload (AP-2.4) of a file that has
   become one of these shows the same notice and keeps the text it had. A file handed over while a notice shows
-  closes the notice first, so that the window read on activation is the file's.
+  closes the notice first, so that the window read on activation is the file's; the update's progress notice stays,
+  the file loading behind it (2026-10-23).
 - AP-2.3 **Navigation**, the window-specific keys of `AxPreviewKeys` (AX-8), AxDown's letters (AxDown §9): Ctrl+H
   heading, Ctrl+1 to Ctrl+6 a heading of that level, Ctrl+K link, Ctrl+L list, Ctrl+I list item, Ctrl+Q block quote,
   Ctrl+T table, each the next one and with Shift the previous one, through the bundle's `TextJumps` over

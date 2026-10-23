@@ -61,6 +61,16 @@ public sealed class TextDocumentTests
     }
 
     [Fact]
+    public void A_lone_lf_or_cr_in_the_text_goes_out_as_the_file_s_line_ending()
+    {
+        // A Unix clipboard pastes lone LFs into the edit control: the file keeps its own ending (AD-3.4, 2026-10-23).
+        var crlf = TextDocument.FromBytes(Encoding.UTF8.GetBytes("a\r\nb"));
+        Assert.Equal("a\r\nb\r\nc\r\nd", Encoding.UTF8.GetString(crlf.ToBytes("a\r\nb\nc\rd")));
+        var lf = TextDocument.FromBytes(Encoding.UTF8.GetBytes("a\nb"));
+        Assert.Equal("a\nb\nc\nd", Encoding.UTF8.GetString(lf.ToBytes("a\r\nb\nc\rd")));
+    }
+
+    [Fact]
     public void Cr_alone_is_a_line_ending_too()
     {
         var bytes = Encoding.UTF8.GetBytes("a\rb");

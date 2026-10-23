@@ -124,7 +124,7 @@ internal sealed partial class MainForm
             Filter = "Claude Code (claude.exe;claude.cmd)|claude.exe;claude.cmd|Programs (*.exe;*.cmd)|*.exe;*.cmd|All files (*.*)|*.*",
             CheckFileExists = true,
         };
-        if (dialog.ShowDialog(this) != DialogResult.OK)
+        if (ShowSystemDialog(dialog) != DialogResult.OK)
         {
             return;
         }

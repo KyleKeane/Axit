@@ -174,8 +174,15 @@ public sealed partial class FileForm : AxitForm
         (_stateLabel, _pathLabel) = StatusLayout.Pair(_status);
 
         SizeChanged += (_, _) => FitPane();
-        // AF-3.4: coming back to the window reads the folder again when another program changed it.
-        Activated += (_, _) => Do(RefreshIfChangedAsync);
+        // AF-3.4: coming back to the window reads the folder again when another program changed it; not when one of
+        // the Windows dialogs closes, which activates the window too (the base's DialogShowing).
+        Activated += (_, _) =>
+        {
+            if (!DialogShowing)
+            {
+                Do(RefreshIfChangedAsync);
+            }
+        };
 
         // Docked from the last control to the first: the menu takes the top, the status bar the bottom, the Actions
         // list the strip above the status bar, and the folder list (or the notice over both) what is left.

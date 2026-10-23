@@ -406,6 +406,28 @@ public abstract partial class AxitForm : Form
 
     // ---- the ways out to the system (AX-7.2: the only separate windows) ----
 
+    /// <summary>
+    /// Whether one of the Windows dialogs (the folder, file and font pickers) is up. Its closing activates the window
+    /// before the command that opened it has gone on, so a window that acts on activation (the editors' reload of a
+    /// file changed on disk, AxFile's read of the folder) waits while this is set (2026-10-23: "Reloaded" was said in
+    /// the middle of Save as).
+    /// </summary>
+    protected bool DialogShowing { get; private set; }
+
+    /// <summary>Shows one of the Windows dialogs over this window, the only separate windows an app opens (AX-7.2), with <see cref="DialogShowing"/> set meanwhile.</summary>
+    protected DialogResult ShowSystemDialog(CommonDialog dialog)
+    {
+        DialogShowing = true;
+        try
+        {
+            return dialog.ShowDialog(this);
+        }
+        finally
+        {
+            DialogShowing = false;
+        }
+    }
+
     /// <summary>The Windows folder picker, titled with <paramref name="description"/> and opened on <paramref name="start"/>: the folder chosen, or null.</summary>
     protected string? ChooseFolder(string description, string? start = null)
     {
@@ -415,7 +437,7 @@ public abstract partial class AxitForm : Form
             dialog.InitialDirectory = start;
         }
 
-        return dialog.ShowDialog(this) == DialogResult.OK && dialog.SelectedPath.Length > 0 ? dialog.SelectedPath : null;
+        return ShowSystemDialog(dialog) == DialogResult.OK && dialog.SelectedPath.Length > 0 ? dialog.SelectedPath : null;
     }
 
     /// <summary>A page in the default browser; a failure is a notice. The Axit menu, in this project, calls it for the repository page.</summary>

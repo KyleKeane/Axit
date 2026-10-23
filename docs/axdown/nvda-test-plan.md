@@ -33,7 +33,7 @@ letter), and a `long.md` with headings and lines longer than the window.
    again the first, a third Ctrl+Z says "Nothing to undo"; Ctrl+Y twice puts both back, a third says "Nothing to
    redo". Paste a line (Ctrl+V) and type after it: Ctrl+Z takes the typed text, then the pasted line. Hold Backspace
    over a few words: one Ctrl+Z restores them all, the caret after them. Type, Ctrl+S ("Saved"), Ctrl+Z: the typing
-   is undone past the save and the title has its star again. Edit, Undo and Edit, Redo do the same as the keys.
+   is undone past the save and the title has its star again. Edit, Undo and Edit, Redo do the same as the keys. Alt+Backspace: "Undone" as Ctrl+Z (the undo of the window, not of the control); Shift+F10 in the text: the menu reads Undo, Redo, Cut, Copy, Paste, Select all.
    Open another file: Ctrl+Z says "Nothing to undo". Nothing but the announcement is spoken on any of these, and
    NVDA's arrow keys read the text as restored.
 

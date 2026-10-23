@@ -40,6 +40,9 @@ public sealed class EditHistory
 
     public bool CanRedo => _redo.Count > 0;
 
+    /// <summary>The characters of deltas held, on both sides: what <see cref="Limit"/> bounds.</summary>
+    public int Size => _size;
+
     /// <summary>Where the caret sits when the open run of typing or deleting goes on, or -1 when no run is open.</summary>
     public int RunCaret => _runOpen && _undo.Count > 0 ? _undo[^1].Start + _undo[^1].Inserted.Length : -1;
 
