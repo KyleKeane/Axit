@@ -173,6 +173,24 @@ public sealed class PtyHost : IDisposable
         }
     }
 
+    /// <summary>
+    /// Ends the client at once, without the two seconds its console's closing gives it: for a restart or a close the
+    /// user confirmed while a command runs (AxClaude FR-1.7, AxTerminal AT-1.6), when a program that ignores the
+    /// console closing (ping -t) would otherwise hold the window for the whole wait. <see cref="Dispose"/> follows.
+    /// </summary>
+    public void Kill()
+    {
+        lock (_writeLock)
+        {
+            if (_disposed || HasExited)
+            {
+                return;
+            }
+        }
+
+        Native.TerminateProcess(_process.hProcess, 1);
+    }
+
     /// <summary>Closes the console, which ends the client, and terminates it if it lingers.</summary>
     public void Dispose()
     {

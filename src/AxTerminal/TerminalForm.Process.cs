@@ -51,10 +51,10 @@ internal sealed partial class TerminalForm
     }
 
     /// <summary>The question heuristic's timer stops with the shell; the console window stops the process, the writes and the control area.</summary>
-    protected override void StopProcess()
+    protected override void StopProcess(bool terminateAtOnce = false)
     {
         _asks.Stop();
-        base.StopProcess();
+        base.StopProcess(terminateAtOnce);
     }
 
     /// <summary>
@@ -91,7 +91,8 @@ internal sealed partial class TerminalForm
     /// </summary>
     private void Relaunch(string systemLine, bool clearTranscript)
     {
-        StopProcess();
+        // A command still running is ended at once (AT-1.6): the user chose the restart or the new session knowing it.
+        StopProcess(terminateAtOnce: ProcessRunning && _model.Running);
         // The next shell draws on a fresh screen either way: the old one's cells and hidden rows are the old shell's,
         // and a new shell assumes a blank terminal (until 2026-10-23 a new session kept them, and the new shell's
         // shorter rows showed the old ones' tails).

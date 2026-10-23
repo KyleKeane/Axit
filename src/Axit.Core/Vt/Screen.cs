@@ -461,8 +461,10 @@ public sealed class Screen
         }
     }
 
+    /// <summary><c>ESC c</c> and <c>ESC[!p</c>: the screen as at the start. A model that keeps what was on screen lets the rows go first, as for an erase (<see cref="Cleared"/>; until 2026-10-23 a reset cleared the rows without the event).</summary>
     private void Reset()
     {
+        Cleared?.Invoke();
         foreach (var row in _rows)
         {
             row.Clear(0, Columns);
@@ -471,6 +473,7 @@ public sealed class Screen
         _top = 0;
         _bottom = Rows - 1;
         MoveCursor(0, 0);
+        ClearedSinceFrameEnd = true;
     }
 
     private void SetScrollRegion(int top, int bottom)
@@ -521,20 +524,23 @@ public sealed class Screen
     /// <summary>
     /// Lets go of every row's line, as if the rows had scrolled away: the lines stay in the transcript with the text
     /// they had at the last frame end, not what was written on their rows since, and what is printed on the rows
-    /// next gets lines of its own.
+    /// next gets lines of its own. The rows start blank: a row the program does not rewrite would otherwise come
+    /// back as a new line with the old text, and a shorter rewrite would read the old tail after the new text
+    /// (2026-10-23).
     /// </summary>
     public void DetachRows()
     {
         foreach (var row in _rows)
         {
-            if (row.Line is not { } line)
+            if (row.Line is { } line)
             {
-                continue;
+                row.Dirty = false;
+                _store.Commit(line);
+                row.Line = null;
             }
 
+            row.Clear(0, Columns);
             row.Dirty = false;
-            _store.Commit(line);
-            row.Line = null;
         }
     }
 

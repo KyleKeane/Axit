@@ -15,11 +15,12 @@ public static class GitExclude
     public static readonly IReadOnlyList<string> Patterns = ["axclaude-*.vt", "axclaude-*.vt.chunks.txt", "axclaude-*.txt"];
 
     /// <summary>
-    /// The exclude file's text with the block present (<paramref name="on"/>) or gone, everything else kept; the same
-    /// text when nothing changes.
+    /// The exclude file's text with the block present (<paramref name="on"/>) or gone, everything else kept, with the
+    /// line ending the file had; the same text when nothing changes.
     /// </summary>
     public static string Apply(string existing, bool on)
     {
+        var newline = existing.Contains("\r\n", StringComparison.Ordinal) ? "\r\n" : "\n";
         var lines = existing.Replace("\r\n", "\n").Split('\n').ToList();
         var start = lines.IndexOf(BlockStart);
         var end = start < 0 ? -1 : lines.IndexOf(BlockEnd, start);
@@ -52,7 +53,7 @@ public static class GitExclude
             lines.Add(string.Empty);
         }
 
-        return string.Join("\n", lines);
+        return string.Join(newline, lines);
     }
 
     /// <summary>

@@ -155,7 +155,9 @@ public sealed class TranscriptView : TextBox
         {
             _pending = lines;
             _hold.Stop();
-            _hold.Interval = (int)Math.Clamp(NavigationHoldMs - sinceKey, 1, NavigationHoldMs);
+            // The rest of the hold after a key; a whole hold while a selection holds the output, since only a key,
+            // which restarts the hold, changes that (the remainder went to 1 ms and spun the UI thread until 2026-10-23).
+            _hold.Interval = sinceKey < NavigationHoldMs ? (int)Math.Max(1, NavigationHoldMs - sinceKey) : NavigationHoldMs;
             _hold.Start();
             return;
         }

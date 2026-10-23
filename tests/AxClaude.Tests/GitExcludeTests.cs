@@ -16,6 +16,19 @@ public class GitExcludeTests
         Assert.Same(once, GitExclude.Apply(once, on: true));
     }
 
+    /// <summary>A file written with Windows line endings keeps them (it was rewritten with Unix ones until 2026-10-23).</summary>
+    [Fact]
+    public void The_file_keeps_its_line_ending()
+    {
+        var windows = GitDefault.Replace("\n", "\r\n") + "secret.txt\r\n";
+        var on = GitExclude.Apply(windows, on: true);
+        Assert.DoesNotContain("\n", on.Replace("\r\n", string.Empty));
+        Assert.EndsWith(GitExclude.BlockEnd + "\r\n", on);
+        Assert.StartsWith(windows, on);
+        var off = GitExclude.Apply(on, on: false);
+        Assert.Equal(windows, off);
+    }
+
     [Fact]
     public void Off_removes_the_block_and_keeps_the_rest()
     {

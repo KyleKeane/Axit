@@ -246,7 +246,8 @@ public abstract partial class ConsoleForm : AxitForm
             RecentlyClosed.Remember(AppName, folder);
         }
 
-        StopProcess();
+        // A close the user confirmed while the program was busy ends it at once; Windows' own close gives it its two seconds.
+        StopProcess(terminateAtOnce: _closeConfirmed);
         StopRecording(announce: false);
         base.OnFormClosing(e);
     }

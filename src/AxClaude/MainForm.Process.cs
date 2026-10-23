@@ -117,20 +117,21 @@ internal sealed partial class MainForm
     }
 
     /// <summary>The attention timer stops with Claude; the console window stops the process, the writes and the control area.</summary>
-    protected override void StopProcess()
+    protected override void StopProcess(bool terminateAtOnce = false)
     {
         _attention.Stop();
-        base.StopProcess();
+        base.StopProcess(terminateAtOnce);
     }
 
     /// <summary>
     /// Stops Claude and starts it again with the current folder and arguments, after the system line. The
     /// conversation stays in the window (Restart Claude) unless <paramref name="clearConversation"/> is set (New
     /// session, a folder change; FR-8.3, FR-8.6), in which case the system line is the first line of the emptied window.
+    /// A Claude in the middle of a turn is terminated at once (FR-1.8): the user chose the restart knowing it.
     /// </summary>
     private void Relaunch(string systemLine, bool clearConversation = false)
     {
-        StopProcess();
+        StopProcess(terminateAtOnce: ClaudeBusy);
         if (clearConversation)
         {
             _model.Clear();

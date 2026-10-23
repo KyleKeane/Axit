@@ -144,10 +144,12 @@ public abstract partial class ConsoleForm
 
     /// <summary>
     /// Stops the program and everything that was waiting on it: the timers, the write pump and its queue, the
-    /// control area (nothing waits on an answer any more), the status bar and the music. A window with timers of
-    /// its own stops them first and calls here.
+    /// control area (nothing waits on an answer any more), the status bar and the music. The program gets two
+    /// seconds to end on its console closing, unless <paramref name="terminateAtOnce"/>: a restart or a close the
+    /// user confirmed while it was busy ends it now (AxClaude FR-1.7, AxTerminal AT-1.6). A window with timers of its
+    /// own stops them first and calls here.
     /// </summary>
-    protected virtual void StopProcess()
+    protected virtual void StopProcess(bool terminateAtOnce = false)
     {
         var host = _host;
         _host = null;
@@ -156,6 +158,11 @@ public abstract partial class ConsoleForm
         _pump.Stop();
         _writes.Clear();
         _writing = false;
+        if (terminateAtOnce)
+        {
+            host?.Kill();
+        }
+
         host?.Dispose();
         CloseArea();
         UpdateStatus();

@@ -83,9 +83,9 @@ public static class SlashCommands
         // Screens with tabs, search fields, sliders or a way on to typed text.
         new("permissions", CommandInteraction.Panel, Recorded),
         new("autocompact", CommandInteraction.Panel, Recorded),
-        // /feedback lists the queued drafts as numbered answers (2.1.302); a draft leads to its review screen, which
-        // waits on a hint row ("Enter to send · d to discard · Esc to later").
-        new("feedback", CommandInteraction.Picker, Recorded),
+        // /feedback lists the queued drafts as numbered answers; a draft leads to its review screen, which waits on a
+        // hint row ("Enter to send · d to discard · Esc to later"). Recorded later than the rest (2026-10-18).
+        new("feedback", CommandInteraction.Picker, "2.1.302"),
         new("artifacts", CommandInteraction.Panel, Recorded),
         new("auto-mode-setup", CommandInteraction.Panel, Docs),
         new("bug", CommandInteraction.Panel, Docs),

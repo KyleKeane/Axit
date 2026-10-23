@@ -116,12 +116,14 @@ out of scope; programs that print and ask are in. It works entirely offline (bun
   always one key away. Session → **Restart shell** (Ctrl+Shift+R) ends the shell and starts the same
   one again in its current directory, keeping the transcript, after the notice "Restart the shell?" while a command
   runs ("Enter: Restart now. Escape: Keep it running."); a shell that ended restarts at once. "Restarting" is
-  announced.
+  announced. A command still running when a restart, a new session or a switch goes ahead is terminated at once
+  with its shell, since the notice said so; an idle shell gets the two seconds of its console closing (AxClaude
+  FR-1.7; 2026-10-23).
 - AT-1.7 **The shell ends** (`exit` typed, a crash): the system line `The shell ended with code 0`, the announcement
   "The shell ended", the status `Shell ended`; Enter in the field then keeps its text and announces "The shell ended.
   Ctrl+Shift+R starts it again" (AxClaude FR-2.1). Closing the window ends the shell and whatever runs in it; while a
   command runs the notice "A command is still running" asks first, with **Close anyway** (Enter) and **Keep running**
-  (Escape), as AxClaude asks for Claude (AxClaude FR-1.7).
+  (Escape), as AxClaude asks for Claude (AxClaude FR-1.7); Close anyway terminates the command at once.
 - AT-1.8 The console is 240 columns by 50 rows (`ptyColumns`, `ptyRows`; AxClaude D9), so that programs wrap little;
   the window never resizes it.
 
@@ -209,9 +211,9 @@ out of scope; programs that print and ask are in. It works entirely offline (bun
   staying; the count of the blocks starts again; "Cleared". The lines off the screen go; the lines still on the
   screen are hidden until the shell writes over their rows, since the shell goes on drawing on that screen. The
   shell's own `cls` or `clear` clears only its screen: the window lets the rows go first (the lines keep their text,
-  the way AxClaude keeps a repainted conversation), so what was read stays and what the shell prints next goes on at
-  the end; a program that homes the cursor to redraw the screen is treated the same, and prints its redraws as new
-  lines (the alternate screen is a non-goal).
+  the way AxClaude keeps a repainted conversation, and the rows start blank), so what was read stays and what the
+  shell prints next goes on at the end; a program that homes the cursor to redraw the screen, or resets the terminal
+  (`ESC c`), is treated the same, and prints its redraws as new lines (the alternate screen is a non-goal).
 - AT-4.5 Bookmarks (`m`, `k`, Ctrl+Shift+K; AxClaude FR-3.9), `l` (the line number), Backspace (back from a jump,
   AxClaude FR-3.12), the reading breaks of a line being written (AxClaude FR-3.10), the selection that holds output
   back (AxClaude D29), Ctrl+C "Copied", Ctrl+A, find with Ctrl+F, F3 and Shift+F3: all the view's, unchanged.
