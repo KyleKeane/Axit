@@ -8,6 +8,9 @@
 //   --build      builds src\Axit in Release into the run's own folder first (the running app's bin is never touched)
 //   --exe        the Axit.exe to drive (default: src\Axit\bin\Release\net10.0-windows\Axit.exe)
 //   --report     writes every script's steps and its whole timeline, with times, to a Markdown file
+//   --nvda       the NVDA tier (tier 3): the windows open on the user's own desktop and come to the front, the keys go
+//                through SendInput as a keyboard's do, and NVDA's speech is read from its capture add-on
+//                (tools/nvda-capture). It takes over the machine: only at the user's word, with the user away.
 //   --keep       keeps %TEMP%\axit-drive\<process id>, the run's folder ({temp} in a script), with its logs
 //   A folder runs every *.txt under it, one after another, each with fresh windows and a fresh {temp}; the exit code
 //   is the number of scripts that failed.
@@ -31,6 +34,9 @@
 //   refuse said <text>        fails when the timeline holds the text within 2 s (what must not be said)
 //   expect quiet <ms>         fails when anything is announced within the time (sounds and values aside)
 //   try said <text>           as expect said, up to 15 s, and never fails: it records whether the text came
+//   expect spoken <text>      (--nvda) waits up to 15 s until NVDA has spoken the text; takes it and what came before
+//   refuse spoken <text>      (--nvda) fails when NVDA speaks the text within 2 s
+//   spoken                    (--nvda) prints what NVDA spoke since the last look, "[cancel]" where it stopped speech
 //   iffound <step>            the step, only when the last try found its text (a trust prompt that may not come)
 //   wait <ms>                 waits
 //   close                     closes the current window as Alt+F4 does
@@ -69,6 +75,7 @@ internal static class Program
                 case "--build": build = true; break;
                 case "--report": reportPath = args[++i]; break;
                 case "--keep": keep = true; break;
+                case "--nvda": Run.Nvda = true; break;
                 default:
                     Console.Error.WriteLine($"Unknown option: {args[i]}");
                     return 2;
@@ -103,6 +110,13 @@ internal static class Program
         var scripts = Directory.Exists(target)
             ? Directory.GetFiles(target, "*.txt", SearchOption.AllDirectories).OrderBy(path => path, StringComparer.OrdinalIgnoreCase).ToList()
             : [target];
+        if (Run.Nvda)
+        {
+            // NVDA records only while this file exists (tools/nvda-capture); the log starts empty for the run.
+            File.Delete(Speech.LogPath);
+            File.WriteAllText(Speech.FlagPath, string.Empty);
+        }
+
         var report = new StringBuilder($"# AxitDrive report\n\n{DateTime.Now:yyyy-MM-dd HH:mm}, {exe}\n\n");
         var failed = new List<string>();
         var clock = Stopwatch.StartNew();
@@ -118,6 +132,12 @@ internal static class Program
             {
                 failed.Add(name);
             }
+        }
+
+        if (Run.Nvda)
+        {
+            File.Delete(Speech.FlagPath);
+            File.Delete(Speech.LogPath);
         }
 
         if (reportPath is not null)
@@ -260,8 +280,13 @@ internal sealed record Event(long Ms, string Kind, string Text, bool Interrupt)
 internal sealed class Run(string exe, string temp)
 {
     private const string DesktopName = "axit-tests";
+
+    /// <summary>The NVDA tier: the user's own desktop, the foreground, real keyboard input, NVDA's speech.</summary>
+    public static bool Nvda { get; set; }
+
     private readonly List<Window> _windows = [];
-    private readonly nint _desktop = Native.CreateDesktopW(DesktopName, 0, 0, 0, 0x10000000, 0);
+    private readonly nint _desktop = Nvda ? 0 : Native.CreateDesktopW(DesktopName, 0, 0, 0, 0x10000000, 0);
+    private readonly Speech _speech = new();
     private readonly string _home = Path.Combine(temp, "home");
     private Window? _current;
     private bool _found;
@@ -289,8 +314,14 @@ internal sealed class Run(string exe, string temp)
             case "run":
                 return RunCommand(rest);
             case "start":
-                _current = Window.Start(exe, rest, DesktopName, _home);
+                _current = Window.Start(exe, rest, Nvda ? null : DesktopName, _home);
                 _windows.Add(_current);
+                if (Nvda)
+                {
+                    Native.AllowSetForegroundWindow(_current.ProcessId);
+                    _current.Send("activate");
+                }
+
                 return (true, $"process {_current.ProcessId}");
             case "use":
                 _current = _windows[int.Parse(rest) - 1];
@@ -313,6 +344,14 @@ internal sealed class Run(string exe, string temp)
             case "text" or "list" or "commands" or "state" or "focus":
                 var answer = Current.Send(verb);
                 return (!answer.Contains("\"error\""), answer);
+            case "spoken":
+                return (true, string.Join(" | ", _speech.TakeAll()));
+            case "keys" when Nvda:
+                Native.Keys(rest);
+                return (true, null);
+            case "type" when Nvda:
+                Native.Type(rest);
+                return (true, null);
             case "keys" or "type" or "menu" or "close":
                 var reply = Current.Send(line);
                 return (!reply.Contains("\"error\""), reply.Contains("\"error\"") ? reply : null);
@@ -373,6 +412,22 @@ internal sealed class Run(string exe, string temp)
         var what = space < 0 ? rest : rest[..space];
         var text = space < 0 ? string.Empty : rest[(space + 1)..];
         var window = Current;
+        if (what == "spoken")
+        {
+            var until = Stopwatch.StartNew();
+            while (until.ElapsedMilliseconds < 15_000)
+            {
+                if (_speech.Take(text) is { } heard)
+                {
+                    return (true, string.Join(" | ", heard));
+                }
+
+                Thread.Sleep(100);
+            }
+
+            return (false, $"NVDA did not say it within 15 s; it said: {string.Join(" | ", _speech.Pending())}");
+        }
+
         if (what == "quiet")
         {
             Thread.Sleep(int.Parse(text));
@@ -421,6 +476,12 @@ internal sealed class Run(string exe, string temp)
         var space = rest.IndexOf(' ');
         var text = rest[(space + 1)..];
         Thread.Sleep(2000);
+        if (rest.StartsWith("spoken", StringComparison.Ordinal))
+        {
+            var spoken = _speech.Pending().FirstOrDefault(said => said.Contains(text, StringComparison.OrdinalIgnoreCase));
+            return spoken is null ? (true, null) : (false, "NVDA said: " + spoken);
+        }
+
         var bad = Current.Pending().FirstOrDefault(e => e.Spoken.Contains(text, StringComparison.OrdinalIgnoreCase));
         return bad is null ? (true, null) : (false, $"said at {bad.Ms} ms: {bad.Spoken}");
     }
@@ -507,6 +568,56 @@ internal sealed class Run(string exe, string temp)
     }
 }
 
+/// <summary>What NVDA spoke, from the capture add-on's log (tools/nvda-capture): "speak" lines, and "[cancel]" where NVDA cut its speech.</summary>
+internal sealed class Speech
+{
+    public static readonly string FlagPath = Path.Combine(Path.GetTempPath(), "axit-nvda-capture.on");
+    public static readonly string LogPath = Path.Combine(Path.GetTempPath(), "axit-nvda-speech.log");
+    private readonly List<string> _all = [];
+    private long _read;
+    private int _taken;
+
+    public List<string> Pending()
+    {
+        if (File.Exists(LogPath))
+        {
+            using var stream = new FileStream(LogPath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite | FileShare.Delete);
+            stream.Seek(_read, SeekOrigin.Begin);
+            using var reader = new StreamReader(stream, new UTF8Encoding(false));
+            var text = reader.ReadToEnd();
+            var complete = text.LastIndexOf('\n') + 1;
+            _read += Encoding.UTF8.GetByteCount(text[..complete]);
+            foreach (var line in text[..complete].Split('\n', StringSplitOptions.RemoveEmptyEntries))
+            {
+                var parts = line.TrimEnd('\r').Split('\t');
+                _all.Add(parts.Length >= 3 && parts[1] == "cancel" ? "[cancel]" : parts.Length >= 3 ? parts[2] : line);
+            }
+        }
+
+        return _all.GetRange(_taken, _all.Count - _taken);
+    }
+
+    public List<string>? Take(string text)
+    {
+        var pending = Pending();
+        var at = pending.FindIndex(said => said.Contains(text, StringComparison.OrdinalIgnoreCase));
+        if (at < 0)
+        {
+            return null;
+        }
+
+        _taken += at + 1;
+        return pending.GetRange(0, at + 1);
+    }
+
+    public List<string> TakeAll()
+    {
+        var pending = Pending();
+        _taken = _all.Count;
+        return pending;
+    }
+}
+
 /// <summary>One Axit process on the test desktop, its automation pipe and its timeline.</summary>
 internal sealed class Window : IDisposable
 {
@@ -534,12 +645,12 @@ internal sealed class Window : IDisposable
 
     public int ExitCode => _process.HasExited ? _process.ExitCode : 0;
 
-    public static Window Start(string exe, string arguments, string desktop, string home)
+    public static Window Start(string exe, string arguments, string? desktop, string home)
     {
         Environment.SetEnvironmentVariable("AXIT_AUTOMATION", "1");
         // The run's own settings, logs and recently closed list, never the user's (AppPaths).
         Environment.SetEnvironmentVariable("AXIT_HOME", home);
-        var startup = new Native.STARTUPINFO { cb = Marshal.SizeOf<Native.STARTUPINFO>(), lpDesktop = "WinSta0\\" + desktop };
+        var startup = new Native.STARTUPINFO { cb = Marshal.SizeOf<Native.STARTUPINFO>(), lpDesktop = desktop is null ? null : "WinSta0\\" + desktop };
         var commandLine = new StringBuilder($"\"{exe}\" {arguments}");
         if (!Native.CreateProcessW(null, commandLine, 0, 0, false, 0, 0, null, ref startup, out var info))
         {
@@ -687,4 +798,106 @@ internal static class Native
 
     [DllImport("kernel32.dll")]
     public static extern bool CloseHandle(nint handle);
+
+    [DllImport("user32.dll")]
+    public static extern bool AllowSetForegroundWindow(int processId);
+
+    // ---- the NVDA tier's keyboard: SendInput, as a keyboard types ----
+
+    private const int INPUT_KEYBOARD = 1;
+    private const uint KEYEVENTF_KEYUP = 0x0002;
+    private const uint KEYEVENTF_UNICODE = 0x0004;
+
+    [StructLayout(LayoutKind.Sequential)]
+    private struct KEYBDINPUT
+    {
+        public ushort wVk;
+        public ushort wScan;
+        public uint dwFlags;
+        public uint time;
+        public nint dwExtraInfo;
+    }
+
+    [StructLayout(LayoutKind.Explicit, Size = 40)]
+    private struct INPUT
+    {
+        [FieldOffset(0)]
+        public int type;
+
+        [FieldOffset(8)]
+        public KEYBDINPUT ki;
+    }
+
+    [DllImport("user32.dll", SetLastError = true)]
+    private static extern uint SendInput(uint count, INPUT[] inputs, int size);
+
+    /// <summary>Key presses as the channel's keys step spells them, "ctrl+shift+p escape down", each one pressed and released with its modifiers.</summary>
+    public static void Keys(string presses)
+    {
+        foreach (var press in presses.Split(' ', StringSplitOptions.RemoveEmptyEntries))
+        {
+            var parts = press.Split('+');
+            var modifiers = parts[..^1].Select(part => part.ToLowerInvariant() switch
+            {
+                "ctrl" => (ushort)0x11,
+                "shift" => (ushort)0x10,
+                "alt" => (ushort)0x12,
+                _ => throw new ArgumentException($"unknown modifier {part}"),
+            }).ToList();
+            var key = VirtualKey(parts[^1]);
+            var inputs = new List<INPUT>();
+            inputs.AddRange(modifiers.Select(vk => Key(vk, up: false)));
+            inputs.Add(Key(key, up: false));
+            inputs.Add(Key(key, up: true));
+            inputs.AddRange(Enumerable.Reverse(modifiers).Select(vk => Key(vk, up: true)));
+            SendInput((uint)inputs.Count, [.. inputs], Marshal.SizeOf<INPUT>());
+            Thread.Sleep(150);
+        }
+    }
+
+    /// <summary>Characters as typed, each a Unicode key press.</summary>
+    public static void Type(string text)
+    {
+        foreach (var c in text)
+        {
+            INPUT[] inputs =
+            [
+                new INPUT { type = INPUT_KEYBOARD, ki = new KEYBDINPUT { wScan = c, dwFlags = KEYEVENTF_UNICODE } },
+                new INPUT { type = INPUT_KEYBOARD, ki = new KEYBDINPUT { wScan = c, dwFlags = KEYEVENTF_UNICODE | KEYEVENTF_KEYUP } },
+            ];
+            SendInput(2, inputs, Marshal.SizeOf<INPUT>());
+            Thread.Sleep(20);
+        }
+    }
+
+    private static INPUT Key(ushort vk, bool up) =>
+        new() { type = INPUT_KEYBOARD, ki = new KEYBDINPUT { wVk = vk, dwFlags = up ? KEYEVENTF_KEYUP : 0 } };
+
+    private static ushort VirtualKey(string name)
+    {
+        if (name.Length == 1 && char.IsLetterOrDigit(name[0]))
+        {
+            return char.ToUpperInvariant(name[0]);
+        }
+
+        return name.ToLowerInvariant() switch
+        {
+            "enter" => 0x0D,
+            "escape" or "esc" => 0x1B,
+            "tab" => 0x09,
+            "space" => 0x20,
+            "backspace" => 0x08,
+            "delete" => 0x2E,
+            "up" => 0x26,
+            "down" => 0x28,
+            "left" => 0x25,
+            "right" => 0x27,
+            "home" => 0x24,
+            "end" => 0x23,
+            "pageup" => 0x21,
+            "pagedown" => 0x22,
+            _ when name.StartsWith('f') && int.TryParse(name[1..], out var f) && f is >= 1 and <= 12 => (ushort)(0x70 + f - 1),
+            _ => throw new ArgumentException($"unknown key {name}"),
+        };
+    }
 }

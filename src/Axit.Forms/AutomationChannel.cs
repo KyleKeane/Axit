@@ -144,6 +144,7 @@ internal sealed class AutomationChannel
             "state" => _form.AutomationState(),
             "menu" => Menu(argument),
             "close" => Close(),
+            "activate" => Activate(),
             _ => new { error = $"unknown command {verb}" },
         };
         return JsonSerializer.Serialize(result);
@@ -262,6 +263,14 @@ internal sealed class AutomationChannel
         return new { ok = true, command = entry.Text };
     }
 
+    /// <summary>The NVDA tier (docs/axit/automation.md, tier 3): the window to the front, so that NVDA follows it and the keyboard reaches it; only on the user's desktop, at the user's word.</summary>
+    private object Activate()
+    {
+        _form.Activate();
+        SetForegroundWindow(_form.Handle);
+        return new { ok = GetForegroundWindow() == _form.Handle };
+    }
+
     private object Close()
     {
         _form.BeginInvoke(_form.Close);
@@ -323,6 +332,12 @@ internal sealed class AutomationChannel
 
     [DllImport("user32.dll")]
     private static extern nint GetFocus();
+
+    [DllImport("user32.dll")]
+    private static extern bool SetForegroundWindow(nint hWnd);
+
+    [DllImport("user32.dll")]
+    private static extern nint GetForegroundWindow();
 
     [DllImport("user32.dll")]
     private static extern bool PostMessage(nint hWnd, int msg, nint wParam, nint lParam);

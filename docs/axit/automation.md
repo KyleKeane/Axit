@@ -80,6 +80,15 @@ NVDA refuses to be started from the assistant's process ("Access is denied"), so
 - **The same scripts**, run with `--nvda`: the window is activated, the keys go through `SendInput` as a keyboard's
   do, and `expect spoken <text>` reads the capture file.
 
+Built 2026-10-23: `--nvda` in `tools/AxitDrive` (the windows on the user's desktop, brought to the front through the
+channel's `activate`, keys and characters through `SendInput`, `expect spoken`, `refuse spoken` and `spoken` over the
+capture log, the capture switched on for the run and its log deleted after it). The NVDA scripts live apart, in
+`tests/nvda-scripts`, so that a run of `tests/scripts` never takes the machine:
+
+```
+dotnet run --project tools\AxitDrive -c Release -- tests\nvda-scripts --build --nvda --report nvda-report.md
+```
+
 ## Rules
 
 - Claude sessions in tests use Haiku through `--model haiku` and leave the user's settings alone.
