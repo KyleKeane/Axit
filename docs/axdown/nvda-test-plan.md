@@ -81,8 +81,11 @@ letter), and a `long.md` with headings and lines longer than the window.
 ## 6. Menus and help
 
 1. Alt opens the menu; every item is read with its shortcut; Escape closes without changing the text.
-2. F1 opens the shortcuts notice; Page Down and Page Up move a screen of its text, Ctrl+Down and Ctrl+Up a paragraph;
-   Escape closes it and the focus is back in the editor at the same place.
+2. F1 opens the shortcuts notice, its first line naming the text's own keys; Page Down and Page Up move a screen of
+   its text, Ctrl+Down and Ctrl+Up a paragraph; h and Ctrl+H alike: "AxDown, heading level 2" (the next section),
+   Shift+H back; Ctrl+F, type `wrap`, Enter: the shortcuts text is back with "wrap" selected and NVDA reads the
+   line, F3: the next line with it, Ctrl+F then Escape: the text is back where it was; Escape closes the notice and
+   the focus is back in the editor at the same place.
 3. Help, User guide shows this app's guide, and Ctrl+H, Ctrl+K, Ctrl+L and the other navigation keys move through it, spoken
    as in the editor, "No next table" when there is none; Axit, About, Version names the version of Axit, the two apps
    and the folders; About, Licence, Attribution and Axit guide open their notices, Escape closes each.

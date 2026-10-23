@@ -33,7 +33,8 @@ If you had AxClaude installed before Axit existed, the installer removes it firs
 - Console: `axclaude`, or `axclaude C:\my\project`; `axdown notes.md`; `axterminal C:\my\project`; `axfile C:\Music`; `axmedia C:\Music\Dune` or `axmedia 03.mp3`; `axpreview README.md`. `axit C:\my\project` and `axit notes.md` do the same as the first two, since a folder means AxClaude and a file AxDown, a `.json` file AxJSON, a sound or video file AxMedia.
 - File Explorer: right-click a folder, open `Open with Axit` and choose AxClaude, AxGit, AxTerminal or AxFile; right-click a file, open `Open with Axit` and choose AxDown, AxFile or AxPreview, AxJSON on a `.json` file, AxMedia on a sound or video file. On Windows 11 the submenu is in the full menu (Shift+F10, or Show more options).
 - From any Axit window: Ctrl+Shift+P, the command palette, finds any command of the window by typing part of its name, read with its menu and its key; Enter runs it.
-- From any Axit window: the Axit menu (Alt+A) starts a new AxClaude or AxDown, reopens a file or folder you closed lately, lists the open Axit windows, the one you were in last first and by type, closes them all, checks for updates, and has About with the version, the licence, the attribution, this guide and the project's page on GitHub.
+- From any Axit window: the Axit menu (Alt+A) has the command palette, starts a new window of any app, reopens a file or folder you closed lately, lists the open Axit windows, the one you were in last first and by type, closes them all, checks for updates, and has About with the version, the licence, the attribution, this guide and the project's page on GitHub.
+- In any notice's text (the keyboard shortcuts of F1, a user guide, this guide, About): h and Shift+H move by heading and 1 to 6 by level; Ctrl+F finds a text, F3 and Shift+F3 the next and the previous match.
 
 ## Update
 

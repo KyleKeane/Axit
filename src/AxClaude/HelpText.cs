@@ -7,8 +7,11 @@ namespace AxClaude;
 /// <summary>The texts the window shows as notices: the keyboard shortcuts (F1), the user guide, and the help when Claude Code is missing.</summary>
 public static class HelpText
 {
+    /// <summary>The F1 text (SPEC.md §6.3): a first line naming the text's own keys, then one Markdown heading per group, so that the heading letters walk it (bundle AX-7.2).</summary>
     public const string Shortcuts = """
-        Anywhere
+        In this text: h and Shift+H move by heading, 1 to 6 by level. Ctrl+F finds, F3 and Shift+F3 the next and the previous match
+
+        ## Anywhere
           Ctrl+1: go to the message field. Ctrl+2: go to the conversation. Both say where you are, also when you are there already
           Ctrl+3: go to the latest reply, in the conversation
           Tab, Shift+Tab, Ctrl+Tab or F6: switch between the message field (or Claude's question in its place) and the conversation
@@ -29,17 +32,17 @@ public static class HelpText
           Ctrl+Plus, Ctrl+Minus: bigger or smaller text
           F1: this list
           Ctrl+Shift+P: the command palette: type part of a command's name, Down and Up through the matches, Enter runs it
-          Alt+A: the Axit menu: a new AxClaude or AxDown window, the files and folders closed lately, the open Axit windows, most recent first (Alt+A, O, 1 is the one you were in last) and by type, Close all windows, Check for updates, and About
+          Alt+A: the Axit menu: the command palette, a new window of any app, the files and folders closed lately, the open Axit windows, most recent first (Alt+A, O, 1 is the one you were in last) and by type, Close all windows, Check for updates, and About
           Alt+F4: close AxClaude (asks first while Claude is working)
 
-        Message field
+        ## Message field
           Enter: send (an empty field sends a plain Enter to Claude)
           Shift+Enter: new line
           Page Up, Page Down: one screen of the field up or down, or the first or last line of the message
           Escape: does nothing; a reminder says that Shift+Escape interrupts Claude
           Ctrl+Up, Ctrl+Down: the previous or next paragraph of the message; with Shift, select to there
 
-        Conversation
+        ## Conversation
           Arrow keys, Home, End, Ctrl+Home, Ctrl+End: move as in any text
           Page Up, Page Down: one screen up or down
           Ctrl+Up, Ctrl+Down: the previous or next paragraph (the first line after a blank line); with Shift, select to there
@@ -64,7 +67,7 @@ public static class HelpText
           Shift with the arrow keys, or Ctrl+A: select text. Ctrl+C: copy the selection. New output waits while text is selected
           Escape: clear the selection, or go to the message field
 
-        When Claude asks something
+        ## When Claude asks something
           A list of the answers takes the message field's place; the question is read each time you arrive there
           Tab, Shift+Tab, Ctrl+Tab or F6: between the conversation and the answers
           Up, Down, or an answer's number: choose (the number again: the next answer starting with it; Shift and the number: back; 0: answers 1 to 9)
@@ -72,11 +75,11 @@ public static class HelpText
           Enter: answer. Escape: cancel the question, or go back a step
           The message field comes back when Claude has your answer
 
-        Notices
+        ## Notices
           AxClaude's questions, errors and help texts appear inside the window, in place of the conversation.
-          Tab moves between the text, a field and the buttons. Enter chooses the main button. Escape closes the notice.
+          Tab moves between the text, a field and the buttons. Enter chooses the main button. Escape closes the notice. In a notice's text, h, 1 to 6 and Ctrl+F work as in this one
 
-        Claude Code itself
+        ## Claude Code itself
           Type /help in the message field and press Enter for Claude Code's own commands.
           The Help menu opens the Claude Code documentation in your browser.
         """;

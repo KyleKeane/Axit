@@ -38,15 +38,49 @@ public sealed class TextJumpsTests
         Assert.Equal(3, spoken.Count);
     }
 
+    /// <summary>The heading letters every notice's text takes (AX-7.2): h, Shift+H, 1 to 6, the same values as AxClaude's transcript keys.</summary>
     [Fact]
-    public void AxClaudes_letters_work_the_same_way_in_a_notice_text()
+    public void The_heading_letters_work_in_a_notice_text()
     {
         var (box, spoken, announce) = Editor();
-        Assert.True(TextJumps.Handle(box, AxClaude.AxClaudeKeys.NoticeJumps, Keys.D2, announce));
+        Assert.True(TextJumps.Handle(box, TextJump.HeadingLetters, Keys.D2, announce));
         Assert.Equal(["Two, heading level 2"], spoken);
-        Assert.True(TextJumps.Handle(box, AxClaude.AxClaudeKeys.NoticeJumps, Keys.Shift | Keys.H, announce));
+        Assert.True(TextJumps.Handle(box, TextJump.HeadingLetters, Keys.Shift | Keys.H, announce));
         Assert.Equal("One, heading level 1", spoken[^1]);
-        Assert.False(TextJumps.Handle(box, AxClaude.AxClaudeKeys.NoticeJumps, Keys.K, announce));
+        Assert.False(TextJumps.Handle(box, TextJump.HeadingLetters, Keys.K, announce));
+        Assert.Equal(AxClaude.AxClaudeKeys.Heading, TextJump.HeadingLetters[0].Next);
+        Assert.Equal(AxClaude.AxClaudeKeys.HeadingLevel6, TextJump.HeadingLetters[6].Next);
+    }
+
+    /// <summary>Every F1 text is written under Markdown headings, one per group of keys, so that the letters walk it (AX-7.2).</summary>
+    [Theory]
+    [InlineData("AxClaude")]
+    [InlineData("AxDown")]
+    [InlineData("AxJSON")]
+    [InlineData("AxGit")]
+    [InlineData("AxTerminal")]
+    [InlineData("AxFile")]
+    [InlineData("AxMedia")]
+    [InlineData("AxPreview")]
+    [InlineData("AxStart")]
+    public void Every_F1_text_has_headings_for_the_letters_to_walk(string app)
+    {
+        var text = app switch
+        {
+            "AxClaude" => AxClaude.HelpText.Shortcuts,
+            "AxDown" => AxDown.HelpText.Shortcuts,
+            "AxJSON" => AxJSON.HelpText.Shortcuts,
+            "AxGit" => AxGit.HelpText.Shortcuts,
+            "AxTerminal" => AxTerminal.HelpText.Shortcuts,
+            "AxFile" => AxFile.HelpText.Shortcuts,
+            "AxMedia" => AxMedia.HelpText.Shortcuts,
+            "AxPreview" => AxPreview.HelpText.Shortcuts,
+            _ => AxStart.HelpText.Shortcuts,
+        };
+        var headings = MarkdownOutline.Headings(text);
+        Assert.True(headings.Count >= 3, $"{app}: {headings.Count} headings");
+        Assert.Contains(headings, heading => heading.Spoken == "Notices, heading level 2");
+        Assert.StartsWith("In this text: h and Shift+H move by heading", text);
     }
 
     [Fact]

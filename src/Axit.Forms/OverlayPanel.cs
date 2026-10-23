@@ -238,12 +238,21 @@ public sealed class OverlayPanel : Panel
     public event Action<OverlayChoice>? Chosen;
 
     /// <summary>
-    /// The window's keys for moving through the text by Markdown structure (AX-7.2): one pair per kind from the window's
-    /// own table, so that a notice follows the window's convention (AxClaude's letters, AxDown's Ctrl+letters). Empty
-    /// until the window sets it.
+    /// The keys for moving through the text by Markdown structure (AX-7.2): the heading letters every window's notices
+    /// take (<see cref="TextJump.HeadingLetters"/>) unless the window sets pairs of its own (an editor adds its
+    /// Ctrl+letter pairs, so that its convention holds in its notices too).
     /// </summary>
     [System.ComponentModel.DesignerSerializationVisibility(System.ComponentModel.DesignerSerializationVisibility.Hidden)]
-    public IReadOnlyList<TextJump> Jumps { get; set; } = [];
+    public IReadOnlyList<TextJump> Jumps { get; set; } = TextJump.HeadingLetters;
+
+    /// <summary>The notice shown, for a flow that shows it again (find in its text, AX-7.2); null before the first.</summary>
+    public Notice? Shown { get; private set; }
+
+    /// <summary>The notice's read-only text, for the window's find in it (AX-7.2): the caret kept and the match selected there.</summary>
+    public TextBox Body => _text;
+
+    /// <summary>Whether the text can be searched: a notice with text and neither a field nor the New session controls, since the text holds the focus then.</summary>
+    public bool HasSearchableText => _text.Visible && _inputSpec is null && _sessionSpec is null;
 
     /// <summary>The button Enter presses: the window's AcceptButton while the notice shows. Null when there is none.</summary>
     public IButtonControl? DefaultButton { get; private set; }
@@ -318,6 +327,7 @@ public sealed class OverlayPanel : Panel
     /// </summary>
     public void Populate(Notice notice)
     {
+        Shown = notice;
         var (title, text, choices) = (notice.Title, notice.Text, notice.Choices);
         var (input, session) = (notice.Input, notice.Session);
         _holdUntil = notice.Unprompted ? Environment.TickCount64 + HoldMs : 0;

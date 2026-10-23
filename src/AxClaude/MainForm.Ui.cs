@@ -191,7 +191,6 @@ internal sealed partial class MainForm
         _transcript.EscapePressed += () => BottomControl.Focus();
         _transcript.LineChosen += QuoteLineInMessage;
         _transcript.BookmarkToggled += ToggleBookmark;
-        Overlay.Jumps = AxClaudeKeys.NoticeJumps;
 
         // The overlay is hidden until a notice shows; it then fills the space of the hidden conversation and field.
         Controls.Add(Overlay);

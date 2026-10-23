@@ -222,8 +222,9 @@ Single keys act only when the view has focus and no modifier other than Shift is
 The key table is data (`QuickKey(Keys, Name, Matches, Previous)` in `TranscriptView`, `Previous` being a condition on the line before the target); the keys are fixed in code.
 
 The heading keys, h and Shift+H and 1 to 6 with Shift, work in a notice's text as well (the user guide, the shortcuts,
-About), by Markdown headings there, through the bundle's notice panel (AX-7.2, `AxClaudeKeys.NoticeJumps`). The other
-quick keys are about the conversation's line kinds and do nothing in a notice.
+About), by Markdown headings there: they are the bundle's heading letters of every notice (AX-7.2,
+`TextJump.HeadingLetters`, the notice panel's default), the same values as this table's. The other quick keys are
+about the conversation's line kinds and do nothing in a notice. Ctrl+F, F3 and Shift+F3 search a notice's text (AX-7.2).
 
 ### FR-6 Focus
 

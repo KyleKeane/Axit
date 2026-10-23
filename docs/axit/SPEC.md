@@ -272,7 +272,7 @@ allow it, see B-9).
 - AX-8.2 Bundle-wide keys are defined once, in `Axit.Forms/BundleKeys`, a plain static class of constants, and every
   window uses those constants. The list: F1 the keyboard shortcuts; Tab,
   Shift+Tab, Ctrl+Tab, Ctrl+Shift+Tab and F6 move between the window's controls (and between a notice's text, field
-  and buttons); Ctrl+F find, F3 and Shift+F3 next and previous; Ctrl+S save (what the window holds: the editors' file; AxClaude, which has no
+  and buttons); Ctrl+F find, F3 and Shift+F3 next and previous, in a notice's text as well (AX-7.2); Ctrl+S save (what the window holds: the editors' file; AxClaude, which has no
   document of its own, exports its conversation to a text file with it, from the bottom of its first menu, so that
   Save and Save as keep their place in the editors' and the first menus share one order); Ctrl+Plus and Ctrl+Minus text size; Enter and Escape on a notice; Page Up and Page Down one screen in an
   edit control; Ctrl+Up and Ctrl+Down the start of the previous and next paragraph in an edit control, a paragraph
@@ -410,11 +410,17 @@ These are the rules of `docs/axclaude/SPEC.md` that are not about Claude; app sp
   (the update's progress, an error, AxDown's changed-on-disk question after Save), which then stays in view. The
   Windows folder, file and font pickers, and the shell's own dialogs and menu an app hands an entry to (AxFile's Open
   with, Properties and Windows menu, docs/axfile/SPEC.md AF-4.7), are the only separate windows.
-  A notice's text takes the window's own keys for moving by Markdown structure, one `TextJump` pair per kind from the
-  window's key table handed to `OverlayPanel.Jumps` and acted on by `TextJumps`, the code AxDown's editor uses for the same
-  keys: AxClaude's heading letters (h, Shift+H, 1 to 6), AxDown's
-  Ctrl+letters for every kind of its section 9. The result is announced on the notice; "No next heading" and the
-  like when there is none, and the caret stays.
+  A notice's text takes the heading letters in every window (`TextJump.HeadingLetters`, the default of
+  `OverlayPanel.Jumps`; the letters of AxClaude's transcript): h and Shift+H the next and the previous heading, 1 to 6
+  and Shift with them a heading of that level, by the text's Markdown headings; an editor's notices take the editor's
+  own Ctrl+letter pairs as well (every kind of AxDown's section 9, JSON's kinds in AxJSON), so that its convention
+  holds in its notices too. The jump is `TextJumps`, the code the editors use on their own text; the result is
+  announced on the notice, "No next heading" and the like when there is none, and the caret stays. A notice's text
+  is searched with the bundle's find keys (AX-8.2): Ctrl+F puts the Find notice in the notice's place, and Find next
+  brings the notice back with the match selected and the focus in its text (Cancel brings it back as it was); F3 and
+  Shift+F3 find the next and the previous match there, "Not found" when there is none. The F1 texts are written under
+  Markdown headings, one per group of keys, with a first line naming the text's own keys, so that the letters and the
+  find walk them (asked 2026-10-23).
 - AX-7.3 The caret never moves except as the direct result of the user's own command. The result of a navigation
   command is announced through a UI Automation notification, joined into one notification when several things arrive
   at once. Nothing speaks on a plain arrow key; information is given on demand.

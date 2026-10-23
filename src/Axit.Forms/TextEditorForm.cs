@@ -204,7 +204,8 @@ public sealed class TextEditorForm : AxitForm
         // ---- the status bar (AD-9): the bundle's pair, no AccessibleName, no Spring ----
         (_fileLabel, _positionLabel) = StatusLayout.Pair(_status);
 
-        Overlay.Jumps = _app.Jumps;
+        // A notice's text takes the heading letters of every window and the editor's own pairs as well (AX-7.2).
+        Overlay.Jumps = [.. TextJump.HeadingLetters, .. _app.Jumps];
         _area.TabIndex = 1;
         SizeChanged += (_, _) => _area.FitHeight();
 

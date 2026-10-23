@@ -169,7 +169,6 @@ internal sealed partial class TerminalForm
         _transcript.EscapePressed += () => BottomControl.Focus();
         _transcript.LineChosen += CopyLineToField;
         _transcript.BookmarkToggled += ToggleBookmark;
-        Overlay.Jumps = AxTerminalKeys.NoticeJumps;
 
         Controls.Add(Overlay);
         Controls.Add(_transcript);

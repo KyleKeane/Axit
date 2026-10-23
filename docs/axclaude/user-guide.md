@@ -98,7 +98,7 @@ Long paragraphs are shown as one line. Claude Code's screen decorations (the mod
 
 Session, Export conversation (Ctrl+S) writes the conversation to a text file. AxClaude has no Save: the conversation itself is Claude Code's record, which `--continue` brings back. Ctrl+A and Ctrl+C in the conversation copy it.
 
-The heading keys, h, Shift+H and 1 to 6, also work in the user guide and the other help texts of the Help menu, where they move by the text's own headings.
+The heading keys, h, Shift+H and 1 to 6, also work in the user guide and the other help texts of the Help menu, where they move by the text's own headings; Ctrl+F finds a text there, F3 and Shift+F3 the next and the previous match.
 
 ## Menus
 

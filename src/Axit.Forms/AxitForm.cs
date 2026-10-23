@@ -258,9 +258,10 @@ public abstract class AxitForm : Form
     }
 
     /// <summary>
-    /// The common keys (AX-8.2): the text size keys work everywhere, a notice included; while a notice shows every
-    /// other shortcut waits (not calling the base skips the menu shortcuts; Enter and Escape reach the notice's
-    /// buttons through AcceptButton and CancelButton); F1 shows the shortcuts; then the window's own keys.
+    /// The common keys (AX-8.2): the text size keys work everywhere, a notice included; while a notice shows, its text
+    /// takes the find keys (AX-7.2) and every other shortcut waits (not calling the base skips the menu shortcuts;
+    /// Enter and Escape reach the notice's buttons through AcceptButton and CancelButton); F1 shows the shortcuts;
+    /// then the window's own keys.
     /// </summary>
     protected override bool ProcessCmdKey(ref Message msg, Keys keyData)
     {
@@ -278,6 +279,22 @@ public abstract class AxitForm : Form
 
         if (NoticeOpen)
         {
+            if (Overlay.HasSearchableText)
+            {
+                switch (keyData)
+                {
+                    case BundleKeys.Find:
+                        ShowFindInNotice();
+                        return true;
+                    case BundleKeys.FindNext:
+                        FindInNotice(1);
+                        return true;
+                    case BundleKeys.FindPrevious:
+                        FindInNotice(-1);
+                        return true;
+                }
+            }
+
             return false;
         }
 
@@ -481,6 +498,54 @@ public abstract class AxitForm : Form
         return true;
     }
 
+    // ---- find in a notice's text (AX-7.2, 2026-10-23) ----
+
+    /// <summary>
+    /// Ctrl+F in a notice: the Find notice takes its place, and Find next or Cancel show it again, Find next with the
+    /// match selected and the focus in the text (the same find as the window's, on the notice's text). The notice
+    /// comes back as the same record, with its chime not played a second time.
+    /// </summary>
+    private void ShowFindInNotice()
+    {
+        if (Overlay.Shown is not { } notice)
+        {
+            return;
+        }
+
+        var back = notice with { Unprompted = false };
+        var caret = Overlay.Body.SelectionStart;
+        ShowNotice(new Notice("Find", string.Empty,
+        [
+            new OverlayChoice("&Find next", () =>
+            {
+                _findText = Overlay.InputText;
+                ShowNotice(back);
+                Overlay.Body.Select(caret, 0);
+                FindNext(Overlay.Body, 1);
+            }, IsDefault: true, StaysOpen: true),
+            new OverlayChoice("&Cancel", () =>
+            {
+                ShowNotice(back);
+                Overlay.Body.Select(caret, 0);
+            }, IsCancel: true, StaysOpen: true),
+        ])
+        {
+            Input = new OverlayInput("Text to find:", "Text to find", _findText, "Type the text to find"),
+        });
+    }
+
+    /// <summary>F3 and Shift+F3 in a notice: the next or the previous match in its text, selected; the Find notice first when nothing was searched for yet.</summary>
+    private void FindInNotice(int direction)
+    {
+        if (_findText.Length == 0)
+        {
+            ShowFindInNotice();
+            return;
+        }
+
+        FindNext(Overlay.Body, direction);
+    }
+
     // ---- find in a list (AxFile AF-3.6, AxMedia AM-3.1; shared on the second use, 2026-10-22) ----
 
     /// <summary>Ctrl+F on a list: the Find notice with the field "Name contains"; Find next closes it and selects the next item of <paramref name="list"/> whose name (from <paramref name="names"/>, one per item) contains the text, wrapping once.</summary>
@@ -620,10 +685,10 @@ public abstract class AxitForm : Form
         }
 
         _paletteSpeak.Stop();
-        wanted = Math.Clamp(wanted, 0, Math.Max(0, _paletteShown.Count - 1));
-        if (_paletteShown.Count == 0 || wanted == index)
+        if (_paletteShown.Count == 0)
         {
             Sounds.Edge();
+            Announce(Palette.NoMatch(Overlay.InputText), true);
             return true;
         }
 

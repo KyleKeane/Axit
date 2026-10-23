@@ -103,18 +103,6 @@ public static class AxTerminalKeys
         ("Heading level 6", HeadingLevel6),
     ];
 
-    /// <summary>The heading quick keys in a notice's text as well (bundle AX-7.2), by Markdown headings; handed to the notice panel.</summary>
-    public static readonly IReadOnlyList<TextJump> NoticeJumps =
-    [
-        TextJump.Markdown(Heading, Keys.Shift | Heading, ElementKind.Heading),
-        TextJump.Markdown(HeadingLevel1, Keys.Shift | HeadingLevel1, ElementKind.Heading, 1),
-        TextJump.Markdown(HeadingLevel2, Keys.Shift | HeadingLevel2, ElementKind.Heading, 2),
-        TextJump.Markdown(HeadingLevel3, Keys.Shift | HeadingLevel3, ElementKind.Heading, 3),
-        TextJump.Markdown(HeadingLevel4, Keys.Shift | HeadingLevel4, ElementKind.Heading, 4),
-        TextJump.Markdown(HeadingLevel5, Keys.Shift | HeadingLevel5, ElementKind.Heading, 5),
-        TextJump.Markdown(HeadingLevel6, Keys.Shift | HeadingLevel6, ElementKind.Heading, 6),
-    ];
-
     /// <summary>k and Shift+K: the bookmarks dropped with m; the Navigate menu reaches them too.</summary>
     private static readonly QuickKey BookmarkKey = new(Bookmark, "bookmark", l => l.Kind == LineKind.Bookmark);
 
