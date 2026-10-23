@@ -62,7 +62,8 @@ opens in the editor for its type (AG-1.4, AG-D1).
 - AG-1.2 The repository is the one that holds the path: `git rev-parse --show-toplevel` from the folder (or the file's
   folder). Without a path, the last repository opened, or none: the window opens with "No repository" and Open
   repository… (Ctrl+O), the Windows folder picker, which resolves the chosen folder the same way. A folder in no
-  repository gives the notice "Not a git repository" naming the folder.
+  repository gives the notice "Not a git repository" naming the folder; a repository already open stays open behind
+  the notice (until 2026-10-23 it was dropped first).
 - AG-1.3 `AxGitApp.Run(args)` is the entry point (AX-1.7): `Log.UseApp("axgit")`, the crash handling, `--help` and
   `--version`, the settings (`axgit.json`), then `GitForm`.
 - AG-1.4 **To and from the other windows.** AxClaude's Session → Show current folder in ▸ **AxGit** starts AxGit on
@@ -72,7 +73,8 @@ opens in the editor for its type (AG-1.4, AG-D1).
   (a new AxClaude on the repository's folder), ▸ **AxTerminal** (a shell there, docs/axterminal/SPEC.md AT-1.5) and
   ▸ **AxFile** (the folder listed, docs/axfile/SPEC.md AF-1.3), and Changes → **Open file in editor** (Ctrl+E) opens
   the selected file in AxJSON for `.json` and AxDown otherwise.
-- AG-1.5 Git itself: `git` on the PATH, run with `-C <repository>`, `-c core.quotepath=false`, `-c color.ui=never`,
+- AG-1.5 Git itself: `git` on the PATH (`GitRunner.Program`; the tests point it at a fake `git.cmd` for the output,
+  the timeout and the open pipe), run with `-C <repository>`, `-c core.quotepath=false`, `-c color.ui=never`,
   `GIT_TERMINAL_PROMPT=0` and UTF-8 output; one command at a time, on a background task, never on the UI thread
   (AX-7.5), with a timeout (60 seconds, 10 minutes for fetch, pull and push). When `git` is not found, the notice
   **Git was not found** says where to get it (git-scm.com) and the window stays with every command disabled.
@@ -88,7 +90,9 @@ opens in the editor for its type (AG-1.4, AG-D1).
   "Working…" and the view stays (2026-10-23: the switch went through with an empty list under the new name). Each
   view keeps its selection while the window is open, by the item's key (the file's path, the commit's hash, the
   branch's name), taken before the lists change (2026-10-23: taken after, two views with the same count swapped
-  selections); F5 refreshes the view and the status bar the same way and says "Refreshed: <the list's name>".
+  selections); F5 refreshes the view and the status bar the same way and says "Refreshed: <the list's name>". Each view is one
+  record in the window (`ViewState`: the list's name, the items, their keys, whether it has been read since it was
+  last made stale, the selected key); the three records are the whole state of the list (2026-10-23).
 - AG-2.3 The title is `<repository folder name> - AxGit`, "No repository - AxGit" without one. The status bar's left
   label: the branch, then the upstream state when there is an upstream ("main · 2 ahead" / "main · 1 behind" / "main
   · up to date" / "main · no upstream"), then the counts ("3 changed, 1 staged"); "Working: pull…" while a command
@@ -132,7 +136,9 @@ opens in the editor for its type (AG-1.4, AG-D1).
 
 - AG-5.1 The Branches view lists the local branches (`git branch --list --format=…`, `GitBranches.Parse`): "<name>,
   current" for the branch checked out, then its upstream and state when it has one ("origin/main, 1 ahead", "up to
-  date", "2 behind, 1 ahead"), "no upstream" otherwise. The list's name is "Branches, N".
+  date", "2 behind, 1 ahead"), "no upstream" otherwise. The list's name is "Branches, N". A detached HEAD is no branch: the line git prints
+  for it, "(HEAD detached at <hash>)", is left out and no branch reads current (until 2026-10-23 it was listed as
+  one); the status bar says "detached" (AG-2.3).
 - AG-5.2 Enter on a branch switches to it (`git switch <name>`): "Switched to <name>", the views refresh; Enter on the
   current one says "Already on <name>". git's refusal (changes that would be overwritten) is the notice **Switch
   failed** with its output.
@@ -162,7 +168,9 @@ opens in the editor for its type (AG-1.4, AG-D1).
   Alt+F4. Window-specific (`AxGitKeys`): Ctrl+O, F5, Ctrl+W, Ctrl+1, Ctrl+2, Ctrl+3, Space and Enter and Delete in the
   list, Ctrl+Shift+A, Ctrl+Shift+U, Ctrl+E, Ctrl+Enter, Ctrl+N, Ctrl+Shift+F, Ctrl+Shift+L, Ctrl+Shift+H. Space,
   Enter and Delete act only while the list has the focus; in the details they are the control's own. The collision
-  test covers the table.
+  test covers the table. A command of one view asked for in another says which view first: "Changes view first:
+  Ctrl+1" for Space, Delete, Stage or unstage, Show diff and Discard changes, "Branches view first: Ctrl+3" for
+  Switch to branch (one rule since 2026-10-23: Space, Enter and Show diff switched the view silently, Delete said this).
 - AG-6.3 The F1 text (`HelpText.Shortcuts`) names them all; `docs/axgit/user-guide.md` is embedded (Help → User guide);
   About is the bundle's (AX-9.9).
 
@@ -175,8 +183,8 @@ lines", "Switched to <name>", "Already on <name>", "Fetched", "Pulled", "Already
 <list name>", "Changes, N files" and the other view names when the view's key is pressed on the view already shown,
 "Working…" when a command is asked for while one runs, "Nothing to save here. Space stages, Ctrl+Enter commits",
 "Not found" (find), "Text size n", "Windows text size", "Copied diagnostics", "No repository" (a command without
-one), "No file selected", "No commit selected", "No branch selected", "Changes view first: Ctrl+1" (Delete in
-another view), "A conflict: resolve it in the editor or the terminal first" (a pull or a switch that git refuses for
+one), "No file selected", "No commit selected", "No branch selected", "Changes view first: Ctrl+1", "Branches view first:
+Ctrl+3" (a command of one view asked for in another, AG-6.2), "A conflict: resolve it in the editor or the terminal first" (a pull or a switch that git refuses for
 one). A failure that git explains in one line is announced as "Failed: <line>"; more than one line is a notice.
 
 ### AG-8 Settings, status

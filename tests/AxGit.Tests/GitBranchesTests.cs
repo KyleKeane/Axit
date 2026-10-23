@@ -8,7 +8,9 @@ public sealed class GitBranchesTests
     [Fact]
     public void Branches_carry_their_upstream_state()
     {
+        // The first line is what git prints for a detached HEAD: no branch, left out (AG-5.1).
         var branches = GitBranches.Parse(
+            "(HEAD detached at 3a1f2c0)\t*\t\t\n" +
             "axit\t \torigin/axit\t[ahead 3]\n" +
             "main\t*\torigin/main\t\n" +
             "old\t \torigin/old\t[gone]\n" +

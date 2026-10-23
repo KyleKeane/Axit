@@ -47,6 +47,9 @@ public static class GitRunner
     public static readonly TimeSpan Short = TimeSpan.FromSeconds(60);
     public static readonly TimeSpan Long = TimeSpan.FromMinutes(10);
 
+    /// <summary>The program run: git, found on the PATH (AG-1.5); the tests point it at a fake git.cmd of their own.</summary>
+    public static string Program { get; set; } = "git";
+
     /// <summary>The whole argument list of a command: the repository, the fixed configuration, then <paramref name="arguments"/>. Pure, tested.</summary>
     public static IReadOnlyList<string> Command(string? repository, IReadOnlyList<string> arguments)
     {
@@ -64,7 +67,7 @@ public static class GitRunner
 
     public static async Task<GitResult> RunAsync(string? repository, IReadOnlyList<string> arguments, TimeSpan timeout, CancellationToken cancellation = default)
     {
-        var info = new ProcessStartInfo("git")
+        var info = new ProcessStartInfo(Program)
         {
             UseShellExecute = false,
             CreateNoWindow = true,
@@ -108,6 +111,9 @@ public static class GitRunner
         }
         catch (OperationCanceledException)
         {
+            // Whether git itself had finished, taken before the kill, which ends it either way (until 2026-10-23 it
+            // was read after the kill, so every timeout read as the open-pipe case; the fake git's test found it).
+            var finished = process.HasExited;
             try
             {
                 process.Kill(entireProcessTree: true);
@@ -117,10 +123,10 @@ public static class GitRunner
             }
 
             cancellation.ThrowIfCancellationRequested();
-            var reason = process.HasExited
+            var reason = finished
                 ? "git finished, but a program it started kept its output open; the output read so far is what there is."
                 : $"git did not finish within {timeout.TotalSeconds:0} seconds and was stopped.";
-            return new GitResult(process.HasExited ? process.ExitCode : -1, await ReadSoFar(output), reason);
+            return new GitResult(finished ? process.ExitCode : -1, await ReadSoFar(output), reason);
         }
     }
 

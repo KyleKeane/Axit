@@ -65,7 +65,8 @@ public static class GitBranches
             }
 
             var fields = line.Split('\t', 4);
-            if (fields.Length < 2 || fields[0].Length == 0)
+            // git lists a detached HEAD as "(HEAD detached at 3a1f2c0)", in parentheses: no branch (AG-5.1).
+            if (fields.Length < 2 || fields[0].Length == 0 || fields[0].StartsWith('('))
             {
                 continue;
             }

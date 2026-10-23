@@ -10,7 +10,8 @@ Run with NVDA before a release, on a repository with a remote (the Axit reposito
 2. Down Arrow: the next item, nothing else. Tab: "Details, edit, read only", empty. Shift+Tab: the list, the same item as before. F6: the details again; Ctrl+Tab: the list.
 3. NVDA+End: the status bar: "main · up to date · 2 changed, 0 staged" (or the branch's state), then the path.
 4. Ctrl+1 while the Changes list shows: "Changes, 2 files". Ctrl+2: "Log, 200 commits list, <hash> <date> <author>: <subject>, 1 of 200". Ctrl+3: "Branches, N list, <branch>, current, …". Ctrl+1: back to Changes on the item you had.
-5. Start AxGit on a folder that is not a repository: "Not a git repository" notice naming the folder; Enter closes it; the title is "No repository - AxGit"; Ctrl+O opens the folder picker.
+4a. In the Log view (Ctrl+2), Space: "Changes view first: Ctrl+1"; Delete: the same; Alt+C, D (Show diff): the same; the view stays. Ctrl+1, then Alt+B, S (Switch to branch): "Branches view first: Ctrl+3".
+5. Start AxGit on a folder that is not a repository: "Not a git repository" notice naming the folder; Enter closes it; the title is "No repository - AxGit"; Ctrl+O opens the folder picker. With a repository open, Ctrl+O on a folder outside any repository: the same notice, and the repository stays open, its title unchanged.
 6. Alt+F4 closes the window without a question.
 
 ## 2. From and to the other windows (AG-1.4)

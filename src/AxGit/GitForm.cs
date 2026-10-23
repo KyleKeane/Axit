@@ -22,6 +22,35 @@ public sealed partial class GitForm : AxitForm
         Branches,
     }
 
+    /// <summary>
+    /// One view of the list (AG-2.2): the list's name with its count, its items and their keys (the file's path, the
+    /// commit's hash, the branch's name), whether it has been read in this repository since it was last made stale,
+    /// and the key of the item selected in it, kept while the window is open. The three records are the whole state
+    /// of the list (one record since 2026-10-23; five fields and a dictionary before).
+    /// </summary>
+    private sealed class ViewState
+    {
+        public string Name { get; private set; } = string.Empty;
+
+        public IReadOnlyList<string> Labels { get; private set; } = [];
+
+        public IReadOnlyList<string> Keys { get; private set; } = [];
+
+        /// <summary>Whether the view's list is current: read in this repository, and not made stale since by a commit, a switch, a fetch.</summary>
+        public bool Loaded { get; set; }
+
+        /// <summary>The key of the item selected in the view, taken before the list changes under it; null before one was chosen.</summary>
+        public string? SelectedKey { get; set; }
+
+        public void Set(string name, IEnumerable<string> labels, IEnumerable<string> keys)
+        {
+            Name = name;
+            Labels = labels.ToList();
+            Keys = keys.ToList();
+            Loaded = true;
+        }
+    }
+
     private const int UntrackedLimit = 200 * 1024;
 
     private readonly GitSettings _settings;
@@ -37,16 +66,14 @@ public sealed partial class GitForm : AxitForm
     /// <summary>The menu items that run git, disabled while a command runs and when git is missing (AG-5.4).</summary>
     private readonly List<ToolStripMenuItem> _gitItems = [];
 
-    /// <summary>The item selected in each view, by path, hash or name, kept while the window is open (AG-2.2).</summary>
-    private readonly Dictionary<View, string?> _selected = [];
+    /// <summary>The three views, indexed by <see cref="View"/>; <see cref="Current"/> is the one the list shows.</summary>
+    private readonly ViewState[] _views = [new(), new(), new()];
 
     private string? _root;
     private View _view = View.Changes;
     private RepositoryStatus _repo = RepositoryStatus.Empty;
     private IReadOnlyList<Commit> _commits = [];
     private IReadOnlyList<Branch> _branches = [];
-    private bool _logLoaded;
-    private bool _branchesLoaded;
 
     /// <summary>The verb of the git command running now, for the status bar; null between commands.</summary>
     private string? _busy;
@@ -74,9 +101,9 @@ public sealed partial class GitForm : AxitForm
         // Show current repository in ▸ File Explorer, AxClaude, AxTerminal, AxFile: the way back to where the user came from (AG-1.4).
         var showIn = new ToolStripMenuItem("Show current repository &in");
         showIn.DropDownItems.Add(Item("File &Explorer", ShowInExplorer, AxGitKeys.ShowInExplorer));
-        showIn.DropDownItems.Add(new ToolStripMenuItem("Ax&Claude", null, (_, _) => OpenInAxClaude()));
-        showIn.DropDownItems.Add(new ToolStripMenuItem("Ax&Terminal", null, (_, _) => OpenInAxTerminal()));
-        showIn.DropDownItems.Add(new ToolStripMenuItem("Ax&File", null, (_, _) => OpenInAxFile()));
+        showIn.DropDownItems.Add(new ToolStripMenuItem("Ax&Claude", null, (_, _) => OpenIn(Dispatch.AxClaude)));
+        showIn.DropDownItems.Add(new ToolStripMenuItem("Ax&Terminal", null, (_, _) => OpenIn(Dispatch.AxTerminal)));
+        showIn.DropDownItems.Add(new ToolStripMenuItem("Ax&File", null, (_, _) => OpenIn(Dispatch.AxFile)));
         repository.DropDownItems.Add(showIn);
         repository.DropDownItems.Add(new ToolStripSeparator());
         repository.DropDownItems.Add(CreateExitItem());
@@ -319,7 +346,12 @@ public sealed partial class GitForm : AxitForm
 
         if (root is null)
         {
-            SetNoRepository();
+            // AG-1.2: the notice names the folder; a repository already open stays (until 2026-10-23 it was dropped first).
+            if (_root is null)
+            {
+                SetNoRepository();
+            }
+
             ShowNotice(Notice.Plain("Not a git repository", $"{target} is not inside a git repository. Repository, Open repository (Ctrl+O) takes another folder.") with { Unprompted = true });
             return;
         }
@@ -330,11 +362,14 @@ public sealed partial class GitForm : AxitForm
     private async Task OpenRepositoryAsync(string root)
     {
         _root = root;
-        _selected.Clear();
+        for (var i = 0; i < _views.Length; i++)
+        {
+            _views[i] = new ViewState();
+        }
+
+        _repo = RepositoryStatus.Empty;
         _commits = [];
         _branches = [];
-        _logLoaded = false;
-        _branchesLoaded = false;
         Text = $"{PathName.Of(root)} - {AxGitApp.Name}";
         _settings.RememberRepository(root);
         SaveSettings();
@@ -379,8 +414,8 @@ public sealed partial class GitForm : AxitForm
         OpenInExplorer(_root);
     }
 
-    /// <summary>Repository → Show current repository in → AxClaude: a new AxClaude on the repository's folder (AG-1.4).</summary>
-    private void OpenInAxClaude()
+    /// <summary>Repository → Show current repository in → AxClaude, AxTerminal, AxFile (AG-1.4): a new window of that app on the repository's folder.</summary>
+    private void OpenIn(string verb)
     {
         if (_root is null)
         {
@@ -388,31 +423,7 @@ public sealed partial class GitForm : AxitForm
             return;
         }
 
-        AxitMenu.Start(Dispatch.AxClaude, _root);
-    }
-
-    /// <summary>Repository → Show current repository in → AxTerminal: a new AxTerminal with a shell in the repository's folder (docs/axterminal/SPEC.md AT-1.5).</summary>
-    private void OpenInAxTerminal()
-    {
-        if (_root is null)
-        {
-            Announce("No repository", true);
-            return;
-        }
-
-        AxitMenu.Start(Dispatch.AxTerminal, _root);
-    }
-
-    /// <summary>Repository → Show current repository in → AxFile: a new AxFile window listing the repository's folder (docs/axfile/SPEC.md AF-1.3).</summary>
-    private void OpenInAxFile()
-    {
-        if (_root is null)
-        {
-            Announce("No repository", true);
-            return;
-        }
-
-        AxitMenu.Start(Dispatch.AxFile, _root);
+        AxitMenu.Start(verb, _root);
     }
 
     /// <summary>Changes → Open file in editor (Ctrl+E): the selected file in AxJSON for .json, AxDown otherwise (AG-1.4).</summary>
@@ -529,8 +540,11 @@ public sealed partial class GitForm : AxitForm
         }
     }
 
-    // ---- the views (AG-2.2) ----
+    // ---- the views (AG-2.2): three records, one list ----
 
+    private ViewState Current => _views[(int)_view];
+
+    /// <summary>F5, and every command's end: the status read again, the view shown read again with it, the list refilled on the item it had.</summary>
     private async Task RefreshAsync(bool announce)
     {
         if (_root is null)
@@ -539,28 +553,15 @@ public sealed partial class GitForm : AxitForm
             return;
         }
 
-        var result = await RunGitAsync(GitStatus.Arguments, GitRunner.Short, "status");
-        if (result is null)
+        RememberSelection();
+        if (!await LoadAsync(View.Changes))
         {
             return;
         }
 
-        if (!result.Ok)
+        if (_view != View.Changes)
         {
-            Failed("Status failed", result);
-            return;
-        }
-
-        // The selection by key, taken before the lists change under it (AG-2.2).
-        _selected[_view] = CurrentKey() ?? _selected.GetValueOrDefault(_view);
-        _repo = GitStatus.Parse(result.Output);
-        if (_view == View.Log)
-        {
-            await LoadLogAsync();
-        }
-        else if (_view == View.Branches)
-        {
-            await LoadBranchesAsync();
+            await LoadAsync(_view);
         }
 
         FillList();
@@ -571,35 +572,60 @@ public sealed partial class GitForm : AxitForm
         }
     }
 
-    private async Task LoadLogAsync()
+    /// <summary>
+    /// Reads one view from git into its record: the status for Changes (<see cref="_repo"/>, which the status bar and
+    /// the commit need too), the log, the branches. False when git did not run or failed, which is said.
+    /// </summary>
+    private async Task<bool> LoadAsync(View view)
     {
-        var result = await RunGitAsync(GitLog.Arguments, GitRunner.Short, "log");
-        if (result is { Ok: true })
+        var (arguments, verb, title) = view switch
         {
-            _commits = GitLog.Parse(result.Output);
-            _logLoaded = true;
+            View.Changes => (GitStatus.Arguments, "status", "Status failed"),
+            View.Log => (GitLog.Arguments, "log", "Log failed"),
+            _ => (GitBranches.Arguments, "branches", "Branches failed"),
+        };
+        var result = await RunGitAsync(arguments, GitRunner.Short, verb);
+        if (result is null)
+        {
+            return false;
         }
-        else if (result is not null)
+
+        if (!result.Ok)
         {
-            Failed("Log failed", result);
+            Failed(title, result);
+            return false;
+        }
+
+        var state = _views[(int)view];
+        switch (view)
+        {
+            case View.Changes:
+                _repo = GitStatus.Parse(result.Output);
+                state.Set(_repo.ListName, _repo.Files.Select(file => file.Label), _repo.Files.Select(file => file.Path));
+                break;
+            case View.Log:
+                _commits = GitLog.Parse(result.Output);
+                state.Set(GitLog.ListName(_commits.Count), _commits.Select(commit => commit.Label), _commits.Select(commit => commit.Hash));
+                break;
+            default:
+                _branches = GitBranches.Parse(result.Output);
+                state.Set(GitBranches.ListName(_branches.Count), _branches.Select(branch => branch.Label), _branches.Select(branch => branch.Name));
+                break;
+        }
+
+        return true;
+    }
+
+    /// <summary>The views to read again before they show next: a commit, a switch, a fetch changed what they list.</summary>
+    private void Stale(params View[] views)
+    {
+        foreach (var view in views)
+        {
+            _views[(int)view].Loaded = false;
         }
     }
 
-    private async Task LoadBranchesAsync()
-    {
-        var result = await RunGitAsync(GitBranches.Arguments, GitRunner.Short, "branches");
-        if (result is { Ok: true })
-        {
-            _branches = GitBranches.Parse(result.Output);
-            _branchesLoaded = true;
-        }
-        else if (result is not null)
-        {
-            Failed("Branches failed", result);
-        }
-    }
-
-    /// <summary>View → Changes, Log, Branches (Ctrl+1, 2, 3): the list refilled, loaded on the first visit, and its name said with the item the focus is on (AxClaude D26).</summary>
+    /// <summary>View → Changes, Log, Branches (Ctrl+1, 2, 3): the list refilled, read on the first visit or when stale, and its name said with the item the focus is on (AxClaude D26).</summary>
     private async Task ShowViewAsync(View view)
     {
         if (_root is null)
@@ -615,15 +641,11 @@ public sealed partial class GitForm : AxitForm
             return;
         }
 
-        _selected[_view] = CurrentKey() ?? _selected.GetValueOrDefault(_view);
+        RememberSelection();
         _view = view;
-        if (view == View.Log && !_logLoaded)
+        if (!Current.Loaded)
         {
-            await LoadLogAsync();
-        }
-        else if (view == View.Branches && !_branchesLoaded)
-        {
-            await LoadBranchesAsync();
+            await LoadAsync(view);
         }
 
         FillList();
@@ -631,66 +653,36 @@ public sealed partial class GitForm : AxitForm
         Announce(_list.SelectedItem is string item ? $"{name}. {item}" : name, true);
     }
 
-    /// <summary>The list's items for the view, named with the view and the count, the selection on the key kept for the view (<see cref="_selected"/>, taken by the caller before the lists changed).</summary>
+    /// <summary>The list's items for the view shown, named with the view and the count, the selection on the view's key when it is still listed, else the first item.</summary>
     private void FillList()
     {
-        var wanted = _selected.GetValueOrDefault(_view);
+        var view = Current;
         _list.BeginUpdate();
         _list.Items.Clear();
-        string name;
-        switch (_view)
+        _list.Items.AddRange(view.Labels.Select(label => (object)label).ToArray());
+        _list.EndUpdate();
+        _list.AccessibleName = view.Name;
+        var index = -1;
+        for (var i = 0; view.SelectedKey is { } key && i < view.Keys.Count && index < 0; i++)
         {
-            case View.Changes:
-                foreach (var file in _repo.Files)
-                {
-                    _list.Items.Add(file.Label);
-                }
-
-                name = _repo.ListName;
-                break;
-            case View.Log:
-                foreach (var commit in _commits)
-                {
-                    _list.Items.Add(commit.Label);
-                }
-
-                name = GitLog.ListName(_commits.Count);
-                break;
-            default:
-                foreach (var branch in _branches)
-                {
-                    _list.Items.Add(branch.Label);
-                }
-
-                name = GitBranches.ListName(_branches.Count);
-                break;
+            if (view.Keys[i] == key)
+            {
+                index = i;
+            }
         }
 
-        _list.EndUpdate();
-        _list.AccessibleName = name;
-        var keys = ItemKeys();
-        var index = wanted is null ? -1 : keys.ToList().IndexOf(wanted);
         if (_list.Items.Count > 0)
         {
             _list.SelectedIndex = index >= 0 ? index : 0;
         }
     }
 
-    /// <summary>The key of each item of the view: the file's path, the commit's hash, the branch's name.</summary>
-    private IReadOnlyList<string> ItemKeys() => _view switch
-    {
-        View.Changes => _repo.Files.Select(file => file.Path).ToList(),
-        View.Log => _commits.Select(commit => commit.Hash).ToList(),
-        _ => _branches.Select(branch => branch.Name).ToList(),
-    };
+    /// <summary>The key of the item selected in the view shown, kept in its record before the list changes under it (a refresh, a view switch); the key kept stays when nothing is selected.</summary>
+    private void RememberSelection() => Current.SelectedKey = CurrentKey() ?? Current.SelectedKey;
 
-    /// <summary>The key of the selected item, read while the list still shows the view's lists as they are (before a refresh replaces them, before a view switch changes <see cref="_view"/>); null with nothing selected.</summary>
-    private string? CurrentKey()
-    {
-        var keys = ItemKeys();
-        var index = _list.SelectedIndex;
-        return index >= 0 && index < keys.Count ? keys[index] : null;
-    }
+    /// <summary>The key of the selected item of the view shown; null with nothing selected.</summary>
+    private string? CurrentKey() =>
+        _list.SelectedIndex is var i && i >= 0 && i < Current.Keys.Count ? Current.Keys[i] : null;
 
     private ChangedFile? CurrentFile() =>
         _view == View.Changes && _list.SelectedIndex is var i && i >= 0 && i < _repo.Files.Count ? _repo.Files[i] : null;
@@ -700,6 +692,27 @@ public sealed partial class GitForm : AxitForm
 
     private Branch? CurrentBranch() =>
         _view == View.Branches && _list.SelectedIndex is var i && i >= 0 && i < _branches.Count ? _branches[i] : null;
+
+    /// <summary>
+    /// Whether the list shows the view a command belongs to; otherwise which view first is said, "Changes view
+    /// first: Ctrl+1" (AG-6.2). One rule for every command of a view since 2026-10-23: Space, Enter and the menu's
+    /// Show diff switched the view silently, Delete said this, and Switch to branch switched too.
+    /// </summary>
+    private bool InView(View view)
+    {
+        if (_view == view)
+        {
+            return true;
+        }
+
+        Announce(view switch
+        {
+            View.Changes => "Changes view first: Ctrl+1",
+            View.Log => "Log view first: Ctrl+2",
+            _ => "Branches view first: Ctrl+3",
+        }, true);
+        return false;
+    }
 
     /// <summary>Enter in the list: the diff of a file, the details of a commit, the switch to a branch (AG-6.2).</summary>
     private Task ActOnItemAsync() => _view switch
@@ -713,9 +726,8 @@ public sealed partial class GitForm : AxitForm
 
     private async Task StageToggleAsync()
     {
-        if (_view != View.Changes)
+        if (!InView(View.Changes))
         {
-            await ShowViewAsync(View.Changes);
             return;
         }
 
@@ -768,9 +780,8 @@ public sealed partial class GitForm : AxitForm
     /// <summary>Enter on a file (AG-3.3): its diff in the details, with the focus on the first line; an untracked file shows itself.</summary>
     private async Task ShowDiffAsync()
     {
-        if (_view != View.Changes)
+        if (!InView(View.Changes))
         {
-            await ShowViewAsync(View.Changes);
             return;
         }
 
@@ -828,9 +839,14 @@ public sealed partial class GitForm : AxitForm
     /// <summary>Changes → Discard changes… (Delete, AG-3.4): a question first; an untracked file is not deleted from here.</summary>
     private void Discard()
     {
+        if (!InView(View.Changes))
+        {
+            return;
+        }
+
         if (CurrentFile() is not { } file)
         {
-            Announce(_view == View.Changes ? "No file selected" : "Changes view first: Ctrl+1", true);
+            Announce("No file selected", true);
             return;
         }
 
@@ -900,8 +916,7 @@ public sealed partial class GitForm : AxitForm
 
                     var hash = CommitHashRegex().Match(result.Output);
                     Announce(hash.Success ? $"Committed {hash.Groups[1].Value}" : "Committed", true);
-                    _logLoaded = false;
-                    _branchesLoaded = false;
+                    Stale(View.Log, View.Branches);
                     await RefreshAsync(announce: false);
                 });
             }, IsDefault: true),
@@ -945,9 +960,8 @@ public sealed partial class GitForm : AxitForm
 
     private async Task SwitchBranchAsync()
     {
-        if (_view != View.Branches)
+        if (!InView(View.Branches))
         {
-            await ShowViewAsync(View.Branches);
             return;
         }
 
@@ -976,8 +990,7 @@ public sealed partial class GitForm : AxitForm
         }
 
         Announce($"Switched to {branch.Name}", true);
-        _logLoaded = false;
-        _branchesLoaded = false;
+        Stale(View.Log, View.Branches);
         await RefreshAsync(announce: false);
     }
 
@@ -1010,8 +1023,7 @@ public sealed partial class GitForm : AxitForm
                     }
 
                     Announce($"Switched to {name}", true);
-                    _logLoaded = false;
-                    _branchesLoaded = false;
+                    Stale(View.Log, View.Branches);
                     await RefreshAsync(announce: false);
                 });
             }, IsDefault: true),
@@ -1037,7 +1049,7 @@ public sealed partial class GitForm : AxitForm
         }
 
         Announce("Fetched", true);
-        _branchesLoaded = false;
+        Stale(View.Branches);
         await RefreshAsync(announce: false);
     }
 
@@ -1056,8 +1068,7 @@ public sealed partial class GitForm : AxitForm
         }
 
         Announce(result.Output.Contains("Already up to date", StringComparison.OrdinalIgnoreCase) ? "Already up to date" : "Pulled", true);
-        _logLoaded = false;
-        _branchesLoaded = false;
+        Stale(View.Log, View.Branches);
         await RefreshAsync(announce: false);
     }
 
@@ -1079,7 +1090,7 @@ public sealed partial class GitForm : AxitForm
         }
 
         Announce("Pushed", true);
-        _branchesLoaded = false;
+        Stale(View.Branches);
         await RefreshAsync(announce: false);
     }
 
