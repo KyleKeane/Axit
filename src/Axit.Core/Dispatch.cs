@@ -35,15 +35,16 @@ public static class Dispatch
     public const string AxProcess = "process";
     public const string AxTask = "task";
     public const string AxPass = "pass";
+    public const string AxCalc = "calc";
 
     /// <summary>Not an app: the executable answers <c>--help</c> and <c>--version</c>, or reports <see cref="Launch.Error"/>.</summary>
     public const string Bundle = "axit";
 
     /// <summary>The apps, in the order the Axit menu lists them (AX-9).</summary>
-    public static readonly IReadOnlyList<App> Apps = [new("axClaude", AxClaude, "AxClaude"), new("axDown", AxDown, "AxDown"), new("axJSON", AxJSON, "AxJSON"), new("axGIT", AxGit, "AxGit"), new("axTerminal", AxTerminal, "AxTerminal"), new("axFile", AxFile, "AxFile"), new("axMedia", AxMedia, "AxMedia"), new("axPreview", AxPreview, "AxPreview"), new("axStart", AxStart, "AxStart"), new("axProcess", AxProcess, "AxProcess"), new("axTask", AxTask, "AxTask"), new("axPass", AxPass, "AxPass")];
+    public static readonly IReadOnlyList<App> Apps = [new("axClaude", AxClaude, "AxClaude"), new("axDown", AxDown, "AxDown"), new("axJSON", AxJSON, "AxJSON"), new("axGIT", AxGit, "AxGit"), new("axTerminal", AxTerminal, "AxTerminal"), new("axFile", AxFile, "AxFile"), new("axMedia", AxMedia, "AxMedia"), new("axPreview", AxPreview, "AxPreview"), new("axStart", AxStart, "AxStart"), new("axProcess", AxProcess, "AxProcess"), new("axTask", AxTask, "AxTask"), new("axPass", AxPass, "AxPass"), new("axCalc", AxCalc, "AxCalc")];
 
     public const string Usage = """
-        Usage: Axit [claude|down|json|git|terminal|file|media|preview|start|process|task|pass] [arguments]
+        Usage: Axit [claude|down|json|git|terminal|file|media|preview|start|process|task|pass|calc] [arguments]
 
           Axit claude [<folder>] ...  axClaude, the front end for Claude Code (Axit claude --help lists its options)
           Axit down [<file>]          axDown, the text editor
@@ -57,12 +58,13 @@ public static class Dispatch
           Axit process                axProcess, the processes, services and startup programs
           Axit task [<folder>]        axTask, tasks and lists as a folder of small files
           Axit pass [<database>]      axPass, a KeePass password database
+          Axit calc                   axCalc, the calculator
           Axit <folder>               the same as Axit claude <folder>
           Axit <file>                 the same as Axit down <file>, Axit json <file> for a .json file, Axit pass <file> for a .kdbx file, or Axit media <file> for a sound or video file
           Axit                        axClaude on the current folder
           --help, --version           this text, or the version
 
-        The installed console commands axit, axclaude, axdown, axjson, axgit, axterminal, axfile, axmedia, axpreview, axstart, axprocess, axtask and axpass stand for Axit, Axit claude, Axit down, Axit json, Axit git, Axit terminal, Axit file, Axit media, Axit preview, Axit start, Axit process, Axit task and Axit pass.
+        The installed console commands axit, axclaude, axdown, axjson, axgit, axterminal, axfile, axmedia, axpreview, axstart, axprocess, axtask, axpass and axcalc stand for Axit, Axit claude, Axit down, Axit json, Axit git, Axit terminal, Axit file, Axit media, Axit preview, Axit start, Axit process, Axit task, Axit pass and Axit calc.
         """;
 
     /// <summary>Whether an argument asks for the usage text: the forms Windows and Unix programs take (the apps' hosts read it too).</summary>

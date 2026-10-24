@@ -23,6 +23,7 @@ body:
         - axProcess
         - axTask
         - axPass
+        - axCalc
         - The bundle (install, update, the Axit menu)
     validations:
       required: true

@@ -15,7 +15,7 @@
       for a kind in Settings, Default apps,
     - axStart, the program launcher, running in the background from sign-in (a value under the user's Run key that axStart
       writes itself): it is stopped before an install or a removal, and started again, hidden, after an install,
-    - the console commands axclaude, axdown, axjson, axgit, axterminal, axfile, axmedia, axpreview, axstart, axprocess, axtask, axpass and axit (a folder
+    - the console commands axclaude, axdown, axjson, axgit, axterminal, axfile, axmedia, axpreview, axstart, axprocess, axtask, axpass, axcalc and axit (a folder
       opens axClaude, a file axDown, a .json file axJSON, a sound or video file axMedia): one-line shims in
       %USERPROFILE%\.local\bin, put on the user's PATH when it is not there yet (Claude Code's installer uses the same
       folder; a removal leaves the PATH, since the folder may hold other programs' commands).
@@ -110,6 +110,7 @@ $apps = @(
     @{ Name = 'axProcess'; Verb = 'process'; Description = 'axProcess, the processes, services and startup programs'; Icon = (Join-Path $target 'AxProcess.ico') },
     @{ Name = 'axTask'; Verb = 'task'; Description = 'axTask, tasks and lists'; Icon = (Join-Path $target 'AxTask.ico'); Opens = 'folders' },
     @{ Name = 'axPass'; Verb = 'pass'; Description = 'axPass, a KeePass password database'; Icon = (Join-Path $target 'AxPass.ico'); Opens = 'files'; Types = '.kdbx'; OpenWith = '.kdbx'; TypeName = 'KeePass database (axPass)' },
+    @{ Name = 'axCalc'; Verb = 'calc'; Description = 'axCalc, a calculator with a history'; Icon = (Join-Path $target 'AxCalc.ico') },
     @{ Name = 'axPreview'; Verb = 'preview'; Description = 'axPreview, a read-only viewer for text files'; Icon = (Join-Path $target 'AxPreview.ico'); Opens = 'files'; OpenWith = '.txt', '.md', '.markdown', '.log', '.json'; TypeName = 'Text file (axPreview)' }
 )
 # The places that follow from the name.

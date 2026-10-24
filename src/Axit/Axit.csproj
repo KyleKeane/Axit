@@ -13,13 +13,13 @@
     <ApplicationIcon>AxClaude.ico</ApplicationIcon>
     <Version>3.6.0</Version>
     <Product>Axit</Product>
-    <Description>Accessible Windows apps for screen reader users: axClaude, a front end for the Claude Code CLI, axDown, a text editor, axJSON, a JSON editor, axGIT, a git manager, axTerminal, a terminal, axFile, a file manager, axMedia, a player, axPreview, a viewer, axStart, a program launcher, axProcess, a view of the processes, services and startup programs, axTask, tasks and lists, and axPass, a KeePass password database</Description>
+    <Description>Accessible Windows apps for screen reader users: axClaude, a front end for the Claude Code CLI, axDown, a text editor, axJSON, a JSON editor, axGIT, a git manager, axTerminal, a terminal, axFile, a file manager, axMedia, a player, axPreview, a viewer, axStart, a program launcher, axProcess, a view of the processes, services and startup programs, axTask, tasks and lists, axPass, a KeePass password database, and axCalc, a calculator</Description>
     <Authors>Dr. Kyle Keane</Authors>
     <Company>Dr. Kyle Keane, www.kylekeane.com</Company>
     <Copyright>Copyright (c) 2026 Dr. Kyle Keane (www.kylekeane.com). MIT License.</Copyright>
   </PropertyGroup>
 
-  <!-- One .ico per app next to this file (AxDown.ico to AxPass.ico; tools/make-icon.ps1 draws them) are the apps'
+  <!-- One .ico per app next to this file (AxDown.ico to AxCalc.ico; tools/make-icon.ps1 draws them) are the apps'
        icons for their Start menu and File Explorer entries (the executable's own icon is axClaude's). publish.ps1
        copies every one of them next to the executable, since a single-file publish would bundle a project item
        into the executable, and install.ps1 copies them on. -->
@@ -37,6 +37,7 @@
     <ProjectReference Include="..\AxProcess\AxProcess.csproj" />
     <ProjectReference Include="..\AxTask\AxTask.csproj" />
     <ProjectReference Include="..\AxPass\AxPass.csproj" />
+    <ProjectReference Include="..\AxCalc\AxCalc.csproj" />
     <ProjectReference Include="..\Axit.Core\Axit.Core.csproj" />
   </ItemGroup>
 

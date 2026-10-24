@@ -1,5 +1,9 @@
 # Changelog
 
+## Unreleased
+
+- axCalc: a new app, a calculator as one expression field and a history list. Enter says the answer and adds the line "expression = answer" to the history; an expression that starts with an operator continues from the last answer; variables (`rate = 1.25`), functions, constants, hexadecimal, binary and octal numbers. Ctrl+I says an answer in hexadecimal, binary and octal, Ctrl+Shift+C copies it, Enter on a history line puts its expression back in the field, Ctrl+S saves the history. Start menu `Axit axCalc`, command `axcalc`.
+
 ## 3.6.0 - 2026-10-24
 
 - axPass: a new app, a KeePass password database (`.kdbx`) in axTask's two panes: Right into a group, Tab or Enter to an entry's fields, the password read as hidden. Ctrl+B copies the user name, Ctrl+C the password (KeePassXC's tool clears the clipboard after 30 seconds), Ctrl+U opens the URL, Ctrl+M moves an entry to another group, Ctrl+L locks, and the window locks itself after ten minutes away. Each password field says what to do ("Re-enter the password for Gmail"). Before the first change after unlocking, the database file is copied into a folder beside it ("mine backups"), the newest 20 kept; File, Back up now makes one at any time. Entries are added, renamed, changed and moved to the Recycle Bin, Ctrl+Z bringing them back; a password is typed twice or generated. It runs KeePassXC's command-line tool and never decrypts the file itself, so KeePassXC must be installed. Start menu `Axit axPass`, command `axpass`.
