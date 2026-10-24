@@ -138,7 +138,6 @@ public abstract partial class AxitForm : Form
     /// <summary>The bundle's Axit menu (AX-9) with this window's Command palette and update items; the window puts it before Help.</summary>
     protected AxitMenu CreateAxitMenu() => new(this, Item("Command &palette...", ShowCommandPalette, BundleKeys.CommandPalette), _checkItem, _updateItem);
 
-    /// <summary>A menu item whose key the window handles itself: the item only shows the key (AX-8).</summary>
     /// <summary>
     /// The "Show current folder in" submenu of a window (AX-9.10; 2026-10-24 one builder for every window): the
     /// window's File Explorer item, then every app of <see cref="Dispatch.Apps"/> that is offered there
@@ -164,6 +163,7 @@ public abstract partial class AxitForm : Form
         return menu;
     }
 
+    /// <summary>A menu item whose key the window handles itself: the item only shows the key (AX-8).</summary>
     protected static ToolStripMenuItem Item(string text, Action action, Keys key)
     {
         var item = new ToolStripMenuItem(text, null, (_, _) => action());
@@ -447,7 +447,47 @@ public abstract partial class AxitForm : Form
                 return true;
         }
 
-        return ProcessWindowKey(keyData) || base.ProcessCmdKey(ref msg, keyData);
+        // The window's own keys first (a rename box's, a state's), then the keys of its command list (app-kit AK-2.3).
+        return ProcessWindowKey(keyData) || RunCommandKey(keyData) || base.ProcessCmdKey(ref msg, keyData);
+    }
+
+    // ---- the window's commands (docs/axit/app-kit.md AK-2) ----
+
+    private readonly List<Command> _commands = [];
+
+    /// <summary>The window's commands, as its menus and keys were made from them: for the command palette's checks and MCP.</summary>
+    protected IReadOnlyList<Command> Commands => _commands;
+
+    /// <summary>A command as an item of <paramref name="menu"/> showing its key, and its key handled with it (AK-2.3); the item, for a window that keeps it.</summary>
+    protected ToolStripMenuItem Add(ToolStripMenuItem menu, Command command)
+    {
+        var item = Item(command.Label, command.Run, command.Key);
+        menu.DropDownItems.Add(item);
+        _commands.Add(command);
+        return item;
+    }
+
+    /// <summary>A command that is a key and no menu item (Tab between a window's panes, a list's Enter).</summary>
+    protected void AddKey(Command command) => _commands.Add(command);
+
+    /// <summary>The first command with the key whose <see cref="Command.When"/> holds, run; true when there was one.</summary>
+    private bool RunCommandKey(Keys keyData)
+    {
+        if (keyData == Keys.None)
+        {
+            return false;
+        }
+
+        foreach (var command in _commands)
+        {
+            if (command.Key == keyData && (command.When?.Invoke() ?? true))
+            {
+                command.Run();
+                return true;
+            }
+        }
+
+        return false;
     }
 
     /// <summary>Runs a command's task from the UI thread and turns an escaped exception into a notice rather than a crash: an exception out of an awaited task would otherwise be unobserved.</summary>

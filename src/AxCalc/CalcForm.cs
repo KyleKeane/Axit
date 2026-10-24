@@ -38,23 +38,23 @@ public sealed class CalcForm : AxitForm
         _entries.AddRange(settings.History);
         _calculator.Answer = _entries.Count > 0 ? _entries[^1].Value : null;
 
-        // ---- menus (AC-7.1); the keys are handled in ProcessWindowKey from the tables, the items only show them ----
+        // ---- menus and keys (AC-7.1, AC-7.2): one command list (docs/axit/app-kit.md AK-2), each key from the tables ----
         var calculator = new ToolStripMenuItem("&Calculator");
-        calculator.DropDownItems.Add(Item("&Answer", Evaluate, AxCalcKeys.Act));
-        calculator.DropDownItems.Add(Item("&Copy answer", CopyAnswer, AxCalcKeys.CopyAnswer));
+        Add(calculator, new Command("&Answer", AxCalcKeys.Act, Evaluate) { When = () => _field.Focused, Mark = CommandMark.Read });
+        Add(calculator, new Command("&Copy answer", AxCalcKeys.CopyAnswer, CopyAnswer));
         var copyIn = new ToolStripMenuItem("Copy answer &in");
         copyIn.DropDownItems.Add(new ToolStripMenuItem("&Hexadecimal", null, (_, _) => CopyCode(16)));
         copyIn.DropDownItems.Add(new ToolStripMenuItem("&Binary", null, (_, _) => CopyCode(2)));
         copyIn.DropDownItems.Add(new ToolStripMenuItem("&Octal", null, (_, _) => CopyCode(8)));
         calculator.DropDownItems.Add(copyIn);
-        calculator.DropDownItems.Add(Item("Answer in other &bases", SayBases, AxCalcKeys.OtherBases));
-        calculator.DropDownItems.Add(Item("Say the &last answer", SayLastAnswer, AxCalcKeys.LastAnswer));
+        Add(calculator, new Command("Answer in other &bases", AxCalcKeys.OtherBases, SayBases) { Mark = CommandMark.Read });
+        Add(calculator, new Command("Say the &last answer", AxCalcKeys.LastAnswer, SayLastAnswer) { Mark = CommandMark.Read });
         calculator.DropDownItems.Add(new ToolStripSeparator());
         calculator.DropDownItems.Add(new ToolStripMenuItem("&Variables", null, (_, _) => ShowVariables()));
         calculator.DropDownItems.Add(new ToolStripMenuItem("Clear va&riables...", null, (_, _) => ClearVariables()));
         calculator.DropDownItems.Add(new ToolStripSeparator());
         calculator.DropDownItems.Add(Item("&Save history...", SaveHistory, BundleKeys.Save));
-        calculator.DropDownItems.Add(Item("Clear &history...", ClearHistory, AxCalcKeys.ClearHistory));
+        Add(calculator, new Command("Clear &history...", AxCalcKeys.ClearHistory, ClearHistory) { Mark = CommandMark.Act });
         calculator.DropDownItems.Add(new ToolStripSeparator());
         calculator.DropDownItems.Add(CreateExitItem());
 
@@ -81,6 +81,21 @@ public sealed class CalcForm : AxitForm
         // The bundle's Axit menu (AX-9) sits before Help in every window.
         _menu.Items.AddRange([calculator, options, CreateAxitMenu(), help]);
         MainMenuStrip = _menu;
+
+        // The keys without a menu item: between the history and the field, find in the history, and the keys that
+        // act on what has the focus (AC-5.2; in the list they also keep it from dinging).
+        foreach (var key in new[] { BundleKeys.NextControl, BundleKeys.PreviousControl, BundleKeys.NextControlAlso })
+        {
+            AddKey(new Command("Switch between the history and the field", key, () => (_history.Focused ? (Control)_field : _history).Focus()) { Mark = CommandMark.Open });
+        }
+
+        AddKey(new Command("Find in the history", BundleKeys.Find, () => ShowFindInList(_history, Labels)) { Mark = CommandMark.Read });
+        AddKey(new Command("Find next", BundleKeys.FindNext, () => FindInList(_history, Labels, 1)) { Mark = CommandMark.Read });
+        AddKey(new Command("Find previous", BundleKeys.FindPrevious, () => FindInList(_history, Labels, -1)) { Mark = CommandMark.Read });
+        AddKey(new Command("Clear the field", AxCalcKeys.Back, ClearField) { When = () => _field.Focused });
+        AddKey(new Command("Recall the entry", AxCalcKeys.Act, Recall) { When = () => _history.Focused, Mark = CommandMark.Open });
+        AddKey(new Command("Back to the field", AxCalcKeys.Back, () => _field.Focus()) { When = () => _history.Focused, Mark = CommandMark.Open });
+        AddKey(new Command("Remove the entry", AxCalcKeys.Remove, RemoveEntry) { When = () => _history.Focused });
 
         // ---- the history and the field (AC-2.1) ----
         _history.IntegralHeight = false;
@@ -159,74 +174,6 @@ public sealed class CalcForm : AxitForm
         // AC-9.1: the history and the variables into the settings, which the base then writes.
         _settings.Keep(_entries, _calculator.Variables);
         base.OnFormClosing(e);
-    }
-
-    // ---- keys (AC-7.2): every key comes from BundleKeys or AxCalcKeys, and is handled here only ----
-
-    protected override bool ProcessWindowKey(Keys keyData)
-    {
-        switch (keyData)
-        {
-            case BundleKeys.NextControl:
-            case BundleKeys.PreviousControl:
-            case BundleKeys.NextControlAlso:
-                Control other = _history.Focused ? _field : _history;
-                other.Focus();
-                return true;
-            case BundleKeys.Find:
-                ShowFindInList(_history, Labels);
-                return true;
-            case BundleKeys.FindNext:
-                FindInList(_history, Labels, 1);
-                return true;
-            case BundleKeys.FindPrevious:
-                FindInList(_history, Labels, -1);
-                return true;
-            case AxCalcKeys.CopyAnswer:
-                CopyAnswer();
-                return true;
-            case AxCalcKeys.OtherBases:
-                SayBases();
-                return true;
-            case AxCalcKeys.LastAnswer:
-                SayLastAnswer();
-                return true;
-            case AxCalcKeys.ClearHistory:
-                ClearHistory();
-                return true;
-        }
-
-        if (_field.Focused)
-        {
-            switch (keyData)
-            {
-                case AxCalcKeys.Act:
-                    Evaluate();
-                    return true;
-                case AxCalcKeys.Back:
-                    ClearField();
-                    return true;
-            }
-        }
-
-        if (_history.Focused)
-        {
-            // Enter, Escape and Delete in the list (AC-5.2); returning true keeps the list from dinging.
-            switch (keyData)
-            {
-                case AxCalcKeys.Act:
-                    Recall();
-                    return true;
-                case AxCalcKeys.Back:
-                    _field.Focus();
-                    return true;
-                case AxCalcKeys.Remove:
-                    RemoveEntry();
-                    return true;
-            }
-        }
-
-        return false;
     }
 
     // ---- the answer (AC-3, AC-6) ----

@@ -1,0 +1,52 @@
+# axCalc: the field, the answer, the history and its keys (docs/axcalc/nvda-test-plan.md; SPEC AC-3 to AC-6). Every
+# key here is a command of the window's one list (docs/axit/app-kit.md AK-2), so this script is also the check that the
+# list does what the key switch did before it.
+file home\Axit\axcalc.json {"checkForUpdates": false, "keepHistory": false}
+
+start calc
+expect focus Expression
+
+# AC-6.1: Enter answers, the answer said alone, the field emptied.
+type 1920*1080*4
+keys enter
+expect said ! 8294400
+expect focus "name":"Expression","role":"Text","value":""
+
+# AC-6.1: Escape empties a field with text ("Cleared") and says "Empty" on an empty one.
+type 2+2
+keys escape
+expect said ! Cleared
+keys escape
+expect said ! Empty
+
+# An expression starting with an operator continues from the last answer (AC-3).
+type /2
+keys enter
+expect said ! 4147200
+
+# Ctrl+Q says the last answer; Ctrl+I the answer in other bases.
+keys ctrl+q
+expect said 4147200
+keys ctrl+i
+expect said hex
+
+# Tab to the history: the newest entry; Enter puts its expression back in the field (AC-5.2).
+keys tab
+expect focus History
+keys enter
+expect focus "name":"Expression"
+
+# In the history Escape goes back to the field, Delete removes the entry.
+keys tab
+expect focus History
+keys escape
+expect focus "name":"Expression"
+keys tab
+keys delete
+expect said ! Removed
+
+# Ctrl+F finds in the history; Escape closes the find.
+keys ctrl+f
+expect state "notice":"Find"
+keys escape
+expect state "notice":null
