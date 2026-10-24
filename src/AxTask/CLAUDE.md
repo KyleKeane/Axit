@@ -17,18 +17,17 @@ The bundle rules are in the root `CLAUDE.md`.
 ## Where things are
 
 - `AxTaskApp`: the entry point `Run`, one call into `Axit.Forms/AppHost.Run` with the one folder or item file.
-- `TaskForm.cs`: the window on `AxitForm`: the menus (Folder; List, Item and Field, only the one for the selection
-  enabled, `UpdateMenus`; View, Options, Axit, Help), the two panes in a `SplitContainer`, the key switch
-  (`ProcessWindowKey`: the keys of everywhere, then the navigator's, then the detail pane's), the levels (`Start`,
-  `Into`, `OpenSelected`, `OpenRow`, `UpLevel`, `ShowAllTasks`, `Refresh`), `Fill` (the one place the navigator, its
-  name, the title and the status bar are filled; the selection by a row's path, or All tasks' name), `FillDetail`
-  (the detail pane for the selection, silently, on every selection change; `_shown`, `_shownPath` and `_shownText` are
-  the document it shows and the text it was read from).
+- The panes, the moves between levels, the shared keys and every field command are the item apps' shared window,
+  `Axit.Forms/ItemForm` (since axPass, its second use); `TaskForm` derives from it and fills in what is axTask's.
+- `TaskForm.cs`: the menus (Folder; List, Item and Field, only the one for the selection enabled, `UpdateRowMenus`;
+  View, Options, Axit, Help), axTask's own keys (`ProcessItemKey`), the levels of the folder (`Start`, `EnterList`,
+  `LeaveList`, `ShowAllTasks`, `ReadLevel` with the rows' `Tag`: an `ItemFile`, a `SmartList`, or nothing for a
+  list) and the detail (`DetailOf`, with a `FileSource` to save to; a link read by `SpokenValue`).
 - `TaskForm.Commands.cs`: the commands and the one way a file changes: `Commit` (a `Step` applied, kept for Ctrl+Z,
-  the panes filled, its words said), `CheckFresh` (the file still as shown, IA-5.5), `ChangeShown` (a change to the
-  detail pane's document), `ChangeItemFile`, `AskText` (every one-field notice, its check in `Accepts`). Rename and
-  Archive add `Links.AfterMove`'s writes, so links follow what moved.
-- `AxTaskKeys`: the window's keys; `All` feeds the collision test and the F1 text names the same keys.
+  the panes filled, its words said), `CheckFresh` (the file still as shown, IA-5.5), `SaveFields` (the shared field
+  commands' change, written), the link's notice (`ChangeSpecial`). Rename and Archive add `Links.AfterMove`'s writes,
+  so links follow what moved.
+- `AxTaskKeys`: the window's keys, `Axit.Forms/ItemKeys.All` and its own; `All` feeds the collision test and the F1 text names the same keys.
 - `HelpText`: the F1 text and the embedded guide; About is the bundle's.
 
 ## Rules
@@ -36,8 +35,8 @@ The bundle rules are in the root `CLAUDE.md`.
 1. Every change goes through `Commit` with a `Step`; nothing writes a file another way.
 2. Never write a file without checking it is as it was shown (`CheckFresh`): axJSON or a sync may have changed it.
 3. The detail pane says nothing when it fills; NVDA reads it when the focus goes there.
-4. When axPass is built, the window, the field notices and the format move to `Axit.Core` and `Axit.Forms` unchanged,
-   one piece per commit (IA-D5); keep what is axTask's own (Done, Due, All tasks, smart lists) out of the shared parts.
+4. The window, the field notices and the format are shared with axPass (IA-D5): a change to them changes both apps;
+   keep what is axTask's own (Done, Due, All tasks, smart lists, links, files) in `TaskForm`.
 5. Run the `accessibility-review` skill on a change here before committing, and check it with NVDA following the test plan.
 
 ## Gotchas
