@@ -54,34 +54,35 @@ public sealed class ProcessForm : AxitForm
         _settings = settings;
         Text = "This computer - " + AxProcessApp.Name;
 
-        // ---- menus (PR-6.1); the keys are handled in ProcessWindowKey from the tables, the items only show them ----
+        // ---- menus and keys (PR-6.1, PR-6.2): one command list (docs/axit/app-kit.md AK-2), each key from the tables ----
         // The first menu holds what every view has (AX-6: the thing worked on, then Exit); each view has a menu of its
         // own, and only the menu of the view shown is enabled, so that a process command is never at hand among the
-        // services (the user's ask, 2026-10-24; UpdateViewMenus).
+        // services (the user's ask, 2026-10-24; UpdateViewMenus). The keys act whichever menu is enabled, as before:
+        // Enter and Ctrl+E are the first menu's command with the key, and each command finds the view shown.
         var computer = new ToolStripMenuItem("&Computer");
-        computer.DropDownItems.Add(Item("&Refresh", () => Do(() => RefreshAsync(announce: true)), AxProcessKeys.Refresh));
-        computer.DropDownItems.Add(Item("&Summary", SaySummary, AxProcessKeys.Summary));
-        computer.DropDownItems.Add(Item("&Copy line", CopyLine, AxProcessKeys.CopyLine));
+        Add(computer, new Command("&Refresh", AxProcessKeys.Refresh, () => Do(() => RefreshAsync(announce: true))) { Mark = CommandMark.Read });
+        Add(computer, new Command("&Summary", AxProcessKeys.Summary, SaySummary) { Mark = CommandMark.Read });
+        Add(computer, new Command("&Copy line", AxProcessKeys.CopyLine, CopyLine) { Mark = CommandMark.Read });
         computer.DropDownItems.Add(new ToolStripSeparator());
         computer.DropDownItems.Add(CreateExitItem());
 
-        _processMenu.DropDownItems.Add(Item("&Details", () => Do(ActAsync), AxProcessKeys.Act));
-        _processMenu.DropDownItems.Add(Item("&End process...", () => EndProcess(tree: false), AxProcessKeys.End));
-        _processMenu.DropDownItems.Add(new ToolStripMenuItem("End process &tree...", null, (_, _) => EndProcess(tree: true)));
-        _processMenu.DropDownItems.Add(Item("Show program in ax&File", ShowProgram, AxProcessKeys.ShowProgram));
+        Add(_processMenu, new Command("&Details", AxProcessKeys.Act, () => Do(ActAsync)) { When = () => _list.Focused, Mark = CommandMark.Read });
+        Add(_processMenu, new Command("&End process...", AxProcessKeys.End, () => EndProcess(tree: false)) { When = () => _list.Focused, Mark = CommandMark.Act });
+        Add(_processMenu, new Command("End process &tree...", Keys.None, () => EndProcess(tree: true)) { Mark = CommandMark.Act });
+        Add(_processMenu, new Command("Show program in ax&File", AxProcessKeys.ShowProgram, ShowProgram) { Mark = CommandMark.Open });
 
-        _serviceMenu.DropDownItems.Add(Item("&Details", () => Do(ActAsync), AxProcessKeys.Act));
-        _serviceMenu.DropDownItems.Add(new ToolStripMenuItem("&Start", null, (_, _) => ControlSelectedService(ServiceAction.Start)));
-        _serviceMenu.DropDownItems.Add(new ToolStripMenuItem("S&top", null, (_, _) => ControlSelectedService(ServiceAction.Stop)));
-        _serviceMenu.DropDownItems.Add(new ToolStripMenuItem("&Restart", null, (_, _) => ControlSelectedService(ServiceAction.Restart)));
+        Add(_serviceMenu, new Command("&Details", AxProcessKeys.Act, () => Do(ActAsync)) { When = () => _list.Focused, Mark = CommandMark.Read });
+        Add(_serviceMenu, new Command("&Start", Keys.None, () => ControlSelectedService(ServiceAction.Start)) { Mark = CommandMark.Act });
+        Add(_serviceMenu, new Command("S&top", Keys.None, () => ControlSelectedService(ServiceAction.Stop)) { Mark = CommandMark.Act });
+        Add(_serviceMenu, new Command("&Restart", Keys.None, () => ControlSelectedService(ServiceAction.Restart)) { Mark = CommandMark.Act });
 
-        _startupMenu.DropDownItems.Add(Item("&Details", () => Do(ActAsync), AxProcessKeys.Act));
-        _startupMenu.DropDownItems.Add(Item("Show program in ax&File", ShowProgram, AxProcessKeys.ShowProgram));
+        Add(_startupMenu, new Command("&Details", AxProcessKeys.Act, () => Do(ActAsync)) { When = () => _list.Focused, Mark = CommandMark.Read });
+        Add(_startupMenu, new Command("Show program in ax&File", AxProcessKeys.ShowProgram, ShowProgram) { Mark = CommandMark.Open });
 
         var view = new ToolStripMenuItem("&View");
-        view.DropDownItems.Add(Item("&Processes", () => Do(() => ShowViewAsync(View.Processes)), AxProcessKeys.ViewProcesses));
-        view.DropDownItems.Add(Item("&Services", () => Do(() => ShowViewAsync(View.Services)), AxProcessKeys.ViewServices));
-        view.DropDownItems.Add(Item("Start&up", () => Do(() => ShowViewAsync(View.Startup)), AxProcessKeys.ViewStartup));
+        Add(view, new Command("&Processes", AxProcessKeys.ViewProcesses, () => Do(() => ShowViewAsync(View.Processes))) { Mark = CommandMark.Open });
+        Add(view, new Command("&Services", AxProcessKeys.ViewServices, () => Do(() => ShowViewAsync(View.Services))) { Mark = CommandMark.Open });
+        Add(view, new Command("Start&up", AxProcessKeys.ViewStartup, () => Do(() => ShowViewAsync(View.Startup))) { Mark = CommandMark.Open });
         view.DropDownItems.Add(new ToolStripSeparator());
         var sort = new ToolStripMenuItem("Sort processes &by");
         foreach (var (choice, text) in new[] { (ProcessSort.Memory, "&Memory"), (ProcessSort.Processor, "&Processor"), (ProcessSort.Name, "&Name") })
@@ -109,6 +110,16 @@ public sealed class ProcessForm : AxitForm
         _menu.Items.AddRange([computer, _processMenu, _serviceMenu, _startupMenu, view, options, CreateAxitMenu(), help]);
         UpdateViewMenus();
         MainMenuStrip = _menu;
+
+        // The keys without a menu item: find in the list, and Tab, Shift+Tab and the menu keys in the list (returning
+        // true there keeps it from dinging).
+        AddKey(new Command("Find in the list", BundleKeys.Find, () => ShowFindInList(_list, () => Current.Labels)) { Mark = CommandMark.Read });
+        AddKey(new Command("Find next", BundleKeys.FindNext, () => FindInList(_list, () => Current.Labels, 1)) { Mark = CommandMark.Read });
+        AddKey(new Command("Find previous", BundleKeys.FindPrevious, () => FindInList(_list, () => Current.Labels, -1)) { Mark = CommandMark.Read });
+        AddKey(new Command("Next view", AxProcessKeys.NextView, () => Do(() => ShowViewAsync(Cycled(1)))) { When = () => _list.Focused, Mark = CommandMark.Open });
+        AddKey(new Command("Previous view", AxProcessKeys.PreviousView, () => Do(() => ShowViewAsync(Cycled(-1)))) { When = () => _list.Focused, Mark = CommandMark.Open });
+        AddKey(new Command("Item menu", AxProcessKeys.ItemMenu, OpenViewMenu) { When = () => _list.Focused, Mark = CommandMark.Open });
+        AddKey(new Command("Item menu", AxProcessKeys.ItemMenuAlso, OpenViewMenu) { When = () => _list.Focused, Mark = CommandMark.Open });
 
         // ---- the list (PR-2.1) ----
         _list.IntegralHeight = false;
@@ -178,70 +189,7 @@ public sealed class ProcessForm : AxitForm
     }
 
 
-    // ---- keys (PR-6.2): every key comes from BundleKeys or AxProcessKeys, and is handled here only ----
-
-    protected override bool ProcessWindowKey(Keys keyData)
-    {
-        switch (keyData)
-        {
-            case BundleKeys.Find:
-                ShowFindInList(_list, () => Current.Labels);
-                return true;
-            case BundleKeys.FindNext:
-                FindInList(_list, () => Current.Labels, 1);
-                return true;
-            case BundleKeys.FindPrevious:
-                FindInList(_list, () => Current.Labels, -1);
-                return true;
-            case AxProcessKeys.ViewProcesses:
-                Do(() => ShowViewAsync(View.Processes));
-                return true;
-            case AxProcessKeys.ViewServices:
-                Do(() => ShowViewAsync(View.Services));
-                return true;
-            case AxProcessKeys.ViewStartup:
-                Do(() => ShowViewAsync(View.Startup));
-                return true;
-            case AxProcessKeys.Refresh:
-                Do(() => RefreshAsync(announce: true));
-                return true;
-            case AxProcessKeys.ShowProgram:
-                ShowProgram();
-                return true;
-            case AxProcessKeys.CopyLine:
-                CopyLine();
-                return true;
-            case AxProcessKeys.Summary:
-                SaySummary();
-                return true;
-        }
-
-        if (_list.Focused)
-        {
-            // Enter, Delete and the menu keys act in the list; returning true keeps it from dinging.
-            switch (keyData)
-            {
-                case AxProcessKeys.Act:
-                    Do(ActAsync);
-                    return true;
-                case AxProcessKeys.End:
-                    EndProcess(tree: false);
-                    return true;
-                case AxProcessKeys.NextView:
-                    Do(() => ShowViewAsync(Cycled(1)));
-                    return true;
-                case AxProcessKeys.PreviousView:
-                    Do(() => ShowViewAsync(Cycled(-1)));
-                    return true;
-                case AxProcessKeys.ItemMenu:
-                case AxProcessKeys.ItemMenuAlso:
-                    OpenViewMenu();
-                    return true;
-            }
-        }
-
-        return false;
-    }
+    // ---- keys (PR-6.2): every key comes from BundleKeys or AxProcessKeys, and is a command of the list made above ----
 
     /// <summary>The view after or before the one shown, round from Startup to Processes (Tab, Shift+Tab; PR-2.2).</summary>
     private View Cycled(int step) => (View)(((int)_view + step + 3) % 3);

@@ -158,14 +158,6 @@ public sealed partial class GitForm
         return false;
     }
 
-    /// <summary>Enter in the list: the diff of a file, the details of a commit, the switch to a branch (AG-6.2).</summary>
-    private Task ActOnItemAsync() => _view switch
-    {
-        View.Changes => ShowDiffAsync(),
-        View.Log => ShowCommitAsync(),
-        _ => SwitchBranchAsync(),
-    };
-
     // ---- the details and the status bar (AG-2.1, AG-2.3, AG-2.4) ----
 
     /// <summary>Text into the details, named for what it is; with <paramref name="focus"/> the focus goes to its first line and the name and length are said after it (AG-D5).</summary>

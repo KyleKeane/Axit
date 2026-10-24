@@ -62,45 +62,51 @@ public sealed partial class GitForm : AxitForm
         _startPath = path;
         Text = "No repository - " + AxGitApp.Name;
 
-        // ---- menus (AG-6.1); the keys are handled in ProcessWindowKey from the tables, the items only show them ----
+        // ---- menus and keys (AG-6.1, AG-6.2): one command list (docs/axit/app-kit.md AK-2), each key from the tables ----
         // Repository is the thing worked on, in the standard order of a first menu (bundle AX-6): Open and the recent
-        // repositories, then the slot the editors have Save in (Refresh here), then the extras, then Exit.
+        // repositories, then the slot the editors have Save in (Refresh here), then the extras, then Exit. The keys act
+        // while a menu item is disabled, as before: the command says what stops it.
         var repository = new ToolStripMenuItem("&Repository");
-        repository.DropDownItems.Add(Item("&Open repository...", OpenRepositoryDialog, AxGitKeys.OpenRepository));
+        Add(repository, new Command("&Open repository...", AxGitKeys.OpenRepository, OpenRepositoryDialog) { Mark = CommandMark.Open });
         CommandPalette.FilledOnOpening(_recentItem).DropDownOpening += (_, _) => FillRecent();
         FillRecent();
         repository.DropDownItems.Add(_recentItem);
         repository.DropDownItems.Add(new ToolStripSeparator());
-        repository.DropDownItems.Add(Git(Item("Re&fresh", () => Do(() => RefreshAsync(announce: true)), AxGitKeys.Refresh)));
+        Git(Add(repository, new Command("Re&fresh", AxGitKeys.Refresh, () => Do(() => RefreshAsync(announce: true))) { Mark = CommandMark.Read }));
         repository.DropDownItems.Add(new ToolStripSeparator());
-        // Show current repository in ▸ File Explorer, axClaude, axTerminal, axFile: the way back to where the user came from (AG-1.4).
-        repository.DropDownItems.Add(CreateShowInMenu("Show current repository &in", Item("File &Explorer", ShowInExplorer, AxGitKeys.ShowInExplorer), RepositoryOrSay));
+        // Show current repository in ▸ File Explorer, axClaude, axTerminal, axFile: the way back to where the user came
+        // from (AG-1.4). The base makes the submenu around its first item, so File Explorer is a key of the list and that item.
+        var explorer = new Command("File &Explorer", AxGitKeys.ShowInExplorer, ShowInExplorer) { Mark = CommandMark.Open };
+        AddKey(explorer);
+        repository.DropDownItems.Add(CreateShowInMenu("Show current repository &in", Item(explorer.Label, explorer.Run, explorer.Key), RepositoryOrSay));
         repository.DropDownItems.Add(new ToolStripSeparator());
         repository.DropDownItems.Add(CreateExitItem());
 
+        // Space, Enter and Delete act in the list only; in the details they are the control's own (AG-6.2). Enter acts
+        // on the item of the view shown: Show diff, the commit (a key without an item), Switch to branch.
         var changes = new ToolStripMenuItem("&Changes");
-        changes.DropDownItems.Add(Git(Item("&Stage or unstage", () => Do(StageToggleAsync), AxGitKeys.StageToggle)));
-        changes.DropDownItems.Add(Git(Item("Stage &all", () => Do(() => StageAllAsync(stage: true)), AxGitKeys.StageAll)));
-        changes.DropDownItems.Add(Git(Item("&Unstage all", () => Do(() => StageAllAsync(stage: false)), AxGitKeys.UnstageAll)));
+        Git(Add(changes, new Command("&Stage or unstage", AxGitKeys.StageToggle, () => Do(StageToggleAsync)) { When = () => _list.Focused }));
+        Git(Add(changes, new Command("Stage &all", AxGitKeys.StageAll, () => Do(() => StageAllAsync(stage: true)))));
+        Git(Add(changes, new Command("&Unstage all", AxGitKeys.UnstageAll, () => Do(() => StageAllAsync(stage: false)))));
         changes.DropDownItems.Add(new ToolStripSeparator());
-        changes.DropDownItems.Add(Git(Item("Show &diff", () => Do(ShowDiffAsync), AxGitKeys.Act)));
-        changes.DropDownItems.Add(Item("&Open file in editor", OpenInEditor, AxGitKeys.OpenInEditor));
-        changes.DropDownItems.Add(Git(Item("Disca&rd changes...", Discard, AxGitKeys.Discard)));
+        Git(Add(changes, new Command("Show &diff", AxGitKeys.Act, () => Do(ShowDiffAsync)) { When = () => _list.Focused && _view == View.Changes, Mark = CommandMark.Read }));
+        Add(changes, new Command("&Open file in editor", AxGitKeys.OpenInEditor, OpenInEditor) { Mark = CommandMark.Open });
+        Git(Add(changes, new Command("Disca&rd changes...", AxGitKeys.Discard, Discard) { When = () => _list.Focused, Mark = CommandMark.Act }));
         changes.DropDownItems.Add(new ToolStripSeparator());
-        changes.DropDownItems.Add(Git(Item("&Commit...", Commit, AxGitKeys.Commit)));
+        Git(Add(changes, new Command("&Commit...", AxGitKeys.Commit, Commit) { Mark = CommandMark.Act }));
 
         var branches = new ToolStripMenuItem("&Branches");
-        branches.DropDownItems.Add(Git(Item("&Switch to branch", () => Do(SwitchBranchAsync), AxGitKeys.Act)));
-        branches.DropDownItems.Add(Git(Item("&New branch...", NewBranch, AxGitKeys.NewBranch)));
+        Git(Add(branches, new Command("&Switch to branch", AxGitKeys.Act, () => Do(SwitchBranchAsync)) { When = () => _list.Focused && _view == View.Branches, Mark = CommandMark.Act }));
+        Git(Add(branches, new Command("&New branch...", AxGitKeys.NewBranch, NewBranch) { Mark = CommandMark.Act }));
         branches.DropDownItems.Add(new ToolStripSeparator());
-        branches.DropDownItems.Add(Git(Item("&Fetch", () => Do(FetchAsync), AxGitKeys.Fetch)));
-        branches.DropDownItems.Add(Git(Item("&Pull", () => Do(PullAsync), AxGitKeys.Pull)));
-        branches.DropDownItems.Add(Git(Item("P&ush", () => Do(PushAsync), AxGitKeys.Push)));
+        Git(Add(branches, new Command("&Fetch", AxGitKeys.Fetch, () => Do(FetchAsync)) { Mark = CommandMark.Act }));
+        Git(Add(branches, new Command("&Pull", AxGitKeys.Pull, () => Do(PullAsync)) { Mark = CommandMark.Act }));
+        Git(Add(branches, new Command("P&ush", AxGitKeys.Push, () => Do(PushAsync)) { Mark = CommandMark.Act }));
 
         var view = new ToolStripMenuItem("&View");
-        view.DropDownItems.Add(Item("&Changes", () => Do(() => ShowViewAsync(View.Changes)), AxGitKeys.ViewChanges));
-        view.DropDownItems.Add(Item("&Log", () => Do(() => ShowViewAsync(View.Log)), AxGitKeys.ViewLog));
-        view.DropDownItems.Add(Item("&Branches", () => Do(() => ShowViewAsync(View.Branches)), AxGitKeys.ViewBranches));
+        Add(view, new Command("&Changes", AxGitKeys.ViewChanges, () => Do(() => ShowViewAsync(View.Changes))) { Mark = CommandMark.Open });
+        Add(view, new Command("&Log", AxGitKeys.ViewLog, () => Do(() => ShowViewAsync(View.Log))) { Mark = CommandMark.Open });
+        Add(view, new Command("&Branches", AxGitKeys.ViewBranches, () => Do(() => ShowViewAsync(View.Branches))) { Mark = CommandMark.Open });
 
         // Options, as the other windows' (AX-6): every setting in the submenu for what it is about.
         var options = new ToolStripMenuItem("&Options");
@@ -114,6 +120,17 @@ public sealed partial class GitForm : AxitForm
         // The bundle's Axit menu (AX-9) sits before Help in every window and ends with the update items and About.
         _menu.Items.AddRange([repository, changes, branches, view, options, CreateAxitMenu(), help]);
         MainMenuStrip = _menu;
+
+        // The keys without a menu item: between the list and the details, find in the details, Enter on a commit.
+        foreach (var key in new[] { BundleKeys.NextControl, BundleKeys.PreviousControl, BundleKeys.NextControlAlso })
+        {
+            AddKey(new Command("Switch between the list and the details", key, () => (_list.Focused ? (Control)_details : _list).Focus()) { Mark = CommandMark.Open });
+        }
+
+        AddKey(new Command("Find in the details", BundleKeys.Find, () => ShowFind(_details)) { Mark = CommandMark.Read });
+        AddKey(new Command("Find next", BundleKeys.FindNext, () => FindNext(_details, 1)) { Mark = CommandMark.Read });
+        AddKey(new Command("Find previous", BundleKeys.FindPrevious, () => FindNext(_details, -1)) { Mark = CommandMark.Read });
+        AddKey(new Command("Show the commit", AxGitKeys.Act, () => Do(ShowCommitAsync)) { When = () => _list.Focused && _view == View.Log, Mark = CommandMark.Read });
 
         // ---- the list and the details (AG-2.1) ----
         _list.IntegralHeight = false;
@@ -193,91 +210,6 @@ public sealed partial class GitForm : AxitForm
 
     /// <summary>The repository, for Recently closed (AX-9.4).</summary>
     protected override string? PathInHand => _root;
-
-    // ---- keys (AG-6.2): every key comes from BundleKeys or AxGitKeys, and is handled here only ----
-
-    protected override bool ProcessWindowKey(Keys keyData)
-    {
-        switch (keyData)
-        {
-            case BundleKeys.NextControl:
-            case BundleKeys.PreviousControl:
-            case BundleKeys.NextControlAlso:
-                Control other = _list.Focused ? _details : _list;
-                other.Focus();
-                return true;
-            case BundleKeys.Find:
-                ShowFind(_details);
-                return true;
-            case BundleKeys.FindNext:
-                FindNext(_details, 1);
-                return true;
-            case BundleKeys.FindPrevious:
-                FindNext(_details, -1);
-                return true;
-            case AxGitKeys.OpenRepository:
-                OpenRepositoryDialog();
-                return true;
-            case AxGitKeys.Refresh:
-                Do(() => RefreshAsync(announce: true));
-                return true;
-            case AxGitKeys.ShowInExplorer:
-                ShowInExplorer();
-                return true;
-            case AxGitKeys.ViewChanges:
-                Do(() => ShowViewAsync(View.Changes));
-                return true;
-            case AxGitKeys.ViewLog:
-                Do(() => ShowViewAsync(View.Log));
-                return true;
-            case AxGitKeys.ViewBranches:
-                Do(() => ShowViewAsync(View.Branches));
-                return true;
-            case AxGitKeys.StageAll:
-                Do(() => StageAllAsync(stage: true));
-                return true;
-            case AxGitKeys.UnstageAll:
-                Do(() => StageAllAsync(stage: false));
-                return true;
-            case AxGitKeys.OpenInEditor:
-                OpenInEditor();
-                return true;
-            case AxGitKeys.Commit:
-                Commit();
-                return true;
-            case AxGitKeys.NewBranch:
-                NewBranch();
-                return true;
-            case AxGitKeys.Fetch:
-                Do(FetchAsync);
-                return true;
-            case AxGitKeys.Pull:
-                Do(PullAsync);
-                return true;
-            case AxGitKeys.Push:
-                Do(PushAsync);
-                return true;
-        }
-
-        if (_list.Focused)
-        {
-            // Space, Enter and Delete act in the list only; in the details they are the control's own (AG-6.2).
-            switch (keyData)
-            {
-                case AxGitKeys.StageToggle:
-                    Do(StageToggleAsync);
-                    return true;
-                case AxGitKeys.Act:
-                    Do(ActOnItemAsync);
-                    return true;
-                case AxGitKeys.Discard:
-                    Discard();
-                    return true;
-            }
-        }
-
-        return false;
-    }
 
     // ---- the repository (AG-1.2) ----
 
