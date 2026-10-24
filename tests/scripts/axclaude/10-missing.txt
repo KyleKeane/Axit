@@ -12,9 +12,12 @@ wait 1500
 expect focus "name":"Claude Code was not found","role":"Text"
 expect state C:\\nowhere\\claude.exe
 expect state irm https://claude.ai/install.ps1 | iex
-# Tab reaches Copy install command, Open install instructions, Locate claude.exe... and Close. (Copy install command
-# writes the Windows clipboard, which the test desktop shares with the user's; Open install instructions opens the
-# browser on the user's desktop; Locate opens the Windows file picker: those three are left manual.)
+# Tab reaches Install Claude Code now (bundle AX-2.9, 3.7.0), Copy install command, Open install instructions, Locate
+# claude.exe... and Close. (Install runs Claude Code's installer; Copy install command writes the Windows clipboard,
+# which the test desktop shares with the user's; Open install instructions opens the browser on the user's desktop;
+# Locate opens the Windows file picker: those four are left manual.)
+keys tab
+expect focus "value":"&Install Claude Code now"
 keys tab
 expect focus "value":"Copy install
 keys tab
