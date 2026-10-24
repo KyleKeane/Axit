@@ -40,7 +40,7 @@ public static class AxitWindows
         return mnemonic == '\0' ? text : $"&{mnemonic}. {text}";
     }
 
-    /// <summary>"Ax&amp;Claude": the app's name with the letter after Ax as the mnemonic.</summary>
+    /// <summary>"ax&amp;Claude": the app's name with the letter after ax as the mnemonic.</summary>
     public static string AppLabel(App app) =>
         app.Name.StartsWith("ax", StringComparison.OrdinalIgnoreCase) ? app.Name[..2] + "&" + app.Name[2..] : "&" + app.Name;
 
