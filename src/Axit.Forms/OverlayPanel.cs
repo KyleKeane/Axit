@@ -17,8 +17,10 @@ public sealed record OverlayChoice(string Text, Action? Action = null, bool IsDe
 /// first and takes it by returning true (axFile's path completion on Down, Up and Right). <paramref name="Changed"/> is
 /// called on each change of the text, and <paramref name="ListName"/>, when given, shows a list under the field that
 /// never takes the focus, filled by the window with <see cref="OverlayPanel.SetMatches"/> (the command palette, AX-10).
+/// <paramref name="Hidden"/> hides what is typed, as a password field does (axPass's master password, docs/axpass/SPEC.md
+/// PW-4.2): the screen shows dots and NVDA reads the field as protected.
 /// </summary>
-public sealed record OverlayInput(string Label, string AccessibleName, string Initial, string EmptyMessage, bool Required = true, Func<Keys, bool>? KeyHook = null, Action? Changed = null, string? ListName = null);
+public sealed record OverlayInput(string Label, string AccessibleName, string Initial, string EmptyMessage, bool Required = true, Func<Keys, bool>? KeyHook = null, Action? Changed = null, string? ListName = null, bool Hidden = false);
 
 /// <summary>
 /// What a notice says and offers, and nothing about how it is shown (D23): the title, the text, the buttons, at most
@@ -295,6 +297,7 @@ public sealed class OverlayPanel : Panel
         {
             _inputLabel.Text = input.Label;
             _input.AccessibleName = input.AccessibleName;
+            _input.UseSystemPasswordChar = input.Hidden;
             _input.Text = input.Initial;
             _input.SelectAll();
             _inputSpec = input;
@@ -302,8 +305,9 @@ public sealed class OverlayPanel : Panel
         }
         else
         {
-            // A notice without the field must not see what was last typed in it (a Find text).
+            // A notice without the field must not see what was last typed in it (a Find text, a password).
             _input.Text = string.Empty;
+            _input.UseSystemPasswordChar = false;
         }
 
         var old = _buttons.Controls.Cast<Control>().ToList();
