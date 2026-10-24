@@ -3,7 +3,7 @@
   Generates the icons in src\Axit: AxClaude.ico (the letters Ax on dark blue, also the icon of Axit.exe),
   AxDown.ico (the letters Ad on dark green), AxJSON.ico (the letters Aj on dark brown), AxGit.ico, AxTerminal.ico,
   AxFile.ico (the letters Af on purple), AxMedia.ico (the letters Am on teal), AxPreview.ico (the letters Ap on
-  slate blue) and AxStart.ico (the letters As on orange), rounded squares at the usual Windows sizes.
+  slate blue) AxStart.ico (the letters As on orange) and AxCalc.ico (the letters Ac on olive), rounded squares at the usual Windows sizes.
 
 .DESCRIPTION
   Uses System.Drawing only, so it runs on any Windows machine. The 256 pixel image is stored PNG-compressed, the
@@ -138,4 +138,5 @@ if ($Out) {
     Write-Icon (Join-Path $iconFolder 'AxMedia.ico') 'Am' @(20, 100, 110)
     Write-Icon (Join-Path $iconFolder 'AxPreview.ico') 'Ap' @(70, 70, 140)
     Write-Icon (Join-Path $iconFolder 'AxStart.ico') 'As' @(150, 90, 20)
+    Write-Icon (Join-Path $iconFolder 'AxCalc.ico') 'Ac' @(90, 100, 30)
 }

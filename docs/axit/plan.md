@@ -211,7 +211,7 @@ library dependency (B-10: `git.exe` and the file system through the APIs already
   5. **axProcess**, processes, services and startup items (named so, since AxTask is the to-do manager): a filtered
      list with memory and CPU, keys to end, restart and show the program file in axFile. Task Manager's lists read
      only in part. Windows APIs only.
-  6. **axCalc** (above), in detail: a field for an expression, each answer a line of a transcript to arrow through
+  6. **axCalc** (above; built 2026-10-23 on the branch `axcalc`, `docs/axcalc/SPEC.md`, NVDA pass owed), in detail: a field for an expression, each answer a line of a transcript to arrow through
      and copy, hex, binary and units for development. The smallest of these.
   7. **axMail** (above): the largest daily need and the largest build (IMAP, SMTP, OAuth sign-in for Gmail and
      Outlook), so it waits until the small apps have proved their patterns.

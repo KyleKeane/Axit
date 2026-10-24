@@ -22,6 +22,7 @@ public sealed class KeyTests
             ["axMedia"] = AxMedia.AxMediaKeys.All,
             ["axPreview"] = AxPreview.AxPreviewKeys.All,
             ["axStart"] = AxStart.AxStartKeys.All,
+            ["axCalc"] = AxCalc.AxCalcKeys.All,
         };
 
     /// <summary>
@@ -81,6 +82,7 @@ public sealed class KeyTests
         ["axMedia"] = AxMedia.HelpText.Shortcuts,
         ["axPreview"] = AxPreview.HelpText.Shortcuts,
         ["axStart"] = AxStart.HelpText.Shortcuts,
+        ["axCalc"] = AxCalc.HelpText.Shortcuts,
     };
 
     /// <summary>

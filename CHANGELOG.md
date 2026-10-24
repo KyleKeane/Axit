@@ -1,5 +1,9 @@
 # Changelog
 
+## Unreleased
+
+- axCalc: a new app, a calculator as one expression field and a history list. Enter says the answer and adds the line "expression = answer" to the history; an expression that starts with an operator continues from the last answer; variables (`rate = 1.25`), functions, constants, hexadecimal, binary and octal numbers. Ctrl+I says an answer in hexadecimal, binary and octal, Ctrl+Shift+C copies it, Enter on a history line puts its expression back in the field, Ctrl+S saves the history. Start menu `Axit axCalc`, command `axcalc`.
+
 ## 3.5.0 - 2026-10-23
 
 - axTerminal: Ctrl+Up and Ctrl+Down in the command field go through the recent commands, with a short earcon on each; past the newest comes what you typed or last changed. The plain arrows only move the caret.
