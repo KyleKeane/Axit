@@ -9,7 +9,7 @@ should read; a step that reads differently is a defect. The specifications are `
 
 ## 1. Unlocking (PW-4)
 
-1. Start axPass: "test - axPass window", then the notice "Unlock test" with the field "Master password, protected".
+1. Start axPass: "test - axPass window", then the notice "Unlock test" with the field "Type the master password to unlock test, protected".
    Type `wrong`, Enter: "The password does not open test." and the notice again.
 2. Type `test-master-1`, Enter: "Unlocking test", then "test, 3 items, Email, group, 1 item".
 3. Ctrl+L: "Locked" and the unlock notice. Escape: "test, locked: Enter unlocks". Enter: the notice again; unlock.
@@ -45,8 +45,10 @@ should read; a step that reads differently is a defect. The specifications are `
 7. Delete on the group Work: the question "Move the group"; Cancel is the default.
 8. Ctrl+M on Gmail personal: the list "Group" on "The top of the database"; Down to Work, Enter: "Moved Gmail personal
    to Work". Ctrl+Z: "Undone: Moved Gmail personal to Work", back in Email.
-9. Every password field names what it is for: the unlock notice's "Master password to unlock test", a new password's
-   "New password for the entry Gmail", the second "Gmail's new password again".
+9. Every password field says what to do: "Type the master password to unlock test", "Type a new password for
+   Gmail", "Re-enter the password for Gmail".
+10. After the first change, File, Show backups in axFile: the folder "test backups" with one copy named with the time.
+    File, Back up now: "Backed up: test …kdbx, in test backups".
 
 ## 5. The rest
 

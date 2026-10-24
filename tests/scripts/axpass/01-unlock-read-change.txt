@@ -15,7 +15,7 @@ run "C:\Program Files\KeePassXC\keepassxc-cli.exe" add -q -u top test.kdbx "Top 
 # 1.1 The unlock notice; a wrong password asks again.
 start pass {temp}\test.kdbx
 expect state Unlock test
-expect focus Master password to unlock test
+expect focus Type the master password to unlock test
 type wrong
 keys enter
 expect said ! Unlocking test
@@ -58,6 +58,8 @@ keys enter
 type sam2
 keys enter
 expect said ! UserName: sam2
+# PW-4.5: the first change after unlocking made a backup beside the database.
+run cmd /c dir /b "test backups\test *.kdbx"
 expect focus UserName, user name, sam2
 keys ctrl+z
 expect said ! Undone: UserName: sam2
@@ -100,7 +102,7 @@ keys down
 keys down
 expect focus Password, password, hidden
 keys enter
-expect focus New password for the entry Gmail personal
+expect focus Type a new password for Gmail personal
 keys alt+g
 expect said ! Generated a password of 20 characters
 keys enter

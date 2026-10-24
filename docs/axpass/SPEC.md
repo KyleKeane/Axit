@@ -46,7 +46,13 @@ forgets the master password and shows only the notice that asks for it.
   gains a hidden form for it). A wrong password says "The password does not open mine" and asks again.
 - **PW-4.3** Lock (Ctrl+L, and after ten minutes without a key, a setting): the panes are cleared, the password
   dropped, the unlock notice shown. Closing the window locks it.
-- **PW-4.4** axPass never keeps a copy of the database or of any entry on disk.
+- **PW-4.4** axPass never keeps a copy of the database or of any entry on disk but the backups of PW-4.5, which are
+  the encrypted file itself.
+- **PW-4.5 Backups** (asked 2026-10-24): before the first change after each unlock, the `.kdbx` file is copied as it
+  is into a folder beside it, "mine backups" next to mine.kdbx (the user's choice, so that a synced database's backups
+  sync too), named with the time ("mine 2026-10-24 15-30-05.kdbx"); the newest 20 are kept. A change is refused when
+  its backup cannot be made. File, Back up now makes one at once; File, Show backups in axFile opens the folder. A
+  backup opens like any database (Ctrl+O), with the master password it had then.
 
 ## 5. The engine (PW-D1)
 
@@ -83,9 +89,10 @@ forgets the master password and shows only the notice that asks for it.
   which writes the `.kdbx` file before axPass says the change, so there is nothing to save and nothing lost when the
   window closes or locks (Ctrl+S says so). The user's worry of 2026-10-24, that saving a whole database on every edit
   might be complex, is the tool's work, not axPass's.
-- **PW-6.7 Every password field says what it is for** (asked 2026-10-24: the master password's field and an entry's
-  read the same): "Master password to unlock mine", "New password for the entry Gmail", "Gmail's new password
-  again", "Master password of the new database mine".
+- **PW-6.7 Every password field says what to do** (asked 2026-10-24: the master password's field and an entry's
+  read the same; then, an instruction rather than a name): "Type the master password to unlock mine", "Type a new
+  password for Gmail", "Re-enter the password for Gmail", "Type a master password for the new database mine",
+  "Re-enter the master password for mine".
 
 ## 7. Keys
 

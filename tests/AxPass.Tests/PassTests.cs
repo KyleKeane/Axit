@@ -72,6 +72,36 @@ public class PassTests
         Assert.Equal("Gmail", PassTree.Join(string.Empty, "Gmail"));
     }
 
+    [Fact]
+    public void BackupsGoBesideTheDatabaseAndTheOldestGo()
+    {
+        var folder = Path.Combine(Path.GetTempPath(), "axpass-backups-" + Guid.NewGuid().ToString("N"));
+        Directory.CreateDirectory(folder);
+        try
+        {
+            var db = Path.Combine(folder, "mine.kdbx");
+            File.WriteAllBytes(db, [1, 2, 3]);
+            var start = new DateTime(2026, 10, 24, 15, 30, 0);
+            for (var i = 0; i < Backups.Keep + 3; i++)
+            {
+                Backups.Make(db, start.AddMinutes(i));
+            }
+
+            var kept = Backups.List(db);
+            Assert.Equal(Backups.Keep, kept.Count);
+            Assert.Equal(Path.Combine(folder, "mine backups", "mine 2026-10-24 15-52-00.kdbx"), kept[0]);
+            Assert.EndsWith("mine 2026-10-24 15-33-00.kdbx", kept[^1]);
+            Assert.Equal([1, 2, 3], File.ReadAllBytes(kept[0]));
+            Assert.EndsWith(" - 2.kdbx", Backups.Make(db, start.AddMinutes(Backups.Keep + 2)));
+            Assert.True(Backups.Changes("edit"));
+            Assert.False(Backups.Changes("show"));
+        }
+        finally
+        {
+            Directory.Delete(folder, recursive: true);
+        }
+    }
+
     /// <summary>The tool itself on a throwaway database, when KeePassXC is installed (not on the build servers, where it passes without running).</summary>
     [Fact]
     public void TheToolTakesThePasswordOnAPipe()

@@ -25,7 +25,8 @@ guide `docs/axpass/user-guide.md` is embedded by `AxPass.csproj`; the manual tes
   an entry's fields read with `show` when first selected, `ReadEntry`, kept in `_entries` until the window locks),
   unlocking and locking (`ShowUnlock`, `UnlockAsync`, `Lock`, `LockWhenIdle` from `GetLastInputInfo`), `ReloadAsync`,
   and `Cli`, the one way a command of the tool runs: off the UI thread, the master password first on its input, one
-  at a time (`_busy`), its failure said.
+  at a time (`_busy`), its failure said, and before the first change after unlocking a backup (`_backedUp`,
+  `Backups.Make`; no change without it); `BackUpNowAsync` and `ShowBackups` for the File menu.
 - `PassForm.Commands.cs`: `SaveFields` (`edit` with `EntryFields.EditOptions`), `RenameItem`, `RenameRow`, `DeleteRow`
   (`rm` with its `mv` back; a group or the Recycle Bin's entries after a question), `NewItem`, `NewList`, `Undo` (the
   runs a `Step` keeps), the password's notices (`ChangeSpecial`, Generate, typed twice, `edit -p`), the copies (the

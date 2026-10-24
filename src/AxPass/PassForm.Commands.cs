@@ -344,7 +344,7 @@ public sealed partial class PassForm
                     new OverlayChoice("&Cancel", IsCancel: true),
                 ])
                 {
-                    Input = new OverlayInput($"{entry.Name}'s new password again:", $"{entry.Name}'s new password again", string.Empty, "Type the password again", Hidden: true),
+                    Input = new OverlayInput("Password again:", $"Re-enter the password for {entry.Name}", string.Empty, "Type the password again", Hidden: true),
                 });
             }, IsDefault: true),
             new OverlayChoice("&Generate", () => Do(async () =>
@@ -369,7 +369,7 @@ public sealed partial class PassForm
             new OverlayChoice("&Cancel", IsCancel: true),
         ])
         {
-            Input = new OverlayInput($"New password for the entry {entry.Name}:", $"New password for the entry {entry.Name}", string.Empty, "Type a password, or Generate", Hidden: true),
+            Input = new OverlayInput("New password:", $"Type a new password for {entry.Name}", string.Empty, "Type a password, or Generate", Hidden: true),
         });
         return true;
     }
@@ -492,6 +492,7 @@ public sealed partial class PassForm
         _tree = null;
         _entries.Clear();
         _undo.Clear();
+        _backedUp = false;
         _database = path;
         _group = string.Empty;
         Fill(select: null);
@@ -559,13 +560,13 @@ public sealed partial class PassForm
                     new OverlayChoice("&Cancel", IsCancel: true),
                 ])
                 {
-                    Input = new OverlayInput("Master password again:", $"Master password of the new database {PassTree.DatabaseName(path)}, again", string.Empty, "Type the master password again", Hidden: true),
+                    Input = new OverlayInput("Master password again:", $"Re-enter the master password for {PassTree.DatabaseName(path)}", string.Empty, "Type the master password again", Hidden: true),
                 });
             }, IsDefault: true),
             new OverlayChoice("&Cancel", IsCancel: true),
         ])
         {
-            Input = new OverlayInput("Master password:", $"Master password of the new database {PassTree.DatabaseName(path)}", string.Empty, "Type a master password", Hidden: true),
+            Input = new OverlayInput("Master password:", $"Type a master password for the new database {PassTree.DatabaseName(path)}", string.Empty, "Type a master password", Hidden: true),
         });
     }
 

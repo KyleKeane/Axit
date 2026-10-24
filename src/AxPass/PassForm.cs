@@ -38,6 +38,9 @@ public sealed partial class PassForm : ItemForm
     /// <summary>Set while a command of the tool runs: a second waits for it to end.</summary>
     private bool _busy;
 
+    /// <summary>Whether this unlock's backup is made (PW-4.5): the first change after unlocking copies the file first.</summary>
+    private bool _backedUp;
+
     public PassForm(string? path, PassSettings settings, string? settingsError)
         : base(AxPassApp.Name, settings, PassSettings.DefaultPath, settingsError)
     {
@@ -48,6 +51,8 @@ public sealed partial class PassForm : ItemForm
         file.DropDownItems.Add(Item("&Open database...", ChooseDatabase, AxPassKeys.OpenDatabase));
         file.DropDownItems.Add(new ToolStripMenuItem("&New database...", null, (_, _) => NewDatabase()));
         file.DropDownItems.Add(Item("&Lock", Lock, AxPassKeys.Lock));
+        file.DropDownItems.Add(new ToolStripMenuItem("&Back up now", null, (_, _) => Do(BackUpNowAsync)));
+        file.DropDownItems.Add(new ToolStripMenuItem("Show backups in ax&File", null, (_, _) => ShowBackups()));
         file.DropDownItems.Add(Item("&Refresh", () => Do(ReloadAsync), ItemKeys.Refresh));
         file.DropDownItems.Add(Item("&Undo", Undo, ItemKeys.Undo));
         file.DropDownItems.Add(new ToolStripSeparator());
@@ -354,8 +359,8 @@ public sealed partial class PassForm : ItemForm
             new OverlayChoice("&Cancel", IsCancel: true),
         ])
         {
-            // The field says what the password is for, since every password field reads the same otherwise.
-            Input = new OverlayInput("Master password of " + name + ":", "Master password to unlock " + name, string.Empty, "Type the master password", Hidden: true),
+            // The field says what to do, since every password field reads the same otherwise (PW-6.7).
+            Input = new OverlayInput("Master password of " + name + ":", "Type the master password to unlock " + name, string.Empty, "Type the master password", Hidden: true),
         });
     }
 
@@ -376,6 +381,7 @@ public sealed partial class PassForm : ItemForm
 
         _database = database;
         _password = password;
+        _backedUp = false;
         _tree = PassTree.Parse(result.Output);
         _group = string.Empty;
         _entries.Clear();
@@ -463,6 +469,21 @@ public sealed partial class PassForm : ItemForm
         _busy = true;
         try
         {
+            if (Backups.Changes(command) && !_backedUp)
+            {
+                // PW-4.5: the file as it was, copied before the first change after unlocking; no change without it.
+                try
+                {
+                    await Task.Run(() => Backups.Make(database, DateTime.Now));
+                    _backedUp = true;
+                }
+                catch (Exception ex) when (ex is IOException or UnauthorizedAccessException)
+                {
+                    Announce("No backup could be made, so nothing changed: " + ex.Message, true);
+                    return null;
+                }
+            }
+
             var result = await Task.Run(() => KeePassCli.Run(cli, KeePassCli.On(command, database, options, rest ?? []), [password, .. input ?? []]));
             if (!result.Succeeded)
             {
@@ -475,6 +496,43 @@ public sealed partial class PassForm : ItemForm
         finally
         {
             _busy = false;
+        }
+    }
+
+    /// <summary>File, Back up now (PW-4.5): a copy of the database in its backup folder at once.</summary>
+    private async Task BackUpNowAsync()
+    {
+        if (_database is not { } database)
+        {
+            Announce("No database open", true);
+            return;
+        }
+
+        try
+        {
+            var copy = await Task.Run(() => Backups.Make(database, DateTime.Now));
+            Announce($"Backed up: {Path.GetFileName(copy)}, in {Path.GetFileName(Backups.FolderFor(database))}", true);
+        }
+        catch (Exception ex) when (ex is IOException or UnauthorizedAccessException)
+        {
+            Fail("The backup could not be made: " + ex.Message);
+        }
+    }
+
+    /// <summary>File, Show backups in axFile: the backup folder, where a backup opens like any database (Ctrl+O).</summary>
+    private void ShowBackups()
+    {
+        if (_database is not { } database)
+        {
+            Announce("No database open", true);
+        }
+        else if (!Directory.Exists(Backups.FolderFor(database)))
+        {
+            Announce("No backups yet: the first change after unlocking makes one, or File, Back up now", true);
+        }
+        else
+        {
+            AxitMenu.Start(Dispatch.AxFile, Backups.FolderFor(database));
         }
     }
 
