@@ -75,6 +75,9 @@ the base's. The rest of this section is for a window of a new kind.
   ("name - AxThing window") before the focused control; without the role the window is a nameless pane to NVDA and
   the app is never named (axDown 2.1.1).
 - Every control gets an `AccessibleName`; the caret moves only on the user's command; nothing speaks on a plain key.
+- A list the user moves through is `Axit.Forms/AxitList`, never a plain `ListBox`: it has type-to-find (Shift with a letter
+  backwards) and the edge earcon at its ends built in (AX-8.6), so the window writes nothing for them; set `Names` only
+  when some items are not names (an empty list's one line). `tests/Axit.Tests/ListTests` fails on a plain list box.
 - `CLAUDE.md`: where things are, the rules, the gotchas.
 
 ## 5. Wiring

@@ -47,7 +47,7 @@ public sealed class ProcessForm : AxitForm
 
     private readonly ProcessSettings _settings;
     private readonly MenuStrip _menu = new();
-    private readonly ListBox _list = new();
+    private readonly AxitList _list = new();
     private readonly StatusStrip _status = new();
     private readonly ToolStripStatusLabel _nameLabel;
     private readonly ToolStripStatusLabel _memoryLabel;
@@ -135,8 +135,6 @@ public sealed class ProcessForm : AxitForm
         _list.Dock = DockStyle.Fill;
         _list.TabIndex = 0;
         _list.AccessibleName = "Processes, reading";
-        // Type-to-find over the view's items, Shift with a letter backwards (AX-8.6; the user's ask, 2026-10-24).
-        ListTypeAhead.Attach(_list, () => Current.Labels);
         _list.MouseDown += (_, e) =>
         {
             if (e.Button == MouseButtons.Right && _list.IndexFromPoint(e.Location) is var index && index >= 0)
@@ -266,11 +264,6 @@ public sealed class ProcessForm : AxitForm
                     OpenViewMenu();
                     return true;
             }
-
-            if (AtEdge(keyData))
-            {
-                return true;
-            }
         }
 
         return false;
@@ -288,29 +281,6 @@ public sealed class ProcessForm : AxitForm
         _processMenu.Enabled = _view == View.Processes;
         _serviceMenu.Enabled = _view == View.Services;
         _startupMenu.Enabled = _view == View.Startup;
-    }
-
-    /// <summary>
-    /// Up or Home on the first item, Down or End on the last (PR-2.6, as axFile's AF-3.6): the key moves nothing, so the
-    /// bundle's edge earcon sounds instead of silence; false when the key moves, and it stays the list's own.
-    /// </summary>
-    private bool AtEdge(Keys key)
-    {
-        var index = _list.SelectedIndex;
-        if (index < 0 || _list.Items.Count == 0)
-        {
-            return false;
-        }
-
-        var first = key is AxProcessKeys.PreviousItem or AxProcessKeys.FirstItem && index == 0;
-        var last = key is AxProcessKeys.NextItem or AxProcessKeys.LastItem && index == _list.Items.Count - 1;
-        if (!first && !last)
-        {
-            return false;
-        }
-
-        Sounds.Edge();
-        return true;
     }
 
     // ---- the views (PR-2.2, PR-2.3) ----

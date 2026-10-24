@@ -35,15 +35,6 @@ public static class AxProcessKeys
 
     public const Keys ItemMenuAlso = Keys.Apps;
 
-    /// <summary>In the list: the first and the last item, where Up and Down at the ends play the edge sound (PR-2.6).</summary>
-    public const Keys FirstItem = Keys.Home;
-
-    public const Keys LastItem = Keys.End;
-
-    public const Keys PreviousItem = Keys.Up;
-
-    public const Keys NextItem = Keys.Down;
-
     /// <summary>Every key of the window with its name, for the collision test and the F1 text.</summary>
     public static readonly IReadOnlyList<(string Name, Keys Key)> All =
     [
@@ -60,9 +51,5 @@ public static class AxProcessKeys
         ("Summary", Summary),
         ("Item menu (in the list)", ItemMenu),
         ("Item menu (in the list, the Applications key)", ItemMenuAlso),
-        ("The edge earcon at the first entry (in a list)", FirstItem),
-        ("The edge earcon at the last entry (in a list)", LastItem),
-        ("The edge earcon at the first entry, or the item before (in the list)", PreviousItem),
-        ("The edge earcon at the last entry, or the item after (in the list)", NextItem),
     ];
 }

@@ -155,7 +155,8 @@ folder of the file or project in hand, and sends back. It works entirely offline
   "aa") cycles through the names starting with it, from the next entry on, as File Explorer does, while any other
   prefix is searched whole, so that a name with a doubled letter inside it ("aab") is found (`Axit.Core/TypeAhead`,
   tested, the bundle's since 2026-10-24, AX-8.6; until 2026-10-23 the doubled letter made the one-letter cycle); Shift
-  with a letter searches the same way backwards (2026-10-24); the edge earcon when no name starts with it. The Actions
+  with a letter searches the same way backwards (2026-10-24); the edge earcon when no name starts with it (both lists are
+  the bundle's `AxitList` since 2026-10-24, which has the type-ahead and the edge earcon built in). The Actions
   list takes typed letters the same way. The list box's own
   one-letter jump gives way to this (`OnListKeyPress`); Space is the selection's key (AF-3.7), so a name is typed up
   to its first space. At the ends, where a key moves nothing, the window sounds the **edge earcon** rather than

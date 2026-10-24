@@ -340,9 +340,12 @@ The apps are named ax and a word, the ax in lower case and the word as it is wri
   with it from the one in hand, round the end; the same letter again goes on to the next item starting with it; Shift
   with a letter searches the same way backwards (the user's ask; the case of the letters never matters, so a capital
   only says the direction); the edge earcon when no item starts with it; nothing is said but what NVDA reads of the
-  selection. One piece for every window: `Axit.Core/TypeAhead` and `Axit.Forms/ListTypeAhead`, in axFile's two lists,
-  axGIT's list, axMedia's queue and axProcess's list; a list whose letters are keys of their own (a question's answers,
-  axClaude D33) keeps them.
+  selection. Up or Home on the first item and Down or End on the last play the edge earcon too, since the key moves
+  nothing. Both are built into one control, `Axit.Forms/AxitList`, the list of every app (`Axit.Core/TypeAhead` the
+  search, tested): a window makes an `AxitList` and has them, and gives it the names to search only when its items
+  are not all names (`Names`). `ListTests` fails on a plain `ListBox` in an app; the lists that never take a typed
+  letter are its named exceptions: axStart's and axClip's matches and the palette's, never focused, and a question's
+  answers, whose letters are the screen's keys (axClaude D33).
 
 ### AX-9 The Axit menu
 

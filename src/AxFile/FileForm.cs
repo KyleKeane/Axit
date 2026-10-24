@@ -22,7 +22,7 @@ public sealed partial class FileForm : AxitForm
     private readonly ToolStripMenuItem _favoritesItem = new("Fa&vorites");
     private readonly ToolStripMenuItem _drivesMenu = new("Driv&es");
     private readonly List<(SortBy By, ToolStripMenuItem Item)> _sortItems = [];
-    private readonly ListBox _list = new();
+    private readonly AxitList _list = new();
     private readonly TextBox _renameBox = new();
     private readonly StatusStrip _status = new();
     private readonly ToolStripStatusLabel _stateLabel;
@@ -143,8 +143,8 @@ public sealed partial class FileForm : AxitForm
         _list.AccessibleName = "No folder";
         _list.DoubleClick += (_, _) => OpenSelected();
         // AF-3.6: File Explorer's type-ahead, several letters into one prefix, in place of the list's one-letter jump.
-        _typeAhead = ListTypeAhead.Attach(_list, () => _shown.Select(entry => entry.Name).ToList());
-        ListTypeAhead.Attach(_pane, () => _pane.Items.Cast<object>().Select(item => item.ToString() ?? string.Empty).ToList());
+        // The bundle's list (AX-8.6) types over the shown entries' names, not the empty folder's or the Not shown line.
+        _list.Names = () => _shown.Select(entry => entry.Name).ToList();
         // AF-4.6, AF-D13: a right click opens the menu bar's Item menu on the entry under it, selected first as File
         // Explorer does; Shift+F10 and the Applications key open the same menu from the key switch.
         _list.MouseDown += (_, e) =>
@@ -428,12 +428,6 @@ public sealed partial class FileForm : AxitForm
 
                 ShowItemMenu();
                 return true;
-        }
-
-        if ((_list.Focused || _pane.Focused) && AtEdge(keyData))
-        {
-            // Up or Home at the first entry, Down or End at the last (AF-3.6): the edge earcon, since the key moves nothing.
-            return true;
         }
 
         if (_pane.Focused)
