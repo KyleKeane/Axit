@@ -42,7 +42,7 @@ public sealed partial class GitForm
         var watch = Stopwatch.StartNew();
         try
         {
-            var result = await GitRunner.RunAsync(_root, arguments, timeout);
+            var result = await GitRunner.RunAsync(_root, arguments, timeout, overrides: _overrides);
             // The subcommand alone (AG-8.2): the arguments hold the commit message and the paths.
             Log.Info($"git {arguments[0]}: exit {result.ExitCode} in {watch.ElapsedMilliseconds} ms{(result.Ok ? string.Empty : ", " + result.FirstLine)}");
             return result;

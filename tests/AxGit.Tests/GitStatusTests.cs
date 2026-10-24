@@ -66,9 +66,9 @@ public sealed class GitStatusTests
     public void Enter_and_Delete_take_the_right_diff_and_restore()
     {
         var files = GitStatus.Parse(Sample).Files.ToDictionary(file => file.Path);
-        Assert.Equal(["diff", "--", "src/Foo.cs"], files["src/Foo.cs"].DiffArguments);
-        Assert.Equal(["diff", "--cached", "--", "docs/plan.md"], files["docs/plan.md"].DiffArguments);
-        Assert.Equal(["diff", "HEAD", "--", "CHANGELOG.md"], files["CHANGELOG.md"].DiffArguments);
+        Assert.Equal(["diff", "--no-ext-diff", "--no-textconv", "--", "src/Foo.cs"], files["src/Foo.cs"].DiffArguments);
+        Assert.Equal(["diff", "--no-ext-diff", "--no-textconv", "--cached", "--", "docs/plan.md"], files["docs/plan.md"].DiffArguments);
+        Assert.Equal(["diff", "--no-ext-diff", "--no-textconv", "HEAD", "--", "CHANGELOG.md"], files["CHANGELOG.md"].DiffArguments);
         Assert.Empty(files["notes.txt"].DiffArguments);
         Assert.Equal(["restore", "--staged", "--worktree", "--", "src/Foo.cs"], files["src/Foo.cs"].DiscardArguments);
         Assert.Empty(files["notes.txt"].DiscardArguments);

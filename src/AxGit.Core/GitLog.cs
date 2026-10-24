@@ -7,7 +7,7 @@ public sealed record Commit(string Hash, string Date, string Author, string Subj
     public string Label => $"{Hash} {Date} {Author}: {Subject}";
 
     /// <summary>Enter: the commit's message and the files it changed (AG-4.2).</summary>
-    public IReadOnlyList<string> ShowArguments => ["show", "--stat", "--format=medium", Hash];
+    public IReadOnlyList<string> ShowArguments => ["show", "--no-ext-diff", "--no-textconv", "--stat", "--format=medium", Hash];
 }
 
 /// <summary>Reads the log as axGIT asks for it: one commit per line, the four fields separated by tabs (SPEC.md AG-4.1).</summary>

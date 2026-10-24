@@ -24,6 +24,9 @@ public sealed partial class GitForm : AxitForm
 
     private const int UntrackedLimit = 200 * 1024;
 
+    /// <summary>The repository's own programs set to nothing while it is not trusted (AG-1.6); empty for a trusted one.</summary>
+    private IReadOnlyList<string> _overrides = [];
+
     private readonly GitSettings _settings;
     private readonly string? _startPath;
     private readonly MenuStrip _menu = new();
@@ -340,7 +343,50 @@ public sealed partial class GitForm : AxitForm
         _settings.RememberRepository(root);
         SaveSettings();
         Log.Info($"Opened {root}");
+        await CheckTrustAsync(root);
         await RefreshAsync(announce: false);
+    }
+
+    /// <summary>
+    /// AG-1.6 (security audit S-2): what in the repository's own configuration and hooks runs a program, read before
+    /// any other command; unless the user trusts the repository, every command sets each of them to nothing, and a
+    /// notice says what is set aside, with the way to trust it.
+    /// </summary>
+    private async Task CheckTrustAsync(string root)
+    {
+        _overrides = [];
+        try
+        {
+            var config = await GitRunner.RunAsync(root, GitTrust.ConfigArguments, GitRunner.Short);
+            var hooks = await GitRunner.RunAsync(root, GitTrust.HooksArguments, GitRunner.Short);
+            var hooksFolder = hooks.Ok && hooks.Output.Trim() is { Length: > 0 } folder ? Path.GetFullPath(folder, root) : null;
+            var risks = GitTrust.Risks(config.Ok ? config.Output : string.Empty, hooksFolder);
+            if (risks.Count == 0 || _settings.Trusts(root) || IsDisposed)
+            {
+                return;
+            }
+
+            _overrides = GitTrust.Overrides(risks);
+            Log.Info($"Untrusted repository: {risks.Count} programs of its own set aside");
+            ShowNotice(new Notice("This repository runs programs of its own",
+                $"Its settings or hooks name programs git would run: {string.Join(", ", risks)}. axGIT runs git without them. Trust the repository only if you know where it comes from: then git runs them as it would in a console.",
+            [
+                new OverlayChoice("Keep them &off", IsDefault: true, IsCancel: true),
+                new OverlayChoice("&Trust this repository", () => TrustRepository(root)),
+            ]) { Unprompted = true });
+        }
+        catch (GitNotFoundException)
+        {
+            // git missing is said by the first command that needs it.
+        }
+    }
+
+    private void TrustRepository(string root)
+    {
+        _settings.TrustedRepositories.Add(root);
+        SaveSettings();
+        _overrides = [];
+        Announce("Trusted", true);
     }
 
     private void SetNoRepository()

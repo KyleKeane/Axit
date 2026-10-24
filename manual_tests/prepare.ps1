@@ -474,6 +474,12 @@ function Build-AxGit([string]$d) {
     Write-Text (Join-Path $repo 'tracked-discard-my-change.txt') 'The original text.'
     git -C $repo add -A
     git -C $repo commit -q -m 'First commit: the readme and three files'
+
+    # AG-1.6: a repository with a hook of its own, which axGIT sets aside until it is trusted. The hook does nothing.
+    $hooked = Join-Path $d 'scratch-repository-with-a-hook'
+    git init -q -b main $hooked
+    Write-Text (Join-Path $hooked 'README.md') 'A repository whose post-checkout hook axGIT names and does not run.'
+    Write-Text (Join-Path $hooked '.git\hooks\post-checkout') "#!/bin/sh`nexit 0"
     for ($n = 2; $n -le 5; $n++) {
         Add-Content -Path (Join-Path $repo 'README.md') -Value "Line added by commit $n."
         git -C $repo commit -q -am "Commit $n of the history"

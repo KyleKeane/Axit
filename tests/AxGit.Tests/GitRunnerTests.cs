@@ -9,9 +9,9 @@ public sealed class GitRunnerTests
     public void A_command_names_the_repository_and_turns_colour_and_quoting_off()
     {
         Assert.Equal(
-            ["-C", @"C:\repo", "-c", "core.quotepath=false", "-c", "color.ui=never", "status", "--porcelain=v2"],
+            ["-C", @"C:\repo", "-c", "core.quotepath=false", "-c", "color.ui=never", "-c", "core.fsmonitor=false", "-c", "protocol.ext.allow=never", "status", "--porcelain=v2"],
             GitRunner.Command(@"C:\repo", ["status", "--porcelain=v2"]));
-        Assert.Equal(["-c", "core.quotepath=false", "-c", "color.ui=never", "--version"], GitRunner.Command(null, ["--version"]));
+        Assert.Equal(["-c", "core.quotepath=false", "-c", "color.ui=never", "-c", "core.fsmonitor=false", "-c", "protocol.ext.allow=never", "--version"], GitRunner.Command(null, ["--version"]));
     }
 
     [Fact]
