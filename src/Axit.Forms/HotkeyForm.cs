@@ -50,6 +50,23 @@ public abstract class HotkeyForm : AxitForm
 
         // AS-3.5: the focus gone to another program hides the window, as the Start menu does.
         Deactivate += (_, _) => BeginInvoke(() => HideIfAnotherProgramIsInFront());
+
+        // AS-3.1, CP-2.1: the caret is always in the field; the list's keys are the field's (AS-3.3).
+        SearchField.Dock = DockStyle.Top;
+        SearchField.TabIndex = 0;
+        SearchField.TextChanged += (_, _) => OnTyped();
+
+        // The matches: for the eyes and NVDA's object navigation, never the focus (AS-D2).
+        Matches.Dock = DockStyle.Fill;
+        Matches.IntegralHeight = false;
+        Matches.TabStop = false;
+        Matches.GotFocus += (_, _) => SearchField.Focus();
+
+        _speak.Tick += (_, _) =>
+        {
+            _speak.Stop();
+            SayFirst();
+        };
     }
 
     // ---- what the app fills in ----
@@ -76,6 +93,115 @@ public abstract class HotkeyForm : AxitForm
 
     /// <summary>The window of the program that was in front when this one last showed: where a paste goes (axClip).</summary>
     protected nint ForegroundBefore => _giveBackTo;
+
+    /// <summary>How many matches the list shows now (none: the list holds one line that says so).</summary>
+    protected abstract int MatchCount { get; }
+
+    /// <summary>What a match says when the selection reaches it: "Notepad, 1 of 3".</summary>
+    protected abstract string SpokenMatch(int index);
+
+    /// <summary>What is said when nothing matches: the line the list shows in place of the matches.</summary>
+    protected abstract string NothingSaid { get; }
+
+    /// <summary>Whether the first match is said after the typing pauses (the app's setting, AS-3.2, CP-2.3).</summary>
+    protected abstract bool SayFirstMatch { get; }
+
+    /// <summary>The matches made again from the field's text, through <see cref="ShowMatches"/>.</summary>
+    protected abstract void Refill();
+
+    // ---- the search field over the matches (AS-3, CP-2; from axStart on its second use, axClip, 2026-10-24) ----
+
+    /// <summary>The pause in the typing after which the first match is said (AS-3.2).</summary>
+    private const int SpeakDelayMs = 300;
+
+    private readonly System.Windows.Forms.Timer _speak = new() { Interval = SpeakDelayMs };
+
+    /// <summary>The one field, which always has the caret (AS-3.1, CP-2.1); the app names it.</summary>
+    protected TextBox SearchField { get; } = new();
+
+    /// <summary>The matches under the field, never focused (AS-D2); the app names it in <see cref="ShowMatches"/>.</summary>
+    protected ListBox Matches { get; } = new();
+
+    /// <summary>The list made from <paramref name="labels"/>, or the one line <paramref name="nothing"/> when there are none, named <paramref name="name"/>, the selection on <paramref name="index"/>.</summary>
+    protected void ShowMatches(IReadOnlyList<string> labels, string nothing, string name, int index)
+    {
+        Matches.BeginUpdate();
+        Matches.Items.Clear();
+        Matches.Items.AddRange(labels.Select(label => (object)label).ToArray());
+        if (labels.Count == 0)
+        {
+            Matches.Items.Add(nothing);
+        }
+
+        Matches.EndUpdate();
+        Matches.AccessibleName = name;
+        Matches.SelectedIndex = index;
+    }
+
+    /// <summary>The keys that move through the matches with the caret kept in the field (AS-3.3, CP-2.4): Down, Up, Page Down, Page Up, and the app's first and last; true when the key was one.</summary>
+    protected bool ProcessMatchKey(Keys keyData, Keys next, Keys previous, Keys first, Keys last)
+    {
+        var page = Math.Max(1, Matches.ClientSize.Height / Math.Max(1, Matches.ItemHeight));
+        int? target = keyData == next ? Matches.SelectedIndex + 1
+            : keyData == previous ? Matches.SelectedIndex - 1
+            : keyData == BundleKeys.PageDown ? Math.Min(Matches.SelectedIndex + page, MatchCount - 1)
+            : keyData == BundleKeys.PageUp ? Math.Max(Matches.SelectedIndex - page, 0)
+            : keyData == first ? 0
+            : keyData == last ? MatchCount - 1
+            : null;
+        if (target is not { } index)
+        {
+            return false;
+        }
+
+        SelectMatch(index);
+        return true;
+    }
+
+    private void OnTyped()
+    {
+        Refill();
+        _speak.Stop();
+        if (SayFirstMatch && SearchField.Text.Trim().Length > 0)
+        {
+            _speak.Start();
+        }
+    }
+
+    /// <summary>The first match and the count, or that nothing matches, after the typing paused (AS-3.2).</summary>
+    private void SayFirst()
+    {
+        if (SearchField.Text.Trim().Length == 0)
+        {
+            return;
+        }
+
+        Announce(MatchCount > 0 && Matches.SelectedIndex >= 0 ? SpokenMatch(Matches.SelectedIndex) : NothingSaid, true);
+    }
+
+    /// <summary>The selection moved to <paramref name="target"/> and said; at an end the edge earcon first, and the match it stays on said all the same, so that the last thing heard is the position and not the typed text (AS-3.3).</summary>
+    private void SelectMatch(int target)
+    {
+        _speak.Stop();
+        if (MatchCount == 0)
+        {
+            Sounds.Edge();
+            Announce(NothingSaid, true);
+            return;
+        }
+
+        target = Math.Clamp(target, 0, MatchCount - 1);
+        if (target == Matches.SelectedIndex)
+        {
+            Sounds.Edge();
+        }
+        else
+        {
+            Matches.SelectedIndex = target;
+        }
+
+        Announce(SpokenMatch(target), true);
+    }
 
     // ---- the window ----
 
@@ -236,6 +362,7 @@ public abstract class HotkeyForm : AxitForm
     /// </summary>
     protected void HideWindow(bool giveBack = true)
     {
+        _speak.Stop();
         OnHiding();
         if (NoticeOpen)
         {

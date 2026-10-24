@@ -15,16 +15,10 @@ namespace AxStart;
 /// </summary>
 public sealed class StartForm : HotkeyForm
 {
-    /// <summary>How long the typing pauses before the first match is said (AS-3.2).</summary>
-    private const int SpeakDelayMs = 300;
-
     private readonly StartSettings _settings;
     private readonly MenuStrip _menu = new();
-    private readonly TextBox _field = new();
-    private readonly ListBox _list = new();
     private readonly StatusStrip _status = new();
     private readonly ToolStripStatusLabel _countLabel;
-    private readonly System.Windows.Forms.Timer _speak = new() { Interval = SpeakDelayMs };
     private IReadOnlyList<ProgramEntry> _programs = [];
     private IReadOnlyList<ProgramEntry> _matches = [];
     private bool _reading;
@@ -65,32 +59,17 @@ public sealed class StartForm : HotkeyForm
         _menu.Items.AddRange([start, options, CreateAxitMenu(), help]);
         MainMenuStrip = _menu;
 
-        // ---- the field (AS-3.1): the caret is always here; the list's keys are the field's (AS-3.3) ----
-        _field.Dock = DockStyle.Top;
-        _field.TabIndex = 0;
-        _field.AccessibleName = "Search programs";
-        _field.TextChanged += (_, _) => OnTyped();
-
-        // ---- the matches: for the eyes and NVDA's object navigation, never the focus (AS-D2) ----
-        _list.Dock = DockStyle.Fill;
-        _list.IntegralHeight = false;
-        _list.TabStop = false;
-        _list.AccessibleName = "Programs, 0";
-        _list.GotFocus += (_, _) => _field.Focus();
-        _list.DoubleClick += (_, _) => StartSelected(administrator: false);
-
-        _speak.Tick += (_, _) =>
-        {
-            _speak.Stop();
-            SayFirst();
-        };
+        // ---- the field and the matches (AS-3.1, AS-D2): HotkeyForm's, named here ----
+        SearchField.AccessibleName = "Search programs";
+        Matches.AccessibleName = "Programs, 0";
+        Matches.DoubleClick += (_, _) => StartSelected(administrator: false);
 
         // ---- the status bar (AS-3.1): the count of programs on the left ----
         (_countLabel, _) = StatusLayout.Pair(_status);
 
         // Docked from the last control to the first: the menu at the top, the status bar at the bottom, the field
         // under the menu, and the list (or the notice over both) what is left.
-        Controls.AddRange([Overlay, _list, _field, _status, _menu]);
+        Controls.AddRange([Overlay, Matches, SearchField, _status, _menu]);
         ApplyTextFont();
         Fill(null);
     }
@@ -101,22 +80,22 @@ public sealed class StartForm : HotkeyForm
 
     protected override void HideForNotice()
     {
-        _field.Visible = false;
-        _list.Visible = false;
+        SearchField.Visible = false;
+        Matches.Visible = false;
     }
 
     protected override void ShowAfterNotice()
     {
-        _field.Visible = true;
-        _list.Visible = true;
+        SearchField.Visible = true;
+        Matches.Visible = true;
     }
 
-    protected override Control FocusTarget => _field;
+    protected override Control FocusTarget => SearchField;
 
     protected override void ApplyFont(Font font)
     {
-        _field.Font = font;
-        _list.Font = font;
+        SearchField.Font = font;
+        Matches.Font = font;
     }
 
     protected override IReadOnlyList<string> RestartArguments() => [Dispatch.AxStart];
@@ -142,11 +121,11 @@ public sealed class StartForm : HotkeyForm
     {
         if (!NoticeOpen && !keepText)
         {
-            _field.Clear();
+            SearchField.Clear();
         }
 
         var width = Math.Max(MinimumSize.Width, area.Width / 4);
-        var height = Math.Max(MinimumSize.Height, Height - ClientSize.Height + _menu.Height + _field.Height + _list.ItemHeight * 12 + _status.Height + 4);
+        var height = Math.Max(MinimumSize.Height, Height - ClientSize.Height + _menu.Height + SearchField.Height + Matches.ItemHeight * 12 + _status.Height + 4);
         Bounds = new Rectangle(area.Left + (area.Width - width) / 2, area.Top + (area.Height - height) / 2, width, height);
     }
 
@@ -155,13 +134,12 @@ public sealed class StartForm : HotkeyForm
     {
         if (!NoticeOpen)
         {
-            _field.Select();
+            SearchField.Select();
         }
 
         Do(() => RefreshAsync(announce: false));
     }
 
-    protected override void OnHiding() => _speak.Stop();
 
     protected override void OnHandleCreated(EventArgs e)
     {
@@ -174,26 +152,13 @@ public sealed class StartForm : HotkeyForm
 
     protected override bool ProcessWindowKey(Keys keyData)
     {
+        if (ProcessMatchKey(keyData, AxStartKeys.NextMatch, AxStartKeys.PreviousMatch, AxStartKeys.FirstMatch, AxStartKeys.LastMatch))
+        {
+            return true;
+        }
+
         switch (keyData)
         {
-            case AxStartKeys.NextMatch:
-                SelectMatch(_list.SelectedIndex + 1);
-                return true;
-            case AxStartKeys.PreviousMatch:
-                SelectMatch(_list.SelectedIndex - 1);
-                return true;
-            case BundleKeys.PageDown:
-                SelectMatch(Math.Min(_list.SelectedIndex + Page(), _matches.Count - 1));
-                return true;
-            case BundleKeys.PageUp:
-                SelectMatch(Math.Max(_list.SelectedIndex - Page(), 0));
-                return true;
-            case AxStartKeys.FirstMatch:
-                SelectMatch(0);
-                return true;
-            case AxStartKeys.LastMatch:
-                SelectMatch(_matches.Count - 1);
-                return true;
             case AxStartKeys.Start:
                 StartSelected(administrator: false);
                 return true;
@@ -221,76 +186,26 @@ public sealed class StartForm : HotkeyForm
 
     // ---- the matches (AS-2.2, AS-3.2, AS-3.3) ----
 
-    private ProgramEntry? Selected => _list.SelectedIndex >= 0 && _list.SelectedIndex < _matches.Count ? _matches[_list.SelectedIndex] : null;
+    private ProgramEntry? Selected => Matches.SelectedIndex >= 0 && Matches.SelectedIndex < _matches.Count ? _matches[Matches.SelectedIndex] : null;
 
-    private void OnTyped()
-    {
-        Fill(null);
-        _speak.Stop();
-        if (_settings.SayFirstMatch && _field.Text.Trim().Length > 0)
-        {
-            _speak.Start();
-        }
-    }
+    protected override int MatchCount => _matches.Count;
+
+    protected override string SpokenMatch(int index) => ProgramMatch.Spoken(_matches[index], index, _matches.Count);
+
+    protected override string NothingSaid => Matches.Items.Count > 0 ? Matches.Items[0].ToString() ?? string.Empty : "No programs";
+
+    protected override bool SayFirstMatch => _settings.SayFirstMatch;
+
+    protected override void Refill() => Fill(null);
 
     /// <summary>The list made again from the typed text, the selection on <paramref name="keep"/> when it is still there, the first otherwise.</summary>
     private void Fill(string? keep)
     {
-        _matches = ProgramMatch.Find(_programs, _field.Text, _settings.Starts);
-        _list.BeginUpdate();
-        _list.Items.Clear();
-        _list.Items.AddRange(_matches.Select(entry => (object)entry.Name).ToArray());
-        if (_matches.Count == 0)
-        {
-            _list.Items.Add(_programs.Count == 0 ? "Reading the programs" : ProgramMatch.NoMatch(_field.Text));
-        }
-
-        _list.EndUpdate();
-        _list.AccessibleName = $"Programs, {_matches.Count}";
+        _matches = ProgramMatch.Find(_programs, SearchField.Text, _settings.Starts);
         var index = keep is null ? 0 : Math.Max(0, _matches.ToList().FindIndex(entry => entry.Name == keep));
-        _list.SelectedIndex = index;
+        ShowMatches(_matches.Select(entry => entry.Name).ToList(), _programs.Count == 0 ? "Reading the programs" : ProgramMatch.NoMatch(SearchField.Text), $"Programs, {_matches.Count}", index);
         _countLabel.Text = $"{_programs.Count} programs";
     }
-
-    /// <summary>The first match and the count, or that nothing matches, after the typing paused (AS-3.2).</summary>
-    private void SayFirst()
-    {
-        if (_field.Text.Trim().Length == 0)
-        {
-            return;
-        }
-
-        Announce(Selected is { } entry ? ProgramMatch.Spoken(entry, _list.SelectedIndex, _matches.Count) : ProgramMatch.NoMatch(_field.Text), true);
-    }
-
-    /// <summary>The selection moved to <paramref name="target"/> and said; at an end the edge earcon first, and the match it stays on said all the same (AS-3.3).</summary>
-    private void SelectMatch(int target)
-    {
-        _speak.Stop();
-        if (_matches.Count == 0)
-        {
-            Sounds.Edge();
-            SayFirstOrNothing();
-            return;
-        }
-
-        target = Math.Clamp(target, 0, _matches.Count - 1);
-        if (target == _list.SelectedIndex)
-        {
-            // Nothing moves: the earcon, then the match again, so that the last thing heard is the position and not
-            // the typed text.
-            Sounds.Edge();
-        }
-        else
-        {
-            _list.SelectedIndex = target;
-        }
-
-        Announce(ProgramMatch.Spoken(_matches[target], target, _matches.Count), true);
-    }
-
-    /// <summary>The matches the list shows at once, for Page Up and Page Down.</summary>
-    private int Page() => Math.Max(1, _list.ClientSize.Height / Math.Max(1, _list.ItemHeight));
 
     /// <summary>The Applications folder read again on its thread; the list swapped in with the selection kept by name (AS-2.1).</summary>
     private async Task RefreshAsync(bool announce)
@@ -380,5 +295,5 @@ public sealed class StartForm : HotkeyForm
     }
 
     /// <summary>What a command on a match says with none: the list's one line, "No programs match xyz".</summary>
-    private void SayFirstOrNothing() => Announce(_list.Items.Count > 0 ? _list.Items[0].ToString() ?? string.Empty : "No programs", true);
+    private void SayFirstOrNothing() => Announce(NothingSaid, true);
 }

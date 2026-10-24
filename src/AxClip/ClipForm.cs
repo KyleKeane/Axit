@@ -16,8 +16,6 @@ public sealed class ClipForm : HotkeyForm
 {
     private const int WM_CLIPBOARDUPDATE = 0x031D;
 
-    /// <summary>How long the typing pauses before the first match is said (CP-2.3).</summary>
-    private const int SpeakDelayMs = 300;
 
     /// <summary>How long after the window hid a paste waits for the program to be in front again (CP-4.1).</summary>
     private const int PasteDelayMs = 150;
@@ -30,13 +28,12 @@ public sealed class ClipForm : HotkeyForm
     private readonly ClipSettings _settings;
     private readonly ClipHistory _history;
     private readonly MenuStrip _menu = new();
-    private readonly TextBox _field = new();
-    private readonly ListBox _list = new();
+
     private readonly StatusStrip _status = new();
     private readonly ToolStripStatusLabel _countLabel;
     private readonly ToolStripStatusLabel _recordingLabel;
     private readonly ToolStripMenuItem _pauseItem;
-    private readonly System.Windows.Forms.Timer _speak = new() { Interval = SpeakDelayMs };
+
     private IReadOnlyList<ClipEntry> _matches = [];
     private bool _paused;
 
@@ -83,28 +80,13 @@ public sealed class ClipForm : HotkeyForm
         _menu.Items.AddRange([clip, options, CreateAxitMenu(), help]);
         MainMenuStrip = _menu;
 
-        // ---- the field (CP-2.1): the caret is always here; the list's keys are the field's ----
-        _field.Dock = DockStyle.Top;
-        _field.TabIndex = 0;
-        _field.AccessibleName = "Search the clipboard";
-        _field.TextChanged += (_, _) => OnTyped();
-
-        // ---- the items: for the eyes and NVDA's object navigation, never the focus (AS-D2) ----
-        _list.Dock = DockStyle.Fill;
-        _list.IntegralHeight = false;
-        _list.TabStop = false;
-        _list.GotFocus += (_, _) => _field.Focus();
-        _list.DoubleClick += (_, _) => Paste();
-
-        _speak.Tick += (_, _) =>
-        {
-            _speak.Stop();
-            SayFirst();
-        };
+        // ---- the field and the items (CP-2.1, AS-D2): HotkeyForm's, named here ----
+        SearchField.AccessibleName = "Search the clipboard";
+        Matches.DoubleClick += (_, _) => Paste();
 
         (_countLabel, _recordingLabel) = StatusLayout.Pair(_status);
 
-        Controls.AddRange([Overlay, _list, _field, _status, _menu]);
+        Controls.AddRange([Overlay, Matches, SearchField, _status, _menu]);
         ApplyTextFont();
         Fill();
     }
@@ -115,22 +97,22 @@ public sealed class ClipForm : HotkeyForm
 
     protected override void HideForNotice()
     {
-        _field.Visible = false;
-        _list.Visible = false;
+        SearchField.Visible = false;
+        Matches.Visible = false;
     }
 
     protected override void ShowAfterNotice()
     {
-        _field.Visible = true;
-        _list.Visible = true;
+        SearchField.Visible = true;
+        Matches.Visible = true;
     }
 
-    protected override Control FocusTarget => _field;
+    protected override Control FocusTarget => SearchField;
 
     protected override void ApplyFont(Font font)
     {
-        _field.Font = font;
-        _list.Font = font;
+        SearchField.Font = font;
+        Matches.Font = font;
     }
 
     protected override IReadOnlyList<string> RestartArguments() => [Dispatch.AxClip];
@@ -154,12 +136,12 @@ public sealed class ClipForm : HotkeyForm
     {
         if (!NoticeOpen && !keepText)
         {
-            _field.Clear();
+            SearchField.Clear();
         }
 
         Fill();
         var width = Math.Max(MinimumSize.Width, area.Width / 3);
-        var height = Math.Max(MinimumSize.Height, Height - ClientSize.Height + _menu.Height + _field.Height + _list.ItemHeight * 12 + _status.Height + 4);
+        var height = Math.Max(MinimumSize.Height, Height - ClientSize.Height + _menu.Height + SearchField.Height + Matches.ItemHeight * 12 + _status.Height + 4);
         Bounds = new Rectangle(area.Left + (area.Width - width) / 2, area.Top + (area.Height - height) / 2, width, height);
     }
 
@@ -167,14 +149,13 @@ public sealed class ClipForm : HotkeyForm
     {
         if (!NoticeOpen)
         {
-            _field.Select();
+            SearchField.Select();
         }
     }
 
     /// <summary>As the window hides: the timer stopped, and the history written when it is kept (CP-3.4).</summary>
     protected override void OnHiding()
     {
-        _speak.Stop();
         if (_settings.KeepHistory)
         {
             _settings.Keep(_history.Items);
@@ -218,26 +199,13 @@ public sealed class ClipForm : HotkeyForm
 
     protected override bool ProcessWindowKey(Keys keyData)
     {
+        if (ProcessMatchKey(keyData, AxClipKeys.NextMatch, AxClipKeys.PreviousMatch, AxClipKeys.FirstMatch, AxClipKeys.LastMatch))
+        {
+            return true;
+        }
+
         switch (keyData)
         {
-            case AxClipKeys.NextMatch:
-                SelectMatch(_list.SelectedIndex + 1);
-                return true;
-            case AxClipKeys.PreviousMatch:
-                SelectMatch(_list.SelectedIndex - 1);
-                return true;
-            case BundleKeys.PageDown:
-                SelectMatch(Math.Min(_list.SelectedIndex + Page(), _matches.Count - 1));
-                return true;
-            case BundleKeys.PageUp:
-                SelectMatch(Math.Max(_list.SelectedIndex - Page(), 0));
-                return true;
-            case AxClipKeys.FirstMatch:
-                SelectMatch(0);
-                return true;
-            case AxClipKeys.LastMatch:
-                SelectMatch(_matches.Count - 1);
-                return true;
             case AxClipKeys.Paste:
                 Paste();
                 return true;
@@ -368,34 +336,24 @@ public sealed class ClipForm : HotkeyForm
 
     // ---- the items (CP-2.3, CP-2.4) ----
 
-    private ClipEntry? Selected => _list.SelectedIndex >= 0 && _list.SelectedIndex < _matches.Count ? _matches[_list.SelectedIndex] : null;
+    private ClipEntry? Selected => Matches.SelectedIndex >= 0 && Matches.SelectedIndex < _matches.Count ? _matches[Matches.SelectedIndex] : null;
 
-    private void OnTyped()
-    {
-        Fill();
-        _speak.Stop();
-        if (_settings.SayFirstMatch && _field.Text.Trim().Length > 0)
-        {
-            _speak.Start();
-        }
-    }
+    protected override int MatchCount => _matches.Count;
+
+    protected override string SpokenMatch(int index) => ClipHistory.Spoken(_matches[index], index, _matches.Count);
+
+    protected override string NothingSaid => _history.Nothing(SearchField.Text);
+
+    protected override bool SayFirstMatch => _settings.SayFirstMatch;
+
+    protected override void Refill() => Fill();
 
     /// <summary>The list made again from the typed text, the selection on <paramref name="keep"/> when it is still there, the newest otherwise.</summary>
     private void Fill(string? keep = null)
     {
-        _matches = _history.Find(_field.Text);
-        _list.BeginUpdate();
-        _list.Items.Clear();
-        _list.Items.AddRange(_matches.Select(entry => (object)entry.Label).ToArray());
-        if (_matches.Count == 0)
-        {
-            _list.Items.Add(_history.Nothing(_field.Text));
-        }
-
-        _list.EndUpdate();
-        _list.AccessibleName = $"Clipboard, {_matches.Count}";
+        _matches = _history.Find(SearchField.Text);
         var index = keep is null ? 0 : Math.Max(0, _matches.ToList().FindIndex(entry => entry.Text == keep));
-        _list.SelectedIndex = index;
+        ShowMatches(_matches.Select(entry => entry.Label).ToList(), _history.Nothing(SearchField.Text), $"Clipboard, {_matches.Count}", index);
         UpdateStatus();
     }
 
@@ -407,41 +365,6 @@ public sealed class ClipForm : HotkeyForm
         StatusLayout.Fit(_status, _countLabel, _recordingLabel);
     }
 
-    private void SayFirst()
-    {
-        if (_field.Text.Trim().Length == 0)
-        {
-            return;
-        }
-
-        Announce(Selected is { } entry ? ClipHistory.Spoken(entry, _list.SelectedIndex, _matches.Count) : _history.Nothing(_field.Text), true);
-    }
-
-    /// <summary>The selection moved and said; at an end the edge sound first and the item said again (CP-2.4).</summary>
-    private void SelectMatch(int target)
-    {
-        _speak.Stop();
-        if (_matches.Count == 0)
-        {
-            Sounds.Edge();
-            Announce(_history.Nothing(_field.Text), true);
-            return;
-        }
-
-        target = Math.Clamp(target, 0, _matches.Count - 1);
-        if (target == _list.SelectedIndex)
-        {
-            Sounds.Edge();
-        }
-        else
-        {
-            _list.SelectedIndex = target;
-        }
-
-        Announce(ClipHistory.Spoken(_matches[target], target, _matches.Count), true);
-    }
-
-    private int Page() => Math.Max(1, _list.ClientSize.Height / Math.Max(1, _list.ItemHeight));
 
     // ---- using an item (CP-4) ----
 
@@ -450,7 +373,7 @@ public sealed class ClipForm : HotkeyForm
     {
         if (Selected is not { } entry)
         {
-            Announce(_history.Nothing(_field.Text), true);
+            Announce(_history.Nothing(SearchField.Text), true);
             return;
         }
 
@@ -483,7 +406,7 @@ public sealed class ClipForm : HotkeyForm
     {
         if (Selected is not { } entry)
         {
-            Announce(_history.Nothing(_field.Text), true);
+            Announce(_history.Nothing(SearchField.Text), true);
             return;
         }
 
@@ -498,7 +421,7 @@ public sealed class ClipForm : HotkeyForm
     {
         if (Selected is not { } entry)
         {
-            Announce(_history.Nothing(_field.Text), true);
+            Announce(_history.Nothing(SearchField.Text), true);
             return;
         }
 
@@ -510,16 +433,16 @@ public sealed class ClipForm : HotkeyForm
     {
         if (Selected is not { } entry)
         {
-            Announce(_history.Nothing(_field.Text), true);
+            Announce(_history.Nothing(SearchField.Text), true);
             return;
         }
 
-        var index = _list.SelectedIndex;
+        var index = Matches.SelectedIndex;
         _history.Remove(entry);
         Fill();
         if (_matches.Count > 0)
         {
-            _list.SelectedIndex = Math.Min(index, _matches.Count - 1);
+            Matches.SelectedIndex = Math.Min(index, _matches.Count - 1);
         }
 
         Announce("Removed", true);
