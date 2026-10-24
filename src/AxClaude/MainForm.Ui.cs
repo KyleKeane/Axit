@@ -11,10 +11,11 @@ internal sealed partial class MainForm
 
     private void BuildMenus()
     {
-        // The menus (FR-10): short, grouped by what the items are about, every mnemonic unique within its menu.
+        // The menus (FR-10): short, grouped by what the items are about, every mnemonic unique within its menu; each
+        // item with a key is a command of the window's one list (docs/axit/app-kit.md AK-2), its key from the table.
         // Session is the thing worked on, as axDown's File is: the session, where Claude runs, what the window holds.
         var session = new ToolStripMenuItem("&Session");
-        session.DropDownItems.Add(new ToolStripMenuItem("&New session...", null, (_, _) => NewSession()) { ShortcutKeys = AxClaudeKeys.NewSession });
+        Add(session, new Command("&New session...", AxClaudeKeys.NewSession, NewSession) { Mark = CommandMark.Act });
         session.DropDownItems.Add(new ToolStripMenuItem("&Open folder...", null, (_, _) => OpenFolder()));
         // FR-8.3, FR-8.5: Open replaces this window's session; in new window leaves it running.
         session.DropDownItems.Add(new ToolStripMenuItem("Open folder in new &window...", null, (_, _) => OpenFolderInNewWindow()));
@@ -23,7 +24,9 @@ internal sealed partial class MainForm
         // The standard order of a File menu (bundle AX-6): the editors have Save and Save as here; axClaude has none.
         session.DropDownItems.Add(new ToolStripSeparator());
         // FR-8.2: Show current folder in ▸ File Explorer and the other apps' windows on the project folder.
-        session.DropDownItems.Add(CreateShowInMenu("Show current folder &in", new ToolStripMenuItem("File &Explorer", null, (_, _) => ShowInExplorer()) { ShortcutKeys = AxClaudeKeys.ShowInExplorer }, FolderOrSay));
+        var explorer = new Command("File &Explorer", AxClaudeKeys.ShowInExplorer, ShowInExplorer) { Mark = CommandMark.Open };
+        AddKey(explorer);
+        session.DropDownItems.Add(CreateShowInMenu("Show current folder &in", Item(explorer.Label, explorer.Run, explorer.Key), FolderOrSay));
         session.DropDownItems.Add(new ToolStripSeparator());
         // Not a save: the conversation is Claude's own record, and this writes a text copy of it. At the bottom, where
         // the editors have Save and Save as, so that the first menu of every window keeps the same order (bundle AX-6).
@@ -34,17 +37,18 @@ internal sealed partial class MainForm
         // What goes to Claude itself (FR-11); the raw sequences are fixed here and listed in Appendix B.
         var claude = new ToolStripMenuItem("&Claude");
         // The process first (FR-1.8), then the turn.
-        claude.DropDownItems.Add(new ToolStripMenuItem("Force Claude to res&tart", null, (_, _) => RestartClaude()) { ShortcutKeys = AxClaudeKeys.RestartClaude });
+        Add(claude, new Command("Force Claude to res&tart", AxClaudeKeys.RestartClaude, RestartClaude) { Mark = CommandMark.Act });
         claude.DropDownItems.Add(new ToolStripSeparator());
         claude.DropDownItems.Add(new ToolStripMenuItem("Send &message", null, (_, _) => SendInput()) { ShortcutKeyDisplayString = "Enter in the message field" });
-        claude.DropDownItems.Add(new ToolStripMenuItem("Send &queued messages now", null, (_, _) => SendNow()) { ShortcutKeys = AxClaudeKeys.SendNow });
-        claude.DropDownItems.Add(new ToolStripMenuItem("&Interrupt", null, (_, _) => Interrupt()) { ShortcutKeyDisplayString = BundleKeys.Text(AxClaudeKeys.Interrupt) });
-        claude.DropDownItems.Add(new ToolStripMenuItem("Next &permission mode", null, (_, _) => Write("\x1b[Z")) { ShortcutKeys = AxClaudeKeys.NextPermissionMode });
+        Add(claude, new Command("Send &queued messages now", AxClaudeKeys.SendNow, SendNow) { Mark = CommandMark.Act });
+        // The interrupt key (FR-2.3). Ctrl+Escape opens the Start menu and never reaches the app.
+        Add(claude, new Command("&Interrupt", AxClaudeKeys.Interrupt, Interrupt) { Mark = CommandMark.Act });
+        Add(claude, new Command("Next &permission mode", AxClaudeKeys.NextPermissionMode, () => Write("\x1b[Z")) { Mark = CommandMark.Act });
         claude.DropDownItems.Add(new ToolStripSeparator());
         // The keys Claude's own menus take. Up and Down are menu items only (FR-2.4): Ctrl+Up and Ctrl+Down move by
         // paragraph in every edit control of the bundle.
         var sendKey = new ToolStripMenuItem("Send &key");
-        sendKey.DropDownItems.Add(new ToolStripMenuItem("Ctrl+&C", null, (_, _) => Write("\x03")) { ShortcutKeys = AxClaudeKeys.SendCtrlC });
+        Add(sendKey, new Command("Ctrl+&C", AxClaudeKeys.SendCtrlC, () => Write("\x03")) { Mark = CommandMark.Act });
         sendKey.DropDownItems.Add(new ToolStripMenuItem("Ctrl+&D", null, (_, _) => Write("\x04")));
         sendKey.DropDownItems.Add(new ToolStripMenuItem("&Tab", null, (_, _) => Write("\t")));
         sendKey.DropDownItems.Add(new ToolStripMenuItem("&Up", null, (_, _) => Write("\x1b[A")));
@@ -52,11 +56,10 @@ internal sealed partial class MainForm
         claude.DropDownItems.Add(sendKey);
 
         var navigate = new ToolStripMenuItem("&Navigate");
-        navigate.DropDownItems.Add(new ToolStripMenuItem("&Message field", null, (_, _) => GoTo(BottomControl)) { ShortcutKeyDisplayString = BundleKeys.Text(AxClaudeKeys.GoToField) });
-        navigate.DropDownItems.Add(new ToolStripMenuItem("&Conversation", null, (_, _) => GoTo(Transcript)) { ShortcutKeyDisplayString = BundleKeys.Text(AxClaudeKeys.GoToConversation) });
-        // Ctrl+3 is a ShortcutKeys key, but drawn through Text like Ctrl+1 and Ctrl+2 so that it ends in the full stop (AX-8.5).
-        navigate.DropDownItems.Add(new ToolStripMenuItem("&Latest response", null, (_, _) => Transcript.JumpToLatestResponse()) { ShortcutKeys = AxClaudeKeys.LatestResponse, ShortcutKeyDisplayString = BundleKeys.Text(AxClaudeKeys.LatestResponse) });
-        navigate.DropDownItems.Add(new ToolStripMenuItem("Claude's &question again", null, (_, _) => ReadQuestionAgain()) { ShortcutKeyDisplayString = BundleKeys.Text(AxClaudeKeys.ReadQuestion) });
+        Add(navigate, new Command("&Message field", AxClaudeKeys.GoToField, () => GoTo(BottomControl)) { Mark = CommandMark.Open });
+        Add(navigate, new Command("&Conversation", AxClaudeKeys.GoToConversation, () => GoTo(Transcript)) { Mark = CommandMark.Open });
+        Add(navigate, new Command("&Latest response", AxClaudeKeys.LatestResponse, Transcript.JumpToLatestResponse) { Mark = CommandMark.Open });
+        Add(navigate, new Command("Claude's &question again", AxClaudeKeys.ReadQuestion, ReadQuestionAgain) { Mark = CommandMark.Read });
         navigate.DropDownItems.Add(new ToolStripSeparator());
         AddFindItems(navigate);
         navigate.DropDownItems.Add(new ToolStripSeparator());

@@ -197,46 +197,30 @@ internal sealed partial class MainForm : ConsoleForm
     /// <summary>The work Claude runs in the background, which outlives the turn ("1 shell"); null when none runs or Claude is stopped.</summary>
     private string? ClaudeBackground => ProcessRunning ? _model.Background : null;
 
-    /// <summary>The window's own keys, after the console's shared ones (the focus keys, find, the bookmark, read to the end) and the base's (the text size keys, F1, the palette, Ctrl+S).</summary>
+    /// <summary>
+    /// The one key of the window's own that is no command: the Ctrl+O guard, a key sent to Claude only in one state of
+    /// its screen. Every other key is a command of the menus (<c>MainForm.Ui.cs</c>, docs/axit/app-kit.md AK-2), run by
+    /// the base after this; the console window's read to the end runs before it.
+    /// </summary>
     protected override bool ProcessConsoleKey(Keys keyData)
     {
-        // Most keys with a menu item of their own are that item's ShortcutKeys and reach the menu through the base
-        // call. This switch holds the rest: the focus keys, the Ctrl+O guard, the interrupt (WinForms takes no
-        // Shift-only shortcut), and the keys whose menu items only show the key.
-        switch (keyData)
+        if (keyData != AxClaudeKeys.CtrlOGuard)
         {
-            case AxClaudeKeys.GoToField:
-                GoTo(BottomControl);
-                return true;
-            case AxClaudeKeys.ToggleMusic:
-                ToggleMusic();
-                return true;
-            case AxClaudeKeys.ReadQuestion:
-                ReadQuestionAgain();
-                return true;
-            case AxClaudeKeys.GoToConversation:
-                GoTo(Transcript);
-                return true;
-            case AxClaudeKeys.CtrlOGuard:
-                // D14: Claude's detailed view redraws the conversation in screen reader mode, which doubles the
-                // transcript and speaks old replies again. The key is sent only to close the view should it be open.
-                if (_model.TranscriptViewOpen)
-                {
-                    Write("\x0f");
-                }
-                else
-                {
-                    Announce(CtrlOGuardText, true);
-                }
-
-                return true;
-            case AxClaudeKeys.Interrupt:
-                // The interrupt key (FR-2.3). Ctrl+Escape opens the Start menu and never reaches the app.
-                Interrupt();
-                return true;
+            return false;
         }
 
-        return false;
+        // D14: Claude's detailed view redraws the conversation in screen reader mode, which doubles the transcript and
+        // speaks old replies again. The key is sent only to close the view should it be open.
+        if (_model.TranscriptViewOpen)
+        {
+            Write("\x0f");
+        }
+        else
+        {
+            Announce(CtrlOGuardText, true);
+        }
+
+        return true;
     }
 
     // ---- what the window base and the console window ask for (bundle AX-6.5) ----
