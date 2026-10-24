@@ -128,8 +128,14 @@ test vectors, not a library.
 
 ## 7. Open, to settle by trying the tool
 
-- How the master password reaches the tool from another program. The manual says nothing about standard input
-  except for `estimate`, nor about a pipe on Windows. The plan's "the password on standard input" is unverified.
+- ~~How the master password reaches the tool from another program.~~ Settled from the source on 2026-10-24
+  (`src/cli/Utils.cpp`, tag 2.8.0): `Utils::getPassword` turns the echo off, reads one line from standard input
+  (`in.readLine()`) and turns the echo back on; nothing requires a console, so a pipe works, and `-q` sends the prompt
+  to nowhere instead of standard error. The password is the line without its line end. Still to see by running it:
+  that the echo calls do not fail on a pipe under Windows.
+- The portable build (`KeePassXC-2.8.0-x64.zip`) needs the Microsoft Visual C++ runtime, which it carries as
+  `vc_redist.x64.exe` but does not install: on a computer without it, `keepassxc-cli.exe` ends at once with
+  0xC0000135 (a DLL not found). The installer (`.msi`) installs the runtime, and needs administrator rights.
 - The exact output formats of `ls`, `show` and `search`, for parsing.
 - Whether `open`'s interactive mode suits a window better than one process per command.
 - The manual lists `-q`/`--quiet` with a `<path>` argument that does not fit its description; try it.

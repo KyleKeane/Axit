@@ -146,7 +146,7 @@ library dependency (B-10: `git.exe` and the file system through the APIs already
   hidden process from sign-in whose hotkey brings up one search field over the Start menu's programs, Down and Up
   through the matches with the caret kept in the field, Enter to start.
 - **axPass** (asked 2026-10-18 as AxKeePassium, after the KeePass app on the phone; renamed axPass by the user on
-  2026-10-23, which keeps clear of anyone's product name; no spec yet; the format and the command-line tool, read from
+  2026-10-23, which keeps clear of anyone's product name; specified 2026-10-24 in `docs/axpass/SPEC.md`, built once the tool runs here; the format and the command-line tool, read from
   their sources, are in `docs/axpass/kdbx-notes.md`; since 2026-10-24 an item app with axTask's window and fields,
   `docs/axit/item-apps.md`, whose section 6 says where the two differ): a KeePass client for one database (`.kdbx`) per window: the
   entries as a list, by group and by search, Enter for an entry's fields as read-only text with the password withheld,

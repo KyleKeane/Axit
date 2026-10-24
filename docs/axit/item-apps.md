@@ -1,7 +1,7 @@
 # Item apps: one shape for axTask and axPass
 
 Written 2026-10-24 at the user's direction, before either app is built. axTask (tasks, `docs/axtask/SPEC.md`) and
-axPass (passwords, `docs/axit/plan.md` and `docs/axpass/kdbx-notes.md`) are both an *item app*: lists of items, each
+axPass (passwords, `docs/axpass/SPEC.md`, with the format in `docs/axpass/kdbx-notes.md`) are both an *item app*: lists of items, each
 item a set of typed fields. This document is the part they share, so that the two stay alike and the places they
 differ are written down in one table (section 6). Requirements are numbered `IA-n.m` and decisions `IA-Dn`; each app's
 spec cites them and does not repeat them. It replaces the Markdown design of axList (branch `axlist`, kept as a
@@ -146,7 +146,8 @@ A folder. Its details are `list.json` in it, the same shape as an item, never sh
 | Row summary | the Title, "done" and the Due date | the Title and the user name |
 | Space in the navigator | marks the item done or not done | nothing |
 | Its own keys | (its spec) | copy user name, copy password with the clipboard cleared after 30 seconds, generate a password, lock |
-| Opens with | a folder | a `.kdbx` file and the master password, asked in a notice |
+| Opens with | a folder | a `.kdbx` file and the master password, asked in a notice whose field hides what is typed |
+| New field | any type (IA-5.3) | not in the first version: KeePass's standard fields, custom attributes read only (PW-D3) |
 | Templates | `list.json`'s `new item` | KeePass's standard fields (Title, UserName, Password, URL, Notes) plus the user's own |
 | Delete | to the top folder's Archive list; Ctrl+Z brings it back | to KeePass's own Recycle Bin group |
 
