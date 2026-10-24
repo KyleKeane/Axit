@@ -111,7 +111,7 @@ Enter pastes the item into the program that was in front. Nothing is spoken but 
 
 - CP-6.1 `%APPDATA%\Axit\axclip.json` (AX-5.3; `ClipSettings`): `fontFamily`, `fontSize`, `fontBold`,
   `checkForUpdates`, `hotkey` (`Windows+Alt+V`), `startWithWindows` (true), `sayFirstMatch` (true), `keepHistory`
-  (false), `history` (the items, newest first, only while Keep history is on: `text` and `copied`, the time).
+  (false), `protectedHistory` (the items, newest first, only while Keep history is on, as JSON of `text` and `copied`, the time, encrypted for the Windows account with DPAPI, `Axit.Core/UserSecret`, so that the file elsewhere shows nothing; security audit S-21; Clear history also removes a `.bad` copy of the file).
 - CP-6.2 Announcements (AX-7.3): the matches as in CP-2.3 and CP-2.4; "Copied"; "Removed"; "Clipboard history
   cleared"; "Recording paused"; "Recording"; "The clipboard history is empty"; the Hotkey notice's words (AS-4.2);
   the bundle's. Nothing is said when the window hides, and nothing when a copy is kept.

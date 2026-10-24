@@ -26,7 +26,7 @@ An item reads as its first line, cut at 120 characters, and says how many lines 
 
 ## Privacy
 
-The history is kept in memory only: it is gone when axClip ends, unless you turn on Options, Keep history between runs, which keeps it in axClip's settings file. Password managers that mark a copy as private (most do) are respected: such a copy is never kept. axClip keeps only text, never pictures or files, and its log never holds what you copied.
+The history is kept in memory only: it is gone when axClip ends, unless you turn on Options, Keep history between runs, which keeps it in axClip's settings file, encrypted so that only your Windows account can read it back. Password managers that mark a copy as private (most do) are respected: such a copy is never kept. axClip keeps only text, never pictures or files, and its log never holds what you copied.
 
 ## Menus
 

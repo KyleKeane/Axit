@@ -464,6 +464,15 @@ public sealed class ClipForm : HotkeyForm
                 _history.Clear();
                 _settings.Keep(_history.Items);
                 SaveSettings();
+                // S-21: a copy of an unreadable settings file kept for mending would still hold the old history.
+                try
+                {
+                    File.Delete(SettingsPath + ".bad");
+                }
+                catch (Exception ex) when (ex is IOException or UnauthorizedAccessException)
+                {
+                }
+
                 Fill();
                 Announce("Clipboard history cleared", true);
             }, IsDefault: true),

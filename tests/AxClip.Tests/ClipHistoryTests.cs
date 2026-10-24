@@ -105,6 +105,8 @@ public sealed class ClipHistoryTests
             settings.Save(path);
             var back = ClipSettings.Load(path, out _);
             Assert.Equal("kept", back.History.Single().Text);
+            // S-21: the file holds the history only encrypted for this Windows account.
+            Assert.DoesNotContain("kept", File.ReadAllText(path), StringComparison.Ordinal);
 
             File.WriteAllText(path, """{ "hotkey": "Shift+V", "keepHistory": false, "history": [ { "text": "left over", "copied": "2026-10-23T14:00:00" } ] }""");
             var mended = ClipSettings.Load(path, out _);

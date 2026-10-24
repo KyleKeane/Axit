@@ -1,3 +1,4 @@
+using System.Text.Json;
 using System.Text.Json.Serialization;
 using Axit.Core;
 
@@ -24,8 +25,16 @@ public sealed class ClipSettings : WindowSettings
 
     public bool KeepHistory { get; set; }
 
-    /// <summary>The items, newest first, written only while <see cref="KeepHistory"/> is on.</summary>
+    /// <summary>The items, newest first, kept only while <see cref="KeepHistory"/> is on; on disk only as <see cref="ProtectedHistory"/>.</summary>
+    [JsonIgnore]
     public List<ClipEntry> History { get; set; } = [];
+
+    /// <summary>
+    /// The history as the file holds it (security audit S-21): encrypted for this Windows account (<see cref="UserSecret"/>),
+    /// so that the file in a backup, a roaming profile or another user's hands shows nothing of what was copied.
+    /// </summary>
+    [JsonPropertyName("protectedHistory")]
+    public string? ProtectedHistory { get; set; }
 
     public static string DefaultPath => AppPaths.SettingsFile("axclip");
 
@@ -39,7 +48,11 @@ public sealed class ClipSettings : WindowSettings
         return settings;
     }
 
-    public override void Save(string path) => SettingsFile.Save(path, this);
+    public override void Save(string path)
+    {
+        ProtectedHistory = KeepHistory && History.Count > 0 ? UserSecret.Protect(JsonSerializer.Serialize(History)) : null;
+        SettingsFile.Save(path, this);
+    }
 
     /// <summary>The window's history into the settings, or nothing of it with Keep history off.</summary>
     public void Keep(IEnumerable<ClipEntry> history) =>
@@ -49,8 +62,19 @@ public sealed class ClipSettings : WindowSettings
     {
         SanitizeWindow();
         HotkeyText = Key.ToString();
-        History = KeepHistory
-            ? (History ?? []).Where(entry => entry is { Text.Length: > 0 and <= ClipPolicy.MaxLength }).Take(ClipHistory.MaxItems).ToList()
-            : [];
+        History = KeepHistory && ProtectedHistory is { } kept && UserSecret.Unprotect(kept) is { } json ? Read(json) : [];
+        History = History.Where(entry => entry is { Text.Length: > 0 and <= ClipPolicy.MaxLength }).Take(ClipHistory.MaxItems).ToList();
+    }
+
+    private static List<ClipEntry> Read(string json)
+    {
+        try
+        {
+            return JsonSerializer.Deserialize<List<ClipEntry>>(json) ?? [];
+        }
+        catch (JsonException)
+        {
+            return [];
+        }
     }
 }
