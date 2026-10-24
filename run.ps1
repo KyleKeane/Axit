@@ -30,8 +30,8 @@
 #>
 [CmdletBinding()]
 param(
-    # The app to start: the verb Axit.exe takes (docs/axit/SPEC.md AX-1). axClaude unless said otherwise.
-    [ValidateSet('claude', 'down', 'json', 'git', 'terminal', 'file', 'media', 'preview', 'start', 'process', 'task', 'pass', 'calc', 'clip')]
+    # The app to start: the verb Axit.exe takes (docs/axit/SPEC.md AX-1), one of Dispatch.Apps' (src/Axit.Core/Dispatch.cs,
+    # read by tools/apps.ps1, so that a new app needs no line here). axClaude unless said otherwise.
     [string]$App = 'claude',
 
     # axClaude's project folder (default: the current folder), axDown's or axJSON's file (default: an empty document),
@@ -52,6 +52,16 @@ param(
 
 $ErrorActionPreference = 'Stop'
 $root = $PSScriptRoot
+
+# The apps, off Dispatch.Apps without a build. A verb is matched without case, as Axit.exe matches it.
+. (Join-Path $root 'tools\apps.ps1')
+$apps = @(Get-AxitApps $root)
+$chosen = $apps | Where-Object { $_.Verb -eq $App } | Select-Object -First 1
+if (-not $chosen) {
+    Write-Host "There is no app '$App'. -App takes one of: $(($apps | ForEach-Object Verb) -join ', ')."
+    exit 1
+}
+$App = $chosen.Verb
 
 if ($Test) {
     # test.ps1: every test project one by one, in Release, as the workflows run them (the solution would build into
@@ -99,8 +109,9 @@ if (-not (Test-Path $exe)) {
 }
 
 if ($App -ne 'claude') {
-    $name = switch ($App) { 'down' { 'axDown' } 'json' { 'axJSON' } 'terminal' { 'axTerminal' } 'file' { 'axFile' } 'media' { 'axMedia' } 'preview' { 'axPreview' } 'start' { 'axStart' } 'process' { 'axProcess' } 'task' { 'axTask' } 'pass' { 'axPass' } 'calc' { 'axCalc' } 'clip' { 'axClip' } default { 'axGIT' } }
-    if ($Path -and $App -notin 'start', 'process', 'calc', 'clip') {
+    $name = $chosen.Name
+    # An app that opens nothing (Opens.Nothing in Dispatch.Apps) is started without the path.
+    if ($Path -and $chosen.Opens -ne 'Nothing') {
         Write-Host "Starting $name on $Path"
         & $exe $App $Path
     } else {

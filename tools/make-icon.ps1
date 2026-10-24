@@ -1,14 +1,13 @@
 <#
 .SYNOPSIS
-  Generates the icons in src\Axit: AxClaude.ico (the letters Ax on dark blue, also the icon of Axit.exe),
-  AxDown.ico (the letters Ad on dark green), AxJSON.ico (the letters Aj on dark brown), AxGit.ico, AxTerminal.ico,
-  AxFile.ico (the letters Af on purple), AxMedia.ico (the letters Am on teal), AxPreview.ico (the letters Ap on
-  slate blue) AxStart.ico (the letters As on orange), AxProcess.ico (the letters Ar on plum), AxTask.ico (the letters Ak on green), AxPass.ico (the letters Aw on navy), AxCalc.ico (the letters Ac on olive) and AxClip.ico (the letters Ab on brick red), rounded squares at the usual Windows sizes.
+  Generates the icons in src\Axit: one per app of Dispatch.Apps (src\Axit.Core\Dispatch.cs), <Project>.ico with the
+  letters and the colour of the app's Icon there (AxClaude.ico, the letters Ax on dark blue, is also the icon of
+  Axit.exe), rounded squares at the usual Windows sizes.
 
 .DESCRIPTION
   Uses System.Drawing only, so it runs on any Windows machine. The 256 pixel image is stored PNG-compressed, the
   smaller ones as 32-bit bitmaps, which is what Windows expects in an icon file. Re-run after changing the design;
-  the result is committed. A new app of the bundle adds a line at the end with its letters and colour.
+  the result is committed. A new app of the bundle gives its letters and colour in its Dispatch.Apps entry.
 
 .EXAMPLE
   .\tools\make-icon.ps1                                   # every icon
@@ -128,19 +127,10 @@ function Write-Icon([string]$out, [string]$text, [int[]]$rgb) {
 if ($Out) {
     Write-Icon ([System.IO.Path]::GetFullPath($Out)) $Text $Rgb
 } else {
-    # One line per app: the letters and the colour.
-    Write-Icon (Join-Path $iconFolder 'AxClaude.ico') 'Ax' @(31, 78, 121)
-    Write-Icon (Join-Path $iconFolder 'AxDown.ico') 'Ad' @(31, 110, 70)
-    Write-Icon (Join-Path $iconFolder 'AxJSON.ico') 'Aj' @(120, 70, 20)
-    Write-Icon (Join-Path $iconFolder 'AxGit.ico') 'Ag' @(110, 40, 40)
-    Write-Icon (Join-Path $iconFolder 'AxTerminal.ico') 'At' @(40, 40, 40)
-    Write-Icon (Join-Path $iconFolder 'AxFile.ico') 'Af' @(90, 50, 130)
-    Write-Icon (Join-Path $iconFolder 'AxMedia.ico') 'Am' @(20, 100, 110)
-    Write-Icon (Join-Path $iconFolder 'AxPreview.ico') 'Ap' @(70, 70, 140)
-    Write-Icon (Join-Path $iconFolder 'AxStart.ico') 'As' @(150, 90, 20)
-    Write-Icon (Join-Path $iconFolder 'AxProcess.ico') 'Ar' @(120, 40, 90)
-    Write-Icon (Join-Path $iconFolder 'AxTask.ico') 'Ak' @(30, 120, 80)
-    Write-Icon (Join-Path $iconFolder 'AxPass.ico') 'Aw' @(20, 40, 100)
-    Write-Icon (Join-Path $iconFolder 'AxCalc.ico') 'Ac' @(90, 100, 30)
-    Write-Icon (Join-Path $iconFolder 'AxClip.ico') 'Ab' @(160, 50, 50)
+    # Every app of Dispatch.Apps with its Icon, the letters and the colour (tools/apps.ps1 reads them off Dispatch.cs).
+    . (Join-Path (Split-Path -Parent $MyInvocation.MyCommand.Path) 'apps.ps1')
+    foreach ($app in Get-AxitApps (Join-Path $iconFolder '..\..')) {
+        if (-not $app.Icon) { throw "$($app.Name) has no Icon in Dispatch.Apps." }
+        Write-Icon ([System.IO.Path]::GetFullPath((Join-Path $iconFolder "$($app.Project).ico"))) $app.Icon.Letters $app.Icon.Rgb
+    }
 }
