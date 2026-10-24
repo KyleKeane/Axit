@@ -139,3 +139,38 @@ test vectors, not a library.
 - The exact output formats of `ls`, `show` and `search`, for parsing.
 - Whether `open`'s interactive mode suits a window better than one process per command.
 - The manual lists `-q`/`--quiet` with a `<path>` argument that does not fit its description; try it.
+
+## 8. Tried on 2026-10-24 (KeePassXC 2.8.0 from winget, a throwaway database)
+
+A program starting `keepassxc-cli.exe` with standard input, output and error redirected and no window, one process
+per command, `-q` on every command that opens the database:
+
+- **The password on a pipe works.** The master password is the first line of standard input. `db-create -p` reads
+  it twice; `add -p` and `edit -p` read the entry's new password twice after it. With `-q` nothing is printed but the
+  result; without it the prompts go to standard error ("Enter password to encrypt database (optional): ").
+- **A wrong password** ends with exit code 1 and, with `-q`, nothing on either stream.
+- **Speed**: 80 to 150 ms a command on a new database (AES-KDF, 1,000,000 rounds); a database with Argon2 takes its
+  own key derivation time on every command.
+- **`ls -R -f`**: one line per group and entry with its full path, a group ending in `/`, an empty group a line
+  `<group>/[empty]`; the top level's entries first, then each group with its contents, in the database's order.
+  `ls -R` indents by two spaces instead. Non-ASCII titles come through in UTF-8.
+- **`show <entry>`**: `Title: …`, `UserName: …`, `Password: PROTECTED`, `URL: …`, `Notes: …` (a note of several lines
+  goes on over the following lines), `Uuid: {…}`, `Tags: …`. `--all` printed the same for an entry without custom
+  attributes. `show -a Password` prints the password itself without `-s`: the attribute's value, one line.
+- **`edit -t <title> -u <name>`** renames and changes the user name; `mv <entry> <group>` says "Successfully moved
+  entry … to group …" on standard output.
+- **`rm`** moves an entry to the group `Recycle Bin` (made by the first `rm`; `db-info` says "Recycle bin is
+  enabled."); `rm` on an entry in it deletes it for good, without a question. **`rmdir`** moves a group, with its
+  entries, into the Recycle Bin the same way.
+- **`generate -L 20 -l -U -n -s`** prints one password and needs no database.
+- `db-info` prints its dates in the system's format, so nothing should parse them.
+
+- **A slash in a title** cannot be made: `add` with `a\/b` says "Could not create entry with path"; the tool's paths
+  have no escape. axPass refuses a slash in a title.
+- **`mv` moves entries only** ("Moves an entry to a new group"): a group in the Recycle Bin cannot be moved back by
+  the tool. A group archived by axPass comes back only in KeePassXC's own window.
+- **`clip <entry> 3`** from a program without a console exited after the 3 seconds with the clipboard empty, as when
+  it clears itself; that it held the password meanwhile is still to be heard (the probe cleared the user's clipboard,
+  so it was not tried again).
+
+Still not tried: custom attributes in `show`, Argon2's time.

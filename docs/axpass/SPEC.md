@@ -70,8 +70,10 @@ forgets the master password and shows only the notice that asks for it.
   says "hidden: Ctrl+C copies it"; Enter changes it in a hidden field, with Generate (Ctrl+G) filling it from
   `generate` (20 characters, upper and lower case, digits, signs), and asks it twice.
 - **PW-6.3 The row summary** (IA-6): the title and the user name, "Gmail, kyle".
-- **PW-6.4 Delete** moves the entry or the group to KeePass's Recycle Bin group (`rm`, which does so when the database
-  has one); Ctrl+Z moves it back. In the Recycle Bin, Delete removes for good after a question.
+- **PW-6.4 Delete** moves the entry or the group to KeePass's Recycle Bin group (`rm` or `rmdir`, which make the group
+  on first use); Ctrl+Z moves an entry back with `mv`; a group cannot come back that way (the tool moves entries only), so
+  Delete on a group asks first and says that KeePassXC's own window brings it back. In the Recycle Bin, Delete removes
+  for good after a question, since the tool asks none. A title cannot hold a slash (the tool's paths have no escape).
 
 ## 7. Keys
 
@@ -99,12 +101,11 @@ On top of IA-3, in `AxPassKeys`:
 
 ## 9. Open questions, to settle by running the tool
 
-- The exact output of `ls -R -f` and `show`, for parsing; whether a title holding a slash is escaped.
-- Whether `edit -p` reads the new password from the second line of standard input.
-- That the echo calls do not fail on a pipe under Windows.
-- Whether `rm` reports that it moved to the Recycle Bin or deleted.
-- Speed: a process per command decrypts the file each time (Argon2 takes the database's own time, often a second);
-  KeePassXC's `open` mode (one process per database) may be the answer and would hold the password once.
+- Settled by running the tool (kdbx-notes 8): the output of `ls -R -f` and `show`, `edit -p` reading the new
+  password twice after the master password, the pipe, `rm` and `rmdir` moving to the Recycle Bin and deleting for
+  good inside it, about 100 ms a command with AES-KDF.
+- Still open: a title holding a slash; custom attributes in `show`; `clip` from a window with no console; a large
+  database with Argon2, where a process per command may be slow enough to want KeePassXC's `open` mode.
 
 ## 10. Status
 
