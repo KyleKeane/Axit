@@ -9,10 +9,12 @@ internal sealed partial class MainForm
     // ---- New session (FR-8.6) ----
 
     /// <summary>The recommended ways to start Claude, in the order of the notice; Custom comes after them.</summary>
+    private static readonly SessionPreset ContinuePreset = new("Continue the last conversation", ["--continue"]);
+
     private static readonly SessionPreset[] SessionPresets =
     [
         new("New conversation", []),
-        new("Continue the last conversation", ["--continue"]),
+        ContinuePreset,
         new("Choose a conversation to resume", ["--resume"]),
         new("New conversation in plan mode", ["--permission-mode", "plan"]),
         new("New conversation, edits accepted without asking", ["--permission-mode", "acceptEdits"]),
@@ -66,7 +68,8 @@ internal sealed partial class MainForm
 
         var arguments = controls.SelectedPreset?.Arguments ?? ClaudeLauncher.SplitArguments(controls.CustomArguments);
         SetFolder(folder);
-        _claudeArgs = [.. arguments];
+        // The Continue preset is the default (FR-9.1), so a folder without a conversation gets the same rescue: a new one.
+        _claudeArgs = controls.SelectedPreset == ContinuePreset ? null : [.. arguments];
         var with = arguments.Count > 0 ? " with " + ClaudeLauncher.JoinArguments(arguments) : " with no extra arguments";
         Announce($"New session in {PathName.Of(folder)}", false);
         // A new session is a new conversation (or a resumed one): the window is cleared first, and what Claude prints
