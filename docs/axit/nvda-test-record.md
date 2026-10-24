@@ -6,6 +6,19 @@ What was checked with NVDA, against which version, and with what result. When a 
 
 Add a section under this one, above the earlier passes, so that the newest comes first: the date, the version, the commit tested, who ran it and how the result was given, and the environment: the NVDA version, the synthesizer and the Windows build (so that a regression is dated to an NVDA release rather than to some time). Under it, one table per app with a line per section of its plan: the steps run and the result, Passed, Failed (with what was heard) or Not run. A step that fails gets a line of its own with what NVDA said and what it should have said, and the bug's fix names the step. When a plan gains or loses steps, the next pass lists them as the plan has them then.
 
+## Owed: the command list of every window (the branch `app-kit`, `docs/axit/app-kit.md` AK-2)
+
+Every window's keys moved from its key switch onto one list of commands, meant to change nothing a key does; the
+automated scripts of every app pass. Heard with NVDA, a short round in each app's plan, and these steps above all:
+
+- axFile: F2 starts the rename a moment after the key, as the menu's Rename always did: the box and its text read.
+- axClaude: with the menu bar open (Alt), Ctrl+N, Ctrl+Shift+R and the other keys that were menu shortcuts do nothing
+  until the menu closes, as every other key of the window already did (AX-6.6); outside the menu they act as before.
+- axTask, axPass: in the rename box (F2), Ctrl+Z and Ctrl+C act on the box's text, never on the list.
+- axPass: F5 says "Refreshed" and shows an entry added in KeePassXC's own window meanwhile.
+- axStart, axClip: the six match keys, Escape hiding, and the window coming back on the hotkey with the field empty.
+- axGIT: Enter in each view: the diff in Changes, the switch in Branches, the commit in Log.
+
 ## Owed: merged to main on 2026-10-24 before their pass (the branch `calc-clip`)
 
 Merged at the user's word ahead of the rule, so that main holds them; no release until these have passed.
