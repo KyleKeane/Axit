@@ -22,6 +22,19 @@ Merged at the user's word ahead of the rule, so that main holds them; no release
   separators skipped; axFile's Item, Open in Axit (no utilities); Show current file in from axDown, axPreview and
   axMedia (axClaude now there); Recently closed after closing axCalc and quitting axClip.
 
+## Owed: the security fixes of 2026-10-24 (the branch `security`, `security-audit-2026-10-24.md`)
+
+- axGIT: open `manual_tests/axgit/scratch-repository-with-a-hook` (plan section 1, step 7): the notice names the hook;
+  Keep them off, then Trust this repository.
+- axPass: Ctrl+C, then Windows+V: the password is not in Windows' clipboard history; after 30 seconds the clipboard is
+  empty; Windows+L locks axPass ("Locked" when you come back); Ctrl+U on an entry whose URL is not a web address says
+  "Not opened".
+- axTerminal: `type` a file holding the shell marks (the plan's new step): no "Done", the command still running.
+- axClip: Keep history between runs on, quit, open `axclip.json`: no copied text in it; start again: the history back.
+- Every window: Copy diagnostics, paste it into axDown: the account's name reads `<user>`.
+- axClaude's `tests/scripts/axclaude/09-options.txt` fails at step 191 on main as on this branch (the second line of the
+  conversation after a forced restart is the recording's line): an older break, most likely Claude Code's output, to be
+  looked at with a recording.
 ## 2026-10-24, axTask and axPass (the branch `axtask`, before its merge)
 
 - Run by the user with NVDA on builds of `axtask` up to cffd363, over the day's rounds of asks; the result given as

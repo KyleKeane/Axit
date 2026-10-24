@@ -160,6 +160,43 @@ State is **open**, **fixed (commit)**, or **decided** with the reason. Grouped b
   names a key below 1.
 - **S-45, low.** The e-mail pattern of `Redaction` backtracks on long input (tools only). Fix: a match timeout.
 
+## 3a. State at the end of 2026-10-24
+
+Fixed on the branch `security`, one commit per finding or close set, each with its tests and its spec:
+
+| Findings | Commit | What |
+|---|---|---|
+| S-1, S-3 | e777871 | programs by full path; the PATH searched in its full folders only (`SystemPrograms`); batch programs refused cmd's special characters |
+| S-2 | 3a61de4 | git's file monitor and `ext::` always off, no diff programs; a repository's own programs set aside until trusted (axGIT AG-1.6) |
+| S-11, S-12 | 07091d6 | the channel's run secret, taken out of the environment; the pipe for the user alone; password fields read "protected" |
+| S-13 | 7ee6136 | a hand-over only to a window of this very `Axit.exe`; the receiver's side accepted (a program of the user's could open the path itself) |
+| S-20, S-45 | 88a4c0f | Copy diagnostics redacted; `Redaction` in `Axit.Core`; its e-mail pattern without backtracking |
+| S-9 | 127bec4 | a `.git` file's `gitdir` only on this computer |
+| S-7, S-8 | 69e3052 | the mark of the web kept on extracted files; links left out of a compressed folder |
+| S-5 | 1bffbbe | axTask links rooted or off this computer never opened |
+| S-4, S-6, S-15, S-18, S-19 | 5e332b1 | axPass: private clipboard (the user's decision), lock with Windows, a signed tool only, web addresses only, option-like names as paths |
+| S-27 to S-34 | c9adcf0 | signed releases (the user's decision): the key on the maintainer's machine, the draft workflow, the updater's and `install.cmd`'s checks, read-only build tokens, locked restore |
+| S-37, S-38 | 9dc315f | axTerminal's marks carry a per-session secret; the folder mark only after the prompt's own, on this computer |
+| S-39, S-40, S-41 | b4f0b1b | depth limits in axJSON and axCalc; caps in the terminal parser; clamped scrolls |
+| S-44 | 5e9d3cf | no "0." answer above the first |
+| S-42 | 1f29a76 | hidden direction marks and control characters made visible in list lines |
+| S-21 | 82136a9 | axClip's kept history encrypted for the account (`UserSecret`) |
+| S-17, S-23, S-24 | c608eb2 | a hidden field emptied as its notice closes; no memory in axPass's crash reports; recordings in the local profile |
+| S-16, S-22, S-25, S-35, S-36, S-43 | this document's commit | said in the guides and `SECURITY.md`; `CODEOWNERS` for what can ship code |
+
+Accepted, with the reason in section 3: S-14 (the paste's check is right), S-26 (the user name in the navigator, an option
+later if wanted).
+
+Open:
+
+- **S-10** on the branch `installs` (winget pinned to its source, no PATH fallback): made with that branch's merge.
+- **The account's own settings** (S-36), which no file can set: branch protection on `main` with required reviews and
+  the build passing; tag protection for `v*`; GitHub's immutable releases; two-factor sign-in with a hardware key;
+  signed commits and tags. Listed here for the maintainer.
+- **The first signed release**: the key was made on 2026-10-24 on the maintainer's machine
+  (`%LOCALAPPDATA%\Axit-release`); the first release after these commits is the first the apps check, and an
+  installed copy older than it updates once more unchecked, into the version that checks.
+- An outside review by a security professional (section 5).
 ## 4. Sound, as checked
 
 Arguments are passed as lists everywhere (no command line joined by hand), paths after `--` for git; the master and

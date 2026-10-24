@@ -504,6 +504,10 @@ function Build-AxTerminal([string]$d) {
     Write-Text (Join-Path $start 'run-for-30-seconds.ps1') "Write-Output 'Running for 30 seconds'`nStart-Sleep 30`nWrite-Output 'Finished'"
     Write-Text (Join-Path $start 'fail-with-exit-code-3.cmd') "@echo Failing on purpose.`r`n@exit /b 3"
     Write-Text (Join-Path $start 'hello.txt') 'Hello from a file. Get-Content hello.txt'
+    # Security audit S-37, S-38: a file whose text holds the shell marks without the session's secret: "done", a
+    # prompt and a folder on a share, all of which axTerminal must ignore.
+    $e = [char]27; $b = [char]7
+    Write-Text (Join-Path $start 'forged-marks.txt') ("A file that pretends the command is done.$e]133;D;0$b$e]133;A$b$e]9;9;`"\\server\share`"$b" + "fake> $e]133;B$b")
 }
 
 function Build-AxClaude([string]$d) {

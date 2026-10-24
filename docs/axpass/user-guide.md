@@ -56,7 +56,9 @@ in a password field rather than in the notes.
 - Backups: before the first change after you unlock, axPass copies the database file into a folder beside it, called
   "mine backups" for mine.kdbx, named with the date and time. The newest 20 are kept. File, Back up now makes one
   whenever you like; File, Show backups in axFile opens the folder. To use one, open it with Ctrl+O and its master
-  password; each is the encrypted file itself.
+  password; each is the encrypted file itself. A backup keeps what the database held then, under the master password
+  it had then: after you change the master password, or delete an entry because it leaked, delete the older backups
+  too (File, Show backups in axFile).
 - Ctrl+M moves the entry to another group, chosen from a list; Ctrl+Z moves it back.
 - Ctrl+N makes a new entry here, Ctrl+Shift+N a new group. F2 renames an entry in place: type the new title over the old and press Enter, or Escape. A title cannot hold a slash.
 - Delete moves an entry to the Recycle Bin group; Ctrl+Z brings it back. A group moves there after a question, and

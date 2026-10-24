@@ -34,7 +34,7 @@ Angles are in degrees unless you choose Options, Angles, Radians.
 
 ## The history
 
-The newest line is at the bottom, so Up from the end reads back from the latest. In the history:
+The newest line is at the bottom, so Up from the end reads back from the latest. axCalc keeps the history and your variables between runs, in plain text in its settings file (`%APPDATA%\Axit\axcalc.json`); Calculator, Clear history empties it. In the history:
 
 - **Enter** puts the line's expression back in the field, to change it and press Enter again.
 - **Ctrl+Shift+C** copies the line's answer. In the field, it copies the last answer.

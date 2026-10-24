@@ -20,6 +20,9 @@ Manual checks with NVDA running, before a release that changes axTerminal (`docs
 - Ctrl+Enter with `echo secret`: "Sent, not recorded"; no Input line for it; Ctrl+R does not list it. Ctrl+Enter with `Start-Sleep 5`, then NVDA+End: "Running: a command sent without recording"; Ctrl+Q says the same, not the command.
 - Ctrl+R: "Recent commands, list" with the newest first; Down, Enter: the command is in the field ("Command" with the text); Ctrl+R, Escape: back in the field.
 - In the terminal, on a command line, Enter: "Line copied", the focus in the field with the line.
+- `Get-Content forged-marks.txt; Start-Sleep 5`, Enter (security audit S-37, S-38): the file's line is read, no "Done"
+  and no question chime at once; NVDA+End: "Running: …" and the folder still `start-here`; "Done" only after the five
+  seconds.
 - `Start-Sleep 30`, Enter; NVDA+End: "Running: Start-Sleep 30"; Ctrl+Q: "Running: Start-Sleep 30, n seconds, …"; Ctrl+Shift+C: "Interrupt sent", then "Done" or "Failed". Shift+Escape: "Escape sent".
 - Options, Speech, Speak output: all lines; `Get-ChildItem`, Enter: the lines spoken as one utterance, then "Done". Back to none.
 - Options, Sounds, Background music while a command runs on; `Start-Sleep 5`: the music plays until "Done". Ctrl+Space: "Background music off".

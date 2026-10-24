@@ -9,7 +9,15 @@
 - Recently closed: every app is in it, axCalc, axClip and axStart by name when they close, as axProcess was. axFile's Open in Axit no longer offers the apps that take no path.
 - Every window: the Show current folder in submenus name the apps as the bundle spells them, axGIT, axTerminal, axFile, axClaude, with the same letters.
 - axClaude, axFile: a clipboard another program holds is said the way every other window says it, "The clipboard could not be written", with the reason.
-- For developers: the inventory of copies, dead code and drift, `docs/axit/inventory-2026-10-24.md`, and its eleven cleanups: shared `CopyText`, `Dispatch.EditorOf`, `MarkdownKeys`, `User32`, `ListViewState`, the search field of `HotkeyForm`, the large windows in partial files, the notes against the code.
+- Updates: every release is now signed, and Axit installs an update only when its signature checks against the key built into it; install.cmd checks the same before it installs. A hijacked GitHub account could publish a release, but not one Axit installs.
+- axGIT: a repository that names programs of its own (hooks, a file monitor, diff programs) runs without them until you choose Trust this repository in the notice that says so. A repository copied from a zip or a USB stick can no longer run anything by being opened.
+- axPass: Ctrl+C puts the password on the clipboard marked private, so Windows clipboard history (Windows+V), the cloud clipboard and axClip keep no copy, and clears it after 30 seconds, on lock and on close. axPass locks when you lock Windows, switch user or the computer sleeps. Ctrl+U opens web addresses only. KeePassXC's tool is used from outside Program Files only when Windows finds it signed.
+- axTerminal: a program's output or a file you print can no longer fake "done", the prompt or the folder: only the marks of the shell's own prompt count.
+- axClip: a history kept between runs is encrypted so that only your Windows account can read it.
+- axTask: a link to a network folder or a file outside the lists is never opened; it reads as missing.
+- axFile: files taken out of a downloaded zip keep the mark Windows uses to warn about downloads, and Compress leaves links inside a folder out.
+- Every window: Copy diagnostics replaces your account's name, paths and e-mail addresses before you share it. Programs Axit starts (git, cmd, PowerShell, File Explorer) are found by their full path, never in the folder you opened. Names with hidden direction marks show them, so "invoice‮txt.exe" cannot pass for a text file.
+- For developers: the security audit, `docs/axit/security-audit-2026-10-24.md` (45 findings and what became of each), the release key and signing (`tools/release-key.ps1`, `tools/sign-release.ps1`, AX-3.4), the automation channel's run secret, and the specifications of MCP access (`docs/axit/mcp.md`) and the app kit (`docs/axit/app-kit.md`), not built yet.- For developers: the inventory of copies, dead code and drift, `docs/axit/inventory-2026-10-24.md`, and its eleven cleanups: shared `CopyText`, `Dispatch.EditorOf`, `MarkdownKeys`, `User32`, `ListViewState`, the search field of `HotkeyForm`, the large windows in partial files, the notes against the code.
 
 ## 3.6.0 - 2026-10-24
 
