@@ -26,14 +26,17 @@ public static class KeePassCli
     /// <summary>How long one command may take before it is ended: Argon2 with a large memory setting takes seconds.</summary>
     public const int TimeoutMs = 60_000;
 
-    /// <summary>The tool: the path the user set, KeePassXC's install folder, or the PATH; null when it is nowhere.</summary>
-    public static string? Find(string? setPath)
-    {
-        if (!string.IsNullOrWhiteSpace(setPath) && File.Exists(setPath))
-        {
-            return setPath;
-        }
+    /// <summary>
+    /// The tool the master password is handed to (security audit S-19): KeePassXC's install folder first, which only an
+    /// administrator can write; then the path the user set, then the PATH, each only when Windows finds the file
+    /// signed by a publisher it trusts, since a folder the user can write could hold a planted program that would
+    /// receive the password. Null when there is none.
+    /// </summary>
+    public static string? Find(string? setPath) => Find(setPath, Signatures.IsTrusted);
 
+    /// <summary>The same with the signature check given, for the tests.</summary>
+    public static string? Find(string? setPath, Func<string, bool> trusted)
+    {
         foreach (var folder in new[] { Environment.SpecialFolder.ProgramFiles, Environment.SpecialFolder.ProgramFilesX86 })
         {
             var path = Path.Combine(Environment.GetFolderPath(folder), "KeePassXC", ExeName);
@@ -43,7 +46,12 @@ public static class KeePassCli
             }
         }
 
-        return SystemPrograms.OnPath(ExeName);
+        if (!string.IsNullOrWhiteSpace(setPath) && File.Exists(setPath) && trusted(setPath))
+        {
+            return setPath;
+        }
+
+        return SystemPrograms.OnPath(ExeName) is { } onPath && trusted(onPath) ? onPath : null;
     }
 
     /// <summary>
@@ -132,5 +140,12 @@ public static class KeePassCli
 
     /// <summary>The arguments of a command on a database: the command, -q (so that the password prompt goes nowhere), the options, the database, the rest.</summary>
     public static IReadOnlyList<string> On(string command, string database, IEnumerable<string>? options = null, params string[] rest) =>
-        [command, "-q", .. options ?? [], database, .. rest];
+        [command, "-q", .. options ?? [], database, .. rest.Select(AsPath)];
+
+    /// <summary>
+    /// An entry's or a group's path as the tool reads it: one that starts with "-" (a name in a shared database such
+    /// as <c>--key-file=\\server\k</c>) gets the root's "/" in front, so that the tool never reads it as an option
+    /// (security audit S-6).
+    /// </summary>
+    public static string AsPath(string path) => path.StartsWith('-') ? "/" + path : path;
 }

@@ -17,6 +17,25 @@ public static class EntryFields
     public const string Url = "URL";
     public const string Notes = "Notes";
 
+    /// <summary>
+    /// The web address Ctrl+U opens for an entry's URL (security audit S-4): an http or https address as it is, a bare
+    /// name with a dot ("example.com/login") with https in front, anything else (a file, a share, another scheme)
+    /// null, never opened.
+    /// </summary>
+    public static string? WebAddress(string url)
+    {
+        var text = url.Trim();
+        if (Uri.TryCreate(text, UriKind.Absolute, out var absolute))
+        {
+            return absolute.Scheme is "http" or "https" && !absolute.IsUnc ? absolute.AbsoluteUri : null;
+        }
+
+        return !text.StartsWith('\\') && !text.StartsWith('/') && text.Contains('.') && !text.Contains(' ')
+            && Uri.TryCreate("https://" + text, UriKind.Absolute, out var web) && web.Host.Contains('.')
+            ? web.AbsoluteUri
+            : null;
+    }
+
     /// <summary>The attributes <c>show</c> prints that are not fields of the entry.</summary>
     private static readonly string[] Bookkeeping = ["Uuid", "Tags"];
 

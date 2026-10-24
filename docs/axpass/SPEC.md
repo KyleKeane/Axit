@@ -44,7 +44,7 @@ forgets the master password and shows only the notice that asks for it.
   file picker (File, Open, Ctrl+O). A new database is File, New: a file name, then the master password twice.
 - **PW-4.2** The master password is asked in a notice whose field hides what is typed (the shared `OverlayInput`
   gains a hidden form for it). A wrong password says "The password does not open mine" and asks again.
-- **PW-4.3** Lock (Ctrl+L, and after ten minutes without a key, a setting): the panes are cleared, the password
+- **PW-4.3** Lock (Ctrl+L, after ten minutes without a key, a setting, and at once when Windows locks, the user switches or disconnects, or the computer sleeps, security audit S-18): the panes are cleared, the password
   dropped, the unlock notice shown. Closing the window locks it.
 - **PW-4.4** axPass never keeps a copy of the database or of any entry on disk but the backups of PW-4.5, which are
   the encrypted file itself.
@@ -56,16 +56,21 @@ forgets the master password and shows only the notice that asks for it.
 
 ## 5. The engine (PW-D1)
 
-- **PW-5.1** `keepassxc-cli.exe`, found in KeePassXC's install folder, on the PATH, or at a path the user sets
-  (Options). Without it, the notice "KeePassXC is not installed" names its download page and the command that
+- **PW-5.1** `keepassxc-cli.exe`, found in KeePassXC's install folder first (Program Files, which only an administrator can write), then at a path the user sets (Options) or on the PATH, those two only when Windows finds the file signed by a publisher it trusts (`Axit.Core/Signatures`; security audit S-19: a program planted where the user can write would receive the master password).
+  Without it, the notice "KeePassXC is not installed" names its download page and the command that
   installs it (`winget install KeePassXCTeam.KeePassXC`).
 - **PW-5.2** One process per command, the database's path and the entry's path as arguments, the master password as
   the first line of standard input, `-q` so the prompt goes nowhere (read from the tool's source, kdbx-notes 7). The
   commands: `ls -R -f` for the groups and entries, `show` (without `-s`, so the password stays hidden) for an entry's
   fields, `clip` for the copies, `add`, `edit`, `mkdir`, `mv`, `rm`, `generate`, `db-create`.
 - **PW-5.3** Every command runs off the UI thread (bundle rule 3); the panes say "Reading mine…" while the list is read.
-- **PW-5.4** A copy is `clip <entry> 30` with `-a UserName` or the password: KeePassXC puts it on the clipboard and
-  clears it itself after 30 seconds, so axPass never holds the password to copy it.
+- **PW-5.4** A copy of the password (Ctrl+C) reads that one password from the tool at the moment of the key
+  (`show -s -a Password <entry>`) and puts it on the clipboard marked private (`Axit.Forms/PrivateClipboard`: the
+  formats password managers set, so that Windows clipboard history, the cloud clipboard and axClip keep no copy), then
+  clears it after 30 seconds, when the window locks and when it closes, unless something else was copied meanwhile
+  (the clipboard's sequence number, never a second read of the password). The user name (Ctrl+B) goes the same way,
+  without the clearing. Until 2026-10-24 the tool's own `clip` copied it, which on Windows sets none of those marks
+  (security audit S-15, the user's decision).
 
 ## 6. axPass's part of the shared shape
 
@@ -114,10 +119,13 @@ On top of IA-3, in `AxPassKeys`:
   The cost: KeePassXC must be installed, with the Visual C++ runtime its installer brings (kdbx-notes 7).
 - **PW-D2 The master password lives in the window's memory while unlocked**, as a .NET string, which cannot be wiped
   on demand; it goes when the window locks or closes and the garbage collector runs. Said plainly here rather than
-  promised away. It reaches the tool through a pipe, never a command line, a file or an environment variable.
+  promised away. It reaches the tool through a pipe, never a command line, a file or an environment variable. An
+  entry's own password is read only for the moment of a copy (PW-5.4); notes, URL, user name and title, when saved,
+  reach the tool as command-line arguments, which the tool has no other way to take, and which another program of the
+  user's or the system's process auditing can see (security audit S-16): the user guide says so.
 - **PW-D3 KeePass's standard fields only, in the first version**: the tool has no command that changes a custom
   attribute (its manual, kdbx-notes 6), and axPass never edits the file itself.
-- **PW-D4 The clipboard is cleared by the tool** (`clip` with a timeout), not by axPass.
+- **PW-D4 The clipboard is axPass's, marked private** (2026-10-24, replacing "the clipboard is cleared by the tool"): a copied password is in axPass's memory for the moment of the copy only, never for the session, and is cleared by axPass (PW-5.4).
 
 ## 9. Open questions, to settle by running the tool
 
