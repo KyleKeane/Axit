@@ -148,7 +148,21 @@ public sealed partial class PassForm : ItemForm
         Microsoft.Win32.SystemEvents.PowerModeChanged += OnPowerModeChanged;
         if (ToolPath() is null)
         {
-            ShowError("KeePassXC is not installed", "axPass reads and writes KeePass databases through KeePassXC's command-line tool, which comes with KeePassXC.\r\n\r\nInstall KeePassXC from https://keepassxc.org/, or in a console: winget install KeePassXCTeam.KeePassXC\r\n\r\nThen start axPass again. If KeePassXC is installed somewhere else, Options, KeePassXC's tool tells axPass where.");
+            ShowNotice(new Notice("KeePassXC is not installed", "axPass reads and writes KeePass databases through KeePassXC's command-line tool, which comes with KeePassXC.\r\n\r\nInstall it now installs KeePassXC (Windows asks whether the installer may make changes: choose Yes); axPass then asks for the master password. Or install it by hand from keepassxc.org. If KeePassXC is installed somewhere else, Options, KeePassXC's tool tells axPass where.",
+            [
+                new OverlayChoice("&Install KeePassXC now", () => InstallProgram(ProgramInstall.KeePassXC, () => ToolPath() is not null, () =>
+                {
+                    if (_database is not null)
+                    {
+                        ShowUnlock(null);
+                    }
+                })),
+                new OverlayChoice("&Open keepassxc.org", () => OpenUrl(ProgramInstall.KeePassXC.Page), StaysOpen: true),
+                OverlayChoice.Close,
+            ])
+            {
+                Unprompted = true,
+            });
         }
         else if (_database is not null)
         {

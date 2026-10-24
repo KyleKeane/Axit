@@ -32,6 +32,15 @@ Automated in `tests/scripts/mcp` (the runner as the client); by ear with NVDA, i
 - A pairing while another notice is open shows nothing and the client hears "ask again".
 - Forget AI tools: "AI tools forgotten"; the next call asks again.
 
+## Owed: Install it now (3.7.0, `docs/axit/SPEC.md` AX-2.9, after the review of 2026-10-24)
+
+- axGIT without Git, axPass without KeePassXC, axClaude without Claude Code: the notice's last line says "Enter:
+  Close" and Enter closes; Tab to Install it now and Enter installs, the progress notice reads, and the app goes on.
+- During an install, Escape hides the progress notice; open another notice (F1): the install's end does not close it,
+  and a failure is said, not shown over it; Install it now again says it is being installed already.
+- axTerminal: Session, Switch shell opens at once and lists only the shells there; after Install PowerShell 7 it
+  lists it.
+
 ## Owed: merged to main on 2026-10-24 before their pass (the branch `calc-clip`)
 
 Merged at the user's word ahead of the rule, so that main holds them; no release until these have passed.

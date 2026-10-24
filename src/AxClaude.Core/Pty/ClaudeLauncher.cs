@@ -9,10 +9,10 @@ namespace AxClaude.Core.Pty;
 /// <summary>Finds the Claude Code executable and builds the command line and environment for it.</summary>
 public static class ClaudeLauncher
 {
-    /// <summary>The native Windows installer, as documented at <see cref="InstallUrl"/>.</summary>
-    public const string InstallCommand = "irm https://claude.ai/install.ps1 | iex";
+    /// <summary>The native Windows installer, as documented at <see cref="InstallUrl"/>; one source with the Install Claude Code now button (<c>ProgramInstall.ClaudeCode</c>).</summary>
+    public static string InstallCommand => ProgramInstall.ClaudeCode.PowerShellCommand!;
 
-    public const string InstallUrl = "https://code.claude.com/docs/en/setup";
+    public static string InstallUrl => ProgramInstall.ClaudeCode.Page;
 
     /// <summary>
     /// The places searched for Claude Code, in order (FR-1.2): the explicit path when one is given, otherwise

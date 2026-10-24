@@ -28,13 +28,22 @@ internal sealed partial class TerminalForm
         }
 
         switchShell.DropDownItems.Add(new ToolStripMenuItem("C&ustom...", null, (_, _) => NewSession()));
-        // The shell in use checked as the menu opens; the palette refreshes it the same way (AX-10.2).
+        // AT-1.2a: a shell Windows does not have is not offered; its installer is, from its maker, through winget.
+        var installPwsh = new ToolStripMenuItem("Install &PowerShell 7...", null, (_, _) => InstallShell(ProgramInstall.PowerShell7, ShellKind.PowerShell7));
+        var installBash = new ToolStripMenuItem("Install Git, for Git &Bash...", null, (_, _) => InstallShell(ProgramInstall.Git, ShellKind.GitBash));
+        switchShell.DropDownItems.Add(installPwsh);
+        switchShell.DropDownItems.Add(installBash);
+        // The shell in use checked and the shells there (looked up once, ShellThere) shown as the menu opens; the palette refreshes it the same way (AX-10.2).
         CommandPalette.RefreshedOnOpening(switchShell, () =>
         {
             foreach (var (kind, item) in _shellItems)
             {
                 item.Checked = kind == _shell;
+                item.Visible = ShellThere(kind);
             }
+
+            installPwsh.Visible = !ShellThere(ShellKind.PowerShell7);
+            installBash.Visible = !ShellThere(ShellKind.GitBash);
         });
         session.DropDownItems.Add(switchShell);
         session.DropDownItems.Add(new ToolStripSeparator());

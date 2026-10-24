@@ -23,7 +23,7 @@ public static class HelpText
           Ctrl+F: find text in the terminal. F3 and Shift+F3: next or previous match
           Ctrl+S: export the transcript as a Markdown file
           Ctrl+W: show the current folder in File Explorer
-          Ctrl+N: new session: choose the folder and the shell (PowerShell 7, Windows PowerShell, Command Prompt, Git Bash, or a custom command line); Session, Switch shell changes the shell in the same folder and keeps the text
+          Ctrl+N: new session: choose the folder and the shell (Windows PowerShell, Command Prompt, PowerShell 7 and Git Bash when they are installed, or a custom command line; Switch shell offers to install the two that are not); Session, Switch shell changes the shell in the same folder and keeps the text
           Ctrl+Shift+R: restart the shell in its current folder, after a confirmation while a command runs
           Ctrl+L: clear the transcript (the shell's own cls clears only its screen)
           Ctrl+Alt and a letter from the Terminal list below: read every line of that kind from the caret to the end of the terminal in one go, without moving; Ctrl+Alt+P reads the paragraphs whole. Control stops NVDA

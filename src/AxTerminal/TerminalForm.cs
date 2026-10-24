@@ -24,6 +24,20 @@ internal sealed partial class TerminalForm : ConsoleForm
     private readonly List<(OutputSpeechMode Mode, ToolStripMenuItem Item)> _speechItems = [];
     private readonly List<(ShellKind Kind, ToolStripMenuItem Item)> _shellItems = [];
 
+    /// <summary>
+    /// The shells this computer has (AT-1.2a), looked up once off the window's thread as it starts and again after an
+    /// install: the menus read this and never search the PATH as they open, since a network folder on it could hold
+    /// them for the network's timeout (2026-10-24 review). Empty until the first look ends: every shell shown meanwhile.
+    /// </summary>
+    private volatile IReadOnlySet<ShellKind>? _shellsThere;
+
+    /// <summary>Whether the shell is there, as last looked up; true before the first look has ended.</summary>
+    private bool ShellThere(ShellKind kind) => _shellsThere is not { } there || there.Contains(kind);
+
+    /// <summary>Looks the shells up again, off the window's thread.</summary>
+    private void LookUpShells() =>
+        Task.Run(() => _shellsThere = Enum.GetValues<ShellKind>().Where(kind => kind != ShellKind.Custom && ShellLauncher.Find(kind) is not null).ToHashSet());
+
     /// <summary>The Speak output choices of Options → Speech in menu order (AT-5.3); the text without its mnemonic is what the choice announces.</summary>
     private static readonly (OutputSpeechMode Mode, string Text)[] SpeechChoices =
     [
@@ -60,6 +74,7 @@ internal sealed partial class TerminalForm : ConsoleForm
         _folder = folder ?? (settings.LastFolder is { } last && Directory.Exists(last) ? last : Environment.CurrentDirectory);
         _shell = settings.ShellKind;
         _customShell = settings.CustomShell;
+        LookUpShells();
         _model.Ready += OnReady;
         _model.CommandFinished += OnCommandFinished;
         _asks.Tick += (_, _) => CheckForQuestion();

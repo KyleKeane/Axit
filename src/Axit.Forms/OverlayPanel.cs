@@ -346,12 +346,14 @@ public sealed class OverlayPanel : Panel
             };
             button.Click += (_, _) => Choose(choice);
             _buttons.Controls.Add(button);
-            if (choice.IsDefault)
+            // The first default and the first cancel, the ones the key line names (WithKeyLine): a second default (a Close
+            // after Install it now) would make Enter press a button the spoken line did not name (2026-10-24 review).
+            if (choice.IsDefault && DefaultButton is null)
             {
                 DefaultButton = button;
             }
 
-            if (choice.IsCancel)
+            if (choice.IsCancel && CancelButton is null)
             {
                 CancelButton = button;
             }

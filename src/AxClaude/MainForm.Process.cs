@@ -117,11 +117,45 @@ internal sealed partial class MainForm
         UpdateStatus();
     }
 
+    /// <summary>
+    /// After Install Claude Code now (bundle AX-2.9): Claude where starting looks for it (the path set, or the usual
+    /// places), or, when a path set no longer exists, where the installer puts it; that stale path is then cleared, so
+    /// that the next start finds the new one (2026-10-24 review).
+    /// </summary>
+    private bool ClaudeInstalled()
+    {
+        var configured = _options.ClaudePath ?? _settings.ClaudePath;
+        if (ClaudeLauncher.Find(configured) is not null)
+        {
+            return true;
+        }
+
+        if (configured is null || ClaudeLauncher.Find(null) is null)
+        {
+            return false;
+        }
+
+        _options = _options with { ClaudePath = null };
+        _settings.ClaudePath = null;
+        SaveSettings();
+        return true;
+    }
+
+    /// <summary>Claude started once installed, unless one was started meanwhile (Ctrl+Shift+R while the install ran): never a second over the first.</summary>
+    private void StartClaudeAfterInstall()
+    {
+        if (!ProcessRunning)
+        {
+            StartClaude();
+        }
+    }
+
     /// <summary>FR-1.9: where the app looked, the install command with a button that copies it, the install page, and Locate claude.exe.</summary>
     private void ShowClaudeNotFound(IReadOnlyList<string> candidates)
     {
         ShowNotice(new Notice("Claude Code was not found", HelpText.ClaudeNotFound(candidates),
         [
+            new OverlayChoice("&Install Claude Code now", () => InstallProgram(ProgramInstall.ClaudeCode, ClaudeInstalled, StartClaudeAfterInstall)),
             new OverlayChoice("Copy install &command", () =>
             {
                 CopyText(ClaudeLauncher.InstallCommand, "Copied. Paste it into PowerShell");

@@ -79,9 +79,16 @@ public sealed partial class GitForm
         SetGitItems(false);
         UpdateStatusBar();
         ShowNotice(new Notice("Git was not found",
-            "axGIT runs the git program, and it is not on the PATH of this computer. Install Git for Windows from git-scm.com, then start axGIT again.",
+            "axGIT runs the git program, and it is not on this computer: neither on the PATH nor in Program Files. Install it now installs Git for Windows (Windows asks whether the installer may make changes: choose Yes); axGIT then opens the repository. Or install it by hand from git-scm.com.",
         [
-            new OverlayChoice("&Open git-scm.com", () => OpenUrl("https://git-scm.com"), StaysOpen: true),
+            // AG-1.5a: installed, then found the way every git command finds it (GitRunner.Program).
+            new OverlayChoice("&Install Git now", () => InstallProgram(ProgramInstall.Git, () => File.Exists(GitRunner.Program), () =>
+            {
+                _gitMissing = false;
+                SetGitItems(true);
+                Do(() => StartAsync(_root ?? _startPath));
+            })),
+            new OverlayChoice("&Open git-scm.com", () => OpenUrl(ProgramInstall.Git.Page), StaysOpen: true),
             OverlayChoice.Close,
         ])
         {

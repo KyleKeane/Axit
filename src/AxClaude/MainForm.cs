@@ -19,7 +19,8 @@ internal sealed partial class MainForm : ConsoleForm
     /// <summary>Spoken for Ctrl+O, which the app does not pass on (D14).</summary>
     private const string CtrlOGuardText = "Ctrl+O is off. For tool output, start with --verbose";
 
-    private readonly StartupOptions _options;
+    /// <summary>The command line's options; its Claude path is cleared when it no longer exists and an install put Claude in its own place.</summary>
+    private StartupOptions _options;
     private readonly AppSettings _settings;
     private readonly SessionModel _model;
 
