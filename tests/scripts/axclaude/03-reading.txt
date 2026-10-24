@@ -23,7 +23,9 @@ keys down
 wait 300
 said
 refuse said ·
-expect said Done
+# The reply done: the status bar's state, not the "Done" announcement, which a fast reply can say before the reads
+# above and their "said" takes (2026-10-24: haiku answered within 3 s and the step waited 60 s for a "Done" gone).
+expect state Claude: ready
 # Step 3: after "Done", Ctrl+3: the newest output marker, focus in the conversation; Ctrl+1 and Ctrl+3 again: the same
 # line; Down: the blank line, then the first line of the reply.
 keys ctrl+3
