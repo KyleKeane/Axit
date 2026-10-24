@@ -6,14 +6,21 @@ on:
     branches: ['**']
   pull_request:
 
+# Read only: a build never writes to the repository (docs/axit/security-audit-2026-10-24.md S-33).
+permissions:
+  contents: read
+
 jobs:
   test:
     runs-on: windows-2025
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
       # The SDK band is global.json's, the one place it is set (docs/axit/longevity.md).
       - uses: actions/setup-dotnet@a98b56852c35b8e3190ac28c8c2271da59106c68 # v6.0.0
         with:
           global-json-file: global.json
       - name: Build and test
-        run: dotnet test Axit.sln --configuration Release --nologo
+        # ContinuousIntegrationBuild: deterministic paths; the test packages restore exactly as their lock files say (S-34).
+        run: dotnet test Axit.sln --configuration Release --nologo -p:ContinuousIntegrationBuild=true

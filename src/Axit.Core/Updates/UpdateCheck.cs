@@ -5,7 +5,14 @@ using System.Text.Json;
 namespace Axit.Core.Updates;
 
 /// <summary>A published release of the app on GitHub (FR-1.10): its version, its notes and where its zip is.</summary>
-public sealed record ReleaseInfo(Version Version, string Tag, string Notes, string PageUrl, string? ZipUrl, long ZipSize);
+public sealed record ReleaseInfo(Version Version, string Tag, string Notes, string PageUrl, string? ZipUrl, long ZipSize)
+{
+    /// <summary>The zip's SHA-256 as GitHub recorded it on upload ("sha256:…"), when GitHub gives it.</summary>
+    public string? ZipDigest { get; init; }
+
+    /// <summary>The zip's signature file, "&lt;zip&gt;.sig" (AX-3.4); a release without one is never installed.</summary>
+    public string? SignatureUrl { get; init; }
+}
 
 /// <summary>
 /// Finds out whether a newer Axit has been released (FR-1.10, D25). A release is a GitHub release of the
@@ -24,6 +31,9 @@ public static class UpdateCheck
 
     public static string ReleasesPage => $"https://github.com/{Repository}/releases";
     public static string LatestReleaseApi => $"https://api.github.com/repos/{Repository}/releases/latest";
+
+    /// <summary>Where every file of this repository's releases is downloaded from; an asset elsewhere is ignored (S-27).</summary>
+    public static string DownloadPrefix => $"https://github.com/{Repository}/releases/download/";
 
     /// <summary>
     /// The version in a tag or version string: <c>v1.2.3</c>, <c>1.2.3</c> and <c>1.2.3.0</c> all give 1.2.3, <c>1.2</c>
@@ -67,22 +77,38 @@ public static class UpdateCheck
             }
 
             string? zipUrl = null;
+            string? zipName = null;
+            string? zipDigest = null;
             long zipSize = 0;
+            var urls = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
             if (root.TryGetProperty("assets", out var assets) && assets.ValueKind == JsonValueKind.Array)
             {
                 foreach (var asset in assets.EnumerateArray())
                 {
-                    if (GetString(asset, "name") is { } name && name.EndsWith(ZipSuffix, StringComparison.OrdinalIgnoreCase))
+                    // AX-3.4 (security audit S-27): only a file of this repository's releases, never an address
+                    // elsewhere that an answer could name.
+                    if (GetString(asset, "name") is not { } name || GetString(asset, "browser_download_url") is not { } url || !url.StartsWith(DownloadPrefix, StringComparison.Ordinal))
                     {
-                        zipUrl = GetString(asset, "browser_download_url");
+                        continue;
+                    }
+
+                    urls[name] = url;
+                    if (zipUrl is null && name.EndsWith(ZipSuffix, StringComparison.OrdinalIgnoreCase))
+                    {
+                        zipUrl = url;
+                        zipName = name;
+                        zipDigest = GetString(asset, "digest");
                         zipSize = asset.TryGetProperty("size", out var size) && size.ValueKind == JsonValueKind.Number ? size.GetInt64() : 0;
-                        break;
                     }
                 }
             }
 
             var notes = (GetString(root, "body") ?? string.Empty).Replace("\r\n", "\n").Trim();
-            return new ReleaseInfo(version, tag, notes, GetString(root, "html_url") ?? ReleasesPage, zipUrl, zipSize);
+            return new ReleaseInfo(version, tag, notes, GetString(root, "html_url") ?? ReleasesPage, zipUrl, zipSize)
+            {
+                ZipDigest = zipDigest,
+                SignatureUrl = zipName is not null && urls.TryGetValue(zipName + ReleaseSigning.SignatureSuffix, out var signature) ? signature : null,
+            };
         }
         catch (JsonException)
         {

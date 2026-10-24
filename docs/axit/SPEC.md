@@ -214,7 +214,16 @@ The apps are named ax and a word, the ax in lower case and the word as it is wri
 - AX-3.3 The 1.7.0 bridge (B-6): axClaude 1.7.0 accepts a download whose program file is not `AxClaude.exe`, so an
   installed axClaude updates into Axit through Help, Update now. The first Axit release is 2.0.0.
 - AX-3.4 The update check and the version comparison are pure code in `Axit.Core/Updates/UpdateCheck`, unit tested;
-  the download and the hand-over are `Axit.Core/Updates/Updater`.
+  the download and the hand-over are `Axit.Core/Updates/Updater`. **Signed releases** (2026-10-24, the user's
+  decision; security audit S-27 to S-31): every release's zip is signed with the release key, an ECDSA P-256 key that
+  lives only on the maintainer's machine, encrypted for its Windows account (`tools/release-key.ps1`), never on
+  GitHub. The release workflow leaves a draft (a build job that can only read, then a job that uploads and attests
+  the build's provenance); `release.ps1` then runs `tools/sign-release.ps1`, which checks the provenance, signs the
+  zip's SHA-256, uploads `<zip>.sig` and publishes. The updater takes assets only from this repository's releases
+  address, downloads afresh every time, and extracts nothing unless the zip matches GitHub's recorded checksum and its
+  signature checks against the public half in `Axit.Core/Updates/ReleaseSigning`; `install.cmd` alone does the same
+  check in Windows PowerShell, into a folder of a random name. A release without a signature is never installed by
+  the apps. Losing the key means one release installed by hand with a new key's public half in it.
 
 ### AX-4 Releases
 
