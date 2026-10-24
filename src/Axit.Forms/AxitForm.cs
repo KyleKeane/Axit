@@ -219,6 +219,49 @@ public abstract partial class AxitForm : Form
         return help;
     }
 
+    /// <summary>
+    /// Shift+F10, the Applications key and a right click (docs/axfile/SPEC.md AF-D13; from axFile on its second use,
+    /// axProcess, 2026-10-24): the menu bar's menu with the mnemonic <paramref name="letter"/>, opened as Alt and the
+    /// letter open it, so that NVDA reads its first item; a context menu of its own never read its first item the first
+    /// time it opened, however it was shown (2026-10-23). It waits until the keys that asked are up: F10 is itself the
+    /// menu key, and with Shift down the letter is Shift and the letter; sent while they were held, Windows only beeped.
+    /// </summary>
+    protected void OpenBarMenu(char letter)
+    {
+        var waited = 0;
+        var timer = new System.Windows.Forms.Timer { Interval = 20 };
+        timer.Tick += (_, _) =>
+        {
+            waited += timer.Interval;
+            if (IsDown(VK_SHIFT) || IsDown(VK_F10) || IsDown(VK_APPS))
+            {
+                if (waited < 3000)
+                {
+                    return;
+                }
+            }
+
+            timer.Dispose();
+            // Alt, then the letter, as the user would press them: the bar in menu mode, then the menu's letter, which
+            // opens it from the keyboard with its first item read. A mnemonic in the Alt message itself opened the first menu.
+            PostMessage(Handle, WM_SYSCOMMAND, SC_KEYMENU, 0);
+            PostMessage(Handle, WM_KEYDOWN, char.ToUpperInvariant(letter), 0);
+            PostMessage(Handle, WM_KEYUP, char.ToUpperInvariant(letter), unchecked((nint)0xC0000001));
+        };
+        timer.Start();
+    }
+
+    private static bool IsDown(int key) => (GetAsyncKeyState(key) & 0x8000) != 0;
+
+    private const int WM_KEYDOWN = 0x0100;
+    private const int WM_KEYUP = 0x0101;
+    private const int VK_SHIFT = 0x10;
+    private const int VK_F10 = 0x79;
+    private const int VK_APPS = 0x5D;
+
+    [System.Runtime.InteropServices.DllImport("user32.dll")]
+    private static extern bool PostMessage(nint window, int message, nint wParam, nint lParam);
+
     // ---- the window ----
 
     /// <summary>The first showing: a settings file that could not be read is reported, then the update check runs when the setting says (AX-3.1).</summary>
