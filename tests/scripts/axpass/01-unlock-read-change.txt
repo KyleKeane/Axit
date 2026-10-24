@@ -27,6 +27,10 @@ keys enter
 expect said ! test, 3 items, Email, group, 1 item
 expect state test - axPass
 
+# F5 reads the database again through the tool, as File → Refresh does (item-apps.md), and says so.
+keys f5
+expect said ! Refreshed: test, 3 items
+
 # 2.1 Right into Email; Right on an entry: the edge sound; Left back.
 keys right
 expect said ! Email, 1 item, Gmail

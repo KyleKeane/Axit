@@ -63,7 +63,9 @@ public sealed partial class PassForm : ItemForm
         Add(file, new Command("&Lock", AxPassKeys.Lock, Lock) { When = NotRenaming });
         file.DropDownItems.Add(new ToolStripMenuItem("&Back up now", null, (_, _) => Do(BackUpNowAsync)));
         file.DropDownItems.Add(new ToolStripMenuItem("Show backups in ax&File", null, (_, _) => ShowBackups()));
-        file.DropDownItems.Add(Item("&Refresh", () => Do(ReloadAsync), ItemKeys.Refresh));
+        // F5 and the item read the database again (item-apps.md: "read the folder again"); until 2026-10-24 the key
+        // was ItemForm's and only filled the navigator again from the tree already read.
+        Add(file, new Command("&Refresh", ItemKeys.Refresh, () => Do(RefreshDatabaseAsync)) { When = NotRenaming, Mark = CommandMark.Read });
         file.DropDownItems.Add(Item("&Undo", Undo, ItemKeys.Undo));
         file.DropDownItems.Add(new ToolStripSeparator());
         file.DropDownItems.Add(CreateExitItem());
@@ -456,6 +458,17 @@ public sealed partial class PassForm : ItemForm
 
     /// <summary>The whole list read again from the database (F5, and after a change), the selection on <paramref name="select"/>.</summary>
     private async Task ReloadAsync() => await ReloadAsync(SelectedKey());
+
+    /// <summary>F5 and File → Refresh: the database read again, the selection kept, and said.</summary>
+    private async Task RefreshDatabaseAsync()
+    {
+        var before = _tree;
+        await ReloadAsync();
+        if (!ReferenceEquals(before, _tree))
+        {
+            Announce("Refreshed: " + Navigator.AccessibleName, true);
+        }
+    }
 
     private async Task ReloadAsync(string? select)
     {
