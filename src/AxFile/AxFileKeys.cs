@@ -2,7 +2,7 @@ namespace AxFile;
 
 /// <summary>
 /// axFile's window-specific keys (SPEC.md AF-6.2; bundle AX-8). A key is changed here and nowhere else: the menu
-/// items, the key switch in <c>FileForm.ProcessWindowKey</c> and the F1 text read this table. The bundle-wide keys
+/// items, the window's command list (<c>FileForm</c>, app-kit AK-2) and the F1 text read this table. The bundle-wide keys
 /// (F1, the control keys, find, Ctrl+S, text size) are <c>Axit.Forms.BundleKeys</c>. Enter, Backspace, Space, F2,
 /// Delete, Ctrl+X, Ctrl+C, Ctrl+V, Ctrl+A, Ctrl+Shift+A, Shift+F10 and the Applications key act in the folder list
 /// only; in the Actions list Enter, Ctrl+Z, Ctrl+I and Escape act on its line; in a notice's field or the rename box
