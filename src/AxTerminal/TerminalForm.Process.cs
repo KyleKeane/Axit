@@ -17,7 +17,10 @@ internal sealed partial class TerminalForm
         }
 
         _model.ContinuationPrompt = ShellLauncher.ContinuationPrompt(_shell);
-        var commandLine = ShellLauncher.BuildCommandLine(_shell, _customShell);
+        // S-37: a new secret for this start; the model takes only marks that carry it (a custom shell prints none).
+        var nonce = ShellLauncher.NewNonce();
+        _model.MarkNonce = _shell == ShellKind.Custom ? null : nonce;
+        var commandLine = ShellLauncher.BuildCommandLine(_shell, _customShell, nonce);
         if (commandLine is null)
         {
             Fail(_shell == ShellKind.Custom
@@ -26,7 +29,7 @@ internal sealed partial class TerminalForm
             return;
         }
 
-        if (!StartProcess(new PtyOptions(commandLine, _folder, _model.Columns, _model.Rows, ShellLauncher.BuildEnvironment(_shell)), "The shell"))
+        if (!StartProcess(new PtyOptions(commandLine, _folder, _model.Columns, _model.Rows, ShellLauncher.BuildEnvironment(_shell, nonce)), "The shell"))
         {
             return;
         }

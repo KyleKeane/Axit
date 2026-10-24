@@ -74,7 +74,11 @@ out of scope; programs that print and ask are in. It works entirely offline (bun
   which switch git's and the GitHub CLI's pager off (AT-D7); nothing is taken out of the environment.
 - AT-1.3 **Integration marks.** The window asks the shell to mark its prompt the way Windows Terminal's shell
   integration does (OSC 133 `A` the prompt starts, `B` the prompt ends and the command begins, `D;<exit code>` the
-  previous command finished; OSC 9;9 the current directory), without touching the user's profile: PowerShell starts
+  previous command finished; OSC 9;9 the current directory), without touching the user's profile. Every mark ends in
+  `;axit=<secret>`, a random secret made for each start of the shell (`ShellLauncher.NewNonce`, the model's
+  `MarkNonce`): a mark without it, printed by a program or found in a file's text, is ignored, and the directory
+  counts only right after the prompt's own A mark and only for a folder on this computer (security audit S-37, S-38;
+  VS Code's terminal does the same with its own marks). The shells are started so: PowerShell starts
   with `-NoLogo -NoExit -EncodedCommand` and a snippet that runs after the profile, keeps the user's `prompt` function and wraps its
   text in the marks (the shape Windows Terminal documents for oh-my-posh), written with `[char]27` so that Windows
   PowerShell takes it too, and sets `$ProgressPreference` to `SilentlyContinue`, since a progress bar drawn over the

@@ -1,3 +1,4 @@
+using Axit.Core;
 using Axit.Core.Transcript;
 
 namespace AxTerminal.Core;
@@ -38,6 +39,16 @@ public sealed class TerminalModel : LineStore
 
     /// <summary>The code the last D mark carried, for the A mark that follows it.</summary>
     private string? _lastCode;
+
+    /// <summary>Set by an A mark that carried the secret: the 9;9 right after it is the shell's own (S-38).</summary>
+    private bool _directoryExpected;
+
+    /// <summary>
+    /// The session's secret (security audit S-37): set, every mark must end in <c>;axit=&lt;secret&gt;</c>, as the
+    /// shell's own prompt prints it (<see cref="ShellLauncher.NewNonce"/>); null for a custom shell and for the recorded
+    /// fixtures, whose marks are taken as they come.
+    /// </summary>
+    public string? MarkNonce { get; set; }
 
     public TerminalModel(int columns, int rows)
         : base(columns, rows)
@@ -233,7 +244,7 @@ public sealed class TerminalModel : LineStore
     {
         var screen = NewScreen();
         screen.Mark += OnMark;
-        screen.DirectoryChanged += d => Directory = d;
+        screen.DirectoryChanged += OnDirectory;
         screen.Homed += LetRowsGo;
         screen.Cleared += LetRowsGo;
     }
@@ -263,8 +274,28 @@ public sealed class TerminalModel : LineStore
     /// is printed on it, so that the row is found again by identity whatever scrolls in between). B closes the prompt:
     /// the rows from that line's row to the cursor row are hidden and their text becomes <see cref="Prompt"/>.
     /// </summary>
-    private void OnMark(char letter, string? code)
+    private void OnMark(char letter, string? rest)
     {
+        // S-37: with a secret set, only a mark the shell's own prompt printed counts; a program's output or a file's
+        // text that prints a mark cannot know the secret, and is left as it is.
+        string? code;
+        if (MarkNonce is { } nonce)
+        {
+            var suffix = "axit=" + nonce;
+            if (rest is null || !(rest == suffix || rest.EndsWith(";" + suffix, StringComparison.Ordinal)))
+            {
+                _directoryExpected = false;
+                return;
+            }
+
+            code = rest == suffix ? null : rest[..^(suffix.Length + 1)];
+        }
+        else
+        {
+            code = rest;
+        }
+
+        _directoryExpected = letter == 'A';
         switch (letter)
         {
             case 'D':
@@ -321,6 +352,25 @@ public sealed class TerminalModel : LineStore
                 _promptStart = null;
                 Prompt = string.Join(" ", texts);
                 break;
+        }
+    }
+
+    /// <summary>
+    /// The shell's directory (OSC 9;9; S-38): with a secret set, only the one the prompt prints right after its own A
+    /// mark, and only a folder on this computer, so that output naming a share never makes the window authenticate to
+    /// it.
+    /// </summary>
+    private void OnDirectory(string directory)
+    {
+        if (MarkNonce is not null && !_directoryExpected)
+        {
+            return;
+        }
+
+        _directoryExpected = false;
+        if (LocalPaths.IsLocal(directory))
+        {
+            Directory = directory;
         }
     }
 
