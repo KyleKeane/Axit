@@ -39,6 +39,7 @@ Run so far, by the user with NVDA, 2026-10-23, on `palette` after 0d46e82:
 - axFile, by ear: the menu bar walk (3.7a), Open in Axit (3.9), Copy and Paste (3.6, with the paths as text and File Explorer both ways), two copies side by side (3.6), Move to folder with completion (3.1a, new), the palette (5.6): Passed.
 - axTerminal: Speak output all lines by default (AT-5.3, decided at this pass); Ctrl+Up and Ctrl+Down through the history with the recall earcon and the changed command kept as the last item (AT-3.9, new): Passed, "working perfectly".
 - axTerminal: the unrecorded command's status, an output line that starts like the prompt, a two-row prompt, New session's fresh screen, Open recent folder in new window, the stop at once, the quick keys reading one row (016d23a): Passed.
+- axFile steps 2a (type-ahead), 10a (filter and sort), 12b (Ctrl+N at This PC), 13a (marks under a filter): Passed.
 
 ## 2026-10-22, Axit 3.3.1
 
