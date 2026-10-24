@@ -1,15 +1,12 @@
 # Changelog
 
-## Unreleased
+## 3.7.0 - 2026-10-24
 
 - axClaude: a side answer (`/btw <question>`) and the other screens of Claude's that only inform (`/goal`, `/tasks` with nothing running) are read-only text in the window, its title the screen's and its text the answer, with Close (Enter or Escape, which closes the screen in Claude too) and a button for each of the screen's other keys (Copy, Fork, Browse); they used to be a list in the message field's place, with "waiting for your answer" in the status bar, which now says "showing a side answer". A second `/btw` in a session, whose keys Claude names with Shift and the arrows, is shown too, where it used to show nothing.
 - Axit: in every window, AI tools such as Claude Code can read what the Axit windows show and open apps, once you turn it on in the Axit menu, AI tools, which also adds Axit to Claude Code for you, and allow each tool in the notice it brings up. It is off by default; a tool cannot change or delete anything, never reads axPass or axClip, and every call is in `mcp-audit.log`. Forget AI tools takes every pairing back.
 - axPass: F5 reads the database again, as File → Refresh does; it used to show the list read before.
 - For developers: every window's keys are one list of commands (`Axit.Forms/Command`, `docs/axit/app-kit.md` AK-2), each making its menu item and its key from one record, with a mark of what it does for the planned AI access; the windows' key switches are gone. New scripts for axStart and axClip in `tests/scripts`.
 - For developers: a new app is registered by its line in `Dispatch.Apps` and a run of `tools/new-app.ps1`, which writes its folders, a first window, its documents and its registration places (`docs/axit/app-kit.md` AK-4.3). The installer reads the apps from `Axit.exe apps`, `run.ps1` and `tools/make-icon.ps1` from `Dispatch.cs`, `Program.cs` starts them from one table, and the executable references the projects of `src` by a glob.
-
-## 3.7.0 - 2026-10-24
-
 - axGIT, axPass, axClaude: when Git, KeePassXC or Claude Code is missing, the notice that says so offers Install it now: the maker's own installer runs without a window (Git and KeePassXC through winget, with one administrator prompt; Claude Code for your account only), and the app goes on once it is there. Without winget, the download page opens.
 - axTerminal: only the shells this computer has are listed; PowerShell 7 and Git Bash, when missing, are offered as Install PowerShell 7 and Install Git, for Git Bash in Session, Switch shell.
 - axCalc: a new app, a calculator as one expression field and a history list. Enter says the answer and adds the line "expression = answer" to the history; an expression that starts with an operator continues from the last answer; variables (`rate = 1.25`), functions, constants, hexadecimal, binary and octal numbers. Ctrl+I says an answer in hexadecimal, binary and octal, Ctrl+Shift+C copies it, Enter on a history line puts its expression back in the field, Ctrl+S saves the history. Start menu `Axit axCalc`, command `axcalc`.
