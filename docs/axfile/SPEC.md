@@ -81,7 +81,7 @@ folder of the file or project in hand, and sends back. It works entirely offline
   From axFile, Folder → Show current folder in ▸ **File Explorer** (Ctrl+W), **axClaude**, **axGIT**, **axTerminal**;
   Item → **Show in File Explorer** (Ctrl+Shift+W) opens File Explorer with the selected entry selected; Item → Open in
   Axit ▸ **Editor** (Ctrl+E) opens the selected file in axJSON for `.json` and axDown for anything else
-  (`FolderListing.EditorOf`), whatever Enter would do with it; Item → **Preview** (Shift+Enter) and the axMedia items
+  (`Dispatch.EditorOf`, the bundle's one rule), whatever Enter would do with it; Item → **Preview** (Shift+Enter) and the axMedia items
   are AF-5.
 
 ### AF-2 The window

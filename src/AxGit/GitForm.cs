@@ -449,8 +449,7 @@ public sealed partial class GitForm : AxitForm
         }
 
         var path = Path.Combine(_root, file.Path.Replace('/', Path.DirectorySeparatorChar));
-        var verb = Path.GetExtension(path).Equals(".json", StringComparison.OrdinalIgnoreCase) ? Dispatch.AxJSON : Dispatch.AxDown;
-        AxitMenu.Start(verb, path);
+        AxitMenu.Start(Dispatch.EditorOf(path), path);
     }
 
     // ---- running git (AG-1.5, AG-D6) ----

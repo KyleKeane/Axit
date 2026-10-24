@@ -146,9 +146,6 @@ public static class FolderListing
     /// <summary>"name", "date", "size": the order's word for the announcement and the menu.</summary>
     public static string SortName(SortBy by) => by.ToString().ToLowerInvariant();
 
-    /// <summary>The editor Ctrl+E opens a file in (AF-1.3): axJSON's verb for .json, axDown's for anything else.</summary>
-    public static string EditorOf(string path) =>
-        System.IO.Path.GetExtension(path).Equals(".json", StringComparison.OrdinalIgnoreCase) ? Dispatch.AxJSON : Dispatch.AxDown;
 
     /// <summary>"24 items", "1 item", "Empty": the list's accessible name (AF-2.1), the folder's name being the window's; with a filter on, "3 of 24 items, filter chap" (AF-3.8).</summary>
     public static string ListName(int count, int total = -1, string filter = "")

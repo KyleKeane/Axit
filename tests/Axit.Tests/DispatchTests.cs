@@ -140,6 +140,16 @@ public sealed class DispatchTests
         }
     }
 
+    [Theory]
+    [InlineData("notes.md", "down")]
+    [InlineData("README.MARKDOWN", "down")]
+    [InlineData("report.pdf", "down")]
+    [InlineData("settings.JSON", "json")]
+    public void The_editor_is_AxJSON_for_json_and_AxDown_for_the_rest(string name, string expected)
+    {
+        Assert.Equal(expected, Dispatch.EditorOf(Path.Combine("C:\\x", name)));
+    }
+
     [Fact]
     public void KeePassDatabaseGoesToAxPass()
     {

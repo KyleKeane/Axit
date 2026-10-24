@@ -780,7 +780,7 @@ public sealed partial class FileForm
             return;
         }
 
-        AxitMenu.Start(FolderListing.EditorOf(entry.Path), entry.Path);
+        AxitMenu.Start(Dispatch.EditorOf(entry.Path), entry.Path);
     }
 
     /// <summary>Item → Open with → Windows default (AF-4.7): the program Windows has for the entry, a folder in File Explorer, or the dialog that picks one.</summary>

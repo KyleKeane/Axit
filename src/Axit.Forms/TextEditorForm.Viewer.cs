@@ -108,18 +108,15 @@ public sealed partial class TextEditorForm
             return;
         }
 
-        AxitMenu.Start(EditorVerb(_path), _path);
+        AxitMenu.Start(Dispatch.EditorOf(_path), _path);
     }
-
-    /// <summary>axPreview's rule (AP-1.4; docs/axfile/SPEC.md AF-1.3 has the same): axJSON for .json, axDown for anything else.</summary>
-    private static string EditorVerb(string path) => Path.GetExtension(path).Equals(".json", StringComparison.OrdinalIgnoreCase) ? Dispatch.AxJSON : Dispatch.AxDown;
 
     /// <summary>The viewer's way to the editor, named after the file's kind (AP-1.4); nothing in an editor.</summary>
     private void UpdateEditItem()
     {
         if (_editItem is not null)
         {
-            _editItem.Text = _path is { } path && EditorVerb(path) == Dispatch.AxJSON ? "&Edit in axJSON" : "&Edit in axDown";
+            _editItem.Text = _path is { } path && Dispatch.EditorOf(path) == Dispatch.AxJSON ? "&Edit in axJSON" : "&Edit in axDown";
         }
     }
 }

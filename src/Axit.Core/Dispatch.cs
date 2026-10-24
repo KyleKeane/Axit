@@ -71,6 +71,13 @@ public static class Dispatch
     /// <summary>Whether an argument asks for the usage text: the forms Windows and Unix programs take (the apps' hosts read it too).</summary>
     public static bool IsHelpFlag(string argument) => argument is "--help" or "-h" or "-?" or "/?";
 
+    /// <summary>
+    /// The editor a file opens in (AX-1.2; axFile's Open in editor AF-1.3, axPreview's Edit AP-1.4, axGIT's Open):
+    /// axJSON's verb for a .json file, axDown's for any other.
+    /// </summary>
+    public static string EditorOf(string path) =>
+        Path.GetExtension(path).Equals(".json", StringComparison.OrdinalIgnoreCase) ? AxJSON : AxDown;
+
     public static Launch Decide(string[] args)
     {
         if (args.Length == 0)
@@ -103,7 +110,7 @@ public static class Dispatch
         if (File.Exists(first))
         {
             // AX-1.2: a .json file is AxJSON's, a KeePass database axPass's, a sound or video file AxMedia's, any other file AxDown's.
-            if (Path.GetExtension(first).Equals(".json", StringComparison.OrdinalIgnoreCase))
+            if (EditorOf(first) == AxJSON)
             {
                 return new Launch(AxJSON, args);
             }
