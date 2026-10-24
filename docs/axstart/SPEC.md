@@ -100,7 +100,8 @@ taskbar. It works entirely offline (bundle G6).
   the screen with the focus, top-most while shown, without a taskbar button, and its title is "axStart". Before the first read of the programs
   has come back the list's one line is "Reading the programs".
 - AS-3.2 **Typing** refills the list with the matches of the new text and selects the first; 300 ms after the last
-  change, one notification says the first match and the count, "Calculator, 1 of 2", or "No programs match xyz";
+  change, one notification says the first match and the count, "Calculator, 1 of 2", or "No programs match xyz",
+  or "Reading the programs" before the first read has come back (2026-10-24, the list's one line, as Down says it);
   with an empty field nothing is said. Options → General → Say the first match while typing (on) turns this off, and
   then Ctrl+I says it on demand.
 - AS-3.3 **The keys in the field** (AS-D2): Down and Up move the selection one match and say it, "Notepad++, 2 of 3";
