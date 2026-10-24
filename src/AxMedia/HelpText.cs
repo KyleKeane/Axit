@@ -16,7 +16,7 @@ public static class HelpText
           Ctrl+F: find a file whose name contains the text. F3 and Shift+F3: the next or the previous match
           Ctrl+Plus, Ctrl+Minus: bigger or smaller text
           Alt: the menu. Alt+F4: close axMedia
-          Alt+A: the Axit menu: the command palette, a new window of any app, the files and folders closed lately, the open Axit windows, most recent first (Alt+A, O, 1 is the one you were in last) and by type, Close all windows, Check for updates, and About
+          Alt+A: the Axit menu: the command palette, a new window of any app, the files and folders closed lately, the open Axit windows, most recent first (Alt+A, O, 1 is the one you were in last) and by type, Close all windows, the AI tools, Check for updates, and About
 
         ## The queue
           Arrow keys, Home, End, Page Up, Page Down: move through the files; type the start of a name to jump to it, Shift with a letter backwards. The one playing reads "(playing)" after its name

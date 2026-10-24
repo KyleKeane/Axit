@@ -23,9 +23,10 @@ automated scripts of every app pass. Heard with NVDA, a short round in each app'
 
 Automated in `tests/scripts/mcp` (the runner as the client); by ear with NVDA, in any window:
 
-- Options, General: "Let AI tools read and open Axit (MCP)" read with its checked state; turning it on shows the notice
-  with the command and the argument to add to the client; turning it off says "AI tools off".
-- With Claude Code given the server (the command from the notice, the argument `mcp`): its first call brings the
+- Axit menu (Alt+A), AI tools (I): "Let AI tools read and open Axit" read with its checked state; turning it on asks
+  "Turn on AI tools?", Enter turning it on and adding Axit to Claude Code ("Axit is added to Claude Code");
+  turning it off says "AI tools off".
+- Then a new Claude Code session, asked to list the Axit windows: its first call brings the
   pairing notice with its chime into the newest Axit window, which flashes when it is not in front; the title names
   the client, the text its program; Enter at once does nothing for a moment, then Deny; Tab to Allow, Enter: "Claude
   Code may read Axit".

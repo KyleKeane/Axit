@@ -18,7 +18,7 @@ public static class HelpText
           Ctrl+S: save the history as a text file
           Ctrl+Plus, Ctrl+Minus: bigger or smaller text
           Alt: the menu. Alt+F4: close axCalc
-          Alt+A: the Axit menu: the command palette, a new window of any app, the files and folders closed lately, the open Axit windows, most recent first (Alt+A, O, 1 is the one you were in last) and by type, Close all windows, Check for updates, and About
+          Alt+A: the Axit menu: the command palette, a new window of any app, the files and folders closed lately, the open Axit windows, most recent first (Alt+A, O, 1 is the one you were in last) and by type, Close all windows, the AI tools, Check for updates, and About
 
         ## axCalc
           In the expression field

@@ -130,7 +130,7 @@ public sealed class KeyTests
     [Fact]
     public void Every_F1_text_names_the_Axit_menu_and_its_first_items()
     {
-        const string line = "Alt+A: the Axit menu: the command palette, a new window of any app, the files and folders closed lately, the open Axit windows, most recent first (Alt+A, O, 1 is the one you were in last) and by type, Close all windows, Check for updates, and About";
+        const string line = "Alt+A: the Axit menu: the command palette, a new window of any app, the files and folders closed lately, the open Axit windows, most recent first (Alt+A, O, 1 is the one you were in last) and by type, Close all windows, the AI tools, Check for updates, and About";
         var missing = F1Texts.Where(pair => !pair.Value.Contains(line, StringComparison.Ordinal)).Select(pair => pair.Key).ToList();
         Assert.True(missing.Count == 0, "Without the Axit menu line: " + string.Join(", ", missing));
     }

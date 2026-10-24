@@ -126,7 +126,7 @@ internal sealed class McpChannel
         using var writer = new StreamWriter(pipe, new UTF8Encoding(false)) { AutoFlush = true };
         if (!McpAccess.Enabled)
         {
-            writer.WriteLine(JsonSerializer.Serialize(new { error = "Axit's AI tools access is off: Options, General, Let AI tools read and open Axit." }, Plain));
+            writer.WriteLine(JsonSerializer.Serialize(new { error = "Axit's AI tools access is off: Axit menu, AI tools, Let AI tools read and open Axit." }, Plain));
             return;
         }
 

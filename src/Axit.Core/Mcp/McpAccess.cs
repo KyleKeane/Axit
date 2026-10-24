@@ -72,7 +72,7 @@ public static class McpAccess
         Save(settings);
     }
 
-    /// <summary>Options → General → Forget AI tools: every client forgotten, so that each must be allowed again.</summary>
+    /// <summary>Axit → AI tools → Forget AI tools: every client forgotten, so that each must be allowed again.</summary>
     public static void ForgetAll()
     {
         var settings = Load();

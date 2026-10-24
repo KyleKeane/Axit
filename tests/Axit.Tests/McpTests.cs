@@ -164,6 +164,14 @@ public sealed class McpTests
     }
 
     [Fact]
+    public void Claude_Code_gets_this_Axit_for_every_folder_an_earlier_entry_removed_first()
+    {
+        Assert.Equal(["mcp", "remove", "--scope", "user", "axit"], McpClaudeCode.RemoveArguments());
+        Assert.Equal(["mcp", "add", "--scope", "user", "axit", "--", @"D:\Axit\Axit.exe", "mcp"], McpClaudeCode.AddArguments(@"D:\Axit\Axit.exe"));
+        Assert.Equal("claude mcp add --scope user axit -- \"D:\\Axit\\Axit.exe\" mcp", McpClaudeCode.AddCommandLine(@"D:\Axit\Axit.exe"));
+    }
+
+    [Fact]
     public void Ten_calls_a_second_and_no_more()
     {
         var rate = new McpRate();

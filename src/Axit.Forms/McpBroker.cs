@@ -71,7 +71,7 @@ public static class McpBroker
         var settings = McpAccess.Load();
         if (!settings.Enabled)
         {
-            return new McpResult("Axit's AI tools access is off. The user turns it on in any Axit window: Options, General, Let AI tools read and open Axit.", true);
+            return new McpResult("Axit's AI tools access is off. The user turns it on in any Axit window: Axit menu, AI tools, Let AI tools read and open Axit.", true);
         }
 
         if (program is null)
@@ -229,7 +229,9 @@ public static class McpBroker
             pipe.Connect(2000);
             if (UserPipe.ServerOf(pipe) is not { } server || !ThisProgram.Runs(server))
             {
-                Log.Error("An AI tools' pipe is served by a program that is not Axit: nothing sent");
+                // Another build of Axit (a checkout's next to the installed one) or a look-alike: its windows are not this
+                // broker's to read. Information, not an error: two builds side by side are ordinary.
+                Log.Info("An AI tools' pipe is served by another program than this Axit.exe: nothing sent");
                 return null;
             }
 
@@ -255,7 +257,7 @@ public static class McpBroker
             var proof = reader.ReadLineAsync();
             if (!proof.Wait(AnswerMs) || !McpAccess.Proves(key, ours, proof.Result))
             {
-                Log.Error("An AI tools' pipe did not prove the key: nothing sent");
+                Log.Info("An AI tools' pipe did not prove the key: nothing sent");
                 return null;
             }
 

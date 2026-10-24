@@ -16,7 +16,7 @@ public static class HelpText
           Ctrl+F: find an item in the list. F3 and Shift+F3: next or previous match
           Ctrl+Plus, Ctrl+Minus: bigger or smaller text
           Alt: the menu. Alt+F4: close axProcess
-          Alt+A: the Axit menu: the command palette, a new window of any app, the files and folders closed lately, the open Axit windows, most recent first (Alt+A, O, 1 is the one you were in last) and by type, Close all windows, Check for updates, and About
+          Alt+A: the Axit menu: the command palette, a new window of any app, the files and folders closed lately, the open Axit windows, most recent first (Alt+A, O, 1 is the one you were in last) and by type, Close all windows, the AI tools, Check for updates, and About
 
         ## axProcess
           Ctrl+1, Ctrl+2, Ctrl+3: the Processes, Services and Startup view of the list; pressed on the view already shown, the key says its name

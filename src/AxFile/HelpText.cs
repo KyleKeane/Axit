@@ -17,7 +17,7 @@ public static class HelpText
           Ctrl+F: find an entry whose name contains the text. F3 and Shift+F3: the next or the previous match
           Ctrl+Plus, Ctrl+Minus: bigger or smaller text
           Alt: the menu. Alt+F4: close axFile
-          Alt+A: the Axit menu: the command palette, a new window of any app, the files and folders closed lately, the open Axit windows, most recent first (Alt+A, O, 1 is the one you were in last) and by type, Close all windows, Check for updates, and About
+          Alt+A: the Axit menu: the command palette, a new window of any app, the files and folders closed lately, the open Axit windows, most recent first (Alt+A, O, 1 is the one you were in last) and by type, Close all windows, the AI tools, Check for updates, and About
 
         ## Moving around
           Arrow keys, Home, End, Page Up, Page Down: through the entries. At the first or the last entry, a key that cannot move plays one short low note

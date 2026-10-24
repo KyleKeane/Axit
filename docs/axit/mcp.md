@@ -33,7 +33,7 @@ and the command lists of `app-kit.md`, which are what the tools are made from. R
 
 ## 3. Pairing and authentication
 
-- MC-2.1 **Off by default.** Options → General → "Let AI tools read and open Axit (MCP)" in every window, one setting for the
+- MC-2.1 **Off by default.** Axit menu → AI tools → "Let AI tools read and open Axit" in every window (MC-6.1), one setting for the
   bundle. Off: the broker answers every call with "Axit's MCP access is off" and nothing else.
 - MC-2.2 **Pairing**: the first call of a client that is not paired shows a notice in the Axit window in front (or
   opens axStart's): "Claude Code asks to use Axit. It can: <the scopes asked>. Allow?", with Allow and Deny; Enter on
@@ -87,10 +87,15 @@ and the command lists of `app-kit.md`, which are what the tools are made from. R
 
 Step 3 of section 8, with the choices it needed; what is not here waits for the later steps.
 
-- MC-6.1 **The setting**: `%APPDATA%\Axit\mcp.json`, `{"enabled": false, "clients": []}`, one for the bundle; Options →
-  General → "Let AI tools read and open Axit (MCP)" in every window turns it on or off. Turning it on makes the key
-  (MC-6.3) and shows a notice with what to add to the client: the command, this `Axit.exe`, and the argument `mcp`.
-  Options → General → "Forget AI tools" forgets every paired client at once. Off, every window refuses every
+- MC-6.1 **The setting**: `%APPDATA%\Axit\mcp.json`, `{"enabled": false, "clients": []}`, one for the bundle, so it
+  is in the bundle's menu, never an app's Options (the user's rule of 2026-10-24: Options are the app's, the Axit
+  menu holds what is the bundle's): Axit → AI tools ▸ (I) in every window, with "Let AI tools read and open Axit"
+  (checked while on), "Add Axit to Claude Code", "Forget AI tools" and "Read the log". Turning it on asks once, a
+  notice saying what it allows, with **Turn on and add to Claude Code** (the default, when Claude Code is found),
+  Turn on only, and Cancel; turning it on makes the key (MC-6.3). Adding to Claude Code (MC-6.8) runs Claude Code's
+  own `claude mcp add` for this user's every folder with this very `Axit.exe` and the argument `mcp`; without
+  Claude Code the notice gives that command line to copy. Turning it off needs no question and says "AI tools off".
+  "Forget AI tools" forgets every paired client at once; "Read the log" opens the audit log in axPreview. Off, every window refuses every
   connection before anything else, so that turning it off in one window ends every client's access at its next call.
   The file carries a seal, HMAC-SHA256 of the setting and the clients under the key (MC-6.3); a file whose seal does
   not check, written by hand or by an AI tool's own file writing, reads as off with no clients, so that turning the
@@ -101,7 +106,8 @@ Step 3 of section 8, with the choices it needed; what is not here waits for the 
   are not reachable at all in this stage. The test channel stays apart (MC-1.3).
 - MC-6.3 **Both ends prove who they are**: the window answers only a client whose process runs this very program file
   (`GetNamedPipeClientProcessId`, its image path, as the hand-over checks, S-13), and the broker talks only to a pipe
-  whose server process runs it (`GetNamedPipeServerProcessId`). Then the window sends a fresh random challenge and the
+  whose server process runs it (`GetNamedPipeServerProcessId`): a broker reads only the windows of its own
+  Axit.exe, so a checkout's build and an installed one, side by side, each have their own windows and client entry. Then the window sends a fresh random challenge and the
   broker answers it with HMAC-SHA256 under the key, `%LOCALAPPDATA%\Axit\mcp.key`: 32 random bytes kept with DPAPI for
   this user (`UserSecret`); then the broker sends a challenge of its own and the window answers it, so that a pipe of
   another user's copy of the same `Axit.exe` cannot pass for this user's window. The key itself never crosses the
@@ -139,6 +145,12 @@ Step 3 of section 8, with the choices it needed; what is not here waits for the 
 - MC-6.6 **Limits and the log**: at most 10 calls a second; every call in `%LOCALAPPDATA%\Axit\mcp-audit.log`, one
   line: the time, the client's name and program, the tool, the first 16 hex digits of the SHA-256 of its arguments,
   and the result (done, refused and why, failed). The arguments themselves are not written.
+- MC-6.8 **Added to Claude Code**: Claude Code found as `claude.exe` (or the npm `claude.cmd`, through cmd) on the
+  PATH's full folders or in its installer's `%USERPROFILE%\.local\bin`; run without a window, off the window's
+  thread, with the arguments as a list: `claude mcp remove --scope user axit` (an earlier entry, perhaps of another
+  build, gone; its failure when there is none is ignored), then `claude mcp add --scope user axit -- <Axit.exe> mcp`.
+  The result is said: "Axit is added to Claude Code: a new Claude session can use it", or Claude Code's own error
+  line. Never in a test run, which must not touch the user's Claude Code settings.
 - MC-6.7 **Not in this stage**: change and act tools and their confirmation (MC-3.3), the "MCP clients…" list with
   scopes per app and folders (MC-2.3, MC-3.4), the reads counted in the status bar (MC-5.1), axPass's titles (MC-4.1).
 

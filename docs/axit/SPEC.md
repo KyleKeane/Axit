@@ -330,8 +330,7 @@ The apps are named ax and a word, the ax in lower case and the word as it is wri
   the hand-over from a starting process of the app (`AppMessage`, answered at once and applied after), the submenus
   and the menu every window has (Options → Text, General and Developer; Help: `CreateTextMenu`,
   `CreateGeneralMenu`, `CreateDeveloperMenu`, `CreateHelpMenu`, each with the window's own items in their place;
-  General ends with the AI tools' two items, Let AI tools read and open Axit and Forget AI tools, in every window,
-  `mcp.md` MC-6.1; `Toggle` for a checked setting; `CreateExitItem` for the last item of the first menu), the
+  `Toggle` for a checked setting; `CreateExitItem` for the last item of the first menu), the
   window's pipe for the AI tools (`McpChannel`, MC-6.2), the window role for NVDA
   (AX-7.1) and the common part of the key switch (the text size keys everywhere, F1, the palette, Ctrl+S). A
   window adds its controls (the `Overlay` first) and fills in the hooks: the F1 text, what to hide for a notice and
@@ -414,7 +413,8 @@ The apps are named ax and a word, the ax in lower case and the word as it is wri
   class, `Axit.Forms/AxitMenu`, which the window constructs with its Command palette item, its two update items, its
   latest-release state and its notice method. In order: Command palette… (P, AX-10; the bundle's own command, so it
   sits in the bundle's menu, asked 2026-10-23); a separator; New window ▸ and Recently closed ▸; a separator; Open
-  windows ▸, Open windows by type ▸ and Close all windows; a separator; Check for updates, Update to (while a newer
+  windows ▸, Open windows by type ▸ and Close all windows; a separator; AI tools ▸ (I, `mcp.md` MC-6.1: the bundle's
+  own settings live here, an app's Options hold only the app's); Check for updates, Update to (while a newer
   release is known) and About ▸ (AX-9.9). The lists are filled each time the menu opens, so that they show the
   windows and the files of that moment.
 - AX-9.2 **New window ▸** (N): one item per app of the bundle (`Dispatch.Apps`), "axClaude", "axDown", with the letter

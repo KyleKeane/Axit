@@ -129,7 +129,7 @@ public static class Dispatch
           Axit <folder>               the same as Axit claude <folder>
           Axit <file>                 the same as Axit down <file>, Axit json <file> for a .json file, Axit pass <file> for a .kdbx file, or Axit media <file> for a sound or video file
           Axit                        axClaude on the current folder
-          Axit mcp                    the AI tools' server, for an MCP client to start (Options, General, Let AI tools read and open Axit)
+          Axit mcp                    the AI tools' server, for an MCP client to start (Axit menu, AI tools)
           --help, --version           this text, or the version
 
         The installed console commands axit, axclaude, axdown, axjson, axgit, axterminal, axfile, axmedia, axpreview, axstart, axprocess, axtask, axpass, axcalc and axclip stand for Axit, Axit claude, Axit down, Axit json, Axit git, Axit terminal, Axit file, Axit media, Axit preview, Axit start, Axit process, Axit task, Axit pass, Axit calc and Axit clip.

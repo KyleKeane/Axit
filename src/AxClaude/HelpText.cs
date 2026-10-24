@@ -32,7 +32,7 @@ public static class HelpText
           Ctrl+Plus, Ctrl+Minus: bigger or smaller text
           F1: this list
           Ctrl+Shift+P: the command palette: type part of a command's name, Down and Up through the matches, Enter runs it
-          Alt+A: the Axit menu: the command palette, a new window of any app, the files and folders closed lately, the open Axit windows, most recent first (Alt+A, O, 1 is the one you were in last) and by type, Close all windows, Check for updates, and About
+          Alt+A: the Axit menu: the command palette, a new window of any app, the files and folders closed lately, the open Axit windows, most recent first (Alt+A, O, 1 is the one you were in last) and by type, Close all windows, the AI tools, Check for updates, and About
           Alt+F4: close axClaude (asks first while Claude is working)
 
         ## Message field

@@ -10,11 +10,13 @@ mcp start
 mcp call axit_windows
 expect mcp error: Axit's AI tools access is off
 
-# On from Options, General: the key made, the notice naming what to add to the client.
+# On from the Axit menu, AI tools: asked once. The default turns it on and adds Axit to Claude Code, which a test run
+# never does (the user's Claude Code settings), and says so; or, without Claude Code here, Turn on alone.
 menu Let AI tools read and open Axit
-expect state "notice":"AI tools on"
-expect state Arguments: mcp
-keys escape
+expect state "notice":"Turn on AI tools?"
+keys enter
+expect said AI tools on
+try said Not in a test run
 
 # MC-6.4: a client not paired is asked about in the window; Deny is the default, so Escape refuses.
 mcp call axit_windows

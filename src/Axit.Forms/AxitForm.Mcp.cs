@@ -6,8 +6,8 @@ using static Axit.Forms.User32;
 namespace Axit.Forms;
 
 /// <summary>
-/// The window's part of the AI tools' access (docs/axit/mcp.md MC-6): its pipe started as it first shows, the two
-/// items of Options → General, what the pipe reads of the window, and the pairing notice. The pipe itself is
+/// The window's part of the AI tools' access (docs/axit/mcp.md MC-6): its pipe started as it first shows, the Axit
+/// menu's AI tools submenu, what the pipe reads of the window, and the pairing notice. The pipe itself is
 /// <see cref="McpChannel"/>; the broker, which the AI client starts, is <see cref="McpBroker"/>.
 /// </summary>
 public abstract partial class AxitForm
@@ -43,45 +43,169 @@ public abstract partial class AxitForm
         };
     }
 
-    /// <summary>Options → General: the access on or off (MC-6.1), its state read as the menu opens, since another window may have changed it; and Forget AI tools.</summary>
-    private void AddMcpItems(ToolStripMenuItem general)
+    /// <summary>
+    /// Axit → AI tools ▸ (MC-6.1): the bundle's own setting, in the bundle's menu, never an app's Options. The check
+    /// read as the submenu opens, since another window may have changed it.
+    /// </summary>
+    internal ToolStripMenuItem CreateMcpMenu()
     {
-        var access = new ToolStripMenuItem("Let AI tools read and open A&xit (MCP)");
-        access.Click += (_, _) =>
-        {
-            ToggleMcp(!access.Checked);
-            access.Checked = McpAccess.Enabled;
-        };
-        general.DropDownOpening += (_, _) => access.Checked = McpAccess.Enabled;
-        general.DropDownItems.Add(new ToolStripSeparator());
-        general.DropDownItems.Add(access);
-        general.DropDownItems.Add(new ToolStripMenuItem("For&get AI tools", null, (_, _) => ForgetMcpClients()));
+        var menu = new ToolStripMenuItem("A&I tools");
+        var access = new ToolStripMenuItem("&Let AI tools read and open Axit", null, (_, _) => ToggleMcp());
+        menu.DropDownItems.Add(access);
+        menu.DropDownItems.Add(new ToolStripMenuItem("&Add Axit to Claude Code", null, (_, _) => AddToClaudeCode()));
+        menu.DropDownItems.Add(new ToolStripMenuItem("&Forget AI tools", null, (_, _) => ForgetMcpClients()));
+        menu.DropDownItems.Add(new ToolStripMenuItem("&Read the log", null, (_, _) => ReadMcpLog()));
+        CommandPalette.RefreshedOnOpening(menu, () => access.Checked = McpAccess.Enabled);
+        return menu;
     }
 
-    private void ToggleMcp(bool on)
+    /// <summary>On: asked once, with what it allows (MC-6.1); off: at once, said.</summary>
+    private void ToggleMcp()
+    {
+        if (McpAccess.Enabled)
+        {
+            if (SetMcp(false))
+            {
+                Announce("AI tools off: no AI tool can read or open Axit", true);
+            }
+
+            return;
+        }
+
+        var claude = McpClaudeCode.Find();
+        var text = "AI tools such as Claude Code may then ask to read what the Axit windows show (their text, lists and status) "
+            + "and to open apps. They cannot change or delete anything, and they never read axPass or axClip. Each tool asks you "
+            + "once, in an Axit window, before it reads anything, and every call is written in the log (AI tools, Read the log).\n\n"
+            + (claude is null
+                ? "Claude Code was not found here, so Turn on only; then add Axit to your AI tool with this command line:\n\n" + McpClaudeCode.AddCommandLine(Environment.ProcessPath!)
+                : "Turn on and add to Claude Code also adds Axit to Claude Code for every folder; a new Claude session can then use it.");
+        List<OverlayChoice> choices = claude is null
+            ? [new OverlayChoice("&Turn on", () => TurnMcpOn(addToClaude: false), IsDefault: true)]
+            : [new OverlayChoice("&Turn on and add to Claude Code", () => TurnMcpOn(addToClaude: true), IsDefault: true), new OverlayChoice("Turn on &only", () => TurnMcpOn(addToClaude: false))];
+        choices.Add(new OverlayChoice("&Cancel", IsCancel: true));
+        ShowNotice(new Notice("Turn on AI tools?", text, choices));
+    }
+
+    private void TurnMcpOn(bool addToClaude)
+    {
+        if (!SetMcp(true))
+        {
+            return;
+        }
+
+        Announce("AI tools on", true);
+        if (addToClaude)
+        {
+            AddToClaudeCode();
+        }
+    }
+
+    /// <summary>The setting written; false after the notice that says why not.</summary>
+    private bool SetMcp(bool on)
     {
         try
         {
             McpAccess.SetEnabled(on);
+            return true;
         }
         catch (Exception ex) when (ex is IOException or UnauthorizedAccessException or InvalidOperationException)
         {
             Fail("The AI tools' setting was not changed: " + ex.Message);
-            return;
+            return false;
         }
+    }
 
-        if (!on)
+    /// <summary>
+    /// MC-6.8: Claude Code's own <c>claude mcp add</c> for every folder, with this very Axit.exe, an earlier entry removed
+    /// first; off the window's thread, the result said. Never in a test run, whose windows must not touch the user's
+    /// Claude Code settings.
+    /// </summary>
+    private void AddToClaudeCode()
+    {
+        if (AutomationEnvironment.Requested)
         {
-            Announce("AI tools off: no AI tool can read or open Axit", true);
+            Announce("Not in a test run: Claude Code's settings are the user's", true);
             return;
         }
 
-        ShowNotice(Notice.Plain("AI tools on",
-            "AI tools can now ask to read what the Axit windows show and to open apps; they cannot change or delete anything. "
-            + "Each tool asks you once, in an Axit window, before it reads anything. axPass and axClip are never read.\n\n"
-            + "To let a tool such as Claude Code in, add this MCP server to its settings:\n\n"
-            + $"Command: {Environment.ProcessPath}\nArguments: mcp\n\n"
-            + $"Every call is written in {AppPaths.McpAuditFile}. Options, General, Let AI tools read and open Axit turns it off again."));
+        if (McpClaudeCode.Find() is not { } claude)
+        {
+            ShowNotice(Notice.Plain("Claude Code was not found",
+                "Claude Code is not installed here, or not where Axit looks (the PATH, and your .local\\bin folder). Add Axit to your AI tool with this command line:\n\n"
+                + McpClaudeCode.AddCommandLine(Environment.ProcessPath!)));
+            return;
+        }
+
+        var exe = Environment.ProcessPath!;
+        Announce("Adding Axit to Claude Code", true);
+        Do(async () =>
+        {
+            await Task.Run(() => RunClaude(claude, McpClaudeCode.RemoveArguments()));
+            var (code, output) = await Task.Run(() => RunClaude(claude, McpClaudeCode.AddArguments(exe)));
+            if (IsDisposed)
+            {
+                return;
+            }
+
+            Log.Info($"claude mcp add: exit {code}");
+            if (code == 0)
+            {
+                Announce("Axit is added to Claude Code: a new Claude session can use it", true);
+                return;
+            }
+
+            ShowNotice(Notice.Plain("Axit was not added to Claude Code",
+                $"Claude Code said: {output}\n\nThe command line, to run by hand:\n\n{McpClaudeCode.AddCommandLine(exe)}"));
+        });
+    }
+
+    /// <summary>Claude Code run without a window, its arguments as a list (cmd for npm's claude.cmd), at most 30 seconds; its exit code and what it printed.</summary>
+    private static (int Code, string Output) RunClaude(string claude, IReadOnlyList<string> arguments)
+    {
+        var script = claude.EndsWith(".cmd", StringComparison.OrdinalIgnoreCase);
+        var start = new System.Diagnostics.ProcessStartInfo(script ? SystemPrograms.Cmd : claude)
+        {
+            UseShellExecute = false,
+            CreateNoWindow = true,
+            RedirectStandardOutput = true,
+            RedirectStandardError = true,
+        };
+        if (script)
+        {
+            start.Arguments = "/d /s /c \"\"" + claude + "\" " + string.Join(' ', arguments.Select(a => a.Contains(' ') ? $"\"{a}\"" : a)) + "\"";
+        }
+        else
+        {
+            foreach (var argument in arguments)
+            {
+                start.ArgumentList.Add(argument);
+            }
+        }
+
+        try
+        {
+            using var process = System.Diagnostics.Process.Start(start);
+            if (process is null)
+            {
+                return (-1, "it did not start");
+            }
+
+            var output = process.StandardOutput.ReadToEndAsync();
+            var error = process.StandardError.ReadToEndAsync();
+            if (!process.WaitForExit(30_000))
+            {
+                process.Kill(entireProcessTree: true);
+                return (-1, "it did not finish within 30 seconds");
+            }
+
+            var reads = Task.WhenAll(output, error);
+            var text = reads.Wait(5000) ? (output.Result + "\n" + error.Result).Trim() : string.Empty;
+            return (process.ExitCode, text.ReplaceLineEndings(" ").Trim());
+        }
+        catch (System.ComponentModel.Win32Exception ex)
+        {
+            return (-1, ex.Message);
+        }
     }
 
     private void ForgetMcpClients()
@@ -97,6 +221,17 @@ public abstract partial class AxitForm
         }
     }
 
+    /// <summary>The audit log (MC-6.6) in axPreview; said when there is none yet.</summary>
+    private void ReadMcpLog()
+    {
+        if (!File.Exists(AppPaths.McpAuditFile))
+        {
+            Announce("No AI tool has called Axit yet: the log is empty", true);
+            return;
+        }
+
+        AxitMenu.Start(Dispatch.AxPreview, AppPaths.McpAuditFile);
+    }
     /// <summary>
     /// The pairing notice (MC-6.4), from the pipe's thread: "Claude Code asks to use Axit …", Allow and Deny. Deny is the
     /// default and Escape, so that Enter alone never allows; the notice is unprompted (its chime, and a moment in

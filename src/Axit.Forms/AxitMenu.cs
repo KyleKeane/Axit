@@ -11,7 +11,7 @@ namespace Axit.Forms;
 /// The Axit menu every window has (docs/axit/SPEC.md AX-9), one class for every window: the window's Command palette
 /// item (AX-10); New window (one item per app) and Recently closed (the bundle's list, AX-9.4); Open windows (the
 /// other windows of the bundle's apps, most recently used first), Open windows by type (one submenu per app, the
-/// current window checked) and Close all windows; the window's own Check for updates and Update to items, and About,
+/// current window checked) and Close all windows; AI tools (the bundle's own setting, docs/axit/mcp.md MC-6.1); the window's own Check for updates and Update to items, and About,
 /// the bundle's sections (AX-9.9). The lists are filled
 /// each time the menu opens, the windows from what the system lists in Z order, which is Alt+Tab's order, so nothing
 /// about windows is stored. The lists and labels are <see cref="AxitWindows"/> and <see cref="RecentlyClosed"/>, the
@@ -60,6 +60,8 @@ public sealed class AxitMenu : ToolStripMenuItem
         DropDownItems.Add(CommandPalette.FilledOnOpening(byType));
         DropDownItems.Add(new ToolStripMenuItem("&Close all windows", null, (_, _) => CloseAll()));
         DropDownItems.Add(new ToolStripSeparator());
+        // The bundle's own settings (docs/axit/mcp.md MC-6.1): an app's Options hold only the app's.
+        DropDownItems.Add(owner.CreateMcpMenu());
         DropDownItems.Add(checkForUpdates);
         DropDownItems.Add(updateTo);
         DropDownItems.Add(about);
