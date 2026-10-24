@@ -17,6 +17,8 @@
 - axTask: a link to a network folder or a file outside the lists is never opened; it reads as missing.
 - axFile: files taken out of a downloaded zip keep the mark Windows uses to warn about downloads, and Compress leaves links inside a folder out.
 - Every window: Copy diagnostics replaces your account's name, paths and e-mail addresses before you share it. Programs Axit starts (git, cmd, PowerShell, File Explorer) are found by their full path, never in the folder you opened. Names with hidden direction marks show them, so "invoice‮txt.exe" cannot pass for a text file.
+- axPass: F5 reads the database again, as File → Refresh does; it used to show the list read before.
+- For developers: every window's keys are one list of commands (`Axit.Forms/Command`, `docs/axit/app-kit.md` AK-2), each making its menu item and its key from one record, with a mark of what it does for the planned AI access; the windows' key switches are gone. New scripts for axStart and axClip in `tests/scripts`.
 - For developers: the security audit, `docs/axit/security-audit-2026-10-24.md` (45 findings and what became of each), the release key and signing (`tools/release-key.ps1`, `tools/sign-release.ps1`, AX-3.4), the automation channel's run secret, and the specifications of MCP access (`docs/axit/mcp.md`) and the app kit (`docs/axit/app-kit.md`), not built yet.- For developers: the inventory of copies, dead code and drift, `docs/axit/inventory-2026-10-24.md`, and its eleven cleanups: shared `CopyText`, `Dispatch.EditorOf`, `MarkdownKeys`, `User32`, `ListViewState`, the search field of `HotkeyForm`, the large windows in partial files, the notes against the code.
 
 ## 3.6.0 - 2026-10-24

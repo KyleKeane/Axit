@@ -2,7 +2,7 @@ namespace AxCalc;
 
 /// <summary>
 /// axCalc's window-specific keys (SPEC.md AC-7.2; bundle AX-8). A key is changed here and nowhere else: the menu
-/// items, the key switch in <c>CalcForm.ProcessWindowKey</c> and the F1 text read this table. The bundle-wide keys
+/// items, the commands of <c>CalcForm</c> and the F1 text read this table. The bundle-wide keys
 /// (F1, the palette, the control keys, find, Ctrl+S, text size) are <c>Axit.Forms.BundleKeys</c>. Enter, Escape and
 /// Delete mean what the control with the focus needs: the field answers and clears, the history recalls and removes.
 /// </summary>

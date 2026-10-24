@@ -2,7 +2,7 @@ namespace AxClip;
 
 /// <summary>
 /// axClip's window-specific keys (SPEC.md CP-5.2; bundle AX-8). A key is changed here and nowhere else: the menu items,
-/// the key switch in <c>ClipForm.ProcessWindowKey</c> and the F1 text read this table. The bundle-wide keys (F1, the
+/// the commands of <c>ClipForm</c> and the F1 text read this table. The bundle-wide keys (F1, the
 /// palette, text size, Page Up and Page Down) are <c>Axit.Forms.BundleKeys</c>; the hotkey is a setting, not a key of
 /// the window. The caret stays in the field: every key here acts on the list of items, as in axStart (AS-D2).
 /// </summary>

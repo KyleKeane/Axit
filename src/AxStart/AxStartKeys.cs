@@ -2,7 +2,7 @@ namespace AxStart;
 
 /// <summary>
 /// axStart's window-specific keys (SPEC.md AS-5.3; bundle AX-8). A key is changed here and nowhere else: the menu
-/// items, the key switch in <c>StartForm.ProcessWindowKey</c> and the F1 text read this table. The bundle-wide keys
+/// items, the commands of <c>StartForm</c> and the F1 text read this table. The bundle-wide keys
 /// (F1, text size, Page Up and Page Down) are <c>Axit.Forms.BundleKeys</c>; the hotkey is a setting, not a key of
 /// the window. The caret stays in the field (AS-D2): every key here acts on the list of matches or on the program.
 /// </summary>

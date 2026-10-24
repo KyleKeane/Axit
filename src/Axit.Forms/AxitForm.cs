@@ -461,10 +461,16 @@ public abstract partial class AxitForm : Form
     /// <summary>A command as an item of <paramref name="menu"/> showing its key, and its key handled with it (AK-2.3); the item, for a window that keeps it.</summary>
     protected ToolStripMenuItem Add(ToolStripMenuItem menu, Command command)
     {
-        var item = Item(command.Label, command.Run, command.Key);
+        var item = Add(command);
         menu.DropDownItems.Add(item);
-        _commands.Add(command);
         return item;
+    }
+
+    /// <summary>A command with its key handled, and its item for a menu the window places itself (the first item of <see cref="CreateShowInMenu"/>, a context menu).</summary>
+    protected ToolStripMenuItem Add(Command command)
+    {
+        _commands.Add(command);
+        return Item(command.Label, command.Run, command.Key);
     }
 
     /// <summary>A command that is a key and no menu item (Tab between a window's panes, a list's Enter).</summary>

@@ -318,7 +318,7 @@ The apps are named ax and a word, the ax in lower case and the word as it is wri
   (`AnnounceSource`), its own palette entries (`PaletteEntries`, AX-10.5), what Ctrl+S does (`SaveCommand`;
   "Nothing to save here" by default), what it does with a hand-over (`TakeHandOver`), how it reports a settings file
   it could not read (`SettingsNotRead`; a notice by default, a system line in the console windows), and its own
-  keys (`ProcessWindowKey`). **The focus across a notice is one rule, the base's** (2026-10-23): when the first
+  keys, as commands (docs/axit/app-kit.md AK-2; `ProcessWindowKey` for what must come before them). **The focus across a notice is one rule, the base's** (2026-10-23): when the first
   notice of a chain opens, the control that has the focus is remembered and `OnNoticeOpened` is called with it; a
   notice a notice's button opens, or one shown while one is open, continues the chain; when the last one closes,
   `OnNoticeClosed` is called and that control gets the focus back if it is still there and visible (the Actions

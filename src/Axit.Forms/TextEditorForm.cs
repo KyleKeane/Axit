@@ -98,8 +98,7 @@ public sealed partial class TextEditorForm : AxitForm
         // Show current file in ▸ File Explorer and the other apps' windows on the file or its folder (AD-4.1).
         // axClaude and axTerminal on the file's folder, axGIT on the repository that holds it, axFile with the file selected.
         var explorer = new Command("File &Explorer", EditorKeys.ShowInExplorer, ShowInExplorer) { Mark = CommandMark.Open };
-        AddKey(explorer);
-        file.DropDownItems.Add(CreateShowInMenu("Show current file &in", Item(explorer.Label, explorer.Run, explorer.Key), FileOrSay));
+        file.DropDownItems.Add(CreateShowInMenu("Show current file &in", Add(explorer), FileOrSay));
         file.DropDownItems.Add(new ToolStripSeparator());
         file.DropDownItems.Add(CreateExitItem());
 
@@ -145,8 +144,7 @@ public sealed partial class TextEditorForm : AxitForm
         // The item goes into the Text submenu the base makes, so it is made from the command here and its key added.
         var options = new ToolStripMenuItem("&Options");
         var wordWrap = new Command("&Word wrap", EditorKeys.WordWrap, ToggleWordWrap);
-        AddKey(wordWrap);
-        _wordWrapItem = Item(wordWrap.Label, wordWrap.Run, wordWrap.Key);
+        _wordWrapItem = Add(wordWrap);
         _wordWrapItem.Checked = _settings.WordWrap;
         options.DropDownItems.Add(CreateTextMenu(_wordWrapItem));
         options.DropDownItems.Add(CreateGeneralMenu());

@@ -29,8 +29,9 @@ public sealed partial class TextEditorForm
     {
         Add(file, new Command("Re&load", EditorKeys.Reload, ReloadCommand));
         file.DropDownItems.Add(new ToolStripSeparator());
-        // The label follows the file's kind (UpdateEditItem); the command keeps the first one.
-        _editItem = Add(file, new Command("&Edit in axDown", EditorKeys.Edit, OpenInEditor) { Mark = CommandMark.Open });
+        // The item's label follows the file's kind (UpdateEditItem); the command's is the key table's, true for either.
+        _editItem = Add(file, new Command("&Edit in the editor", EditorKeys.Edit, OpenInEditor) { Mark = CommandMark.Open });
+        UpdateEditItem();
     }
 
     /// <summary>

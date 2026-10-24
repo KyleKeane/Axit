@@ -2,7 +2,7 @@ namespace AxMedia;
 
 /// <summary>
 /// axMedia's window-specific keys (SPEC.md AM-5.2; bundle AX-8). A key is changed here and nowhere else: the menu
-/// items, the key switch in <c>MediaForm.ProcessWindowKey</c> and the F1 text read this table. The bundle-wide keys
+/// items, the commands of <c>MediaForm</c> and the F1 text read this table. The bundle-wide keys
 /// (F1, the control keys, find, Ctrl+S, text size) are <c>Axit.Forms.BundleKeys</c>. Enter, Delete and Space act in
 /// the list only; in a notice's field they are the field's own. Everything else works from anywhere in the window.
 /// </summary>

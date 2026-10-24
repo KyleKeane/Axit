@@ -25,8 +25,7 @@ internal sealed partial class MainForm
         session.DropDownItems.Add(new ToolStripSeparator());
         // FR-8.2: Show current folder in ▸ File Explorer and the other apps' windows on the project folder.
         var explorer = new Command("File &Explorer", AxClaudeKeys.ShowInExplorer, ShowInExplorer) { Mark = CommandMark.Open };
-        AddKey(explorer);
-        session.DropDownItems.Add(CreateShowInMenu("Show current folder &in", Item(explorer.Label, explorer.Run, explorer.Key), FolderOrSay));
+        session.DropDownItems.Add(CreateShowInMenu("Show current folder &in", Add(explorer), FolderOrSay));
         session.DropDownItems.Add(new ToolStripSeparator());
         // Not a save: the conversation is Claude's own record, and this writes a text copy of it. At the bottom, where
         // the editors have Save and Save as, so that the first menu of every window keeps the same order (bundle AX-6).

@@ -77,8 +77,7 @@ public sealed partial class GitForm : AxitForm
         // Show current repository in ▸ File Explorer, axClaude, axTerminal, axFile: the way back to where the user came
         // from (AG-1.4). The base makes the submenu around its first item, so File Explorer is a key of the list and that item.
         var explorer = new Command("File &Explorer", AxGitKeys.ShowInExplorer, ShowInExplorer) { Mark = CommandMark.Open };
-        AddKey(explorer);
-        repository.DropDownItems.Add(CreateShowInMenu("Show current repository &in", Item(explorer.Label, explorer.Run, explorer.Key), RepositoryOrSay));
+        repository.DropDownItems.Add(CreateShowInMenu("Show current repository &in", Add(explorer), RepositoryOrSay));
         repository.DropDownItems.Add(new ToolStripSeparator());
         repository.DropDownItems.Add(CreateExitItem());
 

@@ -70,9 +70,10 @@ the base's. The rest of this section is for a window of a new kind.
   swaps its file calls `RecentlyClosed.Remember` for the old one; it closes as on Alt+F4 when Close all windows posts
   `SC_CLOSE` (AX-9.8). A window that holds a file or a folder takes the bundle's Show in submenu,
   `CreateShowInMenu` (AX-9.10), never one of its own.
-- `AxThingKeys`: the window's keys as constants with an `All` list; handle every key in `ProcessWindowKey` from
-  `BundleKeys` and `AxThingKeys` and nowhere else (the base handles the text size keys, F1 and the notice's hold
-  before it); menu items show the key with `ShortcutKeyDisplayString` (`Item(text, action, key)` in the base).
+- `AxThingKeys`: the window's keys as constants with an `All` list; every key is a command of the window
+  (docs/axit/app-kit.md AK-2): `Add(menu, new Command(label, AxThingKeys.Key, run) { When, Mark })` makes the menu
+  item and handles the key, `AddKey` a key with no item; `ProcessWindowKey` only for what must come before them
+  (the base handles the text size keys, F1 and the notice's hold first). axCalc's `CalcForm` is the small example.
 - `HelpText`: the F1 text (bundle-wide keys first, then the app's) and the embedded guide.
 - The base sets `AccessibleRole = AccessibleRole.Window`: NVDA then speaks the window's title when it opens
   ("name - AxThing window") before the focused control; without the role the window is a nameless pane to NVDA and

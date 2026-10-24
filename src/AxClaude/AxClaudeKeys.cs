@@ -6,7 +6,7 @@ namespace AxClaude;
 
 /// <summary>
 /// axClaude's window-specific keys (SPEC.md §6.3; bundle AX-8). A key is changed here and nowhere else: the window's
-/// key switch, the menu items and the conversation's quick keys read this table, and the F1 text in <c>HelpText</c>
+/// commands with their menu items, the Ctrl+O guard and the conversation's quick keys read this table, and the F1 text in <c>HelpText</c>
 /// names the same keys. The bundle-wide keys (F1, the controls, find, save, text size, the page and paragraph keys) are
 /// <c>Axit.Forms.BundleKeys</c>; the collision test in <c>tests/Axit.Tests</c> fails when a key here equals one of those
 /// or when a key appears twice.

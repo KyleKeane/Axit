@@ -2,7 +2,7 @@ namespace AxGit;
 
 /// <summary>
 /// axGIT's window-specific keys (SPEC.md AG-6.2; bundle AX-8). A key is changed here and nowhere else: the menu
-/// items, the key switch in <c>GitForm.ProcessCmdKey</c> and the F1 text read this table. The bundle-wide keys
+/// items, the commands of <c>GitForm</c> and the F1 text read this table. The bundle-wide keys
 /// (F1, the control keys, find, Ctrl+S, text size, the edit keys of the details) are <c>Axit.Forms.BundleKeys</c>.
 /// Space, Enter and Delete act in the list only; in the details they are the control's own.
 /// </summary>
