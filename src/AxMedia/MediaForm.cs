@@ -64,7 +64,7 @@ public sealed partial class MediaForm : AxitForm
         // AM-1.4: the ways out, on the file playing or the one under the selection.
         var showIn = new ToolStripMenuItem("&Show current file in");
         showIn.DropDownItems.Add(Item("File &Explorer", ShowInExplorer, AxMediaKeys.ShowInExplorer));
-        showIn.DropDownItems.Add(new ToolStripMenuItem("Ax&File", null, (_, _) => OpenInAxFile()));
+        showIn.DropDownItems.Add(new ToolStripMenuItem("ax&File", null, (_, _) => OpenInAxFile()));
         queue.DropDownItems.Add(showIn);
         queue.DropDownItems.Add(new ToolStripSeparator());
         queue.DropDownItems.Add(CreateExitItem());

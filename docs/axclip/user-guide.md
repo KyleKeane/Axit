@@ -30,7 +30,7 @@ The history is kept in memory only: it is gone when axClip ends, unless you turn
 
 ## Menus
 
-- **AxClip**: Paste (Enter), Copy without pasting (Shift+Enter), Read in full (Ctrl+Q), Remove (Delete), Clear history (Ctrl+Shift+Delete), Hide (Escape), Quit axClip.
+- **axClip**: Paste (Enter), Copy without pasting (Shift+Enter), Read in full (Ctrl+Q), Remove (Delete), Clear history (Ctrl+Shift+Delete), Hide (Escape), Quit axClip.
 - **Options**: Hotkey, Pause recording (Ctrl+P), Keep history between runs, Text (font and size), General (the update check, Start with Windows, Say the first match while typing), Developer (the settings file, diagnostics).
 - **Axit**: new windows of every app, the files and folders closed lately, the open windows, updates, About.
 - **Help**: Keyboard shortcuts (F1), this guide, Windows resources.

@@ -85,11 +85,11 @@ public sealed partial class TextEditorForm : AxitForm
         var showIn = new ToolStripMenuItem("Show current file &in");
         showIn.DropDownItems.Add(Item("File &Explorer", ShowInExplorer, EditorKeys.ShowInExplorer));
         // axGIT on the repository that holds the file, a new window (AD-4.1; docs/axgit/SPEC.md AG-1.4).
-        showIn.DropDownItems.Add(new ToolStripMenuItem("Ax&Git", null, (_, _) => OpenIn(Dispatch.AxGit)));
+        showIn.DropDownItems.Add(new ToolStripMenuItem("ax&GIT", null, (_, _) => OpenIn(Dispatch.AxGit)));
         // axTerminal with a shell in the file's folder, a new window (docs/axterminal/SPEC.md AT-1.5).
-        showIn.DropDownItems.Add(new ToolStripMenuItem("Ax&Terminal", null, (_, _) => OpenInAxTerminal()));
+        showIn.DropDownItems.Add(new ToolStripMenuItem("ax&Terminal", null, (_, _) => OpenInAxTerminal()));
         // axFile on the file's folder with the file selected, a new window (docs/axfile/SPEC.md AF-1.3).
-        showIn.DropDownItems.Add(new ToolStripMenuItem("Ax&File", null, (_, _) => OpenIn(Dispatch.AxFile)));
+        showIn.DropDownItems.Add(new ToolStripMenuItem("ax&File", null, (_, _) => OpenIn(Dispatch.AxFile)));
         file.DropDownItems.Add(showIn);
         file.DropDownItems.Add(new ToolStripSeparator());
         file.DropDownItems.Add(CreateExitItem());

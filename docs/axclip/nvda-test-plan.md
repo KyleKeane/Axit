@@ -28,6 +28,6 @@ Run with NVDA before a release, after `run-axclip.ps1` (or `.\run.ps1 -App clip`
 ## 4. Settings and the rest (CP-5, CP-6)
 
 1. Options, Hotkey: the notice "Press the key that brings axClip up…"; press Ctrl+Alt+Shift+V: the field says it; Enter: "Hotkey Ctrl+Alt+Shift+V"; the new key shows axClip. Set it back to Windows+Alt+V.
-2. Options, Keep history between runs (checked), copy two lines, AxClip, Quit axClip, start it again: the two lines are there. Turn the option off, quit, start again: the history is empty.
+2. Options, Keep history between runs (checked), copy two lines, axClip, Quit axClip, start it again: the two lines are there. Turn the option off, quit, start again: the history is empty.
 3. F1: the Keyboard shortcuts notice; Escape. Help, User guide: this guide.
 4. Alt+A: the Axit menu; About, Version names axClip among the apps.

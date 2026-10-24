@@ -79,9 +79,9 @@ public sealed partial class FileForm : AxitForm
         // AF-1.3: the way to the other windows, on the folder shown.
         var showIn = new ToolStripMenuItem("Show current folder &in");
         showIn.DropDownItems.Add(Item("File &Explorer", ShowFolderInExplorer, AxFileKeys.ShowInExplorer));
-        showIn.DropDownItems.Add(new ToolStripMenuItem("Ax&Claude", null, (_, _) => OpenIn(Dispatch.AxClaude)));
-        showIn.DropDownItems.Add(new ToolStripMenuItem("Ax&Git", null, (_, _) => OpenIn(Dispatch.AxGit)));
-        showIn.DropDownItems.Add(new ToolStripMenuItem("Ax&Terminal", null, (_, _) => OpenIn(Dispatch.AxTerminal)));
+        showIn.DropDownItems.Add(new ToolStripMenuItem("ax&Claude", null, (_, _) => OpenIn(Dispatch.AxClaude)));
+        showIn.DropDownItems.Add(new ToolStripMenuItem("ax&GIT", null, (_, _) => OpenIn(Dispatch.AxGit)));
+        showIn.DropDownItems.Add(new ToolStripMenuItem("ax&Terminal", null, (_, _) => OpenIn(Dispatch.AxTerminal)));
         folder.DropDownItems.Add(showIn);
         folder.DropDownItems.Add(new ToolStripSeparator());
         folder.DropDownItems.Add(CreateExitItem());
@@ -207,7 +207,7 @@ public sealed partial class FileForm : AxitForm
         // Every app that takes a path (AF-4.9): axStart takes none and refuses one with a message box.
         foreach (var app in Dispatch.Apps.Where(app => app.Verb != Dispatch.AxStart))
         {
-            axit.DropDownItems.Add(new ToolStripMenuItem("Ax&" + app.Name[2..], null, (_, _) => OpenInAxit(app.Verb)));
+            axit.DropDownItems.Add(new ToolStripMenuItem(AxitWindows.AppLabel(app), null, (_, _) => OpenInAxit(app.Verb)));
         }
 
         items.Add(axit);

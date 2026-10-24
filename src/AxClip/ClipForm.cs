@@ -44,7 +44,7 @@ public sealed class ClipForm : HotkeyForm
         _history = new ClipHistory(settings.History);
 
         // ---- menus (CP-5.1); the keys are handled in ProcessWindowKey from the table, the items only show them ----
-        var clip = new ToolStripMenuItem("Ax&Clip");
+        var clip = new ToolStripMenuItem("ax&Clip");
         clip.DropDownItems.Add(Item("&Paste", Paste, AxClipKeys.Paste));
         clip.DropDownItems.Add(Item("&Copy without pasting", CopyOnly, AxClipKeys.CopyOnly));
         clip.DropDownItems.Add(Item("&Read in full", ReadInFull, AxClipKeys.ReadInFull));

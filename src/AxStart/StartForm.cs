@@ -29,7 +29,7 @@ public sealed class StartForm : HotkeyForm
         _settings = settings;
 
         // ---- menus (AS-5.2); the keys are handled in ProcessWindowKey from the table, the items only show them ----
-        var start = new ToolStripMenuItem("Ax&Start");
+        var start = new ToolStripMenuItem("ax&Start");
         start.DropDownItems.Add(Item("&Start", () => StartSelected(administrator: false), AxStartKeys.Start));
         start.DropDownItems.Add(Item("Start as &administrator", () => StartSelected(administrator: true), AxStartKeys.StartAsAdministrator));
         start.DropDownItems.Add(Item("Open file &location", OpenFileLocation, AxStartKeys.OpenFileLocation));

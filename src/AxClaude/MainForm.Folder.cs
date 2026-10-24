@@ -7,8 +7,11 @@ internal sealed partial class MainForm
 {
     // ---- project folder ----
 
-    /// <summary>Session → Show current folder in → axGIT (FR-8.2): a new axGIT window on the repository that holds the project folder.</summary>
-    private void OpenInAxGit()
+    /// <summary>
+    /// Session → Show current folder in → axGIT, axTerminal or axFile (FR-8.2; docs/axterminal/SPEC.md AT-1.5,
+    /// docs/axfile/SPEC.md AF-1.3): a new window of that app on the project folder (axGIT on the repository that holds it).
+    /// </summary>
+    private void OpenIn(string verb)
     {
         if (_folder is null)
         {
@@ -16,31 +19,7 @@ internal sealed partial class MainForm
             return;
         }
 
-        AxitMenu.Start(Dispatch.AxGit, _folder);
-    }
-
-    /// <summary>Session → Show current folder in → axTerminal: a new axTerminal window with a shell in the project folder (docs/axterminal/SPEC.md AT-1.5).</summary>
-    private void OpenInAxTerminal()
-    {
-        if (_folder is null)
-        {
-            Announce("No project folder", true);
-            return;
-        }
-
-        AxitMenu.Start(Dispatch.AxTerminal, _folder);
-    }
-
-    /// <summary>Session → Show current folder in → axFile: a new axFile window listing the project folder (docs/axfile/SPEC.md AF-1.3).</summary>
-    private void OpenInAxFile()
-    {
-        if (_folder is null)
-        {
-            Announce("No project folder", true);
-            return;
-        }
-
-        AxitMenu.Start(Dispatch.AxFile, _folder);
+        AxitMenu.Start(verb, _folder);
     }
 
     /// <summary>Session → Show current folder in → File Explorer, Ctrl+W (FR-8.2): the folder in File Explorer, one of the system's own windows (D23).</summary>
@@ -71,7 +50,7 @@ internal sealed partial class MainForm
         if (_folder is { } old && !string.Equals(old, folder, StringComparison.OrdinalIgnoreCase))
         {
             // AX-9.4: the folder left behind joins the bundle's Recently closed list.
-            RecentlyClosed.Remember("axClaude", old);
+            RecentlyClosed.Remember(AppName, old);
         }
 
         _folder = folder;
