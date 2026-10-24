@@ -466,15 +466,60 @@ public abstract partial class AxitForm : Form
         return item;
     }
 
-    /// <summary>A command with its key handled, and its item for a menu the window places itself (the first item of <see cref="CreateShowInMenu"/>, a context menu).</summary>
+    /// <summary>
+    /// A command with its key handled, and its item for a menu the window places itself (the first item of
+    /// <see cref="CreateShowInMenu"/>, a context menu). One record placed in several menus (axProcess's Details in each
+    /// view's menu) is one command: it is listed once.
+    /// </summary>
     protected ToolStripMenuItem Add(Command command)
     {
-        _commands.Add(command);
+        if (!_commands.Any(known => ReferenceEquals(known, command)))
+        {
+            _commands.Add(command);
+        }
+
         return Item(command.Label, command.Run, command.Key);
     }
 
     /// <summary>A command that is a key and no menu item (Tab between a window's panes, a list's Enter).</summary>
     protected void AddKey(Command command) => _commands.Add(command);
+
+    /// <summary>
+    /// What is wrong with the window's command list (app-kit AK-2.4), for the automated checks' <c>check commands</c>:
+    /// a key of the window's own with a modifier, or a function key, that the F1 text does not name, and a command that never runs because
+    /// an earlier one has its key everywhere (no <see cref="Command.When"/>). Empty when all is well.
+    /// </summary>
+    internal List<string> CommandProblems()
+    {
+        var problems = new List<string>();
+        for (var i = 0; i < _commands.Count; i++)
+        {
+            var command = _commands[i];
+            var key = command.Key;
+            if (key == Keys.None)
+            {
+                continue;
+            }
+
+            var code = key & Keys.KeyCode;
+            var text = BundleKeys.Text(key).TrimEnd('.');
+            // A bundle key (the focus keys, find) is the bundle's to describe; KeyTests checks the ones every F1 text names.
+            var bundleKey = BundleKeys.All.Any(known => known.Key == key);
+            if (!bundleKey && ((key & Keys.Modifiers) != 0 || code is >= Keys.F1 and <= Keys.F24) && !Shortcuts.Contains(text, StringComparison.OrdinalIgnoreCase))
+            {
+                problems.Add($"{Plain(command.Label)} ({text}) is not in the F1 text");
+            }
+
+            if (_commands.Take(i).FirstOrDefault(earlier => earlier.Key == key && earlier.When is null) is { } shadow)
+            {
+                problems.Add($"{Plain(command.Label)} ({text}) never runs: {Plain(shadow.Label)} takes the key everywhere");
+            }
+        }
+
+        return problems;
+
+        static string Plain(string label) => label.Replace("&", string.Empty, StringComparison.Ordinal).TrimEnd('.');
+    }
 
     /// <summary>The first command with the key whose <see cref="Command.When"/> holds, run; true when there was one.</summary>
     private bool RunCommandKey(Keys keyData)

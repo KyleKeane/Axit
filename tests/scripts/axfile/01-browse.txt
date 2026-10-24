@@ -22,6 +22,8 @@ file home\Axit\axfile.json {"checkForUpdates": false}
 
 # 1.1 The start: the title names the folder, the list its count, the first entry selected; nothing announced.
 start file {temp}\nav
+# The window's command list: every key of its own in the F1 text, none shadowed (docs/axit/app-kit.md AK-2.4).
+check commands
 expect focus "name":"13 items"
 # A modifier key sent while the window still settles can lose its modifier (the channel); let it settle.
 wait 500

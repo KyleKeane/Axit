@@ -7,6 +7,8 @@ run powershell -NoProfile -Command "Start-Process ping -ArgumentList '-n','120',
 
 # 1.1 The window, and after the first read (one second of sampling) the list's name and first item, not interrupting.
 start process
+# The window's command list: every key of its own in the F1 text, none shadowed (docs/axit/app-kit.md AK-2.4).
+check commands
 expect state This computer - axProcess
 # The list is named "Processes, reading" while the first read runs; the status bar says "Reading…" until it is done.
 expect state "status":["Processes,

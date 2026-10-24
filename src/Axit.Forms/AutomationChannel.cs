@@ -15,7 +15,7 @@ namespace Axit.Forms;
 /// The automation channel of a window (docs/axit/automation.md, tier 2): on only when the environment variable
 /// <c>AXIT_AUTOMATION</c> is set, as the test runner sets it for the processes it starts on its own desktop. One named
 /// pipe, <c>axit-auto-&lt;process id&gt;</c>, one command per line and one JSON answer per line: <c>keys</c>,
-/// <c>type</c>, <c>focus</c>, <c>text</c>, <c>said</c>, <c>state</c>, <c>menu</c>, <c>close</c>. Keys are posted to the focused
+/// <c>type</c>, <c>focus</c>, <c>text</c>, <c>said</c>, <c>state</c>, <c>menu</c>, <c>close</c>, <c>problems</c> (the command list's, AK-2.4). Keys are posted to the focused
 /// control through the window's own message queue with the modifiers set in the thread's keyboard state, so that
 /// <c>ProcessCmdKey</c> and the controls see them as typed; nothing reaches another program.
 /// </summary>
@@ -195,6 +195,7 @@ internal sealed class AutomationChannel : IMessageFilter
             "text" => Text(),
             "list" => List(),
             "commands" => Commands(),
+            "problems" => new { problems = _form.CommandProblems() },
             "said" => Said(),
             "state" => _form.AutomationState(),
             "menu" => Menu(argument),

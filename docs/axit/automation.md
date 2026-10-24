@@ -67,6 +67,8 @@ including while the user works, because nothing takes the foreground.
   - `state`: the title, the status bar's texts, whether a notice shows and its title, the control area's name.
   - `menu <name>`: runs a menu command by the name the command palette knows it by.
   - `close`: closes the window as Alt+F4 does.
+  - `problems`: what is wrong with the window's command list (app-kit AK-2.4): a key of its own the F1 text does not
+    name, a command an earlier one shadows. Every app's first script runs it as `check commands`, after its start.
 - **Scripts**: `tools/AxAutomate` starts an app with the channel on and runs a script of steps (`mkdir`, `start`,
   `use`, `keys`, `type`, `menu`, `said`, `expect said|focus|state <text>`, `try said <text>` with `iffound <step>` for
   what may not come, such as Claude's trust question, `wait <ms>`, `close`; `file <path> <text>` writes a file, its

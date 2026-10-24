@@ -12,6 +12,8 @@ run powershell -NoProfile -Command "[IO.File]::WriteAllText('too-large.txt', ('a
 
 # 1.1: README.md: the title, the text named after the file with its first line; nothing else spoken.
 start preview {temp}\README.md
+# The window's command list: every key of its own in the F1 text, none shadowed (docs/axit/app-kit.md AK-2.4).
+check commands
 expect state "title":"README.md - axPreview"
 expect focus {"name":"README.md","role":"Text","value":"# Readme for the preview tests"}
 expect quiet 1000

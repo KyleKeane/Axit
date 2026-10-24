@@ -8,6 +8,8 @@ file home\Axit\axmedia.json {"checkForUpdates":false}
 
 # Step 1: no path, an empty queue; the list reads "Queue is empty", and every command on that line says so.
 start media
+# The window's command list: every key of its own in the F1 text, none shadowed (docs/axit/app-kit.md AK-2.4).
+check commands
 expect focus Queue is empty
 expect state "title":"axMedia"
 keys enter

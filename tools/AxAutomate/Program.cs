@@ -32,6 +32,8 @@
 //   said                      prints the timeline since the last look (! interrupting, ♪ sound, → focus, · value)
 //   text | list | commands | state | focus   prints the focused text's lines, the focused list's items, the menus'
 //                             commands, the window's state (title, notice and its text, status bar), the focus
+//   check commands            fails when the window's command list has a problem: a key the F1 text does not name, a
+//                             command that never runs because an earlier one takes its key everywhere (app-kit AK-2.4)
 //   expect said <text>        waits up to 60 s until the timeline holds the text (an announcement, "♪ Edge" for a
 //                             sound, "→ Conversation" for a focus move); takes it and what came before it
 //   expect focus|state|list|text|commands <text>   waits up to 10 s until that answer holds the text
@@ -365,6 +367,10 @@ internal sealed class Run(string exe, string temp)
             case "text" or "list" or "commands" or "state" or "focus":
                 var answer = Current.Send(verb);
                 return (!answer.Contains("\"error\""), answer);
+            case "check" when rest == "commands":
+                // The window's command list (docs/axit/app-kit.md AK-2.4): every key in the F1 text, none shadowed.
+                var problems = Current.Send("problems");
+                return (problems.Contains("\"problems\":[]", StringComparison.Ordinal), problems);
             case "spoken":
                 return (true, string.Join(" | ", _speech.TakeAll()));
             case "keys" when Nvda:

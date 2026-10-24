@@ -4,6 +4,8 @@ file home\Axit\axclaude.json {"checkForUpdates":false}
 # Step 1: a folder never used with Claude; the title names the folder and its path, the focus starts in the field.
 mkdir fresh
 start claude {temp}\fresh -- --model haiku
+# The window's command list: every key of its own in the F1 text, none shadowed (docs/axit/app-kit.md AK-2.4).
+check commands
 expect said → Message to Claude (Text)
 expect state fresh (
 expect state ) - axClaude

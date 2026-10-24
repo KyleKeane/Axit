@@ -6,6 +6,8 @@ mkdir myproject
 # The run's own settings: no update check, which would go to the network and log an ERROR when it fails.
 file home\Axit\axterminal.json {"checkForUpdates": false}
 start terminal {temp}\myproject
+# The window's command list: every key of its own in the F1 text, none shadowed (docs/axit/app-kit.md AK-2.4).
+check commands
 # Step 1: the window and the field; after a moment the ping and "Ready".
 expect focus Command
 expect state "title":"myproject -

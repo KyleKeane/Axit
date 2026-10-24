@@ -6,6 +6,8 @@
 file home\Axit\axstart.json {"checkForUpdates": false, "hotkey": "Ctrl+Alt+Shift+F11", "sayFirstMatch": false}
 
 start start
+# The window's command list: every key of its own in the F1 text, none shadowed (docs/axit/app-kit.md AK-2.4).
+check commands
 expect focus Search programs
 
 # F5 reads the programs again and says how many, once the first read is done: the list is there before the typing.

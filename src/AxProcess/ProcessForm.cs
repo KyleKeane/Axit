@@ -66,18 +66,21 @@ public sealed class ProcessForm : AxitForm
         computer.DropDownItems.Add(new ToolStripSeparator());
         computer.DropDownItems.Add(CreateExitItem());
 
-        Add(_processMenu, new Command("&Details", AxProcessKeys.Act, () => Do(ActAsync)) { When = () => _list.Focused, Mark = CommandMark.Read });
+        // Details and Show program are in more than one view's menu: one command each, placed in every menu that has it.
+        var details = new Command("&Details", AxProcessKeys.Act, () => Do(ActAsync)) { When = () => _list.Focused, Mark = CommandMark.Read };
+        var showProgram = new Command("Show program in ax&File", AxProcessKeys.ShowProgram, ShowProgram) { Mark = CommandMark.Open };
+        Add(_processMenu, details);
         Add(_processMenu, new Command("&End process...", AxProcessKeys.End, () => EndProcess(tree: false)) { When = () => _list.Focused, Mark = CommandMark.Act });
         Add(_processMenu, new Command("End process &tree...", Keys.None, () => EndProcess(tree: true)) { Mark = CommandMark.Act });
-        Add(_processMenu, new Command("Show program in ax&File", AxProcessKeys.ShowProgram, ShowProgram) { Mark = CommandMark.Open });
+        Add(_processMenu, showProgram);
 
-        Add(_serviceMenu, new Command("&Details", AxProcessKeys.Act, () => Do(ActAsync)) { When = () => _list.Focused, Mark = CommandMark.Read });
+        Add(_serviceMenu, details);
         Add(_serviceMenu, new Command("&Start", Keys.None, () => ControlSelectedService(ServiceAction.Start)) { Mark = CommandMark.Act });
         Add(_serviceMenu, new Command("S&top", Keys.None, () => ControlSelectedService(ServiceAction.Stop)) { Mark = CommandMark.Act });
         Add(_serviceMenu, new Command("&Restart", Keys.None, () => ControlSelectedService(ServiceAction.Restart)) { Mark = CommandMark.Act });
 
-        Add(_startupMenu, new Command("&Details", AxProcessKeys.Act, () => Do(ActAsync)) { When = () => _list.Focused, Mark = CommandMark.Read });
-        Add(_startupMenu, new Command("Show program in ax&File", AxProcessKeys.ShowProgram, ShowProgram) { Mark = CommandMark.Open });
+        Add(_startupMenu, details);
+        Add(_startupMenu, showProgram);
 
         var view = new ToolStripMenuItem("&View");
         Add(view, new Command("&Processes", AxProcessKeys.ViewProcesses, () => Do(() => ShowViewAsync(View.Processes))) { Mark = CommandMark.Open });

@@ -4,6 +4,8 @@
 file home\Axit\axcalc.json {"checkForUpdates": false, "keepHistory": false}
 
 start calc
+# The window's command list: every key of its own in the F1 text, none shadowed (docs/axit/app-kit.md AK-2.4).
+check commands
 expect focus Expression
 
 # AC-6.1: Enter answers, the answer said alone, the field emptied.

@@ -7,6 +7,8 @@ file settings.json {\n  "model": "opus",\n  "permissions": { "allow": ["Bash", "
 
 # 1.1, the window part: no file, an empty Untitled document; nothing of axJSON's own is said.
 start json
+# The window's command list: every key of its own in the F1 text, none shadowed (docs/axit/app-kit.md AK-2.4).
+check commands
 expect state Untitled - axJSON
 expect focus {"name":"Untitled","role":"Text","value":""}
 expect quiet 1000
