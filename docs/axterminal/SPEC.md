@@ -179,21 +179,23 @@ out of scope; programs that print and ask are in. It works entirely offline (bun
   else typed reaches the shell before Enter.
 - AT-3.6 **Recent commands** (Ctrl+R; Shell → Recent commands…): the window's last fifty commands, the newest first,
   as a list in the field's place (`ControlArea`, axClaude D33, named "Recent commands"); Enter puts the chosen one in
-  the field and focuses it, Escape brings the field back; "No recent commands" when there are none. Up and Down in the
-  field go through the same list (AT-3.9). The list is the window's own and is not persisted (§7).
+  the field and focuses it, Escape brings the field back; "No recent commands" when there are none. Ctrl+Up and Ctrl+Down
+  in the field go through the same list (AT-3.9). The list is the window's own and is not persisted (§7).
 - AT-3.7 **Enter on a line of the view** copies the line's text into the field, after a new line when the field is
   not empty, moves the focus there with the caret at the end and announces "Line copied"; no quote markers (AT-D4).
   A joined row copies as one line; a marker line copies its text like any other.
 - AT-3.8 Page Up, Page Down, Ctrl+Up and Ctrl+Down, with Shift, work in the field as in every edit control of the
   bundle (AX-8.2).
-- AT-3.9 **Up and Down in the field** (asked 2026-10-23, PowerShell's own line editor's rule; until then the caret's
-  keys alone, AT-D5): Up with the caret on the field's first line puts the command before in the field, from the
-  recent list (AT-3.6), the newest first, the text typed so far kept; Down with the caret on the last line puts the
-  command after, and past the newest the kept text; on any other line they move the caret, so that a command of
-  several lines is still edited line by line. The command is said once ("blank" for an empty draft) and the caret
-  is at its start, so that Up again goes further back; at the oldest, or Down with the field holding the user's own
-  text, the edge earcon (AX-10.4). Typing, a paste, a send or a copied line makes the field the user's own again,
-  and the next Up starts from the newest.
+- AT-3.9 **Ctrl+Up and Ctrl+Down in the field** (asked 2026-10-23): the recent list (AT-3.6) in the field, Ctrl+Up the
+  command before, the newest first, and Ctrl+Down the command after; past the newest, the last item, the draft: what
+  the user typed, or the last command the user changed and left, so that Ctrl+Down to the end always gets an edit
+  back (a command in the list never changes). Each move plays the recall earcon (two quick rising notes) and says the
+  command once ("blank" for an empty draft), the caret at its end; at either end the edge earcon (AX-10.4). A send
+  empties the draft and starts again from the newest. Plain Up and Down are the caret's, so a command of several lines
+  is edited line by line. Ctrl+Up and Ctrl+Down take the place of the bundle's paragraph keys in this field only
+  (AX-8.4's overrides); Shift with them still selects by paragraph. The first draft the same day had Up on the first
+  line and Down on the last, as PowerShell's line editor does; the user found it too subtle (where an edit went, which
+  line one was on) and chose this.
 
 ### AT-4 The transcript
 

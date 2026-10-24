@@ -2,7 +2,7 @@
 
 ## Unreleased
 
-- axTerminal: Up on the command field's first line brings back the previous command and Down on its last line the next one, as in PowerShell; inside a command of several lines they still move between its lines.
+- axTerminal: Ctrl+Up and Ctrl+Down in the command field go through the recent commands, with a short earcon on each; past the newest comes what you typed or last changed. The plain arrows only move the caret.
 - axTerminal: Speak output is all lines by default, so a command's output is read as it arrives; a settings file that already says none keeps none (Options, Speech, Speak output: all lines changes it).
 - axFile: Cut and Copy put the paths on the clipboard as text as well, so that a text field pastes them; File Explorer and Paste still take the files.
 - axFile: Move to new folder is Move to folder: Down and Up complete the folder as in Go to folder, a folder that exists (here or by its path) takes the entries, and any other name is a new folder made here.

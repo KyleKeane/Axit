@@ -24,6 +24,17 @@ public sealed class KeyTests
             ["axStart"] = AxStart.AxStartKeys.All,
         };
 
+    /// <summary>
+    /// The window keys that take a bundle key's place on purpose, each with its spec line (bundle AX-8.4). axTerminal's
+    /// command field: Ctrl+Up and Ctrl+Down go through the history instead of by paragraph (AT-3.9, the user's choice
+    /// on 2026-10-23 over Up and Down on the field's first and last line).
+    /// </summary>
+    private static readonly HashSet<(string Window, Keys Key)> Overrides =
+    [
+        ("axTerminal", Keys.Control | Keys.Up),
+        ("axTerminal", Keys.Control | Keys.Down),
+    ];
+
     [Fact]
     public void No_window_key_equals_a_bundle_key()
     {
@@ -33,7 +44,7 @@ public sealed class KeyTests
         {
             foreach (var (name, key) in keys)
             {
-                if (bundle.TryGetValue(key, out var bundleName))
+                if (bundle.TryGetValue(key, out var bundleName) && !Overrides.Contains((window, key)))
                 {
                     collisions.Add($"{window}: {name} is {key}, the bundle's {bundleName}.");
                 }

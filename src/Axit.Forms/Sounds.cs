@@ -192,6 +192,9 @@ public static class Sounds
     // carries on small speakers where A3 hardly does.
     private static readonly Sound EdgeTick = new(WaveTone.Notes(0.6, (440, 45), (220, 90)));
 
+    // E5 up to A5, short: a command recalled into a field (axTerminal AT-3.9, asked 2026-10-23), rising where the edge falls.
+    private static readonly Sound RecallTick = new(WaveTone.Notes(0.45, (659.25, 35), (880, 50)));
+
     // G5, C6 up to a held E6, and once more: longer and louder than the chimes, so that Claude finishing or asking is
     // heard from another window, where the done chime was missed (axClaude FR-7.3).
     private static readonly Sound AlertChime = new(WaveTone.Notes(0.6, (783.99, 100), (1046.5, 100), (1318.5, 300), (0, 200), (783.99, 100), (1046.5, 100), (1318.5, 500)));
@@ -205,7 +208,7 @@ public static class Sounds
         174.61, 220.00, 261.63, 349.23,
         196.00, 246.94, 293.66, 392.00), loops: true);
 
-    private static readonly Device Chimes = new("sounds", LineTick, ToolTick, ReadyChime, SentChime, RespondingChime, DoneChime, QuestionChime, NoticeChime, EdgeTick, AlertChime);
+    private static readonly Device Chimes = new("sounds", LineTick, ToolTick, ReadyChime, SentChime, RespondingChime, DoneChime, QuestionChime, NoticeChime, EdgeTick, RecallTick, AlertChime);
     private static readonly Device Music = new("working music", WorkingMusic);
 
     /// <summary>A tiny typewriter-like tick: a line from Claude arrived.</summary>
@@ -252,6 +255,9 @@ public static class Sounds
 
     /// <summary>One short low note: the edge, nothing there (a key that moves nothing, a typed name no entry starts with).</summary>
     public static void Edge() => Play("Edge", () => Chimes.Play(EdgeTick, replace: true));
+
+    /// <summary>Two quick rising notes: another command came into the field from the history (axTerminal AT-3.9).</summary>
+    public static void Recall() => Play("Recall", () => Chimes.Play(RecallTick, replace: true));
 
     /// <summary>A longer, louder call, three rising notes to a held one and again: Claude is done or asks while the window is in the background.</summary>
     public static void Alert() => Play("Alert", () => Chimes.Play(AlertChime, replace: true));

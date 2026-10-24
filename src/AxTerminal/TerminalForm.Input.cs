@@ -25,21 +25,28 @@ internal sealed partial class TerminalForm
                 e.SuppressKeyPress = true;
                 Announce(EscapeGuardText, true);
                 break;
-            case AxTerminalKeys.OlderCommand when Input.GetLineFromCharIndex(Input.SelectionStart) == 0:
+            case AxTerminalKeys.OlderCommand:
                 e.Handled = e.SuppressKeyPress = true;
-                Recall(_history.Older(Input.Text.Replace("\r\n", "\n")));
+                Recall(_history.Older(FieldText()));
                 break;
-            case AxTerminalKeys.NewerCommand when Input.GetLineFromCharIndex(Input.SelectionStart) == Input.GetLineFromCharIndex(Input.TextLength):
+            case AxTerminalKeys.NewerCommand:
                 e.Handled = e.SuppressKeyPress = true;
-                Recall(_history.Newer());
+                Recall(_history.Newer(FieldText()));
+                break;
+            default:
+                // The bundle's page and paragraph keys (AX-8.2), after the field's own: Ctrl+Up and Ctrl+Down are the
+                // history here, Shift with them still selects by paragraph.
+                EditKeys.Handle(sender, e);
                 break;
         }
     }
 
+    private string FieldText() => Input.Text.Replace("\r\n", "\n");
+
     /// <summary>
-    /// Up on the field's first line and Down on its last (AT-3.9): a command of the recent list in the field, as
-    /// PowerShell's own line editor does, the caret at its start so that Up again goes further back; said once. The
-    /// edge earcon when there is none further, and Down while the field holds the user's own text moves nothing.
+    /// Ctrl+Up and Ctrl+Down (AT-3.9): a command of the recent list in the field, or the draft past the newest, with
+    /// the recall earcon and the command said once, the caret at its end; the edge earcon when there is none further.
+    /// Plain Up and Down stay the caret's.
     /// </summary>
     private void Recall(string? command)
     {
@@ -49,23 +56,10 @@ internal sealed partial class TerminalForm
             return;
         }
 
-        _recalling = true;
         Input.Text = command.Replace("\n", "\r\n");
-        _recalling = false;
-        Input.Select(0, 0);
+        Input.Select(Input.TextLength, 0);
+        Sounds.Recall();
         Announce(command.Length == 0 ? "blank" : command.Replace("\n", " "), true);
-    }
-
-    /// <summary>Set while <see cref="Recall"/> fills the field, so that the change is not taken as the user's own typing.</summary>
-    private bool _recalling;
-
-    /// <summary>Anything else that changes the field (typing, a paste, a sent command, a line copied in) makes it the user's own text again.</summary>
-    private void OnInputChanged(object? sender, EventArgs e)
-    {
-        if (!_recalling)
-        {
-            _history.Reset();
-        }
     }
 
     /// <summary>

@@ -37,34 +37,35 @@ public sealed class CommandHistory
         Reset();
     }
 
-    // ---- Up and Down in the field (AT-3.9, 2026-10-23): PowerShell's own history keys over the same list ----
+    // ---- Ctrl+Up and Ctrl+Down in the field (AT-3.9, 2026-10-23): the same list, with the draft as its last item ----
 
-    /// <summary>The command the field holds from the list, 0 the newest; -1 while it holds the user's own text.</summary>
+    /// <summary>The command the field holds from the list, 0 the newest; -1 while it holds the draft.</summary>
     private int _at = -1;
 
-    /// <summary>What the field held before the first Up, given back by Down past the newest.</summary>
+    /// <summary>
+    /// The last item, past the newest: what the user typed, or the last command the user changed and left. A field
+    /// whose text is not the item in hand has been edited, and that text becomes the draft as the field moves on, so
+    /// that Ctrl+Down to the end always gets the edit back; the commands themselves never change.
+    /// </summary>
     private string _draft = string.Empty;
 
-    /// <summary>The command before the one in hand, or null at the oldest; the first call keeps <paramref name="current"/> as the draft.</summary>
+    /// <summary>The command before the one in hand, or null at the oldest; an edited field is kept as the draft first.</summary>
     public string? Older(string current)
     {
+        Keep(current);
         if (_at + 1 >= _items.Count)
         {
             return null;
-        }
-
-        if (_at < 0)
-        {
-            _draft = current;
         }
 
         _at++;
         return _items[_at];
     }
 
-    /// <summary>The command after the one in hand, the draft past the newest, or null while the field holds the user's own text.</summary>
-    public string? Newer()
+    /// <summary>The command after the one in hand, the draft past the newest, or null at the draft; an edited field is kept as the draft first.</summary>
+    public string? Newer(string current)
     {
+        Keep(current);
         if (_at < 0)
         {
             return null;
@@ -74,10 +75,19 @@ public sealed class CommandHistory
         return _at < 0 ? _draft : _items[_at];
     }
 
-    /// <summary>The field holds the user's own text again (typed, sent, cleared): the next Up starts from the newest.</summary>
+    /// <summary>A sent command: the next Ctrl+Up starts from the newest, and the draft is empty again.</summary>
     public void Reset()
     {
         _at = -1;
         _draft = string.Empty;
+    }
+
+    private void Keep(string current)
+    {
+        var inHand = _at < 0 ? _draft : _items[_at];
+        if (!string.Equals(current, inHand, StringComparison.Ordinal))
+        {
+            _draft = current;
+        }
     }
 }

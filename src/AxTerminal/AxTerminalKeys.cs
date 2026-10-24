@@ -43,10 +43,10 @@ public static class AxTerminalKeys
     /// <summary>In the command field: the text goes to the shell with no block, no history, no log (AT-3.4).</summary>
     public const Keys SendWithoutRecording = Keys.Control | Keys.Return;
     public const Keys Escape = Keys.Escape;
-    /// <summary>In the command field, on its first line: the command before, from the recent list (AT-3.9); elsewhere the caret's own Up.</summary>
-    public const Keys OlderCommand = Keys.Up;
-    /// <summary>In the command field, on its last line: the command after, then what was typed (AT-3.9); elsewhere the caret's own Down.</summary>
-    public const Keys NewerCommand = Keys.Down;
+    /// <summary>In the command field: the command before, from the recent list (AT-3.9), in place of the bundle's paragraph up.</summary>
+    public const Keys OlderCommand = Keys.Control | Keys.Up;
+    /// <summary>In the command field: the command after, then the draft (AT-3.9), in place of the bundle's paragraph down.</summary>
+    public const Keys NewerCommand = Keys.Control | Keys.Down;
 
     /// <summary>In the terminal with a selection: copies it and says so; the control's own copy otherwise.</summary>
     public const Keys CopySelection = Keys.Control | Keys.C;
@@ -88,8 +88,8 @@ public static class AxTerminalKeys
         ("Background music on or off", ToggleMusic),
         ("Enter: send, or copy the line", Enter),
         ("Send without recording", SendWithoutRecording),
-        ("Previous command (in the field, on its first line)", OlderCommand),
-        ("Next command (in the field, on its last line)", NewerCommand),
+        ("Previous command (in the field)", OlderCommand),
+        ("Next command, then what you typed (in the field)", NewerCommand),
         ("Escape: the guard, clear the selection or go to the field", Escape),
         ("Copy the selection", CopySelection),
         ("Heading", Heading),

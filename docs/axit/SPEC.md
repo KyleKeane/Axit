@@ -319,7 +319,9 @@ The apps are named ax and a word, the ax in lower case and the word as it is wri
   defined once for every editor window, and each editor app's table includes them, so that one table per window
   still holds every key and the collision test sees them.
 - AX-8.4 A unit test in `tests/Axit.Tests` fails when a window-specific key equals a bundle-wide key, and lists the
-  keys that two windows use for different actions, so that a collision between apps is seen before it is felt.
+  keys that two windows use for different actions, so that a collision between apps is seen before it is felt. A
+  window key may take a bundle key's place in one control only by the user's decision, listed by name in the test's
+  `Overrides` with its spec line: axTerminal's command field, Ctrl+Up and Ctrl+Down for the history (AT-3.9, 2026-10-23).
 - AX-8.5 A key is never handled anywhere but through its table, and no key is intercepted that NVDA uses (AX-7.4).
   The text a menu item shows for its key comes from the tables too (`BundleKeys.Text`: "Ctrl+Shift+S", "Shift+Escape"),
   so that a key changed in its table changes in the menus by itself; only Windows' own keys (Alt+F4, the edit
