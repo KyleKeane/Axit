@@ -13,9 +13,10 @@
       under Windows' own "Open with" for .md, .markdown and .txt, axJSON for .json, axMedia for the sound and video
       kinds, axPreview for .txt, .md, .markdown, .log and .json, so that the user can make an app the default program
       for a kind in Settings, Default apps,
-    - axStart, the program launcher, running in the background from sign-in (a value under the user's Run key that axStart
-      writes itself): it is stopped before an install or a removal, and started again, hidden, after an install,
-    - the console commands axclaude, axdown, axjson, axgit, axterminal, axfile, axmedia, axpreview, axstart, axprocess, axtask, axpass, axcalc and axit (a folder
+    - axStart, the program launcher, and axClip, the clipboard history, running in the background from sign-in (a value
+      under the user's Run key that each writes itself): they are stopped before an install or a removal, and started
+      again, hidden, after an install,
+    - the console commands axclaude, axdown, axjson, axgit, axterminal, axfile, axmedia, axpreview, axstart, axprocess, axtask, axpass, axcalc, axclip and axit (a folder
       opens axClaude, a file axDown, a .json file axJSON, a sound or video file axMedia): one-line shims in
       %USERPROFILE%\.local\bin, put on the user's PATH when it is not there yet (Claude Code's installer uses the same
       folder; a removal leaves the PATH, since the folder may hold other programs' commands).
@@ -111,6 +112,7 @@ $apps = @(
     @{ Name = 'axTask'; Verb = 'task'; Description = 'axTask, tasks and lists'; Icon = (Join-Path $target 'AxTask.ico'); Opens = 'folders' },
     @{ Name = 'axPass'; Verb = 'pass'; Description = 'axPass, a KeePass password database'; Icon = (Join-Path $target 'AxPass.ico'); Opens = 'files'; Types = '.kdbx'; OpenWith = '.kdbx'; TypeName = 'KeePass database (axPass)' },
     @{ Name = 'axCalc'; Verb = 'calc'; Description = 'axCalc, a calculator with a history'; Icon = (Join-Path $target 'AxCalc.ico') },
+    @{ Name = 'axClip'; Verb = 'clip'; Description = 'axClip, a clipboard history behind a hotkey'; Icon = (Join-Path $target 'AxClip.ico') },
     @{ Name = 'axPreview'; Verb = 'preview'; Description = 'axPreview, a read-only viewer for text files'; Icon = (Join-Path $target 'AxPreview.ico'); Opens = 'files'; OpenWith = '.txt', '.md', '.markdown', '.log', '.json'; TypeName = 'Text file (axPreview)' }
 )
 # The places that follow from the name.
@@ -150,27 +152,36 @@ function Get-Version([string]$path) {
     (Get-Item $path).VersionInfo.FileVersion -replace '^(\d+\.\d+\.\d+).*', '$1'
 }
 
-# axStart runs in the background from sign-in (docs/axstart/SPEC.md AS-1.3, AS-1.5): it is the one app that would
-# always be running here, so it is stopped before anything is changed and started again, hidden, afterwards. Its
-# process is told by its verb; it holds nothing unsaved.
+# axStart and axClip run in the background from sign-in (docs/axstart/SPEC.md AS-1.3, AS-1.5; docs/axclip/SPEC.md
+# CP-1.2): they are the apps that would always be running here, so they are stopped before anything is changed and
+# started again, hidden, afterwards. Their processes are told by their verbs; axStart holds nothing unsaved, axClip
+# writes a kept history as it ends. One table, the verb, the name, the settings file and what is said.
 $runKey = 'HKCU:\Software\Microsoft\Windows\CurrentVersion\Run'
-function Stop-AxStart {
-    $running = @(Get-CimInstance Win32_Process -Filter "Name = 'Axit.exe'" -ErrorAction SilentlyContinue |
-        Where-Object { $_.CommandLine -match '^"?[^"]*\\Axit[^"\\]*\.exe"?\s+start(\s|$)' })
-    foreach ($process in $running) {
-        try { Stop-Process -Id $process.ProcessId -Force -ErrorAction Stop; Wait-Process -Id $process.ProcessId -Timeout 10 -ErrorAction SilentlyContinue } catch { }
+$background = @(
+    @{ Verb = 'start'; Name = 'axStart'; Settings = 'axstart.json'; What = 'the launcher'; Started = 'axStart, the launcher, runs in the background: Ctrl+Shift+Space, or the hotkey you chose, brings up its search field' },
+    @{ Verb = 'clip'; Name = 'axClip'; Settings = 'axclip.json'; What = 'the clipboard history'; Started = 'axClip, the clipboard history, runs in the background: Windows+Alt+V, or the hotkey you chose, brings it up' }
+)
+function Stop-Background {
+    foreach ($app in $background) {
+        $running = @(Get-CimInstance Win32_Process -Filter "Name = 'Axit.exe'" -ErrorAction SilentlyContinue |
+            Where-Object { $_.CommandLine -match ('^"?[^"]*\\Axit[^"\\]*\.exe"?\s+' + $app.Verb + '(\s|$)') })
+        foreach ($process in $running) {
+            try { Stop-Process -Id $process.ProcessId -Force -ErrorAction Stop; Wait-Process -Id $process.ProcessId -Timeout 10 -ErrorAction SilentlyContinue } catch { }
+        }
+        if ($running) { Say "Stopped $($app.Name), $($app.What), for the installation" }
     }
-    if ($running) { Say "Stopped axStart, the launcher, for the installation" }
 }
 
-function Start-AxStart {
-    # Not when the user turned Start with Windows off in axStart's settings.
-    $settingsFile = Join-Path $env:APPDATA 'Axit\axstart.json'
-    if (Test-Path -LiteralPath $settingsFile) {
-        try { if ((Get-Content -LiteralPath $settingsFile -Raw | ConvertFrom-Json).startWithWindows -eq $false) { return } } catch { }
+function Start-Background {
+    foreach ($app in $background) {
+        # Not when the user turned Start with Windows off in the app's settings.
+        $settingsFile = Join-Path $env:APPDATA "Axit\$($app.Settings)"
+        if (Test-Path -LiteralPath $settingsFile) {
+            try { if ((Get-Content -LiteralPath $settingsFile -Raw | ConvertFrom-Json).startWithWindows -eq $false) { continue } } catch { }
+        }
+        Start-Process -FilePath $exe -ArgumentList @($app.Verb, '--hidden') -WorkingDirectory $target
+        Say $app.Started
     }
-    Start-Process -FilePath $exe -ArgumentList @('start', '--hidden') -WorkingDirectory $target
-    Say "axStart, the launcher, runs in the background: Ctrl+Shift+Space, or the hotkey you chose, brings up its search field"
 }
 
 function Test-Running {
@@ -193,8 +204,11 @@ function Remove-Installation {
     foreach ($item in $places) {
         if (Test-Path -LiteralPath $item) { Remove-Item -LiteralPath $item -Recurse -Force }
     }
-    if ((Test-Path -LiteralPath $runKey) -and (Get-ItemProperty -LiteralPath $runKey).PSObject.Properties['Axit axStart']) {
-        Remove-ItemProperty -LiteralPath $runKey -Name 'Axit axStart'
+    foreach ($app in $background) {
+        $value = "Axit $($app.Name)"
+        if ((Test-Path -LiteralPath $runKey) -and (Get-ItemProperty -LiteralPath $runKey).PSObject.Properties[$value]) {
+            Remove-ItemProperty -LiteralPath $runKey -Name $value
+        }
     }
     foreach ($app in ($apps | Where-Object { $_.OpenWith })) {
         foreach ($extension in $app.OpenWith) {
@@ -208,7 +222,7 @@ function Remove-Installation {
 
 if ($Uninstall) {
     # A running app holds its folder: then nothing is removed, so the Apps entry and install.cmd stay to try again.
-    Stop-AxStart
+    Stop-Background
     if (Test-Running) {
         Say "Axit is still running, so nothing was removed. Close it and uninstall again."
         exit 1
@@ -225,7 +239,7 @@ if (-not (Test-Path -LiteralPath $sourceExe)) {
     exit 1
 }
 
-Stop-AxStart
+Stop-Background
 $sameFolder = [string]::Equals((Resolve-Path $source).Path.TrimEnd('\'), $target.TrimEnd('\'), [StringComparison]::OrdinalIgnoreCase)
 if (-not $sameFolder) {
     # A previous installation, of Axit or of axClaude 1.x, is removed completely first, so nothing of it stays
@@ -401,7 +415,7 @@ if (-not (($env:Path -split ';') -contains $bin)) {
     Say "Note: $bin is not on PATH in this console. Open a new console, or add it, before using the commands."
 }
 
-Start-AxStart
+Start-Background
 
 if ($Start) {
     $arguments = @('claude', "`"$Start`"")

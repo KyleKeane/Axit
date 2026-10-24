@@ -3,6 +3,7 @@
 ## Unreleased
 
 - axCalc: a new app, a calculator as one expression field and a history list. Enter says the answer and adds the line "expression = answer" to the history; an expression that starts with an operator continues from the last answer; variables (`rate = 1.25`), functions, constants, hexadecimal, binary and octal numbers. Ctrl+I says an answer in hexadecimal, binary and octal, Ctrl+Shift+C copies it, Enter on a history line puts its expression back in the field, Ctrl+S saves the history. Start menu `Axit axCalc`, command `axcalc`.
+- axClip: a new app, a clipboard history. It runs in the background from sign-in and keeps the text of every copy, in memory unless you turn on Keep history between runs, leaving out what a password manager marks private. Windows+Alt+V from anywhere brings up one search field over it, newest first: type to narrow it, Down and Up move through it, Enter pastes the item into the program you were in, Shift+Enter only copies it, Ctrl+Q reads it in full, Delete removes it, Ctrl+P pauses recording. Start menu `Axit axClip`, command `axclip`.
 
 ## 3.6.0 - 2026-10-24
 

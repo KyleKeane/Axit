@@ -21,6 +21,7 @@ Accessible Windows apps for screen reader users, built for and tested with NVDA,
 - **axTask**: tasks and lists as a folder of small files, moved through as axFile moves through folders. Each item's fields (a due date, done, notes, links to other items) are in a pane beside the list; All tasks gathers every task not done.
 - **axPass**: a KeePass password database, read and changed by ear: groups and entries in the same two panes, the password never spoken, copied with Ctrl+C and cleared from the clipboard after 30 seconds. It runs KeePassXC's own command-line tool, so KeePassXC must be installed.
 - **axCalc**: a calculator as one field and a history: type an expression, Enter says the answer, and every answer stays as a line to read back, copy and recall; hexadecimal, binary and octal for development.
+- **axClip**: a clipboard history. It keeps the text of every copy while it runs, in memory unless you ask; Windows+Alt+V from anywhere brings up a search field over it, Down and Up move through it with the caret kept in the field, and Enter pastes into the program you were in.
 
 The apps reach each other: axFile hands a file to axMedia or axPreview, every window can show its folder in the others, and the Axit menu in every window lists the open windows and starts any app.
 
@@ -37,7 +38,7 @@ Needs the .NET 10 SDK, and NVDA for the manual checks.
 ```
 .\run-axfile.ps1 C:\path\to\folder       # build, then start axFile on that folder
 .\run-axclaude.ps1 C:\path\to\project    # axClaude on a project folder
-.\run.ps1 -App down C:\notes\todo.md     # any app: claude, down, json, git, terminal, file, media, preview, start, process, task, pass, calc
+.\run.ps1 -App down C:\notes\todo.md     # any app: claude, down, json, git, terminal, file, media, preview, start, process, task, pass, calc, clip
 .\run.ps1 -NoBuild                       # start without building
 ```
 

@@ -26,6 +26,7 @@ public sealed class KeyTests
             ["axTask"] = AxTask.AxTaskKeys.All,
             ["axPass"] = AxPass.AxPassKeys.All,
             ["axCalc"] = AxCalc.AxCalcKeys.All,
+            ["axClip"] = AxClip.AxClipKeys.All,
         };
 
     /// <summary>
@@ -94,6 +95,7 @@ public sealed class KeyTests
         ["axTask"] = AxTask.HelpText.Shortcuts,
         ["axPass"] = AxPass.HelpText.Shortcuts,
         ["axCalc"] = AxCalc.HelpText.Shortcuts,
+        ["axClip"] = AxClip.HelpText.Shortcuts,
     };
 
     /// <summary>
@@ -168,7 +170,7 @@ public sealed class KeyTests
             "Apps", "Backspace", "Ctrl+1", "Ctrl+2", "Ctrl+3", "Ctrl+C", "Ctrl+E", "Ctrl+Enter", "Ctrl+G", "Ctrl+I", "Ctrl+K", "Ctrl+L",
             "Ctrl+N", "Ctrl+O", "Ctrl+P", "Ctrl+Q", "Ctrl+Shift+A", "Ctrl+Shift+C", "Ctrl+Shift+F", "Ctrl+Shift+H", "Ctrl+Shift+I",
             "Ctrl+Shift+K", "Ctrl+Shift+L", "Ctrl+Shift+Q", "Ctrl+Shift+R", "Ctrl+Shift+S", "Ctrl+Shift+T", "Ctrl+Shift+W", "Ctrl+T",
-            "Ctrl+W", "Ctrl+Z", "Delete", "Down", "Enter", "Escape", "F5", "O", "Shift+Escape", "Shift+F10", "Space", "Up",
+            "Ctrl+W", "Ctrl+Z", "Delete", "Down", "Enter", "Escape", "F5", "O", "Shift+Enter", "Shift+Escape", "Shift+F10", "Space", "Up",
         ];
         var differing = Windows.SelectMany(w => w.Value.Select(k => (Window: w.Key, k.Name, k.Key)))
             .GroupBy(k => k.Key)

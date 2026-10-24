@@ -24,6 +24,7 @@ body:
         - axTask
         - axPass
         - axCalc
+        - axClip
         - The bundle (install, update, the Axit menu)
     validations:
       required: true

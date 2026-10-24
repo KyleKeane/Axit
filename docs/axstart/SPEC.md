@@ -183,16 +183,16 @@ the screen's width and twelve lines of the list high.
 
 ```
 src/AxStart.Core/    class library (net10.0): ProgramEntry (display name, parsing name, kind, target, from what the
-                     shell gives), ProgramMatch (the matching and the order of AS-2.2), Hotkey (a key as text and
-                     back, and the rule of AS-4.2), StartSettings; references Axit.Core
+                     shell gives), ProgramMatch (the matching and the order of AS-2.2), StartSettings; references
+                     Axit.Core (whose Hotkey is a key as text and back with the rule of AS-4.2, and whose SignInStart
+                     is the Run key's value; both axStart's until axClip, 2026-10-23)
 src/AxStart/         class library (net10.0-windows): AxStartApp (Run, Usage, the one-instance hand-over), StartForm
-                     (the window, on AxitForm: the field with its KeyDown hook, the list, the menus, the keys, the
-                     hotkey through RegisterHotKey, the hiding), AppsFolder (the shell's Applications folder read
-                     through IShellItem and IEnumShellItems, and the start through the shell), StartupEntry (the
-                     Run key's value), AxStartKeys, HelpText; references
-                     AxStart.Core, Axit.Core, Axit.Forms
-tests/AxStart.Tests/ ProgramMatchTests (the order, the words, accents, the kinds), HotkeyTests (the text both ways,
-                     the refusals, the settings)
+                     (the window, on Axit.Forms' HotkeyForm, which holds the hotkey, the hiding and the foreground:
+                     the field with its KeyDown hook, the list, the menus, the keys), AppsFolder (the shell's
+                     Applications folder read through IShellItem and IEnumShellItems, and the start through the
+                     shell), AxStartKeys, HelpText; references AxStart.Core, Axit.Core, Axit.Forms
+tests/AxStart.Tests/ ProgramMatchTests (the order, the words, accents, the kinds), StartSettingsTests (the settings);
+                     the hotkey's text both ways and its refusals are tests/Axit.Tests' HotkeyTests
 docs/axstart/        this spec, user-guide.md (embedded), nvda-test-plan.md
 ```
 

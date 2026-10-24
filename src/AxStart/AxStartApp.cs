@@ -49,7 +49,7 @@ public static class AxStartApp
                 // AS-1.2: one axStart; the running one shows its field, unless this start only wanted it running.
                 _one.Dispose();
                 _one = null;
-                if (!hidden && StartForm.FindRunning() is var running and not 0)
+                if (!hidden && HotkeyForm.FindRunning(Name) is var running and not 0)
                 {
                     AppMessage.SendTo(running, Name, AppMessage.Show, []);
                 }

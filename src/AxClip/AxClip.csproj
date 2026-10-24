@@ -1,0 +1,23 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <!-- axClip's window side, as a class library inside Axit.exe (docs/axit/SPEC.md AX-1.7): the window, its key table
+       and its texts; the pure code is AxClip.Core. -->
+  <PropertyGroup>
+    <TargetFramework>$(AxitDotNet)-windows</TargetFramework>
+    <UseWindowsForms>true</UseWindowsForms>
+    <RootNamespace>AxClip</RootNamespace>
+    <AssemblyName>axClip</AssemblyName>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\AxClip.Core\AxClip.Core.csproj" />
+    <ProjectReference Include="..\Axit.Core\Axit.Core.csproj" />
+    <ProjectReference Include="..\Axit.Forms\Axit.Forms.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <!-- Help, User guide shows this file. -->
+    <EmbeddedResource Include="..\..\docs\axclip\user-guide.md" LogicalName="UserGuide.md" />
+  </ItemGroup>
+
+</Project>
