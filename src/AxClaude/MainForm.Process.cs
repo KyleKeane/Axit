@@ -122,6 +122,7 @@ internal sealed partial class MainForm
     {
         ShowNotice(new Notice("Claude Code was not found", HelpText.ClaudeNotFound(candidates),
         [
+            new OverlayChoice("&Install Claude Code now", () => InstallProgram(ProgramInstall.ClaudeCode, () => ClaudeLauncher.Find(_settings.ClaudePath) is not null, StartClaude), IsDefault: true),
             new OverlayChoice("Copy install &command", () =>
             {
                 if (CopyToClipboard(ClaudeLauncher.InstallCommand))

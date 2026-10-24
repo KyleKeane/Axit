@@ -57,8 +57,8 @@ forgets the master password and shows only the notice that asks for it.
 ## 5. The engine (PW-D1)
 
 - **PW-5.1** `keepassxc-cli.exe`, found in KeePassXC's install folder, on the PATH, or at a path the user sets
-  (Options). Without it, the notice "KeePassXC is not installed" names its download page and the command that
-  installs it (`winget install KeePassXCTeam.KeePassXC`).
+  (Options). Without it, the notice "KeePassXC is not installed" offers Install KeePassXC now (bundle AX-2.9, one
+  administrator prompt) and its download page; once installed, the unlock notice follows.
 - **PW-5.2** One process per command, the database's path and the entry's path as arguments, the master password as
   the first line of standard input, `-q` so the prompt goes nowhere (read from the tool's source, kdbx-notes 7). The
   commands: `ls -R -f` for the groups and entries, `show` (without `-s`, so the password stays hidden) for an entry's

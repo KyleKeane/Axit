@@ -34,14 +34,16 @@ internal sealed partial class TerminalForm
     /// </summary>
     private void NewSession()
     {
-        var selected = _shell == ShellKind.Custom ? ShellPresets.Length : Array.FindIndex(ShellPresets, p => p.Arguments[0] == ShellLauncher.Key(_shell));
+        // AT-1.2a: only the shells this computer has.
+        var presets = ShellPresets.Where(preset => ShellLauncher.Find(ShellLauncher.Parse(preset.Arguments[0])) is not null).ToArray();
+        var selected = _shell == ShellKind.Custom ? presets.Length : Array.FindIndex(presets, p => p.Arguments[0] == ShellLauncher.Key(_shell));
         var text = "Choose the shell and the folder. Starting ends the current shell and starts a new session in the folder.";
         if (ProcessRunning && _model.Running)
         {
             text = $"{_model.RunningCommand} is still running. A new session ends it.\n" + text;
         }
 
-        var controls = new SessionControls(CurrentDirectory, ShellPresets, selected < 0 ? ShellPresets.Length : selected, _customShell ?? string.Empty,
+        var controls = new SessionControls(CurrentDirectory, presets, selected < 0 ? presets.Length : selected, _customShell ?? string.Empty,
             "Shell", "Command line",
             "The command line of the shell to start, as typed at a prompt. Enter starts the session, Shift+Enter starts a new line.",
             start => PickFolder(start ?? CurrentDirectory), said => Announce(said, true), Overlay.SetHeadLine, Overlay.PressDefault);
@@ -108,6 +110,10 @@ internal sealed partial class TerminalForm
         Announce(ShellLauncher.Describe(kind), false);
         Relaunch($"Switched to {ShellLauncher.Describe(kind)} in {_folder}", clearTranscript: false);
     }
+
+    /// <summary>Session, Switch shell, Install (AT-1.2a): the shell's program installed on the user's command (bundle AX-2.9), then switched to.</summary>
+    private void InstallShell(ProgramInstall program, ShellKind kind) =>
+        InstallProgram(program, () => ShellLauncher.Find(kind) is not null, () => SwitchShell(kind));
 
     /// <summary>The bundle's folder picker (one of the few separate windows, AX-7.2), on the folder or the user's profile; null when it was cancelled.</summary>
     private string? PickFolder(string? start) =>

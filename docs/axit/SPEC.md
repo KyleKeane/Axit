@@ -172,6 +172,20 @@ The apps are named ax and a word, the ax in lower case and the word as it is wri
   program file can be renamed but not overwritten or deleted), and `Axit.exe` deletes any `Axit.old*.exe` next to it
   when it starts. The shortcuts, menus, shims and the Apps entry are written again, so the version shown in Settings,
   Apps is the new one. The app, not the installer, starts the new version afterwards (AX-3.2).
+- AX-2.9 **The programs an app needs and Windows lacks** (the user's ask, 2026-10-24): Git (axGIT, and Git Bash in
+  axTerminal), KeePassXC (axPass), Claude Code (axClaude) and PowerShell 7 (axTerminal). Axit's installer installs
+  none of them, so that it stays a per-user install without an administrator prompt and installs nothing nobody asked
+  for. Each app checks for its program and, when it is missing, its notice says so and offers **Install it now**
+  (`Axit.Core.ProgramInstall`, `AxitForm.InstallProgram`): the maker's own package through winget by its exact id
+  (`Git.Git`, `KeePassXCTeam.KeePassXC`, `Microsoft.PowerShell`), or the maker's own installer (Claude Code's, for the
+  user only), never a copy of Axit's; every question answered, silent, no window. The notice says beforehand whether
+  Windows will ask for an administrator's yes. When it ends the PATH is read again from Windows and the app checks
+  for the program itself: found, "Git is installed" and the app goes on (axGIT opens the repository, axPass asks for
+  the master password, axClaude starts Claude, axTerminal switches to the shell); not found, a notice with the
+  installer's exit code and last line, Try again and the download page. Without winget (an older Windows 10) the
+  download page opens instead. Only on the user's command, never on a timer or at start (B-15); each install is
+  logged. Removing such a program is Settings, Apps, as for any program. A shell that is not installed is not offered
+  in axTerminal (AT-1.2a).
 
 ### AX-3 Updates
 

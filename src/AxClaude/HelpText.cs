@@ -100,7 +100,7 @@ public static class HelpText
         lines.AddRange(
         [
             string.Empty,
-            "To install Claude Code, open Windows PowerShell and run this command (the Copy install command button copies it):",
+            "Install Claude Code now runs Claude Code's own installer, for your account only; axClaude then starts it, and Claude Code asks you to log in. Or install it by hand: open Windows PowerShell and run this command (the Copy install command button copies it):",
             "  " + ClaudeLauncher.InstallCommand,
             string.Empty,
             "Then run claude once in PowerShell to log in. Come back here, close this notice and press Ctrl+Shift+R.",

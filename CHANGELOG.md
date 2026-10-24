@@ -1,5 +1,10 @@
 # Changelog
 
+## Unreleased
+
+- axGIT, axPass, axClaude: when Git, KeePassXC or Claude Code is missing, the notice that says so offers Install it now: the maker's own installer runs without a window (Git and KeePassXC through winget, with one administrator prompt; Claude Code for your account only), and the app goes on once it is there. Without winget, the download page opens.
+- axTerminal: only the shells this computer has are listed; PowerShell 7 and Git Bash, when missing, are offered as Install PowerShell 7 and Install Git, for Git Bash in Session, Switch shell.
+
 ## 3.6.0 - 2026-10-24
 
 - axPass: a new app, a KeePass password database (`.kdbx`) in axTask's two panes: Right into a group, Tab or Enter to an entry's fields, the password read as hidden. Ctrl+B copies the user name, Ctrl+C the password (KeePassXC's tool clears the clipboard after 30 seconds), Ctrl+U opens the URL, Ctrl+M moves an entry to another group, Ctrl+L locks, and the window locks itself after ten minutes away. Each password field says what to do ("Re-enter the password for Gmail"). Before the first change after unlocking, the database file is copied into a folder beside it ("mine backups"), the newest 20 kept; File, Back up now makes one at any time. Entries are added, renamed, changed and moved to the Recycle Bin, Ctrl+Z bringing them back; a password is typed twice or generated. It runs KeePassXC's command-line tool and never decrypts the file itself, so KeePassXC must be installed. Start menu `Axit axPass`, command `axpass`.

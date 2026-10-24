@@ -73,6 +73,8 @@ opens in the editor for its type (AG-1.4, AG-D1).
   (a new axClaude on the repository's folder), ▸ **axTerminal** (a shell there, docs/axterminal/SPEC.md AT-1.5) and
   ▸ **axFile** (the folder listed, docs/axfile/SPEC.md AF-1.3), and Changes → **Open file in editor** (Ctrl+E) opens
   the selected file in axJSON for `.json` and axDown otherwise.
+- AG-1.5a When git is missing, its notice offers Install Git now (bundle AX-2.9) and, once git is there, opens the
+  repository.
 - AG-1.5 Git itself: `git` on the PATH (`GitRunner.Program`; the tests point it at a fake `git.cmd` for the output,
   the timeout and the open pipe), run with `-C <repository>`, `-c core.quotepath=false`, `-c color.ui=never`,
   `GIT_TERMINAL_PROMPT=0` and UTF-8 output; one command at a time, on a background task, never on the UI thread

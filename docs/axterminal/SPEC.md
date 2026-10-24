@@ -63,6 +63,10 @@ out of scope; programs that print and ask are in. It works entirely offline (bun
   axTerminal under "Open with Axit" on folders in File Explorer (AX-2.3). A folder given alone to `Axit.exe` still
   means axClaude (AX-1.2); axTerminal is always named by its verb. Without a folder: the process's current folder
   (the Start menu entry starts it in the user's profile folder, as the shells do).
+- AT-1.2a **Only the shells there are** (the user's ask, 2026-10-24): the New session notice and Switch shell list the
+  shells this computer has; Windows always has Windows PowerShell and Command Prompt. PowerShell 7 and Git Bash, when
+  missing, are not listed; Switch shell offers "Install PowerShell 7…" and "Install Git, for Git Bash…" instead
+  (bundle AX-2.9), and switches to the shell once it is installed.
 - AT-1.2 **The shell.** One of PowerShell 7 (`pwsh.exe`, found on the PATH or under `%ProgramFiles%\PowerShell\7`),
   Windows PowerShell (`powershell.exe`), Command Prompt (`cmd.exe`), Git Bash (Git for Windows' `Git\bin\bash.exe`
   under Program Files, Program Files (x86) or `%LOCALAPPDATA%\Programs`, or next to the `git.exe` on the PATH; never
