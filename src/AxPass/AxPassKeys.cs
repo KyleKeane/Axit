@@ -15,6 +15,9 @@ public static class AxPassKeys
     public const Keys Lock = Keys.Control | Keys.L;
     public const Keys OpenDatabase = Keys.Control | Keys.O;
 
+    /// <summary>On an entry: move it to another group (PW-6.5), as axTask's Ctrl+M moves a list to a section.</summary>
+    public const Keys MoveEntry = Keys.Control | Keys.M;
+
     /// <summary>Every key of the window with its name, for the collision test and the F1 text.</summary>
     public static readonly IReadOnlyList<(string Name, Keys Key)> All =
     [
@@ -24,5 +27,6 @@ public static class AxPassKeys
         ("Open the URL", OpenUrl),
         ("Lock", Lock),
         ("Open a database", OpenDatabase),
+        ("Move the entry to a group", MoveEntry),
     ];
 }

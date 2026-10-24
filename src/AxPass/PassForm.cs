@@ -65,6 +65,7 @@ public sealed partial class PassForm : ItemForm
         _entryMenu.DropDownItems.Add(Item("Read in &full", ReadAll, ItemKeys.ReadAll));
         _entryMenu.DropDownItems.Add(Item("New &entry...", NewItem, ItemKeys.New));
         _entryMenu.DropDownItems.Add(Item("Rena&me", RenameSelected, ItemKeys.Rename));
+        _entryMenu.DropDownItems.Add(Item("Move to a gr&oup...", MoveEntry, AxPassKeys.MoveEntry));
         _entryMenu.DropDownItems.Add(Item("To the Recycle &Bin", () => WithRow(DeleteRow), ItemKeys.Delete));
 
         _fieldMenu.DropDownItems.Add(Item("&Change...", ChangeField, ItemKeys.Open));
@@ -166,6 +167,9 @@ public sealed partial class PassForm : ItemForm
                 return true;
             case AxPassKeys.OpenDatabase:
                 ChooseDatabase();
+                return true;
+            case AxPassKeys.MoveEntry when Navigator.Focused:
+                MoveEntry();
                 return true;
             case ItemKeys.Open when _password is null && Navigator.Focused:
                 if (_database is null)
@@ -350,7 +354,8 @@ public sealed partial class PassForm : ItemForm
             new OverlayChoice("&Cancel", IsCancel: true),
         ])
         {
-            Input = new OverlayInput("Master password:", "Master password", string.Empty, "Type the master password", Hidden: true),
+            // The field says what the password is for, since every password field reads the same otherwise.
+            Input = new OverlayInput("Master password of " + name + ":", "Master password to unlock " + name, string.Empty, "Type the master password", Hidden: true),
         });
     }
 

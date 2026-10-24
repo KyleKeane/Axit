@@ -77,6 +77,16 @@ forgets the master password and shows only the notice that asks for it.
   Delete on a group asks first and says that KeePassXC's own window brings it back. In the Recycle Bin, Delete removes
   for good after a question, since the tool asks none. A title cannot hold a slash (the tool's paths have no escape).
 
+- **PW-6.5 Moving an entry** (Ctrl+M, Entry, Move to a group; asked 2026-10-24): a list of the groups, the top of
+  the database first and the Recycle Bin left out; `mv` to it (`/` for the top), and Ctrl+Z moves it back.
+- **PW-6.6 Every change is saved at once.** axPass holds no copy of the database: each change is one run of the tool,
+  which writes the `.kdbx` file before axPass says the change, so there is nothing to save and nothing lost when the
+  window closes or locks (Ctrl+S says so). The user's worry of 2026-10-24, that saving a whole database on every edit
+  might be complex, is the tool's work, not axPass's.
+- **PW-6.7 Every password field says what it is for** (asked 2026-10-24: the master password's field and an entry's
+  read the same): "Master password to unlock mine", "New password for the entry Gmail", "Gmail's new password
+  again", "Master password of the new database mine".
+
 ## 7. Keys
 
 On top of IA-3, in `AxPassKeys`:
@@ -89,6 +99,7 @@ On top of IA-3, in `AxPassKeys`:
 | Alt+G | in a password's notice | Generate, the notice's button (a notice holds the window's own keys) |
 | Ctrl+L | anywhere | lock |
 | Ctrl+O | anywhere | open another database |
+| Ctrl+M | navigator, on an entry | move it to another group (PW-6.5) |
 
 ## 8. Decisions
 

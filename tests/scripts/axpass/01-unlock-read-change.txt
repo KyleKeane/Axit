@@ -15,7 +15,7 @@ run "C:\Program Files\KeePassXC\keepassxc-cli.exe" add -q -u top test.kdbx "Top 
 # 1.1 The unlock notice; a wrong password asks again.
 start pass {temp}\test.kdbx
 expect state Unlock test
-expect focus Master password
+expect focus Master password to unlock test
 type wrong
 keys enter
 expect said ! Unlocking test
@@ -100,7 +100,7 @@ keys down
 keys down
 expect focus Password, password, hidden
 keys enter
-expect focus New password
+expect focus New password for the entry Gmail personal
 keys alt+g
 expect said ! Generated a password of 20 characters
 keys enter
@@ -122,6 +122,23 @@ keys delete
 expect state Move the group
 keys enter
 expect state test - axPass
+
+# 4.8 Ctrl+M moves an entry to another group, and back.
+keys home
+expect focus Email, group
+keys right
+type g
+expect focus Gmail personal
+keys ctrl+m
+expect focus The top of the database
+keys down
+expect focus Work
+keys enter
+expect said ! Moved Gmail personal to Work
+keys ctrl+z
+expect said ! Undone: Moved Gmail personal to Work
+expect focus Gmail personal
+keys left
 
 # 1.3 Ctrl+L locks.
 keys ctrl+l

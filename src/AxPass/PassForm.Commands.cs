@@ -150,6 +150,57 @@ public sealed partial class PassForm
         ]));
     }
 
+    /// <summary>
+    /// Ctrl+M (PW-6.5): the entry moved to another group chosen from a list of them, the top of the database first;
+    /// <c>mv</c>, with the way back kept for Ctrl+Z.
+    /// </summary>
+    private void MoveEntry()
+    {
+        if (SelectedEntry() is not { } entry || _tree is null)
+        {
+            return;
+        }
+
+        const string TopName = "The top of the database";
+        var groups = _tree.Nodes.Where(node => node.IsGroup && !PassTree.InRecycleBin(node.Path) && node.Path != entry.Group).Select(node => node.Path).ToList();
+        List<string> choices = entry.Group.Length == 0 ? groups : [TopName, .. groups];
+        if (choices.Count == 0)
+        {
+            Announce("There is no other group: Ctrl+Shift+N makes one", true);
+            return;
+        }
+
+        ChooseFromList("Move " + entry.Name, $"Now in {(entry.Group.Length == 0 ? "the top of the database" : entry.Group)}.", "Group", choices.Select(choice => choice.Replace("/", ", ")).ToList(), 0, chosen =>
+        {
+            var group = choices[chosen] == TopName ? string.Empty : choices[chosen];
+            if (_tree.HasEntry(PassTree.Join(group, entry.Name)))
+            {
+                Announce($"There is an entry called {entry.Name} there already", true);
+                return;
+            }
+
+            Do(async () =>
+            {
+                var select = NeighbourKey();
+                if (await Cli("mv", null, [entry.Path, group.Length == 0 ? "/" : group]) is null)
+                {
+                    return;
+                }
+
+                var moved = PassTree.Join(group, entry.Name);
+                if (_entries.Remove(entry.Path, out var fields))
+                {
+                    _entries[moved] = fields;
+                }
+
+                var where = group.Length == 0 ? "the top of the database" : group.Replace("/", ", ");
+                Remember(new Step($"Moved {entry.Name} to {where}", [new Call("mv", [], [moved, entry.Group.Length == 0 ? "/" : entry.Group])], entry.Path));
+                await ReloadAsync(select);
+                Announce($"Moved {entry.Name} to {where}", true);
+            });
+        });
+    }
+
     /// <summary>Ctrl+N in the navigator: a new entry in the group shown, its title asked; no password until one is set.</summary>
     protected override void NewItem()
     {
@@ -293,7 +344,7 @@ public sealed partial class PassForm
                     new OverlayChoice("&Cancel", IsCancel: true),
                 ])
                 {
-                    Input = new OverlayInput("Password again:", "Password again", string.Empty, "Type the password again", Hidden: true),
+                    Input = new OverlayInput($"{entry.Name}'s new password again:", $"{entry.Name}'s new password again", string.Empty, "Type the password again", Hidden: true),
                 });
             }, IsDefault: true),
             new OverlayChoice("&Generate", () => Do(async () =>
@@ -318,7 +369,7 @@ public sealed partial class PassForm
             new OverlayChoice("&Cancel", IsCancel: true),
         ])
         {
-            Input = new OverlayInput("New password:", "New password", string.Empty, "Type a password, or Generate", Hidden: true),
+            Input = new OverlayInput($"New password for the entry {entry.Name}:", $"New password for the entry {entry.Name}", string.Empty, "Type a password, or Generate", Hidden: true),
         });
         return true;
     }
@@ -508,13 +559,13 @@ public sealed partial class PassForm
                     new OverlayChoice("&Cancel", IsCancel: true),
                 ])
                 {
-                    Input = new OverlayInput("Master password again:", "Master password again", string.Empty, "Type the master password again", Hidden: true),
+                    Input = new OverlayInput("Master password again:", $"Master password of the new database {PassTree.DatabaseName(path)}, again", string.Empty, "Type the master password again", Hidden: true),
                 });
             }, IsDefault: true),
             new OverlayChoice("&Cancel", IsCancel: true),
         ])
         {
-            Input = new OverlayInput("Master password:", "Master password", string.Empty, "Type a master password", Hidden: true),
+            Input = new OverlayInput("Master password:", $"Master password of the new database {PassTree.DatabaseName(path)}", string.Empty, "Type a master password", Hidden: true),
         });
     }
 

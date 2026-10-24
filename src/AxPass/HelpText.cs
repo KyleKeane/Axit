@@ -27,6 +27,7 @@ public static class HelpText
           Tab: to the detail pane
           Ctrl+N: a new entry here. Ctrl+Shift+N: a new group here
           F2: rename the entry in place: a box over the line, Enter keeps the new title, Escape the old. Delete: move it to the Recycle Bin; Ctrl+Z brings it back
+          Ctrl+M: move the entry to another group, chosen from a list
           Ctrl+Q: read every field of the entry; the password is never read
           Shift+F10 or the Applications key: the menu of the selection
 
@@ -45,7 +46,7 @@ public static class HelpText
           Ctrl+L: lock: the master password is forgotten until you type it again
           Ctrl+O: open another database
           Ctrl+Z: undo the last change. F5: read the database again
-          Ctrl+S: nothing to save here; every change is written at once
+          Ctrl+S: nothing to save here; every change is written to the database at once, by KeePassXC's tool
 
         ## Notices
           The master password, a field's new value and every question appear inside the window, in place of the panes.

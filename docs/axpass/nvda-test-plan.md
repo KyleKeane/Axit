@@ -43,6 +43,10 @@ should read; a step that reads differently is a defect. The specifications are `
 6. Ctrl+N in Email, type `Bank`: "Added Bank; Tab, then Enter on Password sets its password". Delete on Bank: "Moved
    Bank to the Recycle Bin; Ctrl+Z brings it back". Ctrl+Z: Bank is back.
 7. Delete on the group Work: the question "Move the group"; Cancel is the default.
+8. Ctrl+M on Gmail personal: the list "Group" on "The top of the database"; Down to Work, Enter: "Moved Gmail personal
+   to Work". Ctrl+Z: "Undone: Moved Gmail personal to Work", back in Email.
+9. Every password field names what it is for: the unlock notice's "Master password to unlock test", a new password's
+   "New password for the entry Gmail", the second "Gmail's new password again".
 
 ## 5. The rest
 
