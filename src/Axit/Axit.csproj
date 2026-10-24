@@ -24,22 +24,10 @@
        copies every one of them next to the executable, since a single-file publish would bundle a project item
        into the executable, and install.ps1 copies them on. -->
 
+  <!-- Every project of src: the apps' windows and their Cores, and the shared projects (docs/axit/app-kit.md AK-4.1),
+       so that a new app's projects are referenced by being there. -->
   <ItemGroup>
-    <ProjectReference Include="..\AxClaude\AxClaude.csproj" />
-    <ProjectReference Include="..\AxDown\AxDown.csproj" />
-    <ProjectReference Include="..\AxJSON\AxJSON.csproj" />
-    <ProjectReference Include="..\AxGit\AxGit.csproj" />
-    <ProjectReference Include="..\AxTerminal\AxTerminal.csproj" />
-    <ProjectReference Include="..\AxFile\AxFile.csproj" />
-    <ProjectReference Include="..\AxMedia\AxMedia.csproj" />
-    <ProjectReference Include="..\AxPreview\AxPreview.csproj" />
-    <ProjectReference Include="..\AxStart\AxStart.csproj" />
-    <ProjectReference Include="..\AxProcess\AxProcess.csproj" />
-    <ProjectReference Include="..\AxTask\AxTask.csproj" />
-    <ProjectReference Include="..\AxPass\AxPass.csproj" />
-    <ProjectReference Include="..\AxCalc\AxCalc.csproj" />
-    <ProjectReference Include="..\AxClip\AxClip.csproj" />
-    <ProjectReference Include="..\Axit.Core\Axit.Core.csproj" />
+    <ProjectReference Include="..\*\*.csproj" Exclude="..\Axit\Axit.csproj" />
   </ItemGroup>
 
 </Project>
