@@ -79,7 +79,7 @@ public sealed class StartForm : AxitForm
             Toggle("&Start with Windows", _settings.StartWithWindows, v =>
             {
                 _settings.StartWithWindows = v;
-                StartupEntry.Apply(v);
+                StartupEntry.Apply(AxStartApp.Name, Dispatch.AxStart, v);
             }),
             Toggle("Say the first &match while typing", _settings.SayFirstMatch, v => _settings.SayFirstMatch = v)));
         options.DropDownItems.Add(CreateDeveloperMenu());
@@ -207,7 +207,7 @@ public sealed class StartForm : AxitForm
     protected override void OnHandleCreated(EventArgs e)
     {
         base.OnHandleCreated(e);
-        StartupEntry.Apply(_settings.StartWithWindows);
+        StartupEntry.Apply(AxStartApp.Name, Dispatch.AxStart, _settings.StartWithWindows);
         if (!Register(_settings.Key))
         {
             // AS-4.3: never a launcher that cannot be reached.
