@@ -26,6 +26,11 @@ another project on its second use, the bullet says so.
   latest-release state), Licence, Attribution, and the Axit guide, `docs/axit/README.md` embedded by
   `Axit.Core.csproj` as `AxitGuide.md`, read through `EmbeddedText`, which every app's `HelpText.UserGuide` uses for
   its own guide.
+- `BundleHelp` (docs/axit/app-kit.md AK-2.3, AX-7.2; 2026-10-24): the start of every F1 text, written once: `Section`
+  takes the app's name and its own lines of the section (what Tab moves between, what Ctrl+F finds, what Ctrl+S does;
+  all the window keys in axClaude and axTerminal, whose heading is "Anywhere") and returns the first line naming the
+  text's keys and the section with F1, the palette, the app's lines, the text size, the menu with Alt+F4 (`altF4` when
+  it does more than close the app) and `AxitMenuLine`; each `HelpText.Shortcuts` adds its own sections after it.
 
 ## Paths, windows and lists
 

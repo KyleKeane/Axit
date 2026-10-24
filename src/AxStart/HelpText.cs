@@ -6,18 +6,13 @@ namespace AxStart;
 /// <summary>The texts axStart shows as notices: the keyboard shortcuts (F1) and the user guide; About is the bundle's (<c>Axit.Core.BundleAbout</c>).</summary>
 public static class HelpText
 {
-    /// <summary>The F1 text (SPEC.md AS-5.3): a first line naming the text's own keys, then one Markdown heading per group (bundle AX-7.2): the bundle-wide keys, then axStart's own.</summary>
-    public const string Shortcuts = """
-        In this text: h and Shift+H move by heading, 1 to 6 by level. Ctrl+F finds, F3 and Shift+F3 the next and the previous match
-
-        ## In every window of Axit
-          F1: this list
-          Ctrl+Shift+P: the command palette: type part of a command's name, Down and Up through the matches, Enter runs it
-          Ctrl+Plus, Ctrl+Minus: bigger or smaller text
-          Ctrl+S: nothing to save here; axStart says so
-          Alt: the menu. Alt+F4: hide axStart (axStart, Quit axStart ends it)
-          Alt+A: the Axit menu: the command palette, a new window of any app, the files and folders closed lately, the open Axit windows, most recent first (Alt+A, O, 1 is the one you were in last) and by type, Close all windows, the AI tools, Check for updates, and About
-
+    /// <summary>The F1 text (SPEC.md AS-5.3): a first line naming the text's own keys, then one Markdown heading per group (bundle AX-7.2): the bundle-wide keys, then axStart's own. The first line and the bundle's section come from <c>BundleHelp</c>.</summary>
+    public static readonly string Shortcuts = BundleHelp.Section(
+        "axStart",
+        [
+            "Ctrl+S: nothing to save here; axStart says so",
+        ],
+        altF4: "hide axStart (axStart, Quit axStart ends it)") + """
         ## Bringing axStart up
           The hotkey, Ctrl+Shift+Space unless you chose another in Options, Hotkey: from any program, the search field
           The same hotkey while axStart shows hides it again
