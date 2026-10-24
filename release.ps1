@@ -130,7 +130,9 @@ if ($NoPush) {
 # main goes first and the tag only once main's build has passed on GitHub (build.yml, followed with gh): the tag
 # starts the release build, and a tag on a commit whose build fails on the runner (an image or an action moved under
 # the workflow) would be a dangling tag to delete by hand. Without gh the tag follows main at once.
-git -C $root push origin main
+# -q: git's progress goes to stderr, which Windows PowerShell turns into an error under Stop when the script's output is
+# redirected (the 3.5.0 release stopped there after a successful push); a failure still sets the exit code.
+git -C $root push -q origin main
 if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
 if (Get-Command gh -ErrorAction SilentlyContinue) {
     Write-Host "Pushed main. Waiting for its build before pushing the tag..."
@@ -154,7 +156,7 @@ if (Get-Command gh -ErrorAction SilentlyContinue) {
     Write-Host "Pushed main. gh is not installed, so the tag follows without waiting for main's build."
 }
 
-git -C $root push origin $tag
+git -C $root push -q origin $tag
 if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
 Write-Host "Pushed the tag. GitHub Actions is building the release: https://github.com/KyleKeane/Axit/actions"
 Write-Host "Follow it with: gh run watch    (the release then appears at https://github.com/KyleKeane/Axit/releases)"
