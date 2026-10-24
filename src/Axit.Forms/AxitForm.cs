@@ -572,7 +572,7 @@ public abstract partial class AxitForm : Form
         var arguments = !select && Directory.Exists(path) ? $"\"{path}\"" : $"/select,\"{path}\"";
         try
         {
-            Process.Start(new ProcessStartInfo("explorer.exe", arguments) { UseShellExecute = false })?.Dispose();
+            Process.Start(new ProcessStartInfo(SystemPrograms.Explorer, arguments) { UseShellExecute = false })?.Dispose();
         }
         catch (Exception ex) when (ex is System.ComponentModel.Win32Exception or InvalidOperationException)
         {

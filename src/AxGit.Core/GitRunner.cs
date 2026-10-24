@@ -1,6 +1,7 @@
 using System.ComponentModel;
 using System.Diagnostics;
 using System.Text;
+using Axit.Core;
 
 namespace AxGit.Core;
 
@@ -48,7 +49,15 @@ public static class GitRunner
     public static readonly TimeSpan Long = TimeSpan.FromMinutes(10);
 
     /// <summary>The program run: git, found on the PATH (AG-1.5); the tests point it at a fake git.cmd of their own.</summary>
-    public static string Program { get; set; } = "git";
+    public static string Program
+    {
+        // S-1: git found on the PATH's full folders, never by a bare name that Windows would look for in the current
+        // folder first; without one, Git for Windows' usual place, whose absence gives "git is not installed".
+        get => _program ?? SystemPrograms.OnPath("git.exe") ?? Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ProgramFiles), "Git", "cmd", "git.exe");
+        set => _program = value;
+    }
+
+    private static string? _program;
 
     /// <summary>The whole argument list of a command: the repository, the fixed configuration, then <paramref name="arguments"/>. Pure, tested.</summary>
     public static IReadOnlyList<string> Command(string? repository, IReadOnlyList<string> arguments)

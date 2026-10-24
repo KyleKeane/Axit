@@ -345,8 +345,10 @@ Every operation here is one line of the Actions list (AF-9) as well as its annou
   filter), then the notice "Add a program" with the field "Name" holding the file's name without its extension and
   the buttons Add and Cancel; "Added <name>". Remove a program ▸ lists them by name; choosing one takes it off,
   "Removed <name>". Choosing a program runs it once on the selected entries, or the current one (AF-3.7), every path
-  an argument, in the first entry's folder: a `.ps1` through `powershell.exe -NoProfile -ExecutionPolicy Bypass
-  -File <script>`, since Windows opens a script file in an editor; anything else as the shell starts it
+  an argument, in the first entry's folder: a `.ps1` through Windows PowerShell by its full path (`-NoProfile
+  -ExecutionPolicy Bypass -File <script>`), since Windows opens a script file in an editor; a `.bat` or `.cmd` program
+  is refused an entry whose name holds one of cmd.exe's special characters (`& | < > ^ % ! ( ) , ; =` or a quote),
+  which cmd would run as a command ("<name> not started", security audit S-3); anything else as the shell starts it
   (`ShellExecute` with the arguments, so a batch file and a script whose type has a program registered run too);
   "Started <name>", or "Failed: <reason>" when it cannot start (the file gone, no program for the type). The list is
   refilled each time the submenu opens, so two windows see each other's additions after a restart only (the settings

@@ -1,5 +1,6 @@
 using System.Diagnostics;
 using System.Text;
+using Axit.Core;
 
 namespace AxPass.Core;
 
@@ -42,23 +43,7 @@ public static class KeePassCli
             }
         }
 
-        foreach (var folder in (Environment.GetEnvironmentVariable("PATH") ?? string.Empty).Split(Path.PathSeparator, StringSplitOptions.RemoveEmptyEntries))
-        {
-            try
-            {
-                var path = Path.Combine(folder.Trim('"'), ExeName);
-                if (File.Exists(path))
-                {
-                    return path;
-                }
-            }
-            catch (ArgumentException)
-            {
-                // A PATH entry that is no path.
-            }
-        }
-
-        return null;
+        return SystemPrograms.OnPath(ExeName);
     }
 
     /// <summary>

@@ -2,6 +2,7 @@ using System.Collections;
 using System.ComponentModel;
 using System.Diagnostics;
 using System.Text;
+using Axit.Core;
 
 namespace AxClaude.Core.Pty;
 
@@ -25,8 +26,8 @@ public static class ClaudeLauncher
         }
 
         var candidates = new List<string>();
-        var path = Environment.GetEnvironmentVariable("PATH") ?? string.Empty;
-        foreach (var directory in path.Split(';', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries))
+        // Only the PATH's full folders: a relative entry would be the current folder (S-1).
+        foreach (var directory in SystemPrograms.PathFolders())
         {
             foreach (var name in new[] { "claude.exe", "claude.cmd" })
             {
@@ -65,7 +66,7 @@ public static class ClaudeLauncher
     {
         var args = string.Join(' ', arguments.Select(Quote));
         return claudePath.EndsWith(".cmd", StringComparison.OrdinalIgnoreCase)
-            ? $"cmd.exe /d /s /c \"\"{claudePath}\" {args}\""
+            ? $"\"{SystemPrograms.Cmd}\" /d /s /c \"\"{claudePath}\" {args}\""
             : $"\"{claudePath}\" {args}";
     }
 
@@ -81,7 +82,7 @@ public static class ClaudeLauncher
         var script = claudePath.EndsWith(".cmd", StringComparison.OrdinalIgnoreCase);
         var start = new ProcessStartInfo
         {
-            FileName = script ? "cmd.exe" : claudePath,
+            FileName = script ? SystemPrograms.Cmd : claudePath,
             Arguments = script ? $"/d /s /c \"\"{claudePath}\" --version\"" : "--version",
             UseShellExecute = false,
             RedirectStandardInput = true,

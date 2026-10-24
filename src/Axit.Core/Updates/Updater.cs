@@ -127,7 +127,7 @@ public static class Updater
     /// </summary>
     public static async Task<(int ExitCode, string Output)> InstallInPlaceAsync(string folder, IProgress<string>? lines)
     {
-        var start = new ProcessStartInfo("powershell.exe")
+        var start = new ProcessStartInfo(SystemPrograms.PowerShell)
         {
             UseShellExecute = false,
             CreateNoWindow = true,

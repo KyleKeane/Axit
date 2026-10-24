@@ -61,9 +61,17 @@ public sealed partial class FileForm
             return;
         }
 
+        var paths = targets.Select(target => target.Path).ToList();
+        if (UserPrograms.RefusedTarget(program, paths) is { } refused)
+        {
+            // S-3: cmd.exe would read the name's & or | as a command; the name is the danger, not the program.
+            Failed($"{program.Name} not started", $"{System.IO.Path.GetFileName(refused)} has a character a batch file reads as a command (& | < > ^ % ! ( ) , ; = or a quote). Rename it, or use a program that is not a batch file.");
+            return;
+        }
+
         try
         {
-            Process.Start(UserPrograms.StartInfo(program, targets.Select(target => target.Path).ToList()))?.Dispose();
+            Process.Start(UserPrograms.StartInfo(program, paths))?.Dispose();
             Announce($"Started {program.Name}", true);
         }
         catch (Exception ex) when (ex is Win32Exception or InvalidOperationException or IOException)

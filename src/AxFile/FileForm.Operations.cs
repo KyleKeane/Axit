@@ -704,7 +704,7 @@ public sealed partial class FileForm
         {
             try
             {
-                Process.Start(new ProcessStartInfo("explorer.exe", "shell:MyComputerFolder") { UseShellExecute = false })?.Dispose();
+                Process.Start(new ProcessStartInfo(SystemPrograms.Explorer, "shell:MyComputerFolder") { UseShellExecute = false })?.Dispose();
             }
             catch (Exception ex) when (ex is Win32Exception or InvalidOperationException)
             {

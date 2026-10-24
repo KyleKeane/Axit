@@ -1,4 +1,5 @@
 using System.Text;
+using Axit.Core;
 
 namespace AxTerminal.Core;
 
@@ -244,22 +245,6 @@ public static class ShellLauncher
 
     private static string? FindOnPath(string file)
     {
-        foreach (var dir in (Environment.GetEnvironmentVariable("PATH") ?? string.Empty).Split(';', StringSplitOptions.RemoveEmptyEntries))
-        {
-            try
-            {
-                var candidate = Path.Combine(dir.Trim(), file);
-                if (File.Exists(candidate))
-                {
-                    return candidate;
-                }
-            }
-            catch (ArgumentException)
-            {
-                // A PATH entry with characters a path cannot hold: skipped.
-            }
-        }
-
-        return null;
+        return SystemPrograms.OnPath(file);
     }
 }

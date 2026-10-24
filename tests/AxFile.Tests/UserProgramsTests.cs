@@ -28,7 +28,9 @@ public sealed class UserProgramsTests
     public void A_powershell_script_runs_through_powershell_with_the_entries_after_it()
     {
         var info = UserPrograms.StartInfo(new UserProgram("tidy", @"C:\tools\tidy.ps1"), [@"C:\docs\a.txt"]);
-        Assert.Equal("powershell.exe", info.FileName);
+        // S-1: Windows PowerShell by its full path, never a powershell.exe in the entry's folder.
+        Assert.Equal(Axit.Core.SystemPrograms.PowerShell, info.FileName);
+        Assert.True(Path.IsPathFullyQualified(info.FileName));
         Assert.Equal(["-NoProfile", "-ExecutionPolicy", "Bypass", "-File", @"C:\tools\tidy.ps1", @"C:\docs\a.txt"], info.ArgumentList);
         Assert.Equal(@"C:\docs", info.WorkingDirectory);
     }
@@ -40,5 +42,15 @@ public sealed class UserProgramsTests
         Assert.Equal(@"C:\tools\run.cmd", info.FileName);
         Assert.Empty(info.ArgumentList);
         Assert.Equal(string.Empty, info.WorkingDirectory);
+    }
+
+    /// <summary>S-3: cmd.exe reads &amp; and the like in a batch file's arguments as commands, so such a name is refused for a batch program, and only for one.</summary>
+    [Fact]
+    public void A_batch_program_is_refused_a_name_cmd_would_run()
+    {
+        var batch = new UserProgram("run", @"C:\tools\run.cmd");
+        Assert.Equal(@"C:\docs\a&calc.txt", UserPrograms.RefusedTarget(batch, [@"C:\docs\plain.txt", @"C:\docs\a&calc.txt"]));
+        Assert.Null(UserPrograms.RefusedTarget(batch, [@"C:\docs\plain name.txt"]));
+        Assert.Null(UserPrograms.RefusedTarget(new UserProgram("np", @"C:\np\notepad.exe"), [@"C:\docs\a&b.txt"]));
     }
 }
