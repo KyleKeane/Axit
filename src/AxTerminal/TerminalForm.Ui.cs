@@ -43,12 +43,7 @@ internal sealed partial class TerminalForm
         session.DropDownItems.Add(new ToolStripSeparator());
         session.DropDownItems.Add(Item("Say current fol&der", SayFolder, AxTerminalKeys.SayFolder));
         // AT-1.5: the way to the other windows, on the shell's current directory.
-        var showIn = new ToolStripMenuItem("Show current folder &in");
-        showIn.DropDownItems.Add(Item("File &Explorer", ShowInExplorer, AxTerminalKeys.ShowInExplorer));
-        showIn.DropDownItems.Add(new ToolStripMenuItem("ax&Claude", null, (_, _) => OpenIn(Dispatch.AxClaude)));
-        showIn.DropDownItems.Add(new ToolStripMenuItem("ax&GIT", null, (_, _) => OpenIn(Dispatch.AxGit)));
-        showIn.DropDownItems.Add(new ToolStripMenuItem("ax&File", null, (_, _) => OpenIn(Dispatch.AxFile)));
-        session.DropDownItems.Add(showIn);
+        session.DropDownItems.Add(CreateShowInMenu("Show current folder &in", Item("File &Explorer", ShowInExplorer, AxTerminalKeys.ShowInExplorer), () => CurrentDirectory));
         session.DropDownItems.Add(new ToolStripSeparator());
         session.DropDownItems.Add(new ToolStripMenuItem("&Export transcript...", null, (_, _) => ExportTranscript()) { ShortcutKeyDisplayString = BundleKeys.Text(BundleKeys.Save) });
         session.DropDownItems.Add(new ToolStripSeparator());

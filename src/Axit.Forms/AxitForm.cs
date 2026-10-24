@@ -139,6 +139,31 @@ public abstract partial class AxitForm : Form
     protected AxitMenu CreateAxitMenu() => new(this, Item("Command &palette...", ShowCommandPalette, BundleKeys.CommandPalette), _checkItem, _updateItem);
 
     /// <summary>A menu item whose key the window handles itself: the item only shows the key (AX-8).</summary>
+    /// <summary>
+    /// The "Show current folder in" submenu of a window (AX-9.10; 2026-10-24 one builder for every window): the
+    /// window's File Explorer item, then every app of <see cref="Dispatch.Apps"/> that is offered there
+    /// (<see cref="App.ShowIn"/>) but the window's own, in the bundle's order, each a new window on the file or folder
+    /// <paramref name="place"/> gives (a folder's app gets a file's folder, <see cref="Dispatch.PathFor"/>).
+    /// <paramref name="place"/> says itself why there is none and returns null.
+    /// </summary>
+    protected ToolStripMenuItem CreateShowInMenu(string text, ToolStripMenuItem explorer, Func<string?> place)
+    {
+        var menu = new ToolStripMenuItem(text);
+        menu.DropDownItems.Add(explorer);
+        foreach (var app in Dispatch.Apps.Where(app => app.ShowIn && !string.Equals(app.Name, AppName, StringComparison.OrdinalIgnoreCase)))
+        {
+            menu.DropDownItems.Add(new ToolStripMenuItem(AxitWindows.AppLabel(app), null, (_, _) =>
+            {
+                if (place() is { } path && Dispatch.PathFor(app, path, Directory.Exists(path)) is { } target)
+                {
+                    AxitMenu.Start(app.Verb, target);
+                }
+            }));
+        }
+
+        return menu;
+    }
+
     protected static ToolStripMenuItem Item(string text, Action action, Keys key)
     {
         var item = new ToolStripMenuItem(text, null, (_, _) => action());
@@ -291,11 +316,23 @@ public abstract partial class AxitForm : Form
         }
     }
 
-    /// <summary>The place and the settings are saved, and the installed new version started, unless the window cancels its closing before calling here.</summary>
+    /// <summary>
+    /// What the window holds, for the bundle's Recently closed list (AX-9.4), read as it closes: the path of its file
+    /// or folder; an empty text for an app that holds none, listed by its name alone (the default, so that a new app is
+    /// in the list without a line of its own); null for a window that holds nothing to open again (an untitled text).
+    /// </summary>
+    protected virtual string? PathInHand => string.Empty;
+
+    /// <summary>The window joins Recently closed, the place and the settings are saved, and the installed new version started, unless the window cancels its closing before calling here.</summary>
     protected override void OnFormClosing(FormClosingEventArgs e)
     {
         if (!e.Cancel)
         {
+            if (PathInHand is { } held)
+            {
+                RecentlyClosed.Remember(AppName, held);
+            }
+
             SaveWindow();
             SaveSettings();
             StartInstalledVersion();

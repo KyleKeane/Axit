@@ -32,9 +32,9 @@ public sealed class AxitWindowsTests
     [Fact]
     public void An_apps_list_keeps_the_current_window()
     {
-        Assert.Equal("axClaude", Dispatch.Apps[0].Name);
-        Assert.Equal([2, 4], AxitWindows.Of(Windows, Dispatch.Apps[0]).Select(w => (int)w.Handle));
-        Assert.Equal([1, 5], AxitWindows.Of(Windows, Dispatch.Apps[1]).Select(w => (int)w.Handle));
+        Assert.Equal("axClaude", Dispatch.Of(Dispatch.AxClaude).Name);
+        Assert.Equal([2, 4], AxitWindows.Of(Windows, Dispatch.Of(Dispatch.AxClaude)).Select(w => (int)w.Handle));
+        Assert.Equal([1, 5], AxitWindows.Of(Windows, Dispatch.Of(Dispatch.AxDown)).Select(w => (int)w.Handle));
     }
 
     [Fact]
@@ -44,7 +44,7 @@ public sealed class AxitWindowsTests
         Assert.Equal("&9. a", AxitWindows.Label(8, "a"));
         Assert.Equal("&a. a", AxitWindows.Label(9, "a"));
         Assert.Equal("&2. Q && A - axDown", AxitWindows.Label(1, "Q & A - axDown"));
-        Assert.Equal("ax&Claude", AxitWindows.AppLabel(Dispatch.Apps[0]));
-        Assert.Equal("ax&Down", AxitWindows.AppLabel(Dispatch.Apps[1]));
+        Assert.Equal("ax&Claude", AxitWindows.AppLabel(Dispatch.Of(Dispatch.AxClaude)));
+        Assert.Equal("ax&Down", AxitWindows.AppLabel(Dispatch.Of(Dispatch.AxDown)));
     }
 }

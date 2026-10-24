@@ -77,12 +77,7 @@ public sealed partial class FileForm : AxitForm
         folder.DropDownItems.Add(Item("Fil&ter...", ShowFilterNotice, AxFileKeys.Filter));
         folder.DropDownItems.Add(new ToolStripSeparator());
         // AF-1.3: the way to the other windows, on the folder shown.
-        var showIn = new ToolStripMenuItem("Show current folder &in");
-        showIn.DropDownItems.Add(Item("File &Explorer", ShowFolderInExplorer, AxFileKeys.ShowInExplorer));
-        showIn.DropDownItems.Add(new ToolStripMenuItem("ax&Claude", null, (_, _) => OpenIn(Dispatch.AxClaude)));
-        showIn.DropDownItems.Add(new ToolStripMenuItem("ax&GIT", null, (_, _) => OpenIn(Dispatch.AxGit)));
-        showIn.DropDownItems.Add(new ToolStripMenuItem("ax&Terminal", null, (_, _) => OpenIn(Dispatch.AxTerminal)));
-        folder.DropDownItems.Add(showIn);
+        folder.DropDownItems.Add(CreateShowInMenu("Show current folder &in", Item("File &Explorer", ShowFolderInExplorer, AxFileKeys.ShowInExplorer), () => TryFolder(out var shown) ? shown : null));
         folder.DropDownItems.Add(new ToolStripSeparator());
         folder.DropDownItems.Add(CreateExitItem());
 
@@ -204,11 +199,8 @@ public sealed partial class FileForm : AxitForm
         var axit = new ToolStripMenuItem("Open in &Axit");
         axit.DropDownItems.Add(Item("&Editor", OpenInEditor, AxFileKeys.OpenInEditor));
         axit.DropDownItems.Add(new ToolStripSeparator());
-        // Every app that takes a path (AF-4.9): axStart takes none and refuses one with a message box.
-        foreach (var app in Dispatch.Apps.Where(app => app.Verb != Dispatch.AxStart))
-        {
-            axit.DropDownItems.Add(new ToolStripMenuItem(AxitWindows.AppLabel(app), null, (_, _) => OpenInAxit(app.Verb)));
-        }
+        // Every app that opens a path (AF-4.9), by group as in the Axit menu.
+        AxitMenu.AddApps(axit.DropDownItems, Dispatch.Apps.Where(app => app.Opens != Opens.Nothing), app => new ToolStripMenuItem(AxitWindows.AppLabel(app), null, (_, _) => OpenInAxit(app)));
 
         items.Add(axit);
         items.Add(Item("Pr&eview", OpenInPreview, AxFileKeys.Preview));
@@ -291,12 +283,14 @@ public sealed partial class FileForm : AxitForm
         Do(() => StartAsync(_startPath));
     }
 
+    /// <summary>The folder shown, for Recently closed (AX-9.4); nothing at This PC.</summary>
+    protected override string? PathInHand => RealFolder;
+
     protected override void OnFormClosing(FormClosingEventArgs e)
     {
-        if (_folder is { } closing && !FolderListing.IsThisPC(closing))
+        if (RealFolder is { } closing)
         {
-            // AX-9.4: the folder joins the bundle's Recently closed list; AF-8.1: it is the last folder.
-            RecentlyClosed.Remember(AxFileApp.Name, closing);
+            // AF-8.1: the last folder; the window base puts it in Recently closed (PathInHand).
             _settings.LastFolder = closing;
         }
 

@@ -182,27 +182,14 @@ public sealed partial class TextEditorForm
     }
 
     /// <summary>File → Show current file in → axGIT, axFile (AD-4.1): a new window of that app on the file (the repository that holds it; the folder with the file selected).</summary>
-    private void OpenIn(string verb)
+    private string? FileOrSay()
     {
         if (_path is null)
         {
             Announce("No file yet", true);
-            return;
         }
 
-        AxitMenu.Start(verb, _path);
-    }
-
-    /// <summary>File → Show current file in → axTerminal: a new axTerminal window with a shell in the file's folder (docs/axterminal/SPEC.md AT-1.5).</summary>
-    private void OpenInAxTerminal()
-    {
-        if (_path is null || Path.GetDirectoryName(_path) is not { } folder)
-        {
-            Announce("No file yet", true);
-            return;
-        }
-
-        AxitMenu.Start(Dispatch.AxTerminal, folder);
+        return _path;
     }
 
     private void OpenFile() => AskToSave(() =>

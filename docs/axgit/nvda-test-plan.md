@@ -16,7 +16,7 @@ Run with NVDA before a release, on a repository with a remote (the Axit reposito
 
 ## 2. From and to the other windows (AG-1.4)
 
-1. In axClaude on the repository, Alt+S, I: "Show current folder in submenu", Down: "File Explorer Ctrl+W", Down: "axGIT"; Enter: a new axGIT window on the repository, focused.
+1. In axClaude on the repository, Alt+S, I: "Show current folder in submenu", Down: "File Explorer Ctrl+W", Down: "axTerminal", Down: "axGIT"; Enter: a new axGIT window on the repository, focused.
 2. Alt+A, O: the open windows, the axClaude window first; Enter goes back to it. Alt+A, O again, the axGIT window first now.
 3. In axDown on a file of the repository, Alt+F, I, G: axGIT on the repository that holds the file.
 4. In axGIT, Alt+R, I: "File Explorer Ctrl+W" and "axClaude"; Enter on axClaude: a new axClaude on the repository.

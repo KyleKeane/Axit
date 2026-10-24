@@ -140,14 +140,11 @@ public sealed partial class PassForm : ItemForm
         }
     }
 
+    /// <summary>The database, for Recently closed (AX-9.4): its path only.</summary>
+    protected override string? PathInHand => _database;
+
     protected override void OnFormClosing(FormClosingEventArgs e)
     {
-        if (_database is not null)
-        {
-            // AX-9.4: the database joins the bundle's Recently closed list (its path only).
-            RecentlyClosed.Remember(AxPassApp.Name, _database);
-        }
-
         _password = null;
         _lockTimer.Stop();
         base.OnFormClosing(e);

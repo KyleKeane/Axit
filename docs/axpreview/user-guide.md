@@ -27,7 +27,7 @@ The text is the one control. Arrow keys, Home, End, Ctrl+Home, Ctrl+End, Ctrl+Le
 - **Ctrl+H** and **Ctrl+Shift+H** go to the next and the previous Markdown heading, spoken as "Install, heading level 2"; **Ctrl+1** to **Ctrl+6** to the next heading of that level only, Ctrl+Shift with the number back. **Ctrl+K** links, **Ctrl+L** lists, **Ctrl+I** list items, **Ctrl+Q** block quotes, **Ctrl+T** tables, each with Shift for the previous one; "No next heading" when there is none. They work in a plain text file too, where there are none, and in every notice text. Navigate, Next and Previous list them.
 - **F5** reads the file again, the caret kept on its line, "Reloaded". Coming back to the window after another program changed the file does the same by itself: "Reloaded, README.md changed on disk".
 - **Ctrl+E** opens the file in axDown, or in axJSON for a `.json` file, a new editor window; File, Edit in axDown is the same item, named after the file's kind.
-- **Ctrl+W** shows the file in File Explorer; File, Show current file in also offers axFile (the file selected in its folder), axGIT (the repository that holds it) and axTerminal (a shell in its folder).
+- **Ctrl+W** shows the file in File Explorer; File, Show current file in also offers axClaude and axTerminal (in its folder), axGIT (the repository that holds it) and axFile (the file selected in its folder).
 - **Ctrl+O** opens another file with the Windows file picker; File, Open recent lists the last ten, "1. README.md (C:\notes\README.md)".
 - **Ctrl+Shift+W** turns word wrap off and on (Options, Text); the caret stays where it was.
 - **Ctrl+S** says "Nothing to save here": nothing is ever changed, so nothing is ever lost.
@@ -36,7 +36,7 @@ Any file whose first bytes read as text opens, up to 32 MB: the editors' kinds a
 
 ## Menus
 
-- **File**: New window (Ctrl+N), Open (Ctrl+O), Open recent, Reload (F5), Edit in axDown or Edit in axJSON (Ctrl+E), Show current file in (File Explorer Ctrl+W, axGIT, axTerminal, axFile), Exit.
+- **File**: New window (Ctrl+N), Open (Ctrl+O), Open recent, Reload (F5), Edit in axDown or Edit in axJSON (Ctrl+E), Show current file in (File Explorer Ctrl+W, axClaude, axTerminal, axGIT, axFile), Exit.
 - **Navigate**: Find (Ctrl+F), Find next (F3), Find previous (Shift+F3), Go to line (Ctrl+G), Next and Previous (heading, heading level 1 to 6, link, list, list item, block quote, table).
 - **Options**: Text (word wrap, font and size), General (the update check), Developer (the settings file, diagnostics).
 - **Axit**: new windows of every app, the files and folders closed lately, the open windows, updates, About.

@@ -731,38 +731,26 @@ public sealed partial class FileForm
     /// <summary>Folder → New window (Ctrl+N, AF-3.3): another axFile window on the folder shown, as File Explorer's Ctrl+N; without a folder, and at This PC, one that starts as this one did (AF-3.10).</summary>
     private void NewWindow() => AxitMenu.Start(Dispatch.AxFile, RealFolder);
 
-    /// <summary>Folder → Show current folder in → axClaude, axGIT, axTerminal (AF-1.3): a new window of that app on the folder shown.</summary>
-    private void OpenIn(string verb)
-    {
-        if (TryFolder(out var folder))
-        {
-            AxitMenu.Start(verb, folder);
-        }
-    }
-
     /// <summary>
-    /// Item → Open in Axit → one app (AF-4.9): a new window of it on the entry: the editors on the file, axGIT on the
-    /// repository that holds it, axFile on the folder or the file in its folder, axClaude and axTerminal on the folder,
-    /// or on the entry's folder for a file.
+    /// Item → Open in Axit → one app (AF-4.9): a new window of it on the entry, by what the app opens
+    /// (<see cref="Dispatch.PathFor"/>): a file's app on the file, a folder's app on the folder or a file's folder, axGIT
+    /// on the repository that holds it, axFile on the folder or the file in its folder; "Not a file" for a folder given
+    /// to an app of files.
     /// </summary>
-    private void OpenInAxit(string verb)
+    private void OpenInAxit(App app)
     {
         if (!TryEntry(out var entry))
         {
             return;
         }
 
-        switch (verb)
+        if (Dispatch.PathFor(app, entry.Path, entry.IsFolder) is { } path)
         {
-            case Dispatch.AxDown or Dispatch.AxJSON or Dispatch.AxPreview when entry.IsFolder:
-                Announce("Not a file", true);
-                return;
-            case Dispatch.AxClaude or Dispatch.AxTerminal when !entry.IsFolder:
-                AxitMenu.Start(verb, _folder ?? entry.Path);
-                return;
-            default:
-                AxitMenu.Start(verb, entry.Path);
-                return;
+            AxitMenu.Start(app.Verb, path);
+        }
+        else
+        {
+            Announce("Not a file", true);
         }
     }
 

@@ -112,8 +112,8 @@ rather than a new one (AP-1.2). It works entirely offline (bundle G6).
 ### AP-3 Menus, keys, texts
 
 - AP-3.1 Menus (AX-6): **File (F):** New window Ctrl+N | Open… Ctrl+O | Open recent ▸ | ─ | Reload F5 | ─ | Edit in
-  axDown Ctrl+E (or Edit in axJSON, by the file) | Show current file in ▸ (File Explorer Ctrl+W | axGIT | axTerminal |
-  axFile, the editors' order) | ─ | Exit Alt+F4. No Edit menu: the control's own Ctrl+A and Ctrl+C work as they do. **Navigate (N):** Find… Ctrl+F | Find next F3 | Find previous Shift+F3 | Go to line… Ctrl+G | ─ |
+  axDown Ctrl+E (or Edit in axJSON, by the file) | Show current file in ▸ (File Explorer Ctrl+W | axClaude | axTerminal |
+  axGIT | axFile, bundle AX-9.10) | ─ | Exit Alt+F4. No Edit menu: the control's own Ctrl+A and Ctrl+C work as they do. **Navigate (N):** Find… Ctrl+F | Find next F3 | Find previous Shift+F3 | Go to line… Ctrl+G | ─ |
   Next ▸ | Previous ▸ (Heading, Heading level 1 to 6, Link, List, List item, Block quote, Table). **Options (O):**
   Text ▸ (Word wrap Ctrl+Shift+W | ─ | Font… | Larger text | Smaller text | Windows text size) | General ▸ (Check for
   updates at start ✓) | Developer ▸ (Open settings file | Copy diagnostics). **Axit (A)** (AX-9). **Help (H):**

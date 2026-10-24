@@ -177,7 +177,7 @@ internal sealed partial class TerminalForm : ConsoleForm
     ];
 
     /// <summary>The shell's current directory, for the bundle's Recently closed list (AX-9.4).</summary>
-    protected override string? FolderInHand => CurrentDirectory;
+    protected override string? PathInHand => CurrentDirectory;
 
     protected override string Verb => Dispatch.AxTerminal;
 

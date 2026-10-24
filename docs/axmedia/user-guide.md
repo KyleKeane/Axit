@@ -45,7 +45,7 @@ The volume is Windows' own: your keyboard's volume keys work from anywhere. A vi
 
 ## Menus
 
-- **Queue**: New window (Ctrl+N), Open files (Ctrl+O), Open folder (Ctrl+Shift+O), Open recent, Play (Enter), Remove (Delete), Clear queue, Information (Ctrl+I), Show current file in (File Explorer Ctrl+W, axFile), Exit.
+- **Queue**: New window (Ctrl+N), Open files (Ctrl+O), Open folder (Ctrl+Shift+O), Open recent, Play (Enter), Remove (Delete), Clear queue, Information (Ctrl+I), Show current file in (File Explorer Ctrl+W, axClaude, axTerminal, axGIT, axFile), Exit.
 - **Play**: Pause or resume (Space), Next file, Previous file, Forward 15 seconds, Back 15 seconds, Go to time (Ctrl+T), Faster, Slower, Normal speed, Say each file as it starts, What is playing (Ctrl+Q).
 - **Options**: Text (font and size), General (the update check), Developer (the settings file, diagnostics).
 - **Axit**: new windows of every app, the files and folders closed lately, the open windows, updates, About.

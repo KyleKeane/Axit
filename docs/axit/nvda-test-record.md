@@ -18,6 +18,9 @@ Merged at the user's word ahead of the rule, so that main holds them; no release
   views (`ListViewState`), the copy keys of axFile, axPass, axProcess, axCalc and axClaude (`CopyText`), the Show
   current folder in submenus of every window (the names now axGIT, axTerminal, axFile), axDown's and axPreview's
   Markdown keys (`MarkdownKeys`), axFile's Go to folder completion and Open with (moved files).
+- The app lists and Show in (AX-9.2, AX-9.10): Alt+A, N and Alt+A, B in any window, the four groups in order with the
+  separators skipped; axFile's Item, Open in Axit (no utilities); Show current file in from axDown, axPreview and
+  axMedia (axClaude now there); Recently closed after closing axCalc and quitting axClip.
 
 ## 2026-10-24, axTask and axPass (the branch `axtask`, before its merge)
 

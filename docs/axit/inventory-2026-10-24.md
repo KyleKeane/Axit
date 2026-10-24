@@ -72,7 +72,8 @@ change; the one spoken change is axStart saying "Reading the programs" when noth
 5. **The notes of the apps are long single paragraphs** (axFile's "Where things are" bullet is about 6,000
    characters). The same rewrite as `Axit.Core`'s, one bullet per file or section; no content change.
 6. **Recently closed is remembered by four windows' own closing code**; one `PathInHand` on the window base would do
-   it once.
+   it once. Done the same day at the user's ask, with the app lists: every list of apps, the Show in submenus and
+   Recently closed now follow from one line per app in `Dispatch.Apps` (AX-9.2, AX-9.4, AX-9.10).
 7. **A list refilled in place, written twice** (axMedia's `FillList`, axFile's `FillPane`): `AxitList.SetLines`.
 8. **The F1 texts' bundle section is typed by hand in fourteen files.** Each app's lines differ on purpose (what Find
    searches, what Tab moves between), so a generator would take parameters; for now the tests pin the lines that must

@@ -83,8 +83,9 @@ top of the window. It works entirely offline (bundle G6).
   Hand-overs that arrive while one is being applied wait in a queue and apply in the order they came (one queue
   drained in turn since 2026-10-23; a chain of tasks before).
 - AM-1.4 Ways out: Show current file in ▸ File Explorer (Ctrl+W: the playing file, or the file under the selection,
-  selected in File Explorer) and axFile (the same file selected in its folder, a new axFile window; `docs/axfile/SPEC.md`
-  AF-1.1). The Axit menu (AX-9).
+  selected in File Explorer), axClaude and axTerminal (in its folder), axGIT (the repository that holds it) and axFile
+  (the same file selected in its folder, a new axFile window; `docs/axfile/SPEC.md` AF-1.1), the bundle's one submenu
+  (AX-9.10). The Axit menu (AX-9).
 
 ### AM-2 The window
 
@@ -155,7 +156,7 @@ top of the window. It works entirely offline (bundle G6).
 
 - AM-5.1 Menus (AX-6): **Queue (Q):** New window Ctrl+N | Open files… Ctrl+O | Open folder… Ctrl+Shift+O | Open
   recent ▸ | ─ | Play Enter | Remove Delete | Clear queue | ─ | Information Ctrl+I | Show current file in ▸ (File
-  Explorer Ctrl+W | axFile) | ─ | Exit Alt+F4. **Play (P):** Pause or resume Space | Next file Ctrl+Shift+Right | Previous file Ctrl+Shift+Left |
+  Explorer Ctrl+W | axClaude | axTerminal | axGIT | axFile) | ─ | Exit Alt+F4. **Play (P):** Pause or resume Space | Next file Ctrl+Shift+Right | Previous file Ctrl+Shift+Left |
   Forward 15 seconds Ctrl+Right | Back 15 seconds Ctrl+Left | Go to time… Ctrl+T | ─ | Faster Ctrl+Shift+Period |
   Slower Ctrl+Shift+Comma | Normal speed | ─ | Say each file as it starts ✓ | What is playing Ctrl+Q. **Options (O):**
   Text ▸ | General ▸ (Check for updates at start ✓) | Developer ▸ (Open settings file | Copy diagnostics). **Axit (A)**

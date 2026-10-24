@@ -54,7 +54,7 @@ Ctrl+Plus and Ctrl+Minus make the text larger and smaller, and axJSON says the n
 
 ## Menus
 
-- **File**: New, Open, Open recent file, Save, Save as, Show current file in (File Explorer, Ctrl+W; axGIT, a git manager on the repository that holds the file; axTerminal, a shell in the file's folder; axFile, the file's folder with the file selected), Exit.
+- **File**: New, Open, Open recent file, Save, Save as, Show current file in (File Explorer, Ctrl+W; axClaude, Claude in the file's folder; axTerminal, a shell in the file's folder; axGIT, a git manager on the repository that holds the file; axFile, the file's folder with the file selected), Exit.
 - **Edit**: Undo, Redo, Cut, Copy, Paste, Select all, Format (Ctrl+Shift+F).
 - **Navigate**: Find, Find next, Find previous, Go to line, and the submenus Next and Previous, each with Key, Object, Array, Item and Error.
 - **Options**: Text (Word wrap, Font, Larger text, Smaller text, Windows text size), General (Check for updates at start) and Developer (Open settings file, which opens axjson.json in a new axJSON window, and Copy diagnostics).

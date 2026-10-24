@@ -71,12 +71,7 @@ public sealed partial class GitForm : AxitForm
         repository.DropDownItems.Add(Git(Item("Re&fresh", () => Do(() => RefreshAsync(announce: true)), AxGitKeys.Refresh)));
         repository.DropDownItems.Add(new ToolStripSeparator());
         // Show current repository in ▸ File Explorer, axClaude, axTerminal, axFile: the way back to where the user came from (AG-1.4).
-        var showIn = new ToolStripMenuItem("Show current repository &in");
-        showIn.DropDownItems.Add(Item("File &Explorer", ShowInExplorer, AxGitKeys.ShowInExplorer));
-        showIn.DropDownItems.Add(new ToolStripMenuItem("ax&Claude", null, (_, _) => OpenIn(Dispatch.AxClaude)));
-        showIn.DropDownItems.Add(new ToolStripMenuItem("ax&Terminal", null, (_, _) => OpenIn(Dispatch.AxTerminal)));
-        showIn.DropDownItems.Add(new ToolStripMenuItem("ax&File", null, (_, _) => OpenIn(Dispatch.AxFile)));
-        repository.DropDownItems.Add(showIn);
+        repository.DropDownItems.Add(CreateShowInMenu("Show current repository &in", Item("File &Explorer", ShowInExplorer, AxGitKeys.ShowInExplorer), RepositoryOrSay));
         repository.DropDownItems.Add(new ToolStripSeparator());
         repository.DropDownItems.Add(CreateExitItem());
 
@@ -193,16 +188,8 @@ public sealed partial class GitForm : AxitForm
         Do(() => StartAsync(_startPath));
     }
 
-    protected override void OnFormClosing(FormClosingEventArgs e)
-    {
-        if (_root is { } closing)
-        {
-            // AX-9.4: the repository joins the bundle's Recently closed list.
-            RecentlyClosed.Remember(AxGitApp.Name, closing);
-        }
-
-        base.OnFormClosing(e);
-    }
+    /// <summary>The repository, for Recently closed (AX-9.4).</summary>
+    protected override string? PathInHand => _root;
 
     // ---- keys (AG-6.2): every key comes from BundleKeys or AxGitKeys, and is handled here only ----
 
@@ -394,15 +381,14 @@ public sealed partial class GitForm : AxitForm
     }
 
     /// <summary>Repository → Show current repository in → axClaude, axTerminal, axFile (AG-1.4): a new window of that app on the repository's folder.</summary>
-    private void OpenIn(string verb)
+    private string? RepositoryOrSay()
     {
         if (_root is null)
         {
             Announce("No repository", true);
-            return;
         }
 
-        AxitMenu.Start(verb, _root);
+        return _root;
     }
 
     /// <summary>Changes → Open file in editor (Ctrl+E): the selected file in axJSON for .json, axDown otherwise (AG-1.4).</summary>

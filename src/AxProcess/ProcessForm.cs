@@ -177,12 +177,6 @@ public sealed class ProcessForm : AxitForm
         Do(() => RefreshAsync(announce: false));
     }
 
-    protected override void OnFormClosing(FormClosingEventArgs e)
-    {
-        // AX-9.4: the window joins the bundle's Recently closed list by its name, holding no file.
-        RecentlyClosed.Remember(AxProcessApp.Name, string.Empty);
-        base.OnFormClosing(e);
-    }
 
     // ---- keys (PR-6.2): every key comes from BundleKeys or AxProcessKeys, and is handled here only ----
 

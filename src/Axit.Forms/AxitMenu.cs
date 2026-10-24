@@ -35,14 +35,13 @@ public sealed class AxitMenu : ToolStripMenuItem
         void ShowNotice(Notice notice) => owner.ShowNotice(notice);
         var newWindow = new ToolStripMenuItem("&New window");
         var byType = new ToolStripMenuItem("Open windows &by type");
-        foreach (var app in Dispatch.Apps)
+        AddApps(newWindow.DropDownItems, Dispatch.Apps, app => new ToolStripMenuItem(AxitWindows.AppLabel(app), null, (_, _) => Start(app.Verb, null)));
+        AddApps(byType.DropDownItems, Dispatch.Apps, app =>
         {
-            var verb = app.Verb;
-            newWindow.DropDownItems.Add(new ToolStripMenuItem(AxitWindows.AppLabel(app), null, (_, _) => Start(verb, null)));
             var list = new ToolStripMenuItem(AxitWindows.AppLabel(app));
-            byType.DropDownItems.Add(list);
             _perApp.Add((app, list));
-        }
+            return list;
+        });
 
         var about = new ToolStripMenuItem("&About");
         about.DropDownItems.Add(new ToolStripMenuItem("&Version", null, (_, _) => ShowNotice(Notice.Plain(BundleAbout.VersionTitle, BundleAbout.Version(owner.LatestReleaseState)))));
@@ -169,6 +168,25 @@ public sealed class AxitMenu : ToolStripMenuItem
         }
 
         SetForegroundWindow(handle);
+    }
+
+    /// <summary>
+    /// The apps as menu items in the bundle's order, a separator before each new group (AX-9.2, 2026-10-24): every list
+    /// of apps in the windows is made here, so that a new app of <see cref="Dispatch.Apps"/> is in all of them.
+    /// </summary>
+    public static void AddApps(ToolStripItemCollection items, IEnumerable<App> apps, Func<App, ToolStripMenuItem> item)
+    {
+        AppGroup? group = null;
+        foreach (var app in apps)
+        {
+            if (group is { } last && last != app.Group)
+            {
+                items.Add(new ToolStripSeparator());
+            }
+
+            group = app.Group;
+            items.Add(item(app));
+        }
     }
 
     /// <summary>A new window of the app: this program file with the app's verb and, for a recently closed item, its path; a new process (B-2).</summary>

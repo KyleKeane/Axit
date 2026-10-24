@@ -62,10 +62,7 @@ public sealed partial class MediaForm : AxitForm
         queue.DropDownItems.Add(new ToolStripSeparator());
         queue.DropDownItems.Add(Item("&Information", SayInformation, AxMediaKeys.Information));
         // AM-1.4: the ways out, on the file playing or the one under the selection.
-        var showIn = new ToolStripMenuItem("&Show current file in");
-        showIn.DropDownItems.Add(Item("File &Explorer", ShowInExplorer, AxMediaKeys.ShowInExplorer));
-        showIn.DropDownItems.Add(new ToolStripMenuItem("ax&File", null, (_, _) => OpenInAxFile()));
-        queue.DropDownItems.Add(showIn);
+        queue.DropDownItems.Add(CreateShowInMenu("&Show current file in", Item("File &Explorer", ShowInExplorer, AxMediaKeys.ShowInExplorer), CurrentFile));
         queue.DropDownItems.Add(new ToolStripSeparator());
         queue.DropDownItems.Add(CreateExitItem());
 
@@ -186,17 +183,14 @@ public sealed partial class MediaForm : AxitForm
         }
     }
 
+    /// <summary>The file in hand, for Recently closed (AX-9.4); chosen there, it plays with its folder again.</summary>
+    protected override string? PathInHand => FileInHand;
+
     protected override void OnFormClosing(FormClosingEventArgs e)
     {
-        if (FileInHand is { } file)
-        {
-            // AX-9.4: the file in hand joins the bundle's Recently closed list; chosen there, it plays with its folder again.
-            RecentlyClosed.Remember(AxMediaApp.Name, file);
-        }
-
-        // AM-4.4: closing the window stops the player.
-        StopPlayer();
+        // The base first, while the file playing is still the one in hand; AM-4.4: closing the window stops the player.
         base.OnFormClosing(e);
+        StopPlayer();
     }
 
     /// <summary>AM-1.2, AM-1.3: a start with paths while this window is open hands them here; the base answers the message at once and the paths are applied after, nothing read before the answer.</summary>
@@ -495,15 +489,6 @@ public sealed partial class MediaForm : AxitForm
         if (CurrentFile() is { } file)
         {
             OpenInExplorer(file);
-        }
-    }
-
-    /// <summary>Queue → Show current file in → axFile: a new axFile window on the file's folder with the file selected (docs/axfile/SPEC.md AF-1.1).</summary>
-    private void OpenInAxFile()
-    {
-        if (CurrentFile() is { } file)
-        {
-            AxitMenu.Start(Dispatch.AxFile, file);
         }
     }
 

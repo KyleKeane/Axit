@@ -386,8 +386,14 @@ The apps are named ax and a word, the ax in lower case and the word as it is wri
   release is known) and About ▸ (AX-9.9). The lists are filled each time the menu opens, so that they show the
   windows and the files of that moment.
 - AX-9.2 **New window ▸** (N): one item per app of the bundle (`Dispatch.Apps`), "axClaude", "axDown", with the letter
-  after Ax as the mnemonic. It starts `Axit.exe <verb>` with no arguments: a new process and a new window (B-2), the
-  app starting as it does from its Start menu entry.
+  after ax as the mnemonic. It starts `Axit.exe <verb>` with no arguments: a new process and a new window (B-2), the
+  app starting as it does from its Start menu entry. The apps stand in four groups, a separator between them
+  (2026-10-24, the user's choice of a flat list over a submenu per group): Claude and code (axClaude, axTerminal,
+  axGIT), files (axFile, axDown, axJSON, axPreview, axMedia), one's own lists (axTask, axPass), utilities (axStart,
+  axClip, axCalc, axProcess). Every list of apps in the windows has this order and these separators: New window, Open
+  windows by type, axFile's Open in Axit (`AxitMenu.AddApps`). A new app is one line in `Dispatch.Apps`, with its
+  group, what it opens and whether Show in offers it; every list, Show in (AX-9.10) and Recently closed (AX-9.4)
+  follow from that line.
 - AX-9.3 **Open windows ▸** (O): every open window of the bundle's apps except this one, the most recently used first.
   The order is the one Windows keeps its top-level windows in, which is Alt+Tab's, so nothing is stored and Alt+A, O,
   1 is always the window the user was in before this one. **Open windows by type ▸** (B) holds one submenu per app,
@@ -398,8 +404,12 @@ The apps are named ax and a word, the ax in lower case and the word as it is wri
   (checked as the menu opens for a path on a drive of this computer only, since a share or a mapped network drive
   can take the network's timeout to answer, which no menu may wait for; a path elsewhere is listed as it is and
   found missing when chosen; `Axit.Core/LocalPaths`, tested, 2026-10-23; the apps' recent lists follow the same
-  rule, AX-9.5); Enter starts that app on it in a new window. An app that holds no file or folder (axProcess) is listed
-  by its name alone when its window closes, once, and Enter starts it (2026-10-24). The list is one file for the bundle, `%APPDATA%\Axit\recently-closed.json`
+  rule, AX-9.5); Enter starts that app on it in a new window. An app that holds no file or folder (axProcess, axCalc,
+  axClip, axStart) is listed by its name alone when its window closes, once, and Enter starts it (2026-10-24). The
+  window base does it for every window as it closes (`AxitForm.PathInHand`: the file or folder, empty for an app that
+  holds none, which is the default, so that a new app is listed without a line of its own; nothing for a window with
+  nothing to open again, an untitled text or axFile at This PC); a window that swaps its file or folder remembers the
+  old one itself. A background app's window (axStart, axClip) hides on Alt+F4 and is listed when Quit ends it. The list is one file for the bundle, `%APPDATA%\Axit\recently-closed.json`
   (AX-5.1), written whole by the window that closes or swaps (`Axit.Core/RecentlyClosed`, through `SettingsFile`; two
   windows closing in the same instant leave the last writer's list). Nothing else about windows is stored.
 - AX-9.5 A window's or a file's item is its number, a full stop and a title, "1. notes.md (C:\notes\notes.md) - axDown":
@@ -430,6 +440,14 @@ The apps are named ax and a word, the ax in lower case and the word as it is wri
   **Attribution** (A; the maker, the Anthropic note, what Axit is built with), **Axit guide** (G; `docs/axit/README.md`,
   the zip's guide, embedded by `Axit.Core`: install, start, update, remove; its headings take the window's heading
   keys, AX-7.2), and **Axit on GitHub** (H; the repository page, `UpdateCheck.RepositoryPage`, in the browser).
+- AX-9.10 **Show current folder in ▸** (2026-10-24, one builder, `AxitForm.CreateShowInMenu`): the window's File
+  Explorer item (Ctrl+W), then the apps that work in a folder (`App.ShowIn`: axClaude, axTerminal, axGIT, axFile, in
+  that order) but the window's own, each a new window on the file or folder in hand: axClaude and axTerminal on a
+  file's folder, axGIT on the repository that holds it, axFile on the folder or with the file selected
+  (`Dispatch.PathFor`). The windows that hold a folder or a file have it: axClaude and axTerminal ("Show current folder
+  in"), axGIT ("Show current repository in"), axFile ("Show current folder in"), the editors and axPreview ("Show
+  current file in") and axMedia ("Show current file in"). With nothing in hand the window says why ("No project
+  folder", "No repository", "No file yet", the empty queue).
 
 - AX-6.6 **Menus are the standard ones.** A menu bar item's drop-down is the one WinForms makes for it; no window
   assigns a drop-down of its own (a `ContextMenuStrip` or any `ToolStripDropDown` set as `DropDown`). A hand-made

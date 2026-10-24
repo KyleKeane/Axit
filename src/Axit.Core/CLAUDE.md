@@ -5,8 +5,10 @@ another project on its second use, the bullet says so.
 
 ## The bundle
 
-- `Dispatch` (AX-1): which app a command line starts; `Apps`, the name, verb and project of each app, for the Axit
-  menu and the inventory test.
+- `Dispatch` (AX-1): which app a command line starts; `Apps`, each app's name, verb, project, `AppGroup`, what it
+  `Opens` and whether Show in offers it, in the order every list of apps shows (AX-9.2), the one source of the Axit
+  menu, Open in Axit, the Show in submenus and the inventory test; `Of` (an app by its verb), `PathFor` (the path an
+  app is started on from a file or folder in hand), `EditorOf`.
 - `BundleInfo`: the version, read from the executable.
 - `AppPaths` (AX-5.1): settings, logs, updates and the recently closed list under the `Axit` folders.
 - `SettingsFile` (AX-5.2, AX-5.3): how every app's settings file is read and written, an unreadable one copied to

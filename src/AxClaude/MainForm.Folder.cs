@@ -7,19 +7,15 @@ internal sealed partial class MainForm
 {
     // ---- project folder ----
 
-    /// <summary>
-    /// Session → Show current folder in → axGIT, axTerminal or axFile (FR-8.2; docs/axterminal/SPEC.md AT-1.5,
-    /// docs/axfile/SPEC.md AF-1.3): a new window of that app on the project folder (axGIT on the repository that holds it).
-    /// </summary>
-    private void OpenIn(string verb)
+    /// <summary>Session → Show current folder in (FR-8.2): the project folder, or "No project folder" said.</summary>
+    private string? FolderOrSay()
     {
         if (_folder is null)
         {
             Announce("No project folder", true);
-            return;
         }
 
-        AxitMenu.Start(verb, _folder);
+        return _folder;
     }
 
     /// <summary>Session → Show current folder in → File Explorer, Ctrl+W (FR-8.2): the folder in File Explorer, one of the system's own windows (D23).</summary>
@@ -79,7 +75,7 @@ internal sealed partial class MainForm
     protected override string Verb => Dispatch.AxClaude;
 
     /// <summary>The project folder, for the bundle's Recently closed list (AX-9.4).</summary>
-    protected override string? FolderInHand => _folder;
+    protected override string? PathInHand => _folder;
 
     /// <summary>Restarts Claude in another folder (Open folder, Open recent folder), with a system line and an announcement.</summary>
     protected override void SwitchFolder(string folder)

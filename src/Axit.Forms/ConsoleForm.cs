@@ -159,8 +159,6 @@ public abstract partial class ConsoleForm : AxitForm
     /// <summary>Alt+F4 with the program in the middle of something: true when the window asked first (a notice whose Close anyway calls <see cref="CloseConfirmed"/>), false to close now.</summary>
     protected abstract bool AskBeforeClosing();
 
-    /// <summary>The folder the window is on, for the bundle's Recently closed list (AX-9.4): the project folder, the shell's current directory; null when none.</summary>
-    protected abstract string? FolderInHand { get; }
 
     /// <summary>Open recent folder (axClaude FR-8.1, axTerminal AT-1.5): the program again in that folder.</summary>
     protected abstract void SwitchFolder(string folder);
@@ -249,10 +247,6 @@ public abstract partial class ConsoleForm : AxitForm
             return;
         }
 
-        if (FolderInHand is { } folder)
-        {
-            RecentlyClosed.Remember(AppName, folder);
-        }
 
         // A close the user confirmed while the program was busy ends it at once; Windows' own close gives it its two seconds.
         StopProcess(terminateAtOnce: _closeConfirmed);

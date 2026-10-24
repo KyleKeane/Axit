@@ -10,8 +10,37 @@ public sealed record Launch(string App, string[] Arguments, string? Error = null
 /// so that a screen reader says it as a word; 2026-10-23), which ends every title of its windows ("notes.md - axDown")
 /// and names its Start menu entry; <paramref name="Verb"/> starts it (AX-1.1); <paramref name="Project"/> is the name
 /// of its code (the folder src/AxClaude, the class AxClaudeApp, the icon AxClaude.ico), which keeps the C# spelling.
+/// <paramref name="Group"/> is its place among the apps (AX-9.2: the Axit menu's lists keep the groups together with a
+/// separator between them); <paramref name="Opens"/> what it opens from a path; <paramref name="ShowIn"/> whether every
+/// window's Show current folder in submenu offers it (AX-9.10). Every list of apps in the windows reads these, so a new
+/// app is in the Axit menu, Open in Axit, the Show in submenus and Recently closed by its line in <see cref="Dispatch.Apps"/>.
 /// </summary>
-public sealed record App(string Name, string Verb, string Project);
+public sealed record App(string Name, string Verb, string Project, AppGroup Group, Opens Opens, bool ShowIn = false);
+
+/// <summary>The groups of the apps, in the Axit menu's order (AX-9.2).</summary>
+public enum AppGroup
+{
+    /// <summary>Claude, the shell and git: working in a folder.</summary>
+    Code,
+
+    /// <summary>Files and what is in them: the file manager, the editors, the viewer, the player.</summary>
+    Files,
+
+    /// <summary>Lists of one's own: tasks, passwords.</summary>
+    Organise,
+
+    /// <summary>Small tools for the whole computer: the launcher, the clipboard, the calculator, the processes.</summary>
+    Utilities,
+}
+
+/// <summary>What an app opens from a path: a file's app given a folder is refused, a folder's app given a file gets the file's folder.</summary>
+public enum Opens
+{
+    Nothing,
+    Folders,
+    Files,
+    FilesAndFolders,
+}
 
 /// <summary>
 /// Decides which app <c>Axit.exe</c> starts (docs/axit/SPEC.md AX-1). The first argument may be a verb naming one of
@@ -40,8 +69,42 @@ public static class Dispatch
     /// <summary>Not an app: the executable answers <c>--help</c> and <c>--version</c>, or reports <see cref="Launch.Error"/>.</summary>
     public const string Bundle = "axit";
 
-    /// <summary>The apps, in the order the Axit menu lists them (AX-9).</summary>
-    public static readonly IReadOnlyList<App> Apps = [new("axClaude", AxClaude, "AxClaude"), new("axDown", AxDown, "AxDown"), new("axJSON", AxJSON, "AxJSON"), new("axGIT", AxGit, "AxGit"), new("axTerminal", AxTerminal, "AxTerminal"), new("axFile", AxFile, "AxFile"), new("axMedia", AxMedia, "AxMedia"), new("axPreview", AxPreview, "AxPreview"), new("axStart", AxStart, "AxStart"), new("axProcess", AxProcess, "AxProcess"), new("axTask", AxTask, "AxTask"), new("axPass", AxPass, "AxPass"), new("axCalc", AxCalc, "AxCalc"), new("axClip", AxClip, "AxClip")];
+    /// <summary>
+    /// The apps, in the order every list of the windows shows them, by group (AX-9.2, 2026-10-24): one line here puts an
+    /// app in the Axit menu, axFile's Open in Axit, the Show in submenus and Recently closed.
+    /// </summary>
+    public static readonly IReadOnlyList<App> Apps =
+    [
+        new("axClaude", AxClaude, "AxClaude", AppGroup.Code, Opens.Folders, ShowIn: true),
+        new("axTerminal", AxTerminal, "AxTerminal", AppGroup.Code, Opens.Folders, ShowIn: true),
+        new("axGIT", AxGit, "AxGit", AppGroup.Code, Opens.FilesAndFolders, ShowIn: true),
+        new("axFile", AxFile, "AxFile", AppGroup.Files, Opens.FilesAndFolders, ShowIn: true),
+        new("axDown", AxDown, "AxDown", AppGroup.Files, Opens.Files),
+        new("axJSON", AxJSON, "AxJSON", AppGroup.Files, Opens.Files),
+        new("axPreview", AxPreview, "AxPreview", AppGroup.Files, Opens.Files),
+        new("axMedia", AxMedia, "AxMedia", AppGroup.Files, Opens.FilesAndFolders),
+        new("axTask", AxTask, "AxTask", AppGroup.Organise, Opens.Folders),
+        new("axPass", AxPass, "AxPass", AppGroup.Organise, Opens.Files),
+        new("axStart", AxStart, "AxStart", AppGroup.Utilities, Opens.Nothing),
+        new("axClip", AxClip, "AxClip", AppGroup.Utilities, Opens.Nothing),
+        new("axCalc", AxCalc, "AxCalc", AppGroup.Utilities, Opens.Nothing),
+        new("axProcess", AxProcess, "AxProcess", AppGroup.Utilities, Opens.Nothing),
+    ];
+
+    /// <summary>The app of a verb.</summary>
+    public static App Of(string verb) => Apps.First(app => app.Verb == verb);
+
+    /// <summary>
+    /// The path an app is started on from a file or a folder in hand (AX-9.10, axFile AF-4.9): the path itself when the
+    /// app opens its kind, the folder of a file for an app that opens folders only, null for a folder given to an app
+    /// that opens files only, or for an app that opens nothing.
+    /// </summary>
+    public static string? PathFor(App app, string path, bool isFolder) => (app.Opens, isFolder) switch
+    {
+        (Opens.FilesAndFolders, _) or (Opens.Folders, true) or (Opens.Files, false) => path,
+        (Opens.Folders, false) => System.IO.Path.GetDirectoryName(path),
+        _ => null,
+    };
 
     public const string Usage = """
         Usage: Axit [claude|down|json|git|terminal|file|media|preview|start|process|task|pass|calc|clip] [arguments]

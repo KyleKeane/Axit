@@ -82,15 +82,8 @@ public sealed partial class TextEditorForm : AxitForm
         }
 
         // Show current file in ▸ File Explorer and the other apps' windows on the file or its folder (AD-4.1).
-        var showIn = new ToolStripMenuItem("Show current file &in");
-        showIn.DropDownItems.Add(Item("File &Explorer", ShowInExplorer, EditorKeys.ShowInExplorer));
-        // axGIT on the repository that holds the file, a new window (AD-4.1; docs/axgit/SPEC.md AG-1.4).
-        showIn.DropDownItems.Add(new ToolStripMenuItem("ax&GIT", null, (_, _) => OpenIn(Dispatch.AxGit)));
-        // axTerminal with a shell in the file's folder, a new window (docs/axterminal/SPEC.md AT-1.5).
-        showIn.DropDownItems.Add(new ToolStripMenuItem("ax&Terminal", null, (_, _) => OpenInAxTerminal()));
-        // axFile on the file's folder with the file selected, a new window (docs/axfile/SPEC.md AF-1.3).
-        showIn.DropDownItems.Add(new ToolStripMenuItem("ax&File", null, (_, _) => OpenIn(Dispatch.AxFile)));
-        file.DropDownItems.Add(showIn);
+        // axClaude and axTerminal on the file's folder, axGIT on the repository that holds it, axFile with the file selected.
+        file.DropDownItems.Add(CreateShowInMenu("Show current file &in", Item("File &Explorer", ShowInExplorer, EditorKeys.ShowInExplorer), FileOrSay));
         file.DropDownItems.Add(new ToolStripSeparator());
         file.DropDownItems.Add(CreateExitItem());
 
@@ -299,6 +292,9 @@ public sealed partial class TextEditorForm : AxitForm
         }
     }
 
+    /// <summary>The file, for Recently closed (AX-9.4); an untitled text is left out.</summary>
+    protected override string? PathInHand => _path;
+
     protected override void OnFormClosing(FormClosingEventArgs e)
     {
         if (_changed && !_closeConfirmed)
@@ -312,12 +308,6 @@ public sealed partial class TextEditorForm : AxitForm
             }, KeepWorkingAfterUpdate);
             base.OnFormClosing(e);
             return;
-        }
-
-        if (_path is { } closing)
-        {
-            // AX-9.4: the file joins the bundle's Recently closed list.
-            RecentlyClosed.Remember(_app.Name, closing);
         }
 
         base.OnFormClosing(e);
