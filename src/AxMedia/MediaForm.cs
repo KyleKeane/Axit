@@ -45,41 +45,57 @@ public sealed partial class MediaForm : AxitForm
         // A start on one file is named after it from the first moment, so that NVDA reads the file's window as it opens (AM-2.3).
         Text = start is { Verb: AppMessage.Play, Paths: [var only] } && File.Exists(only) ? $"{Path.GetFileName(only)} - {AxMediaApp.Name}" : AxMediaApp.Name;
 
-        // ---- menus (AM-5.1); the keys are handled in ProcessWindowKey from the tables, the items only show them ----
+        // ---- menus and keys (AM-5.1, AM-5.2): one command list (docs/axit/app-kit.md AK-2), each key from the tables ----
         // Queue is the thing worked on, in the standard order of a first menu (bundle AX-6): New and Open with the
-        // recent list, the items on the file, Show current file in, Exit.
+        // recent list, the items on the file, Show current file in, Exit. Enter, Delete and Space act in the list
+        // only (AM-5.2); in a notice's field they are the field's own, and in the list returning true keeps it from dinging.
         var queue = new ToolStripMenuItem("&Queue");
-        queue.DropDownItems.Add(Item("&New window", NewWindow, AxMediaKeys.NewWindow));
-        queue.DropDownItems.Add(Item("&Open files...", OpenFiles, AxMediaKeys.OpenFiles));
-        queue.DropDownItems.Add(Item("Open &folder...", OpenFolder, AxMediaKeys.OpenFolder));
+        Add(queue, new Command("&New window", AxMediaKeys.NewWindow, NewWindow) { Mark = CommandMark.Open });
+        Add(queue, new Command("&Open files...", AxMediaKeys.OpenFiles, OpenFiles) { Mark = CommandMark.Open });
+        Add(queue, new Command("Open &folder...", AxMediaKeys.OpenFolder, OpenFolder) { Mark = CommandMark.Open });
         CommandPalette.FilledOnOpening(_recentItem).DropDownOpening += (_, _) => FillRecent();
         FillRecent();
         queue.DropDownItems.Add(_recentItem);
         queue.DropDownItems.Add(new ToolStripSeparator());
-        queue.DropDownItems.Add(Item("&Play", PlaySelected, AxMediaKeys.Play));
-        queue.DropDownItems.Add(Item("R&emove", RemoveSelected, AxMediaKeys.Remove));
+        Add(queue, new Command("&Play", AxMediaKeys.Play, PlaySelected) { When = () => _list.Focused, Mark = CommandMark.Open });
+        Add(queue, new Command("R&emove", AxMediaKeys.Remove, RemoveSelected) { When = () => _list.Focused });
         queue.DropDownItems.Add(new ToolStripMenuItem("&Clear queue", null, (_, _) => ClearQueue()));
         queue.DropDownItems.Add(new ToolStripSeparator());
-        queue.DropDownItems.Add(Item("&Information", SayInformation, AxMediaKeys.Information));
-        // AM-1.4: the ways out, on the file playing or the one under the selection.
-        queue.DropDownItems.Add(CreateShowInMenu("&Show current file in", Item("File &Explorer", ShowInExplorer, AxMediaKeys.ShowInExplorer), CurrentFile));
+        Add(queue, new Command("&Information", AxMediaKeys.Information, SayInformation) { Mark = CommandMark.Read });
+        // AM-1.4: the ways out, on the file playing or the one under the selection; the File Explorer item is the
+        // first of the submenu the base makes, so its command is made here and its key added to the list.
+        var explorer = new Command("File &Explorer", AxMediaKeys.ShowInExplorer, ShowInExplorer) { Mark = CommandMark.Open };
+        AddKey(explorer);
+        queue.DropDownItems.Add(CreateShowInMenu("&Show current file in", Item(explorer.Label, explorer.Run, explorer.Key), CurrentFile));
         queue.DropDownItems.Add(new ToolStripSeparator());
         queue.DropDownItems.Add(CreateExitItem());
 
+        // The menu item shows Space, the list's key; Ctrl+P pauses and resumes from anywhere in the window.
         var play = new ToolStripMenuItem("&Play");
-        play.DropDownItems.Add(Item("P&ause or resume", PauseResume, AxMediaKeys.PauseResume));
-        play.DropDownItems.Add(Item("&Next file", () => MoveInQueue(1), AxMediaKeys.NextFile));
-        play.DropDownItems.Add(Item("Pre&vious file", () => MoveInQueue(-1), AxMediaKeys.PreviousFile));
-        play.DropDownItems.Add(Item($"&Forward {_settings.SeekSeconds} seconds", () => Seek(_settings.SeekSeconds), AxMediaKeys.Forward));
-        play.DropDownItems.Add(Item($"&Back {_settings.SeekSeconds} seconds", () => Seek(-_settings.SeekSeconds), AxMediaKeys.Back));
-        play.DropDownItems.Add(Item("&Go to time...", GoToTime, AxMediaKeys.GoToTime));
+        Add(play, new Command("P&ause or resume", AxMediaKeys.PauseResume, PauseResume) { When = () => _list.Focused, Mark = CommandMark.Open });
+        AddKey(new Command("Pause or resume", AxMediaKeys.PauseResumeAlso, PauseResume) { Mark = CommandMark.Open });
+        Add(play, new Command("&Next file", AxMediaKeys.NextFile, () => MoveInQueue(1)) { Mark = CommandMark.Open });
+        Add(play, new Command("Pre&vious file", AxMediaKeys.PreviousFile, () => MoveInQueue(-1)) { Mark = CommandMark.Open });
+        Add(play, new Command($"&Forward {_settings.SeekSeconds} seconds", AxMediaKeys.Forward, () => Seek(_settings.SeekSeconds)) { Mark = CommandMark.Open });
+        Add(play, new Command($"&Back {_settings.SeekSeconds} seconds", AxMediaKeys.Back, () => Seek(-_settings.SeekSeconds)) { Mark = CommandMark.Open });
+        Add(play, new Command("&Go to time...", AxMediaKeys.GoToTime, GoToTime) { Mark = CommandMark.Open });
         play.DropDownItems.Add(new ToolStripSeparator());
-        play.DropDownItems.Add(Item("Fa&ster", () => ChangeSpeed(MediaFiles.Faster(_settings.Speed)), AxMediaKeys.Faster));
-        play.DropDownItems.Add(Item("S&lower", () => ChangeSpeed(MediaFiles.Slower(_settings.Speed)), AxMediaKeys.Slower));
+        Add(play, new Command("Fa&ster", AxMediaKeys.Faster, () => ChangeSpeed(MediaFiles.Faster(_settings.Speed))));
+        Add(play, new Command("S&lower", AxMediaKeys.Slower, () => ChangeSpeed(MediaFiles.Slower(_settings.Speed))));
         play.DropDownItems.Add(new ToolStripMenuItem("N&ormal speed", null, (_, _) => ChangeSpeed(1)));
         play.DropDownItems.Add(new ToolStripSeparator());
         play.DropDownItems.Add(Toggle("Say &each file as it starts", _settings.SayEachFile, v => _settings.SayEachFile = v));
-        play.DropDownItems.Add(Item("&What is playing", SayWhatIsPlaying, AxMediaKeys.WhatIsPlaying));
+        Add(play, new Command("&What is playing", AxMediaKeys.WhatIsPlaying, SayWhatIsPlaying) { Mark = CommandMark.Read });
+
+        // The keys without a menu item: Tab and its kin back to the list (the one control), and find in the queue.
+        foreach (var key in new[] { BundleKeys.NextControl, BundleKeys.PreviousControl, BundleKeys.NextControlAlso })
+        {
+            AddKey(new Command("Back to the list", key, () => _list.Focus()) { Mark = CommandMark.Open });
+        }
+
+        AddKey(new Command("Find in the queue", BundleKeys.Find, () => ShowFindInList(_list, Names)) { Mark = CommandMark.Read });
+        AddKey(new Command("Find next", BundleKeys.FindNext, () => FindInList(_list, Names, 1)) { Mark = CommandMark.Read });
+        AddKey(new Command("Find previous", BundleKeys.FindPrevious, () => FindInList(_list, Names, -1)) { Mark = CommandMark.Read });
 
         // Options, as the other windows' (AX-6).
         var options = new ToolStripMenuItem("&Options");
@@ -225,91 +241,6 @@ public sealed partial class MediaForm : AxitForm
                 Do(DrainAsync);
             }
         }
-    }
-
-    // ---- keys (AM-5.2): every key comes from BundleKeys or AxMediaKeys, and is handled here only ----
-
-    protected override bool ProcessWindowKey(Keys keyData)
-    {
-        switch (keyData)
-        {
-            case BundleKeys.NextControl:
-            case BundleKeys.PreviousControl:
-            case BundleKeys.NextControlAlso:
-                // One control: the list.
-                _list.Focus();
-                return true;
-            case BundleKeys.Find:
-                ShowFindInList(_list, Names);
-                return true;
-            case BundleKeys.FindNext:
-                FindInList(_list, Names, 1);
-                return true;
-            case BundleKeys.FindPrevious:
-                FindInList(_list, Names, -1);
-                return true;
-            case AxMediaKeys.NewWindow:
-                NewWindow();
-                return true;
-            case AxMediaKeys.OpenFiles:
-                OpenFiles();
-                return true;
-            case AxMediaKeys.OpenFolder:
-                OpenFolder();
-                return true;
-            case AxMediaKeys.ShowInExplorer:
-                ShowInExplorer();
-                return true;
-            case AxMediaKeys.Information:
-                SayInformation();
-                return true;
-            case AxMediaKeys.PauseResumeAlso:
-                PauseResume();
-                return true;
-            case AxMediaKeys.Forward:
-                Seek(_settings.SeekSeconds);
-                return true;
-            case AxMediaKeys.Back:
-                Seek(-_settings.SeekSeconds);
-                return true;
-            case AxMediaKeys.NextFile:
-                MoveInQueue(1);
-                return true;
-            case AxMediaKeys.PreviousFile:
-                MoveInQueue(-1);
-                return true;
-            case AxMediaKeys.GoToTime:
-                GoToTime();
-                return true;
-            case AxMediaKeys.Faster:
-                ChangeSpeed(MediaFiles.Faster(_settings.Speed));
-                return true;
-            case AxMediaKeys.Slower:
-                ChangeSpeed(MediaFiles.Slower(_settings.Speed));
-                return true;
-            case AxMediaKeys.WhatIsPlaying:
-                SayWhatIsPlaying();
-                return true;
-        }
-
-        if (_list.Focused)
-        {
-            // Enter, Delete and Space act in the list only (AM-5.2); in a notice's field they are the field's own.
-            switch (keyData)
-            {
-                case AxMediaKeys.Play:
-                    PlaySelected();
-                    return true;
-                case AxMediaKeys.Remove:
-                    RemoveSelected();
-                    return true;
-                case AxMediaKeys.PauseResume:
-                    PauseResume();
-                    return true;
-            }
-        }
-
-        return false;
     }
 
     // ---- the queue (AM-3) ----
