@@ -139,6 +139,8 @@ internal sealed partial class MainForm
     protected override void CloseArea()
     {
         base.CloseArea();
+        // An information screen's notice (FR-2.11) goes the same way as the area.
+        CloseScreenNotice();
         if (_wait is { Shown: true } wait)
         {
             _wait = wait with { Shown = false, Text = null };
@@ -409,6 +411,12 @@ internal sealed partial class MainForm
             return;
         }
 
+        if (ScreenActions.IsInformation(screen))
+        {
+            ShowScreenNotice(screen, text.ToString());
+            return;
+        }
+
         ShowInArea(screen.Signature, screen.Title, text.ToString(), !UserActed(), (focus, hold) =>
             Area.ShowList(screen.Title, items, 0, null, focus, hold, (index, _) =>
             {
@@ -438,6 +446,165 @@ internal sealed partial class MainForm
             ScreenKeySent();
             TypeAnswer(typed);
         }, () => SendScreenKey("\x1b")));
+    }
+
+    // ---- a screen that only informs, as read-only text in a notice (FR-2.11) ----
+
+    /// <summary>The notice that shows an information screen; null while none shows.</summary>
+    private Notice? _screenNotice;
+
+    /// <summary>While an information screen's notice opens: its chime is the area's rule (<see cref="ShowScreenNotice"/>), not the notice's.</summary>
+    private bool _screenNoticeOpening;
+
+    protected override bool NoticeChime => base.NoticeChime && !_screenNoticeOpening;
+
+    /// <summary>The notice of an information screen is the one showing (an error or an update offer may have replaced it).</summary>
+    private bool ScreenNoticeOpen => _screenNotice is not null && NoticeOpen && ReferenceEquals(Overlay.Shown, _screenNotice);
+
+    /// <summary>The information screen's notice shows text that Claude's screen no longer has (a scroll, the answer arriving): the settle refreshes it.</summary>
+    private bool ScreenNoticeOutdated => ScreenNoticeShows(_model.PendingScreen) && ScreenActions.NoticeText(_model.PendingScreen!) != _screenNotice!.Text;
+
+    /// <summary>
+    /// The notice showing is this information screen's: the same title. Not the whole signature, since the keys change
+    /// as the user browses (a second /btw offers ⇧← only at its oldest answer): the notice keeps the buttons it opened
+    /// with, and only its text follows the screen.
+    /// </summary>
+    private bool ScreenNoticeShows(ClaudeScreen? screen) =>
+        ScreenNoticeOpen && screen is not null && ScreenActions.IsInformation(screen) && screen.Title == _screenNotice!.Title;
+
+    /// <summary>
+    /// A screen of Claude's that only informs (/btw's side answer, /goal; FR-2.11, <see cref="ScreenActions.IsInformation"/>):
+    /// a read-only notice, the screen's title and lines, with Close (Enter and Escape) and a button per other key of
+    /// its hint row. The same screen again (after a key, or with new lines) replaces the notice's text in place. The
+    /// notice opens by the control area's rules (<see cref="ShowInArea"/>): at once from the bottom of the window,
+    /// interrupting under Go to them at once; after a moment from the conversation or in the background; once
+    /// another notice or a menu has closed.
+    /// </summary>
+    private void ShowScreenNotice(ClaudeScreen screen, string summary)
+    {
+        var signature = screen.Signature;
+        if (ScreenNoticeShows(screen))
+        {
+            if (ScreenActions.NoticeText(screen) != _screenNotice!.Text)
+            {
+                Overlay.SetBody(ScreenActions.NoticeText(screen));
+                _screenNotice = Overlay.Shown;
+            }
+
+            _wait = new Wait(signature, Shown: true, summary);
+            return;
+        }
+
+        // Another information screen in place of the one shown: that one's notice goes first.
+        CloseScreenNotice();
+        var unprompted = !UserActed();
+        var bottom = Area.ContainsFocus || Input.ContainsFocus;
+        var interrupt = !NoticeOpen && (unprompted ? _settings.InterruptForQuestions : bottom);
+        if (Area.Current is not null)
+        {
+            // What the area showed before is over: the field comes back under the notice.
+            CloseArea();
+        }
+
+        if (unprompted && _settings.SoundOnBell && !(_settings.BackgroundAlert && !ContainsFocus))
+        {
+            Sounds.Notice();
+        }
+
+        if (!NoticeOpen && (interrupt || bottom))
+        {
+            OpenScreenNotice(screen, summary, interrupt, unprompted);
+            return;
+        }
+
+        // From the conversation, in the background, or behind another notice or a menu: after a moment, and again
+        // until nothing is in the way, while Claude still shows the screen.
+        void TryOpen()
+        {
+            if (_model.PendingScreen is not { } now || now.Signature != signature || _wait is not { Shown: false } wait || wait.Signature != signature)
+            {
+                return;
+            }
+
+            if (NoticeOpen || !(Transcript.ContainsFocus || Input.ContainsFocus || Area.ContainsFocus || !ContainsFocus))
+            {
+                Later(QuestionFocusMs, TryOpen);
+                return;
+            }
+
+            OpenScreenNotice(now, summary, interrupt: false, unprompted);
+        }
+
+        Later(QuestionFocusMs, TryOpen);
+    }
+
+    /// <summary>Opens the information screen's notice: Close, a button per other key, the scroll buttons when the screen may hold more than the console shows.</summary>
+    private void OpenScreenNotice(ClaudeScreen screen, string summary, bool interrupt, bool unprompted)
+    {
+        var signature = screen.Signature;
+        var leave = ScreenActions.LeaveKey(screen);
+        var choices = new List<OverlayChoice>
+        {
+            new(ScreenActions.LeaveButton(leave), () =>
+            {
+                _screenNotice = null;
+                if (_wait is { } wait)
+                {
+                    _wait = wait with { Shown = false, Text = null };
+                }
+
+                SendScreenKey(leave.Send);
+                if (ScreenActions.Closes(leave))
+                {
+                    Announce("Closed", false);
+                }
+            }, IsDefault: true, IsCancel: true),
+        };
+        choices.AddRange(ScreenActions.NoticeKeys(screen).Select(key => new OverlayChoice(ScreenActions.KeyItem(key), () => SendScreenKey(key.Send), StaysOpen: true)));
+        if (ScreenActions.Scrolls(screen))
+        {
+            choices.Add(new OverlayChoice("Scroll &down", () => SendScreenKey("\x1b[B"), StaysOpen: true));
+            choices.Add(new OverlayChoice("Scroll &up", () => SendScreenKey("\x1b[A"), StaysOpen: true));
+        }
+
+        var notice = new Notice(screen.Title, ScreenActions.NoticeText(screen), choices) { Unprompted = unprompted };
+        _screenNoticeOpening = true;
+        try
+        {
+            ShowNotice(notice);
+        }
+        finally
+        {
+            _screenNoticeOpening = false;
+        }
+
+        _screenNotice = Overlay.Shown;
+        _wait = new Wait(signature, Shown: true, summary);
+        if (interrupt)
+        {
+            // As a question's: after NVDA has taken the focus, so that it comes last and cuts off what was read.
+            var spoken = (screen.Lines.Count == 0 ? screen.Title : screen.Title + Stop(screen.Title) + screen.Lines[0]).TrimEnd(' ', '.');
+            var shown = _screenNotice;
+            var actedBefore = _userActedAt;
+            Later(FocusSettleMs, () =>
+            {
+                if (ScreenNoticeOpen && ReferenceEquals(_screenNotice, shown) && _userActedAt == actedBefore)
+                {
+                    Announce(spoken, true);
+                }
+            });
+        }
+    }
+
+    /// <summary>The information screen's notice closes, when Claude closed the screen or showed something else; nothing when it is not the notice showing.</summary>
+    private void CloseScreenNotice()
+    {
+        if (ScreenNoticeOpen)
+        {
+            CloseNotice(null);
+        }
+
+        _screenNotice = null;
     }
 
     /// <summary>Sends a screen's key. The screen that shows next opens again even when its title and keys are the same (a moved selection, another tab).</summary>

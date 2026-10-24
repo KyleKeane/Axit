@@ -1,0 +1,77 @@
+# axClaude, docs/axclaude/nvda-test-plan.md section 12, step 22: a side answer (/btw) and /goal, information screens
+# shown as read-only text in a notice (SPEC.md FR-2.11), never as a list in the control area.
+# The update check off (GitHub's limit for unsigned requests made it fail and log an ERROR in runs).
+file home\Axit\axclaude.json {"checkForUpdates":false}
+mkdir side
+start claude {temp}\side -- --model haiku
+expect said trust
+wait 1500
+keys enter
+expect said Ready
+wait 2000
+# /btw from the message field: the trill, then the notice titled with the question, its text the answer, the focus
+# in the text; the status says "showing a side answer", not "waiting for your answer"; no list in the field's place.
+type /btw what is two plus two? answer in one word
+keys enter
+expect said ♪ Notice
+expect state "notice":"/btw what is two plus two? answer in one word"
+expect state "noticeText":"Four
+expect state Claude: showing a side answer
+refuse state waiting for your answer
+expect focus /btw what is two plus two? answer in one word
+expect text Four
+expect text Enter or Escape: Close.
+refuse focus "role":"List"
+# Tab reaches the buttons: Close, then Copy (c) and Fork (f), the keys of the hint row; the scroll keys are not buttons.
+keys tab
+expect focus Close
+keys tab
+expect focus Copy (c)
+keys tab
+expect focus Fork (f)
+refuse focus Scroll
+keys shift+tab shift+tab shift+tab
+expect focus /btw what is two plus two?
+# Escape closes the notice and the screen in Claude: "Closed", the message field back, the status ready.
+wait 1000
+keys escape
+expect said Closed
+expect focus Message to Claude
+expect state "notice":null
+expect state Claude: ready
+refuse list Close (Escape)
+wait 2000
+# A second /btw in the session: Claude Code 2.1.310 keeps a history, its hint row "⇧←/→ to browse · c to copy · f to
+# fork · x to clear history · Esc to close". Its title is the first question, the newest question and answer its
+# text. Browse (Shift+Left) shows the earlier answer: the text changes in place, the focus stays on the button.
+type /btw what is three plus three? answer in one word
+keys enter
+expect said ♪ Notice
+expect state "noticeText":"/btw what is three plus three? answer in one word\nSix"
+wait 1500
+keys tab tab
+expect focus Browse (Shift+Left)
+said
+keys enter
+expect state "noticeText":"/btw what is three plus three? answer in one word\nFour"
+wait 1500
+expect focus Browse (Shift+Left)
+refuse said → /btw
+keys escape
+expect said Closed
+expect focus Message to Claude
+expect state Claude: ready
+wait 3500
+# /goal with no goal set: the notice "Goal", its text "No goal set", Close alone; Enter closes it.
+type /goal
+keys enter
+expect said ♪ Notice
+expect state "notice":"Goal"
+expect state No goal set
+expect state Claude: showing Goal
+refuse focus "role":"List"
+wait 1500
+keys enter
+expect said Closed
+expect focus Message to Claude
+expect state Claude: ready

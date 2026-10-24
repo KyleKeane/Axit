@@ -80,8 +80,9 @@ internal sealed partial class MainForm
                 _attention.Stop();
                 _attention.Start();
             }
-            else if (waiting != _wait.Signature && !_attention.Enabled)
+            else if ((waiting != _wait.Signature || ScreenNoticeOutdated) && !_attention.Enabled)
             {
+                // Also an information screen's new lines (FR-2.11), which the settle puts into its notice.
                 _attention.Start();
             }
         }
@@ -133,8 +134,14 @@ internal sealed partial class MainForm
         var waiting = WaitSignature;
         if (waiting is not null)
         {
-            if (_wait is null || _wait.Stale || _wait.Signature != waiting)
+            if (_wait is null || _wait.Stale || _wait.Signature != waiting || ScreenNoticeOutdated)
             {
+                if (_wait?.Signature != waiting && !ScreenNoticeShows(_model.PendingScreen))
+                {
+                    // Something else waits now: an information screen's notice (FR-2.11) gives way to it.
+                    CloseScreenNotice();
+                }
+
                 if (!(_settings.QuestionNotices && ShowWaiting()))
                 {
                     // Claude moved on from what the control area shows to something it cannot show (D33).
@@ -252,6 +259,7 @@ internal sealed partial class MainForm
     {
         var state = !ProcessRunning ? "stopped"
             : _model.TranscriptViewOpen ? "detailed view on, Ctrl+O turns it off"
+            : _model.PendingScreen is { } screen && ScreenActions.IsInformation(screen) ? "showing " + ScreenActions.StatusName(screen)
             : _model.PromptPending ? "waiting for your answer"
             : _model.Working ? ("working " + (_model.Spinner ?? string.Empty)).Trim()
             : _model.Mode is not null ? "ready"

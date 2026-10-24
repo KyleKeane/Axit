@@ -2,6 +2,7 @@
 
 ## Unreleased
 
+- axClaude: a side answer (`/btw <question>`) and the other screens of Claude's that only inform (`/goal`, `/tasks` with nothing running) are read-only text in the window, its title the screen's and its text the answer, with Close (Enter or Escape, which closes the screen in Claude too) and a button for each of the screen's other keys (Copy, Fork, Browse); they used to be a list in the message field's place, with "waiting for your answer" in the status bar, which now says "showing a side answer". A second `/btw` in a session, whose keys Claude names with Shift and the arrows, is shown too, where it used to show nothing.
 - Axit: in every window, AI tools such as Claude Code can read what the Axit windows show and open apps, once you turn it on in the Axit menu, AI tools, which also adds Axit to Claude Code for you, and allow each tool in the notice it brings up. It is off by default; a tool cannot change or delete anything, never reads axPass or axClip, and every call is in `mcp-audit.log`. Forget AI tools takes every pairing back.
 - axPass: F5 reads the database again, as File → Refresh does; it used to show the list read before.
 - For developers: every window's keys are one list of commands (`Axit.Forms/Command`, `docs/axit/app-kit.md` AK-2), each making its menu item and its key from one record, with a mark of what it does for the planned AI access; the windows' key switches are gone. New scripts for axStart and axClip in `tests/scripts`.

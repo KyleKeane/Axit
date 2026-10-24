@@ -6,6 +6,19 @@ What was checked with NVDA, against which version, and with what result. When a 
 
 Add a section under this one, above the earlier passes, so that the newest comes first: the date, the version, the commit tested, who ran it and how the result was given, and the environment: the NVDA version, the synthesizer and the Windows build (so that a regression is dated to an NVDA release rather than to some time). Under it, one table per app with a line per section of its plan: the steps run and the result, Passed, Failed (with what was heard) or Not run. A step that fails gets a line of its own with what NVDA said and what it should have said, and the bug's fix names the step. When a plan gains or loses steps, the next pass lists them as the plan has them then.
 
+## Owed: axClaude's side answer as read-only text (the branch `kit-j`, docs/axclaude/SPEC.md FR-2.11)
+
+`/btw` and the other screens that only inform (`/goal`, `/tasks` with nothing running) are a notice in the window, not
+a list in the control area; automated in `tests/scripts/axclaude/14-side-answer.txt`. By ear, axClaude's plan section
+12, step 22 and the new step 6:
+
+- `/btw <question>` from the message field: the trill, the notice's title and the answer read; Down Arrow reads
+  "Enter or Escape: Close."; NVDA+End "Claude: showing a side answer"; Tab: Close, Copy (c), Fork (f).
+- Escape and Enter both close it, "Closed", the message field back, NVDA+End "Claude: ready".
+- A second `/btw`: Browse (Shift+Left) changes the text with the focus kept on the button.
+- From the conversation, the notice comes a second later; with Go to them at once off, nothing is cut off.
+- `/tasks` with nothing running: the notice "Background"; with a task, still the list.
+
 ## Owed: the command list of every window (the branch `app-kit`, `docs/axit/app-kit.md` AK-2)
 
 Every window's keys moved from its key switch onto one list of commands, meant to change nothing a key does; the

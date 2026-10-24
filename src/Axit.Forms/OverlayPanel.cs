@@ -239,6 +239,25 @@ public sealed class OverlayPanel : Panel
         SetText();
     }
 
+    /// <summary>
+    /// The notice's text replaced while it shows, its buttons, the focus and, as far as the new text reaches, the
+    /// caret kept: axClaude's information screen as Claude redraws it (docs/axclaude/SPEC.md FR-2.11). <see cref="Shown"/>
+    /// then holds the new text.
+    /// </summary>
+    public void SetBody(string text)
+    {
+        if (Shown is not { } shown)
+        {
+            return;
+        }
+
+        Shown = shown with { Text = text };
+        _body = WithKeyLine(text, shown.Choices);
+        var caret = _text.SelectionStart;
+        SetText();
+        _text.Select(Math.Min(caret, _text.TextLength), 0);
+    }
+
     /// <summary>The default button pressed, as Enter presses it: a control of the window's own asks for it (Enter in the session controls' free field).</summary>
     public void PressDefault() => DefaultButton?.PerformClick();
 

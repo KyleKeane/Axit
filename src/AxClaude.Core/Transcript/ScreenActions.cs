@@ -48,4 +48,39 @@ public static class ScreenActions
 
     /// <summary>What Enter on a line says when it sends nothing: "Actions at the end of the list: View (Enter), Close (Escape)".</summary>
     public static string ActionsText(ClaudeScreen screen) => "Actions at the end of the list: " + string.Join(", ", screen.Keys.Select(KeyItem));
+
+    // ---- information screens, shown as read-only text (SPEC.md FR-2.11) ----
+
+    /// <summary>
+    /// A screen that only informs (/btw's side answer, /goal, /mobile): its hint row names no Enter and it has no
+    /// tabs. The window shows it as a read-only notice rather than a list; a screen with Enter (/tasks with tasks,
+    /// a review) or with tabs (/status) stays a list.
+    /// </summary>
+    public static bool IsInformation(ClaudeScreen screen) => !screen.Tabbed && !screen.Keys.Any(key => key.Send == "\r");
+
+    /// <summary>Up or Down: the notice's own arrows move in its text, and the scroll buttons send them (<see cref="Scrolls"/>).</summary>
+    public static bool IsScrollKey(ScreenKey key) => key.Send is "\x1b[A" or "\x1b[B";
+
+    /// <summary>The keys that get a button of their own besides Close: every key of the hint row but Up, Down and the leaving key ("Copy (c)", "Fork (f)").</summary>
+    public static IReadOnlyList<ScreenKey> NoticeKeys(ClaudeScreen screen)
+    {
+        var leave = LeaveKey(screen);
+        return screen.Keys.Where(key => !IsScrollKey(key) && !ReferenceEquals(key, leave)).ToList();
+    }
+
+    /// <summary>The leaving key's button: "&amp;Close" for a key that closes the screen, else its action ("&amp;Go back").</summary>
+    public static string LeaveButton(ScreenKey leave) => Closes(leave) ? "&Close" : $"&{char.ToUpperInvariant(leave.Action[0])}{leave.Action[1..]}";
+
+    /// <summary>
+    /// Whether the notice offers Scroll down and Scroll up: the hint row names Up and Down, and the screen reaches the
+    /// top of the console (its first row is row 0), so that it may hold more than the console shows.
+    /// </summary>
+    public static bool Scrolls(ClaudeScreen screen) => screen.FirstRow == 0 && screen.Keys.Count(IsScrollKey) == 2;
+
+    /// <summary>The notice's text: the screen's lines, one per line.</summary>
+    public static string NoticeText(ClaudeScreen screen) => string.Join("\n", screen.Lines);
+
+    /// <summary>What the status bar says the screen is after "Claude: showing": "a side answer" for /btw, else its title.</summary>
+    public static string StatusName(ClaudeScreen screen) =>
+        screen.Title.StartsWith("/btw", StringComparison.Ordinal) ? "a side answer" : screen.Title;
 }
