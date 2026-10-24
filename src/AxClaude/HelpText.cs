@@ -7,34 +7,30 @@ namespace AxClaude;
 /// <summary>The texts the window shows as notices: the keyboard shortcuts (F1), the user guide, and the help when Claude Code is missing.</summary>
 public static class HelpText
 {
-    /// <summary>The F1 text (SPEC.md §6.3): a first line naming the text's own keys, then one Markdown heading per group, so that the heading letters walk it (bundle AX-7.2).</summary>
-    public const string Shortcuts = """
-        In this text: h and Shift+H move by heading, 1 to 6 by level. Ctrl+F finds, F3 and Shift+F3 the next and the previous match
-
-        ## Anywhere
-          Ctrl+1: go to the message field. Ctrl+2: go to the conversation. Both say where you are, also when you are there already
-          Ctrl+3: go to the latest reply, in the conversation
-          Tab, Shift+Tab, Ctrl+Tab or F6: switch between the message field (or Claude's question in its place) and the conversation
-          Shift+Escape: interrupt Claude, or close one of Claude's dialogs
-          Ctrl+Shift+S: make Claude take up the waiting message now instead of after its current step
-          Ctrl+F: find text in the conversation. F3 and Shift+F3: next or previous match
-          Ctrl+S: export the conversation as a text file
-          Ctrl+W: show the current folder in File Explorer
-          Ctrl+N: new session: choose the folder and how Claude starts (continue, resume, plan mode, custom arguments)
-          Ctrl+Shift+R: force Claude to restart in the same folder with the same arguments, after a confirmation
-          Ctrl+O: switched off, a reminder says why (Claude's detailed view redraws the conversation in screen reader mode)
-          Ctrl+Shift+C: send Ctrl+C to Claude
-          Ctrl+Shift+M: next permission mode
-          Ctrl+Alt and a letter from the Conversation list below: read every line of that kind from the caret to the end of the conversation in one go, without moving; Ctrl+Alt+P reads the paragraphs whole. Control stops NVDA
-          Ctrl+Shift+K: bookmark the conversation line the caret is on, or take the bookmark away
-          Ctrl+Space: background music on or off, and says which
-          Ctrl+Q: read Claude's question or screen again while it waits at the bottom, all its lines and the answer the focus is on, without moving
-          Ctrl+Plus, Ctrl+Minus: bigger or smaller text
-          F1: this list
-          Ctrl+Shift+P: the command palette: type part of a command's name, Down and Up through the matches, Enter runs it
-          Alt+A: the Axit menu: the command palette, a new window of any app, the files and folders closed lately, the open Axit windows, most recent first (Alt+A, O, 1 is the one you were in last) and by type, Close all windows, the AI tools, Check for updates, and About
-          Alt+F4: close axClaude (asks first while Claude is working)
-
+    /// <summary>The F1 text (SPEC.md §6.3): a first line naming the text's own keys, then one Markdown heading per group, so that the heading letters walk it (bundle AX-7.2). The first line and the bundle's section come from <c>BundleHelp</c>.</summary>
+    public static readonly string Shortcuts = BundleHelp.Section(
+        "axClaude",
+        [
+            "Ctrl+1: go to the message field. Ctrl+2: go to the conversation. Both say where you are, also when you are there already",
+            "Ctrl+3: go to the latest reply, in the conversation",
+            "Tab, Shift+Tab, Ctrl+Tab or F6: switch between the message field (or Claude's question in its place) and the conversation",
+            "Shift+Escape: interrupt Claude, or close one of Claude's dialogs",
+            "Ctrl+Shift+S: make Claude take up the waiting message now instead of after its current step",
+            "Ctrl+F: find text in the conversation. F3 and Shift+F3: next or previous match",
+            "Ctrl+S: export the conversation as a text file",
+            "Ctrl+W: show the current folder in File Explorer",
+            "Ctrl+N: new session: choose the folder and how Claude starts (continue, resume, plan mode, custom arguments)",
+            "Ctrl+Shift+R: force Claude to restart in the same folder with the same arguments, after a confirmation",
+            "Ctrl+O: switched off, a reminder says why (Claude's detailed view redraws the conversation in screen reader mode)",
+            "Ctrl+Shift+C: send Ctrl+C to Claude",
+            "Ctrl+Shift+M: next permission mode",
+            "Ctrl+Alt and a letter from the Conversation list below: read every line of that kind from the caret to the end of the conversation in one go, without moving; Ctrl+Alt+P reads the paragraphs whole. Control stops NVDA",
+            "Ctrl+Shift+K: bookmark the conversation line the caret is on, or take the bookmark away",
+            "Ctrl+Space: background music on or off, and says which",
+            "Ctrl+Q: read Claude's question or screen again while it waits at the bottom, all its lines and the answer the focus is on, without moving",
+        ],
+        altF4: "close axClaude (asks first while Claude is working)",
+        heading: "Anywhere") + """
         ## Message field
           Enter: send (an empty field sends a plain Enter to Claude)
           Shift+Enter: new line
