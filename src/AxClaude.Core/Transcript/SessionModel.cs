@@ -112,7 +112,7 @@ public sealed partial class SessionModel : LineStore
     /// <summary>
     /// The name Claude was started with (<c>--name demo</c>, FR-8.6), which the window sets: Claude draws it on a row
     /// of its own above the prompt (" demo", 2.1.309), chrome like the mode line; unknown to the model, it closed the
-    /// chrome block there, the mode line was never read and "Ready" never came (found by tools/AxitDrive, 2026-10-23).
+    /// chrome block there, the mode line was never read and "Ready" never came (found by tools/AxAutomate, 2026-10-23).
     /// The title is no help: Claude replaces it with a summary of the conversation.
     /// </summary>
     public string? StartName { get; set; }

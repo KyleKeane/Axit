@@ -1,5 +1,9 @@
 # Changelog
 
+## Unreleased
+
+- For developers: the automated checks' runner, `tools/AxitDrive`, is called axAutomate now: `tools/AxAutomate`, run as `dotnet run --project tools\AxAutomate`.
+
 ## 3.5.0 - 2026-10-23
 
 - axTerminal: Ctrl+Up and Ctrl+Down in the command field go through the recent commands, with a short earcon on each; past the newest comes what you typed or last changed. The plain arrows only move the caret.

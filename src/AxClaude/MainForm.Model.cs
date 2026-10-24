@@ -204,7 +204,7 @@ internal sealed partial class MainForm
             {
                 // The app answered it itself (the review after the last answer of a set): what the area still shows,
                 // the set's last question, goes, or it stayed for good and took the next message as its answer (found
-                // by tools/AxitDrive, 2026-10-23; the record already names the review, so nothing else closed it).
+                // by tools/AxAutomate, 2026-10-23; the record already names the review, so nothing else closed it).
                 if (Area.Current is not null)
                 {
                     CloseArea();
