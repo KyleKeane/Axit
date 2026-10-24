@@ -1,5 +1,6 @@
 using System.Text.Json.Nodes;
 using AxTask.Core;
+using Axit.Core;
 
 namespace AxTask.Tests;
 
@@ -53,6 +54,8 @@ public sealed class LinksTests : IDisposable
     [Fact]
     public void ACheckComesAndGoes()
     {
+        Assert.Empty(TaskRules.TemplateOf(ItemDocument.NewList([]).WithTemplate([])));
+        Assert.Equal(3, TaskRules.TemplateOf(null).Count);
         var plain = ItemDocument.NewItem("Butter", []);
         var task = TaskRules.WithDone(plain);
         Assert.Equal(["Title", "Done"], task.Fields.Select(field => field.Title));

@@ -12,15 +12,9 @@ The window is `src/AxTask`, with its own `CLAUDE.md`.
 
 ## Where things are
 
-- `ItemDocument` and `ItemField` (IA-4.1, IA-4.3): an item file or a list's `list.json` as a `JsonObject` kept whole,
-  so that unknown keys are written back (IA-4.1); `Fields`, `Template` (a list's `new item`), `Title`, `Parse` (an
-  `InvalidDataException` for what is not an item), `NewItem`, `NewList`, `ToText` (indented, CRLF), and the changes,
-  each returning a new document (`WithValue`, `WithTitle`, `WithField`, `WithoutField`, `WithFieldTitle`,
-  `WithFieldMoved`, `WithTemplate`); `Holds` checks a field is still the one shown.
-- `FieldTypes` and `Parsed` (IA-4.2): the type names, `Spoken` (the type's words and a value read out: "30 October
-  2026, Friday", "done", a long text's first line and the count of the others), `Parse` (a typed text into a value or
-  a refusal: dates as 2026-10-30, today, tomorrow, +3, a weekday, 30 October), `ReadDate`, `ReadDateTime`. English
-  dates whatever the system's language (the program runs without the globalization data).
+- The item format itself (`ItemDocument`, `ItemField`, `FieldTypes`, `Parsed`: an item or a list's `list.json` as JSON
+  kept whole, every change a new document; the types read out and typed) is `Axit.Core`'s since axPass, its second
+  use (IA-D5), with its tests in `tests/Axit.Tests`.
 - `ItemFolder` and `ItemFile`, `FolderLevel` (IA-4, IA-D4): a level's lists and items (`Read`; hidden and dot entries
   left out; the Archive last at the top; files that are not items counted), `ReadItem` (with the text read, for
   `CheckFresh`), `ReadList`, `NameOf`, `FileStem` and `FreePath` (IA-4.5), `RefusedListName`, `AllItems` (the Archive

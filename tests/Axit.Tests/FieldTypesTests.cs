@@ -1,7 +1,7 @@
 using System.Text.Json.Nodes;
-using AxTask.Core;
+using Axit.Core;
 
-namespace AxTask.Tests;
+namespace Axit.Tests;
 
 public class FieldTypesTests
 {

@@ -1,7 +1,7 @@
 using System.Text.Json;
 using System.Text.Json.Nodes;
 
-namespace AxTask.Core;
+namespace Axit.Core;
 
 /// <summary>One field as the window shows it (docs/axit/item-apps.md IA-4.1): its title, its type, its value as in the file, and a choice's options.</summary>
 public sealed record ItemField(string Title, string Type, JsonNode? Value, IReadOnlyList<string> Options);

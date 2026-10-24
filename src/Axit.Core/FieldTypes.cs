@@ -1,7 +1,7 @@
 using System.Globalization;
 using System.Text.Json.Nodes;
 
-namespace AxTask.Core;
+namespace Axit.Core;
 
 /// <summary>What came of a typed value (IA-5.1): the value for the file, or why the type refuses it.</summary>
 public sealed record Parsed(JsonNode? Value, string? Refused);

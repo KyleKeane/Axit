@@ -1,10 +1,17 @@
 using System.Text.Json.Nodes;
-using AxTask.Core;
+using Axit.Core;
 
-namespace AxTask.Tests;
+namespace Axit.Tests;
 
 public class ItemDocumentTests
 {
+    private static readonly IReadOnlyList<ItemField> Template =
+    [
+        new("Done", FieldTypes.Check, JsonValue.Create(false), []),
+        new("Start", FieldTypes.Date, JsonValue.Create(string.Empty), []),
+        new("Due", FieldTypes.Date, JsonValue.Create(string.Empty), []),
+    ];
+
     private const string Sample = """
         {
           "format": "axit-item 1",
@@ -42,7 +49,7 @@ public class ItemDocumentTests
     {
         var document = ItemDocument.Parse(Sample);
         _ = document.WithValue(1, JsonValue.Create(true));
-        Assert.False(TaskRules.IsDone(document));
+        Assert.False(FieldTypes.IsTrue(document.Fields[1].Value));
     }
 
     [Fact]
@@ -63,7 +70,7 @@ public class ItemDocumentTests
     [Fact]
     public void ANewItemHasItsTitleThenTheTemplate()
     {
-        var item = ItemDocument.NewItem("Call the plumber", TaskRules.DefaultTemplate);
+        var item = ItemDocument.NewItem("Call the plumber", Template);
         Assert.Equal(["Title", "Done", "Start", "Due"], item.Fields.Select(field => field.Title));
         Assert.Equal("Call the plumber", item.Title);
         Assert.Contains("\"format\": \"axit-item 1\"", item.ToText());
@@ -98,15 +105,13 @@ public class ItemDocumentTests
     [Fact]
     public void AListKeepsItsTemplate()
     {
-        var list = ItemDocument.NewList(TaskRules.DefaultTemplate);
+        var list = ItemDocument.NewList(Template);
         Assert.True(list.HasTemplate);
         Assert.Equal(["Done", "Start", "Due"], list.Template.Select(field => field.Title));
         var plain = list.WithTemplate([]);
         Assert.True(plain.HasTemplate);
         Assert.Empty(plain.Template);
         Assert.Contains("\"new item\": []", plain.ToText());
-        Assert.Empty(TaskRules.TemplateOf(plain));
-        Assert.Equal(3, TaskRules.TemplateOf(null).Count);
     }
 
     [Fact]
