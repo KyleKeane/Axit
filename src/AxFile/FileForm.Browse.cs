@@ -211,7 +211,7 @@ public sealed partial class FileForm
 
     /// <summary>
     /// Letters typed in the folder list (AF-3.6), as File Explorer takes them: typed within a second of each other
-    /// they build one prefix, "cha", which <see cref="FolderListing.TypeAhead"/> finds among the shown entries (a run
+    /// they build one prefix, "cha", which <see cref="TypeAhead.Find"/> finds among the shown entries (a run
     /// of one letter cycles through the names starting with it); a new prefix starts after a second's pause. The edge
     /// earcon when no name starts with it. The list's own one-letter jump gives way to this. NVDA reads the entry selected.
     /// </summary>
@@ -227,7 +227,7 @@ public sealed partial class FileForm
         var now = Environment.TickCount64;
         _typed = now - _typedAt > TypeAheadMs ? e.KeyChar.ToString() : _typed + e.KeyChar;
         _typedAt = now;
-        var index = FolderListing.TypeAhead(_shown, _typed, _list.SelectedIndex);
+        var index = TypeAhead.Find(_shown.Select(entry => entry.Name).ToList(), _typed, _list.SelectedIndex);
         if (index >= 0)
         {
             _list.SelectedIndex = index;
