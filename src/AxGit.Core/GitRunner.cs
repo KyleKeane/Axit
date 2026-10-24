@@ -1,6 +1,7 @@
 using System.ComponentModel;
 using System.Diagnostics;
 using System.Text;
+using Axit.Core;
 
 namespace AxGit.Core;
 
@@ -48,10 +49,24 @@ public static class GitRunner
     public static readonly TimeSpan Long = TimeSpan.FromMinutes(10);
 
     /// <summary>The program run: git, found on the PATH (AG-1.5); the tests point it at a fake git.cmd of their own.</summary>
-    public static string Program { get; set; } = "git";
+    public static string Program
+    {
+        // S-1: git found on the PATH's full folders, never by a bare name that Windows would look for in the current
+        // folder first; without one, Git for Windows' usual place, whose absence gives "git is not installed".
+        get => _program ?? SystemPrograms.OnPath("git.exe") ?? Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ProgramFiles), "Git", "cmd", "git.exe");
+        set => _program = value;
+    }
 
-    /// <summary>The whole argument list of a command: the repository, the fixed configuration, then <paramref name="arguments"/>. Pure, tested.</summary>
-    public static IReadOnlyList<string> Command(string? repository, IReadOnlyList<string> arguments)
+    private static string? _program;
+
+    /// <summary>
+    /// The whole argument list of a command: the repository, the fixed configuration, the repository's own programs
+    /// set to nothing while it is not trusted (<paramref name="overrides"/>, <see cref="GitTrust.Overrides"/>), then
+    /// <paramref name="arguments"/>. The fixed configuration never lets a repository's file monitor run (it would on
+    /// every <c>git status</c>) nor the <c>ext::</c> transport, which runs a command named in a remote's address
+    /// (security audit S-2). Pure, tested.
+    /// </summary>
+    public static IReadOnlyList<string> Command(string? repository, IReadOnlyList<string> arguments, IReadOnlyList<string>? overrides = null)
     {
         var list = new List<string>();
         if (repository is not null)
@@ -60,12 +75,13 @@ public static class GitRunner
             list.Add(repository);
         }
 
-        list.AddRange(["-c", "core.quotepath=false", "-c", "color.ui=never"]);
+        list.AddRange(["-c", "core.quotepath=false", "-c", "color.ui=never", "-c", "core.fsmonitor=false", "-c", "protocol.ext.allow=never"]);
+        list.AddRange(overrides ?? []);
         list.AddRange(arguments);
         return list;
     }
 
-    public static async Task<GitResult> RunAsync(string? repository, IReadOnlyList<string> arguments, TimeSpan timeout, CancellationToken cancellation = default)
+    public static async Task<GitResult> RunAsync(string? repository, IReadOnlyList<string> arguments, TimeSpan timeout, CancellationToken cancellation = default, IReadOnlyList<string>? overrides = null)
     {
         var info = new ProcessStartInfo(Program)
         {
@@ -77,7 +93,7 @@ public static class GitRunner
             StandardOutputEncoding = new UTF8Encoding(false),
             StandardErrorEncoding = new UTF8Encoding(false),
         };
-        foreach (var argument in Command(repository, arguments))
+        foreach (var argument in Command(repository, arguments, overrides))
         {
             info.ArgumentList.Add(argument);
         }

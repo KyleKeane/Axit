@@ -2,16 +2,17 @@ using System.Collections;
 using System.ComponentModel;
 using System.Diagnostics;
 using System.Text;
+using Axit.Core;
 
 namespace AxClaude.Core.Pty;
 
 /// <summary>Finds the Claude Code executable and builds the command line and environment for it.</summary>
 public static class ClaudeLauncher
 {
-    /// <summary>The native Windows installer, as documented at <see cref="InstallUrl"/>.</summary>
-    public const string InstallCommand = "irm https://claude.ai/install.ps1 | iex";
+    /// <summary>The native Windows installer, as documented at <see cref="InstallUrl"/>; one source with the Install Claude Code now button (<c>ProgramInstall.ClaudeCode</c>).</summary>
+    public static string InstallCommand => ProgramInstall.ClaudeCode.PowerShellCommand!;
 
-    public const string InstallUrl = "https://code.claude.com/docs/en/setup";
+    public static string InstallUrl => ProgramInstall.ClaudeCode.Page;
 
     /// <summary>
     /// The places searched for Claude Code, in order (FR-1.2): the explicit path when one is given, otherwise
@@ -25,8 +26,8 @@ public static class ClaudeLauncher
         }
 
         var candidates = new List<string>();
-        var path = Environment.GetEnvironmentVariable("PATH") ?? string.Empty;
-        foreach (var directory in path.Split(';', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries))
+        // Only the PATH's full folders: a relative entry would be the current folder (S-1).
+        foreach (var directory in SystemPrograms.PathFolders())
         {
             foreach (var name in new[] { "claude.exe", "claude.cmd" })
             {
@@ -65,7 +66,7 @@ public static class ClaudeLauncher
     {
         var args = string.Join(' ', arguments.Select(Quote));
         return claudePath.EndsWith(".cmd", StringComparison.OrdinalIgnoreCase)
-            ? $"cmd.exe /d /s /c \"\"{claudePath}\" {args}\""
+            ? $"\"{SystemPrograms.Cmd}\" /d /s /c \"\"{claudePath}\" {args}\""
             : $"\"{claudePath}\" {args}";
     }
 
@@ -81,7 +82,7 @@ public static class ClaudeLauncher
         var script = claudePath.EndsWith(".cmd", StringComparison.OrdinalIgnoreCase);
         var start = new ProcessStartInfo
         {
-            FileName = script ? "cmd.exe" : claudePath,
+            FileName = script ? SystemPrograms.Cmd : claudePath,
             Arguments = script ? $"/d /s /c \"\"{claudePath}\" --version\"" : "--version",
             UseShellExecute = false,
             RedirectStandardInput = true,

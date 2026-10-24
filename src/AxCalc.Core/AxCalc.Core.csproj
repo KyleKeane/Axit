@@ -1,0 +1,14 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <!-- axCalc's pure code (docs/axcalc/SPEC.md §5): the evaluator, the answer's text and bases, the history entry, the
+       settings; no window. -->
+  <PropertyGroup>
+    <TargetFramework>$(AxitDotNet)</TargetFramework>
+    <RootNamespace>AxCalc.Core</RootNamespace>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Axit.Core\Axit.Core.csproj" />
+  </ItemGroup>
+
+</Project>

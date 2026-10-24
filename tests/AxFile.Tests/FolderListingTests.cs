@@ -86,15 +86,6 @@ public sealed class FolderListingTests : IDisposable
         Assert.Equal(["another", "Folder", "file 9", "file 10"], sorted.Select(e => e.Name));
     }
 
-    [Theory]
-    [InlineData("notes.md", "down")]
-    [InlineData("README.MARKDOWN", "down")]
-    [InlineData("report.pdf", "down")]
-    [InlineData("settings.JSON", "json")]
-    public void The_editor_is_AxJSON_for_json_and_AxDown_for_the_rest(string name, string expected)
-    {
-        Assert.Equal(expected, FolderListing.EditorOf(Path.Combine("C:\\x", name)));
-    }
 
     [Fact]
     public void Sort_by_date_and_by_size_keep_folders_first_and_break_ties_by_name()

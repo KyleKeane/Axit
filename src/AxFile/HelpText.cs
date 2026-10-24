@@ -55,7 +55,7 @@ public static class HelpText
 
         ## Information
           Ctrl+I: the entry's size and date; for a drive, the free space
-          Ctrl+Shift+W: show the entry in File Explorer. Ctrl+W: show the folder in File Explorer. Folder, Show current folder in: axClaude, axGIT, axTerminal
+          Ctrl+Shift+W: show the entry in File Explorer. Ctrl+W: show the folder in File Explorer. Folder, Show current folder in: axClaude, axTerminal, axGIT
           NVDA+End: the status bar: the newest operation on the left, the folder's full path on the right
           Ctrl+S: nothing to save here; axFile says so
 

@@ -1,5 +1,6 @@
 using System.Diagnostics;
 using Axit.Core;
+using static Axit.Forms.User32;
 
 namespace Axit.Forms;
 
@@ -17,7 +18,6 @@ namespace Axit.Forms;
 /// </summary>
 public abstract partial class AxitForm : Form
 {
-    private const int WM_SYSCOMMAND = 0x0112;
     private const int SC_KEYMENU = 0xF100;
     private const int VK_MENU = 0x12;
 
@@ -139,6 +139,31 @@ public abstract partial class AxitForm : Form
     protected AxitMenu CreateAxitMenu() => new(this, Item("Command &palette...", ShowCommandPalette, BundleKeys.CommandPalette), _checkItem, _updateItem);
 
     /// <summary>A menu item whose key the window handles itself: the item only shows the key (AX-8).</summary>
+    /// <summary>
+    /// The "Show current folder in" submenu of a window (AX-9.10; 2026-10-24 one builder for every window): the
+    /// window's File Explorer item, then every app of <see cref="Dispatch.Apps"/> that is offered there
+    /// (<see cref="App.ShowIn"/>) but the window's own, in the bundle's order, each a new window on the file or folder
+    /// <paramref name="place"/> gives (a folder's app gets a file's folder, <see cref="Dispatch.PathFor"/>).
+    /// <paramref name="place"/> says itself why there is none and returns null.
+    /// </summary>
+    protected ToolStripMenuItem CreateShowInMenu(string text, ToolStripMenuItem explorer, Func<string?> place)
+    {
+        var menu = new ToolStripMenuItem(text);
+        menu.DropDownItems.Add(explorer);
+        foreach (var app in Dispatch.Apps.Where(app => app.ShowIn && !string.Equals(app.Name, AppName, StringComparison.OrdinalIgnoreCase)))
+        {
+            menu.DropDownItems.Add(new ToolStripMenuItem(AxitWindows.AppLabel(app), null, (_, _) =>
+            {
+                if (place() is { } path && Dispatch.PathFor(app, path, Directory.Exists(path)) is { } target)
+                {
+                    AxitMenu.Start(app.Verb, target);
+                }
+            }));
+        }
+
+        return menu;
+    }
+
     protected static ToolStripMenuItem Item(string text, Action action, Keys key)
     {
         var item = new ToolStripMenuItem(text, null, (_, _) => action());
@@ -253,14 +278,9 @@ public abstract partial class AxitForm : Form
 
     private static bool IsDown(int key) => (GetAsyncKeyState(key) & 0x8000) != 0;
 
-    private const int WM_KEYDOWN = 0x0100;
-    private const int WM_KEYUP = 0x0101;
     private const int VK_SHIFT = 0x10;
     private const int VK_F10 = 0x79;
     private const int VK_APPS = 0x5D;
-
-    [System.Runtime.InteropServices.DllImport("user32.dll")]
-    private static extern bool PostMessage(nint window, int message, nint wParam, nint lParam);
 
     // ---- the window ----
 
@@ -296,11 +316,23 @@ public abstract partial class AxitForm : Form
         }
     }
 
-    /// <summary>The place and the settings are saved, and the installed new version started, unless the window cancels its closing before calling here.</summary>
+    /// <summary>
+    /// What the window holds, for the bundle's Recently closed list (AX-9.4), read as it closes: the path of its file
+    /// or folder; an empty text for an app that holds none, listed by its name alone (the default, so that a new app is
+    /// in the list without a line of its own); null for a window that holds nothing to open again (an untitled text).
+    /// </summary>
+    protected virtual string? PathInHand => string.Empty;
+
+    /// <summary>The window joins Recently closed, the place and the settings are saved, and the installed new version started, unless the window cancels its closing before calling here.</summary>
     protected override void OnFormClosing(FormClosingEventArgs e)
     {
         if (!e.Cancel)
         {
+            if (PathInHand is { } held)
+            {
+                RecentlyClosed.Remember(AppName, held);
+            }
+
             SaveWindow();
             SaveSettings();
             StartInstalledVersion();
@@ -540,7 +572,7 @@ public abstract partial class AxitForm : Form
         var arguments = !select && Directory.Exists(path) ? $"\"{path}\"" : $"/select,\"{path}\"";
         try
         {
-            Process.Start(new ProcessStartInfo("explorer.exe", arguments) { UseShellExecute = false })?.Dispose();
+            Process.Start(new ProcessStartInfo(SystemPrograms.Explorer, arguments) { UseShellExecute = false })?.Dispose();
         }
         catch (Exception ex) when (ex is System.ComponentModel.Win32Exception or InvalidOperationException)
         {
@@ -556,7 +588,7 @@ public abstract partial class AxitForm : Form
     }
 
     /// <summary>Options → Developer → Copy diagnostics: the versions, the window's own lines and the end of the log, to the clipboard.</summary>
-    protected virtual void CopyDiagnostics()
+    private void CopyDiagnostics()
     {
         var text = string.Join("\r\n",
         [
@@ -567,14 +599,32 @@ public abstract partial class AxitForm : Form
             string.Empty,
             Log.Tail(200),
         ]);
+        // S-20: meant for a public bug report, so the account's name and paths, e-mail addresses and ids are replaced.
+        CopyText(Redaction.Redact(text), "Copied diagnostics");
+    }
+
+    /// <summary>
+    /// The one way a window puts text on the clipboard: <paramref name="said"/> announced when it is there (null says
+    /// nothing), and a clipboard another program holds for a moment reported through <see cref="Fail"/> rather than as a
+    /// crash; false then.
+    /// </summary>
+    protected bool CopyText(string text, string? said)
+    {
         try
         {
             Clipboard.SetText(text);
-            Announce("Copied diagnostics", true);
         }
         catch (Exception ex) when (ex is System.Runtime.InteropServices.ExternalException or InvalidOperationException)
         {
             Fail("The clipboard could not be written: " + ex.Message);
+            return false;
         }
+
+        if (said is not null)
+        {
+            Announce(said, true);
+        }
+
+        return true;
     }
 }

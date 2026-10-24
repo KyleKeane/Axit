@@ -1,3 +1,5 @@
+using Axit.Core;
+
 namespace AxClaude.Core.Privacy;
 
 /// <summary>
@@ -91,8 +93,10 @@ public static class GitExclude
 
         if (File.Exists(dotGit) && File.ReadAllText(dotGit).Trim() is var text && text.StartsWith("gitdir:", StringComparison.Ordinal))
         {
+            // S-9: a .git file in a downloaded project can name any folder, a share included; only one on this
+            // computer is read or written, so that nothing makes Windows authenticate to someone else's server.
             var full = Resolve(folder, text["gitdir:".Length..]);
-            if (!Directory.Exists(full))
+            if (!LocalPaths.IsLocal(full) || !Directory.Exists(full))
             {
                 return null;
             }
@@ -100,7 +104,13 @@ public static class GitExclude
             // A linked worktree's gitdir is <repo>/.git/worktrees/<name>, whose info/exclude git never reads: the
             // exclude file belongs to the common directory, which the commondir file there names.
             var commonDir = Path.Combine(full, "commondir");
-            return File.Exists(commonDir) ? Resolve(full, File.ReadAllText(commonDir)) : full;
+            if (!File.Exists(commonDir))
+            {
+                return full;
+            }
+
+            var common = Resolve(full, File.ReadAllText(commonDir));
+            return LocalPaths.IsLocal(common) ? common : null;
         }
 
         return null;

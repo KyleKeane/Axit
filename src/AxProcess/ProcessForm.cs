@@ -21,27 +21,6 @@ public sealed class ProcessForm : AxitForm
         Startup,
     }
 
-    /// <summary>One view of the list (PR-2.2), as axGIT's: the list's name, the items and their keys, whether it was read, the selected key.</summary>
-    private sealed class ViewState
-    {
-        public string Name { get; private set; } = string.Empty;
-
-        public IReadOnlyList<string> Labels { get; private set; } = [];
-
-        public IReadOnlyList<string> Keys { get; private set; } = [];
-
-        public bool Loaded { get; set; }
-
-        public string? SelectedKey { get; set; }
-
-        public void Set(string name, IEnumerable<string> labels, IEnumerable<string> keys)
-        {
-            Name = name;
-            Labels = labels.ToList();
-            Keys = keys.ToList();
-            Loaded = true;
-        }
-    }
 
     private static readonly TimeSpan SampleInterval = TimeSpan.FromSeconds(1);
 
@@ -51,7 +30,8 @@ public sealed class ProcessForm : AxitForm
     private readonly StatusStrip _status = new();
     private readonly ToolStripStatusLabel _nameLabel;
     private readonly ToolStripStatusLabel _memoryLabel;
-    private readonly ViewState[] _views = [new(), new(), new()];
+    /// <summary>The three views of the list (PR-2.2), as axGIT's.</summary>
+    private readonly ListViewState[] _views = [new(), new(), new()];
     private readonly Dictionary<ProcessSort, ToolStripMenuItem> _sortItems = [];
     private readonly ToolStripMenuItem _processMenu = new("&Process");
     private readonly ToolStripMenuItem _serviceMenu = new("&Service");
@@ -197,12 +177,6 @@ public sealed class ProcessForm : AxitForm
         Do(() => RefreshAsync(announce: false));
     }
 
-    protected override void OnFormClosing(FormClosingEventArgs e)
-    {
-        // AX-9.4: the window joins the bundle's Recently closed list by its name, holding no file.
-        RecentlyClosed.Remember(AxProcessApp.Name, string.Empty);
-        base.OnFormClosing(e);
-    }
 
     // ---- keys (PR-6.2): every key comes from BundleKeys or AxProcessKeys, and is handled here only ----
 
@@ -285,7 +259,7 @@ public sealed class ProcessForm : AxitForm
 
     // ---- the views (PR-2.2, PR-2.3) ----
 
-    private ViewState Current => _views[(int)_view];
+    private ListViewState Current => _views[(int)_view];
 
     /// <summary>F5, the first showing and every command's end: the view shown read again on a background task, the list refilled on the item it had.</summary>
     private async Task RefreshAsync(bool announce)
@@ -397,39 +371,12 @@ public sealed class ProcessForm : AxitForm
 
     private void FillList()
     {
-        var view = Current;
-        _list.BeginUpdate();
-        _list.Items.Clear();
-        _list.Items.AddRange(view.Labels.Select(label => (object)label).ToArray());
-        _list.EndUpdate();
-        _list.AccessibleName = view.Name;
         UpdateViewMenus();
-        var index = view.SelectedKey is { } key ? IndexOf(view.Keys, key) : -1;
-        if (_list.Items.Count > 0)
-        {
-            _list.SelectedIndex = index >= 0 ? index : 0;
-        }
-
+        Current.FillInto(_list);
         UpdateStatusBar();
     }
 
-    private static int IndexOf(IReadOnlyList<string> keys, string key)
-    {
-        for (var i = 0; i < keys.Count; i++)
-        {
-            if (keys[i] == key)
-            {
-                return i;
-            }
-        }
-
-        return -1;
-    }
-
-    private void RememberSelection() => Current.SelectedKey = CurrentKey() ?? Current.SelectedKey;
-
-    private string? CurrentKey() =>
-        _list.SelectedIndex is var i && i >= 0 && i < Current.Keys.Count ? Current.Keys[i] : null;
+    private void RememberSelection() => Current.Remember(_list);
 
     private ProcessRow? CurrentProcess() =>
         _view == View.Processes && _list.SelectedIndex is var i && i >= 0 && i < _processes.Count ? _processes[i] : null;
@@ -628,15 +575,7 @@ public sealed class ProcessForm : AxitForm
             return;
         }
 
-        try
-        {
-            Clipboard.SetText(line);
-            Announce("Copied", true);
-        }
-        catch (Exception ex) when (ex is System.Runtime.InteropServices.ExternalException or InvalidOperationException)
-        {
-            Fail("The clipboard could not be written: " + ex.Message);
-        }
+        CopyText(line, "Copied");
     }
 
     /// <summary>Ctrl+Q (PR-2.5): the processes of the last read, or counted now, the memory now, the processor of the last read.</summary>

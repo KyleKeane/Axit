@@ -192,9 +192,23 @@ public static class ItemFolder
     public static string LinkTo(string fromItem, string toItem) =>
         Path.GetRelativePath(Path.GetDirectoryName(fromItem)!, toItem).Replace('\\', '/');
 
-    /// <summary>The file a link names, from the item that holds it.</summary>
-    public static string Resolve(string fromItem, string link) =>
-        Path.GetFullPath(Path.Combine(Path.GetDirectoryName(fromItem)!, link.Replace('/', Path.DirectorySeparatorChar)));
+    /// <summary>
+    /// The file a link names, from the item that holds it; null for a link that is not relative (<c>//server/x.json</c>,
+    /// <c>C:\x.json</c>) or that leads off this computer, which is never opened: a link in a shared folder would
+    /// otherwise make Windows authenticate to a server of someone else's choosing as the item is merely shown
+    /// (security audit S-5).
+    /// </summary>
+    public static string? Resolve(string fromItem, string link)
+    {
+        var relative = link.Replace('/', Path.DirectorySeparatorChar);
+        if (relative.Length == 0 || Path.IsPathRooted(relative) || relative.Contains(':'))
+        {
+            return null;
+        }
+
+        var target = Path.GetFullPath(Path.Combine(Path.GetDirectoryName(fromItem)!, relative));
+        return LocalPaths.IsLocal(target) ? target : null;
+    }
 
     private static bool Hidden(FileSystemInfo entry) =>
         entry.Name.StartsWith('.') || (entry.Attributes & (FileAttributes.Hidden | FileAttributes.System)) != 0;

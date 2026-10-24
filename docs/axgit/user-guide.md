@@ -15,6 +15,8 @@ axGIT is part of Axit. Installing Axit (see the Axit guide in the Axit menu, Abo
 
 The window is named after the repository's folder: "myproject - axGIT".
 
+A repository can name programs of its own that git runs, hooks for example. When the one you open does, axGIT says so in a notice, "This repository runs programs of its own", with their names, and runs git without them. Choose Trust this repository only for a repository you know, your own for example; from then on git runs them as it would in a console.
+
 ## The list and its views
 
 The list at the top has three views, each named with what it holds:

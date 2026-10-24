@@ -42,7 +42,7 @@ Type the command in the field and press Enter. You hear "Sent" with a low note. 
 - Ctrl+Shift+C interrupts (it sends Ctrl+C to the shell). Shift+Escape sends Escape. The Shell menu's Send key sends Up, Down or Ctrl+D for a program that wants them.
 - Escape in the field does nothing but remind you of those two keys.
 
-A program that asks a question (y/n, a passphrase) prints it as a line; when the output has been quiet for a couple of seconds and the last line ends like a question, you hear "Asks:" and the line, with the question chime. Type the answer in the field and press Enter. Ctrl+Q says what is running, for how long, and the prompt, at any time.
+A program that asks a question (y/n, a passphrase) prints it as a line; when the output has been quiet for a couple of seconds and the last line ends like a question, you hear "Asks:" and the line, with the question chime. Type the answer in the field and press Enter. Ctrl+Q says what is running, for how long, and the prompt, at any time. "Asks:" is always the program's own line, never axTerminal asking: a program, or a file you print, can word a line to look like any question, a password prompt included, so answer only what you know the program you ran asks.
 
 ## Read the terminal
 

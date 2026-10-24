@@ -22,15 +22,15 @@ public sealed class TextJumpsTests
         var (box, spoken, announce) = Editor();
         var jumps = AxDown.AxDownKeys.Jumps;
 
-        Assert.True(TextJumps.Handle(box, jumps, AxDown.AxDownKeys.NextHeading, announce));
+        Assert.True(TextJumps.Handle(box, jumps, Axit.Forms.MarkdownKeys.NextHeading, announce));
         Assert.Equal(Text.IndexOf("## Two", StringComparison.Ordinal), box.SelectionStart);
         Assert.Equal(["Two, heading level 2"], spoken);
 
-        Assert.True(TextJumps.Handle(box, jumps, AxDown.AxDownKeys.PreviousLink, announce));
+        Assert.True(TextJumps.Handle(box, jumps, Axit.Forms.MarkdownKeys.PreviousLink, announce));
         Assert.Equal(Text.IndexOf("[link]", StringComparison.Ordinal), box.SelectionStart);
         Assert.Equal("link, link", spoken[^1]);
 
-        Assert.True(TextJumps.Handle(box, jumps, AxDown.AxDownKeys.NextTable, announce));
+        Assert.True(TextJumps.Handle(box, jumps, Axit.Forms.MarkdownKeys.NextTable, announce));
         Assert.Equal(Text.IndexOf("[link]", StringComparison.Ordinal), box.SelectionStart);   // the caret stays
         Assert.Equal("No next table", spoken[^1]);
 

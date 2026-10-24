@@ -750,12 +750,21 @@ internal sealed class Window : IDisposable
     private Window(Process process, int connectMs = 30_000)
     {
         _process = process;
-        _pipe = new NamedPipeClientStream(".", $"axit-auto-{process.Id}", PipeDirection.InOut);
+        // CurrentUserOnly: the pipe must be the user's own, never one another program made under the same name.
+        _pipe = new NamedPipeClientStream(".", $"axit-auto-{process.Id}", PipeDirection.InOut, PipeOptions.CurrentUserOnly);
         // The window opens its pipe when it first shows.
         _pipe.Connect(connectMs);
         _reader = new StreamReader(_pipe, new UTF8Encoding(false));
         _writer = new StreamWriter(_pipe, new UTF8Encoding(false)) { AutoFlush = true };
+        _writer.WriteLine(Secret);
+        if (_reader.ReadLine() is not { } answer || !answer.Contains("\"ok\":true", StringComparison.Ordinal))
+        {
+            throw new InvalidOperationException($"The window of process {process.Id} did not accept the run's secret.");
+        }
     }
+
+    /// <summary>The run's secret, 256 random bits, made once per run of the runner.</summary>
+    public static readonly string Secret = Convert.ToHexString(System.Security.Cryptography.RandomNumberGenerator.GetBytes(32));
 
     public int ProcessId => _process.Id;
 
@@ -833,7 +842,8 @@ internal sealed class Window : IDisposable
 
     private static int Create(string exe, string arguments, string? desktop, string home)
     {
-        Environment.SetEnvironmentVariable("AXIT_AUTOMATION", "1");
+        // The run's secret (security audit S-11): the windows open their channel to a client that sends it first.
+        Environment.SetEnvironmentVariable("AXIT_AUTOMATION", Secret);
         // The run's own settings, logs and recently closed list, never the user's (AppPaths).
         Environment.SetEnvironmentVariable("AXIT_HOME", home);
         var startup = new Native.STARTUPINFO { cb = Marshal.SizeOf<Native.STARTUPINFO>(), lpDesktop = desktop is null ? null : "WinSta0\\" + desktop };

@@ -2,6 +2,7 @@ using System.ComponentModel;
 using System.Diagnostics;
 using System.IO.Compression;
 using System.Net.Http.Headers;
+using System.Security.Cryptography;
 using System.Text;
 
 namespace Axit.Core.Updates;
@@ -26,8 +27,11 @@ public static class Updater
 
     /// <summary>
     /// Downloads and extracts the release's zip and returns the folder that holds the new program file and install.ps1.
-    /// A complete earlier download of the same version is reused. <paramref name="progress"/>, when given, hears the
-    /// percentage downloaded each time it changes (the window shows it on a progress bar, AX-3.2).
+    /// Nothing is extracted, let alone run, unless the zip matches the checksum GitHub recorded for it and its
+    /// signature checks against the release key built into Axit (AX-3.4, <see cref="ReleaseSigning"/>; security audit
+    /// S-27); a download is always made afresh, never taken from an earlier one, which another program could have
+    /// changed (S-29). <paramref name="progress"/>, when given, hears the percentage downloaded each time it changes
+    /// (the window shows it on a progress bar, AX-3.2).
     /// </summary>
     public static async Task<string> DownloadAsync(ReleaseInfo release, CancellationToken cancellation, IProgress<int>? progress = null)
     {
@@ -36,16 +40,18 @@ public static class Updater
             throw new InvalidOperationException("The release has no Windows zip attached.");
         }
 
-        var version = release.Version.ToString(3);
-        var folder = Path.Combine(Folder, version);
-        if (IsComplete(folder))
+        if (release.SignatureUrl is null)
         {
-            return folder;
+            throw new InvalidOperationException("The release is not signed, so Axit does not install it. Its page on GitHub has the zip for a manual install, if you trust where it came from.");
         }
 
+        var version = release.Version.ToString(3);
+        var folder = Path.Combine(Folder, version);
         Directory.CreateDirectory(Folder);
-        // Only the version being installed is kept: earlier downloads are about 45 MB each.
-        foreach (var old in Directory.GetDirectories(Folder).Where(path => !string.Equals(path, folder, StringComparison.OrdinalIgnoreCase)))
+        var signature = await Http.GetStringAsync(release.SignatureUrl, cancellation).ConfigureAwait(false);
+        // Nothing earlier is kept or reused: earlier downloads are about 45 MB each, and a folder from before could
+        // have been changed since it was checked.
+        foreach (var old in Directory.GetDirectories(Folder))
         {
             try
             {
@@ -61,6 +67,7 @@ public static class Updater
         }
 
         var zip = Path.Combine(Folder, $"Axit-{version}{UpdateCheck.ZipSuffix}");
+        using var hash = IncrementalHash.CreateHash(HashAlgorithmName.SHA256);
         using (var response = await Http.GetAsync(release.ZipUrl, HttpCompletionOption.ResponseHeadersRead, cancellation).ConfigureAwait(false))
         {
             response.EnsureSuccessStatusCode();
@@ -76,6 +83,7 @@ public static class Updater
                 while ((read = await stream.ReadAsync(buffer, cancellation).ConfigureAwait(false)) > 0)
                 {
                     await file.WriteAsync(buffer.AsMemory(0, read), cancellation).ConfigureAwait(false);
+                    hash.AppendData(buffer, 0, read);
                     done += read;
                     if (progress is not null && total > 0)
                     {
@@ -103,6 +111,13 @@ public static class Updater
             }
         }
 
+        var sha256 = hash.GetHashAndReset();
+        if (!MatchesDigest(sha256, release.ZipDigest) || !ReleaseSigning.Verify(sha256, signature))
+        {
+            File.Delete(zip);
+            throw new InvalidOperationException("The downloaded zip is not the one the Axit release was signed with, so it was deleted and nothing was installed. Try again later; if it happens again, report it on GitHub.");
+        }
+
         if (Directory.Exists(folder))
         {
             Directory.Delete(folder, recursive: true);
@@ -127,7 +142,7 @@ public static class Updater
     /// </summary>
     public static async Task<(int ExitCode, string Output)> InstallInPlaceAsync(string folder, IProgress<string>? lines)
     {
-        var start = new ProcessStartInfo("powershell.exe")
+        var start = new ProcessStartInfo(SystemPrograms.PowerShell)
         {
             UseShellExecute = false,
             CreateNoWindow = true,
@@ -210,6 +225,11 @@ public static class Updater
     /// A download is complete when it has install.ps1 and a program file. The program file is not named: the
     /// installer knows what to install, and 1.7.0 relied on this to update into Axit (docs/axit/SPEC.md B-6).
     /// </summary>
+    /// <summary>Whether the zip's SHA-256 is the one GitHub recorded ("sha256:&lt;hex&gt;"); true when GitHub gave none, the signature being the check that counts.</summary>
+    public static bool MatchesDigest(byte[] sha256, string? digest) =>
+        digest is null || !digest.StartsWith("sha256:", StringComparison.OrdinalIgnoreCase)
+        || string.Equals(Convert.ToHexString(sha256), digest["sha256:".Length..], StringComparison.OrdinalIgnoreCase);
+
     private static bool IsComplete(string folder) =>
         File.Exists(Path.Combine(folder, "install.ps1")) && Directory.Exists(folder) && Directory.GetFiles(folder, "*.exe").Length > 0;
 

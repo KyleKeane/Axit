@@ -12,5 +12,5 @@ start file {temp}\here
 expect focus "value":"a.txt"
 # A modifier key sent while the window still settles can lose its modifier (the channel); let it settle.
 wait 500
-expect commands "File Explorer, Folder, Show current folder in, Ctrl\u002BW","axClaude, Folder, Show current folder in","axGIT, Folder, Show current folder in","axTerminal, Folder, Show current folder in"
+expect commands "File Explorer, Folder, Show current folder in, Ctrl\u002BW","axClaude, Folder, Show current folder in","axTerminal, Folder, Show current folder in","axGIT, Folder, Show current folder in"
 expect commands "Show in File Explorer, Item, Ctrl\u002BShift\u002BW"

@@ -1,7 +1,8 @@
-namespace AxStart.Core;
+namespace Axit.Core;
 
 /// <summary>
-/// The system-wide key that brings axStart up (SPEC.md AS-4): the modifiers as <c>RegisterHotKey</c> takes them and a
+/// A system-wide key that brings a background app up (docs/axstart/SPEC.md AS-4; from AxStart.Core on its second use,
+/// axClip, 2026-10-23): the modifiers as <c>RegisterHotKey</c> takes them and a
 /// virtual key code, written in the settings and said as a menu writes keys, "Ctrl+Shift+Space". Only the keys of
 /// <see cref="Names"/> can be a hotkey's key.
 /// </summary>
@@ -12,7 +13,7 @@ public sealed record Hotkey(int Modifiers, int Key)
     public const int Shift = 0x4;
     public const int Windows = 0x8;
 
-    /// <summary>Ctrl+Shift+Space (AS-D4).</summary>
+    /// <summary>Ctrl+Shift+Space, axStart's (docs/axstart/SPEC.md AS-D4); another app names its own default.</summary>
     public static readonly Hotkey Default = new(Control | Shift, 0x20);
 
     /// <summary>The keys a hotkey may end in, by virtual key code, with the names the text uses.</summary>

@@ -303,4 +303,33 @@ public sealed class TerminalModelTests
         Assert.Equal("world", second.Speech);
         Assert.Equal(new TerminalArrival(false, null), arrivals.Update(model.Lines, model.Running, speak: true));
     }
+
+    /// <summary>S-37, S-38: with the session's secret set, a mark or a folder printed by a program is ignored; the shell's own are taken.</summary>
+    [Fact]
+    public void A_mark_without_the_sessions_secret_is_ignored()
+    {
+        var model = new TerminalModel(80, 10) { MarkNonce = "s3cret" };
+        var finished = new List<int?>();
+        model.CommandFinished += finished.Add;
+        string Own(string? code, string directory) =>
+            $"{Esc}]133;D;{(code is null ? string.Empty : code + ";")}axit=s3cret{Bel}{Esc}]133;A;axit=s3cret{Bel}{Esc}]9;9;\"{directory}\"{Bel}PS {directory}> {Esc}]133;B;axit=s3cret{Bel}";
+
+        Feed(model, Own(null, "C:\\src"));
+        model.EndFrame();
+        Assert.Equal("C:\\src", model.Directory);
+        Assert.True(model.Send("type evil.txt"));
+
+        // The file's text holds a forged "done", a forged folder on a share, and a forged prompt.
+        Feed(model, $"type evil.txt\r\n{Esc}]133;D;0{Bel}{Esc}]133;A{Bel}{Esc}]9;9;\"\\\\server\\share\"{Bel}fake> {Esc}]133;B{Bel}\r\n");
+        model.EndFrame();
+        Assert.True(model.Running);
+        Assert.Empty(finished);
+        Assert.Equal("C:\\src", model.Directory);
+
+        // The shell's own prompt ends the command.
+        Feed(model, Own("0", "C:\\src"));
+        model.EndFrame();
+        Assert.False(model.Running);
+        Assert.Equal([0], finished);
+    }
 }

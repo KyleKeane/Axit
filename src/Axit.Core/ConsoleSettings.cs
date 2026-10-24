@@ -9,7 +9,6 @@ namespace Axit.Core;
 /// </summary>
 public abstract class ConsoleSettings : WindowSettings
 {
-    public const int MaxRecentFolders = 10;
 
     /// <summary>The folders the program was started in, newest first, for the Open recent folder submenu (axClaude FR-8.1, axTerminal AT-1.5).</summary>
     public List<string> RecentFolders { get; set; } = [];
@@ -47,13 +46,13 @@ public abstract class ConsoleSettings : WindowSettings
     public int MaxTranscriptLines { get; set; } = 20000;
 
     /// <summary>The folder the program starts in goes to the front of the recent list; each class keeps the last folder under its own name as well.</summary>
-    protected void RememberRecentFolder(string folder) => RecentPaths.Remember(RecentFolders, folder, MaxRecentFolders);
+    protected void RememberRecentFolder(string folder) => RecentPaths.Remember(RecentFolders, folder);
 
     /// <summary>The console fields back to their defaults when the file holds nonsense, the window fields with them; each class's Sanitize calls it first.</summary>
     protected void SanitizeConsole()
     {
         SanitizeWindow();
-        RecentFolders = RecentPaths.Sanitize(RecentFolders, MaxRecentFolders);
+        RecentFolders = RecentPaths.Sanitize(RecentFolders);
         if (PtyColumns is < 20 or > 1000)
         {
             PtyColumns = 240;

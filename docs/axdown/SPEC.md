@@ -156,9 +156,10 @@ UTF-8, UTF-16 and the system code page; files that are not text; files over 32 M
   none, AX-9.5); then Save (Ctrl+S), Save as… (Ctrl+Shift+S), where every Windows program has them (the standard
   order of a File menu, shared with axClaude's Session menu, whose Save slot is empty, 2.11.0); then Show current file in ▸
   File Explorer (Ctrl+W; the file selected in File Explorer, one of the system's own windows; "No file yet" on
-  Untitled), axGIT (a new axGIT window on the repository that holds the file, docs/axgit/SPEC.md AG-1.4), axTerminal
-  (a shell in the file's folder, docs/axterminal/SPEC.md AT-1.5) and axFile (the file's folder listed with the file
-  selected, docs/axfile/SPEC.md AF-1.3); then Exit (Alt+F4).
+  Untitled), axClaude (Claude in the file's folder), axTerminal (a shell in the file's folder,
+  docs/axterminal/SPEC.md AT-1.5), axGIT (a new axGIT window on the repository that holds the file, docs/axgit/SPEC.md
+  AG-1.4) and axFile (the file's folder listed with the file selected, docs/axfile/SPEC.md AF-1.3), the bundle's one
+  submenu (AX-9.10); then Exit (Alt+F4).
 - AD-4.2 Edit: Undo (Ctrl+Z) and Redo (Ctrl+Y) over the window's own history (AD-2.5), then Cut, Copy, Paste,
   Select all (the control's own, listed for discoverability).
   Navigate (as axClaude's): Find… (Ctrl+F), Find next (F3), Find previous (Shift+F3), Go to line… (Ctrl+G), then the

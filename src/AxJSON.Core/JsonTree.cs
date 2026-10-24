@@ -47,6 +47,14 @@ public sealed record JsonTree(JsonNode? Root, JsonProblem? Problem, IReadOnlyLis
 /// </summary>
 public static class JsonParser
 {
+    /// <summary>
+    /// How deep objects and arrays may nest (security audit S-39): deeper, the document is "not valid", so that a file
+    /// of nested brackets is refused rather than ending the process, which no exception handler can catch when the
+    /// stack runs out. 512 is far past any real document and well within the stack, for the parse, the outline and
+    /// Format alike.
+    /// </summary>
+    public const int MaxDepth = 512;
+
     public static JsonTree Parse(string text)
     {
         var (tokens, repairs) = JsonScanner.Scan(text);
@@ -67,6 +75,7 @@ public static class JsonParser
     private sealed class State(IReadOnlyList<Token> tokens, List<RepairKind> repairs)
     {
         private int _at;
+        private int _depth;
 
         public JsonProblem? Problem { get; private set; }
 
@@ -87,10 +96,31 @@ public static class JsonParser
             var token = Current;
             switch (token.Kind)
             {
+                case TokenKind.OpenObject or TokenKind.OpenArray when _depth >= MaxDepth:
+                    Fail($"objects and arrays nested more than {MaxDepth} deep");
+                    return null;
                 case TokenKind.OpenObject:
-                    return Object(key);
+                    _depth++;
+                    try
+                    {
+                        return Object(key);
+                    }
+                    finally
+                    {
+                        _depth--;
+                    }
+
                 case TokenKind.OpenArray:
-                    return Array(key);
+                    _depth++;
+                    try
+                    {
+                        return Array(key);
+                    }
+                    finally
+                    {
+                        _depth--;
+                    }
+
                 case TokenKind.String:
                     Advance();
                     if (token.SingleQuoted)

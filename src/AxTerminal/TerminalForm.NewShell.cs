@@ -35,7 +35,7 @@ internal sealed partial class TerminalForm
     private void NewSession()
     {
         // AT-1.2a: only the shells this computer has.
-        var presets = ShellPresets.Where(preset => ShellLauncher.Find(ShellLauncher.Parse(preset.Arguments[0])) is not null).ToArray();
+        var presets = ShellPresets.Where(preset => ShellThere(ShellLauncher.Parse(preset.Arguments[0]))).ToArray();
         var selected = _shell == ShellKind.Custom ? presets.Length : Array.FindIndex(presets, p => p.Arguments[0] == ShellLauncher.Key(_shell));
         var text = "Choose the shell and the folder. Starting ends the current shell and starts a new session in the folder.";
         if (ProcessRunning && _model.Running)
@@ -113,7 +113,11 @@ internal sealed partial class TerminalForm
 
     /// <summary>Session, Switch shell, Install (AT-1.2a): the shell's program installed on the user's command (bundle AX-2.9), then switched to.</summary>
     private void InstallShell(ProgramInstall program, ShellKind kind) =>
-        InstallProgram(program, () => ShellLauncher.Find(kind) is not null, () => SwitchShell(kind));
+        InstallProgram(program, () => ShellLauncher.Find(kind) is not null, () =>
+        {
+            LookUpShells();
+            SwitchShell(kind);
+        });
 
     /// <summary>The bundle's folder picker (one of the few separate windows, AX-7.2), on the folder or the user's profile; null when it was cancelled.</summary>
     private string? PickFolder(string? start) =>
@@ -156,6 +160,4 @@ internal sealed partial class TerminalForm
         OpenInExplorer(CurrentDirectory);
     }
 
-    /// <summary>Session → Show current folder in → axClaude, axGIT or axFile (AT-1.5): a new window of that app on the shell's current directory.</summary>
-    private void OpenIn(string verb) => AxitMenu.Start(verb, CurrentDirectory);
 }

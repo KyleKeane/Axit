@@ -20,6 +20,8 @@ Accessible Windows apps for screen reader users, built for and tested with NVDA,
 - **axProcess**: what runs on the computer, as one list with three views: the processes with their memory and processor use, the services, and the programs that start at sign-in. End a process after a question, start or stop a service; nothing refreshes by itself.
 - **axTask**: tasks and lists as a folder of small files, moved through as axFile moves through folders. Each item's fields (a due date, done, notes, links to other items) are in a pane beside the list; All tasks gathers every task not done.
 - **axPass**: a KeePass password database, read and changed by ear: groups and entries in the same two panes, the password never spoken, copied with Ctrl+C and cleared from the clipboard after 30 seconds. It runs KeePassXC's own command-line tool, so KeePassXC must be installed.
+- **axCalc**: a calculator as one field and a history: type an expression, Enter says the answer, and every answer stays as a line to read back, copy and recall; hexadecimal, binary and octal for development.
+- **axClip**: a clipboard history. It keeps the text of every copy while it runs, in memory unless you ask; Windows+Alt+V from anywhere brings up a search field over it, Down and Up move through it with the caret kept in the field, and Enter pastes into the program you were in.
 
 The apps reach each other: axFile hands a file to axMedia or axPreview, every window can show its folder in the others, and the Axit menu in every window lists the open windows and starts any app.
 
@@ -36,7 +38,7 @@ Needs the .NET 10 SDK, and NVDA for the manual checks.
 ```
 .\run-axfile.ps1 C:\path\to\folder       # build, then start axFile on that folder
 .\run-axclaude.ps1 C:\path\to\project    # axClaude on a project folder
-.\run.ps1 -App down C:\notes\todo.md     # any app: claude, down, json, git, terminal, file, media, preview, start, process, task, pass
+.\run.ps1 -App down C:\notes\todo.md     # any app: claude, down, json, git, terminal, file, media, preview, start, process, task, pass, calc, clip
 .\run.ps1 -NoBuild                       # start without building
 ```
 
@@ -69,7 +71,7 @@ Without GitHub Actions (a runner image or an action changed under the workflow, 
 - `src/<App>` and `src/<App>.Core`: each app's window and its pure code. Each folder has a `CLAUDE.md` with its notes.
 - `tests/`: the unit tests, one project per app, and the recorded console fixtures.
 - `docs/<app>/`: each app's `SPEC.md`, `user-guide.md` (Help, User guide in the app) and `nvda-test-plan.md`. The specifications are the source of truth.
-- `docs/axit/`: the bundle's `SPEC.md` (launch, install, update, release, the accessibility and modularity rules), `plan.md`, `adding-an-app.md`, the test record, `review-2026-10-23.md` (the review of the code and documents, what was fixed and what is proposed) and `longevity.md` (the practices that keep the repository stable for years, with its calendar).
+- `docs/axit/`: the bundle's `SPEC.md` (launch, install, update, release, the accessibility and modularity rules), `plan.md`, `adding-an-app.md`, the test record, `review-2026-10-23.md` (the review of the code and documents, what was fixed and what is proposed), `inventory-2026-10-24.md` (the copies, dead code and drift, what was cleaned up and what is open) and `longevity.md` (the practices that keep the repository stable for years, with its calendar).
 - `manual_tests/`: the script that makes the files for the NVDA passes.
 - `CLAUDE.md`: the map and the rules for working on this repository with Claude Code.
 

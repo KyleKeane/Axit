@@ -13,9 +13,11 @@
     4. sets <Version> in src/Axit/Axit.csproj,
     5. commits CHANGELOG.md and the project file as "Release <version>" and tags v<version>,
     6. pushes main, waits for its build to pass on GitHub (gh run watch), then pushes the tag: a tag never goes up on
-       a commit whose build failed there.
-  The tag starts .github/workflows/release.yml. Follow it with `gh run watch`, or on the Actions page. When it is
-  done, the release is at https://github.com/KyleKeane/Axit/releases and the apps offer it as an update.
+       a commit whose build failed there,
+    7. waits for the tag's release workflow, which leaves a draft release, then signs its zip with the release key
+       on this machine and publishes it (tools/sign-release.ps1; docs/axit/SPEC.md AX-3.4). The apps install only a
+       signed zip, so a release is never published without this step.
+  When it is done, the release is at https://github.com/KyleKeane/Axit/releases and the apps offer it as an update.
 
 .EXAMPLE
   .\release.ps1 1.0.1
@@ -158,5 +160,13 @@ if (Get-Command gh -ErrorAction SilentlyContinue) {
 
 git -C $root push -q origin $tag
 if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
-Write-Host "Pushed the tag. GitHub Actions is building the release: https://github.com/KyleKeane/Axit/actions"
-Write-Host "Follow it with: gh run watch    (the release then appears at https://github.com/KyleKeane/Axit/releases)"
+Write-Host "Pushed the tag. GitHub Actions is building the draft release: https://github.com/KyleKeane/Axit/actions"
+
+# AX-3.4 (security audit S-27): the draft is signed here, with the key that never leaves this machine, and only then
+# published; the apps install nothing unsigned.
+if (Get-Command gh -ErrorAction SilentlyContinue) {
+    & (Join-Path $root 'tools\sign-release.ps1') $Version
+    exit $LASTEXITCODE
+}
+
+Write-Host "gh is not installed: once the workflow is done, sign and publish with: .\tools\sign-release.ps1 $Version"

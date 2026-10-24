@@ -5,7 +5,7 @@ namespace AxTask.Core;
 
 /// <summary>
 /// What makes an item a task (docs/axtask/SPEC.md TK-4): a check field titled Done (TK-D2), with a Due date; the
-/// default fields of a new item, the row's summary, and the order of All tasks (TK-5.1).
+/// default fields of a new item and the row's summary; All tasks' order is its smart list's (`SmartList.AllTasks`, TK-5.1).
 /// </summary>
 public static class TaskRules
 {
@@ -91,10 +91,4 @@ public static class TaskRules
         return parts.Count == 0 ? string.Empty : ", " + string.Join(", ", parts);
     }
 
-    /// <summary>TK-5.1: the soonest due first, then the ones without a date, each group by title.</summary>
-    public static IReadOnlyList<ItemFile> Ordered(IEnumerable<ItemFile> items) =>
-        items.OrderBy(item => Due(item.Document) is null ? 1 : 0)
-            .ThenBy(item => Due(item.Document) ?? DateOnly.MaxValue)
-            .ThenBy(item => ItemFolder.NameOf(item), Axit.Core.NaturalOrder.Instance)
-            .ToList();
 }

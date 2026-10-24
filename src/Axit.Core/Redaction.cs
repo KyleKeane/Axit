@@ -1,6 +1,6 @@
 using System.Text.RegularExpressions;
 
-namespace AxClaude.Core.Privacy;
+namespace Axit.Core;
 
 /// <summary>
 /// Personal data in text read off Claude's screen: `/status` prints the account's e-mail address, session
@@ -10,7 +10,8 @@ namespace AxClaude.Core.Privacy;
 /// </summary>
 public static partial class Redaction
 {
-    [GeneratedRegex(@"[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}")]
+    // Without backtracking: a long run of letters and dots would otherwise take time growing with its square (S-45).
+    [GeneratedRegex(@"[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}", RegexOptions.NonBacktracking)]
     private static partial Regex EmailRegex();
 
     // The account folder under a drive's Users folder, also with doubled or forward slashes and as Git Bash (/c/Users)

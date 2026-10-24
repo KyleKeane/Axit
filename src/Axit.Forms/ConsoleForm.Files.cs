@@ -77,13 +77,22 @@ public abstract partial class ConsoleForm
             FileName = $"{AppName.ToLowerInvariant()}-{DateTime.Now:yyyyMMdd-HHmm}.vt",
             AddExtension = true,
             DefaultExt = "vt",
-            // A recording holds everything on screen, account details and paths included: outside the project (axClaude D34).
-            InitialDirectory = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments),
+            // A recording holds everything on screen, account details and paths included: outside the project (axClaude
+            // D34), and in the local profile rather than Documents, which OneDrive often syncs (security audit S-24).
+            InitialDirectory = RecordingsFolder(),
         };
         if (ShowSystemDialog(dialog) == DialogResult.OK)
         {
             StartRecording(dialog.FileName);
         }
+    }
+
+    /// <summary>%LOCALAPPDATA%\Axit\recordings, made when first asked for.</summary>
+    private static string RecordingsFolder()
+    {
+        var folder = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "Axit", "recordings");
+        Directory.CreateDirectory(folder);
+        return folder;
     }
 
     /// <summary>Records the raw stream to <paramref name="path"/> from now (the menu, or axClaude's --record).</summary>

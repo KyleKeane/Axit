@@ -35,4 +35,34 @@ public sealed class MenuTests
 
         Assert.True(offenders.Count == 0, "A hand-made drop-down on a menu item: " + string.Join("; ", offenders));
     }
+
+    /// <summary>
+    /// A menu item names an app as the bundle spells it, the ax in lower case (docs/axit/SPEC.md, the naming rule of
+    /// 2026-10-23): "ax&amp;GIT", never "Ax&amp;Git", which the Show current folder in submenus kept until 2026-10-24.
+    /// </summary>
+    [Fact]
+    public void No_menu_item_spells_an_app_the_old_way()
+    {
+        var root = LayoutTests.RepositoryRoot();
+        var offenders = new List<string>();
+        foreach (var file in Directory.GetFiles(Path.Combine(root, "src"), "*.cs", SearchOption.AllDirectories))
+        {
+            if (file.Contains($"{Path.DirectorySeparatorChar}obj{Path.DirectorySeparatorChar}"))
+            {
+                continue;
+            }
+
+            var number = 0;
+            foreach (var line in File.ReadLines(file))
+            {
+                number++;
+                if (line.Contains("\"Ax&", StringComparison.Ordinal))
+                {
+                    offenders.Add($"{Path.GetRelativePath(root, file)}:{number}: {line.Trim()}");
+                }
+            }
+        }
+
+        Assert.True(offenders.Count == 0, "An app named the old way in a menu: " + string.Join("; ", offenders));
+    }
 }

@@ -13,10 +13,9 @@ public sealed class ListTests
     /// <summary>The plain list boxes allowed, by file, with why.</summary>
     private static readonly IReadOnlyDictionary<string, string> Allowed = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
     {
-        // axStart's matches never take the focus: the caret stays in its search field (docs/axstart/SPEC.md AS-D2).
-        [Path.Combine("src", "AxStart", "StartForm.cs")] = "never focused",
-        // axClip's items never take the focus either, as axStart's (docs/axclip/SPEC.md CP-2.1).
-        [Path.Combine("src", "AxClip", "ClipForm.cs")] = "never focused",
+        // axStart's matches and axClip's items never take the focus: the caret stays in the search field
+        // (docs/axstart/SPEC.md AS-D2, docs/axclip/SPEC.md CP-2.1); the list is HotkeyForm's since 2026-10-24.
+        [Path.Combine("src", "Axit.Forms", "HotkeyForm.cs")] = "never focused",
         // The command palette's matches under its field, never focused (AX-10).
         [Path.Combine("src", "Axit.Forms", "OverlayPanel.cs")] = "never focused",
         // A question's answers: their letters are the screen's own keys (axClaude D33), not a search.
@@ -40,8 +39,8 @@ public sealed class ListTests
             foreach (var line in File.ReadLines(file))
             {
                 number++;
-                // "ListBox _list = new()", "new ListBox()", "new CheckedListBox()": a plain list box made.
-                if (Regex.IsMatch(line, @"\b(Checked)?ListBox\s+_\w+\s*=\s*new\b|\bnew\s+(Checked)?ListBox\s*\("))
+                // "ListBox _list = new()", "ListBox Matches { get; } = new()", "new ListBox()", "new CheckedListBox()": a plain list box made.
+                if (Regex.IsMatch(line, @"\b(Checked)?ListBox\s+_\w+\s*=\s*new\b|\b(Checked)?ListBox\s+\w+\s*\{\s*get;\s*\}\s*=\s*new\b|\bnew\s+(Checked)?ListBox\s*\("))
                 {
                     offenders.Add($"{relative}:{number}: {line.Trim()}");
                 }

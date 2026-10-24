@@ -1,7 +1,9 @@
-# Builds the zip that publish.ps1 builds locally and attaches it to a GitHub release, with install.cmd on its own so
-# it can be downloaded alone and install the latest release. The apps install updates from these releases (docs/axit/SPEC.md
-# AX-3). Started by pushing a version tag, which release.ps1 does, or by hand from the
-# Actions tab (or `gh workflow run release.yml -f tag=v1.0.1`) for a tag that already exists.
+# Builds the zip that publish.ps1 builds locally and attaches it to a draft GitHub release, with install.cmd on its own
+# so it can be downloaded alone and install the latest release. The release stays a draft: release.ps1, on the
+# maintainer's machine, signs the zip with the release key, which never reaches GitHub, uploads the signature and
+# publishes the release (docs/axit/SPEC.md AX-3.4; docs/axit/security-audit-2026-10-24.md S-27, S-30, S-31). The apps
+# install only a signed zip. Started by pushing a version tag, which release.ps1 does, or by hand from the Actions tab
+# (or `gh workflow run release.yml -f tag=v1.0.1`) for a tag that already exists.
 name: Release
 
 on:
@@ -13,16 +15,20 @@ on:
         description: 'The tag to release, for example v1.0.1'
         required: true
 
-permissions:
-  contents: write
+# Nothing by default; each job asks for what it needs.
+permissions: {}
 
 jobs:
-  release:
+  # Tests and builds with a token that can only read: the test code and its packages never hold one that writes (S-30).
+  build:
     runs-on: windows-2025
+    permissions:
+      contents: read
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           ref: ${{ github.event.inputs.tag || github.ref }}
+          persist-credentials: false
 
       # The SDK band is global.json's, the one place it is set (docs/axit/longevity.md).
       - uses: actions/setup-dotnet@a98b56852c35b8e3190ac28c8c2271da59106c68 # v6.0.0
@@ -31,10 +37,17 @@ jobs:
 
       - name: Check the tag against the project version
         shell: pwsh
+        env:
+          # Passed through the environment and checked, never pasted into the script (S-32).
+          TAG_INPUT: ${{ github.event.inputs.tag }}
         run: |
-          $tag = '${{ github.event.inputs.tag }}'
+          $tag = $env:TAG_INPUT
           if (-not $tag) { $tag = $env:GITHUB_REF_NAME }
-          $version = $tag -replace '^v', ''
+          if ($tag -notmatch '^v\d+\.\d+\.\d+$') {
+            Write-Host "The tag must be v and three numbers, like v1.0.1."
+            exit 1
+          }
+          $version = $tag.Substring(1)
           $projectVersion = (Select-Xml -Path src/Axit/Axit.csproj -XPath '/Project/PropertyGroup/Version').Node.InnerText
           if ($projectVersion -ne $version) {
             Write-Host "Tag $tag does not match <Version>$projectVersion</Version> in Axit.csproj. Release with release.ps1, which sets both."
@@ -44,7 +57,7 @@ jobs:
           "VERSION=$version" >> $env:GITHUB_ENV
 
       - name: Test
-        run: dotnet test Axit.sln --configuration Release --nologo
+        run: dotnet test Axit.sln --configuration Release --nologo -p:ContinuousIntegrationBuild=true
 
       - name: Publish
         shell: pwsh
@@ -56,21 +69,51 @@ jobs:
           .\tools\release-notes.ps1 -Version $env:VERSION | Set-Content -Path notes.md -Encoding utf8
           # The SDK that built this release, so that a rebuild years later knows what to reproduce (docs/axit/longevity.md).
           Add-Content -Path notes.md -Value "`nBuilt with the .NET SDK $(dotnet --version)." -Encoding utf8
+          "$env:TAG" | Set-Content -Path tag.txt -Encoding ascii
 
-      # The release is made as a draft and published only once its files are up: the apps' update check reads the
-      # latest published release (AX-3), and a window that checked while the zip was still uploading downloaded a
-      # half-written file and reported "The installer failed" (2026-10-21).
-      - name: Create the GitHub release
-        shell: pwsh
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: release
+          path: |
+            publish/Axit-*-win-x64.zip
+            install.cmd
+            notes.md
+            tag.txt
+          if-no-files-found: error
+
+  # Uploads what the build made to a draft release, and attests where it was built; runs no code of the repository.
+  draft:
+    needs: build
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      id-token: write
+      attestations: write
+    steps:
+      - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
+        with:
+          name: release
+
+      # Provenance: gh attestation verify <zip> --repo KyleKeane/Axit tells this workflow built it (S-31).
+      - uses: actions/attest-build-provenance@4d101475d8b20a2381f78447822ac1eab6504dd8 # v4.2.2
+        with:
+          subject-path: 'publish/Axit-*-win-x64.zip'
+
+      - name: Create the draft release
         env:
           GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
         run: |
-          $zip = (Get-Item "publish\Axit-$env:VERSION-win-x64.zip").FullName
-          gh release view $env:TAG *> $null
-          if ($LASTEXITCODE -eq 0) {
-            gh release upload $env:TAG $zip install.cmd --clobber
-          } else {
-            gh release create $env:TAG $zip install.cmd --title "Axit $env:VERSION" --notes-file notes.md --draft
-            if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
-            gh release edit $env:TAG --draft=false
-          }
+          tag=$(cat tag.txt)
+          zip=$(ls publish/Axit-*-win-x64.zip)
+          # A published release's files are never replaced (S-31); a draft's are, when the workflow runs again.
+          if draft=$(gh release view "$tag" --json isDraft --jq .isDraft 2>/dev/null); then
+            if [ "$draft" != "true" ]; then
+              echo "Release $tag is already published; its files are not replaced."
+              exit 1
+            fi
+            gh release upload "$tag" "$zip" install.cmd --clobber
+          else
+            gh release create "$tag" "$zip" install.cmd --title "Axit ${tag#v}" --notes-file notes.md --draft
+          fi
+          echo "Draft $tag is up. release.ps1 signs it and publishes it."

@@ -140,7 +140,7 @@ public abstract partial class ItemForm : AxitForm
     protected virtual string SpokenValue(ItemRow? row, ItemField field) => FieldTypes.Spoken(field);
 
     /// <summary>A type's name read out.</summary>
-    protected virtual string SpokenType(string type) => FieldTypes.Spoken(type);
+    private static string SpokenType(string type) => FieldTypes.Spoken(type);
 
     /// <summary>Enter on a field of the app's own type (a link, a password); true when the app took it.</summary>
     protected virtual bool ChangeSpecial(ItemRow row, int index, ItemField field) => false;
@@ -149,7 +149,7 @@ public abstract partial class ItemForm : AxitForm
     protected virtual string? FieldsFixed => null;
 
     /// <summary>The types New field offers.</summary>
-    protected virtual IReadOnlyList<string> NewFieldTypes => FieldTypes.All;
+    private static IReadOnlyList<string> NewFieldTypes => FieldTypes.All;
 
     /// <summary>The app's own keys, asked first; true when taken.</summary>
     protected virtual bool ProcessItemKey(Keys keyData) => false;
@@ -493,7 +493,8 @@ public abstract partial class ItemForm : AxitForm
         _rows = [.. rows];
         Navigator.BeginUpdate();
         Navigator.Items.Clear();
-        Navigator.Items.AddRange(_rows.Select(row => (object)row.Label).ToArray());
+        // S-42: titles from a shared folder or database with their hidden characters made visible.
+        Navigator.Items.AddRange(_rows.Select(row => (object)DisplayText.Visible(row.Label)).ToArray());
         Navigator.EndUpdate();
         Navigator.AccessibleName = name;
         Navigator.ResetTypeAhead();
@@ -549,7 +550,7 @@ public abstract partial class ItemForm : AxitForm
         _lines = lines;
         DetailPane.BeginUpdate();
         DetailPane.Items.Clear();
-        DetailPane.Items.AddRange(lines.Select(line => (object)line.Line.Label).ToArray());
+        DetailPane.Items.AddRange(lines.Select(line => (object)DisplayText.Visible(line.Line.Label)).ToArray());
         DetailPane.EndUpdate();
         DetailPane.AccessibleName = detail.Name;
         DetailPane.ResetTypeAhead();

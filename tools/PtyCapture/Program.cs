@@ -23,7 +23,7 @@
 
 using System.Diagnostics;
 using System.Text;
-using AxClaude.Core.Privacy;
+using Axit.Core;
 using AxClaude.Core.Pty;
 using AxTerminal.Core;
 using Axit.Core.Pty;

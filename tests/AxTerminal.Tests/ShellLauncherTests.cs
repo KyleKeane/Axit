@@ -8,8 +8,8 @@ public sealed class ShellLauncherTests
     [Fact]
     public void Command_prompt_gets_the_marks_around_its_prompt()
     {
-        Assert.Equal("$e]133;D$e\\$e]133;A$e\\$e]9;9;$P$e\\$P$G$e]133;B$e\\", ShellLauncher.CommandPromptWithMarks(null));
-        Assert.Equal("$e]133;D$e\\$e]133;A$e\\$e]9;9;$P$e\\$P$_$G$e]133;B$e\\", ShellLauncher.CommandPromptWithMarks("$P$_$G"));
+        Assert.Equal("$e]133;D;axit=n0$e\\$e]133;A;axit=n0$e\\$e]9;9;$P$e\\$P$G$e]133;B;axit=n0$e\\", ShellLauncher.CommandPromptWithMarks(null, "n0"));
+        Assert.Equal("$e]133;D;axit=n0$e\\$e]133;A;axit=n0$e\\$e]9;9;$P$e\\$P$_$G$e]133;B;axit=n0$e\\", ShellLauncher.CommandPromptWithMarks("$P$_$G", "n0"));
         var env = ShellLauncher.BuildEnvironment(ShellKind.CommandPrompt);
         Assert.StartsWith("$e]133;D", env["PROMPT"]);
         Assert.Equal("cat", env["GIT_PAGER"]);

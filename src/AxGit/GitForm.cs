@@ -22,36 +22,10 @@ public sealed partial class GitForm : AxitForm
         Branches,
     }
 
-    /// <summary>
-    /// One view of the list (AG-2.2): the list's name with its count, its items and their keys (the file's path, the
-    /// commit's hash, the branch's name), whether it has been read in this repository since it was last made stale,
-    /// and the key of the item selected in it, kept while the window is open. The three records are the whole state
-    /// of the list (one record since 2026-10-23; five fields and a dictionary before).
-    /// </summary>
-    private sealed class ViewState
-    {
-        public string Name { get; private set; } = string.Empty;
-
-        public IReadOnlyList<string> Labels { get; private set; } = [];
-
-        public IReadOnlyList<string> Keys { get; private set; } = [];
-
-        /// <summary>Whether the view's list is current: read in this repository, and not made stale since by a commit, a switch, a fetch.</summary>
-        public bool Loaded { get; set; }
-
-        /// <summary>The key of the item selected in the view, taken before the list changes under it; null before one was chosen.</summary>
-        public string? SelectedKey { get; set; }
-
-        public void Set(string name, IEnumerable<string> labels, IEnumerable<string> keys)
-        {
-            Name = name;
-            Labels = labels.ToList();
-            Keys = keys.ToList();
-            Loaded = true;
-        }
-    }
-
     private const int UntrackedLimit = 200 * 1024;
+
+    /// <summary>The repository's own programs set to nothing while it is not trusted (AG-1.6); empty for a trusted one.</summary>
+    private IReadOnlyList<string> _overrides = [];
 
     private readonly GitSettings _settings;
     private readonly string? _startPath;
@@ -67,7 +41,8 @@ public sealed partial class GitForm : AxitForm
     private readonly List<ToolStripMenuItem> _gitItems = [];
 
     /// <summary>The three views, indexed by <see cref="View"/>; <see cref="Current"/> is the one the list shows.</summary>
-    private readonly ViewState[] _views = [new(), new(), new()];
+    /// <summary>The three views of the list (AG-2.2), the whole state of the list: keys the file's path, the commit's hash, the branch's name; made stale by a commit, a switch, a fetch.</summary>
+    private readonly ListViewState[] _views = [new(), new(), new()];
 
     private string? _root;
     private View _view = View.Changes;
@@ -99,12 +74,7 @@ public sealed partial class GitForm : AxitForm
         repository.DropDownItems.Add(Git(Item("Re&fresh", () => Do(() => RefreshAsync(announce: true)), AxGitKeys.Refresh)));
         repository.DropDownItems.Add(new ToolStripSeparator());
         // Show current repository in ▸ File Explorer, axClaude, axTerminal, axFile: the way back to where the user came from (AG-1.4).
-        var showIn = new ToolStripMenuItem("Show current repository &in");
-        showIn.DropDownItems.Add(Item("File &Explorer", ShowInExplorer, AxGitKeys.ShowInExplorer));
-        showIn.DropDownItems.Add(new ToolStripMenuItem("Ax&Claude", null, (_, _) => OpenIn(Dispatch.AxClaude)));
-        showIn.DropDownItems.Add(new ToolStripMenuItem("Ax&Terminal", null, (_, _) => OpenIn(Dispatch.AxTerminal)));
-        showIn.DropDownItems.Add(new ToolStripMenuItem("Ax&File", null, (_, _) => OpenIn(Dispatch.AxFile)));
-        repository.DropDownItems.Add(showIn);
+        repository.DropDownItems.Add(CreateShowInMenu("Show current repository &in", Item("File &Explorer", ShowInExplorer, AxGitKeys.ShowInExplorer), RepositoryOrSay));
         repository.DropDownItems.Add(new ToolStripSeparator());
         repository.DropDownItems.Add(CreateExitItem());
 
@@ -221,16 +191,8 @@ public sealed partial class GitForm : AxitForm
         Do(() => StartAsync(_startPath));
     }
 
-    protected override void OnFormClosing(FormClosingEventArgs e)
-    {
-        if (_root is { } closing)
-        {
-            // AX-9.4: the repository joins the bundle's Recently closed list.
-            RecentlyClosed.Remember(AxGitApp.Name, closing);
-        }
-
-        base.OnFormClosing(e);
-    }
+    /// <summary>The repository, for Recently closed (AX-9.4).</summary>
+    protected override string? PathInHand => _root;
 
     // ---- keys (AG-6.2): every key comes from BundleKeys or AxGitKeys, and is handled here only ----
 
@@ -371,7 +333,7 @@ public sealed partial class GitForm : AxitForm
         _root = root;
         for (var i = 0; i < _views.Length; i++)
         {
-            _views[i] = new ViewState();
+            _views[i] = new ListViewState();
         }
 
         _repo = RepositoryStatus.Empty;
@@ -381,7 +343,50 @@ public sealed partial class GitForm : AxitForm
         _settings.RememberRepository(root);
         SaveSettings();
         Log.Info($"Opened {root}");
+        await CheckTrustAsync(root);
         await RefreshAsync(announce: false);
+    }
+
+    /// <summary>
+    /// AG-1.6 (security audit S-2): what in the repository's own configuration and hooks runs a program, read before
+    /// any other command; unless the user trusts the repository, every command sets each of them to nothing, and a
+    /// notice says what is set aside, with the way to trust it.
+    /// </summary>
+    private async Task CheckTrustAsync(string root)
+    {
+        _overrides = [];
+        try
+        {
+            var config = await GitRunner.RunAsync(root, GitTrust.ConfigArguments, GitRunner.Short);
+            var hooks = await GitRunner.RunAsync(root, GitTrust.HooksArguments, GitRunner.Short);
+            var hooksFolder = hooks.Ok && hooks.Output.Trim() is { Length: > 0 } folder ? Path.GetFullPath(folder, root) : null;
+            var risks = GitTrust.Risks(config.Ok ? config.Output : string.Empty, hooksFolder);
+            if (risks.Count == 0 || _settings.Trusts(root) || IsDisposed)
+            {
+                return;
+            }
+
+            _overrides = GitTrust.Overrides(risks);
+            Log.Info($"Untrusted repository: {risks.Count} programs of its own set aside");
+            ShowNotice(new Notice("This repository runs programs of its own",
+                $"Its settings or hooks name programs git would run: {string.Join(", ", risks)}. axGIT runs git without them. Trust the repository only if you know where it comes from: then git runs them as it would in a console.",
+            [
+                new OverlayChoice("Keep them &off", IsDefault: true, IsCancel: true),
+                new OverlayChoice("&Trust this repository", () => TrustRepository(root)),
+            ]) { Unprompted = true });
+        }
+        catch (GitNotFoundException)
+        {
+            // git missing is said by the first command that needs it.
+        }
+    }
+
+    private void TrustRepository(string root)
+    {
+        _settings.TrustedRepositories.Add(root);
+        SaveSettings();
+        _overrides = [];
+        Announce("Trusted", true);
     }
 
     private void SetNoRepository()
@@ -422,15 +427,14 @@ public sealed partial class GitForm : AxitForm
     }
 
     /// <summary>Repository → Show current repository in → axClaude, axTerminal, axFile (AG-1.4): a new window of that app on the repository's folder.</summary>
-    private void OpenIn(string verb)
+    private string? RepositoryOrSay()
     {
         if (_root is null)
         {
             Announce("No repository", true);
-            return;
         }
 
-        AxitMenu.Start(verb, _root);
+        return _root;
     }
 
     /// <summary>Changes → Open file in editor (Ctrl+E): the selected file in axJSON for .json, axDown otherwise (AG-1.4).</summary>
@@ -449,705 +453,6 @@ public sealed partial class GitForm : AxitForm
         }
 
         var path = Path.Combine(_root, file.Path.Replace('/', Path.DirectorySeparatorChar));
-        var verb = Path.GetExtension(path).Equals(".json", StringComparison.OrdinalIgnoreCase) ? Dispatch.AxJSON : Dispatch.AxDown;
-        AxitMenu.Start(verb, path);
-    }
-
-    // ---- running git (AG-1.5, AG-D6) ----
-
-    /// <summary>
-    /// One git command in the repository: the status bar says what runs, the git items are disabled meanwhile, and
-    /// the result comes back for the caller to announce. Null when nothing ran: no repository, git missing, or a
-    /// command still running ("Working…").
-    /// </summary>
-    private async Task<GitResult?> RunGitAsync(IReadOnlyList<string> arguments, TimeSpan timeout, string verb)
-    {
-        if (_root is null)
-        {
-            Announce("No repository", true);
-            return null;
-        }
-
-        if (_gitMissing)
-        {
-            GitMissing();
-            return null;
-        }
-
-        if (_busy is not null)
-        {
-            Announce("Working…", true);
-            return null;
-        }
-
-        _busy = verb;
-        SetGitItems(false);
-        UpdateStatusBar();
-        var watch = Stopwatch.StartNew();
-        try
-        {
-            var result = await GitRunner.RunAsync(_root, arguments, timeout);
-            // The subcommand alone (AG-8.2): the arguments hold the commit message and the paths.
-            Log.Info($"git {arguments[0]}: exit {result.ExitCode} in {watch.ElapsedMilliseconds} ms{(result.Ok ? string.Empty : ", " + result.FirstLine)}");
-            return result;
-        }
-        catch (GitNotFoundException)
-        {
-            GitMissing();
-            return null;
-        }
-        finally
-        {
-            _busy = null;
-            if (!IsDisposed)
-            {
-                SetGitItems(true);
-                UpdateStatusBar();
-            }
-        }
-    }
-
-    private void SetGitItems(bool enabled)
-    {
-        foreach (var item in _gitItems)
-        {
-            item.Enabled = enabled && !_gitMissing;
-        }
-    }
-
-    /// <summary>git is not on the PATH (AG-1.5): a notice each time a command is asked for, with the chime the first time, and every command stays disabled.</summary>
-    private void GitMissing()
-    {
-        var first = !_gitMissing;
-        _gitMissing = true;
-        SetGitItems(false);
-        UpdateStatusBar();
-        ShowNotice(new Notice("Git was not found",
-            "axGIT runs the git program, and it is not on this computer. Install it now installs Git for Windows (Windows asks whether the installer may make changes: choose Yes); axGIT then opens the repository. Or install it by hand from git-scm.com.",
-        [
-            new OverlayChoice("&Install Git now", () => InstallProgram(ProgramInstall.Git, () => ProgramInstall.OnPath("git.exe") is not null, () =>
-            {
-                _gitMissing = false;
-                SetGitItems(true);
-                Do(() => StartAsync(_root ?? _startPath));
-            }), IsDefault: true),
-            new OverlayChoice("&Open git-scm.com", () => OpenUrl("https://git-scm.com"), StaysOpen: true),
-            OverlayChoice.Close,
-        ])
-        {
-            Unprompted = first,
-        });
-    }
-
-    /// <summary>A failed command: one announcement when git said one line, a notice with everything it said otherwise (AG-7).</summary>
-    private void Failed(string title, GitResult result)
-    {
-        var text = result.AllText;
-        if (text.Contains('\n'))
-        {
-            ShowNotice(Notice.Plain(title, text) with { Unprompted = true });
-        }
-        else
-        {
-            Announce("Failed: " + result.FirstLine, true);
-        }
-    }
-
-    // ---- the views (AG-2.2): three records, one list ----
-
-    private ViewState Current => _views[(int)_view];
-
-    /// <summary>F5, and every command's end: the status read again, the view shown read again with it, the list refilled on the item it had.</summary>
-    private async Task RefreshAsync(bool announce)
-    {
-        if (_root is null)
-        {
-            Announce("No repository", true);
-            return;
-        }
-
-        RememberSelection();
-        if (!await LoadAsync(View.Changes))
-        {
-            return;
-        }
-
-        if (_view != View.Changes)
-        {
-            await LoadAsync(_view);
-        }
-
-        FillList();
-        UpdateStatusBar();
-        if (announce)
-        {
-            Announce("Refreshed: " + _list.AccessibleName, true);
-        }
-    }
-
-    /// <summary>
-    /// Reads one view from git into its record: the status for Changes (<see cref="_repo"/>, which the status bar and
-    /// the commit need too), the log, the branches. False when git did not run or failed, which is said.
-    /// </summary>
-    private async Task<bool> LoadAsync(View view)
-    {
-        var (arguments, verb, title) = view switch
-        {
-            View.Changes => (GitStatus.Arguments, "status", "Status failed"),
-            View.Log => (GitLog.Arguments, "log", "Log failed"),
-            _ => (GitBranches.Arguments, "branches", "Branches failed"),
-        };
-        var result = await RunGitAsync(arguments, GitRunner.Short, verb);
-        if (result is null)
-        {
-            return false;
-        }
-
-        if (!result.Ok)
-        {
-            Failed(title, result);
-            return false;
-        }
-
-        var state = _views[(int)view];
-        switch (view)
-        {
-            case View.Changes:
-                _repo = GitStatus.Parse(result.Output);
-                state.Set(_repo.ListName, _repo.Files.Select(file => file.Label), _repo.Files.Select(file => file.Path));
-                break;
-            case View.Log:
-                _commits = GitLog.Parse(result.Output);
-                state.Set(GitLog.ListName(_commits.Count), _commits.Select(commit => commit.Label), _commits.Select(commit => commit.Hash));
-                break;
-            default:
-                _branches = GitBranches.Parse(result.Output);
-                state.Set(GitBranches.ListName(_branches.Count), _branches.Select(branch => branch.Label), _branches.Select(branch => branch.Name));
-                break;
-        }
-
-        return true;
-    }
-
-    /// <summary>The views to read again before they show next: a commit, a switch, a fetch changed what they list.</summary>
-    private void Stale(params View[] views)
-    {
-        foreach (var view in views)
-        {
-            _views[(int)view].Loaded = false;
-        }
-    }
-
-    /// <summary>View → Changes, Log, Branches (Ctrl+1, 2, 3): the list refilled, read on the first visit or when stale, and its name said with the item the focus is on (axClaude D26).</summary>
-    private async Task ShowViewAsync(View view)
-    {
-        if (_root is null)
-        {
-            Announce("No repository", true);
-            return;
-        }
-
-        if (_busy is not null)
-        {
-            // The view's first load would be refused and the list shown empty under the new name.
-            Announce("Working…", true);
-            return;
-        }
-
-        RememberSelection();
-        _view = view;
-        if (!Current.Loaded)
-        {
-            await LoadAsync(view);
-        }
-
-        FillList();
-        var name = _list.AccessibleName ?? string.Empty;
-        Announce(_list.SelectedItem is string item ? $"{name}. {item}" : name, true);
-    }
-
-    /// <summary>The list's items for the view shown, named with the view and the count, the selection on the view's key when it is still listed, else the first item.</summary>
-    private void FillList()
-    {
-        var view = Current;
-        _list.BeginUpdate();
-        _list.Items.Clear();
-        _list.Items.AddRange(view.Labels.Select(label => (object)label).ToArray());
-        _list.EndUpdate();
-        _list.AccessibleName = view.Name;
-        var index = -1;
-        for (var i = 0; view.SelectedKey is { } key && i < view.Keys.Count && index < 0; i++)
-        {
-            if (view.Keys[i] == key)
-            {
-                index = i;
-            }
-        }
-
-        if (_list.Items.Count > 0)
-        {
-            _list.SelectedIndex = index >= 0 ? index : 0;
-        }
-    }
-
-    /// <summary>The key of the item selected in the view shown, kept in its record before the list changes under it (a refresh, a view switch); the key kept stays when nothing is selected.</summary>
-    private void RememberSelection() => Current.SelectedKey = CurrentKey() ?? Current.SelectedKey;
-
-    /// <summary>The key of the selected item of the view shown; null with nothing selected.</summary>
-    private string? CurrentKey() =>
-        _list.SelectedIndex is var i && i >= 0 && i < Current.Keys.Count ? Current.Keys[i] : null;
-
-    private ChangedFile? CurrentFile() =>
-        _view == View.Changes && _list.SelectedIndex is var i && i >= 0 && i < _repo.Files.Count ? _repo.Files[i] : null;
-
-    private Commit? CurrentCommit() =>
-        _view == View.Log && _list.SelectedIndex is var i && i >= 0 && i < _commits.Count ? _commits[i] : null;
-
-    private Branch? CurrentBranch() =>
-        _view == View.Branches && _list.SelectedIndex is var i && i >= 0 && i < _branches.Count ? _branches[i] : null;
-
-    /// <summary>
-    /// Whether the list shows the view a command belongs to; otherwise which view first is said, "Changes view
-    /// first: Ctrl+1" (AG-6.2). One rule for every command of a view since 2026-10-23: Space, Enter and the menu's
-    /// Show diff switched the view silently, Delete said this, and Switch to branch switched too.
-    /// </summary>
-    private bool InView(View view)
-    {
-        if (_view == view)
-        {
-            return true;
-        }
-
-        Announce(view switch
-        {
-            View.Changes => "Changes view first: Ctrl+1",
-            View.Log => "Log view first: Ctrl+2",
-            _ => "Branches view first: Ctrl+3",
-        }, true);
-        return false;
-    }
-
-    /// <summary>Enter in the list: the diff of a file, the details of a commit, the switch to a branch (AG-6.2).</summary>
-    private Task ActOnItemAsync() => _view switch
-    {
-        View.Changes => ShowDiffAsync(),
-        View.Log => ShowCommitAsync(),
-        _ => SwitchBranchAsync(),
-    };
-
-    // ---- changes (AG-3) ----
-
-    private async Task StageToggleAsync()
-    {
-        if (!InView(View.Changes))
-        {
-            return;
-        }
-
-        if (CurrentFile() is not { } file)
-        {
-            Announce("No file selected", true);
-            return;
-        }
-
-        if (!file.CanStage)
-        {
-            Announce("A conflict: resolve it in the editor or the terminal first", true);
-            return;
-        }
-
-        var result = await RunGitAsync(file.StageArguments, GitRunner.Short, file.Unstaged ? "stage" : "unstage");
-        if (result is null)
-        {
-            return;
-        }
-
-        if (!result.Ok)
-        {
-            Failed(file.Unstaged ? "Stage failed" : "Unstage failed", result);
-            return;
-        }
-
-        Announce(file.StageAnnouncement, true);
-        await RefreshAsync(announce: false);
-    }
-
-    private async Task StageAllAsync(bool stage)
-    {
-        var result = await RunGitAsync(stage ? ["add", "-A"] : ["restore", "--staged", "."], GitRunner.Short, stage ? "stage all" : "unstage all");
-        if (result is null)
-        {
-            return;
-        }
-
-        if (!result.Ok)
-        {
-            Failed(stage ? "Stage failed" : "Unstage failed", result);
-            return;
-        }
-
-        Announce(stage ? "Staged all" : "Unstaged all", true);
-        await RefreshAsync(announce: false);
-    }
-
-    /// <summary>Enter on a file (AG-3.3): its diff in the details, with the focus on the first line; an untracked file shows itself.</summary>
-    private async Task ShowDiffAsync()
-    {
-        if (!InView(View.Changes))
-        {
-            return;
-        }
-
-        if (_root is null || CurrentFile() is not { } file)
-        {
-            Announce(_root is null ? "No repository" : "No file selected", true);
-            return;
-        }
-
-        if (file.Kind == ChangeKind.Untracked)
-        {
-            var path = Path.Combine(_root, file.Path.Replace('/', Path.DirectorySeparatorChar));
-            string text;
-            try
-            {
-                text = await File.ReadAllTextAsync(path);
-            }
-            catch (Exception ex) when (ex is IOException or UnauthorizedAccessException)
-            {
-                Fail($"{file.Path} could not be read: {ex.Message}");
-                return;
-            }
-
-            if (text.Length > UntrackedLimit)
-            {
-                text = text[..UntrackedLimit] + "\n(cut after 200 KB)";
-            }
-
-            var lines = text.Length == 0 ? 0 : text.Split('\n').Length;
-            ShowDetails($"Diff of {file.Path}", $"Untracked file, {lines} lines\n{text}", focus: true);
-            return;
-        }
-
-        var result = await RunGitAsync(file.DiffArguments, GitRunner.Short, "diff");
-        if (result is null)
-        {
-            return;
-        }
-
-        if (!result.Ok)
-        {
-            Failed("Diff failed", result);
-            return;
-        }
-
-        if (result.Output.Trim().Length == 0)
-        {
-            Announce("No changes", true);
-            return;
-        }
-
-        ShowDetails($"Diff of {file.Path}", result.Output, focus: true);
-    }
-
-    /// <summary>Changes → Discard changes… (Delete, AG-3.4): a question first; an untracked file is not deleted from here.</summary>
-    private void Discard()
-    {
-        if (!InView(View.Changes))
-        {
-            return;
-        }
-
-        if (CurrentFile() is not { } file)
-        {
-            Announce("No file selected", true);
-            return;
-        }
-
-        if (file.Kind == ChangeKind.Untracked)
-        {
-            Announce("Untracked file: delete it in File Explorer", true);
-            return;
-        }
-
-        ShowNotice(new Notice($"Discard the changes to {file.Path}?", "They cannot be brought back.",
-        [
-            new OverlayChoice("&Discard", () => Do(async () =>
-            {
-                var result = await RunGitAsync(file.DiscardArguments, GitRunner.Short, "discard");
-                if (result is null)
-                {
-                    return;
-                }
-
-                if (!result.Ok)
-                {
-                    Failed("Discard failed", result);
-                    return;
-                }
-
-                Announce($"Discarded {file.Path}", true);
-                await RefreshAsync(announce: false);
-            }), IsDefault: true),
-            new OverlayChoice("&Cancel", IsCancel: true),
-        ]));
-    }
-
-    /// <summary>Changes → Commit… (Ctrl+Enter, AG-3.5): the message in a notice, then git commit.</summary>
-    private void Commit()
-    {
-        if (_root is null)
-        {
-            Announce("No repository", true);
-            return;
-        }
-
-        if (_busy is not null)
-        {
-            // A stage or its refresh still runs: the count below is the one before it (found by tools/AxAutomate,
-            // 2026-10-23: Space then Ctrl+Enter said "Nothing staged").
-            Announce("Working…", true);
-            return;
-        }
-
-        var staged = _repo.StagedCount;
-        if (staged == 0)
-        {
-            Announce("Nothing staged. Space stages a file", true);
-            return;
-        }
-
-        ShowNotice(new Notice($"Commit {staged} staged {(staged == 1 ? "file" : "files")}", string.Empty,
-        [
-            new OverlayChoice("&Commit", () =>
-            {
-                var message = Overlay.InputText.Trim();
-                Do(async () =>
-                {
-                    var result = await RunGitAsync(["commit", "-m", message], GitRunner.Short, "commit");
-                    if (result is null)
-                    {
-                        return;
-                    }
-
-                    if (!result.Ok)
-                    {
-                        Failed("Commit failed", result);
-                        return;
-                    }
-
-                    var hash = CommitHashRegex().Match(result.Output);
-                    Announce(hash.Success ? $"Committed {hash.Groups[1].Value}" : "Committed", true);
-                    Stale(View.Log, View.Branches);
-                    await RefreshAsync(announce: false);
-                });
-            }, IsDefault: true),
-            new OverlayChoice("C&ancel", IsCancel: true),
-        ])
-        {
-            Input = new OverlayInput("Message:", "Message", string.Empty, "Type the commit message"),
-        });
-    }
-
-    // "[main 3a1f2c0] Subject" on the first line of git commit's output.
-    [GeneratedRegex(@"^\[[^\]]+ ([0-9a-f]{7,})\]", RegexOptions.Multiline)]
-    private static partial Regex CommitHashRegex();
-
-    // ---- history (AG-4) ----
-
-    private async Task ShowCommitAsync()
-    {
-        if (CurrentCommit() is not { } commit)
-        {
-            Announce("No commit selected", true);
-            return;
-        }
-
-        var result = await RunGitAsync(commit.ShowArguments, GitRunner.Short, "show");
-        if (result is null)
-        {
-            return;
-        }
-
-        if (!result.Ok)
-        {
-            Failed("Show failed", result);
-            return;
-        }
-
-        ShowDetails($"Commit {commit.Hash}", result.Output, focus: true);
-    }
-
-    // ---- branches (AG-5) ----
-
-    private async Task SwitchBranchAsync()
-    {
-        if (!InView(View.Branches))
-        {
-            return;
-        }
-
-        if (CurrentBranch() is not { } branch)
-        {
-            Announce("No branch selected", true);
-            return;
-        }
-
-        if (branch.Current)
-        {
-            Announce($"Already on {branch.Name}", true);
-            return;
-        }
-
-        var result = await RunGitAsync(branch.SwitchArguments, GitRunner.Short, "switch");
-        if (result is null)
-        {
-            return;
-        }
-
-        if (!result.Ok)
-        {
-            Failed("Switch failed", result);
-            return;
-        }
-
-        Announce($"Switched to {branch.Name}", true);
-        Stale(View.Log, View.Branches);
-        await RefreshAsync(announce: false);
-    }
-
-    /// <summary>Branches → New branch… (Ctrl+N, AG-5.3): the name in a notice, then git switch -c.</summary>
-    private void NewBranch()
-    {
-        if (_root is null)
-        {
-            Announce("No repository", true);
-            return;
-        }
-
-        ShowNotice(new Notice("New branch", "A new branch from the current commit, checked out at once.",
-        [
-            new OverlayChoice("C&reate", () =>
-            {
-                var name = Overlay.InputText.Trim();
-                Do(async () =>
-                {
-                    var result = await RunGitAsync(GitBranches.CreateArguments(name), GitRunner.Short, "new branch");
-                    if (result is null)
-                    {
-                        return;
-                    }
-
-                    if (!result.Ok)
-                    {
-                        Failed("New branch failed", result);
-                        return;
-                    }
-
-                    Announce($"Switched to {name}", true);
-                    Stale(View.Log, View.Branches);
-                    await RefreshAsync(announce: false);
-                });
-            }, IsDefault: true),
-            new OverlayChoice("&Cancel", IsCancel: true),
-        ])
-        {
-            Input = new OverlayInput("Name:", "Name", string.Empty, "Type the branch name"),
-        });
-    }
-
-    private async Task FetchAsync()
-    {
-        var result = await RunGitAsync(["fetch", "--prune"], GitRunner.Long, "fetch");
-        if (result is null)
-        {
-            return;
-        }
-
-        if (!result.Ok)
-        {
-            Failed("Fetch failed", result);
-            return;
-        }
-
-        Announce("Fetched", true);
-        Stale(View.Branches);
-        await RefreshAsync(announce: false);
-    }
-
-    private async Task PullAsync()
-    {
-        var result = await RunGitAsync(["pull", "--ff-only"], GitRunner.Long, "pull");
-        if (result is null)
-        {
-            return;
-        }
-
-        if (!result.Ok)
-        {
-            Failed("Pull failed", result);
-            return;
-        }
-
-        Announce(result.Output.Contains("Already up to date", StringComparison.OrdinalIgnoreCase) ? "Already up to date" : "Pulled", true);
-        Stale(View.Log, View.Branches);
-        await RefreshAsync(announce: false);
-    }
-
-    private async Task PushAsync()
-    {
-        IReadOnlyList<string> arguments = _repo.Upstream is null && _repo.Branch is { } branch
-            ? ["push", "--set-upstream", "origin", branch]
-            : ["push"];
-        var result = await RunGitAsync(arguments, GitRunner.Long, "push");
-        if (result is null)
-        {
-            return;
-        }
-
-        if (!result.Ok)
-        {
-            Failed("Push failed", result);
-            return;
-        }
-
-        Announce("Pushed", true);
-        Stale(View.Branches);
-        await RefreshAsync(announce: false);
-    }
-
-    // ---- the details and the status bar (AG-2.1, AG-2.3, AG-2.4) ----
-
-    /// <summary>Text into the details, named for what it is; with <paramref name="focus"/> the focus goes to its first line and the name and length are said after it (AG-D5).</summary>
-    private void ShowDetails(string name, string text, bool focus)
-    {
-        var normalized = text.Replace("\r\n", "\n").TrimEnd('\n').Replace("\n", "\r\n");
-        var lines = normalized.Length == 0 ? 0 : normalized.Split("\r\n").Length;
-        _details.AccessibleName = name;
-        _details.Text = normalized;
-        _details.Select(0, 0);
-        _details.ScrollToCaret();
-        if (focus)
-        {
-            _details.Focus();
-        }
-
-        Announce($"{name}, {lines} {(lines == 1 ? "line" : "lines")}", !focus);
-    }
-
-    private void UpdateStatusBar()
-    {
-        _stateLabel.Text = _busy is not null ? $"Working: {_busy}…"
-            : _gitMissing ? "git was not found"
-            : _root is null ? "No repository"
-            : _repo.StatusText;
-        _pathLabel.Text = _root ?? string.Empty;
-        StatusLayout.Fit(_status, _stateLabel, _pathLabel);
-    }
-
-    /// <summary>An item that runs git: disabled while a command runs and when git is missing.</summary>
-    private ToolStripMenuItem Git(ToolStripMenuItem item)
-    {
-        _gitItems.Add(item);
-        return item;
+        AxitMenu.Start(Dispatch.EditorOf(path), path);
     }
 }

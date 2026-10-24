@@ -1,4 +1,4 @@
-using AxClaude.Core.Privacy;
+using Axit.Core;
 
 namespace AxClaude.Tests;
 

@@ -19,7 +19,7 @@ installed; axPass never decrypts the file itself.
 - The notice "Unlock mine" asks the master password. Its field hides what you type; NVDA calls it protected.
 - A wrong password says "The password does not open mine" and asks again.
 - Ctrl+L locks: axPass forgets the master password and everything it read, and asks again. It also locks after ten
-  minutes without a key or a mouse move anywhere in Windows (Options, Lock after), and when the window closes.
+  minutes without a key or a mouse move anywhere in Windows (Options, Lock after), when you lock Windows (Windows+L) or switch user, when the computer goes to sleep, and when the window closes.
 
 ## The window
 
@@ -35,9 +35,16 @@ The password is never spoken, never shown and never written anywhere by axPass.
 ## Using a password
 
 - Ctrl+B copies the user name.
-- Ctrl+C copies the password. KeePassXC's tool puts it on the clipboard and clears the clipboard itself after 30
-  seconds.
-- Ctrl+U opens the URL in your browser.
+- Ctrl+C copies the password. axPass marks the copy private, so Windows clipboard history (Windows+V), the cloud
+  clipboard and axClip keep no copy of it, and clears the clipboard after 30 seconds, when it locks and when it closes,
+  unless you copied something else meanwhile.
+- Ctrl+U opens the URL in your browser, when it is a web address; anything else (a file, a network folder) is not
+  opened.
+
+What travels where: the master password and every password go to KeePassXC's tool through a private pipe only. When
+you save an entry's notes, URL, user name or title, KeePassXC's tool can only take them on its command line, where
+other programs you run, and Windows' process auditing if it is on, can see them. Keep secrets such as recovery codes
+in a password field rather than in the notes.
 
 ## Changing entries
 
@@ -49,7 +56,9 @@ The password is never spoken, never shown and never written anywhere by axPass.
 - Backups: before the first change after you unlock, axPass copies the database file into a folder beside it, called
   "mine backups" for mine.kdbx, named with the date and time. The newest 20 are kept. File, Back up now makes one
   whenever you like; File, Show backups in axFile opens the folder. To use one, open it with Ctrl+O and its master
-  password; each is the encrypted file itself.
+  password; each is the encrypted file itself. A backup keeps what the database held then, under the master password
+  it had then: after you change the master password, or delete an entry because it leaked, delete the older backups
+  too (File, Show backups in axFile).
 - Ctrl+M moves the entry to another group, chosen from a list; Ctrl+Z moves it back.
 - Ctrl+N makes a new entry here, Ctrl+Shift+N a new group. F2 renames an entry in place: type the new title over the old and press Enter, or Escape. A title cannot hold a slash.
 - Delete moves an entry to the Recycle Bin group; Ctrl+Z brings it back. A group moves there after a question, and

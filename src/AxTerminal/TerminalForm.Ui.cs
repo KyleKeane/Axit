@@ -33,17 +33,17 @@ internal sealed partial class TerminalForm
         var installBash = new ToolStripMenuItem("Install Git, for Git &Bash...", null, (_, _) => InstallShell(ProgramInstall.Git, ShellKind.GitBash));
         switchShell.DropDownItems.Add(installPwsh);
         switchShell.DropDownItems.Add(installBash);
-        // The shell in use checked and the shells there are shown as the menu opens; the palette refreshes it the same way (AX-10.2).
+        // The shell in use checked and the shells there (looked up once, ShellThere) shown as the menu opens; the palette refreshes it the same way (AX-10.2).
         CommandPalette.RefreshedOnOpening(switchShell, () =>
         {
             foreach (var (kind, item) in _shellItems)
             {
                 item.Checked = kind == _shell;
-                item.Visible = ShellLauncher.Find(kind) is not null;
+                item.Visible = ShellThere(kind);
             }
 
-            installPwsh.Visible = ShellLauncher.Find(ShellKind.PowerShell7) is null;
-            installBash.Visible = ShellLauncher.Find(ShellKind.GitBash) is null;
+            installPwsh.Visible = !ShellThere(ShellKind.PowerShell7);
+            installBash.Visible = !ShellThere(ShellKind.GitBash);
         });
         session.DropDownItems.Add(switchShell);
         session.DropDownItems.Add(new ToolStripSeparator());
@@ -52,12 +52,7 @@ internal sealed partial class TerminalForm
         session.DropDownItems.Add(new ToolStripSeparator());
         session.DropDownItems.Add(Item("Say current fol&der", SayFolder, AxTerminalKeys.SayFolder));
         // AT-1.5: the way to the other windows, on the shell's current directory.
-        var showIn = new ToolStripMenuItem("Show current folder &in");
-        showIn.DropDownItems.Add(Item("File &Explorer", ShowInExplorer, AxTerminalKeys.ShowInExplorer));
-        showIn.DropDownItems.Add(new ToolStripMenuItem("Ax&Claude", null, (_, _) => OpenIn(Dispatch.AxClaude)));
-        showIn.DropDownItems.Add(new ToolStripMenuItem("Ax&Git", null, (_, _) => OpenIn(Dispatch.AxGit)));
-        showIn.DropDownItems.Add(new ToolStripMenuItem("Ax&File", null, (_, _) => OpenIn(Dispatch.AxFile)));
-        session.DropDownItems.Add(showIn);
+        session.DropDownItems.Add(CreateShowInMenu("Show current folder &in", Item("File &Explorer", ShowInExplorer, AxTerminalKeys.ShowInExplorer), () => CurrentDirectory));
         session.DropDownItems.Add(new ToolStripSeparator());
         session.DropDownItems.Add(new ToolStripMenuItem("&Export transcript...", null, (_, _) => ExportTranscript()) { ShortcutKeyDisplayString = BundleKeys.Text(BundleKeys.Save) });
         session.DropDownItems.Add(new ToolStripSeparator());

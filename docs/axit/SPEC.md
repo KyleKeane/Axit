@@ -13,7 +13,7 @@ the NVDA screen reader. Each app is a separate window that starts on its own, ha
 File Explorer's Open with Axit submenu and its own console command, and all of them share one installer, one updater, one
 version number and one release workflow. The first apps were **axClaude**, the front end for the Claude Code CLI, and
 **axDown**, a barebones editor for Markdown and text files; **axJSON**, **axGIT**, **axTerminal**, **axFile**,
-**axMedia**, **axPreview**, **axStart**, **axProcess**, **axTask** and **axPass** followed (section 3). Later apps are planned (a password manager, a vault
+**axMedia**, **axPreview**, **axStart**, **axProcess**, **axTask**, **axPass**, **axCalc** and **axClip** followed (section 3). Later apps are planned (a password manager, a vault
 manager: `docs/axit/plan.md`) and follow the same pattern without changes to the bundle.
 
 ## 2. Goals and non-goals
@@ -38,7 +38,7 @@ allow it, see B-9).
 
 ## 3. The apps
 
-The apps are named ax and a word, the ax in lower case and the word as it is written: axClaude, axDown, axJSON, axGIT, axTerminal, axFile, axMedia, axPreview, axStart, axProcess, axTask, axPass (2026-10-23, the user's rule; until then AxClaude and the like). A screen reader then says the name as ax and a word it knows, and an acronym keeps its capitals. Nothing depends on the case: the Start menu, the command palette, axStart and the console commands (xclaude) find a name typed in any case, and the code that tells the apps apart by name (a window's title, the Recently closed list, the hand-over) ignores case, so an entry saved under the old spelling still opens. The code keeps the C# spelling of its projects, folders and classes (`src/AxClaude`, `AxClaudeApp`), which no screen reader speaks; `Dispatch.App` holds both, `Name` and `Project`.
+The apps are named ax and a word, the ax in lower case and the word as it is written: axClaude, axDown, axJSON, axGIT, axTerminal, axFile, axMedia, axPreview, axStart, axProcess, axTask, axPass, axCalc, axClip (2026-10-23, the user's rule; until then AxClaude and the like). A screen reader then says the name as ax and a word it knows, and an acronym keeps its capitals. Nothing depends on the case: the Start menu, the command palette, axStart and the console commands (xclaude) find a name typed in any case, and the code that tells the apps apart by name (a window's title, the Recently closed list, the hand-over) ignores case, so an entry saved under the old spelling still opens. The code keeps the C# spelling of its projects, folders and classes (`src/AxClaude`, `AxClaudeApp`), which no screen reader speaks; `Dispatch.App` holds both, `Name` and `Project`.
 
 - **axClaude** (built): `Axit.exe claude [<folder>] [options]`, Start entry `Axit axClaude`, Open with Axit on
   folders, command `axclaude`. Specification `docs/axclaude/SPEC.md`.
@@ -91,12 +91,21 @@ The apps are named ax and a word, the ax in lower case and the word as it is wri
   `.kdbx` files in File Explorer's Open with Axit submenu and Open with. A KeePass database in axTask's two panes,
   through KeePassXC's command-line tool, which must be installed. Specification `docs/axpass/SPEC.md`, guide
   `docs/axpass/user-guide.md`, test plan `docs/axpass/nvda-test-plan.md`.
+- **axCalc** (2026-10-23, branch `axcalc`): `Axit.exe calc`, Start entry `Axit axCalc`, command `axcalc`, no File
+  Explorer entry. A calculator as one expression field and a history list: Enter says the answer, the history keeps
+  every answer to read back, copy and recall, and Ctrl+I says an answer in hexadecimal, binary and octal.
+  Specification `docs/axcalc/SPEC.md`, guide `docs/axcalc/user-guide.md`, test plan `docs/axcalc/nvda-test-plan.md`.
+- **axClip** (2026-10-23, branch `axclip`): `Axit.exe clip [--hidden]`, Start entry `Axit axClip`, command `axclip`, no File
+  Explorer entry. A clipboard history behind a hotkey (Windows+Alt+V unless the user chose another): a background
+  process from sign-in, as axStart, on the bundle's `HotkeyForm`, with one search field over the text of every copy;
+  Enter pastes into the program that was in front. Specification `docs/axclip/SPEC.md`, guide
+  `docs/axclip/user-guide.md`, test plan `docs/axclip/nvda-test-plan.md`.
 
 ## 4. Functional requirements
 
 ### AX-1 Launch and dispatch
 
-- AX-1.1 The first argument may be a verb naming an app: `claude`, `down`, `json`, `git`, `terminal`, `file`, `media`, `preview`, `start`, `process`, `task`, `pass` (the one list is `Dispatch.Apps`). The rest of the arguments go to that app
+- AX-1.1 The first argument may be a verb naming an app: `claude`, `down`, `json`, `git`, `terminal`, `file`, `media`, `preview`, `start`, `process`, `task`, `pass`, `calc`, `clip` (the one list is `Dispatch.Apps`). The rest of the arguments go to that app
   unchanged, so `Axit.exe claude C:\src --record x.vt` is what `AxClaude.exe C:\src --record x.vt` was.
 - AX-1.2 Without a verb, a first argument that is an existing folder goes to axClaude and an existing file to axDown,
   or to axJSON when its extension is `.json`, to axPass when it is `.kdbx`, or to axMedia when it is a sound or video
@@ -109,7 +118,7 @@ The apps are named ax and a word, the ax in lower case and the word as it is wri
   usage text.
 - AX-1.5 The dispatch is pure code in `Axit.Core` (`Dispatch`): arguments in, app name and arguments out. It is unit
   tested and has no knowledge of the apps beyond their names.
-- AX-1.6 Each process sets a Windows application id before its window opens (`Axit.AxClaude`, `Axit.AxDown`, `Axit.AxJSON`, `Axit.AxGit`, `Axit.AxTerminal`, `Axit.AxFile`, `Axit.AxMedia`, `Axit.AxPreview`, `Axit.AxStart`, `Axit.AxProcess`, `Axit.AxTask`, `Axit.AxPass`), so the
+- AX-1.6 Each process sets a Windows application id before its window opens (`Axit.AxClaude`, `Axit.AxDown`, `Axit.AxJSON`, `Axit.AxGit`, `Axit.AxTerminal`, `Axit.AxFile`, `Axit.AxMedia`, `Axit.AxPreview`, `Axit.AxStart`, `Axit.AxProcess`, `Axit.AxTask`, `Axit.AxPass`, `Axit.AxCalc`, `Axit.AxClip`), so the
   taskbar shows the apps apart and Win+number keys reach the right one.
 - AX-1.7 An app is a class library with one entry point, `static void Run(string[] args)` on a class named
   `<App>App`, plus a `Usage` text. `Axit`'s `Program` only dispatches; the entry point is one call into
@@ -150,11 +159,13 @@ The apps are named ax and a word, the ax in lower case and the word as it is wri
   | axProcess | | | |
   | axTask | folders | | |
   | axPass | | `.kdbx` | `.kdbx` (`Axit.AxPass`) |
+  | axCalc | | | |
+  | axClip | | | |
 
   On Windows 11 the submenu is in the full menu (Shift+F10, or Show more options), as every program's own entries
   are. Up to 2.13.0 each app had an entry of its own (`Open in axClaude` and the like); the installer removes them.
 - AX-2.4 Console commands: `axit.cmd` and one `<app>.cmd` per app (`axclaude.cmd`, `axdown.cmd`, `axjson.cmd`,
-  `axgit.cmd`, `axterminal.cmd`, `axfile.cmd`, `axmedia.cmd`, `axpreview.cmd`, `axstart.cmd`, `axprocess.cmd`, `axtask.cmd`, `axpass.cmd`) in `%USERPROFILE%\.local\bin`, one line each, passing their arguments to `Axit.exe`
+  `axgit.cmd`, `axterminal.cmd`, `axfile.cmd`, `axmedia.cmd`, `axpreview.cmd`, `axstart.cmd`, `axprocess.cmd`, `axtask.cmd`, `axpass.cmd`, `axcalc.cmd`, `axclip.cmd`) in `%USERPROFILE%\.local\bin`, one line each, passing their arguments to `Axit.exe`
   and `Axit.exe <verb>`. They work from cmd and from PowerShell.
 - AX-2.5 Settings, Apps lists one entry, `Axit`, with the version, the publisher and an Uninstall that runs
   `install.cmd -Uninstall`.
@@ -185,7 +196,13 @@ The apps are named ax and a word, the ax in lower case and the word as it is wri
   installer's exit code and last line, Try again and the download page. Without winget (an older Windows 10) the
   download page opens instead. Only on the user's command, never on a timer or at start (B-15); each install is
   logged. Removing such a program is Settings, Apps, as for any program. A shell that is not installed is not offered
-  in axTerminal (AT-1.2a).
+  in axTerminal (AT-1.2a). winget is the one Windows puts in the user's WindowsApps folder, never one on the PATH,
+  and installs from its own source (`--source winget`, security audit S-10); Claude Code's installer runs in
+  Windows PowerShell by its full path. One install at a time in a window: a second Install it now, while one runs or
+  after the window stopped waiting for one (it is never killed), says so. Install it now is never the notice's
+  default button: Enter is Close, as the key line says (the first default of a notice is its Enter, OverlayPanel).
+  The end closes only its own progress notice; a failure while the user is in another notice is announced, not shown
+  over it. The installer's output is read under the same deadline, so a helper left running cannot hold it.
 
 ### AX-3 Updates
 
@@ -217,7 +234,16 @@ The apps are named ax and a word, the ax in lower case and the word as it is wri
 - AX-3.3 The 1.7.0 bridge (B-6): axClaude 1.7.0 accepts a download whose program file is not `AxClaude.exe`, so an
   installed axClaude updates into Axit through Help, Update now. The first Axit release is 2.0.0.
 - AX-3.4 The update check and the version comparison are pure code in `Axit.Core/Updates/UpdateCheck`, unit tested;
-  the download and the hand-over are `Axit.Core/Updates/Updater`.
+  the download and the hand-over are `Axit.Core/Updates/Updater`. **Signed releases** (2026-10-24, the user's
+  decision; security audit S-27 to S-31): every release's zip is signed with the release key, an ECDSA P-256 key that
+  lives only on the maintainer's machine, encrypted for its Windows account (`tools/release-key.ps1`), never on
+  GitHub. The release workflow leaves a draft (a build job that can only read, then a job that uploads and attests
+  the build's provenance); `release.ps1` then runs `tools/sign-release.ps1`, which checks the provenance, signs the
+  zip's SHA-256, uploads `<zip>.sig` and publishes. The updater takes assets only from this repository's releases
+  address, downloads afresh every time, and extracts nothing unless the zip matches GitHub's recorded checksum and its
+  signature checks against the public half in `Axit.Core/Updates/ReleaseSigning`; `install.cmd` alone does the same
+  check in Windows PowerShell, into a folder of a random name. A release without a signature is never installed by
+  the apps. Losing the key means one release installed by hand with a new key's public half in it.
 
 ### AX-4 Releases
 
@@ -298,7 +324,7 @@ The apps are named ax and a word, the ax in lower case and the word as it is wri
   Windows font picker (the choice said), the window's place and size, the settings saving and the notice for a
   settings file that could not be read, the Axit menu with the
   update check, the update notice and the install in place (AX-3), find in a text box, in a list, in a transcript
-  and in a notice's text (one Find notice, one last text), Copy diagnostics, `OpenUrl`, `OpenInExplorer`, the
+  and in a notice's text (one Find notice, one last text), Copy diagnostics (the account's name, its paths, e-mail addresses and ids replaced by `Redaction`, since it is meant for a public bug report, security audit S-20), `OpenUrl`, `OpenInExplorer`, the
   Windows folder picker (`ChooseFolder`), `Do` (a command's task with an escaped exception turned into a notice),
   the hand-over from a starting process of the app (`AppMessage`, answered at once and applied after), the submenus
   and the menu every window has (Options → Text, General and Developer; Help: `CreateTextMenu`,
@@ -343,7 +369,7 @@ The apps are named ax and a word, the ax in lower case and the word as it is wri
   Ctrl+Shift+Down the selection grown to there, as in Word (`EditParagraphs`; the EDIT control's own keys scroll a
   row and leave the caret where it is, as Notepad's do, which a screen reader, reading at the caret after the key,
   reports as the same text again); Ctrl+Shift+P the command palette (AX-10); Alt+F4 exit; Alt and F10 the menu. Everything else is window-specific.
-- AX-8.3 Window-specific keys are defined once per window, in one table (`AxClaudeKeys`, `AxDownKeys`, `AxJSONKeys`, `AxGitKeys`, `AxTerminalKeys`, `AxFileKeys`, `AxMediaKeys`, `AxPreviewKeys`, `AxStartKeys`, `AxProcessKeys`, `AxTaskKeys`, `AxPassKeys`), as constants
+- AX-8.3 Window-specific keys are defined once per window, in one table (`AxClaudeKeys`, `AxDownKeys`, `AxJSONKeys`, `AxGitKeys`, `AxTerminalKeys`, `AxFileKeys`, `AxMediaKeys`, `AxPreviewKeys`, `AxStartKeys`, `AxProcessKeys`, `AxTaskKeys`, `AxPassKeys`, `AxCalcKeys`, `AxClipKeys`), as constants
   with names that say what the key does. Changing a key is a change to that one line: the menu item and the key
   handler read the table, and the F1 text names the same keys and is changed with it. Single-letter quick keys
   (axClaude's `h`, `i`, `o`) are in the table too. The text editor shell's keys (`Axit.Forms/EditorKeys`: Ctrl+N new,
@@ -389,8 +415,14 @@ The apps are named ax and a word, the ax in lower case and the word as it is wri
   release is known) and About ▸ (AX-9.9). The lists are filled each time the menu opens, so that they show the
   windows and the files of that moment.
 - AX-9.2 **New window ▸** (N): one item per app of the bundle (`Dispatch.Apps`), "axClaude", "axDown", with the letter
-  after Ax as the mnemonic. It starts `Axit.exe <verb>` with no arguments: a new process and a new window (B-2), the
-  app starting as it does from its Start menu entry.
+  after ax as the mnemonic. It starts `Axit.exe <verb>` with no arguments: a new process and a new window (B-2), the
+  app starting as it does from its Start menu entry. The apps stand in four groups, a separator between them
+  (2026-10-24, the user's choice of a flat list over a submenu per group): Claude and code (axClaude, axTerminal,
+  axGIT), files (axFile, axDown, axJSON, axPreview, axMedia), one's own lists (axTask, axPass), utilities (axStart,
+  axClip, axCalc, axProcess). Every list of apps in the windows has this order and these separators: New window, Open
+  windows by type, axFile's Open in Axit (`AxitMenu.AddApps`). A new app is one line in `Dispatch.Apps`, with its
+  group, what it opens and whether Show in offers it; every list, Show in (AX-9.10) and Recently closed (AX-9.4)
+  follow from that line.
 - AX-9.3 **Open windows ▸** (O): every open window of the bundle's apps except this one, the most recently used first.
   The order is the one Windows keeps its top-level windows in, which is Alt+Tab's, so nothing is stored and Alt+A, O,
   1 is always the window the user was in before this one. **Open windows by type ▸** (B) holds one submenu per app,
@@ -401,8 +433,12 @@ The apps are named ax and a word, the ax in lower case and the word as it is wri
   (checked as the menu opens for a path on a drive of this computer only, since a share or a mapped network drive
   can take the network's timeout to answer, which no menu may wait for; a path elsewhere is listed as it is and
   found missing when chosen; `Axit.Core/LocalPaths`, tested, 2026-10-23; the apps' recent lists follow the same
-  rule, AX-9.5); Enter starts that app on it in a new window. An app that holds no file or folder (axProcess) is listed
-  by its name alone when its window closes, once, and Enter starts it (2026-10-24). The list is one file for the bundle, `%APPDATA%\Axit\recently-closed.json`
+  rule, AX-9.5); Enter starts that app on it in a new window. An app that holds no file or folder (axProcess, axCalc,
+  axClip, axStart) is listed by its name alone when its window closes, once, and Enter starts it (2026-10-24). The
+  window base does it for every window as it closes (`AxitForm.PathInHand`: the file or folder, empty for an app that
+  holds none, which is the default, so that a new app is listed without a line of its own; nothing for a window with
+  nothing to open again, an untitled text or axFile at This PC); a window that swaps its file or folder remembers the
+  old one itself. A background app's window (axStart, axClip) hides on Alt+F4 and is listed when Quit ends it. The list is one file for the bundle, `%APPDATA%\Axit\recently-closed.json`
   (AX-5.1), written whole by the window that closes or swaps (`Axit.Core/RecentlyClosed`, through `SettingsFile`; two
   windows closing in the same instant leave the last writer's list). Nothing else about windows is stored.
 - AX-9.5 A window's or a file's item is its number, a full stop and a title, "1. notes.md (C:\notes\notes.md) - axDown":
@@ -433,6 +469,14 @@ The apps are named ax and a word, the ax in lower case and the word as it is wri
   **Attribution** (A; the maker, the Anthropic note, what Axit is built with), **Axit guide** (G; `docs/axit/README.md`,
   the zip's guide, embedded by `Axit.Core`: install, start, update, remove; its headings take the window's heading
   keys, AX-7.2), and **Axit on GitHub** (H; the repository page, `UpdateCheck.RepositoryPage`, in the browser).
+- AX-9.10 **Show current folder in ▸** (2026-10-24, one builder, `AxitForm.CreateShowInMenu`): the window's File
+  Explorer item (Ctrl+W), then the apps that work in a folder (`App.ShowIn`: axClaude, axTerminal, axGIT, axFile, in
+  that order) but the window's own, each a new window on the file or folder in hand: axClaude and axTerminal on a
+  file's folder, axGIT on the repository that holds it, axFile on the folder or with the file selected
+  (`Dispatch.PathFor`). The windows that hold a folder or a file have it: axClaude and axTerminal ("Show current folder
+  in"), axGIT ("Show current repository in"), axFile ("Show current folder in"), the editors and axPreview ("Show
+  current file in") and axMedia ("Show current file in"). With nothing in hand the window says why ("No project
+  folder", "No repository", "No file yet", the empty queue).
 
 - AX-6.6 **Menus are the standard ones.** A menu bar item's drop-down is the one WinForms makes for it; no window
   assigns a drop-down of its own (a `ContextMenuStrip` or any `ToolStripDropDown` set as `DropDown`). A hand-made
@@ -557,16 +601,20 @@ src/AxMedia.Core/    class library (net10.0): MediaPlayer, PlayQueue, MediaFolde
 src/AxPreview/       class library (net10.0-windows): AxPreviewApp (its EditorApp, read-only), AxPreviewKeys, HelpText;
                      the window is the shell's
 src/AxPreview.Core/  class library (net10.0): TextSniff (whether a file reads as text; axPreview's pure code)
-src/AxStart/         class library (net10.0-windows): AxStartApp, StartForm, AppsFolder, StartupEntry, AxStartKeys,
-                     HelpText (axStart's window, the hotkey and the shell's Applications folder)
-src/AxStart.Core/    class library (net10.0): ProgramEntry, ProgramMatch, Hotkey, StartSettings (axStart's pure code)
+src/AxStart/         class library (net10.0-windows): AxStartApp, StartForm, AppsFolder, AxStartKeys, HelpText
+                     (axStart's window on HotkeyForm, and the shell's Applications folder)
+src/AxStart.Core/    class library (net10.0): ProgramEntry, ProgramMatch, StartSettings (axStart's pure code)
 src/AxProcess/       class library (net10.0-windows): AxProcessApp, ProcessForm, AxProcessKeys, HelpText (axProcess's window)
 src/AxProcess.Core/  class library (net10.0): ProcessTable, ServiceManager, StartupList, SystemInfo, ProcessSettings (axProcess's pure code)
 src/AxTask/          class library (net10.0-windows): AxTaskApp, TaskForm, AxTaskKeys, HelpText (axTask's window)
 src/AxTask.Core/     class library (net10.0): ItemFolder, Changes, Links, TaskRules, SmartList, TaskSettings (axTask's pure code)
 src/AxPass/          class library (net10.0-windows): AxPassApp, PassForm, AxPassKeys, HelpText (axPass's window)
 src/AxPass.Core/     class library (net10.0): KeePassCli, PassTree, EntryFields, PassSettings (axPass's pure code)
-tests/Axit.Tests, tests/AxClaude.Tests, tests/AxJSON.Tests, tests/AxGit.Tests, tests/AxTerminal.Tests, tests/AxFile.Tests, tests/AxMedia.Tests, tests/AxPreview.Tests, tests/AxStart.Tests, tests/AxProcess.Tests, tests/AxTask.Tests, tests/AxPass.Tests
+src/AxCalc/          class library (net10.0-windows): AxCalcApp, CalcForm, AxCalcKeys, HelpText (axCalc's window)
+src/AxCalc.Core/     class library (net10.0): Calculator, NumberText, CalcEntry, CalcSettings (axCalc's pure code)
+src/AxClip/          class library (net10.0-windows): AxClipApp, ClipForm, AxClipKeys, HelpText (axClip's window, on HotkeyForm)
+src/AxClip.Core/     class library (net10.0): ClipHistory, ClipEntry, ClipPolicy, ClipSettings (axClip's pure code)
+tests/Axit.Tests, tests/AxClaude.Tests, tests/AxJSON.Tests, tests/AxGit.Tests, tests/AxTerminal.Tests, tests/AxFile.Tests, tests/AxMedia.Tests, tests/AxPreview.Tests, tests/AxStart.Tests, tests/AxProcess.Tests, tests/AxTask.Tests, tests/AxPass.Tests, tests/AxCalc.Tests, tests/AxClip.Tests
 ```
 
 References point one way: `Axit` references every app; an app's window project references its own `.Core`,
@@ -586,7 +634,7 @@ CLAUDE.md               the map of the bundle and its rules (short); each projec
 README.md, CONTRIBUTING.md, SECURITY.md   the repository's own pages (AX-4.5)
 docs/axit/              SPEC.md (this), README.md (the zip's guide: install, the apps, uninstall), adding-an-app.md, plan.md,
                         nvda-test-record.md (every NVDA pass, by step), axfile-split.md (the inventory of the split),
-                        review-2026-10-23.md (the review of the code and documents) and longevity.md (the practices for the years ahead)
+                        review-2026-10-23.md (the review of the code and documents), inventory-2026-10-24.md (the copies and drift, and what is open) and longevity.md (the practices for the years ahead)
 docs/<app>/             SPEC.md, user-guide.md (embedded by the app's project), nvda-test-plan.md, for each app of section 3;
                         docs/axclaude also claude-screens.md, docs/axdown also tutorial.md
 ```

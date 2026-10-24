@@ -66,9 +66,10 @@ public sealed record ChangedFile(string Path, ChangeKind Kind, bool Staged, bool
     public IReadOnlyList<string> DiffArguments => Kind switch
     {
         ChangeKind.Untracked => [],
-        _ when Staged && Unstaged => ["diff", "HEAD", "--", Path],
-        _ when Staged => ["diff", "--cached", "--", Path],
-        _ => ["diff", "--", Path],
+        // --no-ext-diff --no-textconv: never a diff program the repository names (security audit S-2).
+        _ when Staged && Unstaged => ["diff", "--no-ext-diff", "--no-textconv", "HEAD", "--", Path],
+        _ when Staged => ["diff", "--no-ext-diff", "--no-textconv", "--cached", "--", Path],
+        _ => ["diff", "--no-ext-diff", "--no-textconv", "--", Path],
     };
 
     /// <summary>Delete: the file back to HEAD, index and working tree (AG-3.4); empty for an untracked file.</summary>

@@ -25,6 +25,8 @@ public sealed class KeyTests
             ["axProcess"] = AxProcess.AxProcessKeys.All,
             ["axTask"] = AxTask.AxTaskKeys.All,
             ["axPass"] = AxPass.AxPassKeys.All,
+            ["axCalc"] = AxCalc.AxCalcKeys.All,
+            ["axClip"] = AxClip.AxClipKeys.All,
         };
 
     /// <summary>
@@ -92,6 +94,8 @@ public sealed class KeyTests
         ["axProcess"] = AxProcess.HelpText.Shortcuts,
         ["axTask"] = AxTask.HelpText.Shortcuts,
         ["axPass"] = AxPass.HelpText.Shortcuts,
+        ["axCalc"] = AxCalc.HelpText.Shortcuts,
+        ["axClip"] = AxClip.HelpText.Shortcuts,
     };
 
     /// <summary>
@@ -122,11 +126,11 @@ public sealed class KeyTests
         Assert.True(missing.Count == 0, "Not in the F1 text: " + string.Join("; ", missing));
     }
 
-    /// <summary>Every F1 text names the Axit menu with its first items in the bundle's words (AX-9), so that the menu is found from any window's help and the texts do not drift apart.</summary>
+    /// <summary>Every F1 text names the Axit menu with its items in the bundle's words, the whole line (AX-9; only its start until 2026-10-24, when two texts had drifted), so that the menu is found from any window's help and the texts do not drift apart.</summary>
     [Fact]
     public void Every_F1_text_names_the_Axit_menu_and_its_first_items()
     {
-        const string line = "Alt+A: the Axit menu: the command palette, a new window of any app, the files and folders closed lately";
+        const string line = "Alt+A: the Axit menu: the command palette, a new window of any app, the files and folders closed lately, the open Axit windows, most recent first (Alt+A, O, 1 is the one you were in last) and by type, Close all windows, Check for updates, and About";
         var missing = F1Texts.Where(pair => !pair.Value.Contains(line, StringComparison.Ordinal)).Select(pair => pair.Key).ToList();
         Assert.True(missing.Count == 0, "Without the Axit menu line: " + string.Join(", ", missing));
     }
@@ -166,7 +170,7 @@ public sealed class KeyTests
             "Apps", "Backspace", "Ctrl+1", "Ctrl+2", "Ctrl+3", "Ctrl+C", "Ctrl+E", "Ctrl+Enter", "Ctrl+G", "Ctrl+I", "Ctrl+K", "Ctrl+L",
             "Ctrl+N", "Ctrl+O", "Ctrl+P", "Ctrl+Q", "Ctrl+Shift+A", "Ctrl+Shift+C", "Ctrl+Shift+F", "Ctrl+Shift+H", "Ctrl+Shift+I",
             "Ctrl+Shift+K", "Ctrl+Shift+L", "Ctrl+Shift+Q", "Ctrl+Shift+R", "Ctrl+Shift+S", "Ctrl+Shift+T", "Ctrl+Shift+W", "Ctrl+T",
-            "Ctrl+W", "Ctrl+Z", "Delete", "Down", "Enter", "Escape", "F5", "O", "Shift+Escape", "Shift+F10", "Space", "Up",
+            "Ctrl+W", "Ctrl+Z", "Delete", "Down", "Enter", "Escape", "F5", "O", "Shift+Enter", "Shift+Escape", "Shift+F10", "Space", "Up",
         ];
         var differing = Windows.SelectMany(w => w.Value.Select(k => (Window: w.Key, k.Name, k.Key)))
             .GroupBy(k => k.Key)

@@ -6,6 +6,44 @@ What was checked with NVDA, against which version, and with what result. When a 
 
 Add a section under this one, above the earlier passes, so that the newest comes first: the date, the version, the commit tested, who ran it and how the result was given, and the environment: the NVDA version, the synthesizer and the Windows build (so that a regression is dated to an NVDA release rather than to some time). Under it, one table per app with a line per section of its plan: the steps run and the result, Passed, Failed (with what was heard) or Not run. A step that fails gets a line of its own with what NVDA said and what it should have said, and the bug's fix names the step. When a plan gains or loses steps, the next pass lists them as the plan has them then.
 
+## Owed: Install it now (3.7.0, `docs/axit/SPEC.md` AX-2.9, after the review of 2026-10-24)
+
+- axGIT without Git, axPass without KeePassXC, axClaude without Claude Code: the notice's last line says "Enter:
+  Close" and Enter closes; Tab to Install it now and Enter installs, the progress notice reads, and the app goes on.
+- During an install, Escape hides the progress notice; open another notice (F1): the install's end does not close it,
+  and a failure is said, not shown over it; Install it now again says it is being installed already.
+- axTerminal: Session, Switch shell opens at once and lists only the shells there; after Install PowerShell 7 it
+  lists it.
+
+## Owed: merged to main on 2026-10-24 before their pass (the branch `calc-clip`)
+
+Merged at the user's word ahead of the rule, so that main holds them; no release until these have passed.
+
+- axCalc, `docs/axcalc/nvda-test-plan.md`: every section (new app; its history became the bundle's list at the merge).
+- axClip, `docs/axclip/nvda-test-plan.md`: every section (new app).
+- axStart, `docs/axstart/nvda-test-plan.md`: the typing, the keys in the field and the edge sound, hiding and the
+  hotkey (its window moved onto `HotkeyForm`, and the search field into it).
+- The cleanups of `docs/axit/inventory-2026-10-24.md`, meant to change nothing a key does: axGIT's and axProcess's
+  views (`ListViewState`), the copy keys of axFile, axPass, axProcess, axCalc and axClaude (`CopyText`), the Show
+  current folder in submenus of every window (the names now axGIT, axTerminal, axFile), axDown's and axPreview's
+  Markdown keys (`MarkdownKeys`), axFile's Go to folder completion and Open with (moved files).
+- The app lists and Show in (AX-9.2, AX-9.10): Alt+A, N and Alt+A, B in any window, the four groups in order with the
+  separators skipped; axFile's Item, Open in Axit (no utilities); Show current file in from axDown, axPreview and
+  axMedia (axClaude now there); Recently closed after closing axCalc and quitting axClip.
+
+## Owed: the security fixes of 2026-10-24 (the branch `security`, `security-audit-2026-10-24.md`)
+
+- axGIT: open `manual_tests/axgit/scratch-repository-with-a-hook` (plan section 1, step 7): the notice names the hook;
+  Keep them off, then Trust this repository.
+- axPass: Ctrl+C, then Windows+V: the password is not in Windows' clipboard history; after 30 seconds the clipboard is
+  empty; Windows+L locks axPass ("Locked" when you come back); Ctrl+U on an entry whose URL is not a web address says
+  "Not opened".
+- axTerminal: `type` a file holding the shell marks (the plan's new step): no "Done", the command still running.
+- axClip: Keep history between runs on, quit, open `axclip.json`: no copied text in it; start again: the history back.
+- Every window: Copy diagnostics, paste it into axDown: the account's name reads `<user>`.
+- axClaude's `tests/scripts/axclaude/09-options.txt` fails at step 191 on main as on this branch (the second line of the
+  conversation after a forced restart is the recording's line): an older break, most likely Claude Code's output, to be
+  looked at with a recording.
 ## 2026-10-24, axTask and axPass (the branch `axtask`, before its merge)
 
 - Run by the user with NVDA on builds of `axtask` up to cffd363, over the day's rounds of asks; the result given as

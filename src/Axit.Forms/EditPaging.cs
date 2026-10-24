@@ -1,4 +1,5 @@
 using System.Runtime.InteropServices;
+using static Axit.Forms.User32;
 
 namespace Axit.Forms;
 
@@ -14,8 +15,6 @@ namespace Axit.Forms;
 public static class EditPaging
 {
     private const int EM_LINESCROLL = 0x00B6;
-    private const int EM_SCROLLCARET = 0x00B7;
-    private const int EM_GETLINECOUNT = 0x00BA;
     private const int EM_GETFIRSTVISIBLELINE = 0x00CE;
     private const int EM_CHARFROMPOS = 0x00D7;
 
@@ -51,6 +50,4 @@ public static class EditPaging
         return true;
     }
 
-    [DllImport("user32.dll")]
-    private static extern IntPtr SendMessage(IntPtr hWnd, int msg, IntPtr wParam, IntPtr lParam);
 }

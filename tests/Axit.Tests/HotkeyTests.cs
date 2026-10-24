@@ -1,8 +1,8 @@
-using AxStart.Core;
+using Axit.Core;
 
-namespace AxStart.Tests;
+namespace Axit.Tests;
 
-/// <summary>The hotkey as text both ways and the keys refused (SPEC.md AS-4.2), and the settings around it (AS-5.1).</summary>
+/// <summary>The hotkey as text both ways and the keys refused (docs/axstart/SPEC.md AS-4.2); from AxStart.Tests with the record, 2026-10-23.</summary>
 public sealed class HotkeyTests
 {
     [Fact]
@@ -54,39 +54,5 @@ public sealed class HotkeyTests
         Assert.Equal("Ctrl+Alt+Key 255", odd.ToString());
         Assert.Equal("That key cannot be a hotkey", odd.Refusal());
         Assert.Null(Hotkey.Parse(odd.ToString()));
-    }
-
-    [Fact]
-    public void Settings_keep_their_values_and_mend_nonsense()
-    {
-        var folder = Path.Combine(Path.GetTempPath(), "axstart-tests-" + Guid.NewGuid().ToString("N"));
-        Directory.CreateDirectory(folder);
-        try
-        {
-            var path = Path.Combine(folder, "axstart.json");
-            var settings = StartSettings.Load(path, out var error);
-            Assert.Null(error);
-            Assert.Equal("Ctrl+Shift+Space", settings.HotkeyText);
-            Assert.True(settings.StartWithWindows);
-            Assert.True(settings.SayFirstMatch);
-
-            settings.HotkeyText = "Ctrl+Alt+K";
-            settings.Started("Notepad");
-            settings.Started("notepad");
-            settings.Save(path);
-            var back = StartSettings.Load(path, out _);
-            Assert.Equal(new Hotkey(Hotkey.Control | Hotkey.Alt, 0x4B), back.Key);
-            Assert.Equal(2, back.Starts["NOTEPAD"]);
-
-            File.WriteAllText(path, """{ "hotkey": "Shift+A", "starts": { "Notepad": 2, "notepad": 1, "": 4, "Calculator": -3 } }""");
-            var mended = StartSettings.Load(path, out _);
-            Assert.Equal("Ctrl+Shift+Space", mended.HotkeyText);
-            Assert.Equal(3, mended.Starts["Notepad"]);
-            Assert.Single(mended.Starts);
-        }
-        finally
-        {
-            Directory.Delete(folder, recursive: true);
-        }
     }
 }

@@ -110,9 +110,11 @@ public class ClaudeLauncherTests
     public void A_cmd_wrapper_runs_through_cmd_exe_with_the_whole_line_quoted_once_more()
     {
         // cmd /s strips the outer quotes, leaving the quoted path and the arguments as they are; the extension's case does not matter.
+        // S-1: cmd.exe by its full path, never one in the project folder.
+        var cmd = "\"" + Axit.Core.SystemPrograms.Cmd + "\"";
         Assert.Equal(
-            @"cmd.exe /d /s /c """"C:\npm\claude.cmd"" --name ""my feature""""",
+            cmd + @" /d /s /c """"C:\npm\claude.cmd"" --name ""my feature""""",
             ClaudeLauncher.BuildCommandLine(@"C:\npm\claude.cmd", ["--name", "my feature"]));
-        Assert.StartsWith("cmd.exe /d /s /c ", ClaudeLauncher.BuildCommandLine(@"C:\npm\CLAUDE.CMD", ["--continue"]));
+        Assert.StartsWith(cmd + " /d /s /c ", ClaudeLauncher.BuildCommandLine(@"C:\npm\CLAUDE.CMD", ["--continue"]));
     }
 }

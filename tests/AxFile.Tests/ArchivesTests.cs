@@ -88,6 +88,48 @@ public sealed class ArchivesTests : IDisposable
         Assert.Equal("a", File.ReadAllText(Path.Combine(target, "docs", "a.txt")));
     }
 
+    /// <summary>S-7: a zip from the internet hands its mark of the web to every file taken out of it, as File Explorer does.</summary>
+    [Fact]
+    public void An_extracted_file_keeps_the_zips_mark_of_the_web()
+    {
+        var zip = Path.Combine(_folder, "downloaded.zip");
+        using (var archive = ZipFile.Open(zip, ZipArchiveMode.Create))
+        {
+            using var writer = new StreamWriter(archive.CreateEntry("run.txt").Open());
+            writer.Write("x");
+        }
+
+        const string mark = "[ZoneTransfer]\r\nZoneId=3\r\n";
+        File.WriteAllText(zip + ":Zone.Identifier", mark);
+        var target = Archives.Extract(zip, _folder);
+        Assert.Equal(mark, Archives.DownloadMark(Path.Combine(target, "run.txt")));
+    }
+
+    /// <summary>S-8: a link inside a folder being compressed is left out, never followed into what it points at.</summary>
+    [Fact]
+    public void A_link_inside_a_folder_is_not_followed_into_the_zip()
+    {
+        var outside = Path.Combine(_folder, "private");
+        Directory.CreateDirectory(outside);
+        File.WriteAllText(Path.Combine(outside, "secret.txt"), "s");
+        try
+        {
+            Directory.CreateSymbolicLink(Path.Combine(_folder, "docs", "link"), outside);
+        }
+        catch (IOException)
+        {
+            // Making a link needs Developer Mode or an administrator; without it there is nothing to check.
+            return;
+        }
+        catch (UnauthorizedAccessException)
+        {
+            return;
+        }
+
+        var zip = Archives.Compress([Path.Combine(_folder, "docs")], _folder);
+        using var archive = ZipFile.OpenRead(zip);
+        Assert.DoesNotContain(archive.Entries, entry => entry.FullName.Contains("secret", StringComparison.Ordinal));
+    }
     [Fact]
     public void An_entry_that_would_land_outside_the_folder_is_refused()
     {

@@ -10,7 +10,19 @@ public sealed class VtParser(Screen screen)
 {
     private enum State { Ground, Escape, Csi, Osc, OscEscape, String, StringEscape }
 
+    /// <summary>
+    /// The longest an OSC string, a DCS-like string, a CSI's parameters or an escape's intermediates may run (security
+    /// audit S-40): past it the sequence is dropped and what follows is text again, so that an unterminated sequence in
+    /// a program's output neither grows without end nor hides everything printed after it.
+    /// </summary>
+    public const int MaxString = 4096;
+
+    public const int MaxParameters = 64;
+
+    public const int MaxIntermediates = 16;
+
     private State _state = State.Ground;
+    private int _stringLength;
     private readonly StringBuilder _print = new();
     private readonly StringBuilder _parameters = new();
     private readonly StringBuilder _intermediates = new();
@@ -63,10 +75,17 @@ public sealed class VtParser(Screen screen)
                 }
                 else if (c is 'P' or 'X' or '^' or '_')
                 {
+                    _stringLength = 0;
                     _state = State.String;
                 }
                 else if (c >= ' ' && c <= '/')
                 {
+                    if (_intermediates.Length >= MaxIntermediates)
+                    {
+                        _state = State.Ground;
+                        break;
+                    }
+
                     _intermediates.Append(c);
                 }
                 else if (c >= '0' && c <= '~')
@@ -92,7 +111,12 @@ public sealed class VtParser(Screen screen)
                 break;
 
             case State.Csi:
-                if (c >= '0' && c <= '?')
+                if ((c >= '0' && c <= '?' && _parameters.Length >= MaxParameters) || (c >= ' ' && c <= '/' && _intermediates.Length >= MaxIntermediates))
+                {
+                    // S-40: a sequence too long to be a real one is dropped.
+                    _state = State.Ground;
+                }
+                else if (c >= '0' && c <= '?')
                 {
                     _parameters.Append(c);
                 }
@@ -137,6 +161,14 @@ public sealed class VtParser(Screen screen)
                 }
                 else if (c >= ' ')
                 {
+                    if (_osc.Length >= MaxString)
+                    {
+                        // S-40: an unterminated string is dropped; what follows is text again.
+                        _osc.Clear();
+                        _state = State.Ground;
+                        break;
+                    }
+
                     _osc.Append(c);
                 }
 
@@ -163,7 +195,7 @@ public sealed class VtParser(Screen screen)
                 {
                     _state = State.StringEscape;
                 }
-                else if (c == '\a')
+                else if (c == '\a' || ++_stringLength > MaxString)
                 {
                     _state = State.Ground;
                 }

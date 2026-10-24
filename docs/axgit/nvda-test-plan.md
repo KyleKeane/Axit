@@ -13,10 +13,11 @@ Run with NVDA before a release, on a repository with a remote (the Axit reposito
 4a. In the Log view (Ctrl+2), Space: "Changes view first: Ctrl+1"; Delete: the same; Alt+C, D (Show diff): the same; the view stays. Ctrl+1, then Alt+B, S (Switch to branch): "Branches view first: Ctrl+3".
 5. Start axGIT on a folder that is not a repository: "Not a git repository" notice naming the folder; Enter closes it; the title is "No repository - axGIT"; Ctrl+O opens the folder picker. With a repository open, Ctrl+O on a folder outside any repository: the same notice, and the repository stays open, its title unchanged.
 6. Alt+F4 closes the window without a question.
+7. A repository with a hook of its own (`manual_tests/axgit/scratch-repository-with-a-hook`, made by `prepare.ps1 axgit`): opening it shows the notice "This repository runs programs of its own" naming "hook post-checkout"; Enter keeps them off and the Changes list comes. Open it again and choose Trust this repository: "Trusted"; the next opening shows no notice.
 
 ## 2. From and to the other windows (AG-1.4)
 
-1. In axClaude on the repository, Alt+S, I: "Show current folder in submenu", Down: "File Explorer Ctrl+W", Down: "axGIT"; Enter: a new axGIT window on the repository, focused.
+1. In axClaude on the repository, Alt+S, I: "Show current folder in submenu", Down: "File Explorer Ctrl+W", Down: "axTerminal", Down: "axGIT"; Enter: a new axGIT window on the repository, focused.
 2. Alt+A, O: the open windows, the axClaude window first; Enter goes back to it. Alt+A, O again, the axGIT window first now.
 3. In axDown on a file of the repository, Alt+F, I, G: axGIT on the repository that holds the file.
 4. In axGIT, Alt+R, I: "File Explorer Ctrl+W" and "axClaude"; Enter on axClaude: a new axClaude on the repository.

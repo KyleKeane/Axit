@@ -23,15 +23,7 @@ internal sealed partial class MainForm
         // The standard order of a File menu (bundle AX-6): the editors have Save and Save as here; axClaude has none.
         session.DropDownItems.Add(new ToolStripSeparator());
         // FR-8.2: Show current folder in ▸ File Explorer and the other apps' windows on the project folder.
-        var showIn = new ToolStripMenuItem("Show current folder &in");
-        showIn.DropDownItems.Add(new ToolStripMenuItem("File &Explorer", null, (_, _) => ShowInExplorer()) { ShortcutKeys = AxClaudeKeys.ShowInExplorer });
-        // axGIT on the repository that holds the project folder, a new window (FR-8.2; docs/axgit/SPEC.md AG-1.4).
-        showIn.DropDownItems.Add(new ToolStripMenuItem("Ax&Git", null, (_, _) => OpenInAxGit()));
-        // axTerminal with a shell in the project folder, a new window (docs/axterminal/SPEC.md AT-1.5).
-        showIn.DropDownItems.Add(new ToolStripMenuItem("Ax&Terminal", null, (_, _) => OpenInAxTerminal()));
-        // axFile listing the project folder, a new window (docs/axfile/SPEC.md AF-1.3).
-        showIn.DropDownItems.Add(new ToolStripMenuItem("Ax&File", null, (_, _) => OpenInAxFile()));
-        session.DropDownItems.Add(showIn);
+        session.DropDownItems.Add(CreateShowInMenu("Show current folder &in", new ToolStripMenuItem("File &Explorer", null, (_, _) => ShowInExplorer()) { ShortcutKeys = AxClaudeKeys.ShowInExplorer }, FolderOrSay));
         session.DropDownItems.Add(new ToolStripSeparator());
         // Not a save: the conversation is Claude's own record, and this writes a text copy of it. At the bottom, where
         // the editors have Save and Save as, so that the first menu of every window keeps the same order (bundle AX-6).

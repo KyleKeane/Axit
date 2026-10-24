@@ -19,6 +19,8 @@ body:
         - axProcess
         - axTask
         - axPass
+        - axCalc
+        - axClip
         - The bundle, or a new app
     validations:
       required: true

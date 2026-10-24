@@ -140,6 +140,16 @@ public sealed class DispatchTests
         }
     }
 
+    [Theory]
+    [InlineData("notes.md", "down")]
+    [InlineData("README.MARKDOWN", "down")]
+    [InlineData("report.pdf", "down")]
+    [InlineData("settings.JSON", "json")]
+    public void The_editor_is_AxJSON_for_json_and_AxDown_for_the_rest(string name, string expected)
+    {
+        Assert.Equal(expected, Dispatch.EditorOf(Path.Combine("C:\\x", name)));
+    }
+
     [Fact]
     public void KeePassDatabaseGoesToAxPass()
     {
@@ -174,7 +184,7 @@ public sealed class DispatchTests
         Assert.Equal(Dispatch.AxJSON, Dispatch.Decide(["json", "x.json"]).App);
         Assert.Equal(["x.json"], Dispatch.Decide(["JSON", "x.json"]).Arguments);
         Assert.Contains("Axit json", Dispatch.Usage);
-        Assert.Equal(["axClaude", "axDown", "axJSON", "axGIT", "axTerminal", "axFile", "axMedia", "axPreview", "axStart", "axProcess", "axTask", "axPass"], Dispatch.Apps.Select(a => a.Name));
+        Assert.Equal(["axClaude", "axTerminal", "axGIT", "axFile", "axDown", "axJSON", "axPreview", "axMedia", "axTask", "axPass", "axStart", "axClip", "axCalc", "axProcess"], Dispatch.Apps.Select(a => a.Name));
     }
 
     [Fact]
@@ -209,5 +219,36 @@ public sealed class DispatchTests
             Assert.Equal(["x", "--y"], launch.Arguments);
             Assert.Null(launch.Error);
         }
+    }
+
+    /// <summary>AX-9.2: the apps of a group stand together, in the groups' order, so that the menus' separators fall between groups; a new app is placed by its group.</summary>
+    [Fact]
+    public void The_apps_stand_in_their_groups_in_order()
+    {
+        var groups = Dispatch.Apps.Select(app => app.Group).ToList();
+        Assert.Equal(groups.OrderBy(group => group).ToList(), groups);
+        Assert.Equal(Enum.GetValues<AppGroup>(), groups.Distinct());
+    }
+
+    /// <summary>AX-9.10, AF-4.9: what an app is started on from a file or a folder in hand.</summary>
+    [Fact]
+    public void An_app_is_started_on_the_kind_of_path_it_opens()
+    {
+        var file = Path.Combine("C:\\work", "notes.md");
+        Assert.Equal(file, Dispatch.PathFor(Dispatch.Of(Dispatch.AxDown), file, isFolder: false));
+        Assert.Null(Dispatch.PathFor(Dispatch.Of(Dispatch.AxDown), "C:\\work", isFolder: true));
+        Assert.Equal("C:\\work", Dispatch.PathFor(Dispatch.Of(Dispatch.AxClaude), file, isFolder: false));
+        Assert.Equal("C:\\work", Dispatch.PathFor(Dispatch.Of(Dispatch.AxTerminal), "C:\\work", isFolder: true));
+        Assert.Equal(file, Dispatch.PathFor(Dispatch.Of(Dispatch.AxFile), file, isFolder: false));
+        Assert.Equal(file, Dispatch.PathFor(Dispatch.Of(Dispatch.AxGit), file, isFolder: false));
+        Assert.Null(Dispatch.PathFor(Dispatch.Of(Dispatch.AxCalc), file, isFolder: false));
+    }
+
+    /// <summary>AX-9.10: the Show in submenus offer the apps that work in a folder, and only apps that open one.</summary>
+    [Fact]
+    public void Show_in_offers_the_folder_apps()
+    {
+        Assert.Equal(["axClaude", "axTerminal", "axGIT", "axFile"], Dispatch.Apps.Where(app => app.ShowIn).Select(app => app.Name));
+        Assert.All(Dispatch.Apps.Where(app => app.ShowIn), app => Assert.NotEqual(Opens.Files, app.Opens));
     }
 }

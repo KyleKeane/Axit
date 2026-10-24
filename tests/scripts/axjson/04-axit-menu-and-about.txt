@@ -21,7 +21,7 @@ expect commands "axStart, Axit, New window"
 # 4.2: Axit, About, Version names the nine apps.
 menu Version
 expect state "notice":"Axit 3.
-expect state : axClaude, axDown, axJSON, axGIT, axTerminal, axFile, axMedia, axPreview, axStart.
+expect state : axClaude, axTerminal, axGIT, axFile, axDown, axJSON, axPreview, axMedia, axTask, axPass, axStart, axClip, axCalc, axProcess.
 keys escape
 expect state "notice":null
 expect focus settings.json

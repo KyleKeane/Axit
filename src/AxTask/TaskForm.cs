@@ -108,12 +108,8 @@ public sealed partial class TaskForm : ItemForm
 
     protected override IEnumerable<string> DiagnosticsLines => [$"Level: {(_smart is not null ? "smart list" : AtTop ? "top" : "list")}, {Rows.Count} rows"];
 
-    protected override void OnFormClosing(FormClosingEventArgs e)
-    {
-        // AX-9.4: the folder joins the bundle's Recently closed list.
-        RecentlyClosed.Remember(AxTaskApp.Name, TopFolder);
-        base.OnFormClosing(e);
-    }
+    /// <summary>The folder of lists, for Recently closed (AX-9.4).</summary>
+    protected override string? PathInHand => TopFolder;
 
     /// <summary>axTask's own keys (TK-7), asked before the shared ones.</summary>
     protected override bool ProcessItemKey(Keys keyData)

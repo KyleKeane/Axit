@@ -1,6 +1,8 @@
 using System.Runtime.InteropServices;
 using AxClaude;
 using AxPass;
+using AxCalc;
+using AxClip;
 using AxProcess;
 using AxTask;
 using AxDown;
@@ -25,6 +27,9 @@ internal static class Program
     [STAThread]
     private static void Main(string[] args)
     {
+        // First of all: a test run's variables read and taken out of the environment, so that nothing this process
+        // starts inherits them (security audit S-11).
+        AutomationEnvironment.Capture();
         ApplicationConfiguration.Initialize();
         // AX-7.7: the windows are light or dark as Windows is; a high contrast theme takes over as it always has.
         Application.SetColorMode(SystemColorMode.System);
@@ -86,6 +91,14 @@ internal static class Program
             case Dispatch.AxPass:
                 SetAppId("Axit.AxPass");
                 AxPassApp.Run(launch.Arguments);
+                break;
+            case Dispatch.AxCalc:
+                SetAppId("Axit.AxCalc");
+                AxCalcApp.Run(launch.Arguments);
+                break;
+            case Dispatch.AxClip:
+                SetAppId("Axit.AxClip");
+                AxClipApp.Run(launch.Arguments);
                 break;
             default:
                 // --help or --version for the bundle itself (AX-1.4).

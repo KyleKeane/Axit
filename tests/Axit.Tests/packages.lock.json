@@ -93,6 +93,20 @@
           "xunit.extensibility.core": "[2.9.3]"
         }
       },
+      "axcalc": {
+        "type": "Project",
+        "dependencies": {
+          "AxCalc.Core": "[1.0.0, )",
+          "Axit.Core": "[1.0.0, )",
+          "Axit.Forms": "[1.0.0, )"
+        }
+      },
+      "axcalc.core": {
+        "type": "Project",
+        "dependencies": {
+          "Axit.Core": "[1.0.0, )"
+        }
+      },
       "axclaude": {
         "type": "Project",
         "dependencies": {
@@ -102,6 +116,20 @@
         }
       },
       "axclaude.core": {
+        "type": "Project",
+        "dependencies": {
+          "Axit.Core": "[1.0.0, )"
+        }
+      },
+      "axclip": {
+        "type": "Project",
+        "dependencies": {
+          "AxClip.Core": "[1.0.0, )",
+          "Axit.Core": "[1.0.0, )",
+          "Axit.Forms": "[1.0.0, )"
+        }
+      },
+      "axclip.core": {
         "type": "Project",
         "dependencies": {
           "Axit.Core": "[1.0.0, )"

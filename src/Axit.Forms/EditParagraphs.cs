@@ -1,5 +1,6 @@
 using System.Runtime.InteropServices;
 using Axit.Core;
+using static Axit.Forms.User32;
 
 namespace Axit.Forms;
 
@@ -15,7 +16,6 @@ namespace Axit.Forms;
 public static class EditParagraphs
 {
     private const int EM_SETSEL = 0x00B1;
-    private const int EM_SCROLLCARET = 0x00B7;
 
     /// <summary>
     /// Moves the caret to the start of the next (<paramref name="direction"/> 1) or previous (-1) paragraph; with
@@ -61,6 +61,4 @@ public static class EditParagraphs
     [DllImport("user32.dll")]
     private static extern bool GetCaretPos(out POINT point);
 
-    [DllImport("user32.dll")]
-    private static extern IntPtr SendMessage(IntPtr hWnd, int msg, IntPtr wParam, IntPtr lParam);
 }

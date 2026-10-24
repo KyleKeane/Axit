@@ -1,9 +1,13 @@
 using System.IO.Pipes;
 using System.Runtime.InteropServices;
+using System.Security.AccessControl;
+using System.Security.Cryptography;
+using System.Security.Principal;
 using System.Text;
 using System.Text.Encodings.Web;
 using System.Text.Json;
 using Axit.Core;
+using static Axit.Forms.User32;
 
 namespace Axit.Forms;
 
@@ -23,8 +27,6 @@ internal sealed class AutomationChannel : IMessageFilter
     /// <summary>The modifiers of each posted key press, in order, applied when its key down reaches the message loop.</summary>
     private readonly Queue<Keys> _modifiers = new();
 
-    private const int WM_KEYDOWN = 0x0100;
-    private const int WM_KEYUP = 0x0101;
     private const int WM_CHAR = 0x0102;
     private const int WM_SYSKEYDOWN = 0x0104;
     private const int WM_SYSKEYUP = 0x0105;
@@ -91,7 +93,7 @@ internal sealed class AutomationChannel : IMessageFilter
         }
     }
 
-    public static bool Requested => !string.IsNullOrEmpty(Environment.GetEnvironmentVariable("AXIT_AUTOMATION"));
+    public static bool Requested => AutomationEnvironment.Requested;
 
     /// <summary>Starts the channel for the window when the run asks for it; once per process.</summary>
     public static void StartIfRequested(AxitForm form)
@@ -112,14 +114,24 @@ internal sealed class AutomationChannel : IMessageFilter
 
     private void Serve()
     {
-        while (true)
+        var failures = 0;
+        while (!_form.IsDisposed)
         {
             try
             {
-                using var pipe = new NamedPipeServerStream($"axit-auto-{Environment.ProcessId}", PipeDirection.InOut, 1);
+                using var pipe = NamedPipeServerStreamAcl.Create($"axit-auto-{Environment.ProcessId}", PipeDirection.InOut, 1, PipeTransmissionMode.Byte, PipeOptions.None, 0, 0, PipeSecurityForUser());
                 pipe.WaitForConnection();
                 using var reader = new StreamReader(pipe, new UTF8Encoding(false));
                 using var writer = new StreamWriter(pipe, new UTF8Encoding(false)) { AutoFlush = true };
+                // S-11: the runner proves the run's secret on its first line; any other client is let go.
+                if (!Proves(reader.ReadLine()))
+                {
+                    Log.Info("Automation channel: a client without the run's secret was refused");
+                    continue;
+                }
+
+                writer.WriteLine("{\"ok\":true}");
+                failures = 0;
                 while (reader.ReadLine() is { } line)
                 {
                     string answer;
@@ -135,15 +147,40 @@ internal sealed class AutomationChannel : IMessageFilter
                     writer.WriteLine(answer);
                 }
             }
+            catch (UnauthorizedAccessException ex)
+            {
+                // The pipe's name taken by another program first: the channel ends, the window goes on (S-11).
+                Log.Error("Automation channel closed: its pipe is held by another program", ex);
+                return;
+            }
             catch (Exception ex) when (ex is IOException or ObjectDisposedException or InvalidOperationException)
             {
-                if (_form.IsDisposed)
+                if (_form.IsDisposed || ++failures > 20)
                 {
                     return;
                 }
+
+                Thread.Sleep(Math.Min(2000, 50 * failures));
             }
         }
     }
+
+    /// <summary>The pipe for the current user alone, and never for a client over the network (S-11).</summary>
+    private static PipeSecurity PipeSecurityForUser()
+    {
+        var security = new PipeSecurity();
+        using var identity = WindowsIdentity.GetCurrent();
+        var user = identity.User ?? throw new InvalidOperationException("No user for the automation channel");
+        security.SetOwner(user);
+        security.AddAccessRule(new PipeAccessRule(new SecurityIdentifier(WellKnownSidType.NetworkSid, null), PipeAccessRights.FullControl, AccessControlType.Deny));
+        security.AddAccessRule(new PipeAccessRule(user, PipeAccessRights.ReadWrite | PipeAccessRights.CreateNewInstance, AccessControlType.Allow));
+        return security;
+    }
+
+    /// <summary>Whether the first line is the run's secret, compared in constant time.</summary>
+    private static bool Proves(string? line) =>
+        line is not null && AutomationEnvironment.Secret is { } secret
+        && CryptographicOperations.FixedTimeEquals(Encoding.UTF8.GetBytes(line), Encoding.UTF8.GetBytes(secret));
 
     private string Execute(string line)
     {
@@ -235,11 +272,15 @@ internal sealed class AutomationChannel : IMessageFilter
     {
         ListBox { SelectedItem: { } item } => item.ToString(),
         ListBox => string.Empty,
-        // A hidden field (axPass's passwords) is never read out, as NVDA reads it: protected.
-        TextBox { UseSystemPasswordChar: true } => "protected",
+        // A hidden field (axPass's passwords) is never read out, as NVDA reads it: protected (S-12).
+        TextBoxBase box when IsSecret(box) => "protected",
         TextBoxBase box => CaretLine(box),
         _ => control.Text,
     };
+
+    /// <summary>Whether a text control hides what is typed in it (a password field): its text never leaves the window through the channel (S-12).</summary>
+    internal static bool IsSecret(Control control) =>
+        control is TextBox { UseSystemPasswordChar: true } or TextBox { PasswordChar: not '\0' };
 
     /// <summary>The focused list's items, or the list named, with the selected index: a question's answers, axFile's entries, axGIT's views.</summary>
     private static AxitForm? _formForList;
@@ -287,6 +328,12 @@ internal sealed class AutomationChannel : IMessageFilter
         if (Control.FromChildHandle(GetFocus()) is not TextBoxBase box)
         {
             return new { error = "the focus is not in a text control" };
+        }
+
+        // S-12: a hidden field's text is never read out, by this command or any other; NVDA says "protected".
+        if (IsSecret(box))
+        {
+            return new { lines = new[] { "protected" }, caretLine = 0, count = 1 };
         }
 
         var lines = box.Lines;
@@ -424,14 +471,7 @@ internal sealed class AutomationChannel : IMessageFilter
     [DllImport("user32.dll")]
     private static extern nint GetFocus();
 
-    [DllImport("user32.dll")]
-    private static extern bool SetForegroundWindow(nint hWnd);
 
-    [DllImport("user32.dll")]
-    private static extern nint GetForegroundWindow();
-
-    [DllImport("user32.dll")]
-    private static extern bool PostMessage(nint hWnd, int msg, nint wParam, nint lParam);
 
     [DllImport("user32.dll")]
     private static extern bool GetKeyboardState(byte[] state);

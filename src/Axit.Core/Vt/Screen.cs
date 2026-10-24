@@ -354,11 +354,12 @@ public sealed class Screen
             case 'M':
                 DeleteLines(P(0, 1));
                 break;
+            // Clamped to the scroll region: a count of 65535 would otherwise make and move rows 65535 times (S-41).
             case 'S':
-                ScrollUp(P(0, 1));
+                ScrollUp(Math.Min(P(0, 1), _bottom - _top + 1));
                 break;
             case 'T':
-                ScrollDown(P(0, 1));
+                ScrollDown(Math.Min(P(0, 1), _bottom - _top + 1));
                 break;
             case 'r':
                 SetScrollRegion(P(0, 1), P(1, Rows));

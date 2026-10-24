@@ -1,6 +1,7 @@
 using System.Runtime.InteropServices;
 using System.Text;
 using Axit.Core;
+using static Axit.Forms.User32;
 
 namespace Axit.Forms;
 
@@ -86,6 +87,15 @@ public static class AppMessage
     /// </summary>
     public static bool SendTo(nint target, string appName, string verb, IReadOnlyList<string> paths)
     {
+        // S-13: the window is found by its title and its process's name, which any program can copy; the paths go
+        // only to a window of this very program file, never to a look-alike, which would also get the right to
+        // take the front.
+        if (!IsThisProgram(target))
+        {
+            Log.Error($"A window titled as {appName}'s is not this program's; nothing handed over");
+            return false;
+        }
+
         if (TakesFocus(verb))
         {
             // The window brings itself to the front once it has applied the paths; this process, started by the
@@ -136,6 +146,40 @@ public static class AppMessage
         return Parse(Marshal.PtrToStringUni(data.Data, (int)(data.Length / 2)) ?? string.Empty);
     }
 
+    /// <summary>Whether the window belongs to a process of this program file (the same Axit.exe), asked of Windows by the process's own image path.</summary>
+    private static bool IsThisProgram(nint window)
+    {
+        GetWindowThreadProcessId(window, out var processId);
+        var process = OpenProcess(ProcessQueryLimitedInformation, false, processId);
+        if (process == 0)
+        {
+            return false;
+        }
+
+        try
+        {
+            var size = 1024;
+            var path = new StringBuilder(size);
+            return QueryFullProcessImageNameW(process, 0, path, ref size)
+                && string.Equals(path.ToString(), Environment.ProcessPath, StringComparison.OrdinalIgnoreCase);
+        }
+        finally
+        {
+            CloseHandle(process);
+        }
+    }
+
+    private const uint ProcessQueryLimitedInformation = 0x1000;
+
+    [DllImport("kernel32.dll")]
+    private static extern nint OpenProcess(uint access, bool inherit, uint processId);
+
+    [DllImport("kernel32.dll", CharSet = CharSet.Unicode)]
+    private static extern bool QueryFullProcessImageNameW(nint process, uint flags, StringBuilder path, ref int size);
+
+    [DllImport("kernel32.dll")]
+    private static extern bool CloseHandle(nint handle);
+
     /// <summary>COPYDATASTRUCT: a number of the sender's choosing, the byte count, and the bytes.</summary>
     [StructLayout(LayoutKind.Sequential)]
     private struct CopyData
@@ -147,9 +191,6 @@ public static class AppMessage
 
     [DllImport("user32.dll", CharSet = CharSet.Unicode)]
     private static extern nint SendMessageTimeoutW(nint hWnd, uint msg, nint wParam, ref CopyData lParam, uint flags, uint timeout, out nint result);
-
-    [DllImport("user32.dll")]
-    private static extern uint GetWindowThreadProcessId(nint hWnd, out uint processId);
 
     [DllImport("user32.dll")]
     private static extern bool AllowSetForegroundWindow(uint processId);

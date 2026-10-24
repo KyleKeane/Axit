@@ -187,6 +187,21 @@ public sealed class OverlayPanel : Panel
     /// <summary>The text field's current text.</summary>
     public string InputText => _input.Text;
 
+    /// <summary>
+    /// A password typed into a notice's hidden field goes with the notice, whichever way it closed, Cancel and Escape
+    /// included (security audit S-17): the notice's action has read it by then, and the field held it until the next
+    /// notice before.
+    /// </summary>
+    protected override void OnVisibleChanged(EventArgs e)
+    {
+        if (!Visible && _input.UseSystemPasswordChar)
+        {
+            _input.Text = string.Empty;
+        }
+
+        base.OnVisibleChanged(e);
+    }
+
     /// <summary>Where the caret is in the text field.</summary>
     public int InputCaret => _input.SelectionStart;
 
@@ -331,12 +346,14 @@ public sealed class OverlayPanel : Panel
             };
             button.Click += (_, _) => Choose(choice);
             _buttons.Controls.Add(button);
-            if (choice.IsDefault)
+            // The first default and the first cancel, the ones the key line names (WithKeyLine): a second default (a Close
+            // after Install it now) would make Enter press a button the spoken line did not name (2026-10-24 review).
+            if (choice.IsDefault && DefaultButton is null)
             {
                 DefaultButton = button;
             }
 
-            if (choice.IsCancel)
+            if (choice.IsCancel && CancelButton is null)
             {
                 CancelButton = button;
             }

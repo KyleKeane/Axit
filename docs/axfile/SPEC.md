@@ -78,10 +78,10 @@ folder of the file or project in hand, and sends back. It works entirely offline
   File → Show current file in ▸ **axFile** (the file's folder, the file selected), axGIT's Repository → Show current
   repository in ▸ **axFile**, axTerminal's Session → Show current folder in ▸ **axFile** and axMedia's Queue → Show
   current file in ▸ **axFile** each start a new axFile window (`AxitMenu.Start`, found again in the Axit menu, AX-9.3).
-  From axFile, Folder → Show current folder in ▸ **File Explorer** (Ctrl+W), **axClaude**, **axGIT**, **axTerminal**;
+  From axFile, Folder → Show current folder in ▸ **File Explorer** (Ctrl+W), **axClaude**, **axTerminal**, **axGIT** (bundle AX-9.10);
   Item → **Show in File Explorer** (Ctrl+Shift+W) opens File Explorer with the selected entry selected; Item → Open in
   Axit ▸ **Editor** (Ctrl+E) opens the selected file in axJSON for `.json` and axDown for anything else
-  (`FolderListing.EditorOf`), whatever Enter would do with it; Item → **Preview** (Shift+Enter) and the axMedia items
+  (`Dispatch.EditorOf`, the bundle's one rule), whatever Enter would do with it; Item → **Preview** (Shift+Enter) and the axMedia items
   are AF-5.
 
 ### AF-2 The window
@@ -328,11 +328,13 @@ Every operation here is one line of the Actions list (AF-9) as well as its annou
   longer than a second; after a move the clipboard is cleared, as File Explorer does. "Nothing to paste" without
   files on the clipboard; "Already in this folder" for a cut entry pasted where it is; "Already pasting" for a cut
   whose files a paste is still moving (AF-4.5).
-- AF-4.9 **Open in Axit ▸**: one item per app of the bundle that takes a path (`Dispatch.Apps` without axStart, which
-  takes none and until 2026-10-23 answered with a message box), a new window of that app on the entry: axDown, axJSON and axPreview on the file ("Not a file" on a folder), axMedia on the file with its folder's
-  media files after it, or on a folder's (axMedia hands them to its open window itself), axGIT on the repository that
-  holds the entry, axFile on the folder (or the file in its folder), axClaude and axTerminal on the folder, or on the
-  entry's folder for a file; Editor (Ctrl+E), the submenu's first item, is the quick way to the right editor.
+- AF-4.9 **Open in Axit ▸**: one item per app of the bundle that opens a path (`Dispatch.Apps` whose `Opens` is not
+  Nothing: the utilities, axStart, axClip, axCalc and axProcess, take none), in the bundle's groups with their
+  separators (AX-9.2), a new window of that app on the entry by what it opens (`Dispatch.PathFor`): axDown, axJSON,
+  axPreview and axPass on the file ("Not a file" on a folder), axMedia on the file with its folder's media files after
+  it, or on a folder's (axMedia hands them to its open window itself), axGIT on the repository that holds the entry,
+  axFile on the folder (or the file in its folder), axClaude, axTerminal and axTask on the folder, or on the entry's
+  folder for a file; Editor (Ctrl+E), the submenu's first item, is the quick way to the right editor.
 - AF-4.10 (Ctrl+I inside the open context menu) went with the context menu on 2026-10-23 (AF-D13): the bar's Item
   menu is a standard drop-down and does not take it; Ctrl+I in the list says the entry.
 - AF-4.11 **The user's own programs in Open with ▸** (asked 2026-10-21): a list of programs and scripts, kept in the
@@ -343,8 +345,10 @@ Every operation here is one line of the Actions list (AF-9) as well as its annou
   filter), then the notice "Add a program" with the field "Name" holding the file's name without its extension and
   the buttons Add and Cancel; "Added <name>". Remove a program ▸ lists them by name; choosing one takes it off,
   "Removed <name>". Choosing a program runs it once on the selected entries, or the current one (AF-3.7), every path
-  an argument, in the first entry's folder: a `.ps1` through `powershell.exe -NoProfile -ExecutionPolicy Bypass
-  -File <script>`, since Windows opens a script file in an editor; anything else as the shell starts it
+  an argument, in the first entry's folder: a `.ps1` through Windows PowerShell by its full path (`-NoProfile
+  -ExecutionPolicy Bypass -File <script>`), since Windows opens a script file in an editor; a `.bat` or `.cmd` program
+  is refused an entry whose name holds one of cmd.exe's special characters (`& | < > ^ % ! ( ) , ; =` or a quote),
+  which cmd would run as a command ("<name> not started", security audit S-3); anything else as the shell starts it
   (`ShellExecute` with the arguments, so a batch file and a script whose type has a program registered run too);
   "Started <name>", or "Failed: <reason>" when it cannot start (the file gone, no program for the type). The list is
   refilled each time the submenu opens, so two windows see each other's additions after a restart only (the settings
@@ -419,9 +423,9 @@ and the started process finds its open window and hands the paths over with the 
   Drives ▸ (1. Local Disk (C:) … | ─ | This PC | ─ | Eject this drive | Drive properties; AF-3.11) | Go to folder…
   Ctrl+G | ─ | Up one level Backspace | Refresh F5 | Undo <operation> Ctrl+Z (AF-4.14) | Actions
   (AF-9.1) | ─ | Sort by ▸ (Name ✓ | Date | Size) | Filter… Ctrl+Shift+F | ─ | Show current folder in ▸ (File Explorer
-  Ctrl+W | axClaude | axGIT | axTerminal) | ─ | Exit Alt+F4. **Item (I):** Open Enter | Open with ▸ (Windows default |
+  Ctrl+W | axClaude | axTerminal | axGIT) | ─ | Exit Alt+F4. **Item (I):** Open Enter | Open with ▸ (Windows default |
   Choose a program… | ─ | 1. name (path) … or No programs of your own yet | Add a program… | Remove a program ▸) |
-  Open in Axit ▸ (Editor Ctrl+E | ─ | axClaude | axDown | axJSON | axGIT | axTerminal | axFile | axMedia | axPreview) |
+  Open in Axit ▸ (Editor Ctrl+E | ─ | axClaude | axTerminal | axGIT | ─ | axFile | axDown | axJSON | axPreview | axMedia | ─ | axTask | axPass) |
   Preview Shift+Enter | Play folder in axMedia Ctrl+Enter | Add to axMedia's queue Ctrl+Shift+Q | ─ | Cut Ctrl+X |
   Copy Ctrl+C | Paste Ctrl+V | ─ | Rename F2 | Delete Delete | ─ | New folder… Ctrl+Shift+N | New text file
   Ctrl+Shift+T | Move to folder… | Compress to zip | Extract here | ─ | Copy path Ctrl+Shift+C | Show in File

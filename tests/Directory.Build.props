@@ -15,6 +15,8 @@
     <!-- A lock file per test project (packages.lock.json, committed), so that a test run years from now restores
          exactly the packages that run today (docs/axit/longevity.md 3.12); Dependabot moves the lock files with the packages. -->
     <RestorePackagesWithLockFile>true</RestorePackagesWithLockFile>
+    <!-- In CI the lock files are the law: a package that does not match them fails the restore (security audit S-34). -->
+    <RestoreLockedMode Condition="'$(ContinuousIntegrationBuild)' == 'true'">true</RestoreLockedMode>
   </PropertyGroup>
 
   <ItemGroup>

@@ -21,6 +21,12 @@ public sealed partial class PassForm : ItemForm
     private readonly ToolStripMenuItem _fieldMenu = new("Fiel&d");
     private readonly System.Windows.Forms.Timer _lockTimer = new() { Interval = 30_000 };
 
+    /// <summary>Clears a copied password after <c>ClipboardSeconds</c> (PW-5.4).</summary>
+    private readonly System.Windows.Forms.Timer _clipboardTimer = new() { Interval = 30_000 };
+
+    /// <summary>The clipboard's sequence number right after axPass put a password there; null when none is waiting to be cleared.</summary>
+    private uint? _clipboardSequence;
+
     /// <summary>The entries' fields read so far, by path; emptied when the window locks.</summary>
     private readonly Dictionary<string, ItemDocument> _entries = new(StringComparer.Ordinal);
 
@@ -110,6 +116,7 @@ public sealed partial class PassForm : ItemForm
         PlaceControls(_menu);
 
         _lockTimer.Tick += (_, _) => LockWhenIdle();
+        _clipboardTimer.Tick += (_, _) => ClearCopiedPassword();
         ApplyTextFont();
         RestoreWindow();
         _database = path is not null && File.Exists(path) ? Path.GetFullPath(path)
@@ -130,6 +137,9 @@ public sealed partial class PassForm : ItemForm
     {
         base.OnShown(e);
         _lockTimer.Start();
+        // PW-4.3, security audit S-18: locked when Windows locks, the user switches or disconnects, and on sleep.
+        Microsoft.Win32.SystemEvents.SessionSwitch += OnSessionSwitch;
+        Microsoft.Win32.SystemEvents.PowerModeChanged += OnPowerModeChanged;
         if (ToolPath() is null)
         {
             ShowNotice(new Notice("KeePassXC is not installed", "axPass reads and writes KeePass databases through KeePassXC's command-line tool, which comes with KeePassXC.\r\n\r\nInstall it now installs KeePassXC (Windows asks whether the installer may make changes: choose Yes); axPass then asks for the master password. Or install it by hand from keepassxc.org. If KeePassXC is installed somewhere else, Options, KeePassXC's tool tells axPass where.",
@@ -140,7 +150,7 @@ public sealed partial class PassForm : ItemForm
                     {
                         ShowUnlock(null);
                     }
-                }), IsDefault: true),
+                })),
                 new OverlayChoice("&Open keepassxc.org", () => OpenUrl(ProgramInstall.KeePassXC.Page), StaysOpen: true),
                 OverlayChoice.Close,
             ])
@@ -154,17 +164,52 @@ public sealed partial class PassForm : ItemForm
         }
     }
 
+    /// <summary>The database, for Recently closed (AX-9.4): its path only.</summary>
+    protected override string? PathInHand => _database;
+
     protected override void OnFormClosing(FormClosingEventArgs e)
     {
-        if (_database is not null)
-        {
-            // AX-9.4: the database joins the bundle's Recently closed list (its path only).
-            RecentlyClosed.Remember(AxPassApp.Name, _database);
-        }
-
         _password = null;
         _lockTimer.Stop();
+        ClearCopiedPassword();
+        Microsoft.Win32.SystemEvents.SessionSwitch -= OnSessionSwitch;
+        Microsoft.Win32.SystemEvents.PowerModeChanged -= OnPowerModeChanged;
         base.OnFormClosing(e);
+    }
+
+    private void OnSessionSwitch(object? sender, Microsoft.Win32.SessionSwitchEventArgs e)
+    {
+        if (e.Reason is Microsoft.Win32.SessionSwitchReason.SessionLock or Microsoft.Win32.SessionSwitchReason.ConsoleDisconnect
+            or Microsoft.Win32.SessionSwitchReason.RemoteDisconnect or Microsoft.Win32.SessionSwitchReason.SessionLogoff)
+        {
+            LockFromWindows("Windows locked");
+        }
+    }
+
+    private void OnPowerModeChanged(object? sender, Microsoft.Win32.PowerModeChangedEventArgs e)
+    {
+        if (e.Mode == Microsoft.Win32.PowerModes.Suspend)
+        {
+            LockFromWindows("the computer went to sleep");
+        }
+    }
+
+    /// <summary>Windows' events come on a thread of their own: the lock runs on the window's.</summary>
+    private void LockFromWindows(string reason)
+    {
+        if (IsDisposed || !IsHandleCreated)
+        {
+            return;
+        }
+
+        BeginInvoke(() =>
+        {
+            if (_password is not null)
+            {
+                Log.Info($"Locked: {reason}");
+                Lock();
+            }
+        });
     }
 
     /// <summary>axPass's own keys (PW-7), asked before the shared ones; Enter on a locked window unlocks it.</summary>
@@ -423,6 +468,7 @@ public sealed partial class PassForm : ItemForm
         _tree = null;
         _entries.Clear();
         _undo.Clear();
+        ClearCopiedPassword();
         Fill(select: null);
         Announce("Locked", true);
         ShowUnlock(null);

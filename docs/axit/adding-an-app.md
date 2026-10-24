@@ -65,8 +65,11 @@ the base's. The rest of this section is for a window of a new kind.
 - The menu bar gets the bundle's Axit menu before Help, `CreateAxitMenu()` from the base (AX-9), which places the
   window's Check for updates and Update to items and the bundle's About submenu (AX-9.9); Help holds the app's own
   items only; the window's title ends in ` - AxThing`,
-  which is how the Axit menu tells the apps' windows apart; the window calls `RecentlyClosed.Remember("AxThing", path)`
-  when it closes or swaps its file (AX-9.4), and closes as on Alt+F4 when Close all windows posts `SC_CLOSE` (AX-9.8).
+  which is how the Axit menu tells the apps' windows apart; Recently closed takes the window when it closes by itself
+  (AX-9.4: by the app's name alone, or by the file or folder the window gives as `PathInHand`), and a window that
+  swaps its file calls `RecentlyClosed.Remember` for the old one; it closes as on Alt+F4 when Close all windows posts
+  `SC_CLOSE` (AX-9.8). A window that holds a file or a folder takes the bundle's Show in submenu,
+  `CreateShowInMenu` (AX-9.10), never one of its own.
 - `AxThingKeys`: the window's keys as constants with an `All` list; handle every key in `ProcessWindowKey` from
   `BundleKeys` and `AxThingKeys` and nowhere else (the base handles the text size keys, F1 and the notice's hold
   before it); menu items show the key with `ShortcutKeyDisplayString` (`Item(text, action, key)` in the base).
@@ -82,9 +85,11 @@ the base's. The rest of this section is for a window of a new kind.
 
 ## 5. Wiring
 
-- `Axit.Core/Dispatch`: the verb constant, the usage text, and the entry in `Apps` (the name and the verb), which
-  `Decide` loops over and which gives the app its item under New window, its submenu in the Axit menu (AX-9) and its
-  line in About, Version; `DispatchTests` and `BundleAboutTests` cover every entry by themselves.
+- `Axit.Core/Dispatch`: the verb constant, the usage text, and the entry in `Apps`, placed in its group (the name, the
+  verb, the project, the `AppGroup`, what it `Opens`, and `ShowIn` for an app that works in a folder), which `Decide`
+  loops over and which gives the app its item under New window, its submenu in Open windows by type, its place in
+  axFile's Open in Axit and the Show in submenus, and its line in About, Version (AX-9.2); `DispatchTests` and
+  `BundleAboutTests` cover every entry by themselves.
 - `src/Axit/Program.cs`: `case Dispatch.AxThing: SetAppId("Axit.AxThing"); AxThingApp.Run(launch.Arguments);`.
 - `src/Axit/Axit.csproj`: the project reference. `Axit.sln`: the two projects (`dotnet sln add`).
 - `tests/Axit.Tests`: the project reference and the window's table in `KeyTests.Windows`.

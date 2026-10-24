@@ -1,4 +1,3 @@
-using System.Runtime.InteropServices;
 using AxStart.Core;
 using Axit.Core;
 using Axit.Forms;
@@ -10,58 +9,27 @@ namespace AxStart;
 /// under it that never takes the focus (AS-D2), and a status bar. The process runs from sign-in with the window
 /// hidden (AS-D3); the hotkey, registered on this window (AS-4), shows it in front with the field empty, and Enter,
 /// Escape, Alt+F4 and the focus going to another program hide it again. Only Quit axStart ends
-/// the process. The notices, the fonts, the update flow and the announcements are the bundle's window base
-/// (<see cref="AxitForm"/>).
+/// the process. The hidden window with its hotkey, its showing and hiding and the rule of the foreground are the
+/// bundle's background window (<see cref="HotkeyForm"/>, since axClip, 2026-10-23); the notices, the fonts, the update
+/// flow and the announcements are the window base under it (<see cref="AxitForm"/>).
 /// </summary>
-public sealed class StartForm : AxitForm
+public sealed class StartForm : HotkeyForm
 {
-    private const int WM_HOTKEY = 0x0312;
-    private const int WM_ACTIVATE = 0x0006;
-    private const int HotkeyId = 1;
-    private const int MOD_NOREPEAT = 0x4000;
-
-    /// <summary>How long the typing pauses before the first match is said (AS-3.2).</summary>
-    private const int SpeakDelayMs = 300;
-
-    /// <summary>How long after a start the foreground is left to the program started before the rule of <see cref="GiveForegroundBack"/> is applied (AS-3.4).</summary>
-    private const int StartSettleMs = 3000;
-
     private readonly StartSettings _settings;
-    private readonly bool _hidden;
     private readonly MenuStrip _menu = new();
-    private readonly TextBox _field = new();
-    private readonly ListBox _list = new();
     private readonly StatusStrip _status = new();
     private readonly ToolStripStatusLabel _countLabel;
-    private readonly System.Windows.Forms.Timer _speak = new() { Interval = SpeakDelayMs };
     private IReadOnlyList<ProgramEntry> _programs = [];
     private IReadOnlyList<ProgramEntry> _matches = [];
-    private Hotkey? _registered;
-
-    /// <summary>
-    /// The window the foreground goes back to whenever this process holds it while the launcher is hidden (AS-3.4):
-    /// the window of another program that was in front when the launcher last showed, or, before any showing, when
-    /// the process started. The one place the rule reads; <see cref="ShowLauncher"/> the one place that sets it.
-    /// </summary>
-    private nint _giveBackTo = GetForegroundWindow();
-
-    private Hotkey? _captured;
-    private bool _capturing;
-    private bool _quitting;
     private bool _reading;
 
     public StartForm(bool hidden, StartSettings settings, string? settingsError)
-        : base(AxStartApp.Name, settings, StartSettings.DefaultPath, settingsError)
+        : base(AxStartApp.Name, settings, StartSettings.DefaultPath, settingsError, hidden)
     {
         _settings = settings;
-        _hidden = hidden;
-        Text = AxStartApp.Name;
-        ShowInTaskbar = false;
-        TopMost = true;
-        StartPosition = FormStartPosition.Manual;
 
         // ---- menus (AS-5.2); the keys are handled in ProcessWindowKey from the table, the items only show them ----
-        var start = new ToolStripMenuItem("Ax&Start");
+        var start = new ToolStripMenuItem("ax&Start");
         start.DropDownItems.Add(Item("&Start", () => StartSelected(administrator: false), AxStartKeys.Start));
         start.DropDownItems.Add(Item("Start as &administrator", () => StartSelected(administrator: true), AxStartKeys.StartAsAdministrator));
         start.DropDownItems.Add(Item("Open file &location", OpenFileLocation, AxStartKeys.OpenFileLocation));
@@ -69,7 +37,7 @@ public sealed class StartForm : AxitForm
         start.DropDownItems.Add(new ToolStripSeparator());
         start.DropDownItems.Add(Item("&Refresh programs", () => Do(() => RefreshAsync(announce: true)), AxStartKeys.Refresh));
         start.DropDownItems.Add(new ToolStripSeparator());
-        start.DropDownItems.Add(Item("&Hide", () => HideLauncher(), AxStartKeys.Hide));
+        start.DropDownItems.Add(Item("&Hide", () => HideWindow(), AxStartKeys.Hide));
         start.DropDownItems.Add(new ToolStripMenuItem("&Quit axStart", null, (_, _) => Quit()));
 
         var options = new ToolStripMenuItem("&Options");
@@ -79,7 +47,7 @@ public sealed class StartForm : AxitForm
             Toggle("&Start with Windows", _settings.StartWithWindows, v =>
             {
                 _settings.StartWithWindows = v;
-                StartupEntry.Apply(v);
+                SignInStart.Apply(AxStartApp.Name, Dispatch.AxStart, v);
             }),
             Toggle("Say the first &match while typing", _settings.SayFirstMatch, v => _settings.SayFirstMatch = v)));
         options.DropDownItems.Add(CreateDeveloperMenu());
@@ -91,67 +59,19 @@ public sealed class StartForm : AxitForm
         _menu.Items.AddRange([start, options, CreateAxitMenu(), help]);
         MainMenuStrip = _menu;
 
-        // ---- the field (AS-3.1): the caret is always here; the list's keys are the field's (AS-3.3) ----
-        _field.Dock = DockStyle.Top;
-        _field.TabIndex = 0;
-        _field.AccessibleName = "Search programs";
-        _field.TextChanged += (_, _) => OnTyped();
-
-        // ---- the matches: for the eyes and NVDA's object navigation, never the focus (AS-D2) ----
-        _list.Dock = DockStyle.Fill;
-        _list.IntegralHeight = false;
-        _list.TabStop = false;
-        _list.AccessibleName = "Programs, 0";
-        _list.GotFocus += (_, _) => _field.Focus();
-        _list.DoubleClick += (_, _) => StartSelected(administrator: false);
-
-        _speak.Tick += (_, _) =>
-        {
-            _speak.Stop();
-            SayFirst();
-        };
+        // ---- the field and the matches (AS-3.1, AS-D2): HotkeyForm's, named here ----
+        SearchField.AccessibleName = "Search programs";
+        Matches.AccessibleName = "Programs, 0";
+        Matches.DoubleClick += (_, _) => StartSelected(administrator: false);
 
         // ---- the status bar (AS-3.1): the count of programs on the left ----
         (_countLabel, _) = StatusLayout.Pair(_status);
 
-        // AS-3.5: the focus gone to another program hides the window, as the Start menu does.
-        Deactivate += (_, _) => BeginInvoke(() => HideIfAnotherProgramIsInFront());
-
         // Docked from the last control to the first: the menu at the top, the status bar at the bottom, the field
         // under the menu, and the list (or the notice over both) what is left.
-        Controls.AddRange([Overlay, _list, _field, _status, _menu]);
+        Controls.AddRange([Overlay, Matches, SearchField, _status, _menu]);
         ApplyTextFont();
         Fill(null);
-    }
-
-    /// <summary>For the starting process (AS-1.2): this process's hidden window, which a second start hands "show" to.</summary>
-    public static nint FindRunning()
-    {
-        var process = (uint)Environment.ProcessId;
-        for (var window = FindWindowExW(0, 0, null, AxStartApp.Name); window != 0; window = FindWindowExW(0, window, null, AxStartApp.Name))
-        {
-            GetWindowThreadProcessId(window, out var owner);
-            if (owner != process && OfThisProgram(owner))
-            {
-                return window;
-            }
-        }
-
-        return 0;
-    }
-
-    private static bool OfThisProgram(uint processId)
-    {
-        try
-        {
-            using var other = System.Diagnostics.Process.GetProcessById((int)processId);
-            using var self = System.Diagnostics.Process.GetCurrentProcess();
-            return string.Equals(other.ProcessName, self.ProcessName, StringComparison.OrdinalIgnoreCase);
-        }
-        catch (ArgumentException)
-        {
-            return false;
-        }
     }
 
     // ---- what the window base asks for ----
@@ -160,22 +80,22 @@ public sealed class StartForm : AxitForm
 
     protected override void HideForNotice()
     {
-        _field.Visible = false;
-        _list.Visible = false;
+        SearchField.Visible = false;
+        Matches.Visible = false;
     }
 
     protected override void ShowAfterNotice()
     {
-        _field.Visible = true;
-        _list.Visible = true;
+        SearchField.Visible = true;
+        Matches.Visible = true;
     }
 
-    protected override Control FocusTarget => _field;
+    protected override Control FocusTarget => SearchField;
 
     protected override void ApplyFont(Font font)
     {
-        _field.Font = font;
-        _list.Font = font;
+        SearchField.Font = font;
+        Matches.Font = font;
     }
 
     protected override IReadOnlyList<string> RestartArguments() => [Dispatch.AxStart];
@@ -185,130 +105,60 @@ public sealed class StartForm : AxitForm
     protected override IEnumerable<string> DiagnosticsLines =>
     [
         $"Programs: {_programs.Count}",
-        $"Hotkey: {_settings.Key}, {(_registered is null ? "not registered" : "registered")}",
+        $"Hotkey: {_settings.Key}, {(HotkeyRegistered ? "registered" : "not registered")}",
     ];
 
-    /// <summary>
-    /// The first showing, which Application.Run asks for before the handle exists (AS-1.1): the handle is made, so that
-    /// the hotkey and the hand-over reach the window, and nothing shows; <see cref="OnHandleCreated"/> then shows the
-    /// window itself unless it started with --hidden. Every later showing (<see cref="ShowLauncher"/>) finds the handle made and goes through.
-    /// </summary>
-    protected override void SetVisibleCore(bool value)
-    {
-        if (!IsHandleCreated)
-        {
-            CreateHandle();
-            value = false;
-        }
+    protected override Hotkey CurrentHotkey => _settings.Key;
 
-        base.SetVisibleCore(value);
+    protected override void KeepHotkey(Hotkey key)
+    {
+        _settings.HotkeyText = key.ToString();
+        SaveSettings();
     }
 
-    protected override void OnHandleCreated(EventArgs e)
+    /// <summary>The field emptied (unless a start failed) and the window centred on the screen of the program that had the focus (AS-3.4).</summary>
+    protected override void PrepareShowing(Rectangle area, bool keepText)
     {
-        base.OnHandleCreated(e);
-        StartupEntry.Apply(_settings.StartWithWindows);
-        if (!Register(_settings.Key))
+        if (!NoticeOpen && !keepText)
         {
-            // AS-4.3: never a launcher that cannot be reached.
-            BeginInvoke(() =>
-            {
-                ShowLauncher();
-                ShowNotice(Notice.Plain("Hotkey", $"The hotkey {_settings.Key} is taken by another program. Options, Hotkey, to choose another.") with { Unprompted = true });
-            });
+            SearchField.Clear();
         }
-        else if (!_hidden)
+
+        var width = Math.Max(MinimumSize.Width, area.Width / 4);
+        var height = Math.Max(MinimumSize.Height, Height - ClientSize.Height + _menu.Height + SearchField.Height + Matches.ItemHeight * 12 + _status.Height + 4);
+        Bounds = new Rectangle(area.Left + (area.Width - width) / 2, area.Top + (area.Height - height) / 2, width, height);
+    }
+
+    /// <summary>The caret in the field, and a fresh read: a program installed since the last showing is there by the time the typing is done (AS-2.1).</summary>
+    protected override void AfterShowing()
+    {
+        if (!NoticeOpen)
         {
-            BeginInvoke(() => ShowLauncher());
+            SearchField.Select();
         }
 
         Do(() => RefreshAsync(announce: false));
     }
 
-    protected override void OnHandleDestroyed(EventArgs e)
+
+    protected override void OnHandleCreated(EventArgs e)
     {
-        if (_registered is not null)
-        {
-            UnregisterHotKey(Handle, HotkeyId);
-            _registered = null;
-        }
-
-        base.OnHandleDestroyed(e);
+        base.OnHandleCreated(e);
+        SignInStart.Apply(AxStartApp.Name, Dispatch.AxStart, _settings.StartWithWindows);
+        Do(() => RefreshAsync(announce: false));
     }
-
-    protected override void OnFormClosing(FormClosingEventArgs e)
-    {
-        // AS-1.4: Alt+F4 and Close all windows hide the window; Quit axStart, the update's own close (AX-3.2) and
-        // Windows' own end end the process.
-        if (!_quitting && !ClosingForUpdate && e.CloseReason == CloseReason.UserClosing)
-        {
-            e.Cancel = true;
-            HideLauncher();
-        }
-
-        base.OnFormClosing(e);
-    }
-
-    protected override void WndProc(ref Message m)
-    {
-        if (m.Msg == WM_ACTIVATE && (m.WParam & 0xFFFF) != 0 && !IsWindowVisible(Handle))
-        {
-            // AS-3.4: the hidden window must never hold the keyboard. Windows activated it when axStart started hidden
-            // and when it hid, and the user's typing went into a window nobody could see (2026-10-22).
-            Log.Info("Activated while hidden; the front given back");
-            BeginInvoke(GiveForegroundBack);
-        }
-
-        if (m.Msg == WM_HOTKEY && m.WParam == HotkeyId)
-        {
-            if (_capturing)
-            {
-                // The hotkey pressed in Hotkey…: the key in use chosen again.
-                CaptureKey(_settings.Key);
-            }
-            else if (Visible && ContainsFocus)
-            {
-                Log.Info("Hidden: the hotkey");
-                HideLauncher();
-            }
-            else
-            {
-                ShowLauncher();
-            }
-
-            return;
-        }
-
-        base.WndProc(ref m);
-    }
-
-    /// <summary>A second start's "show" (AS-1.2), through the base: the window shown with the focus in its field once the sender has its answer.</summary>
-    protected override Action? TakeHandOver(HandOver message) => message.Verb == AppMessage.Show ? () => ShowLauncher() : null;
 
     // ---- keys (AS-3.3, AS-5.3): every key comes from BundleKeys or AxStartKeys, and is handled here only ----
 
     protected override bool ProcessWindowKey(Keys keyData)
     {
+        if (ProcessMatchKey(keyData, AxStartKeys.NextMatch, AxStartKeys.PreviousMatch, AxStartKeys.FirstMatch, AxStartKeys.LastMatch))
+        {
+            return true;
+        }
+
         switch (keyData)
         {
-            case AxStartKeys.NextMatch:
-                SelectMatch(_list.SelectedIndex + 1);
-                return true;
-            case AxStartKeys.PreviousMatch:
-                SelectMatch(_list.SelectedIndex - 1);
-                return true;
-            case BundleKeys.PageDown:
-                SelectMatch(Math.Min(_list.SelectedIndex + Page(), _matches.Count - 1));
-                return true;
-            case BundleKeys.PageUp:
-                SelectMatch(Math.Max(_list.SelectedIndex - Page(), 0));
-                return true;
-            case AxStartKeys.FirstMatch:
-                SelectMatch(0);
-                return true;
-            case AxStartKeys.LastMatch:
-                SelectMatch(_matches.Count - 1);
-                return true;
             case AxStartKeys.Start:
                 StartSelected(administrator: false);
                 return true;
@@ -327,224 +177,35 @@ public sealed class StartForm : AxitForm
             case AxStartKeys.Hide:
                 // AS-3.4: hidden at once, whatever the field holds (asked 2026-10-22); the next showing starts empty.
                 Log.Info("Hidden: Escape");
-                HideLauncher();
+                HideWindow();
                 return true;
         }
 
         return false;
     }
 
-    // ---- showing and hiding (AS-3.4, AS-4.1) ----
-
-    /// <summary>The window in front, centred on the screen of the program that had the focus, with the field empty (unless <paramref name="keepText"/>: a start that failed) and the caret in it.</summary>
-    private void ShowLauncher(bool keepText = false)
-    {
-        if (Visible && ContainsFocus)
-        {
-            return;
-        }
-
-        if (!NoticeOpen && !keepText)
-        {
-            _field.Clear();
-        }
-
-        // AS-3.4: the window the foreground goes back to when the launcher hides, when it is another program's (this
-        // process's own windows, after a start that failed or a hide Windows answered with one of them, are not it).
-        var before = GetForegroundWindow();
-        GetWindowThreadProcessId(before, out var owner);
-        if (owner != (uint)Environment.ProcessId)
-        {
-            _giveBackTo = before;
-        }
-
-        var area = Screen.FromHandle(before).WorkingArea;
-        var width = Math.Max(MinimumSize.Width, area.Width / 4);
-        var height = Math.Max(MinimumSize.Height, Height - ClientSize.Height + _menu.Height + _field.Height + _list.ItemHeight * 12 + _status.Height + 4);
-        Bounds = new Rectangle(area.Left + (area.Width - width) / 2, area.Top + (area.Height - height) / 2, width, height);
-        Log.Info("Shown");
-        Show();
-        AxitMenu.Activate(Handle);
-        if (!NoticeOpen)
-        {
-            _field.Select();
-        }
-
-        // AS-2.1: a program installed since the last showing is there by the time the typing is done.
-        Do(() => RefreshAsync(announce: false));
-    }
-
-    /// <summary>
-    /// The window hidden, and the foreground given back by the rule of <see cref="GiveForegroundBack"/>, unless
-    /// <paramref name="giveBack"/> is off: after a start, the program started takes the front itself, and a process
-    /// no longer in front could not start it in front.
-    /// </summary>
-    private void HideLauncher(bool giveBack = true)
-    {
-        _speak.Stop();
-        if (NoticeOpen)
-        {
-            CloseNotice(null);
-        }
-
-        _capturing = false;
-        Hide();
-        if (giveBack)
-        {
-            GiveForegroundBack();
-        }
-    }
-
-    /// <summary>
-    /// The one rule of the foreground (AS-3.4): while the launcher is hidden, this process never keeps it. Whenever
-    /// the process holds it with the window hidden (Windows activates a hidden window of the process that hid one or
-    /// that started hidden; a start brought nothing up), the window of <see cref="_giveBackTo"/> gets it, allowed
-    /// because this process is in front at that moment. Called as the window hides, on an activation while hidden,
-    /// and once three seconds after a start; nothing happens when another program has the front (one rule since
-    /// 2026-10-23; three patches with three fields before).
-    /// </summary>
-    private void GiveForegroundBack()
-    {
-        if (IsWindowVisible(Handle))
-        {
-            return;
-        }
-
-        GetWindowThreadProcessId(GetForegroundWindow(), out var owner);
-        if (owner == (uint)Environment.ProcessId && _giveBackTo != 0 && IsWindow(_giveBackTo))
-        {
-            SetForegroundWindow(_giveBackTo);
-        }
-    }
-
-    /// <summary>After a start (AS-3.4): a program without a window, or a declined administrator prompt, leaves the front to this hidden process; the rule gives it back.</summary>
-    private async Task GiveForegroundBackLaterAsync()
-    {
-        await Task.Delay(StartSettleMs);
-        GiveForegroundBack();
-    }
-
-    /// <summary>
-    /// The focus went elsewhere (AS-3.5): the window hides when another program took the front, as the Start menu
-    /// does; it stays for a picker of its own (the font) and for NVDA's own windows (its menu, its settings), since
-    /// NVDA is how the launcher is seen, not another program (decided 2026-10-23).
-    /// </summary>
-    private void HideIfAnotherProgramIsInFront()
-    {
-        if (!Visible || NoticeOpen)
-        {
-            return;
-        }
-
-        GetWindowThreadProcessId(GetForegroundWindow(), out var owner);
-        if (owner == (uint)Environment.ProcessId)
-        {
-            return;
-        }
-
-        // Which process took the front, by its program name only, for the case of a hide nobody asked for.
-        var name = ProcessName(owner);
-        if (name.StartsWith("nvda", StringComparison.OrdinalIgnoreCase))
-        {
-            Log.Info("NVDA came to the front; the launcher stays");
-            return;
-        }
-
-        Log.Info($"Hidden: {name} came to the front");
-        HideLauncher();
-    }
-
-    private static string ProcessName(uint processId)
-    {
-        try
-        {
-            using var process = System.Diagnostics.Process.GetProcessById((int)processId);
-            return process.ProcessName;
-        }
-        catch (ArgumentException)
-        {
-            return "a program that has ended";
-        }
-    }
-
-    private void Quit()
-    {
-        _quitting = true;
-        Close();
-    }
-
     // ---- the matches (AS-2.2, AS-3.2, AS-3.3) ----
 
-    private ProgramEntry? Selected => _list.SelectedIndex >= 0 && _list.SelectedIndex < _matches.Count ? _matches[_list.SelectedIndex] : null;
+    private ProgramEntry? Selected => Matches.SelectedIndex >= 0 && Matches.SelectedIndex < _matches.Count ? _matches[Matches.SelectedIndex] : null;
 
-    private void OnTyped()
-    {
-        Fill(null);
-        _speak.Stop();
-        if (_settings.SayFirstMatch && _field.Text.Trim().Length > 0)
-        {
-            _speak.Start();
-        }
-    }
+    protected override int MatchCount => _matches.Count;
+
+    protected override string SpokenMatch(int index) => ProgramMatch.Spoken(_matches[index], index, _matches.Count);
+
+    protected override string NothingSaid => Matches.Items.Count > 0 ? Matches.Items[0].ToString() ?? string.Empty : "No programs";
+
+    protected override bool SayFirstMatch => _settings.SayFirstMatch;
+
+    protected override void Refill() => Fill(null);
 
     /// <summary>The list made again from the typed text, the selection on <paramref name="keep"/> when it is still there, the first otherwise.</summary>
     private void Fill(string? keep)
     {
-        _matches = ProgramMatch.Find(_programs, _field.Text, _settings.Starts);
-        _list.BeginUpdate();
-        _list.Items.Clear();
-        _list.Items.AddRange(_matches.Select(entry => (object)entry.Name).ToArray());
-        if (_matches.Count == 0)
-        {
-            _list.Items.Add(_programs.Count == 0 ? "Reading the programs" : ProgramMatch.NoMatch(_field.Text));
-        }
-
-        _list.EndUpdate();
-        _list.AccessibleName = $"Programs, {_matches.Count}";
+        _matches = ProgramMatch.Find(_programs, SearchField.Text, _settings.Starts);
         var index = keep is null ? 0 : Math.Max(0, _matches.ToList().FindIndex(entry => entry.Name == keep));
-        _list.SelectedIndex = index;
+        ShowMatches(_matches.Select(entry => entry.Name).ToList(), _programs.Count == 0 ? "Reading the programs" : ProgramMatch.NoMatch(SearchField.Text), $"Programs, {_matches.Count}", index);
         _countLabel.Text = $"{_programs.Count} programs";
     }
-
-    /// <summary>The first match and the count, or that nothing matches, after the typing paused (AS-3.2).</summary>
-    private void SayFirst()
-    {
-        if (_field.Text.Trim().Length == 0)
-        {
-            return;
-        }
-
-        Announce(Selected is { } entry ? ProgramMatch.Spoken(entry, _list.SelectedIndex, _matches.Count) : ProgramMatch.NoMatch(_field.Text), true);
-    }
-
-    /// <summary>The selection moved to <paramref name="target"/> and said; at an end the edge earcon first, and the match it stays on said all the same (AS-3.3).</summary>
-    private void SelectMatch(int target)
-    {
-        _speak.Stop();
-        if (_matches.Count == 0)
-        {
-            Sounds.Edge();
-            SayFirstOrNothing();
-            return;
-        }
-
-        target = Math.Clamp(target, 0, _matches.Count - 1);
-        if (target == _list.SelectedIndex)
-        {
-            // Nothing moves: the earcon, then the match again, so that the last thing heard is the position and not
-            // the typed text.
-            Sounds.Edge();
-        }
-        else
-        {
-            _list.SelectedIndex = target;
-        }
-
-        Announce(ProgramMatch.Spoken(_matches[target], target, _matches.Count), true);
-    }
-
-    /// <summary>The matches the list shows at once, for Page Up and Page Down.</summary>
-    private int Page() => Math.Max(1, _list.ClientSize.Height / Math.Max(1, _list.ItemHeight));
 
     /// <summary>The Applications folder read again on its thread; the list swapped in with the selection kept by name (AS-2.1).</summary>
     private async Task RefreshAsync(bool announce)
@@ -590,10 +251,10 @@ public sealed class StartForm : AxitForm
         // Hidden first, so that the program comes up in front; the foreground is not handed back, or the program,
         // started by a process no longer in front, would open behind.
         Log.Info("Hidden: a program started");
-        HideLauncher(giveBack: false);
+        HideWindow(giveBack: false);
         if (AppsFolder.Start(entry, administrator) is { } error)
         {
-            ShowLauncher(keepText: true);
+            ShowWindowInFront(keepText: true);
             Announce(error, true);
             return;
         }
@@ -617,7 +278,7 @@ public sealed class StartForm : AxitForm
             return;
         }
 
-        HideLauncher(giveBack: false);
+        HideWindow(giveBack: false);
         AxitMenu.Start(Dispatch.AxFile, target);
         Do(GiveForegroundBackLaterAsync);
     }
@@ -634,130 +295,5 @@ public sealed class StartForm : AxitForm
     }
 
     /// <summary>What a command on a match says with none: the list's one line, "No programs match xyz".</summary>
-    private void SayFirstOrNothing() => Announce(_list.Items.Count > 0 ? _list.Items[0].ToString() ?? string.Empty : "No programs", true);
-
-    // ---- the hotkey (AS-4) ----
-
-    /// <summary>The hotkey registered in place of the one before; false, with nothing registered, when another program holds it.</summary>
-    private bool Register(Hotkey key)
-    {
-        if (_registered is not null)
-        {
-            UnregisterHotKey(Handle, HotkeyId);
-            _registered = null;
-        }
-
-        if (!RegisterHotKey(Handle, HotkeyId, (uint)(key.Modifiers | MOD_NOREPEAT), (uint)key.Key))
-        {
-            Log.Info($"The hotkey {key} could not be registered");
-            return false;
-        }
-
-        _registered = key;
-        Log.Info($"Hotkey {key} registered");
-        return true;
-    }
-
-    /// <summary>Options → Hotkey… (AS-4.2): a field that takes the next key pressed with its modifiers; Enter keeps it.</summary>
-    private void ShowHotkeyNotice()
-    {
-        _captured = null;
-        _capturing = true;
-        ShowNotice(new Notice("Hotkey",
-            $"Press the key that brings axStart up, with Ctrl, Alt or the Windows key, then Enter. Now: {_settings.Key}.",
-            [
-                new OverlayChoice("&Save", () => ApplyHotkey(_captured), IsDefault: true),
-                new OverlayChoice("&Cancel", () => _capturing = false, IsCancel: true),
-            ])
-        {
-            Input = new OverlayInput("Press the new key:", "Press the new key", _settings.Key.ToString(), "Press a key first", KeyHook: OnHotkeyField),
-        });
-    }
-
-    /// <summary>A key in the Hotkey field: taken as the new hotkey, or refused with the reason; Enter, Escape and Tab stay the notice's.</summary>
-    private bool OnHotkeyField(Keys keyData)
-    {
-        var code = keyData & Keys.KeyCode;
-        var modifiers = keyData & Keys.Modifiers;
-        if ((modifiers == Keys.None && code is Keys.Return or Keys.Escape or Keys.Tab) || keyData == (Keys.Shift | Keys.Tab))
-        {
-            return false;
-        }
-
-        if (code is Keys.ShiftKey or Keys.ControlKey or Keys.Menu or Keys.LWin or Keys.RWin)
-        {
-            return true;
-        }
-
-        var flags = ((modifiers & Keys.Control) != 0 ? Hotkey.Control : 0)
-            | ((modifiers & Keys.Alt) != 0 ? Hotkey.Alt : 0)
-            | ((modifiers & Keys.Shift) != 0 ? Hotkey.Shift : 0)
-            | (WindowsKeyDown() ? Hotkey.Windows : 0);
-        CaptureKey(new Hotkey(flags, (int)code));
-        return true;
-    }
-
-    private void CaptureKey(Hotkey key)
-    {
-        if (key.Refusal() is { } refusal)
-        {
-            Announce(refusal, true);
-            return;
-        }
-
-        _captured = key;
-        Overlay.SetInputText(key.ToString());
-        Announce(key.ToString(), true);
-    }
-
-    private void ApplyHotkey(Hotkey? key)
-    {
-        _capturing = false;
-        var old = _settings.Key;
-        if (key is null || key == old)
-        {
-            Announce($"Hotkey {old}", true);
-            return;
-        }
-
-        if (!Register(key))
-        {
-            Register(old);
-            Announce($"{key} is taken by another program", true);
-            return;
-        }
-
-        _settings.HotkeyText = key.ToString();
-        SaveSettings();
-        Announce($"Hotkey {key}", true);
-    }
-
-    private static bool WindowsKeyDown() => GetKeyState(0x5B) < 0 || GetKeyState(0x5C) < 0;
-
-    [DllImport("user32.dll", SetLastError = true)]
-    private static extern bool RegisterHotKey(nint hWnd, int id, uint modifiers, uint key);
-
-    [DllImport("user32.dll")]
-    private static extern bool UnregisterHotKey(nint hWnd, int id);
-
-    [DllImport("user32.dll")]
-    private static extern nint GetForegroundWindow();
-
-    [DllImport("user32.dll")]
-    private static extern bool SetForegroundWindow(nint hWnd);
-
-    [DllImport("user32.dll")]
-    private static extern bool IsWindow(nint hWnd);
-
-    [DllImport("user32.dll")]
-    private static extern bool IsWindowVisible(nint hWnd);
-
-    [DllImport("user32.dll")]
-    private static extern uint GetWindowThreadProcessId(nint hWnd, out uint processId);
-
-    [DllImport("user32.dll")]
-    private static extern short GetKeyState(int key);
-
-    [DllImport("user32.dll", CharSet = CharSet.Unicode)]
-    private static extern nint FindWindowExW(nint parent, nint after, string? className, string title);
+    private void SayFirstOrNothing() => Announce(NothingSaid, true);
 }

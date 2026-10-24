@@ -91,7 +91,7 @@ expect commands Check for updates
 expect commands Version, Axit, About
 menu Version
 expect state "notice":"Axit 
-expect state axDown, axJSON, axGIT, axTerminal
+expect state axTerminal, axGIT, axFile, axDown, axJSON
 wait 1200
 keys escape
 expect state "notice":null

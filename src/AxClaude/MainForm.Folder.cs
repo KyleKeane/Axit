@@ -7,40 +7,15 @@ internal sealed partial class MainForm
 {
     // ---- project folder ----
 
-    /// <summary>Session → Show current folder in → axGIT (FR-8.2): a new axGIT window on the repository that holds the project folder.</summary>
-    private void OpenInAxGit()
+    /// <summary>Session → Show current folder in (FR-8.2): the project folder, or "No project folder" said.</summary>
+    private string? FolderOrSay()
     {
         if (_folder is null)
         {
             Announce("No project folder", true);
-            return;
         }
 
-        AxitMenu.Start(Dispatch.AxGit, _folder);
-    }
-
-    /// <summary>Session → Show current folder in → axTerminal: a new axTerminal window with a shell in the project folder (docs/axterminal/SPEC.md AT-1.5).</summary>
-    private void OpenInAxTerminal()
-    {
-        if (_folder is null)
-        {
-            Announce("No project folder", true);
-            return;
-        }
-
-        AxitMenu.Start(Dispatch.AxTerminal, _folder);
-    }
-
-    /// <summary>Session → Show current folder in → axFile: a new axFile window listing the project folder (docs/axfile/SPEC.md AF-1.3).</summary>
-    private void OpenInAxFile()
-    {
-        if (_folder is null)
-        {
-            Announce("No project folder", true);
-            return;
-        }
-
-        AxitMenu.Start(Dispatch.AxFile, _folder);
+        return _folder;
     }
 
     /// <summary>Session → Show current folder in → File Explorer, Ctrl+W (FR-8.2): the folder in File Explorer, one of the system's own windows (D23).</summary>
@@ -71,7 +46,7 @@ internal sealed partial class MainForm
         if (_folder is { } old && !string.Equals(old, folder, StringComparison.OrdinalIgnoreCase))
         {
             // AX-9.4: the folder left behind joins the bundle's Recently closed list.
-            RecentlyClosed.Remember("axClaude", old);
+            RecentlyClosed.Remember(AppName, old);
         }
 
         _folder = folder;
@@ -100,7 +75,7 @@ internal sealed partial class MainForm
     protected override string Verb => Dispatch.AxClaude;
 
     /// <summary>The project folder, for the bundle's Recently closed list (AX-9.4).</summary>
-    protected override string? FolderInHand => _folder;
+    protected override string? PathInHand => _folder;
 
     /// <summary>Restarts Claude in another folder (Open folder, Open recent folder), with a system line and an announcement.</summary>
     protected override void SwitchFolder(string folder)

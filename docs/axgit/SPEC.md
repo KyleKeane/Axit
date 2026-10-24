@@ -73,13 +73,24 @@ opens in the editor for its type (AG-1.4, AG-D1).
   (a new axClaude on the repository's folder), ▸ **axTerminal** (a shell there, docs/axterminal/SPEC.md AT-1.5) and
   ▸ **axFile** (the folder listed, docs/axfile/SPEC.md AF-1.3), and Changes → **Open file in editor** (Ctrl+E) opens
   the selected file in axJSON for `.json` and axDown otherwise.
-- AG-1.5a When git is missing, its notice offers Install Git now (bundle AX-2.9) and, once git is there, opens the
-  repository.
-- AG-1.5 Git itself: `git` on the PATH (`GitRunner.Program`; the tests point it at a fake `git.cmd` for the output,
-  the timeout and the open pipe), run with `-C <repository>`, `-c core.quotepath=false`, `-c color.ui=never`,
+- AG-1.5a When git is missing (neither on the PATH nor in Program Files, `GitRunner.Program`), its notice offers
+  Install Git now (bundle AX-2.9) and, once git is there, opens the repository.
+- AG-1.5 Git itself: `git.exe` in the PATH's full folders, never the current folder (`GitRunner.Program`,
+  `SystemPrograms.OnPath`; the tests point it at a fake `git.cmd` for the output, the timeout and the open pipe),
+  run with `-C <repository>`, `-c core.quotepath=false`, `-c color.ui=never`, `-c core.fsmonitor=false`,
+  `-c protocol.ext.allow=never` (security audit S-1, S-2), diffs and `show` with `--no-ext-diff --no-textconv`,
   `GIT_TERMINAL_PROMPT=0` and UTF-8 output; one command at a time, on a background task, never on the UI thread
   (AX-7.5), with a timeout (60 seconds, 10 minutes for fetch, pull and push). When `git` is not found, the notice
   **Git was not found** says where to get it (git-scm.com) and the window stays with every command disabled.
+- AG-1.6 **A repository's own programs** (2026-10-24, security audit S-2). A repository that arrives with its `.git`
+  folder (an archive, a USB stick, a share) can name programs git runs: a file monitor (`git status`), diff and filter
+  drivers, hooks (commit, switch), an ssh command (fetch, push), a credential helper. On opening, before any other
+  command, axGIT reads the names of the repository's configuration (`git config --local --includes --name-only
+  --list`, which runs nothing) and its hooks folder (`git rev-parse --git-path hooks`); each that runs a program
+  (`GitTrust`) is set to nothing on every command (`-c <name>=`, the hooks folder `NUL`), and the notice **This
+  repository runs programs of its own** names them, with **Keep them off** (Enter, Escape) and **Trust this
+  repository**, which keeps the repository in the settings (`trustedRepositories`) and lets git run them as in a
+  console from then on.
 
 ### AG-2 The window
 

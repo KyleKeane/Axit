@@ -3,6 +3,7 @@ using System.Runtime.InteropServices;
 using System.Text;
 using Axit.Core;
 using Axit.Core.Updates;
+using static Axit.Forms.User32;
 
 namespace Axit.Forms;
 
@@ -34,14 +35,13 @@ public sealed class AxitMenu : ToolStripMenuItem
         void ShowNotice(Notice notice) => owner.ShowNotice(notice);
         var newWindow = new ToolStripMenuItem("&New window");
         var byType = new ToolStripMenuItem("Open windows &by type");
-        foreach (var app in Dispatch.Apps)
+        AddApps(newWindow.DropDownItems, Dispatch.Apps, app => new ToolStripMenuItem(AxitWindows.AppLabel(app), null, (_, _) => Start(app.Verb, null)));
+        AddApps(byType.DropDownItems, Dispatch.Apps, app =>
         {
-            var verb = app.Verb;
-            newWindow.DropDownItems.Add(new ToolStripMenuItem(AxitWindows.AppLabel(app), null, (_, _) => Start(verb, null)));
             var list = new ToolStripMenuItem(AxitWindows.AppLabel(app));
-            byType.DropDownItems.Add(list);
             _perApp.Add((app, list));
-        }
+            return list;
+        });
 
         var about = new ToolStripMenuItem("&About");
         about.DropDownItems.Add(new ToolStripMenuItem("&Version", null, (_, _) => ShowNotice(Notice.Plain(BundleAbout.VersionTitle, BundleAbout.Version(owner.LatestReleaseState)))));
@@ -170,6 +170,25 @@ public sealed class AxitMenu : ToolStripMenuItem
         SetForegroundWindow(handle);
     }
 
+    /// <summary>
+    /// The apps as menu items in the bundle's order, a separator before each new group (AX-9.2, 2026-10-24): every list
+    /// of apps in the windows is made here, so that a new app of <see cref="Dispatch.Apps"/> is in all of them.
+    /// </summary>
+    public static void AddApps(ToolStripItemCollection items, IEnumerable<App> apps, Func<App, ToolStripMenuItem> item)
+    {
+        AppGroup? group = null;
+        foreach (var app in apps)
+        {
+            if (group is { } last && last != app.Group)
+            {
+                items.Add(new ToolStripSeparator());
+            }
+
+            group = app.Group;
+            items.Add(item(app));
+        }
+    }
+
     /// <summary>A new window of the app: this program file with the app's verb and, for a recently closed item, its path; a new process (B-2).</summary>
     public static void Start(string verb, string? path) => StartWith(verb, path is null ? [] : [path]);
 
@@ -182,6 +201,8 @@ public sealed class AxitMenu : ToolStripMenuItem
         }
 
         var info = new ProcessStartInfo(exe) { UseShellExecute = false };
+        // A new window of a test run joins the run; nothing else ever inherits its variables (security audit S-11).
+        AutomationEnvironment.PassTo(info);
         info.ArgumentList.Add(verb);
         foreach (var argument in arguments)
         {
@@ -214,7 +235,6 @@ public sealed class AxitMenu : ToolStripMenuItem
 
     private const uint GW_OWNER = 4;
     private const int SW_RESTORE = 9;
-    private const uint WM_SYSCOMMAND = 0x0112;
     private const nint SC_CLOSE = 0xF060;
 
     private delegate bool EnumWindowsProc(nint hWnd, nint lParam);
@@ -223,13 +243,7 @@ public sealed class AxitMenu : ToolStripMenuItem
     private static extern bool EnumWindows(EnumWindowsProc callback, nint lParam);
 
     [DllImport("user32.dll")]
-    private static extern bool IsWindowVisible(nint hWnd);
-
-    [DllImport("user32.dll")]
     private static extern nint GetWindow(nint hWnd, uint cmd);
-
-    [DllImport("user32.dll")]
-    private static extern uint GetWindowThreadProcessId(nint hWnd, out uint processId);
 
     [DllImport("user32.dll", CharSet = CharSet.Unicode)]
     private static extern int GetWindowTextLength(nint hWnd);
@@ -242,10 +256,4 @@ public sealed class AxitMenu : ToolStripMenuItem
 
     [DllImport("user32.dll")]
     private static extern bool ShowWindow(nint hWnd, int cmd);
-
-    [DllImport("user32.dll")]
-    private static extern bool SetForegroundWindow(nint hWnd);
-
-    [DllImport("user32.dll")]
-    private static extern bool PostMessage(nint hWnd, uint msg, nint wParam, nint lParam);
 }

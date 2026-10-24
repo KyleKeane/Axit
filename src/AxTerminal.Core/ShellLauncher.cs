@@ -1,4 +1,5 @@
 using System.Text;
+using Axit.Core;
 
 namespace AxTerminal.Core;
 
@@ -52,13 +53,13 @@ public static class ShellLauncher
                         } catch { $code = -1 }
                     }
                 }
-                if ($null -ne $code) { $out += "$e]133;D;$code$b" } else { $out += "$e]133;D$b" }
+                if ($null -ne $code) { $out += "$e]133;D;$code;axit=AXITNONCE$b" } else { $out += "$e]133;D;axit=AXITNONCE$b" }
             }
             $global:__AxitHistoryId = $lastId
             $loc = $executionContext.SessionState.Path.CurrentLocation.Path
-            $out += "$e]133;A$b$e]9;9;`"$loc`"$b"
+            $out += "$e]133;A;axit=AXITNONCE$b$e]9;9;`"$loc`"$b"
             $text = if ($global:__AxitPrompt) { & $global:__AxitPrompt } else { "PS $loc> " }
-            $out += "$text$e]133;B$b"
+            $out += "$text$e]133;B;axit=AXITNONCE$b"
             $out
         }
         $global:ProgressPreference = 'SilentlyContinue'
@@ -78,9 +79,22 @@ public static class ShellLauncher
         + "/[A-Za-z]) __axit_dir=\"${__axit_dir:1:1}:/\"; __axit_dir=${__axit_dir^};; "
         + "*) __axit_dir=$(cygpath -w \"$__axit_dir\" 2>/dev/null || printf %s \"$__axit_dir\");; esac; "
         + "__axit_dir=${__axit_dir//\\//\\\\}; "
-        + "if [ -n \"$__axit_ran\" ]; then printf '\\033]133;D;%s\\007' \"$__axit_code\"; fi; __axit_ran=1; "
-        + "printf '\\033]133;A\\007\\033]9;9;%s\\007' \"$__axit_dir\"; "
-        + "case \"$PS1\" in *'133;B'*) ;; *) PS1=\"$PS1\"'\\[\\033]133;B\\007\\]';; esac";
+        + "if [ -n \"$__axit_ran\" ]; then printf '\\033]133;D;%s;axit=AXITNONCE\\007' \"$__axit_code\"; fi; __axit_ran=1; "
+        + "printf '\\033]133;A;axit=AXITNONCE\\007\\033]9;9;%s\\007' \"$__axit_dir\"; "
+        + "case \"$PS1\" in *'133;B'*) ;; *) PS1=\"$PS1\"'\\[\\033]133;B;axit=AXITNONCE\\007\\]';; esac";
+
+    /// <summary>
+    /// The place of the session's secret in the marks (security audit S-37): every mark the shell's own prompt prints
+    /// ends in <c>;axit=&lt;secret&gt;</c>, which <see cref="NewNonce"/> makes for each start and the model asks for, so
+    /// that a mark in a program's output or a file's text, which cannot know the secret, is ignored.
+    /// </summary>
+    public const string NonceToken = "AXITNONCE";
+
+    /// <summary>A new secret for one start of the shell: 128 random bits as hexadecimal.</summary>
+    public static string NewNonce() => Convert.ToHexString(System.Security.Cryptography.RandomNumberGenerator.GetBytes(16));
+
+    /// <summary>A prompt text with the session's secret in its marks.</summary>
+    public static string WithNonce(string text, string nonce) => text.Replace(NonceToken, nonce, StringComparison.Ordinal);
 
     /// <summary>What the menus and the system lines call each shell.</summary>
     public static string Describe(ShellKind kind) => kind switch
@@ -172,7 +186,7 @@ public static class ShellLauncher
     /// (<c>--login -i</c>, its marks through the environment too), the custom line as typed. Null when the shell is
     /// not installed or the custom line is empty.
     /// </summary>
-    public static string? BuildCommandLine(ShellKind kind, string? customCommandLine = null)
+    public static string? BuildCommandLine(ShellKind kind, string? customCommandLine = null, string nonce = NonceToken)
     {
         if (kind == ShellKind.Custom)
         {
@@ -189,19 +203,19 @@ public static class ShellLauncher
         {
             ShellKind.CommandPrompt => Quote(program),
             ShellKind.GitBash => $"{Quote(program)} --login -i",
-            _ => $"{Quote(program)} -NoLogo -NoExit -EncodedCommand {EncodedSnippet()}",
+            _ => $"{Quote(program)} -NoLogo -NoExit -EncodedCommand {EncodedSnippet(nonce)}",
         };
     }
 
     /// <summary>The snippet as <c>-EncodedCommand</c> takes it: base64 of its UTF-16 text.</summary>
-    public static string EncodedSnippet() => Convert.ToBase64String(Encoding.Unicode.GetBytes(PromptSnippet.ReplaceLineEndings("\n")));
+    public static string EncodedSnippet(string nonce = NonceToken) => Convert.ToBase64String(Encoding.Unicode.GetBytes(WithNonce(PromptSnippet, nonce).ReplaceLineEndings("\n")));
 
     /// <summary>
     /// The user's environment, plus TERM for the programs that look, GIT_PAGER and GH_PAGER set to cat, which git and
     /// the GitHub CLI document as "no pager" (AT-D7), and for Command Prompt the PROMPT with the marks around the
     /// prompt it had, for Git Bash the PROMPT_COMMAND with the marks.
     /// </summary>
-    public static Dictionary<string, string> BuildEnvironment(ShellKind kind)
+    public static Dictionary<string, string> BuildEnvironment(ShellKind kind, string nonce = NonceToken)
     {
         var env = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
         foreach (System.Collections.DictionaryEntry entry in Environment.GetEnvironmentVariables())
@@ -215,11 +229,11 @@ public static class ShellLauncher
         if (kind == ShellKind.CommandPrompt)
         {
             env.TryGetValue("PROMPT", out var current);
-            env["PROMPT"] = CommandPromptWithMarks(current);
+            env["PROMPT"] = CommandPromptWithMarks(current, nonce);
         }
         else if (kind == ShellKind.GitBash)
         {
-            env["PROMPT_COMMAND"] = BashPromptCommand;
+            env["PROMPT_COMMAND"] = WithNonce(BashPromptCommand, nonce);
         }
 
         return env;
@@ -230,10 +244,10 @@ public static class ShellLauncher
     /// terminator, <c>$P</c> the directory): the D without an exit code, since cmd has none to give, A, the directory,
     /// the prompt as it was (<c>$P$G</c> when none was set), B.
     /// </summary>
-    public static string CommandPromptWithMarks(string? current)
+    public static string CommandPromptWithMarks(string? current, string nonce = NonceToken)
     {
         var text = string.IsNullOrWhiteSpace(current) ? "$P$G" : current;
-        return "$e]133;D$e\\$e]133;A$e\\$e]9;9;$P$e\\" + text + "$e]133;B$e\\";
+        return $"$e]133;D;axit={nonce}$e\\$e]133;A;axit={nonce}$e\\$e]9;9;$P$e\\" + text + $"$e]133;B;axit={nonce}$e\\";
     }
 
     private static string Quote(string path) => path.Contains(' ') ? $"\"{path}\"" : path;
@@ -244,22 +258,6 @@ public static class ShellLauncher
 
     private static string? FindOnPath(string file)
     {
-        foreach (var dir in (Environment.GetEnvironmentVariable("PATH") ?? string.Empty).Split(';', StringSplitOptions.RemoveEmptyEntries))
-        {
-            try
-            {
-                var candidate = Path.Combine(dir.Trim(), file);
-                if (File.Exists(candidate))
-                {
-                    return candidate;
-                }
-            }
-            catch (ArgumentException)
-            {
-                // A PATH entry with characters a path cannot hold: skipped.
-            }
-        }
-
-        return null;
+        return SystemPrograms.OnPath(file);
     }
 }

@@ -51,7 +51,10 @@ the restart by the app itself (2.3.0).
 - axJSON, an editor for JSON files (`docs/axjson/SPEC.md`): raw mode built 2026-10-18 as the editor shell plus JSON's
   navigation keys and Format (AJ-D4, B-14: the shell shared, one app per file type, one file per window, the Axit menu
   for the open windows). Still to come: structured mode, a form of real input fields from templates (AJ-3), and the
-  caret's path in the status bar (AJ-2.4).
+  caret's path in the status bar (AJ-2.4). The user's direction (2026-10-24): structured mode follows the item apps'
+  field management and editing (axTask and axPass, `docs/axit/item-apps.md`: a navigator, a pane of typed fields,
+  Enter to change one), and gets a focused pass of its own later, since making it general for any JSON adds
+  complexity to the interface and the interactions; not started before that pass.
 - axDown and axJSON, a file changed outside the editor (asked and built 2026-10-18, AD-3.6): compared when the window
   becomes active again; reloaded with the caret kept when nothing is unsaved, said once otherwise, and Save offers
   Reload and lose mine. No watcher thread, no merging. A watcher for live reload while the window stays active is
@@ -98,6 +101,9 @@ the restart by the app itself (2.3.0).
   account (`longevity.md` section 3, each marked), in twenty commits on `palette`. Open: the NVDA checks of all of it
   (review section 9), the `ApplyChrome` and mirror restructure (review 5.6), and the longevity items for the
   maintainer (3.2 the organization, 3.13 the archive branch, 3.14 the yearly pass).
+- **The inventory of 2026-10-24** (`inventory-2026-10-24.md`, asked as axCalc and axClip merged): the copies, the
+  dead code and the notes that had drifted, eleven cleanups the same day, and twelve open items ranked, the first of
+  them the seventeen hand-kept lists a new app touches.
 
 - **Axit's own folder and file picker** (asked 2026-10-23; kept for later with the later apps, its priority to be chosen; spec first): in place of the Windows Open, Save as and folder pickers, an owned modal window in front of the window it serves (as the Windows picker stays), with a menu bar for the extras (favourites, sort, hidden files, "Use the Windows picker instead"). The view is axFile's folder list with its keys (arrows, Enter, Backspace, Left and Right, type-ahead; Home and End stay the first and last entry); Ctrl+Left goes to This PC, in axFile too; Ctrl+G opens the Go to field with the path completion, which also completes favourites and the known folders by name (places by name without crowding the list). The Save version adds a name field; every version has buttons for its action and Cancel. It takes axFile's list, `FolderListing` and the path completion into the shared pieces. The user weighed the Windows dialogs' familiarity against Axit's consistency; the choice was Axit's own picker with a way back to Windows'.
 
@@ -166,7 +172,7 @@ library dependency (B-10: `git.exe` and the file system through the APIs already
   rest) is never reimplemented. To verify before the spec: the current release's Windows support and mount options,
   and how it lives beside a running desktop app. Local first (B-15): the vault's cloud copy is the user's sync client's
   business.
-- **axTask** (redesigned 2026-10-24 at the user's direction, specified, not built: `docs/axtask/SPEC.md`, with the
+- **axTask** (redesigned 2026-10-24 at the user's direction, built and merged the same day after its NVDA pass: `docs/axtask/SPEC.md`, with the
   shape it shares with axPass in `docs/axit/item-apps.md`): lists as folders and each item a JSON file of typed fields
   (title, type, value), a navigator like axFile's and a detail pane, All tasks and smart lists. It replaces the first
   design below, built as axList (Markdown lists) on the branch `axlist`, which stays as a record and is not merged.
@@ -201,7 +207,8 @@ library dependency (B-10: `git.exe` and the file system through the APIs already
 - **Apps suggested on 2026-10-23, recorded at the user's ask** (no specs; ranked by daily use and fit with the
   bundle's rules). The two picked to start with, if any: axClip, then axCalc or axHTTP as a small app that follows
   `adding-an-app.md`.
-  1. **axClip** (above), in detail: axStart's hotkey and search list over what was copied; typing filters, Enter
+  1. **axClip** (above; built 2026-10-23 on the branch `axclip`, `docs/axclip/SPEC.md`, on `HotkeyForm` moved out of
+     axStart; brought up to main and merged 2026-10-24; its NVDA pass owed, and axStart's again for the move), in detail: axStart's hotkey and search list over what was copied; typing filters, Enter
      pastes, a key reads an item in full. The Windows clipboard history (Windows+V) reads poorly with NVDA.
   2. **axOCR**, text from a screenshot, an image file or the window in front, through Windows' offline OCR engine
      (`Windows.Media.Ocr`), the text opened in axPreview: images, scanned PDFs, dialogs that read badly, screenshots
@@ -213,16 +220,16 @@ library dependency (B-10: `git.exe` and the file system through the APIs already
      on the user's command.
   4. **axSQL**, a SQLite browser: the tables, a query field, the result as a list read row by row with a key for the
      whole row. Windows ships SQLite (`winsqlite3.dll`), so no library; the shared database planned above could use it.
-  5. **axProcess** (built 2026-10-23 on the branch `axprocess`, `docs/axprocess/SPEC.md`, NVDA pass owed), processes, services and startup items (named so, since AxTask is the to-do manager): a filtered
+  5. **axProcess** (built 2026-10-23 on the branch `axprocess`, `docs/axprocess/SPEC.md`, merged 2026-10-24 after its NVDA pass), processes, services and startup items (named so, since AxTask is the to-do manager): a filtered
      list with memory and CPU, keys to end, restart and show the program file in axFile. Task Manager's lists read
      only in part. Windows APIs only.
-  6. **axCalc** (above), in detail: a field for an expression, each answer a line of a transcript to arrow through
+  6. **axCalc** (above; built 2026-10-23 on the branch `axcalc`, `docs/axcalc/SPEC.md`, merged 2026-10-24; NVDA pass owed), in detail: a field for an expression, each answer a line of a transcript to arrow through
      and copy, hex, binary and units for development. The smallest of these.
   7. **axMail** (above): the largest daily need and the largest build (IMAP, SMTP, OAuth sign-in for Gmail and
      Outlook), so it waits until the small apps have proved their patterns.
   Not planned: a full browser (a web view, B-10; AxWeb above is a reader) and a PDF reader (Windows has no built-in
   way to pull text from a PDF; axOCR covers scanned pages).
-- **The bundle's list in the branches' apps** (AX-8.6, 2026-10-24): axCalc's history and axList's list become `Axit.Forms/AxitList` (type-to-find with Shift backwards, the edge earcon) when their branches merge; `ListTests` would fail on them otherwise.
+- **The bundle's list in the branches' apps** (AX-8.6, 2026-10-24): axCalc's history became `Axit.Forms/AxitList` at its merge (AC-5.7); axList's list would too if its branch were ever merged.
 - The order the user set: the spec, then the infrastructure, then the build; axTerminal first, since its
   infrastructure is the moves; axFile next; the two engines verified before their specs are written.
 

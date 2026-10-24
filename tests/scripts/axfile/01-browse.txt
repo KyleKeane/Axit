@@ -211,12 +211,13 @@ keys ctrl+g
 expect state "notice":"Go to folder"
 expect focus "name":"Path"
 expect focus \\nav\\"
-# An environment variable is expanded (AXIT_HOME is the run's own folder, set by the runner).
+# An environment variable is expanded (SystemRoot, which every Windows has; the run's own AXIT_HOME is taken out of
+# the window's environment as it starts, security audit S-11).
 expect focus "name":"Path"
-type %AXIT_HOME%
+type %SystemRoot%
 keys enter
-expect said ! home,
-expect state "title":"home - axFile"
+expect said ! Windows,
+expect state "title":"Windows - axFile"
 # A file's path: its folder with the file selected.
 keys ctrl+g
 expect focus "name":"Path"

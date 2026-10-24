@@ -83,4 +83,15 @@ public sealed class LinksTests : IDisposable
         Directory.CreateDirectory(Path.GetDirectoryName(path)!);
         File.WriteAllText(path, document.ToText());
     }
+
+    /// <summary>S-5: a link that is not relative, or leads off this computer, is never opened; it reads as missing.</summary>
+    [Fact]
+    public void A_rooted_or_network_link_is_never_followed()
+    {
+        var from = Path.Combine(Path.GetTempPath(), "tasks", "Home", "Fix.json");
+        Assert.Null(ItemFolder.Resolve(from, "//server/share/x.json"));
+        Assert.Null(ItemFolder.Resolve(from, @"\\server\share\x.json"));
+        Assert.Null(ItemFolder.Resolve(from, "C:/Windows/win.ini"));
+        Assert.Equal("missing: x", Links.Spoken(from, "//server/share/x.json"));
+    }
 }

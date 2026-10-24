@@ -78,7 +78,7 @@ public sealed class EditorSettingsTests
 
         settings.RememberFile(@"c:\WORK\11.md");
         settings.RememberFile(@"C:\work\3.md");
-        Assert.Equal(EditorSettings.MaxRecentFiles, settings.RecentFiles.Count);
+        Assert.Equal(RecentPaths.Max, settings.RecentFiles.Count);
         Assert.Equal([@"C:\work\3.md", @"c:\WORK\11.md", @"C:\work\10.md"], settings.RecentFiles.Take(3));
         Assert.DoesNotContain(@"C:\work\0.md", settings.RecentFiles);
     }

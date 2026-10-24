@@ -16,7 +16,7 @@ public sealed class GitLogTests
         Assert.Equal(3, commits.Count);
         Assert.Equal("3369581 2026-10-18 Kyle: Release 2.11.0", commits[0].Label);
         Assert.Equal("c2e4c25 2026-10-18 Kyle: Save conversation as is Export conversation: colons, too", commits[2].Label);
-        Assert.Equal(["show", "--stat", "--format=medium", "efe0662"], commits[1].ShowArguments);
+        Assert.Equal(["show", "--no-ext-diff", "--no-textconv", "--stat", "--format=medium", "efe0662"], commits[1].ShowArguments);
     }
 
     [Fact]

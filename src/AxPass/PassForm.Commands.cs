@@ -407,28 +407,65 @@ public sealed partial class PassForm
 
         try
         {
-            Clipboard.SetText(user);
+            // Marked private as the password is: no copy in Windows clipboard history or axClip (S-15).
+            PrivateClipboard.Copy(user);
             Announce("Copied the user name of " + entry.Name, true);
         }
-        catch (Exception ex) when (ex is System.Runtime.InteropServices.ExternalException or InvalidOperationException)
+        catch (System.Runtime.InteropServices.ExternalException ex)
         {
             Fail("The clipboard could not be written: " + ex.Message);
         }
     }
 
-    /// <summary>Ctrl+C: the password on the clipboard by the tool's <c>clip</c>, which clears it after 30 seconds (PW-5.4, PW-D4).</summary>
+    /// <summary>The seconds a copied password stays on the clipboard (PW-5.4).</summary>
+    private const int ClipboardSeconds = 30;
+
+    /// <summary>
+    /// Ctrl+C (PW-5.4, PW-D4; security audit S-15): the one password read from the tool at this moment (<c>show -s -a
+    /// Password</c>), put on the clipboard marked private, so that Windows clipboard history, the cloud clipboard and
+    /// axClip keep no copy, and cleared after 30 seconds, on lock and on close, if nothing else was copied meanwhile.
+    /// The tool's own <c>clip</c> set no such marks on Windows.
+    /// </summary>
     private void CopyPassword()
     {
-        if (SelectedEntry() is not { } entry || _password is not { } password || _database is not { } database || ToolPath() is not { } cli)
+        if (SelectedEntry() is not { } entry || _password is null)
         {
             return;
         }
 
         Do(async () =>
         {
-            var result = await Task.Run(() => KeePassCli.StartLasting(cli, KeePassCli.On("clip", database, null, entry.Path, "30"), [password], 1500));
-            Announce(result is { Succeeded: false } failed ? failed.Why : $"Copied the password of {entry.Name}; the clipboard clears in 30 seconds", true);
+            if (await Cli("show", ["-s", "-a", EntryFields.Password], [entry.Path]) is not { } result)
+            {
+                return;
+            }
+
+            try
+            {
+                // Only the line end the tool adds: a password may end in spaces.
+                _clipboardSequence = PrivateClipboard.Copy(result.Output.TrimEnd('\r', '\n'));
+            }
+            catch (System.Runtime.InteropServices.ExternalException ex)
+            {
+                Fail("The clipboard could not be written: " + ex.Message);
+                return;
+            }
+
+            _clipboardTimer.Stop();
+            _clipboardTimer.Start();
+            Announce($"Copied the password of {entry.Name}; the clipboard clears in {ClipboardSeconds} seconds", true);
         });
+    }
+
+    /// <summary>The password copied by axPass taken off the clipboard, if it is still there.</summary>
+    private void ClearCopiedPassword()
+    {
+        _clipboardTimer.Stop();
+        if (_clipboardSequence is { } sequence)
+        {
+            _clipboardSequence = null;
+            PrivateClipboard.ClearIfUnchanged(sequence);
+        }
     }
 
     /// <summary>Ctrl+U: the entry's URL in the browser.</summary>
@@ -441,7 +478,15 @@ public sealed partial class PassForm
 
         if (_entries.TryGetValue(entry.Path, out var fields) && EntryFields.ValueOf(fields, EntryFields.Url) is { Length: > 0 } url)
         {
-            OpenUrl(url);
+            // S-4: a web address only; a database from elsewhere could hold \\server\x.exe, file: or another scheme.
+            if (EntryFields.WebAddress(url) is { } web)
+            {
+                OpenUrl(web);
+            }
+            else
+            {
+                Announce($"Not opened: {entry.Name}'s URL is not a web address", true);
+            }
         }
         else
         {

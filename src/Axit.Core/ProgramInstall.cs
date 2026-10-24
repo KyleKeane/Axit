@@ -20,11 +20,14 @@ public sealed record ProgramInstall(string Name, string? WingetId, string? Power
     /// <summary>Claude Code's own installer, for this user only, as its setup page gives it.</summary>
     public static readonly ProgramInstall ClaudeCode = new("Claude Code", null, "irm https://claude.ai/install.ps1 | iex", "https://code.claude.com/docs/en/setup", AsksForAdministrator: false);
 
-    /// <summary>winget, Windows' package manager (the App Installer); null on a Windows without it.</summary>
+    /// <summary>
+    /// winget, Windows' package manager (the App Installer), where Windows puts it for the user; null on a Windows
+    /// without it. Never a winget.exe found on the PATH, which any folder there could hold (security audit S-10).
+    /// </summary>
     public static string? Winget()
     {
         var apps = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "Microsoft", "WindowsApps", "winget.exe");
-        return File.Exists(apps) ? apps : OnPath("winget.exe");
+        return File.Exists(apps) ? apps : null;
     }
 
     /// <summary>Whether this program can be installed from here: its own installer, or winget being there.</summary>
@@ -36,7 +39,7 @@ public sealed record ProgramInstall(string Name, string? WingetId, string? Power
         ProcessStartInfo info;
         if (PowerShellCommand is { } command)
         {
-            info = new ProcessStartInfo("powershell.exe");
+            info = new ProcessStartInfo(SystemPrograms.PowerShell);
             foreach (var argument in new[] { "-NoProfile", "-ExecutionPolicy", "Bypass", "-Command", command })
             {
                 info.ArgumentList.Add(argument);
@@ -62,9 +65,9 @@ public sealed record ProgramInstall(string Name, string? WingetId, string? Power
         return info;
     }
 
-    /// <summary>winget's arguments: the package by its exact id, every question answered, the installer silent.</summary>
+    /// <summary>winget's arguments: the package by its exact id from winget's own source (S-10: never another source the user added), every question answered, the installer silent.</summary>
     public static IReadOnlyList<string> WingetArguments(string id) =>
-        ["install", "--id", id, "--exact", "--silent", "--accept-package-agreements", "--accept-source-agreements", "--disable-interactivity"];
+        ["install", "--id", id, "--exact", "--source", "winget", "--silent", "--accept-package-agreements", "--accept-source-agreements", "--disable-interactivity"];
 
     /// <summary>
     /// The process's PATH made again from Windows' own (the machine's, then the user's), so that a program installed
@@ -90,27 +93,5 @@ public sealed record ProgramInstall(string Name, string? WingetId, string? Power
         }
 
         return string.Join(';', entries);
-    }
-
-    /// <summary>The first folder of the PATH that holds the file; null when none does.</summary>
-    public static string? OnPath(string fileName)
-    {
-        foreach (var folder in (Environment.GetEnvironmentVariable("PATH") ?? string.Empty).Split(Path.PathSeparator, StringSplitOptions.RemoveEmptyEntries))
-        {
-            try
-            {
-                var path = Path.Combine(folder.Trim('"'), fileName);
-                if (File.Exists(path))
-                {
-                    return path;
-                }
-            }
-            catch (ArgumentException)
-            {
-                // A PATH entry that is no path.
-            }
-        }
-
-        return null;
     }
 }

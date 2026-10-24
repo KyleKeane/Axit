@@ -100,7 +100,8 @@ taskbar. It works entirely offline (bundle G6).
   the screen with the focus, top-most while shown, without a taskbar button, and its title is "axStart". Before the first read of the programs
   has come back the list's one line is "Reading the programs".
 - AS-3.2 **Typing** refills the list with the matches of the new text and selects the first; 300 ms after the last
-  change, one notification says the first match and the count, "Calculator, 1 of 2", or "No programs match xyz";
+  change, one notification says the first match and the count, "Calculator, 1 of 2", or "No programs match xyz",
+  or "Reading the programs" before the first read has come back (2026-10-24, the list's one line, as Down says it);
   with an empty field nothing is said. Options → General → Say the first match while typing (on) turns this off, and
   then Ctrl+I says it on demand.
 - AS-3.3 **The keys in the field** (AS-D2): Down and Up move the selection one match and say it, "Notepad++, 2 of 3";
@@ -183,16 +184,16 @@ the screen's width and twelve lines of the list high.
 
 ```
 src/AxStart.Core/    class library (net10.0): ProgramEntry (display name, parsing name, kind, target, from what the
-                     shell gives), ProgramMatch (the matching and the order of AS-2.2), Hotkey (a key as text and
-                     back, and the rule of AS-4.2), StartSettings; references Axit.Core
+                     shell gives), ProgramMatch (the matching and the order of AS-2.2), StartSettings; references
+                     Axit.Core (whose Hotkey is a key as text and back with the rule of AS-4.2, and whose SignInStart
+                     is the Run key's value; both axStart's until axClip, 2026-10-23)
 src/AxStart/         class library (net10.0-windows): AxStartApp (Run, Usage, the one-instance hand-over), StartForm
-                     (the window, on AxitForm: the field with its KeyDown hook, the list, the menus, the keys, the
-                     hotkey through RegisterHotKey, the hiding), AppsFolder (the shell's Applications folder read
-                     through IShellItem and IEnumShellItems, and the start through the shell), StartupEntry (the
-                     Run key's value), AxStartKeys, HelpText; references
-                     AxStart.Core, Axit.Core, Axit.Forms
-tests/AxStart.Tests/ ProgramMatchTests (the order, the words, accents, the kinds), HotkeyTests (the text both ways,
-                     the refusals, the settings)
+                     (the window, on Axit.Forms' HotkeyForm, which holds the hotkey, the hiding and the foreground:
+                     the field with its KeyDown hook, the list, the menus, the keys), AppsFolder (the shell's
+                     Applications folder read through IShellItem and IEnumShellItems, and the start through the
+                     shell), AxStartKeys, HelpText; references AxStart.Core, Axit.Core, Axit.Forms
+tests/AxStart.Tests/ ProgramMatchTests (the order, the words, accents, the kinds), StartSettingsTests (the settings);
+                     the hotkey's text both ways and its refusals are tests/Axit.Tests' HotkeyTests
 docs/axstart/        this spec, user-guide.md (embedded), nvda-test-plan.md
 ```
 

@@ -6,8 +6,8 @@ namespace Axit.Tests;
 public class ProgramInstallTests
 {
     [Fact]
-    public void WingetInstallsTheExactPackageSilently() =>
-        Assert.Equal(["install", "--id", "Git.Git", "--exact", "--silent", "--accept-package-agreements", "--accept-source-agreements", "--disable-interactivity"],
+    public void WingetInstallsTheExactPackageFromItsOwnSourceSilently() =>
+        Assert.Equal(["install", "--id", "Git.Git", "--exact", "--source", "winget", "--silent", "--accept-package-agreements", "--accept-source-agreements", "--disable-interactivity"],
             ProgramInstall.WingetArguments("Git.Git"));
 
     [Fact]
@@ -25,7 +25,7 @@ public class ProgramInstallTests
     public void ClaudeCodesOwnInstallerRunsInPowerShellWithoutAWindow()
     {
         var info = ProgramInstall.ClaudeCode.StartInfo()!;
-        Assert.Equal("powershell.exe", info.FileName);
+        Assert.Equal(SystemPrograms.PowerShell, info.FileName);
         Assert.Equal(["-NoProfile", "-ExecutionPolicy", "Bypass", "-Command", "irm https://claude.ai/install.ps1 | iex"], info.ArgumentList);
         Assert.True(info.CreateNoWindow);
         Assert.True(ProgramInstall.ClaudeCode.CanInstall);
