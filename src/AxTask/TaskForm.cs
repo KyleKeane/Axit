@@ -33,12 +33,14 @@ public sealed partial class TaskForm : ItemForm
     {
         _settings = settings;
 
-        // ---- menus; the keys are handled in ProcessWindowKey from the tables, the items only show them ----
+        // ---- menus and keys: one command list (docs/axit/app-kit.md AK-2), each key from the tables (TK-7) ----
+        // The shared keys (ItemKeys) are ItemForm's commands, registered after these by PlaceControls; the items here
+        // for them only show them. A key in a second menu is an item showing it too: its command is the first menu's.
         // The first menu holds what every pane has; List and Item act on the navigator's selection, Field on the
         // detail pane's, and only the menu of where the focus is and what is selected is enabled (UpdateRowMenus).
         var file = new ToolStripMenuItem("&Folder");
         file.DropDownItems.Add(new ToolStripMenuItem("Top &folder...", null, (_, _) => ChooseTopFolder()));
-        file.DropDownItems.Add(Item("&All tasks", ShowAllTasks, AxTaskKeys.AllTasks));
+        Add(file, new Command("&All tasks", AxTaskKeys.AllTasks, ShowAllTasks) { When = NotRenaming, Mark = CommandMark.Open });
         file.DropDownItems.Add(Item("&Refresh", () => Refresh(announce: true), ItemKeys.Refresh));
         file.DropDownItems.Add(Item("&Undo", Undo, ItemKeys.Undo));
         file.DropDownItems.Add(new ToolStripSeparator());
@@ -50,15 +52,15 @@ public sealed partial class TaskForm : ItemForm
         _listMenu.DropDownItems.Add(new ToolStripMenuItem("New &smart list...", null, (_, _) => NewSmartList()));
         _listMenu.DropDownItems.Add(Item("&Rename", RenameSelected, ItemKeys.Rename));
         _listMenu.DropDownItems.Add(Item("Ar&chive", () => WithRow(DeleteRow), ItemKeys.Delete));
-        _listMenu.DropDownItems.Add(Item("Move to s&ection...", MoveToSection, AxTaskKeys.MoveToSection));
+        Add(_listMenu, new Command("Move to s&ection...", AxTaskKeys.MoveToSection, MoveToSection) { When = InNavigator });
         _listMenu.DropDownItems.Add(Item("Pre&vious section", () => JumpSection(-1), ItemKeys.PreviousSection));
         _listMenu.DropDownItems.Add(Item("Ne&xt section", () => JumpSection(1), ItemKeys.NextSection));
         _listMenu.DropDownItems.Add(new ToolStripSeparator());
         _listMenu.DropDownItems.Add(new ToolStripMenuItem("Add &Done to every item", null, (_, _) => SwitchList(done: true)));
         _listMenu.DropDownItems.Add(new ToolStripMenuItem("Remove Do&ne from every item", null, (_, _) => SwitchList(done: false)));
         _listMenu.DropDownItems.Add(new ToolStripSeparator());
-        _listMenu.DropDownItems.Add(Item("Open in ax&JSON", OpenInAxJson, AxTaskKeys.OpenInAxJson));
-        _listMenu.DropDownItems.Add(Item("Show in ax&File", ShowInAxFile, AxTaskKeys.ShowInAxFile));
+        Add(_listMenu, new Command("Open in ax&JSON", AxTaskKeys.OpenInAxJson, OpenInAxJson) { When = NotRenaming, Mark = CommandMark.Open });
+        Add(_listMenu, new Command("Show in ax&File", AxTaskKeys.ShowInAxFile, ShowInAxFile) { When = NotRenaming, Mark = CommandMark.Open });
 
         _itemMenu.DropDownItems.Add(Item("&Open its fields", OpenSelected, ItemKeys.Open));
         _itemMenu.DropDownItems.Add(Item("&Done or not done", () => CheckInNavigator(SelectedRow()), ItemKeys.Check));
@@ -81,9 +83,8 @@ public sealed partial class TaskForm : ItemForm
         _fieldMenu.DropDownItems.Add(Item("Move do&wn", () => MoveField(1), ItemKeys.MoveFieldDown));
 
         var view = new ToolStripMenuItem("&View");
-        _hideDoneItem = Item("&Hide done tasks", ToggleHideDone, AxTaskKeys.HideDone);
+        _hideDoneItem = Add(view, new Command("&Hide done tasks", AxTaskKeys.HideDone, ToggleHideDone) { When = NotRenaming });
         _hideDoneItem.Checked = settings.HideDone;
-        view.DropDownItems.Add(_hideDoneItem);
 
         var options = new ToolStripMenuItem("&Options");
         options.DropDownItems.Add(CreateTextMenu());
@@ -110,31 +111,6 @@ public sealed partial class TaskForm : ItemForm
 
     /// <summary>The folder of lists, for Recently closed (AX-9.4).</summary>
     protected override string? PathInHand => TopFolder;
-
-    /// <summary>axTask's own keys (TK-7), asked before the shared ones.</summary>
-    protected override bool ProcessItemKey(Keys keyData)
-    {
-        switch (keyData)
-        {
-            case AxTaskKeys.OpenInAxJson:
-                OpenInAxJson();
-                return true;
-            case AxTaskKeys.ShowInAxFile:
-                ShowInAxFile();
-                return true;
-            case AxTaskKeys.HideDone:
-                ToggleHideDone();
-                return true;
-            case AxTaskKeys.AllTasks:
-                ShowAllTasks();
-                return true;
-            case AxTaskKeys.MoveToSection when Navigator.Focused:
-                MoveToSection();
-                return true;
-        }
-
-        return false;
-    }
 
     protected override char MenuLetter(bool inDetail, ItemRow? row) => inDetail ? 'D' : row is { IsList: false } ? 'I' : 'L';
 
