@@ -51,7 +51,7 @@ Window-specific keys, in one table per app (AX-8); the ones here are the same in
 
 - **IA-3.1** Entering the detail pane reads its name and the field: "Fields of Fix the tap, Due, date, 30 October
   2026". Leaving it says the navigator's selection.
-- **IA-3.2** A list's items and fields are in the order the user gave them; nothing sorts behind the user's back.
+- **IA-3.2** A level shows its sub-lists first, then its items, each by name in natural order, as axFile shows folders and files (the Archive last at the top, IA-D4). An item's fields are in the order the user gave them (Alt+Up and Alt+Down move one); nothing else sorts behind the user's back.
 
 ## 4. The format
 
@@ -83,13 +83,13 @@ A JSON file holding a list of fields. The first field is the Title.
 | Type | Value in the file | Read as | Set by (section 5) |
 | --- | --- | --- | --- |
 | `text` | a string, one line | the text | a text field |
-| `longtext` | a string with line breaks | the first line, Ctrl+Q for all | a multi-line field |
+| `longtext` | a string with line breaks | the first line and the count of the others, Ctrl+Q for all | a field of several lines: Enter makes a new line, Tab then Enter on Save keeps it |
 | `number` | a JSON number | the number | a text field that takes only a number |
 | `date` | `"YYYY-MM-DD"` | "30 October 2026, Friday" | a text field: a date, `today`, `tomorrow`, `+3` (days) |
 | `datetime` | `"YYYY-MM-DDTHH:MM"` | "30 October 2026, 14:00" | the same, a time after the date |
 | `check` | `true` or `false` | "done" or "not done" | Space toggles it, no field |
-| `choice` | one of `options` | the option | a list of the options |
-| `link` | a path to another item, relative to this file | the other item's title | a search over the items' titles |
+| `choice` | one of `options` | the option | one button per option, the current one the default |
+| `link` | a path to another item, relative to this file | the other item's title, or "missing: name" | the other item's title, typed |
 
 axPass adds `username` and `password` (section 6).
 
@@ -124,9 +124,9 @@ A folder. Its details are `list.json` in it, the same shape as an item, never sh
 
 ## 5. Changing a field
 
-- **IA-5.1** Enter on a field puts its editor in place of the detail pane's list, in the window's control area
-  (bundle rule 2): the field's title as the editor's name, the value selected. Enter keeps it, Escape leaves it as it
-  was. A value the type refuses ("30 Febuary") says why and the editor stays.
+- **IA-5.1** Enter on a field opens a notice in the window (bundle rule 2) titled with the field, its value in an edit
+  field and selected (a date as 2026-10-30, a link as the other item's title). Enter keeps it, Escape leaves it as it
+  was. A value the type refuses ("30 Febuary") says why and the notice stays.
 - **IA-5.2** A check changes with Space or Enter, at once: "Done: done".
 - **IA-5.3** New field (Ctrl+N in the pane): its title in a text field, then its type from the list of types.
 - **IA-5.4** Every change is one announcement ("Due: 30 October 2026, Friday") and one step for Ctrl+Z.
@@ -147,7 +147,7 @@ A folder. Its details are `list.json` in it, the same shape as an item, never sh
 | Its own keys | (its spec) | copy user name, copy password with the clipboard cleared after 30 seconds, generate a password, lock |
 | Opens with | a folder | a `.kdbx` file and the master password, asked in a notice |
 | Templates | `list.json`'s `new item` | KeePass's standard fields (Title, UserName, Password, URL, Notes) plus the user's own |
-| Delete | to the Recycle Bin; Ctrl+Z brings it back | to KeePass's own Recycle Bin group |
+| Delete | to the top folder's Archive list; Ctrl+Z brings it back | to KeePass's own Recycle Bin group |
 
 Everything not in this table is the same in both apps, and a change to one of those things changes this document and
 both apps in the same commit.
@@ -166,9 +166,12 @@ both apps in the same commit.
 - **IA-D3 Links are paths** relative to the item's file, so that a folder moved or synced whole keeps them. The app
   changes them when it renames or moves an item; a link changed by another program to a file that is not there reads
   "Waits on, link, missing: Washer".
-- **IA-D4 Delete is the app's archive.** No separate archive folder: axTask's Delete goes to the Recycle Bin with
-  Ctrl+Z to restore, axPass's to KeePass's Recycle Bin group. A task done stays where it is, marked done, until the
-  user deletes it.
+- **IA-D4 Delete archives.** Delete moves an item or a list into the app's archive: for axTask the list `Archive` in
+  the top folder (made by the first Delete, shown last at the top, left out of All tasks and the smart lists), for
+  axPass KeePass's Recycle Bin group. Ctrl+Z brings it back; in the archive, Delete says that axFile (Ctrl+E) deletes
+  for good. A task done stays where it is, marked done, until the user archives it (the user's thought of
+  2026-10-24: "delete could just remove them and add them into an archive"). The Recycle Bin was the first draft;
+  the archive is a list like the others, read by ear and by axFile, with no shell call behind it.
 - **IA-D5 Built once, shared on the second use** (bundle rule 4). axTask is built first with the window and the format
   in its own projects. When axPass is built, the window, the field editors and the format move unchanged to
   `Axit.Core` and `Axit.Forms`, one piece per commit, and the two apps keep only what section 6 lists.

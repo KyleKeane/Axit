@@ -70,12 +70,13 @@ Space marks a task done. Saved filters, the smart lists, are small files of thei
 ```
 
   The conditions in the first version: a field equals a value (`is`), a date before or after a date or a day count
-  from today (`before`, `after`), a field is empty or not (`empty`), the item is in a list or its sub-lists (`list`), a
+  from today, the day itself included (`before`, `after`), a field is empty or not (`empty`), the item is in a list or its sub-lists (`list`), a
   text field holds a word (`has`). `match` is `all` or `any`. A condition the app does not know shows the smart list
   as "Due this week, smart list, a condition not understood" and nothing in it.
-- **TK-5.3 A new smart list** (Ctrl+Shift+N on the top level, with All tasks or a smart list selected) starts as a copy
-  of All tasks' conditions; its details in the detail pane are its conditions, one per line, changed as fields are.
-  A smart list can also be written in axJSON (Ctrl+J).
+- **TK-5.3 A new smart list** (List, New smart list) asks its name, writes `<name>.filter.json` with All tasks'
+  conditions and opens it in axJSON to change them; Ctrl+J on a smart list opens it again. The detail pane of a smart
+  list says what it shows, how many, and its file; the conditions are written in axJSON, not field by field, until
+  the need is heard (a filter is written once and read many times).
 
 ## 6. Later: rules (automation)
 

@@ -1,0 +1,83 @@
+using System.Text.Json.Nodes;
+using AxTask.Core;
+
+namespace AxTask.Tests;
+
+public sealed class LinksTests : IDisposable
+{
+    private readonly string _top = Path.Combine(Path.GetTempPath(), "axtask-links-" + Guid.NewGuid().ToString("N"));
+
+    public LinksTests()
+    {
+        Directory.CreateDirectory(Path.Combine(_top, "Home"));
+        Directory.CreateDirectory(Path.Combine(_top, "Shopping"));
+        Write(Path.Combine(_top, "Shopping", "Washer.json"), ItemDocument.NewItem("Washer", []));
+        Write(Path.Combine(_top, "Home", "Fix the tap.json"), WithLink("Fix the tap", "../Shopping/Washer.json"));
+        Write(Path.Combine(_top, "Shopping", "Spanner.json"), WithLink("Spanner", "../Home/Fix the tap.json"));
+    }
+
+    public void Dispose() => Directory.Delete(_top, recursive: true);
+
+    [Fact]
+    public void AnItemMovedKeepsTheLinksToIt()
+    {
+        var from = Path.Combine(_top, "Shopping", "Washer.json");
+        var to = Path.Combine(_top, "Archive", "Washer.json");
+        var writes = Links.AfterMove(ItemFolder.AllItems(_top), from, to);
+        var write = Assert.Single(writes);
+        Assert.Equal(Path.Combine(_top, "Home", "Fix the tap.json"), write.Path);
+        Assert.Contains("../Archive/Washer.json", write.After);
+    }
+
+    [Fact]
+    public void AListMovedDeeperKeepsTheLinksItHolds()
+    {
+        var from = Path.Combine(_top, "Home");
+        var to = Path.Combine(_top, "Archive", "Home");
+        var writes = Links.AfterMove(ItemFolder.AllItems(_top), from, to);
+        Assert.Equal(2, writes.Count);
+        var inside = writes.Single(write => write.Path == Path.Combine(to, "Fix the tap.json"));
+        Assert.Contains("../../Shopping/Washer.json", inside.After);
+        var outside = writes.Single(write => write.Path == Path.Combine(_top, "Shopping", "Spanner.json"));
+        Assert.Contains("../Archive/Home/Fix the tap.json", outside.After);
+    }
+
+    [Fact]
+    public void ALinkReadsItsItemOrMissing()
+    {
+        var from = Path.Combine(_top, "Home", "Fix the tap.json");
+        Assert.Equal("Washer", Links.Spoken(from, "../Shopping/Washer.json"));
+        Assert.Equal("missing: Hose", Links.Spoken(from, "../Shopping/Hose.json"));
+    }
+
+    [Fact]
+    public void ACheckComesAndGoes()
+    {
+        var plain = ItemDocument.NewItem("Butter", []);
+        var task = TaskRules.WithDone(plain);
+        Assert.Equal(["Title", "Done"], task.Fields.Select(field => field.Title));
+        Assert.Same(task, TaskRules.WithDone(task));
+        Assert.Equal(["Title"], TaskRules.WithoutDone(task).Fields.Select(field => field.Title));
+        Assert.Equal(["Done", "Due"], TaskRules.TemplateWithDone(TaskRules.TemplateWithDone(TaskRules.DefaultTemplate, false).Where(f => f.Title != "Start").ToList(), true).Select(f => f.Title));
+    }
+
+    [Fact]
+    public void ANewListsFolderGoesWithItsUndo()
+    {
+        var path = Path.Combine(_top, "Garden", ItemDocument.ListFile);
+        var step = new Step([FileChange.WriteInNewFolder(path, ItemDocument.NewList(TaskRules.DefaultTemplate).ToText())], "Made Garden");
+        Changes.Apply(step.Parts);
+        Assert.True(Directory.Exists(Path.Combine(_top, "Garden")));
+        Changes.Undo(step);
+        Assert.False(Directory.Exists(Path.Combine(_top, "Garden")));
+    }
+
+    private static ItemDocument WithLink(string title, string link) =>
+        ItemDocument.NewItem(title, [new ItemField("Waits on", FieldTypes.Link, JsonValue.Create(link), [])]);
+
+    private static void Write(string path, ItemDocument document)
+    {
+        Directory.CreateDirectory(Path.GetDirectoryName(path)!);
+        File.WriteAllText(path, document.ToText());
+    }
+}

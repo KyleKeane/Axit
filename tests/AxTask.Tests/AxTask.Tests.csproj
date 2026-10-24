@@ -1,0 +1,7 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\src\AxTask.Core\AxTask.Core.csproj" />
+  </ItemGroup>
+
+</Project>
