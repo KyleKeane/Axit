@@ -20,7 +20,8 @@ The bundle rules are in the root `CLAUDE.md`.
 - The panes, the moves between levels, the shared keys and every field command are the item apps' shared window,
   `Axit.Forms/ItemForm` (since axPass, its second use); `TaskForm` derives from it and fills in what is axTask's.
 - `TaskForm.cs`: the menus (Folder; List, Item and Field, only the one for the selection enabled, `UpdateRowMenus`;
-  View, Options, Axit, Help), axTask's own keys (`ProcessItemKey`), the levels of the folder (`Start`, `EnterList`,
+  View, Options, Axit, Help) with axTask's own keys as commands of the window's one command list (`Add`, each key's`r
+  command at its first menu item; docs/axit/app-kit.md AK-2), the levels of the folder (`Start`, `EnterList`,
   `LeaveList`, which goes straight back to the top, `ShowAllTasks`, `ReadLevel` with the rows' `Tag`: an `ItemFile`, a
   `SmartList`, a `SectionTag` on a header, `ArchivedItemsTag`, or nothing for a list; the top level in sections is
   `ReadSections`, TK-3a) and the detail (`DetailOf`, with a `FileSource` to save to; a link read by `SpokenValue`).
@@ -45,4 +46,6 @@ The bundle rules are in the root `CLAUDE.md`.
 - The reads and writes run on the UI thread: items are small local files. All tasks reads every file under the top
   folder on each fill (TK-D3); a slow share would stall the window.
 - Enter, Space, Delete, Escape, Backspace, Tab and the arrows reach `ProcessCmdKey` while a list has the focus; they are
-  handled there with a `Focused` check, and returning true keeps the list box from its own move and its ding.
+  `ItemForm`'s commands with a `When` of the pane focused, and taking them keeps the list box from its own move and its
+  ding. `ItemForm` registers the shared keys after the app's (`PlaceControls`), so that an app's key comes first; a
+  command of axTask that acts anywhere has `When = NotRenaming`, so that the rename box keeps its keys.

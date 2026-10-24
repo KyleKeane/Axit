@@ -23,7 +23,8 @@ public sealed record ItemDetail(string Name, string? Key, ItemDocument? Document
 /// The window of an item app (docs/axit/item-apps.md IA-2, IA-3, IA-5; from axTask on its second use, axPass,
 /// 2026-10-24): the navigator on the left, the detail pane on the right, each the bundle's <see cref="AxitList"/>, a
 /// status bar, and the window's menu bar. This class holds what both apps do the same way: the panes, Right, Left and
-/// Enter through the levels, Tab between the panes, the key switch of <see cref="ItemKeys"/>, the detail pane filled
+/// Enter through the levels, Tab between the panes, the keys of <see cref="ItemKeys"/> on the window's command list
+/// (docs/axit/app-kit.md AK-2; registered after the app's own, so that the app's come first), the detail pane filled
 /// silently for the selection, and every field command with its notices (<c>ItemForm.Fields.cs</c>). The app fills in
 /// what a level holds (<see cref="ReadLevel"/>), how it goes in and out of a list, what the detail pane shows, and how
 /// a change is saved (<see cref="SaveFields"/>): a file for axTask, the KeePassXC tool for axPass.
@@ -151,9 +152,6 @@ public abstract partial class ItemForm : AxitForm
     /// <summary>The types New field offers.</summary>
     private static IReadOnlyList<string> NewFieldTypes => FieldTypes.All;
 
-    /// <summary>The app's own keys, asked first; true when taken.</summary>
-    protected virtual bool ProcessItemKey(Keys keyData) => false;
-
     /// <summary>Space in the navigator (axTask: a task done); the edge sound otherwise.</summary>
     protected virtual void CheckInNavigator(ItemRow? row) => Sounds.Edge();
 
@@ -190,140 +188,83 @@ public abstract partial class ItemForm : AxitForm
         base.OnShown(e);
     }
 
-    /// <summary>The controls in their places with the app's menu bar: called once from the app's constructor, after its menus are made.</summary>
+    /// <summary>
+    /// The controls in their places with the app's menu bar, and the shared keys on the command list: called once at
+    /// the end of the app's constructor, after its menus and its own commands are made, so that the app's keys come
+    /// first (axPass's Enter unlocking a locked window before Enter opening).
+    /// </summary>
     protected void PlaceControls(MenuStrip menu)
     {
         menu.MenuActivate += (_, _) => UpdateMenus();
         Controls.AddRange([Overlay, _split, _status, menu]);
         MainMenuStrip = menu;
+        AddSharedKeys();
     }
 
-    // ---- keys (IA-3): the app's own first, then ItemKeys, handled here only ----
+    // ---- keys (IA-3): one command list (docs/axit/app-kit.md AK-2), the app's own first, then ItemKeys here ----
 
-    protected override bool ProcessWindowKey(Keys keyData)
+    /// <summary>
+    /// The rename box has its own keys (AX-8.7): Enter, Escape, Ctrl+Z on the typing. While it is open no command
+    /// runs: a command that acts anywhere in the window has this as its <see cref="Command.When"/>, and one of a
+    /// pane needs the pane focused, which it is not while the box has the focus.
+    /// </summary>
+    protected bool NotRenaming() => !Navigator.Renaming && !DetailPane.Renaming;
+
+    /// <summary>Where a navigator command's key acts.</summary>
+    protected bool InNavigator() => Navigator.Focused;
+
+    /// <summary>Where a field command's key acts.</summary>
+    protected bool InDetail() => DetailPane.Focused;
+
+    /// <summary>An app's own keys not yet on the command list, asked before the commands; true when taken.</summary>
+    protected virtual bool ProcessItemKey(Keys keyData) => false;
+
+    protected override bool ProcessWindowKey(Keys keyData) => NotRenaming() && ProcessItemKey(keyData);
+
+    /// <summary>The keys of <see cref="ItemKeys"/>; the apps' menu items for them only show them. In a pane, taking a key keeps the list box from its own move and its ding.</summary>
+    private void AddSharedKeys()
     {
-        if (Navigator.Renaming || DetailPane.Renaming)
-        {
-            // The rename box has its own keys (AX-8.7): Enter, Escape, Ctrl+Z on the typing.
-            return false;
-        }
+        AddKey(new Command("Find in the list", BundleKeys.Find, () => ShowFindInList(Navigator, NavigatorLabels)) { When = NotRenaming, Mark = CommandMark.Read });
+        AddKey(new Command("Find next", BundleKeys.FindNext, () => FindInList(Navigator, NavigatorLabels, 1)) { When = NotRenaming, Mark = CommandMark.Read });
+        AddKey(new Command("Find previous", BundleKeys.FindPrevious, () => FindInList(Navigator, NavigatorLabels, -1)) { When = NotRenaming, Mark = CommandMark.Read });
+        AddKey(new Command("Undo", ItemKeys.Undo, Undo) { When = NotRenaming });
+        AddKey(new Command("Refresh", ItemKeys.Refresh, () => Refresh(announce: true)) { When = NotRenaming, Mark = CommandMark.Read });
+        AddKey(new Command("New list", ItemKeys.NewList, NewList) { When = NotRenaming });
+        AddKey(new Command("Read in full", ItemKeys.ReadAll, ReadAll) { When = NotRenaming, Mark = CommandMark.Read });
 
-        if (ProcessItemKey(keyData))
-        {
-            return true;
-        }
+        // The navigator's keys.
+        AddKey(new Command("Into the list", ItemKeys.Into, Into) { When = InNavigator, Mark = CommandMark.Open });
+        AddKey(new Command("Up a level", ItemKeys.Up, UpLevel) { When = InNavigator, Mark = CommandMark.Open });
+        AddKey(new Command("Up a level", ItemKeys.UpAlso, UpLevel) { When = InNavigator, Mark = CommandMark.Open });
+        AddKey(new Command("Previous section", ItemKeys.PreviousSection, () => JumpSection(-1)) { When = InNavigator, Mark = CommandMark.Open });
+        AddKey(new Command("Next section", ItemKeys.NextSection, () => JumpSection(1)) { When = InNavigator, Mark = CommandMark.Open });
+        AddKey(new Command("Open", ItemKeys.Open, OpenSelected) { When = InNavigator, Mark = CommandMark.Open });
+        AddKey(new Command("To the detail pane", ItemKeys.OtherPane, () => DetailPane.Select()) { When = InNavigator, Mark = CommandMark.Open });
+        AddKey(new Command("To the detail pane", ItemKeys.OtherPaneBack, () => DetailPane.Select()) { When = InNavigator, Mark = CommandMark.Open });
+        AddKey(new Command("Check", ItemKeys.Check, () => CheckInNavigator(SelectedRow())) { When = InNavigator });
+        AddKey(new Command("New item", ItemKeys.New, NewItem) { When = InNavigator });
+        AddKey(new Command("Rename", ItemKeys.Rename, RenameSelected) { When = InNavigator });
+        AddKey(new Command("Delete", ItemKeys.Delete, () => WithRow(DeleteRow)) { When = InNavigator, Mark = CommandMark.Act });
+        AddKey(new Command("The selection's menu", ItemKeys.ItemMenu, OpenPaneMenu) { When = InNavigator, Mark = CommandMark.Open });
+        AddKey(new Command("The selection's menu", ItemKeys.ItemMenuAlso, OpenPaneMenu) { When = InNavigator, Mark = CommandMark.Open });
 
-        switch (keyData)
-        {
-            case BundleKeys.Find:
-                ShowFindInList(Navigator, NavigatorLabels);
-                return true;
-            case BundleKeys.FindNext:
-                FindInList(Navigator, NavigatorLabels, 1);
-                return true;
-            case BundleKeys.FindPrevious:
-                FindInList(Navigator, NavigatorLabels, -1);
-                return true;
-            case ItemKeys.Undo:
-                Undo();
-                return true;
-            case ItemKeys.Refresh:
-                Refresh(announce: true);
-                return true;
-            case ItemKeys.NewList:
-                NewList();
-                return true;
-            case ItemKeys.ReadAll:
-                ReadAll();
-                return true;
-        }
+        // The detail pane's keys.
+        AddKey(new Command("Change the field", ItemKeys.Open, ChangeField) { When = InDetail });
+        AddKey(new Command("To the navigator", ItemKeys.OtherPane, () => Navigator.Select()) { When = InDetail, Mark = CommandMark.Open });
+        AddKey(new Command("To the navigator", ItemKeys.OtherPaneBack, () => Navigator.Select()) { When = InDetail, Mark = CommandMark.Open });
+        AddKey(new Command("To the navigator", ItemKeys.Back, () => Navigator.Select()) { When = InDetail, Mark = CommandMark.Open });
+        AddKey(new Command("Check the field", ItemKeys.Check, CheckField) { When = InDetail });
+        AddKey(new Command("New field", ItemKeys.New, NewField) { When = InDetail });
+        AddKey(new Command("Rename the field", ItemKeys.Rename, RenameField) { When = InDetail });
+        AddKey(new Command("Remove the field", ItemKeys.Delete, RemoveField) { When = InDetail });
+        AddKey(new Command("Move the field up", ItemKeys.MoveFieldUp, () => MoveField(-1)) { When = InDetail });
+        AddKey(new Command("Move the field down", ItemKeys.MoveFieldDown, () => MoveField(1)) { When = InDetail });
 
-        if (Navigator.Focused)
-        {
-            // The navigator's keys; returning true keeps the list box from its own move and its ding.
-            switch (keyData)
-            {
-                case ItemKeys.Into:
-                    Into();
-                    return true;
-                case ItemKeys.Up:
-                case ItemKeys.UpAlso:
-                    UpLevel();
-                    return true;
-                case ItemKeys.PreviousSection:
-                    JumpSection(-1);
-                    return true;
-                case ItemKeys.NextSection:
-                    JumpSection(1);
-                    return true;
-                case ItemKeys.Open:
-                    OpenSelected();
-                    return true;
-                case ItemKeys.OtherPane:
-                case ItemKeys.OtherPaneBack:
-                    DetailPane.Select();
-                    return true;
-                case ItemKeys.Check:
-                    CheckInNavigator(SelectedRow());
-                    return true;
-                case ItemKeys.New:
-                    NewItem();
-                    return true;
-                case ItemKeys.Rename:
-                    RenameSelected();
-                    return true;
-                case ItemKeys.Delete:
-                    WithRow(DeleteRow);
-                    return true;
-                case ItemKeys.ItemMenu:
-                case ItemKeys.ItemMenuAlso:
-                    OpenPaneMenu();
-                    return true;
-            }
-        }
-        else if (DetailPane.Focused)
-        {
-            switch (keyData)
-            {
-                case ItemKeys.Open:
-                    ChangeField();
-                    return true;
-                case ItemKeys.OtherPane:
-                case ItemKeys.OtherPaneBack:
-                case ItemKeys.Back:
-                    Navigator.Select();
-                    return true;
-                case ItemKeys.Check:
-                    CheckField();
-                    return true;
-                case ItemKeys.New:
-                    NewField();
-                    return true;
-                case ItemKeys.Rename:
-                    RenameField();
-                    return true;
-                case ItemKeys.Delete:
-                    RemoveField();
-                    return true;
-                case ItemKeys.MoveFieldUp:
-                    MoveField(-1);
-                    return true;
-                case ItemKeys.MoveFieldDown:
-                    MoveField(1);
-                    return true;
-                case ItemKeys.Into:
-                case ItemKeys.Up:
-                    // Nothing moves sideways in the field list: the edge sound, not the list box's own scroll.
-                    Sounds.Edge();
-                    return true;
-                case ItemKeys.ItemMenu:
-                case ItemKeys.ItemMenuAlso:
-                    OpenPaneMenu();
-                    return true;
-            }
-        }
-
-        return false;
+        // Nothing moves sideways in the field list: the edge sound, not the list box's own scroll.
+        AddKey(new Command("Nothing sideways", ItemKeys.Into, Sounds.Edge) { When = InDetail, Mark = CommandMark.Read });
+        AddKey(new Command("Nothing sideways", ItemKeys.Up, Sounds.Edge) { When = InDetail, Mark = CommandMark.Read });
+        AddKey(new Command("The field's menu", ItemKeys.ItemMenu, OpenPaneMenu) { When = InDetail, Mark = CommandMark.Open });
+        AddKey(new Command("The field's menu", ItemKeys.ItemMenuAlso, OpenPaneMenu) { When = InDetail, Mark = CommandMark.Open });
     }
 
     /// <summary>A navigator command on the selected row; "Nothing selected" without one.</summary>

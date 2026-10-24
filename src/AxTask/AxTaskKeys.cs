@@ -5,7 +5,7 @@ namespace AxTask;
 /// <summary>
 /// axTask's window-specific keys (SPEC.md TK-7; bundle AX-8): the item apps' shared keys (<see cref="ItemKeys"/>,
 /// docs/axit/item-apps.md IA-3) and axTask's own. A key is changed here or in <see cref="ItemKeys"/> and nowhere else:
-/// the menu items, the key switches (<c>ItemForm.ProcessWindowKey</c>, <c>TaskForm.ProcessItemKey</c>) and the F1
+/// the commands (<c>ItemForm.AddSharedKeys</c>, the menus of <c>TaskForm</c>) and the F1
 /// text read these tables. The bundle-wide keys (F1, the palette, find, Ctrl+S, text size) are <c>BundleKeys</c>.
 /// </summary>
 public static class AxTaskKeys
