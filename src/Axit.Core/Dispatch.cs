@@ -5,12 +5,11 @@ namespace Axit.Core;
 /// that does not exist.</summary>
 public sealed record Launch(string App, string[] Arguments, string? Error = null);
 
-/// <summary>An app of the bundle: its name, which ends every title of its windows ("notes.md - axDown") and names its
-/// Start menu entry, and the verb that starts it (AX-1.1).</summary>
 /// <summary>
 /// An app of the bundle: <paramref name="Name"/> is its name as shown and spoken ("axClaude", "axGIT", lower-case "ax"
-/// so that a screen reader says it as a word; 2026-10-23), <paramref name="Project"/> the name of its code (the folder
-/// src/AxClaude, the class AxClaudeApp, the icon AxClaude.ico), which keeps the C# spelling.
+/// so that a screen reader says it as a word; 2026-10-23), which ends every title of its windows ("notes.md - axDown")
+/// and names its Start menu entry; <paramref name="Verb"/> starts it (AX-1.1); <paramref name="Project"/> is the name
+/// of its code (the folder src/AxClaude, the class AxClaudeApp, the icon AxClaude.ico), which keeps the C# spelling.
 /// </summary>
 public sealed record App(string Name, string Verb, string Project);
 

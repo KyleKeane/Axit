@@ -27,7 +27,7 @@ guide `docs/axpass/user-guide.md` is embedded by `AxPass.csproj`; the manual tes
   and `Cli`, the one way a command of the tool runs: off the UI thread, the master password first on its input, one
   at a time (`_busy`), its failure said, and before the first change after unlocking a backup (`_backedUp`,
   `Backups.Make`; no change without it); `BackUpNowAsync` and `ShowBackups` for the File menu.
-- `PassForm.Commands.cs`: `SaveFields` (`edit` with `EntryFields.EditOptions`), `RenameItem`, `RenameRow`, `DeleteRow`
+- `PassForm.Commands.cs`: `SaveFields` (`edit` with `EntryFields.EditOptions`), `RenameItem`, `RenameTo`, `DeleteRow`
   (`rm` with its `mv` back; a group or the Recycle Bin's entries after a question), `NewItem`, `NewList`, `Undo` (the
   runs a `Step` keeps), the password's notices (`ChangeSpecial`, Generate, typed twice, `edit -p`), the copies (the
   user name by axPass, the password by the tool's `clip` with its 30-second clear, `KeePassCli.StartLasting`), the URL,
