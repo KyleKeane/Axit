@@ -157,9 +157,13 @@ public static partial class QuestionReader
     [GeneratedRegex(@"\[1-(\d+)\]")]
     private static partial Regex LastKeyRegex();
 
-    /// <summary>True when answer <paramref name="key"/> comes just before <paramref name="below"/>: 2 before 3, y before n.</summary>
+    /// <summary>
+    /// True when answer <paramref name="key"/> comes just before <paramref name="below"/>: 2 before 3, y before n. Never
+    /// 0 before 1: Claude numbers answers from 1, and a "0." row above the first answer, past a text row, is text a
+    /// program or a page put on the screen, which would otherwise become an answer of the question (security audit S-44).
+    /// </summary>
     private static bool Follows(string key, string below) =>
-        (key, below) is ("y", "n") || (int.TryParse(key, out var a) && int.TryParse(below, out var b) && a + 1 == b);
+        (key, below) is ("y", "n") || (int.TryParse(key, out var a) && a >= 1 && int.TryParse(below, out var b) && a + 1 == b);
 
     /// <summary>
     /// The number and count of the question under a tab row ("←   ☒ Colour   ☐ Fruit   ✔ Submit   →"): the tab row
