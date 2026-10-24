@@ -3,6 +3,7 @@
 ## Unreleased
 
 - axProcess: a new app, what runs on the computer as one list with three views. Ctrl+1 the processes with their memory and processor use, largest first; Ctrl+2 the services with their state and start type; Ctrl+3 the programs that start at sign-in. Enter shows an item's details with what can be done to it, Delete ends a process after a question, a service's details start, stop or restart it, Ctrl+E shows a program in axFile, Ctrl+Q says the summary. Nothing refreshes by itself: F5 reads again. Start menu `Axit axProcess`, command `axprocess`.
+- For developers: the automated checks' runner, `tools/AxitDrive`, is called axAutomate now: `tools/AxAutomate`, run as `dotnet run --project tools\AxAutomate`.
 
 ## 3.5.0 - 2026-10-23
 

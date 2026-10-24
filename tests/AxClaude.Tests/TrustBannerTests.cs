@@ -6,7 +6,7 @@ namespace AxClaude.Tests;
 /// <summary>
 /// The trust question on a fresh folder (Claude Code 2.1.309): after the answer Claude erases the question's rows and
 /// draws its banner from the second row without clearing the screen, and the first message follows. Found by
-/// tools/AxitDrive on 2026-10-23: the banner showed twice, the second copy inside the first reply.
+/// tools/AxAutomate on 2026-10-23: the banner showed twice, the second copy inside the first reply.
 /// </summary>
 public class TrustBannerTests
 {

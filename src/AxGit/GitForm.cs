@@ -897,7 +897,7 @@ public sealed partial class GitForm : AxitForm
 
         if (_busy is not null)
         {
-            // A stage or its refresh still runs: the count below is the one before it (found by tools/AxitDrive,
+            // A stage or its refresh still runs: the count below is the one before it (found by tools/AxAutomate,
             // 2026-10-23: Space then Ctrl+Enter said "Nothing staged").
             Announce("Working…", true);
             return;

@@ -71,7 +71,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AxStart", "src\AxStart\AxSt
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "QaRun", "tools\QaRun\QaRun.csproj", "{94F03090-B27B-42DD-BA73-D4B75F3B36F8}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AxitDrive", "tools\AxitDrive\AxitDrive.csproj", "{7AFA008A-E7DA-4AC7-B7A4-E474AEADB790}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AxAutomate", "tools\AxAutomate\AxAutomate.csproj", "{7AFA008A-E7DA-4AC7-B7A4-E474AEADB790}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AxProcess.Core", "src\AxProcess.Core\AxProcess.Core.csproj", "{81FF857F-543C-4D63-85CD-766F94C3BECD}"
 EndProject

@@ -852,7 +852,7 @@ public sealed partial class TextEditorForm : AxitForm
             var before = _editor.Text;
             // One undo step for the whole command (AJ-2.3): the control reports the replacement as two changes, the
             // text removed and the text put in, which were two steps, the first leaving an empty document (found by
-            // tools/AxitDrive, 2026-10-23); so the change is recorded here, once.
+            // tools/AxAutomate, 2026-10-23); so the change is recorded here, once.
             _replaying = true;
             _editor.SelectAll();
             _editor.SelectedText = result.Text;
