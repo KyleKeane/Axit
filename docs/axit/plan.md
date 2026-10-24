@@ -196,7 +196,8 @@ library dependency (B-10: `git.exe` and the file system through the APIs already
 - **Apps suggested on 2026-10-23, recorded at the user's ask** (no specs; ranked by daily use and fit with the
   bundle's rules). The two picked to start with, if any: axClip, then axCalc or axHTTP as a small app that follows
   `adding-an-app.md`.
-  1. **axClip** (above), in detail: axStart's hotkey and search list over what was copied; typing filters, Enter
+  1. **axClip** (above; built 2026-10-23 on the branch `axclip`, `docs/axclip/SPEC.md`, on `HotkeyForm` moved out of
+     axStart; NVDA pass owed, and axStart's again before the branch merges), in detail: axStart's hotkey and search list over what was copied; typing filters, Enter
      pastes, a key reads an item in full. The Windows clipboard history (Windows+V) reads poorly with NVDA.
   2. **axOCR**, text from a screenshot, an image file or the window in front, through Windows' offline OCR engine
      (`Windows.Media.Ocr`), the text opened in axPreview: images, scanned PDFs, dialogs that read badly, screenshots

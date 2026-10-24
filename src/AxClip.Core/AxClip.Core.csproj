@@ -1,0 +1,13 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <!-- axClip's pure code (docs/axclip/SPEC.md §5): the history, what a copy is kept for, the settings; no window. -->
+  <PropertyGroup>
+    <TargetFramework>$(AxitDotNet)</TargetFramework>
+    <RootNamespace>AxClip.Core</RootNamespace>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Axit.Core\Axit.Core.csproj" />
+  </ItemGroup>
+
+</Project>

@@ -107,6 +107,20 @@
           "Axit.Core": "[1.0.0, )"
         }
       },
+      "axclip": {
+        "type": "Project",
+        "dependencies": {
+          "AxClip.Core": "[1.0.0, )",
+          "Axit.Core": "[1.0.0, )",
+          "Axit.Forms": "[1.0.0, )"
+        }
+      },
+      "axclip.core": {
+        "type": "Project",
+        "dependencies": {
+          "Axit.Core": "[1.0.0, )"
+        }
+      },
       "axdown": {
         "type": "Project",
         "dependencies": {

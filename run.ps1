@@ -15,18 +15,19 @@
   .\run.ps1 -App media C:\Music\Dune         # axMedia on the folder's sound and video files (run-axmedia.ps1 says the same)
   .\run.ps1 -App preview C:\notes\README.md  # axPreview on the file, read-only (run-axpreview.ps1 says the same)
   .\run.ps1 -App start                       # axStart, the launcher: its field shown; it keeps running (run-axstart.ps1 says the same)
+  .\run.ps1 -App clip                        # axClip (run-axclip.ps1 says the same)
   .\run.ps1 -NoBuild                         # skip the build, just start
   .\run.ps1 -Test                            # run the unit tests instead (test.ps1: every test project, in Release)
 
-  run-axclaude.ps1, run-axdown.ps1, run-axjson.ps1, run-axgit.ps1, run-axterminal.ps1, run-axfile.ps1, run-axmedia.ps1, run-axpreview.ps1 and run-axstart.ps1 next to this script pass -App for you and take the same other arguments.
+  run-axclaude.ps1, run-axdown.ps1, run-axjson.ps1, run-axgit.ps1, run-axterminal.ps1, run-axfile.ps1, run-axmedia.ps1, run-axpreview.ps1, run-axstart.ps1 and run-axclip.ps1 next to this script pass -App for you and take the same other arguments.
   If PowerShell refuses to run scripts: powershell -ExecutionPolicy Bypass -File .\run.ps1
-  Close a running Axit window first: the build writes into the folder it holds open. axStart, which runs in the
-  background, is ended before the build and started again hidden after it.
+  Close a running Axit window first: the build writes into the folder it holds open. axStart and axClip, which run in
+  the background, are ended before the build and started again hidden after it.
 #>
 [CmdletBinding()]
 param(
     # The app to start: the verb Axit.exe takes (docs/axit/SPEC.md AX-1). axClaude unless said otherwise.
-    [ValidateSet('claude', 'down', 'json', 'git', 'terminal', 'file', 'media', 'preview', 'start')]
+    [ValidateSet('claude', 'down', 'json', 'git', 'terminal', 'file', 'media', 'preview', 'start', 'clip')]
     [string]$App = 'claude',
 
     # axClaude's project folder (default: the current folder), axDown's or axJSON's file (default: an empty document),
@@ -60,23 +61,27 @@ $dotnet = ([xml](Get-Content (Join-Path $root 'Directory.Build.props') -Raw)).Pr
 $exe = Join-Path $root "src\Axit\bin\Debug\$dotnet-windows\Axit.exe"
 
 if (-not $NoBuild) {
-    # axStart started from this build keeps running in the background after every window has closed, and holds the
-    # folder the build writes into: it is ended before the build and started again, hidden, from the new one after,
-    # so that the hotkey runs the new code (asked 2026-10-23). It keeps no unsaved state; its settings save as they change.
-    $launcher = @(Get-CimInstance Win32_Process -Filter "Name = 'Axit.exe'" |
-        Where-Object { $_.ExecutablePath -eq $exe -and $_.CommandLine -match '\sstart(\s|$)' })
-    foreach ($process in $launcher) {
-        Write-Host "Ending axStart (process $($process.ProcessId)), which holds the build folder; it starts again after the build."
-        Stop-Process -Id $process.ProcessId -Force
-        Wait-Process -Id $process.ProcessId -Timeout 10 -ErrorAction SilentlyContinue
+    # The background apps started from this build, axStart and axClip, keep running after every window has closed,
+    # and hold the folder the build writes into: each is ended before the build and started again, hidden, from the
+    # new one after, so that the hotkey runs the new code (asked 2026-10-23). axStart keeps no unsaved state; axClip's
+    # history is in memory unless it is kept, and starts empty again.
+    $background = @(Get-CimInstance Win32_Process -Filter "Name = 'Axit.exe'" |
+        Where-Object { $_.ExecutablePath -eq $exe -and $_.CommandLine -match '\s(start|clip)(\s|$)' } |
+        ForEach-Object { [pscustomobject]@{ Id = $_.ProcessId; Verb = [regex]::Match($_.CommandLine, '\s(start|clip)(\s|$)').Groups[1].Value } })
+    foreach ($process in $background) {
+        Write-Host "Ending Axit $($process.Verb) (process $($process.Id)), which holds the build folder; it starts again after the build."
+        Stop-Process -Id $process.Id -Force
+        Wait-Process -Id $process.Id -Timeout 10 -ErrorAction SilentlyContinue
     }
 
     Write-Host "Building Axit..."
     dotnet build "$root\src\Axit\Axit.csproj" -c Debug -nologo -v q
     $built = $LASTEXITCODE
-    if ($launcher.Count -gt 0 -and (Test-Path $exe)) {
-        Write-Host "Starting axStart again, hidden."
-        Start-Process -FilePath $exe -ArgumentList 'start', '--hidden' -WindowStyle Hidden
+    foreach ($verb in @($background | ForEach-Object Verb | Sort-Object -Unique)) {
+        if (Test-Path $exe) {
+            Write-Host "Starting Axit $verb again, hidden."
+            Start-Process -FilePath $exe -ArgumentList $verb, '--hidden' -WindowStyle Hidden
+        }
     }
 
     if ($built -ne 0) {
@@ -90,7 +95,7 @@ if (-not (Test-Path $exe)) {
 }
 
 if ($App -ne 'claude') {
-    $name = switch ($App) { 'down' { 'axDown' } 'json' { 'axJSON' } 'terminal' { 'axTerminal' } 'file' { 'axFile' } 'media' { 'axMedia' } 'preview' { 'axPreview' } 'start' { 'axStart' } default { 'axGIT' } }
+    $name = switch ($App) { 'down' { 'axDown' } 'json' { 'axJSON' } 'terminal' { 'axTerminal' } 'file' { 'axFile' } 'media' { 'axMedia' } 'preview' { 'axPreview' } 'start' { 'axStart' } 'clip' { 'axClip' } default { 'axGIT' } }
     if ($Path -and $App -ne 'start') {
         Write-Host "Starting $name on $Path"
         & $exe $App $Path

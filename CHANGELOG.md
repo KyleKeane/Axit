@@ -1,5 +1,9 @@
 # Changelog
 
+## Unreleased
+
+- axClip: a new app, a clipboard history. It runs in the background from sign-in and keeps the text of every copy, in memory unless you turn on Keep history between runs, leaving out what a password manager marks private. Windows+Alt+V from anywhere brings up one search field over it, newest first: type to narrow it, Down and Up move through it, Enter pastes the item into the program you were in, Shift+Enter only copies it, Ctrl+Q reads it in full, Delete removes it, Ctrl+P pauses recording. Start menu `Axit axClip`, command `axclip`.
+
 ## 3.5.0 - 2026-10-23
 
 - axTerminal: Ctrl+Up and Ctrl+Down in the command field go through the recent commands, with a short earcon on each; past the newest comes what you typed or last changed. The plain arrows only move the caret.

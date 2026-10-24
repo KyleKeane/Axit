@@ -1,0 +1,7 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\src\AxClip.Core\AxClip.Core.csproj" />
+  </ItemGroup>
+
+</Project>
