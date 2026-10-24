@@ -187,6 +187,21 @@ public sealed class OverlayPanel : Panel
     /// <summary>The text field's current text.</summary>
     public string InputText => _input.Text;
 
+    /// <summary>
+    /// A password typed into a notice's hidden field goes with the notice, whichever way it closed, Cancel and Escape
+    /// included (security audit S-17): the notice's action has read it by then, and the field held it until the next
+    /// notice before.
+    /// </summary>
+    protected override void OnVisibleChanged(EventArgs e)
+    {
+        if (!Visible && _input.UseSystemPasswordChar)
+        {
+            _input.Text = string.Empty;
+        }
+
+        base.OnVisibleChanged(e);
+    }
+
     /// <summary>Where the caret is in the text field.</summary>
     public int InputCaret => _input.SelectionStart;
 

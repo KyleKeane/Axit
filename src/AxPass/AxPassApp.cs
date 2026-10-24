@@ -20,7 +20,10 @@ public static class AxPassApp
           --help, --version this text, or the version
         """;
 
-    public static void Run(string[] args) =>
+    public static void Run(string[] args)
+    {
+        // Security audit S-23: a crash report of this process never carries its memory, which can hold a password.
+        WerSetFlags(WerFaultReportingFlagNoHeap);
         AppHost.Run(Name, "axpass", Usage, args, arguments =>
         {
             if (!AppHost.OnePath(Name, "database", Usage, arguments, out var path))
@@ -31,4 +34,10 @@ public static class AxPassApp
             var settings = PassSettings.Load(PassSettings.DefaultPath, out var settingsError);
             return new PassForm(path, settings, settingsError);
         });
+    }
+
+    private const uint WerFaultReportingFlagNoHeap = 0x1;
+
+    [System.Runtime.InteropServices.DllImport("kernel32.dll")]
+    private static extern int WerSetFlags(uint flags);
 }
