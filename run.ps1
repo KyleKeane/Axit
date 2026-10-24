@@ -16,10 +16,11 @@
   .\run.ps1 -App preview C:\notes\README.md  # axPreview on the file, read-only (run-axpreview.ps1 says the same)
   .\run.ps1 -App start                       # axStart, the launcher: its field shown; it keeps running (run-axstart.ps1 says the same)
   .\run.ps1 -App process                     # axProcess (run-axprocess.ps1 says the same)
+  .\run.ps1 -App task C:\my\tasks            # axTask on a folder of lists (run-axtask.ps1 says the same)
   .\run.ps1 -NoBuild                         # skip the build, just start
   .\run.ps1 -Test                            # run the unit tests instead (test.ps1: every test project, in Release)
 
-  run-axclaude.ps1, run-axdown.ps1, run-axjson.ps1, run-axgit.ps1, run-axterminal.ps1, run-axfile.ps1, run-axmedia.ps1, run-axpreview.ps1, run-axstart.ps1 and run-axprocess.ps1 next to this script pass -App for you and take the same other arguments.
+  run-axclaude.ps1, run-axdown.ps1, run-axjson.ps1, run-axgit.ps1, run-axterminal.ps1, run-axfile.ps1, run-axmedia.ps1, run-axpreview.ps1, run-axstart.ps1, run-axprocess.ps1 and run-axtask.ps1 next to this script pass -App for you and take the same other arguments.
   If PowerShell refuses to run scripts: powershell -ExecutionPolicy Bypass -File .\run.ps1
   Close a running Axit window first: the build writes into the folder it holds open. axStart, which runs in the
   background, is ended before the build and started again hidden after it.
@@ -27,13 +28,13 @@
 [CmdletBinding()]
 param(
     # The app to start: the verb Axit.exe takes (docs/axit/SPEC.md AX-1). axClaude unless said otherwise.
-    [ValidateSet('claude', 'down', 'json', 'git', 'terminal', 'file', 'media', 'preview', 'start', 'process')]
+    [ValidateSet('claude', 'down', 'json', 'git', 'terminal', 'file', 'media', 'preview', 'start', 'process', 'task')]
     [string]$App = 'claude',
 
     # axClaude's project folder (default: the current folder), axDown's or axJSON's file (default: an empty document),
     # a folder or file inside axGIT's repository (default: the last one opened), axTerminal's folder, axFile's folder
     # or file (default: the last folder opened), axMedia's file or folder (default: an empty queue), or axPreview's
-    # file (default: an empty window). axStart and axProcess take none.
+    # file (default: an empty window), or axTask's folder (default: the last one). axStart and axProcess take none.
     [Parameter(Position = 0)]
     [Alias('Project')]
     [string]$Path,
@@ -91,7 +92,7 @@ if (-not (Test-Path $exe)) {
 }
 
 if ($App -ne 'claude') {
-    $name = switch ($App) { 'down' { 'axDown' } 'json' { 'axJSON' } 'terminal' { 'axTerminal' } 'file' { 'axFile' } 'media' { 'axMedia' } 'preview' { 'axPreview' } 'start' { 'axStart' } 'process' { 'axProcess' } default { 'axGIT' } }
+    $name = switch ($App) { 'down' { 'axDown' } 'json' { 'axJSON' } 'terminal' { 'axTerminal' } 'file' { 'axFile' } 'media' { 'axMedia' } 'preview' { 'axPreview' } 'start' { 'axStart' } 'process' { 'axProcess' } 'task' { 'axTask' } default { 'axGIT' } }
     if ($Path -and $App -notin 'start', 'process') {
         Write-Host "Starting $name on $Path"
         & $exe $App $Path

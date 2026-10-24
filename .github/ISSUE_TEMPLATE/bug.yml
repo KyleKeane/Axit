@@ -21,6 +21,7 @@ body:
         - axPreview
         - axStart
         - axProcess
+        - axTask
         - The bundle (install, update, the Axit menu)
     validations:
       required: true

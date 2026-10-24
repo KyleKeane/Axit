@@ -1,0 +1,115 @@
+# axTask: a list's details, plain lists and checklists, links, smart lists, a change on disk (docs/axtask/nvda-test-plan.md
+# sections 1.8, 2.4, 2.8 to 2.10, 3 and 4; docs/axit/item-apps.md IA-4.3, IA-5.5, IA-D3; SPEC TK-4, TK-5).
+file home\Axit\axtask.json {"checkForUpdates": false}
+file "tasks\Home\Fix the tap.json" {"format": "axit-item 1", "fields": [{"title": "Title", "type": "text", "value": "Fix the tap"}, {"title": "Done", "type": "check", "value": false}, {"title": "Due", "type": "date", "value": "2026-10-30"}, {"title": "Waits on", "type": "link", "value": ""}]}
+file "tasks\Home\Water plants.json" {"format": "axit-item 1", "fields": [{"title": "Title", "type": "text", "value": "Water plants"}, {"title": "Done", "type": "check", "value": true}]}
+file tasks\Shopping\Milk.json {"format": "axit-item 1", "fields": [{"title": "Title", "type": "text", "value": "Milk"}]}
+file tasks\Shopping\Washer.json {"format": "axit-item 1", "fields": [{"title": "Title", "type": "text", "value": "Washer"}, {"title": "Done", "type": "check", "value": false}]}
+
+start task {temp}\tasks
+expect focus All tasks, 2 not done
+
+# 1.8 A list's details: its fields, then the fields its new items get.
+keys down
+expect focus Home, list, 2 items
+keys tab
+expect focus Notes, long text, empty
+keys down
+expect focus Fields of a new item: Done, Start, Due
+
+# 2.4 A long text of two lines: the field takes Enter as a new line; Save keeps it; Ctrl+Q reads both lines.
+keys up
+keys enter
+type First line
+keys enter
+type Second line
+keys tab
+keys enter
+expect said ! Notes: First line, and 1 more line
+run findstr /l /c:"First line\nSecond line" "tasks\Home\list.json"
+keys ctrl+q
+expect said ! Notes: First line. Second line
+
+# 3.1 A link set by the other item's title; renamed, the link follows; archived, it still reads it.
+keys escape
+keys right
+expect focus Fix the tap, due 30 October
+keys tab
+keys end
+expect focus Waits on, link, empty
+keys enter
+type Washer
+keys enter
+expect said ! Waits on: Washer
+run findstr /l /c:"../Shopping/Washer.json" "tasks\Home\Fix the tap.json"
+keys enter
+type Nothing like it
+keys enter
+expect said ! No item is called Nothing like it
+keys escape
+keys escape
+keys left
+type s
+keys right
+type w
+expect focus Washer
+keys f2
+type Washer 15 mm
+keys enter
+expect said ! Renamed Washer 15 mm
+run findstr /l /c:"../Shopping/Washer 15 mm.json" "tasks\Home\Fix the tap.json"
+keys delete
+expect said ! Archived Washer 15 mm
+run findstr /l /c:"../Archive/Washer 15 mm.json" "tasks\Home\Fix the tap.json"
+
+# 2.8 Shopping made a plain list and back.
+keys left
+expect focus Shopping, list
+menu Remove Done from every item
+expect said ! Shopping is a plain list: Done removed from 0 items
+keys ctrl+z
+expect said ! Undone: Shopping is a plain list
+menu Add Done to every item
+expect said ! Shopping is a checklist: Done added to 1 item
+run findstr /l /c:"\"Done\"" tasks\Shopping\Milk.json
+
+# 2.10 A new list, and its undo.
+keys ctrl+shift+n
+type Garden
+keys enter
+expect said ! Made Garden
+run cmd /c if exist tasks\Garden\list.json (exit 0) else (exit 1)
+keys ctrl+z
+expect said ! Undone: Made Garden
+run cmd /c if not exist tasks\Garden (exit 0) else (exit 1)
+
+# 2.9 A change on disk since the item was shown: read again, not written over.
+type h
+keys right
+expect focus Fix the tap
+run cmd /c powershell -NoProfile -Command "(Get-Content -Raw 'tasks\Home\Fix the tap.json').Replace('2026-10-30','2026-11-02') | Set-Content -NoNewline 'tasks\Home\Fix the tap.json'"
+keys space
+expect said ! The item changed on disk; it has been read again
+expect focus Fix the tap, due 2 November
+
+# 4.1 Done tasks hidden and shown.
+keys ctrl+shift+d
+expect said ! Done tasks hidden
+keys left
+keys right
+expect said ! Home, 1 item, 1 done hidden
+keys ctrl+shift+d
+expect said ! Done tasks shown
+
+# 3.2 A smart list with a condition not understood shows nothing and says so.
+file tasks\Odd.filter.json {"conditions": [{"field": "Due", "soon": true}]}
+file tasks\Soon.filter.json {"format": "axit-filter 1", "match": "all", "conditions": [{"field": "Done", "is": false}, {"field": "Due", "before": "2026-11-30"}]}
+keys left
+keys f5
+keys home
+keys down
+expect focus Odd, smart list, a condition not understood
+keys down
+expect focus Soon, smart list, 1
+keys right
+expect said ! Soon, 1 item, Fix the tap, due 2 November, in Home

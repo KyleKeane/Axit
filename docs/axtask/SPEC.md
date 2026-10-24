@@ -3,7 +3,7 @@
 axTask is an app of the Axit bundle (`docs/axit/SPEC.md`): tasks and lists as a folder of small JSON files, for a
 blind developer who uses the NVDA screen reader. It is an item app: its window, keys, field types and file format are
 the shared ones of `docs/axit/item-apps.md` (cited as IA-n.m and not repeated), and this document holds only what is
-axTask's own. Written 2026-10-24, before the build; it takes the place of axList (`docs/axlist/SPEC.md`, branch
+axTask's own. Written 2026-10-24 and built the same day on the branch `axtask`, not yet heard under NVDA; it takes the place of axList (`docs/axlist/SPEC.md`, branch
 `axlist`, never merged). Requirements are numbered `TK-n.m` and decisions `TK-Dn`. In axTask's code and documents,
 "SPEC.md" means this file.
 
@@ -26,8 +26,8 @@ Space marks a task done. Saved filters, the smart lists, are small files of thei
 
 ## 3. Scenarios
 
-1. Start axTask on the folder: "Lists - axTask window", then "Lists, 3, All tasks, 5 not done, 1 of 3". Down:
-   "Home, list, 2 items".
+1. Start axTask on the folder: "Lists - axTask window", then "Lists, 3 items list, All tasks, 5 not done, 1 of 4".
+   Down: "Home, list, 2 items".
 2. Right: "Home, 2 items, Fix the tap, due 30 October". Tab: "Fields of Fix the tap, Title, text, Fix the tap". Down:
    "Done, check, not done", then "Due, date, 30 October 2026, Friday".
 3. Enter on Due, type `+3`, Enter: "Due: 2 November 2026, Monday". Shift+Tab: "Fix the tap, due 2 November".

@@ -1,14 +1,14 @@
 # Makes the files for the manual NVDA tests, and puts them back as they were after a test changed them.
 # Every app folder is emptied except its _main.md, then filled again. Git ignores everything made here.
 # Usage: .\manual_tests\prepare.ps1            (all apps)
-#        .\manual_tests\prepare.ps1 axfile     (one app: axclaude, axdown, axjson, axgit, axterminal, axfile, axmedia, axpreview)
+#        .\manual_tests\prepare.ps1 axfile     (one app: axclaude, axdown, axjson, axgit, axterminal, axfile, axmedia, axpreview, axtask)
 # Close the Axit windows that have these files open first: a file in use cannot be replaced.
 
 param([string]$App = '')
 
 $ErrorActionPreference = 'Stop'
 $root = $PSScriptRoot
-$apps = @('axclaude', 'axdown', 'axjson', 'axgit', 'axterminal', 'axfile', 'axmedia', 'axpreview')
+$apps = @('axclaude', 'axdown', 'axjson', 'axgit', 'axterminal', 'axfile', 'axmedia', 'axpreview', 'axtask')
 if ($App -ne '') {
     if ($apps -notcontains $App) { throw "Unknown app '$App'. One of: $($apps -join ', ')" }
     $apps = @($App)
@@ -392,6 +392,27 @@ function Build-AxPreview([string]$d) {
     try { for ($i = 0; $i -lt 100; $i++) { $stream.Write($chunk, 0, $chunk.Length) } } finally { $stream.Dispose() }
 }
 
+function Write-Item([string]$path, [string]$title, [string]$done, [string]$due, [string]$extra = '') {
+    $fields = @("    { ""title"": ""Title"", ""type"": ""text"", ""value"": ""$title"" }")
+    if ($done -ne '') { $fields += "    { ""title"": ""Done"", ""type"": ""check"", ""value"": $done }" }
+    if ($due -ne '-') { $fields += "    { ""title"": ""Start"", ""type"": ""date"", ""value"": """" }"; $fields += "    { ""title"": ""Due"", ""type"": ""date"", ""value"": ""$due"" }" }
+    if ($extra -ne '') { $fields += $extra }
+    Write-Text $path ("{`r`n  ""format"": ""axit-item 1"",`r`n  ""fields"": [`r`n" + ($fields -join ",`r`n") + "`r`n  ]`r`n}`r`n")
+}
+
+function Build-AxTask([string]$d) {
+    $t = New-Folder (Join-Path $d 'tasks')
+    $house = New-Folder (Join-Path $t 'Home')
+    $shop = New-Folder (Join-Path $t 'Shopping')
+    $plan = New-Folder (Join-Path $t 'Work\Course plan')
+    Write-Item (Join-Path $house 'Fix the tap.json') 'Fix the tap' 'false' '2026-10-30'
+    Write-Item (Join-Path $house 'Water plants.json') 'Water plants' 'true' '2026-10-20'
+    Write-Item (Join-Path $shop 'Milk.json') 'Milk' '' '-'
+    Write-Item (Join-Path $shop 'Washer.json') 'Washer' 'false' ''
+    Write-Item (Join-Path $plan 'Week one.json') 'Week one' 'false' '' '    { "title": "Notes", "type": "longtext", "value": "Read chapter one.\nWrite the summary." }'
+    Write-Text (Join-Path $house 'notes.txt') 'Not an item: the list counts it as a file not shown.'
+}
+
 function Build-AxDown([string]$d) {
     Write-Text (Join-Path $d 'plain.txt') $plain
     Write-Text (Join-Path $d 'bom.md') "# UTF-8 with a byte order mark`n`nLF line endings only. Saved, it keeps both." (New-Object Text.UTF8Encoding $true) -Lf
@@ -489,6 +510,7 @@ foreach ($name in $apps) {
         'axfile' { Build-AxFile $folder }
         'axmedia' { Build-AxMedia $folder }
         'axpreview' { Build-AxPreview $folder }
+        'axtask' { Build-AxTask $folder }
     }
 }
 

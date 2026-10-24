@@ -20,6 +20,7 @@
     <ProjectReference Include="..\..\src\AxPreview\AxPreview.csproj" />
     <ProjectReference Include="..\..\src\AxStart\AxStart.csproj" />
     <ProjectReference Include="..\..\src\AxProcess\AxProcess.csproj" />
+    <ProjectReference Include="..\..\src\AxTask\AxTask.csproj" />
   </ItemGroup>
 
 </Project>

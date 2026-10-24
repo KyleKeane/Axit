@@ -88,7 +88,7 @@ A JSON file holding a list of fields. The first field is the Title.
 | `date` | `"YYYY-MM-DD"` | "30 October 2026, Friday" | a text field: a date, `today`, `tomorrow`, `+3` (days) |
 | `datetime` | `"YYYY-MM-DDTHH:MM"` | "30 October 2026, 14:00" | the same, a time after the date |
 | `check` | `true` or `false` | "done" or "not done" | Space toggles it, no field |
-| `choice` | one of `options` | the option | one button per option, the current one the default |
+| `choice` | one of `options` | the option | a list of the options, the current one selected |
 | `link` | a path to another item, relative to this file | the other item's title, or "missing: name" | the other item's title, typed |
 
 axPass adds `username` and `password` (section 6).
@@ -128,7 +128,8 @@ A folder. Its details are `list.json` in it, the same shape as an item, never sh
   field and selected (a date as 2026-10-30, a link as the other item's title). Enter keeps it, Escape leaves it as it
   was. A value the type refuses ("30 Febuary") says why and the notice stays.
 - **IA-5.2** A check changes with Space or Enter, at once: "Done: done".
-- **IA-5.3** New field (Ctrl+N in the pane): its title in a text field, then its type from the list of types.
+- **IA-5.3** New field (Ctrl+N in the pane): its title in a text field, then its type from a list of the types (a
+  choice then asks its options, with a comma between them), added after the selected field.
 - **IA-5.4** Every change is one announcement ("Due: 30 October 2026, Friday") and one step for Ctrl+Z.
 - **IA-5.5** Before every write the file is read again; if it changed since it was shown (axJSON, a script, a sync),
   the change is refused with "The item changed on disk; it has been read again" (axList's LI-D5).

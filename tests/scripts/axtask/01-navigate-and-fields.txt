@@ -1,0 +1,135 @@
+# axTask: the navigator, the detail pane and every change to a field (docs/axtask/nvda-test-plan.md sections 1 and 2;
+# docs/axit/item-apps.md IA-2, IA-3, IA-5). A scratch folder of lists; findstr checks what reached the file.
+file home\Axit\axtask.json {"checkForUpdates": false}
+file "tasks\Home\Fix the tap.json" {"format": "axit-item 1", "fields": [{"title": "Title", "type": "text", "value": "Fix the tap"}, {"title": "Done", "type": "check", "value": false}, {"title": "Start", "type": "date", "value": ""}, {"title": "Due", "type": "date", "value": "2026-10-30"}]}
+file "tasks\Home\Water plants.json" {"format": "axit-item 1", "fields": [{"title": "Title", "type": "text", "value": "Water plants"}, {"title": "Done", "type": "check", "value": true}]}
+file tasks\Home\notes.txt not an item
+file tasks\Shopping\Milk.json {"format": "axit-item 1", "fields": [{"title": "Title", "type": "text", "value": "Milk"}]}
+file tasks\Shopping\Washer.json {"format": "axit-item 1", "fields": [{"title": "Title", "type": "text", "value": "Washer"}, {"title": "Done", "type": "check", "value": false}]}
+file "tasks\Work\Course plan\Week one.json" {"format": "axit-item 1", "fields": [{"title": "Title", "type": "text", "value": "Week one"}, {"title": "Done", "type": "check", "value": false}]}
+
+# 1.1 The top level: All tasks, then the lists.
+start task {temp}\tasks
+expect state Lists - axTask
+expect focus All tasks, 3 not done
+keys down
+expect focus Home, list, 2 items
+
+# 1.2 Right into Home: its name, its count, the first row.
+keys right
+expect said ! Home, 2 items, 1 file not shown, Fix the tap, due 30 October
+expect state Home - axTask
+keys down
+expect focus Water plants, done
+
+# 1.3 Right on an item: the edge sound only. Left back up, Home selected; Left at the top: the edge sound.
+keys right
+expect said ♪ Edge
+keys left
+expect said ! Lists, 3 items, Home, list, 2 items
+keys left
+expect said ♪ Edge
+
+# 1.4 Enter opens Home; Enter on an item moves to its fields.
+keys enter
+expect said ! Home, 2 items
+keys enter
+expect focus Title, text, Fix the tap
+keys down
+expect focus Done, check, not done
+keys down
+keys down
+expect focus Due, date, 30 October 2026, Friday
+
+# 1.5 Escape back to the navigator; Tab to the fields and Shift+Tab back.
+keys escape
+expect focus Fix the tap, due 30 October
+keys tab
+expect focus Due, date, 30 October 2026, Friday
+keys shift+tab
+expect focus Fix the tap, due 30 October
+
+# 2.1 Space marks it done and not done, in the file too.
+keys space
+expect said ! Done: Fix the tap
+run findstr /l /c:"\"value\": true" "tasks\Home\Fix the tap.json"
+keys space
+expect said ! Not done: Fix the tap
+
+# 2.2 A date typed as a weekday; a date refused keeps the notice.
+keys tab
+keys enter
+expect focus Due
+type friday
+keys enter
+expect said ! Due: 30 October 2026, Friday
+keys enter
+type 30 Febuary
+keys enter
+expect said ! Not a date: 30 Febuary
+keys escape
+expect focus Due, date, 30 October 2026, Friday
+
+# 2.3 A new field, a choice of two, chosen.
+keys ctrl+n
+type Priority
+keys enter
+expect focus text
+type cc
+expect focus choice
+keys enter
+type High, Low
+keys enter
+expect said ! Added Priority, choice of 2
+run findstr /l /c:"\"options\"" "tasks\Home\Fix the tap.json"
+keys enter
+expect focus High
+keys down
+keys enter
+expect said ! Priority: Low
+
+# 2.5 Alt+Up moves the field; at the top of the fields, the edge sound.
+keys alt+up
+expect said ! Moved up: Priority
+keys home
+keys alt+up
+expect said ! Top of the fields
+
+# 2.6 The Title keeps its name; F2 in the navigator renames the item and its file.
+keys f2
+expect said ! The Title field keeps its name
+keys escape
+keys f2
+type Fix the sink
+keys enter
+expect said ! Renamed Fix the sink
+run cmd /c if exist "tasks\Home\Fix the sink.json" (exit 0) else (exit 1)
+
+# 2.7 A new item gets the default fields; Delete archives it, Ctrl+Z brings it back.
+keys left
+type s
+keys right
+keys ctrl+n
+type Bread
+keys enter
+expect said ! Added Bread
+expect focus Bread
+run findstr /l /c:"\"Due\"" "tasks\Shopping\Bread.json"
+keys delete
+expect said ! Archived Bread
+run cmd /c if exist "tasks\Archive\Bread.json" (exit 0) else (exit 1)
+keys ctrl+z
+expect said ! Undone: Archived Bread
+run cmd /c if exist "tasks\Shopping\Bread.json" (exit 0) else (exit 1)
+
+# 2.8 Space on a plain item: the edge sound and "Not a task".
+type m
+expect focus Milk
+keys space
+expect said ! Not a task
+
+# 1.7 Ctrl+1: All tasks, the soonest due first, each with its list.
+keys ctrl+1
+expect said ! All tasks, 4 items, Fix the sink, due 30 October, in Home
+keys left
+expect focus All tasks, 4 not done

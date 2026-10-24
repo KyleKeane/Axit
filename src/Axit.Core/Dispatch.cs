@@ -33,15 +33,16 @@ public static class Dispatch
     public const string AxPreview = "preview";
     public const string AxStart = "start";
     public const string AxProcess = "process";
+    public const string AxTask = "task";
 
     /// <summary>Not an app: the executable answers <c>--help</c> and <c>--version</c>, or reports <see cref="Launch.Error"/>.</summary>
     public const string Bundle = "axit";
 
     /// <summary>The apps, in the order the Axit menu lists them (AX-9).</summary>
-    public static readonly IReadOnlyList<App> Apps = [new("axClaude", AxClaude, "AxClaude"), new("axDown", AxDown, "AxDown"), new("axJSON", AxJSON, "AxJSON"), new("axGIT", AxGit, "AxGit"), new("axTerminal", AxTerminal, "AxTerminal"), new("axFile", AxFile, "AxFile"), new("axMedia", AxMedia, "AxMedia"), new("axPreview", AxPreview, "AxPreview"), new("axStart", AxStart, "AxStart"), new("axProcess", AxProcess, "AxProcess")];
+    public static readonly IReadOnlyList<App> Apps = [new("axClaude", AxClaude, "AxClaude"), new("axDown", AxDown, "AxDown"), new("axJSON", AxJSON, "AxJSON"), new("axGIT", AxGit, "AxGit"), new("axTerminal", AxTerminal, "AxTerminal"), new("axFile", AxFile, "AxFile"), new("axMedia", AxMedia, "AxMedia"), new("axPreview", AxPreview, "AxPreview"), new("axStart", AxStart, "AxStart"), new("axProcess", AxProcess, "AxProcess"), new("axTask", AxTask, "AxTask")];
 
     public const string Usage = """
-        Usage: Axit [claude|down|json|git|terminal|file|media|preview|start|process] [arguments]
+        Usage: Axit [claude|down|json|git|terminal|file|media|preview|start|process|task] [arguments]
 
           Axit claude [<folder>] ...  axClaude, the front end for Claude Code (Axit claude --help lists its options)
           Axit down [<file>]          axDown, the text editor
@@ -53,12 +54,13 @@ public static class Dispatch
           Axit preview [<file>]       axPreview, the read-only viewer, on the file (the open axPreview window takes it)
           Axit start [--hidden]       axStart, the program launcher: its search field, or with --hidden running until its hotkey
           Axit process                axProcess, the processes, services and startup programs
+          Axit task [<folder>]        axTask, tasks and lists as a folder of small files
           Axit <folder>               the same as Axit claude <folder>
           Axit <file>                 the same as Axit down <file>, Axit json <file> for a .json file, or Axit media <file> for a sound or video file
           Axit                        axClaude on the current folder
           --help, --version           this text, or the version
 
-        The installed console commands axit, axclaude, axdown, axjson, axgit, axterminal, axfile, axmedia, axpreview, axstart and axprocess stand for Axit, Axit claude, Axit down, Axit json, Axit git, Axit terminal, Axit file, Axit media, Axit preview, Axit start and Axit process.
+        The installed console commands axit, axclaude, axdown, axjson, axgit, axterminal, axfile, axmedia, axpreview, axstart, axprocess and axtask stand for Axit, Axit claude, Axit down, Axit json, Axit git, Axit terminal, Axit file, Axit media, Axit preview, Axit start, Axit process and Axit task.
         """;
 
     /// <summary>Whether an argument asks for the usage text: the forms Windows and Unix programs take (the apps' hosts read it too).</summary>
