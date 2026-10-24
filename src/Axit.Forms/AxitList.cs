@@ -73,6 +73,92 @@ public class AxitList : ListBox
         }
     }
 
+    // ---- the rename in place (AX-8.7; from axFile's AF-4.2 on its second use, axTask and axPass, 2026-10-24) ----
+
+    private TextBox? _renameBox;
+    private Action<string>? _renameCommit;
+    private Action? _renameEnded;
+
+    /// <summary>Whether a rename box shows over the selected item.</summary>
+    public bool Renaming => _renameBox is { Visible: true };
+
+    /// <summary>
+    /// F2 in every list whose items can be renamed: a box named "New name" over the selected item with
+    /// <paramref name="text"/>, its first <paramref name="selectLength"/> characters selected (a file's name before
+    /// its extension). Enter calls <paramref name="commit"/> with the text, which checks it and calls
+    /// <see cref="EndRename"/> when it is taken (it stays open on a refusal the window says); Escape, or the focus
+    /// leaving the box, ends it with the name kept. <paramref name="ended"/> is called whenever the box closes.
+    /// </summary>
+    public void BeginRename(string text, int selectLength, Action<string> commit, Action? ended = null)
+    {
+        if (SelectedIndex < 0 || Renaming)
+        {
+            return;
+        }
+
+        if (_renameBox is null)
+        {
+            _renameBox = new TextBox { Visible = false, AccessibleName = "New name", BorderStyle = BorderStyle.FixedSingle, Font = Font };
+            _renameBox.KeyDown += OnRenameKey;
+            _renameBox.Leave += (_, _) => EndRename();
+            Controls.Add(_renameBox);
+        }
+
+        _renameCommit = commit;
+        _renameEnded = ended;
+        _renameBox.Bounds = GetItemRectangle(SelectedIndex);
+        _renameBox.Text = text;
+        // The selection goes before the focus: a text box that gets the focus selects everything unless one was set.
+        _renameBox.Select(0, Math.Clamp(selectLength, 0, text.Length));
+        _renameBox.Visible = true;
+        _renameBox.BringToFront();
+        _renameBox.Select();
+    }
+
+    /// <summary>The rename box closed, the focus back on the list first, so that hiding the box does not send it somewhere of WinForms' choosing.</summary>
+    public void EndRename()
+    {
+        if (_renameBox is not { Visible: true } box)
+        {
+            return;
+        }
+
+        _renameCommit = null;
+        var ended = _renameEnded;
+        _renameEnded = null;
+        if (!IsDisposed && Visible && !Focused)
+        {
+            Select();
+        }
+
+        box.Visible = false;
+        ended?.Invoke();
+    }
+
+    protected override void OnFontChanged(EventArgs e)
+    {
+        base.OnFontChanged(e);
+        if (_renameBox is not null)
+        {
+            _renameBox.Font = Font;
+        }
+    }
+
+    /// <summary>Enter and Escape in the box are the box's own, as a notice's field's.</summary>
+    private void OnRenameKey(object? sender, KeyEventArgs e)
+    {
+        if (e.KeyData == Keys.Return)
+        {
+            e.SuppressKeyPress = true;
+            _renameCommit?.Invoke(_renameBox!.Text.Trim());
+        }
+        else if (e.KeyData == Keys.Escape)
+        {
+            e.SuppressKeyPress = true;
+            EndRename();
+        }
+    }
+
     protected override void OnKeyPress(KeyPressEventArgs e)
     {
         base.OnKeyPress(e);

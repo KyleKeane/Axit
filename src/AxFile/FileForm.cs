@@ -23,7 +23,6 @@ public sealed partial class FileForm : AxitForm
     private readonly ToolStripMenuItem _drivesMenu = new("Driv&es");
     private readonly List<(SortBy By, ToolStripMenuItem Item)> _sortItems = [];
     private readonly AxitList _list = new();
-    private readonly TextBox _renameBox = new();
     private readonly StatusStrip _status = new();
     private readonly ToolStripStatusLabel _stateLabel;
     private readonly ToolStripStatusLabel _pathLabel;
@@ -162,14 +161,6 @@ public sealed partial class FileForm : AxitForm
             }
         };
 
-        // ---- the rename box (AF-4.2): a child of the list, placed over the entry while a rename runs, hidden otherwise ----
-        _renameBox.Visible = false;
-        _renameBox.AccessibleName = "New name";
-        _renameBox.BorderStyle = BorderStyle.FixedSingle;
-        _renameBox.KeyDown += OnRenameKey;
-        _renameBox.Leave += (_, _) => CancelRename();
-        _list.Controls.Add(_renameBox);
-
         // ---- the Actions list (AF-9): always under the folder list, "No actions yet" until the first operation ----
         SetUpActions();
 
@@ -253,7 +244,7 @@ public sealed partial class FileForm : AxitForm
 
     protected override void HideForNotice()
     {
-        CancelRename();
+        EndRename();
         _list.Visible = false;
         _pane.Visible = false;
     }
@@ -274,7 +265,6 @@ public sealed partial class FileForm : AxitForm
     protected override void ApplyFont(Font font)
     {
         _list.Font = font;
-        _renameBox.Font = font;
         _pane.Font = font;
         FitPane();
     }
@@ -393,7 +383,7 @@ public sealed partial class FileForm : AxitForm
                 ShowProperties();
                 return true;
             case AxFileKeys.Undo:
-                if (_renameBox.Focused)
+                if (_list.Renaming)
                 {
                     // The rename box's own undo of the typing (AF-6.2).
                     return false;

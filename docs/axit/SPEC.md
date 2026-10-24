@@ -358,6 +358,12 @@ The apps are named ax and a word, the ax in lower case and the word as it is wri
   are not all names (`Names`). `ListTests` fails on a plain `ListBox` in an app; the lists that never take a typed
   letter are its named exceptions: axStart's and axClip's matches and the palette's, never focused, and a question's
   answers, whose letters are the screen's keys (axClaude D33).
+- AX-8.7 F2 renames in place in every list whose items can be renamed (the user's rule, 2026-10-24; axFile's AF-4.2
+  since 2026-10-20): a box named "New name" over the item, holding its name with the part that changes selected (a
+  file's name before its extension); Enter takes it, and a name the window refuses is said and the box stays; Escape,
+  or the focus leaving the box, keeps the old name; Ctrl+Z in the box undoes the typing. Built into `AxitList`
+  (`BeginRename`, `EndRename`, `Renaming`), so that a window only says what renaming means for its items. In axFile's
+  folder list, axTask's and axPass's navigators, and the item apps' field titles.
 
 ### AX-9 The Axit menu
 

@@ -118,7 +118,7 @@ public sealed partial class FileForm
     private async Task<bool> ShowFolderAsync(string folder, string? select, bool remember, bool announce = true)
     {
         // A rename box left open over the list that is about to change renames the wrong entry (AF-4.2).
-        CancelRename();
+        EndRename();
         var read = ++_reads;
         var changed = !string.Equals(folder, _folder, StringComparison.OrdinalIgnoreCase);
         Listing listing;
