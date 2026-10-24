@@ -147,7 +147,8 @@ library dependency (B-10: `git.exe` and the file system through the APIs already
   through the matches with the caret kept in the field, Enter to start.
 - **axPass** (asked 2026-10-18 as AxKeePassium, after the KeePass app on the phone; renamed axPass by the user on
   2026-10-23, which keeps clear of anyone's product name; no spec yet; the format and the command-line tool, read from
-  their sources, are in `docs/axpass/kdbx-notes.md`): a KeePass client for one database (`.kdbx`) per window: the
+  their sources, are in `docs/axpass/kdbx-notes.md`; since 2026-10-24 an item app with axTask's window and fields,
+  `docs/axit/item-apps.md`, whose section 6 says where the two differ): a KeePass client for one database (`.kdbx`) per window: the
   entries as a list, by group and by search, Enter for an entry's fields as read-only text with the password withheld,
   keys that copy the user name and the password to the clipboard with a timed clear, add and edit through notices, a
   generator, lock. The engine, by the bundle's precedent (AG-D2, B-10): KeePassXC's `keepassxc-cli` as a process per
@@ -165,7 +166,11 @@ library dependency (B-10: `git.exe` and the file system through the APIs already
   rest) is never reimplemented. To verify before the spec: the current release's Windows support and mount options,
   and how it lives beside a running desktop app. Local first (B-15): the vault's cloud copy is the user's sync client's
   business.
-- **AxList and AxTask** (asked 2026-10-23; placeholder names, no spec; the user may or may not pursue them). AxList: a
+- **axTask** (redesigned 2026-10-24 at the user's direction, specified, not built: `docs/axtask/SPEC.md`, with the
+  shape it shares with axPass in `docs/axit/item-apps.md`): lists as folders and each item a JSON file of typed fields
+  (title, type, value), a navigator like axFile's and a detail pane, All tasks and smart lists. It replaces the first
+  design below, built as axList (Markdown lists) on the branch `axlist`, which stays as a record and is not merged.
+- **AxList and AxTask, the first design** (asked 2026-10-23; placeholder names). AxList: a
   list manager for things to remember, with bullet, numbered and checkbox lists; later, links between items for
   mind maps, curriculum planning, recall in plain language and structured storage. AxTask: the checkbox lists as a
   task manager, with reminders, automations and smart lists (saved filters). Perhaps one app at first, split when the
