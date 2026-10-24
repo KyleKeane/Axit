@@ -31,6 +31,10 @@ public sealed partial class TextEditorForm : AxitForm
     // ---- undo and redo (AD-2.5): the window's own history over the text, one step per change ----
     private readonly EditHistory _history = new();
 
+    /// <summary>Edit → Undo and Redo, in the Edit menu with their keys and in the text's context menu (AD-4.1).</summary>
+    private readonly Command _undo;
+    private readonly Command _redo;
+
     /// <summary>A second without a change ends a run of typing, so that the next key starts a step of its own.</summary>
     private readonly System.Windows.Forms.Timer _runTimer = new() { Interval = 1000 };
 
@@ -56,16 +60,25 @@ public sealed partial class TextEditorForm : AxitForm
     {
         _app = app;
         _settings = settings;
+        _undo = new Command("&Undo", EditorKeys.Undo, Undo);
+        _redo = new Command("&Redo", EditorKeys.Redo, Redo);
 
-        // ---- menus (AD-4); the keys are handled in ProcessWindowKey from the tables, the items only show them ----
+        // ---- menus and keys (AD-4, AD-5): one command list (docs/axit/app-kit.md AK-2), each key from the tables ----
         // File is the thing worked on, in the standard order of a File menu (AD-4.1, bundle AX-6): New, Open and the
         // recent files, then Save and Save as where every Windows program has them, then the extras, then Exit.
         // axClaude's Session menu has the same order with the Save slot empty and its export before Exit.
+        // In the viewer (AP-3.2) the commands that write are not made at all, so that their keys do nothing there.
         var file = new ToolStripMenuItem("&File");
-        file.DropDownItems.Add(_app.ReadOnly
-            ? Item("&New window", NewWindow, EditorKeys.NewDocument)
-            : Item("&New", NewDocument, EditorKeys.NewDocument));
-        file.DropDownItems.Add(Item("&Open...", OpenFile, EditorKeys.Open));
+        if (_app.ReadOnly)
+        {
+            Add(file, new Command("&New window", EditorKeys.NewDocument, NewWindow) { Mark = CommandMark.Open });
+        }
+        else
+        {
+            Add(file, new Command("&New", EditorKeys.NewDocument, NewDocument));
+        }
+
+        Add(file, new Command("&Open...", EditorKeys.Open, OpenFile) { Mark = CommandMark.Open });
         CommandPalette.FilledOnOpening(_recentFilesItem).DropDownOpening += (_, _) => FillRecentFiles();
         FillRecentFiles();
         file.DropDownItems.Add(_recentFilesItem);
@@ -76,14 +89,17 @@ public sealed partial class TextEditorForm : AxitForm
         }
         else
         {
+            // Ctrl+S is the base's key (SaveCommand), so Save stays an item that shows it.
             file.DropDownItems.Add(Item("&Save", () => Save(), BundleKeys.Save));
-            file.DropDownItems.Add(Item("Save &as...", () => SaveAs(), EditorKeys.SaveAs));
+            Add(file, new Command("Save &as...", EditorKeys.SaveAs, () => SaveAs()));
             file.DropDownItems.Add(new ToolStripSeparator());
         }
 
         // Show current file in ▸ File Explorer and the other apps' windows on the file or its folder (AD-4.1).
         // axClaude and axTerminal on the file's folder, axGIT on the repository that holds it, axFile with the file selected.
-        file.DropDownItems.Add(CreateShowInMenu("Show current file &in", Item("File &Explorer", ShowInExplorer, EditorKeys.ShowInExplorer), FileOrSay));
+        var explorer = new Command("File &Explorer", EditorKeys.ShowInExplorer, ShowInExplorer) { Mark = CommandMark.Open };
+        AddKey(explorer);
+        file.DropDownItems.Add(CreateShowInMenu("Show current file &in", Item(explorer.Label, explorer.Run, explorer.Key), FileOrSay));
         file.DropDownItems.Add(new ToolStripSeparator());
         file.DropDownItems.Add(CreateExitItem());
 
@@ -92,39 +108,45 @@ public sealed partial class TextEditorForm : AxitForm
         if (!_app.ReadOnly)
         {
             edit = new ToolStripMenuItem("&Edit");
-            AddEditItems(edit.DropDownItems);
+            Add(edit, _undo);
+            Add(edit, _redo);
+            AddKey(_redo with { Key = EditorKeys.RedoAlso });
+            AddClipboardItems(edit.DropDownItems);
             if (_app.Commands.Count > 0)
             {
                 // The app's own commands on the whole text (AJ-2.3), after the control's own.
                 edit.DropDownItems.Add(new ToolStripSeparator());
                 foreach (var command in _app.Commands)
                 {
-                    edit.DropDownItems.Add(Item(command.Label, () => RunCommand(command), command.Key));
+                    Add(edit, new Command(command.Label, command.Key, () => RunCommand(command)));
                 }
             }
         }
 
         var navigate = new ToolStripMenuItem("&Navigate");
-        navigate.DropDownItems.Add(Item("&Find...", () => ShowFind(_editor), BundleKeys.Find));
-        navigate.DropDownItems.Add(Item("Find &next", () => FindInEditor(1), BundleKeys.FindNext));
-        navigate.DropDownItems.Add(Item("Find pre&vious", () => FindInEditor(-1), BundleKeys.FindPrevious));
-        navigate.DropDownItems.Add(Item("&Go to line...", ShowGoToLine, EditorKeys.GoToLine));
+        Add(navigate, new Command("&Find...", BundleKeys.Find, () => ShowFind(_editor)) { Mark = CommandMark.Read });
+        Add(navigate, new Command("Find &next", BundleKeys.FindNext, () => FindInEditor(1)) { Mark = CommandMark.Read });
+        Add(navigate, new Command("Find pre&vious", BundleKeys.FindPrevious, () => FindInEditor(-1)) { Mark = CommandMark.Read });
+        Add(navigate, new Command("&Go to line...", EditorKeys.GoToLine, ShowGoToLine) { Mark = CommandMark.Read });
         navigate.DropDownItems.Add(new ToolStripSeparator());
         // One item per kind under Next and under Previous, from the key pairs of the app's table (AD-D7, AX-7.2).
         var next = new ToolStripMenuItem("Ne&xt");
         var previous = new ToolStripMenuItem("&Previous");
         foreach (var jump in _app.Jumps)
         {
-            next.DropDownItems.Add(Item(TextJumps.MenuLabel(jump), () => JumpTo(jump, 1), jump.Next));
-            previous.DropDownItems.Add(Item(TextJumps.MenuLabel(jump), () => JumpTo(jump, -1), jump.Previous));
+            Add(next, new Command(TextJumps.MenuLabel(jump), jump.Next, () => JumpTo(jump, 1)) { Mark = CommandMark.Read });
+            Add(previous, new Command(TextJumps.MenuLabel(jump), jump.Previous, () => JumpTo(jump, -1)) { Mark = CommandMark.Read });
         }
 
         navigate.DropDownItems.Add(next);
         navigate.DropDownItems.Add(previous);
 
         // Options, as axClaude's (AD-4.3): every setting in the submenu for what it is about, none outside one.
+        // The item goes into the Text submenu the base makes, so it is made from the command here and its key added.
         var options = new ToolStripMenuItem("&Options");
-        _wordWrapItem = Item("&Word wrap", ToggleWordWrap, EditorKeys.WordWrap);
+        var wordWrap = new Command("&Word wrap", EditorKeys.WordWrap, ToggleWordWrap);
+        AddKey(wordWrap);
+        _wordWrapItem = Item(wordWrap.Label, wordWrap.Run, wordWrap.Key);
         _wordWrapItem.Checked = _settings.WordWrap;
         options.DropDownItems.Add(CreateTextMenu(_wordWrapItem));
         options.DropDownItems.Add(CreateGeneralMenu());
@@ -136,6 +158,18 @@ public sealed partial class TextEditorForm : AxitForm
         // The bundle's Axit menu (AX-9) sits before Help in every window and ends with the update items and About.
         _menu.Items.AddRange(edit is null ? [file, navigate, options, CreateAxitMenu(), help] : [file, edit, navigate, options, CreateAxitMenu(), help]);
         MainMenuStrip = _menu;
+
+        // The keys without a menu item: one main control, the editor, or the Go to line field while it shows; the
+        // viewer's line number. The keys the edit control would act on first are OnEditorKeyDown's (AD-5.1).
+        foreach (var key in new[] { BundleKeys.NextControl, BundleKeys.PreviousControl, BundleKeys.NextControlAlso })
+        {
+            AddKey(new Command("Back to the text or the Go to line field", key, () => (_area.Current ?? _editor).Focus()) { Mark = CommandMark.Open });
+        }
+
+        if (_app.ReadOnly)
+        {
+            AddViewerKeys();
+        }
 
         // ---- the editor (AD-2) ----
         _editor.Multiline = true;
@@ -154,7 +188,13 @@ public sealed partial class TextEditorForm : AxitForm
         _editor.TabIndex = 0;
         // The window's own context menu in place of the EDIT control's, whose Undo reaches the control's buffer (AD-D1).
         var context = new ContextMenuStrip();
-        AddEditItems(context.Items);
+        if (!_app.ReadOnly)
+        {
+            context.Items.Add(Item(_undo.Label, _undo.Run, _undo.Key));
+            context.Items.Add(Item(_redo.Label, _redo.Run, _redo.Key));
+        }
+
+        AddClipboardItems(context.Items);
         _editor.ContextMenuStrip = context;
         _editor.KeyDown += OnEditorKeyDown;
         _editor.KeyPress += OnEditorKeyPress;
@@ -196,16 +236,14 @@ public sealed partial class TextEditorForm : AxitForm
     private string DocumentName => _path is null ? Untitled : Path.GetFileName(_path);
 
     /// <summary>
-    /// The Edit menu's items and the text's context menu (AD-4.1): the window's own Undo and Redo, then the control's
-    /// Cut, Copy, Paste and Select all; in the viewer Copy and Select all alone. The EDIT control's own menu would undo
-    /// through the control's buffer, outside the window's history (AD-D1; replaced 2026-10-23).
+    /// The Edit menu's and the text's context menu's items after the window's own Undo and Redo (AD-4.1): the control's
+    /// Cut, Copy, Paste and Select all, whose keys are the control's own; in the viewer Copy and Select all alone. The
+    /// EDIT control's own menu would undo through the control's buffer, outside the window's history (AD-D1; replaced 2026-10-23).
     /// </summary>
-    private void AddEditItems(ToolStripItemCollection items)
+    private void AddClipboardItems(ToolStripItemCollection items)
     {
         if (!_app.ReadOnly)
         {
-            items.Add(Item("&Undo", Undo, EditorKeys.Undo));
-            items.Add(Item("&Redo", Redo, EditorKeys.Redo));
             items.Add(new ToolStripSeparator());
             items.Add(new ToolStripMenuItem("Cu&t", null, (_, _) => _editor.Cut()) { ShortcutKeyDisplayString = "Ctrl+X" });
         }
@@ -313,77 +351,8 @@ public sealed partial class TextEditorForm : AxitForm
         base.OnFormClosing(e);
     }
 
-    // ---- keys (AD-5): every key comes from BundleKeys, EditorKeys or the app's table, and is handled here only ----
-
-    protected override bool ProcessWindowKey(Keys keyData)
-    {
-        if (_app.ReadOnly && ViewerKey(keyData) is { } taken)
-        {
-            return taken;
-        }
-
-        switch (keyData)
-        {
-            case BundleKeys.NextControl:
-            case BundleKeys.PreviousControl:
-            case BundleKeys.NextControlAlso:
-                // One main control: the editor, or the Go to line field while it shows.
-                (_area.Current ?? _editor).Focus();
-                return true;
-            case BundleKeys.Find:
-                ShowFind(_editor);
-                return true;
-            case BundleKeys.FindNext:
-                FindInEditor(1);
-                return true;
-            case BundleKeys.FindPrevious:
-                FindInEditor(-1);
-                return true;
-            case EditorKeys.NewDocument:
-                NewDocument();
-                return true;
-            case EditorKeys.Open:
-                OpenFile();
-                return true;
-            case EditorKeys.ShowInExplorer:
-                ShowInExplorer();
-                return true;
-            case EditorKeys.SaveAs:
-                SaveAs();
-                return true;
-            case EditorKeys.GoToLine:
-                ShowGoToLine();
-                return true;
-            case EditorKeys.WordWrap:
-                ToggleWordWrap();
-                return true;
-            case EditorKeys.Undo:
-                Undo();
-                return true;
-            case EditorKeys.Redo:
-            case EditorKeys.RedoAlso:
-                Redo();
-                return true;
-        }
-
-        foreach (var command in _app.Commands)
-        {
-            if (keyData == command.Key)
-            {
-                RunCommand(command);
-                return true;
-            }
-        }
-
-        // The app's navigation keys, from the pairs its table gives the notice text as well (AD-D7).
-        if (TextJumps.Handle(_editor, _app.Jumps, keyData, Announce))
-        {
-            UpdateStatus();
-            return true;
-        }
-
-        return false;
-    }
+    // ---- keys (AD-5): every key comes from BundleKeys, EditorKeys or the app's table; the window's are its command
+    // list (made with the menus above), and here are only the keys the edit control would act on first ----
 
     private void OnEditorKeyDown(object? sender, KeyEventArgs e)
     {

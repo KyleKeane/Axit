@@ -27,43 +27,25 @@ public sealed partial class TextEditorForm
     /// <summary>The viewer's File menu after Open and the recent files (AP-3.1): nothing is written, so the Save slot holds Reload and the way to the editor.</summary>
     private void AddViewerFileItems(ToolStripMenuItem file)
     {
-        file.DropDownItems.Add(Item("Re&load", ReloadCommand, EditorKeys.Reload));
+        Add(file, new Command("Re&load", EditorKeys.Reload, ReloadCommand));
         file.DropDownItems.Add(new ToolStripSeparator());
-        _editItem = Item("&Edit in axDown", OpenInEditor, EditorKeys.Edit);
-        file.DropDownItems.Add(_editItem);
+        // The label follows the file's kind (UpdateEditItem); the command keeps the first one.
+        _editItem = Add(file, new Command("&Edit in axDown", EditorKeys.Edit, OpenInEditor) { Mark = CommandMark.Open });
     }
 
     /// <summary>
-    /// The viewer's keys (AP-3.2), asked before the shell's: Ctrl+N is a new window, F5 reloads, Ctrl+E opens the
-    /// editor, l says the line while the text has the focus; the shell's keys that write do nothing. Null for a key
-    /// that is not the viewer's, true when handled, false for one the viewer turns off.
+    /// The viewer's key without a menu item (AP-2.3): l says the line while the text has the focus. The viewer's other
+    /// keys are its File menu's commands (Ctrl+N a new window, F5, Ctrl+E); the shell's keys that write (Ctrl+Shift+S,
+    /// Ctrl+Z, Ctrl+Y, Ctrl+Shift+Z) are not made in the viewer, so they do nothing there (AP-3.2).
     /// </summary>
-    private bool? ViewerKey(Keys keyData)
-    {
-        switch (keyData)
-        {
-            case EditorKeys.NewDocument:
-                NewWindow();
-                return true;
-            case EditorKeys.Reload:
-                ReloadCommand();
-                return true;
-            case EditorKeys.Edit:
-                OpenInEditor();
-                return true;
-            case EditorKeys.LineNumber when _editor.Focused:
-                // A plain letter: taken in the text only, so that the Go to line field still accepts it.
-                var (line, _, lines) = Position();
-                Announce($"Line {line} of {lines}", true);
-                return true;
-            case EditorKeys.SaveAs:
-            case EditorKeys.Undo:
-            case EditorKeys.Redo:
-            case EditorKeys.RedoAlso:
-                return false;
-        }
+    private void AddViewerKeys() =>
+        // A plain letter: taken in the text only, so that the Go to line field still accepts it.
+        AddKey(new Command("Say the line", EditorKeys.LineNumber, SayLine) { When = () => _editor.Focused, Mark = CommandMark.Read });
 
-        return null;
+    private void SayLine()
+    {
+        var (line, _, lines) = Position();
+        Announce($"Line {line} of {lines}", true);
     }
 
     /// <summary>AP-1.2, AP-1.3: a start with a file while this window is open hands it here; the base answers the message at once and the file is loaded after, so that the starting process never waits on a read.</summary>
