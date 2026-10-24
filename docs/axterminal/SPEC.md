@@ -417,7 +417,7 @@ its notes record what moved.
 
 ## 8. Status
 
-- Planned 2026-10-18 at the user's ask, with axFile (`docs/axfile/SPEC.md`), AxKeePassium and AxCryptomator
+- Planned 2026-10-18 at the user's ask, with axFile (`docs/axfile/SPEC.md`), AxKeePassium (axPass since 2026-10-23) and AxCryptomator
   (`docs/axit/plan.md`).
 - Built the same day as a first draft, in the order of §5: the `LineStore` seam and the moves into the shared
   projects (axClaude's tests unchanged), the marks as events, the view with its keys as data, `AxTerminal.Core` with

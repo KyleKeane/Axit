@@ -145,15 +145,16 @@ library dependency (B-10: `git.exe` and the file system through the APIs already
   which is still owed): a program launcher behind a global hotkey, the one app of the bundle with no document: a
   hidden process from sign-in whose hotkey brings up one search field over the Start menu's programs, Down and Up
   through the matches with the caret kept in the field, Enter to start.
-- **AxKeePassium** (asked 2026-10-18; no spec yet; the name is the user's, after the KeePass app on the phone, and is
-  someone's product name, so AxKeePass is the alternative): a KeePass client for one database (`.kdbx`) per window: the
+- **axPass** (asked 2026-10-18 as AxKeePassium, after the KeePass app on the phone; renamed axPass by the user on
+  2026-10-23, which keeps clear of anyone's product name; no spec yet; the format and the command-line tool, read from
+  their sources, are in `docs/axpass/kdbx-notes.md`): a KeePass client for one database (`.kdbx`) per window: the
   entries as a list, by group and by search, Enter for an entry's fields as read-only text with the password withheld,
   keys that copy the user name and the password to the clipboard with a timed clear, add and edit through notices, a
   generator, lock. The engine, by the bundle's precedent (AG-D2, B-10): KeePassXC's `keepassxc-cli` as a process per
   command (`ls`, `show`, `clip`, `add`, `edit`, `rm`, `mv`, `generate`, `db-create`), the master password handed to it on
   standard input and held only in the window's memory until lock; the format, Argon2 and the rest stay KeePassXC's and
-  are never reimplemented. To verify before the spec: that the Windows build reads the password from a pipe, its
-  output formats, key files (`-k`). Local first (B-15): the database is a file, synced by whatever syncs the user's
+  are never reimplemented. To verify before the spec: that the Windows build reads the password from a pipe (its
+  manual does not say; see the notes), its output formats. Local first (B-15): the database is a file, synced by whatever syncs the user's
   files.
 - **AxCryptomator** (asked 2026-10-18; no spec yet; Cryptomator is a product name too, AxVault the alternative): a
   window to unlock and lock Cryptomator vaults, since the desktop app's JavaFX window reads poorly with NVDA: a list
