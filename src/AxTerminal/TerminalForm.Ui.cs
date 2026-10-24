@@ -10,12 +10,12 @@ internal sealed partial class TerminalForm
 
     private void BuildMenus()
     {
-        // The menus (SPEC.md AT-6.1), every mnemonic unique within its menu; the keys are handled in ProcessConsoleKey
-        // from the table, the items only show them. Session, the shell in its folder, is the thing worked on, in the
-        // standard order of a first menu (bundle AX-6): New, the recent folders, the slot the editors have Save in,
-        // Show current folder in, the export, Exit.
+        // The menus (SPEC.md AT-6.1), every mnemonic unique within its menu; each item with a key is a command of the
+        // window's one list (docs/axit/app-kit.md AK-2), its key from the table. Session, the shell in its folder, is the
+        // thing worked on, in the standard order of a first menu (bundle AX-6): New, the recent folders, the slot the
+        // editors have Save in, Show current folder in, the export, Exit.
         var session = new ToolStripMenuItem("&Session");
-        session.DropDownItems.Add(Item("&New session...", NewSession, AxTerminalKeys.NewSession));
+        Add(session, new Command("&New session...", AxTerminalKeys.NewSession, NewSession) { Mark = CommandMark.Act });
         session.DropDownItems.Add(RecentFoldersItem);
         session.DropDownItems.Add(RecentFoldersInNewWindowItem);
         // AT-1.6: the shell changed in place, the current one checked when the submenu opens.
@@ -38,12 +38,14 @@ internal sealed partial class TerminalForm
         });
         session.DropDownItems.Add(switchShell);
         session.DropDownItems.Add(new ToolStripSeparator());
-        session.DropDownItems.Add(Item("Res&tart shell", RestartShell, AxTerminalKeys.RestartShell));
-        session.DropDownItems.Add(Item("&Clear transcript", ClearTranscript, AxTerminalKeys.ClearTranscript));
+        Add(session, new Command("Res&tart shell", AxTerminalKeys.RestartShell, RestartShell) { Mark = CommandMark.Act });
+        Add(session, new Command("&Clear transcript", AxTerminalKeys.ClearTranscript, ClearTranscript));
         session.DropDownItems.Add(new ToolStripSeparator());
-        session.DropDownItems.Add(Item("Say current fol&der", SayFolder, AxTerminalKeys.SayFolder));
+        Add(session, new Command("Say current fol&der", AxTerminalKeys.SayFolder, SayFolder) { Mark = CommandMark.Read });
         // AT-1.5: the way to the other windows, on the shell's current directory.
-        session.DropDownItems.Add(CreateShowInMenu("Show current folder &in", Item("File &Explorer", ShowInExplorer, AxTerminalKeys.ShowInExplorer), () => CurrentDirectory));
+        var explorer = new Command("File &Explorer", AxTerminalKeys.ShowInExplorer, ShowInExplorer) { Mark = CommandMark.Open };
+        AddKey(explorer);
+        session.DropDownItems.Add(CreateShowInMenu("Show current folder &in", Item(explorer.Label, explorer.Run, explorer.Key), () => CurrentDirectory));
         session.DropDownItems.Add(new ToolStripSeparator());
         session.DropDownItems.Add(new ToolStripMenuItem("&Export transcript...", null, (_, _) => ExportTranscript()) { ShortcutKeyDisplayString = BundleKeys.Text(BundleKeys.Save) });
         session.DropDownItems.Add(new ToolStripSeparator());
@@ -51,27 +53,27 @@ internal sealed partial class TerminalForm
 
         // What goes to the shell itself (AT-3.5), and the field's extras.
         var shell = new ToolStripMenuItem("Sh&ell");
-        shell.DropDownItems.Add(Item("&Interrupt", Interrupt, AxTerminalKeys.Interrupt));
-        shell.DropDownItems.Add(Item("Send &Escape", SendEscape, AxTerminalKeys.SendEscape));
+        Add(shell, new Command("&Interrupt", AxTerminalKeys.Interrupt, Interrupt) { Mark = CommandMark.Act });
+        Add(shell, new Command("Send &Escape", AxTerminalKeys.SendEscape, SendEscape) { Mark = CommandMark.Act });
         var sendKey = new ToolStripMenuItem("Send &key");
         sendKey.DropDownItems.Add(new ToolStripMenuItem("&Up", null, (_, _) => SendKey("\x1b[A", "Up sent")));
         sendKey.DropDownItems.Add(new ToolStripMenuItem("&Down", null, (_, _) => SendKey("\x1b[B", "Down sent")));
         sendKey.DropDownItems.Add(new ToolStripMenuItem("Ctrl+D (&end of input)", null, (_, _) => SendKey("\x04", "Ctrl+D sent")));
         shell.DropDownItems.Add(sendKey);
         shell.DropDownItems.Add(new ToolStripSeparator());
-        shell.DropDownItems.Add(Item("&Recent commands...", ShowRecentCommands, AxTerminalKeys.RecentCommands));
+        Add(shell, new Command("&Recent commands...", AxTerminalKeys.RecentCommands, ShowRecentCommands) { Mark = CommandMark.Open });
         shell.DropDownItems.Add(new ToolStripMenuItem("Send &without recording", null, (_, _) => SendInput(record: false)) { ShortcutKeyDisplayString = "Ctrl+Enter in the command field" });
         shell.DropDownItems.Add(new ToolStripSeparator());
-        shell.DropDownItems.Add(Item("What is r&unning", SayWhatIsRunning, AxTerminalKeys.WhatIsRunning));
+        Add(shell, new Command("What is r&unning", AxTerminalKeys.WhatIsRunning, SayWhatIsRunning) { Mark = CommandMark.Read });
 
         var navigate = new ToolStripMenuItem("&Navigate");
-        navigate.DropDownItems.Add(Item("&Command field", () => GoTo(BottomControl), AxTerminalKeys.GoToField));
-        navigate.DropDownItems.Add(Item("&Terminal", () => GoTo(Transcript), AxTerminalKeys.GoToTerminal));
-        navigate.DropDownItems.Add(Item("&Latest output", Transcript.JumpToLatestResponse, AxTerminalKeys.LatestOutput));
+        Add(navigate, new Command("&Command field", AxTerminalKeys.GoToField, () => GoTo(BottomControl)) { Mark = CommandMark.Open });
+        Add(navigate, new Command("&Terminal", AxTerminalKeys.GoToTerminal, () => GoTo(Transcript)) { Mark = CommandMark.Open });
+        Add(navigate, new Command("&Latest output", AxTerminalKeys.LatestOutput, Transcript.JumpToLatestResponse) { Mark = CommandMark.Open });
         navigate.DropDownItems.Add(new ToolStripSeparator());
-        navigate.DropDownItems.AddRange(FindItems());
+        AddFindItems(navigate);
         navigate.DropDownItems.Add(new ToolStripSeparator());
-        navigate.DropDownItems.AddRange(BookmarkItems());
+        AddBookmarkItems(navigate);
 
         // The settings: a submenu for each kind, nothing outside one. Each check item is saved as it is toggled.
         var options = new ToolStripMenuItem("&Options");

@@ -58,9 +58,9 @@ internal sealed partial class MainForm
         navigate.DropDownItems.Add(new ToolStripMenuItem("&Latest response", null, (_, _) => Transcript.JumpToLatestResponse()) { ShortcutKeys = AxClaudeKeys.LatestResponse, ShortcutKeyDisplayString = BundleKeys.Text(AxClaudeKeys.LatestResponse) });
         navigate.DropDownItems.Add(new ToolStripMenuItem("Claude's &question again", null, (_, _) => ReadQuestionAgain()) { ShortcutKeyDisplayString = BundleKeys.Text(AxClaudeKeys.ReadQuestion) });
         navigate.DropDownItems.Add(new ToolStripSeparator());
-        navigate.DropDownItems.AddRange(FindItems());
+        AddFindItems(navigate);
         navigate.DropDownItems.Add(new ToolStripSeparator());
-        navigate.DropDownItems.AddRange(BookmarkItems());
+        AddBookmarkItems(navigate);
 
         // The settings: a submenu for each kind, nothing outside one. Each check item is saved as it is toggled.
         var options = new ToolStripMenuItem("&Options");

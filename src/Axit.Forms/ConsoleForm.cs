@@ -92,6 +92,13 @@ public abstract partial class ConsoleForm : AxitForm
             PumpWrites();
         };
 
+        // The window has two places, the view and the control at the bottom (the field, or the control area in its
+        // place): every focus key moves between them, so a hidden control never takes the focus (app-kit AK-2).
+        foreach (var key in new[] { Keys.Tab, Keys.Shift | Keys.Tab, BundleKeys.NextControl, BundleKeys.PreviousControl, BundleKeys.NextControlAlso })
+        {
+            AddKey(new Command("Switch between the view and the field", key, SwitchPlace) { Mark = CommandMark.Open });
+        }
+
         // The overlay is hidden until a notice shows; it then fills the space of the hidden view and field. The
         // window adds its menu items to MenuBar after this constructor.
         Controls.Add(Overlay);
@@ -166,7 +173,7 @@ public abstract partial class ConsoleForm : AxitForm
     /// <summary>The app's verb on the command line (<c>Dispatch.AxClaude</c>, <c>Dispatch.AxTerminal</c>), for a folder opened in a new window.</summary>
     protected abstract string Verb { get; }
 
-    /// <summary>The window's own keys, from its table, after the console's shared ones (the focus keys, find, the bookmark, read to the end).</summary>
+    /// <summary>The window's own keys that are no command (axClaude's Ctrl+O guard), after read to the end and before the command list.</summary>
     protected virtual bool ProcessConsoleKey(Keys keyData) => false;
 
     // ---- the window base's hooks, filled in for both console windows ----
@@ -263,45 +270,13 @@ public abstract partial class ConsoleForm : AxitForm
 
     // ---- keys and focus (axClaude FR-6, axTerminal AT-2.2) ----
 
-    /// <summary>The console's shared keys, then the window's own (<see cref="ProcessConsoleKey"/>).</summary>
+    /// <summary>
+    /// The keys that are no command: read to the end, a pattern of a modifier pair with any quick key letter, then the
+    /// window's own (<see cref="ProcessConsoleKey"/>). The focus keys, find, the bookmark, the music and the window's
+    /// menu keys are its command list (app-kit AK-2), which the base runs after this.
+    /// </summary>
     protected sealed override bool ProcessWindowKey(Keys keyData)
     {
-        switch (keyData)
-        {
-            case Keys.Tab:
-            case Keys.Shift | Keys.Tab:
-            case BundleKeys.NextControl:
-            case BundleKeys.PreviousControl:
-            case BundleKeys.NextControlAlso:
-                // The window has two places, the view and the control at the bottom (the field, or the control area
-                // in its place): every one of these keys moves between them, so a hidden control never takes the focus.
-                if (Transcript.Focused)
-                {
-                    BottomControl.Focus();
-                }
-                else
-                {
-                    Transcript.Focus();
-                }
-
-                return true;
-            case BundleKeys.Find:
-                FindDialog();
-                return true;
-            case BundleKeys.FindNext:
-                FindNext(backward: false);
-                return true;
-            case BundleKeys.FindPrevious:
-                FindNext(backward: true);
-                return true;
-        }
-
-        if (keyData == _keys.BookmarkLine)
-        {
-            Transcript.ToggleBookmark();
-            return true;
-        }
-
         // Ctrl+Alt with a quick key letter reads that kind of line to the end, from anywhere (axClaude FR-5, D36).
         if ((keyData & Keys.Modifiers) == _keys.ReadToEnd && Transcript.ReadToEnd(keyData & Keys.KeyCode))
         {
@@ -309,6 +284,19 @@ public abstract partial class ConsoleForm : AxitForm
         }
 
         return ProcessConsoleKey(keyData);
+    }
+
+    /// <summary>Tab, Shift+Tab and the bundle's focus keys: the view, or the control at the bottom when the view has the focus.</summary>
+    private void SwitchPlace()
+    {
+        if (Transcript.Focused)
+        {
+            BottomControl.Focus();
+        }
+        else
+        {
+            Transcript.Focus();
+        }
     }
 
     /// <summary>
@@ -382,24 +370,22 @@ public abstract partial class ConsoleForm : AxitForm
 
     // ---- the menu items both windows have, for the window to place ----
 
-    /// <summary>Find…, Find next and Find previous for the Navigate menu (axClaude FR-3.7).</summary>
-    protected ToolStripItem[] FindItems() =>
-    [
-        Item("&Find...", FindDialog, BundleKeys.Find),
-        Item("Find &next", () => FindNext(backward: false), BundleKeys.FindNext),
-        Item("Find &previous", () => FindNext(backward: true), BundleKeys.FindPrevious),
-    ];
+    /// <summary>Find…, Find next and Find previous as commands of the Navigate menu (axClaude FR-3.7).</summary>
+    protected void AddFindItems(ToolStripMenuItem menu)
+    {
+        Add(menu, new Command("&Find...", BundleKeys.Find, FindDialog) { Mark = CommandMark.Read });
+        Add(menu, new Command("Find &next", BundleKeys.FindNext, () => FindNext(backward: false)) { Mark = CommandMark.Read });
+        Add(menu, new Command("Find &previous", BundleKeys.FindPrevious, () => FindNext(backward: true)) { Mark = CommandMark.Read });
+    }
 
-    /// <summary>Bookmark this line, Next bookmark and Previous bookmark for the Navigate menu (axClaude FR-3.9), with the view's letters named.</summary>
-    protected ToolStripItem[] BookmarkItems()
+    /// <summary>Bookmark this line (a command with its key), Next bookmark and Previous bookmark for the Navigate menu (axClaude FR-3.9), with the view's letters named.</summary>
+    protected void AddBookmarkItems(ToolStripMenuItem menu)
     {
         var view = _transcriptName.ToLowerInvariant();
-        return
-        [
-            new ToolStripMenuItem("&Bookmark this line", null, (_, _) => Transcript.ToggleBookmark()) { ShortcutKeyDisplayString = $"{BundleKeys.Text(_keys.BookmarkLine)}, or {BundleKeys.Text(_keys.BookmarkToggle)} in the {view}" },
-            new ToolStripMenuItem("Next bookmar&k", null, (_, _) => Transcript.JumpToBookmark(backward: false)) { ShortcutKeyDisplayString = $"{BundleKeys.Text(_keys.Bookmark.Key)} in the {view}" },
-            new ToolStripMenuItem("Pre&vious bookmark", null, (_, _) => Transcript.JumpToBookmark(backward: true)) { ShortcutKeyDisplayString = $"Shift+{BundleKeys.Text(_keys.Bookmark.Key)} in the {view}" },
-        ];
+        var bookmark = Add(menu, new Command("&Bookmark this line", _keys.BookmarkLine, Transcript.ToggleBookmark));
+        bookmark.ShortcutKeyDisplayString = $"{BundleKeys.Text(_keys.BookmarkLine)}, or {BundleKeys.Text(_keys.BookmarkToggle)} in the {view}";
+        menu.DropDownItems.Add(new ToolStripMenuItem("Next bookmar&k", null, (_, _) => Transcript.JumpToBookmark(backward: false)) { ShortcutKeyDisplayString = $"{BundleKeys.Text(_keys.Bookmark.Key)} in the {view}" });
+        menu.DropDownItems.Add(new ToolStripMenuItem("Pre&vious bookmark", null, (_, _) => Transcript.JumpToBookmark(backward: true)) { ShortcutKeyDisplayString = $"Shift+{BundleKeys.Text(_keys.Bookmark.Key)} in the {view}" });
     }
 
     /// <summary>The transcript's two switches for Options → Text: the time stamps on the markers and the # markers in the text (axClaude FR-4.6, FR-4.6a).</summary>
@@ -418,9 +404,10 @@ public abstract partial class ConsoleForm : AxitForm
         }),
     ];
 
-    /// <summary>Options → Sounds → Background music …, made with the window's words and key; <see cref="ToggleMusic"/> flips it from anywhere.</summary>
+    /// <summary>Options → Sounds → Background music …, made with the window's words and key, the key a command that flips it from anywhere (<see cref="ToggleMusic"/>).</summary>
     protected ToolStripMenuItem CreateMusicItem(string text, Keys key)
     {
+        AddKey(new Command("Background music on or off", key, ToggleMusic));
         _musicItem = Toggle(text, ConsoleSettings.WorkingMusic, v =>
         {
             ConsoleSettings.WorkingMusic = v;
