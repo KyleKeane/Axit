@@ -1,0 +1,60 @@
+# axStart: the search field, the match keys and the commands that stay inside the window (docs/axstart/nvda-test-plan.md;
+# SPEC AS-3, AS-5.3). Every key here is a command of the window's one list (docs/axit/app-kit.md AK-2), the match keys
+# HotkeyForm's, so this script is also the check that the list does what the key switch did before it. The hotkey is
+# one nobody uses, so that the run never takes the user's; Start with Windows stays on, which a development build
+# never writes (SignInStart), since off would remove the user's own sign-in value.
+file home\Axit\axstart.json {"checkForUpdates": false, "hotkey": "Ctrl+Alt+Shift+F11", "sayFirstMatch": false}
+
+start start
+expect focus Search programs
+
+# F5 reads the programs again and says how many, once the first read is done: the list is there before the typing.
+wait 5000
+keys f5
+expect said ! Programs refreshed
+
+# AS-3.3: Down and Up move the selection with the caret kept in the field; at an end the edge sound, and the match said.
+type windows
+keys down
+expect said , 2 of
+keys up
+expect said , 1 of
+keys up
+expect said ♪ Edge
+expect said , 1 of
+
+# Ctrl+End the last match (Down there is the edge), Ctrl+Home the first; Page Down and Page Up by a page.
+keys ctrl+end
+expect said of
+keys down
+expect said ♪ Edge
+keys ctrl+home
+expect said , 1 of
+keys pagedown
+expect said of
+keys pageup
+expect said , 1 of
+
+# Ctrl+I the selected match, its kind and its path.
+keys ctrl+i
+expect said Windows
+
+# A text nothing matches: the match keys say so, with the edge.
+type zzqqxx
+keys down
+expect said ♪ Edge
+expect said ! No programs match
+keys ctrl+end
+expect said ! No programs match
+
+# Enter (Start), Ctrl+Shift+Enter (Start as administrator) and Ctrl+O (Open file location in axFile) start programs
+# outside the window: not run here, they stay for the NVDA plan.
+
+# AS-3.4: Escape hides the window whatever the field holds; a second start shows it again with the field empty.
+keys escape
+launch start
+expect focus "name":"Search programs","role":"Text","value":""
+
+# Quit axStart, the one close that ends the process (AS-1.4).
+menu Quit axStart
+expect closed

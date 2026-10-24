@@ -138,25 +138,23 @@ public abstract class HotkeyForm : AxitForm
         Matches.SelectedIndex = index;
     }
 
-    /// <summary>The keys that move through the matches with the caret kept in the field (AS-3.3, CP-2.4): Down, Up, Page Down, Page Up, and the app's first and last; true when the key was one.</summary>
-    protected bool ProcessMatchKey(Keys keyData, Keys next, Keys previous, Keys first, Keys last)
+    /// <summary>
+    /// The keys that move through the matches with the caret kept in the field (AS-3.3, CP-2.4), as commands of the
+    /// window's list (app-kit AK-2): the app's next and previous, Page Down, Page Up, and the app's first and last. The
+    /// app calls this first in its constructor, so that these keys come before its own, as the switch had them.
+    /// </summary>
+    protected void AddMatchKeys(Keys next, Keys previous, Keys first, Keys last)
     {
-        var page = Math.Max(1, Matches.ClientSize.Height / Math.Max(1, Matches.ItemHeight));
-        int? target = keyData == next ? Matches.SelectedIndex + 1
-            : keyData == previous ? Matches.SelectedIndex - 1
-            : keyData == BundleKeys.PageDown ? Math.Min(Matches.SelectedIndex + page, MatchCount - 1)
-            : keyData == BundleKeys.PageUp ? Math.Max(Matches.SelectedIndex - page, 0)
-            : keyData == first ? 0
-            : keyData == last ? MatchCount - 1
-            : null;
-        if (target is not { } index)
-        {
-            return false;
-        }
-
-        SelectMatch(index);
-        return true;
+        AddKey(new Command("Next match", next, () => SelectMatch(Matches.SelectedIndex + 1)) { Mark = CommandMark.Read });
+        AddKey(new Command("Previous match", previous, () => SelectMatch(Matches.SelectedIndex - 1)) { Mark = CommandMark.Read });
+        AddKey(new Command("Page down", BundleKeys.PageDown, () => SelectMatch(Math.Min(Matches.SelectedIndex + MatchPage, MatchCount - 1))) { Mark = CommandMark.Read });
+        AddKey(new Command("Page up", BundleKeys.PageUp, () => SelectMatch(Math.Max(Matches.SelectedIndex - MatchPage, 0))) { Mark = CommandMark.Read });
+        AddKey(new Command("First match", first, () => SelectMatch(0)) { Mark = CommandMark.Read });
+        AddKey(new Command("Last match", last, () => SelectMatch(MatchCount - 1)) { Mark = CommandMark.Read });
     }
+
+    /// <summary>How many matches the list shows at once: the step of Page Down and Page Up.</summary>
+    private int MatchPage => Math.Max(1, Matches.ClientSize.Height / Math.Max(1, Matches.ItemHeight));
 
     private void OnTyped()
     {
