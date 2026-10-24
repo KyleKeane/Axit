@@ -97,4 +97,30 @@ public sealed class VtScreenTests
         // Another screen's line is on no row of this one.
         Assert.Equal(-1, screen.RowOf(new Screen(20, 4, new Store()).EnsureLine(0)));
     }
+
+    /// <summary>S-40: an unterminated string in a program's output is dropped past its limit, and what follows is shown, not swallowed.</summary>
+    [Fact]
+    public void An_unterminated_osc_does_not_hide_what_follows()
+    {
+        var screen = new Screen(40, 3, new Store());
+        var parser = new VtParser(screen);
+        parser.Feed("\u001b]0;" + new string('x', VtParser.MaxString + 10) + "\r\nshown");
+        screen.PullRowText();
+        Assert.Contains("shown", Enumerable.Range(0, 3).Select(row => screen.LineAt(row)?.Text ?? string.Empty));
+    }
+
+    /// <summary>S-41: a scroll count far past the screen is clamped to the scroll region, and is quick.</summary>
+    [Fact]
+    public void A_huge_scroll_count_is_clamped()
+    {
+        var screen = new Screen(20, 3, new Store());
+        var parser = new VtParser(screen);
+        var watch = System.Diagnostics.Stopwatch.StartNew();
+        for (var i = 0; i < 200; i++)
+        {
+            parser.Feed("\u001b[65535S\u001b[65535T");
+        }
+
+        Assert.True(watch.ElapsedMilliseconds < 2000, $"{watch.ElapsedMilliseconds} ms");
+    }
 }

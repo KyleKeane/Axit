@@ -155,4 +155,14 @@ public sealed class CalculatorTests
     [InlineData("mod", false)]
     [InlineData("a-b", false)]
     public void Variable_names_follow_AC_3_4(string name, bool valid) => Assert.Equal(valid, Calculator.IsVariableName(name));
+
+    /// <summary>S-39: deep nesting is refused with a message, never a stack overflow.</summary>
+    [Fact]
+    public void Deep_nesting_is_refused()
+    {
+        var calculator = new Calculator();
+        Assert.False(calculator.Evaluate(new string('(', 100_000) + "1" + new string(')', 100_000)).Ok);
+        Assert.False(calculator.Evaluate(new string('-', 100_000) + "1").Ok);
+        Assert.True(calculator.Evaluate(new string('(', 50) + "1" + new string(')', 50)).Ok);
+    }
 }

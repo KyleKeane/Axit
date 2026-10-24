@@ -142,7 +142,15 @@ public sealed partial class Calculator
     /// <summary>One expression, read left to right; each method is a level of the grammar above.</summary>
     private sealed class Parser(string text, Calculator calculator)
     {
+        /// <summary>
+        /// How deep parentheses, signs and powers may nest (security audit S-39): every level passes through
+        /// <see cref="Unary"/>, which counts; deeper is "nested too deeply", never a stack overflow, which would end the
+        /// process with no message.
+        /// </summary>
+        private const int MaxDepth = 200;
+
         private int _position;
+        private int _depth;
 
         public double ParseAll()
         {
@@ -215,13 +223,25 @@ public sealed partial class Calculator
 
         private double Unary()
         {
-            SkipSpaces();
-            if (Eat('-'))
+            if (++_depth > MaxDepth)
             {
-                return -Unary();
+                throw new CalcException("nested too deeply");
             }
 
-            return Eat('+') ? Unary() : Power();
+            try
+            {
+                SkipSpaces();
+                if (Eat('-'))
+                {
+                    return -Unary();
+                }
+
+                return Eat('+') ? Unary() : Power();
+            }
+            finally
+            {
+                _depth--;
+            }
         }
 
         private double Power()

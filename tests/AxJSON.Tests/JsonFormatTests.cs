@@ -45,4 +45,16 @@ public sealed class JsonFormatTests
         Assert.Equal("Already formatted", message);
         Assert.Equal("Nothing to format", JsonFormat.Apply("  ").Message);
     }
+
+    /// <summary>S-39: a file of nested brackets is refused as too deep, never a stack overflow that ends axJSON with the edits.</summary>
+    [Fact]
+    public void Nesting_past_the_limit_is_refused_and_does_not_end_the_process()
+    {
+        var deep = new string('[', 200_000) + new string(']', 200_000);
+        var (text, message) = JsonFormat.Apply(deep);
+        Assert.Equal(deep, text);
+        Assert.StartsWith("Not valid JSON", message);
+        Assert.Contains("nested more than", message);
+        Assert.Equal("Formatted", JsonFormat.Apply(new string('[', 100) + new string(']', 100)).Message);
+    }
 }
