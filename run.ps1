@@ -20,7 +20,8 @@
 
   run-axclaude.ps1, run-axdown.ps1, run-axjson.ps1, run-axgit.ps1, run-axterminal.ps1, run-axfile.ps1, run-axmedia.ps1, run-axpreview.ps1 and run-axstart.ps1 next to this script pass -App for you and take the same other arguments.
   If PowerShell refuses to run scripts: powershell -ExecutionPolicy Bypass -File .\run.ps1
-  Close a running Axit first: the build writes into the folder it holds open.
+  Close a running Axit window first: the build writes into the folder it holds open. axStart, which runs in the
+  background, is ended before the build and started again hidden after it.
 #>
 [CmdletBinding()]
 param(
@@ -54,18 +55,35 @@ if ($Test) {
     exit $LASTEXITCODE
 }
 
-if (-not $NoBuild) {
-    Write-Host "Building Axit..."
-    dotnet build "$root\src\Axit\Axit.csproj" -c Debug -nologo -v q
-    if ($LASTEXITCODE -ne 0) {
-        Write-Host "Build failed."
-        exit $LASTEXITCODE
-    }
-}
-
 # The .NET version is Directory.Build.props' AxitDotNet, the one place it is set.
 $dotnet = ([xml](Get-Content (Join-Path $root 'Directory.Build.props') -Raw)).Project.PropertyGroup.AxitDotNet
 $exe = Join-Path $root "src\Axit\bin\Debug\$dotnet-windows\Axit.exe"
+
+if (-not $NoBuild) {
+    # axStart started from this build keeps running in the background after every window has closed, and holds the
+    # folder the build writes into: it is ended before the build and started again, hidden, from the new one after,
+    # so that the hotkey runs the new code (asked 2026-10-23). It keeps no unsaved state; its settings save as they change.
+    $launcher = @(Get-CimInstance Win32_Process -Filter "Name = 'Axit.exe'" |
+        Where-Object { $_.ExecutablePath -eq $exe -and $_.CommandLine -match '\sstart(\s|$)' })
+    foreach ($process in $launcher) {
+        Write-Host "Ending axStart (process $($process.ProcessId)), which holds the build folder; it starts again after the build."
+        Stop-Process -Id $process.ProcessId -Force
+        Wait-Process -Id $process.ProcessId -Timeout 10 -ErrorAction SilentlyContinue
+    }
+
+    Write-Host "Building Axit..."
+    dotnet build "$root\src\Axit\Axit.csproj" -c Debug -nologo -v q
+    $built = $LASTEXITCODE
+    if ($launcher.Count -gt 0 -and (Test-Path $exe)) {
+        Write-Host "Starting axStart again, hidden."
+        Start-Process -FilePath $exe -ArgumentList 'start', '--hidden' -WindowStyle Hidden
+    }
+
+    if ($built -ne 0) {
+        Write-Host "Build failed."
+        exit $built
+    }
+}
 if (-not (Test-Path $exe)) {
     Write-Host "Axit.exe was not found at $exe. Run without -NoBuild first."
     exit 1
