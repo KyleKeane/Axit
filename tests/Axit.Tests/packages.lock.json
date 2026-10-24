@@ -165,6 +165,20 @@
           "Axit.Core": "[1.0.0, )"
         }
       },
+      "axlist": {
+        "type": "Project",
+        "dependencies": {
+          "AxList.Core": "[1.0.0, )",
+          "Axit.Core": "[1.0.0, )",
+          "Axit.Forms": "[1.0.0, )"
+        }
+      },
+      "axlist.core": {
+        "type": "Project",
+        "dependencies": {
+          "Axit.Core": "[1.0.0, )"
+        }
+      },
       "axmedia": {
         "type": "Project",
         "dependencies": {

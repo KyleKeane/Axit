@@ -1,0 +1,23 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <!-- axList's window side, as a class library inside Axit.exe (docs/axit/SPEC.md AX-1.7): the window, its key table
+       and its texts; the pure code is AxList.Core. -->
+  <PropertyGroup>
+    <TargetFramework>$(AxitDotNet)-windows</TargetFramework>
+    <UseWindowsForms>true</UseWindowsForms>
+    <RootNamespace>AxList</RootNamespace>
+    <AssemblyName>axList</AssemblyName>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\AxList.Core\AxList.Core.csproj" />
+    <ProjectReference Include="..\Axit.Core\Axit.Core.csproj" />
+    <ProjectReference Include="..\Axit.Forms\Axit.Forms.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <!-- Help, User guide shows this file. -->
+    <EmbeddedResource Include="..\..\docs\axlist\user-guide.md" LogicalName="UserGuide.md" />
+  </ItemGroup>
+
+</Project>

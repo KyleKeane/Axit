@@ -1,0 +1,7 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\src\AxList.Core\AxList.Core.csproj" />
+  </ItemGroup>
+
+</Project>

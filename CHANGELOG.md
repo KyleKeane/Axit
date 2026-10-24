@@ -1,5 +1,9 @@
 # Changelog
 
+## Unreleased
+
+- axList: a new app, lists of things to remember and to do, each a plain Markdown file in a folder of lists. Ctrl+1 the lists, Ctrl+2 a list's items, Ctrl+3 the open tasks of every list. Space checks a task off, Enter changes an item, Ctrl+N adds one of the same kind, Delete removes it with what is nested under it, Alt+Up and Alt+Down move it, Alt+Right and Alt+Left indent it, Ctrl+T makes it a task, Ctrl+Shift+D hides the done ones, Ctrl+Z undoes. Every change is written to the file at once, after reading it again, so a list open in axDown or changed by a script is never written over. Start menu `Axit axList`, command `axlist`, Open with Axit on `.md` files.
+
 ## 3.5.0 - 2026-10-23
 
 - axTerminal: Ctrl+Up and Ctrl+Down in the command field go through the recent commands, with a short earcon on each; past the newest comes what you typed or last changed. The plain arrows only move the caret.

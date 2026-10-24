@@ -165,7 +165,9 @@ library dependency (B-10: `git.exe` and the file system through the APIs already
   rest) is never reimplemented. To verify before the spec: the current release's Windows support and mount options,
   and how it lives beside a running desktop app. Local first (B-15): the vault's cloud copy is the user's sync client's
   business.
-- **AxList and AxTask** (asked 2026-10-23; placeholder names, no spec; the user may or may not pursue them). AxList: a
+- **AxList and AxTask** (asked 2026-10-23; built the same day as one app, **axList**, on the branch `axlist`,
+  `docs/axlist/SPEC.md`, with a Tasks view as the task side's first step; NVDA pass owed; the split into AxTask comes
+  with reminders, automations and smart lists). AxList: a
   list manager for things to remember, with bullet, numbered and checkbox lists; later, links between items for
   mind maps, curriculum planning, recall in plain language and structured storage. AxTask: the checkbox lists as a
   task manager, with reminders, automations and smart lists (saved filters). Perhaps one app at first, split when the

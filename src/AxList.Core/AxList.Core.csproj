@@ -1,0 +1,14 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <!-- axList's pure code (docs/axlist/SPEC.md §8): a list file's lines, the changes to them, the folder of lists and
+       its open tasks, the settings; no window. -->
+  <PropertyGroup>
+    <TargetFramework>$(AxitDotNet)</TargetFramework>
+    <RootNamespace>AxList.Core</RootNamespace>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Axit.Core\Axit.Core.csproj" />
+  </ItemGroup>
+
+</Project>

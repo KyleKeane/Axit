@@ -1,5 +1,6 @@
 using System.Runtime.InteropServices;
 using AxClaude;
+using AxList;
 using AxDown;
 using AxFile;
 using AxGit;
@@ -71,6 +72,10 @@ internal static class Program
             case Dispatch.AxStart:
                 SetAppId("Axit.AxStart");
                 AxStartApp.Run(launch.Arguments);
+                break;
+            case Dispatch.AxList:
+                SetAppId("Axit.AxList");
+                AxListApp.Run(launch.Arguments);
                 break;
             default:
                 // --help or --version for the bundle itself (AX-1.4).
