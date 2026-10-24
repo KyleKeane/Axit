@@ -71,7 +71,7 @@ Without GitHub Actions (a runner image or an action changed under the workflow, 
 - `src/<App>` and `src/<App>.Core`: each app's window and its pure code. Each folder has a `CLAUDE.md` with its notes.
 - `tests/`: the unit tests, one project per app, and the recorded console fixtures.
 - `docs/<app>/`: each app's `SPEC.md`, `user-guide.md` (Help, User guide in the app) and `nvda-test-plan.md`. The specifications are the source of truth.
-- `docs/axit/`: the bundle's `SPEC.md` (launch, install, update, release, the accessibility and modularity rules), `plan.md`, `adding-an-app.md`, the test record, `review-2026-10-23.md` (the review of the code and documents, what was fixed and what is proposed) and `longevity.md` (the practices that keep the repository stable for years, with its calendar).
+- `docs/axit/`: the bundle's `SPEC.md` (launch, install, update, release, the accessibility and modularity rules), `plan.md`, `adding-an-app.md`, the test record, `review-2026-10-23.md` (the review of the code and documents, what was fixed and what is proposed), `inventory-2026-10-24.md` (the copies, dead code and drift, what was cleaned up and what is open) and `longevity.md` (the practices that keep the repository stable for years, with its calendar).
 - `manual_tests/`: the script that makes the files for the NVDA passes.
 - `CLAUDE.md`: the map and the rules for working on this repository with Claude Code.
 

@@ -101,6 +101,9 @@ the restart by the app itself (2.3.0).
   account (`longevity.md` section 3, each marked), in twenty commits on `palette`. Open: the NVDA checks of all of it
   (review section 9), the `ApplyChrome` and mirror restructure (review 5.6), and the longevity items for the
   maintainer (3.2 the organization, 3.13 the archive branch, 3.14 the yearly pass).
+- **The inventory of 2026-10-24** (`inventory-2026-10-24.md`, asked as axCalc and axClip merged): the copies, the
+  dead code and the notes that had drifted, eleven cleanups the same day, and twelve open items ranked, the first of
+  them the seventeen hand-kept lists a new app touches.
 
 - **Axit's own folder and file picker** (asked 2026-10-23; kept for later with the later apps, its priority to be chosen; spec first): in place of the Windows Open, Save as and folder pickers, an owned modal window in front of the window it serves (as the Windows picker stays), with a menu bar for the extras (favourites, sort, hidden files, "Use the Windows picker instead"). The view is axFile's folder list with its keys (arrows, Enter, Backspace, Left and Right, type-ahead; Home and End stay the first and last entry); Ctrl+Left goes to This PC, in axFile too; Ctrl+G opens the Go to field with the path completion, which also completes favourites and the known folders by name (places by name without crowding the list). The Save version adds a name field; every version has buttons for its action and Cancel. It takes axFile's list, `FolderListing` and the path completion into the shared pieces. The user weighed the Windows dialogs' familiarity against Axit's consistency; the choice was Axit's own picker with a way back to Windows'.
 
