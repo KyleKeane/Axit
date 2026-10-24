@@ -52,11 +52,15 @@ public sealed partial class PassForm : ItemForm
     {
         _settings = settings;
 
-        // ---- menus; the keys are handled in ProcessWindowKey from the tables, the items only show them ----
+        // ---- menus and keys: one command list (docs/axit/app-kit.md AK-2), each key from the tables (PW-7) ----
+        // The shared keys (ItemKeys) are ItemForm's commands, registered after these by PlaceControls; the items here
+        // for them only show them. A key in a second menu is an item showing it too: its command is the first menu's.
+        // Enter on a locked window unlocks it, before Enter opens (ItemForm's, later on the list).
+        AddKey(new Command("Unlock", ItemKeys.Open, UnlockOrOpen) { When = () => _password is null && InNavigator(), Mark = CommandMark.Open });
         var file = new ToolStripMenuItem("&File");
-        file.DropDownItems.Add(Item("&Open database...", ChooseDatabase, AxPassKeys.OpenDatabase));
+        Add(file, new Command("&Open database...", AxPassKeys.OpenDatabase, ChooseDatabase) { When = NotRenaming, Mark = CommandMark.Open });
         file.DropDownItems.Add(new ToolStripMenuItem("&New database...", null, (_, _) => NewDatabase()));
-        file.DropDownItems.Add(Item("&Lock", Lock, AxPassKeys.Lock));
+        Add(file, new Command("&Lock", AxPassKeys.Lock, Lock) { When = NotRenaming });
         file.DropDownItems.Add(new ToolStripMenuItem("&Back up now", null, (_, _) => Do(BackUpNowAsync)));
         file.DropDownItems.Add(new ToolStripMenuItem("Show backups in ax&File", null, (_, _) => ShowBackups()));
         file.DropDownItems.Add(Item("&Refresh", () => Do(ReloadAsync), ItemKeys.Refresh));
@@ -70,13 +74,13 @@ public sealed partial class PassForm : ItemForm
         _groupMenu.DropDownItems.Add(Item("To the &Recycle Bin", () => WithRow(DeleteRow), ItemKeys.Delete));
 
         _entryMenu.DropDownItems.Add(Item("&Open its fields", OpenSelected, ItemKeys.Open));
-        _entryMenu.DropDownItems.Add(Item("Copy &user name", CopyUserName, AxPassKeys.CopyUserName));
-        _entryMenu.DropDownItems.Add(Item("Copy &password", CopyPassword, AxPassKeys.CopyPassword));
-        _entryMenu.DropDownItems.Add(Item("Open U&RL", OpenEntryUrl, AxPassKeys.OpenUrl));
+        Add(_entryMenu, new Command("Copy &user name", AxPassKeys.CopyUserName, CopyUserName) { When = NotRenaming, Mark = CommandMark.Act });
+        Add(_entryMenu, new Command("Copy &password", AxPassKeys.CopyPassword, CopyPassword) { When = NotRenaming, Mark = CommandMark.Act });
+        Add(_entryMenu, new Command("Open U&RL", AxPassKeys.OpenUrl, OpenEntryUrl) { When = NotRenaming, Mark = CommandMark.Act });
         _entryMenu.DropDownItems.Add(Item("Read in &full", ReadAll, ItemKeys.ReadAll));
         _entryMenu.DropDownItems.Add(Item("New &entry...", NewItem, ItemKeys.New));
         _entryMenu.DropDownItems.Add(Item("Rena&me", RenameSelected, ItemKeys.Rename));
-        _entryMenu.DropDownItems.Add(Item("Move to a gr&oup...", MoveEntry, AxPassKeys.MoveEntry));
+        Add(_entryMenu, new Command("Move to a gr&oup...", AxPassKeys.MoveEntry, MoveEntry) { When = InNavigator });
         _entryMenu.DropDownItems.Add(Item("To the Recycle &Bin", () => WithRow(DeleteRow), ItemKeys.Delete));
 
         _fieldMenu.DropDownItems.Add(Item("&Change...", ChangeField, ItemKeys.Open));
@@ -198,43 +202,17 @@ public sealed partial class PassForm : ItemForm
         });
     }
 
-    /// <summary>axPass's own keys (PW-7), asked before the shared ones; Enter on a locked window unlocks it.</summary>
-    protected override bool ProcessItemKey(Keys keyData)
+    /// <summary>Enter in the navigator of a locked window: the unlock notice, or the database chosen when none is open.</summary>
+    private void UnlockOrOpen()
     {
-        switch (keyData)
+        if (_database is null)
         {
-            case AxPassKeys.CopyUserName:
-                CopyUserName();
-                return true;
-            case AxPassKeys.CopyPassword:
-                CopyPassword();
-                return true;
-            case AxPassKeys.OpenUrl:
-                OpenEntryUrl();
-                return true;
-            case AxPassKeys.Lock:
-                Lock();
-                return true;
-            case AxPassKeys.OpenDatabase:
-                ChooseDatabase();
-                return true;
-            case AxPassKeys.MoveEntry when Navigator.Focused:
-                MoveEntry();
-                return true;
-            case ItemKeys.Open when _password is null && Navigator.Focused:
-                if (_database is null)
-                {
-                    ChooseDatabase();
-                }
-                else
-                {
-                    ShowUnlock(null);
-                }
-
-                return true;
+            ChooseDatabase();
         }
-
-        return false;
+        else
+        {
+            ShowUnlock(null);
+        }
     }
 
     protected override char MenuLetter(bool inDetail, ItemRow? row) => inDetail ? 'D' : row is { IsList: false } ? 'E' : 'G';

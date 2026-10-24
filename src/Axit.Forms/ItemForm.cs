@@ -216,11 +216,6 @@ public abstract partial class ItemForm : AxitForm
     /// <summary>Where a field command's key acts.</summary>
     protected bool InDetail() => DetailPane.Focused;
 
-    /// <summary>An app's own keys not yet on the command list, asked before the commands; true when taken.</summary>
-    protected virtual bool ProcessItemKey(Keys keyData) => false;
-
-    protected override bool ProcessWindowKey(Keys keyData) => NotRenaming() && ProcessItemKey(keyData);
-
     /// <summary>The keys of <see cref="ItemKeys"/>; the apps' menu items for them only show them. In a pane, taking a key keeps the list box from its own move and its ding.</summary>
     private void AddSharedKeys()
     {

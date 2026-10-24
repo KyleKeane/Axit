@@ -20,7 +20,9 @@ guide `docs/axpass/user-guide.md` is embedded by `AxPass.csproj`; the manual tes
 - `AxPassApp`: the entry point `Run`, one call into `Axit.Forms/AppHost.Run` with the one database of the command line.
 - `PassForm.cs`: the window on `ItemForm`: the menus (File; Group, Entry and Field, only the one for the selection
   enabled, `UpdateRowMenus`; Options with Lock after and the tool's place; Axit; Help), axPass's own keys
-  (`ProcessItemKey`, Enter unlocking a locked window), the levels from the `PassTree` (`ReadLevel`, `EnterList`,
+  as commands of the window's one command list (`Add`, `AddKey`; docs/axit/app-kit.md AK-2; each before
+  `ItemForm`'s shared keys, so that Enter unlocks a locked window before it opens; a command that acts anywhere has
+  `When = NotRenaming`, so that the rename box keeps its keys), the levels from the `PassTree` (`ReadLevel`, `EnterList`,
   `LeaveList`; a group's key ends in a slash, so that a group and an entry of one name differ), the detail (`DetailOf`;
   an entry's fields read with `show` when first selected, `ReadEntry`, kept in `_entries` until the window locks),
   unlocking and locking (`ShowUnlock`, `UnlockAsync`, `Lock`, `LockWhenIdle` from `GetLastInputInfo`), `ReloadAsync`,
