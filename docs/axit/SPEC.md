@@ -358,7 +358,8 @@ The apps are named ax and a word, the ax in lower case and the word as it is wri
   (checked as the menu opens for a path on a drive of this computer only, since a share or a mapped network drive
   can take the network's timeout to answer, which no menu may wait for; a path elsewhere is listed as it is and
   found missing when chosen; `Axit.Core/LocalPaths`, tested, 2026-10-23; the apps' recent lists follow the same
-  rule, AX-9.5); Enter starts that app on it in a new window. The list is one file for the bundle, `%APPDATA%\Axit\recently-closed.json`
+  rule, AX-9.5); Enter starts that app on it in a new window. An app that holds no file or folder (axProcess) is listed
+  by its name alone when its window closes, once, and Enter starts it (2026-10-24). The list is one file for the bundle, `%APPDATA%\Axit\recently-closed.json`
   (AX-5.1), written whole by the window that closes or swaps (`Axit.Core/RecentlyClosed`, through `SettingsFile`; two
   windows closing in the same instant leave the last writer's list). Nothing else about windows is stored.
 - AX-9.5 A window's or a file's item is its number, a full stop and a title, "1. notes.md (C:\notes\notes.md) - axDown":
