@@ -128,22 +128,23 @@ expect focus "value":"draft"
 keys ctrl+a delete
 expect said Done
 wait 2000
-# Step 6: /tasks: the trill and the list "Background" with "No tasks currently running", then its keys (with no task,
-# Claude Code 2.1.309 offers "Close (Escape)" alone, not the plan's Select and View); the status bar
-# says "waiting for your answer"; Enter on "No tasks currently running": "Closed", the message field back. Again with
-# Escape: the same.
+# Step 6: /tasks with no task: Claude Code 2.1.309 offers Escape alone ("Esc to close"), so it is an information
+# screen (SPEC.md FR-2.11): the trill and the notice "Background" with "No tasks currently running", the status bar
+# "Claude: showing Background"; Enter: "Closed", the message field back. Again with Escape: the same. (/tasks with a
+# task running names Enter and stays a list.)
 type /tasks
 keys enter
 expect said ♪ Notice
-expect focus "role":"List"
-expect list No tasks currently running
-expect list Close (Escape)
-expect state waiting for your answer
+expect state "notice":"Background"
+expect state No tasks currently running
+expect state Claude: showing Background
+refuse focus "role":"List"
 wait 1500
-keys home enter
+keys enter
 expect said Closed
 expect focus Message to Claude
-wait 2000
+# More than the three seconds after a key of the user's, within which what Claude shows comes without the trill.
+wait 3500
 type /tasks
 keys enter
 expect said ♪ Notice

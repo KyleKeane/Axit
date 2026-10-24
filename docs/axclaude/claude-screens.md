@@ -10,7 +10,7 @@ The app does not need to know the command: the shape of Claude's screen decides.
 
 1. **None.** The command prints text into the conversation and Claude is back at the `$` prompt, or the session changes or ends, or another program opens. Nothing to answer.
 2. **A list of answers.** The cursor sits on `Select with numbers [1-N]. …` or `Enter y/n:` under numbered or `y.`/`n.` answers. The control area lists the answers, named with the question.
-3. **A screen's lines and keys.** The cursor sits on a key-hint row (`↑/↓ to select · Enter to view · Esc to close`) or on a tab row (`Settings  Status   Config   Usage   Stats`). The control area lists the screen's lines, then one item per key the hint row names.
+3. **A screen's lines and keys.** The cursor sits on a key-hint row (`↑/↓ to select · Enter to view · Esc to close`) or on a tab row (`Settings  Status   Config   Usage   Stats`). The control area lists the screen's lines, then one item per key the hint row names. A screen whose hint row names no Enter and that has no tabs only informs (`/btw`, `/goal`, `/mobile`, `/tasks` with nothing running): it is a read-only notice instead, its title and lines with Close and a button per other key (SPEC.md FR-2.11).
 4. **Typed input.** A command that wants text after it goes in the message field, guarded so that a message is not sent into a question by mistake (SPEC.md FR-2.10). An `Enter text for` row (after "Other") gets a field in the control area; the message field also sends your words there without the guard, one keystroke at a time.
 
 ## One gap in the app today
@@ -52,7 +52,8 @@ Recorded with Claude Code 2.1.281 (2026-09-24); every answer is typed one keystr
 - `/help`: tabs Help, General, Commands, Custom commands; shortcuts and pointers. Cursor on the tab row.
 - `/diff`: "Uncommitted changes (git diff HEAD)". Hint: `↑/↓ to select · Enter to view · Esc to close`.
 - `/tasks`: "Background", the running tasks. Hint: `↑/↓ to select · Enter to view · Esc to close`. A task's details (seen in the background fixture) take `← to go back · Esc/Enter/Space to close · x to stop`.
-- `/goal`: "Goal", the current goal or "No goal set". Hint: `Esc to dismiss`.
+- `/goal`: "Goal", the current goal or "No goal set". Hint: `Esc to dismiss`. An information screen: a notice.
+- `/btw <question>`: the side answer, answered without entering the conversation (recorded with 2.1.310 on 2026-10-24, `--model haiku`). The screen's first line is the question (`/btw what is two plus two? answer in one word`), then the answer (`Four`), over the hint `↑/↓ to scroll · c to copy · f to fork · Esc to close`. A second `/btw` in the session keeps a history: the first question stays the first line, the newest question and its answer follow, and the hint is `⇧←/→ to browse · c to copy · f to fork · x to clear history · Esc to close`, Shift+Left showing an earlier answer under the same rows. An information screen: a notice titled with the first line, the rest as its text, buttons Close, Copy (c), Fork (f) (and Browse (Shift+Left), Browse (Shift+Right), Clear history (x) for the second). An answer longer than the console is drawn whole, not scrolled in a box: the console scrolls and its first rows, the question among them, are only in the conversation (80 numbered lines left the screen starting at 32, and Down changed nothing).
 - `/mobile`: where to get the phone app. Hint: `Esc to close`, with the cursor on the row under it ("Then run /rc to continue this session from your phone"), which the list shows as its last line (recorded with 2.1.282).
 - `/rewind`: "Rewind", "Nothing to rewind to yet." in a new conversation. Hint: `Esc to cancel`. With checkpoints the docs describe a list, probably numbered (not recorded).
 - `/ide`: "Select IDE", "No available IDEs detected." Hint: `Enter to confirm · Esc to cancel`. With an IDE running, probably a list.
@@ -88,7 +89,7 @@ In a repository the branch row `  ● main` can sit between the mode line and th
 - `/output-style` bare: the available styles and "Usage: /output-style <style>". With a style it switches.
 - `/import`: "No other AI coding agents detected" here; with one installed the docs describe a picker.
 - `/copy`: "No assistant message to copy" in a new conversation; with replies the docs describe a picker of code blocks, `w` to write a file.
-- `/btw` bare: "Usage: /btw <your question>".
+- `/btw` bare: "Usage: /btw <your question>". With a question, a screen (above).
 - `/context`: works for a moment, then prints the context use.
 - `/list-agents`: this session's name and the other Claude sessions.
 - `/tui`: the current renderer and "Usage: /tui <default|fullscreen>".

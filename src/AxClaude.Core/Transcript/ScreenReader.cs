@@ -16,6 +16,9 @@ public sealed record ClaudeScreen(string Title, IReadOnlyList<string> Lines, IRe
     /// <summary>The screen row the screen starts on (its title or tab row), where the app marks it in the conversation.</summary>
     public int FirstRow { get; init; }
 
+    /// <summary>A screen under a tab row (<c>/status</c>, <c>/permissions</c>), whose title is the tabs: it stays a list in the control area (SPEC.md FR-2.11).</summary>
+    public bool Tabbed { get; init; }
+
     /// <summary>
     /// What tells one screen from the next: the title and the keys. The lines are left out, since some screens change
     /// by themselves (a task's running time counts up every second); after a key of the user's the same screen is
@@ -42,8 +45,8 @@ public static partial class ScreenReader
     private const int MaxRows = 60;
 
     // "Esc to close", "Esc/Enter/Space to close", "↑/↓ to select", "x to stop", "ctrl+j to new line": a key, or keys
-    // joined by "/", then "to".
-    [GeneratedRegex(@"^(?<keys>(?:Esc|Enter|Space|Tab|ctrl\+[a-z]|[←→↑↓]|[a-z])(?:/(?:Esc|Enter|Space|Tab|ctrl\+[a-z]|[←→↑↓]|[a-z]))*) to (?<action>.+)$")]
+    // joined by "/", then "to". "⇧←/→ to browse" (a second /btw, 2.1.310) is Shift with both arrows.
+    [GeneratedRegex(@"^(?<keys>(?:Esc|Enter|Space|Tab|ctrl\+[a-z]|⇧?[←→↑↓]|[a-z])(?:/(?:Esc|Enter|Space|Tab|ctrl\+[a-z]|⇧?[←→↑↓]|[a-z]))*) to (?<action>.+)$")]
     private static partial Regex HintRegex();
 
     /// <summary>How far under the cursor the hint row of a field being edited is looked for.</summary>
@@ -109,7 +112,7 @@ public static partial class ScreenReader
                 var text = rows[r].Trim();
                 if (Keys(text) is { } tabKeys)
                 {
-                    return new ClaudeScreen("Tabs: " + string.Join(", ", Tabs(cursorText)), lines, tabKeys) { FirstRow = cursorRow };
+                    return new ClaudeScreen("Tabs: " + string.Join(", ", Tabs(cursorText)), lines, tabKeys) { FirstRow = cursorRow, Tabbed = true };
                 }
 
                 if (text.Length > 0)
@@ -145,8 +148,12 @@ public static partial class ScreenReader
             }
 
             var action = match.Groups["action"].Value;
-            foreach (var key in match.Groups["keys"].Value.Split('/'))
+            var names = match.Groups["keys"].Value.Split('/');
+            // "⇧←/→": the Shift of the first arrow holds for the arrows after it.
+            var shift = names[0].StartsWith('⇧');
+            foreach (var name in names)
             {
+                var key = shift && name is "←" or "→" or "↑" or "↓" ? "⇧" + name : name;
                 keys.Add(new ScreenKey(Send(key), Name(key), action));
             }
         }
@@ -200,6 +207,10 @@ public static partial class ScreenReader
         "→" => "\x1b[C",
         "↑" => "\x1b[A",
         "↓" => "\x1b[B",
+        "⇧←" => "\x1b[1;2D",
+        "⇧→" => "\x1b[1;2C",
+        "⇧↑" => "\x1b[1;2A",
+        "⇧↓" => "\x1b[1;2B",
         // "ctrl+j": the control character of the letter.
         { Length: 6 } when key.StartsWith("ctrl+", StringComparison.Ordinal) => ((char)(key[5] - 'a' + 1)).ToString(),
         _ => key,
@@ -212,6 +223,7 @@ public static partial class ScreenReader
         "→" => "Right",
         "↑" => "Up",
         "↓" => "Down",
+        ['⇧', var arrow] => "Shift+" + Name(arrow.ToString()),
         { Length: 6 } when key.StartsWith("ctrl+", StringComparison.Ordinal) => "Ctrl+" + char.ToUpperInvariant(key[5]),
         _ => key,
     };
