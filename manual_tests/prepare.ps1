@@ -1,14 +1,14 @@
 # Makes the files for the manual NVDA tests, and puts them back as they were after a test changed them.
 # Every app folder is emptied except its _main.md, then filled again. Git ignores everything made here.
 # Usage: .\manual_tests\prepare.ps1            (all apps)
-#        .\manual_tests\prepare.ps1 axfile     (one app: axclaude, axdown, axjson, axgit, axterminal, axfile, axmedia, axpreview)
+#        .\manual_tests\prepare.ps1 axfile     (one app: axclaude, axdown, axjson, axgit, axterminal, axfile, axmedia, axpreview, axlist)
 # Close the Axit windows that have these files open first: a file in use cannot be replaced.
 
 param([string]$App = '')
 
 $ErrorActionPreference = 'Stop'
 $root = $PSScriptRoot
-$apps = @('axclaude', 'axdown', 'axjson', 'axgit', 'axterminal', 'axfile', 'axmedia', 'axpreview')
+$apps = @('axclaude', 'axdown', 'axjson', 'axgit', 'axterminal', 'axfile', 'axmedia', 'axpreview', 'axlist')
 if ($App -ne '') {
     if ($apps -notcontains $App) { throw "Unknown app '$App'. One of: $($apps -join ', ')" }
     $apps = @($App)
@@ -474,6 +474,14 @@ function Build-AxClaude([string]$d) {
     Write-Text (Join-Path $proj 'plain.txt') $plain
 }
 
+# ---- axList: a folder of two lists (docs/axlist/nvda-test-plan.md) ----
+
+function Build-AxList([string]$d) {
+    $lists = New-Folder (Join-Path $d 'lists')
+    Write-Text (Join-Path $lists 'Shopping.md') "# Shopping`n- [ ] Milk`n- [x] Eggs`n  - [ ] Free range`n- Butter`n1. One`n2. Two`n"
+    Write-Text (Join-Path $lists 'Home.md') "- [ ] Fix the tap`n"
+}
+
 # ---- empty each app folder but its _main.md, then fill it ----
 
 foreach ($name in $apps) {
@@ -489,6 +497,7 @@ foreach ($name in $apps) {
         'axfile' { Build-AxFile $folder }
         'axmedia' { Build-AxMedia $folder }
         'axpreview' { Build-AxPreview $folder }
+        'axlist' { Build-AxList $folder }
     }
 }
 

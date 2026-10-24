@@ -1,0 +1,117 @@
+# axList: the views, the items and every change to them (docs/axlist/nvda-test-plan.md sections 1 and 2; SPEC LI-2 to LI-4, LI-6).
+# A scratch folder of two lists; findstr checks what reached the file after a change (it fails the step when the text is missing).
+file home\Axit\axlist.json {"checkForUpdates": false}
+mkdir lists
+file lists\Shopping.md # Shopping\n- [ ] Milk\n- [x] Eggs\n  - [ ] Free range\n- Butter\n1. One\n2. Two\n
+file lists\Home.md - [ ] Fix the tap\n
+
+# 1.1 The Lists view of the folder, newest names in File Explorer's order.
+start list {temp}\lists
+expect state Lists - axList
+expect focus Lists, 2
+expect focus Home, 1 open task
+
+# AX-8.6 Type-to-find: a letter jumps to the list starting with it.
+type s
+expect focus Shopping, 2 open tasks
+
+# 1.2 Enter opens the list: its name, its count, the first line; the title follows.
+keys enter
+expect said ! Shopping, 7 items. Heading: Shopping
+expect state Shopping - axList
+keys down
+expect focus Milk, task, not done
+keys down
+expect focus Eggs, task, done
+keys down
+expect focus Free range, task, not done, level 2
+
+# 1.3 Escape back to the Lists view on the list that was open; Ctrl+2 back to the item.
+keys escape
+expect said ! Lists, 2.
+expect focus Shopping, 2 open tasks
+keys ctrl+2
+expect said ! Shopping, 7 items. Free range, task, not done, level 2
+
+# 2.1 Space checks and unchecks, and the file says so.
+keys home
+keys down
+keys space
+expect said ! Done: Milk
+run findstr /l /c:"- [x] Milk" lists\Shopping.md
+keys space
+expect said ! Not done: Milk
+run findstr /l /c:"- [ ] Milk" lists\Shopping.md
+
+# 2.6 Ctrl+T on Butter, and on the heading.
+type b
+expect focus Butter
+keys ctrl+t
+expect said ! Butter is a task
+run findstr /l /c:"- [ ] Butter" lists\Shopping.md
+keys ctrl+t
+expect said ! Butter is not a task
+keys home
+keys ctrl+t
+expect said ! Only list items become tasks
+
+# 2.4 Alt+Down moves Milk past Eggs with its nested item; at the bottom of its run the edge earcon; Alt+Up back.
+keys down
+keys alt+down
+expect said ! Moved down: Milk
+keys alt+up
+expect said ! Moved up: Milk
+keys alt+up
+expect said ! Top of the list
+expect said ♪ Edge
+
+# 2.5 Alt+Right nests under the item before, Alt+Left takes it out.
+type e
+expect focus Eggs
+keys alt+right
+expect said ! Indented: Eggs, level 2
+keys alt+left
+expect said ! Outdented: Eggs
+
+# 2.8 Delete takes the nested item along; Ctrl+Z brings both back.
+keys delete
+expect said ! Removed Eggs and 1 nested item
+keys ctrl+z
+expect said ! Undone: Removed Eggs and 1 nested item
+run findstr /l /c:"  - [ ] Free range" lists\Shopping.md
+
+# 2.7 Numbering: an item added after One is numbered and the rest follow (the notice's field takes the text).
+type 1
+expect focus 1. One
+keys ctrl+n
+expect state "notice":"New item"
+type Half
+wait 1200
+keys enter
+expect said ! Added Half
+run findstr /l /c:"2. Half" lists\Shopping.md
+run findstr /l /c:"3. Two" lists\Shopping.md
+
+# 2.9 Hide done tasks, and show them.
+keys ctrl+shift+d
+expect said ! Done tasks hidden
+expect focus done hidden
+keys ctrl+shift+d
+expect said ! Done tasks shown
+
+# 2.10 A change on disk is never written over: the file changes under the window, the next Space refuses and reads again.
+keys home
+keys down
+run powershell -NoProfile -Command "(Get-Content lists\Shopping.md) -replace 'Milk','Oat milk' | Set-Content lists\Shopping.md"
+keys space
+expect said ! The list changed on disk; it has been read again
+expect focus Oat milk, task, not done
+
+# The ends: the edge earcon, nothing said.
+keys home
+keys up
+expect said ♪ Edge
+
+# Ctrl+S: nothing to save.
+keys ctrl+s
+expect said ! Nothing to save here: every change is written at once

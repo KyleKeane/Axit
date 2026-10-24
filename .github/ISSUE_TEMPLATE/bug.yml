@@ -1,4 +1,4 @@
-name: Bug report
+﻿name: Bug report
 description: Something an Axit app does wrong, or something NVDA reads wrong.
 labels: [bug]
 body:
@@ -20,6 +20,7 @@ body:
         - axMedia
         - axPreview
         - axStart
+        - axProcess
         - axList
         - The bundle (install, update, the Axit menu)
     validations:

@@ -21,6 +21,10 @@ public static class HelpText
 
         ## axList
           Ctrl+1: the Lists view, the folder's lists. Ctrl+2: the Items view, the open list. Ctrl+3: the Tasks view, the open tasks of every list
+          Tab, Shift+Tab: the next or the previous view (the Items view while a list is open)
+          Type the start of an item to jump to it, the same letter again to the next; Shift with a letter backwards
+          Up or Home on the first item, Down or End on the last: the edge sound, since nothing moves
+          Shift+F10 or the Applications key: the menu of the view, List, Item or Task
           F5: read the folder and the list again
           In the Lists view
             Enter: open the list

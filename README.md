@@ -1,4 +1,4 @@
-# Axit
+﻿# Axit
 
 [![Build](https://github.com/KyleKeane/Axit/actions/workflows/build.yml/badge.svg)](https://github.com/KyleKeane/Axit/actions/workflows/build.yml)
 [![Latest release](https://img.shields.io/github/v/release/KyleKeane/Axit?label=release)](https://github.com/KyleKeane/Axit/releases/latest)
@@ -17,6 +17,7 @@ Accessible Windows apps for screen reader users, built for and tested with NVDA,
 - **axMedia**: a player for sound and video files with one queue, speed with the pitch kept, and seeking by key.
 - **axPreview**: a read-only viewer for one text file, with the editors' navigation keys.
 - **axStart**: a program launcher. One key from anywhere, Ctrl+Shift+Space unless you choose another, brings up a search field over the Start menu's programs; Down and Up move through the matches while the caret stays in the field.
+- **axProcess**: what runs on the computer, as one list with three views: the processes with their memory and processor use, the services, and the programs that start at sign-in. End a process after a question, start or stop a service; nothing refreshes by itself.
 - **axList**: lists of things to remember and to do, each a plain Markdown file: bullet, numbered and checkbox items, nested; Space checks a task off, Alt and the arrows move and indent, and a Tasks view gathers the open tasks of every list. Every change is written to the file at once, in a format any editor or AI system reads.
 
 The apps reach each other: axFile hands a file to axMedia or axPreview, every window can show its folder in the others, and the Axit menu in every window lists the open windows and starts any app.
@@ -34,7 +35,7 @@ Needs the .NET 10 SDK, and NVDA for the manual checks.
 ```
 .\run-axfile.ps1 C:\path\to\folder       # build, then start axFile on that folder
 .\run-axclaude.ps1 C:\path\to\project    # axClaude on a project folder
-.\run.ps1 -App down C:\notes\todo.md     # any app: claude, down, json, git, terminal, file, media, preview, start, list
+.\run.ps1 -App down C:\notes\todo.md     # any app: claude, down, json, git, terminal, file, media, preview, start, process, list
 .\run.ps1 -NoBuild                       # start without building
 ```
 

@@ -97,23 +97,6 @@ public sealed class FolderListingTests : IDisposable
     }
 
     [Fact]
-    public void Typing_builds_a_prefix_and_a_run_of_one_letter_cycles()
-    {
-        var shown = new[] { "aardvark", "apple", "apricot", "banana" }.Select(name => new Entry(name, "C:\\x\\" + name, false, 0, DateTime.Now)).ToList();
-        // One letter: the next name starting with it, round the end.
-        Assert.Equal(1, FolderListing.TypeAhead(shown, "a", 0));
-        Assert.Equal(0, FolderListing.TypeAhead(shown, "A", 3));
-        // The letter again: the cycle goes on.
-        Assert.Equal(2, FolderListing.TypeAhead(shown, "aa", 1));
-        // Another letter: the prefix whole, from the entry in hand.
-        Assert.Equal(1, FolderListing.TypeAhead(shown, "ap", 1));
-        Assert.Equal(2, FolderListing.TypeAhead(shown, "apr", 1));
-        Assert.Equal(0, FolderListing.TypeAhead(shown, "aar", 2));
-        Assert.Equal(-1, FolderListing.TypeAhead(shown, "z", 0));
-        Assert.Equal(-1, FolderListing.TypeAhead([], "a", 0));
-    }
-
-    [Fact]
     public void Sort_by_date_and_by_size_keep_folders_first_and_break_ties_by_name()
     {
         var when = new DateTime(2026, 10, 18);

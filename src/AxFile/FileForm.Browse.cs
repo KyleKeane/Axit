@@ -32,10 +32,6 @@ public sealed partial class FileForm
     /// <summary>The number of the latest read: a slow read of a folder left behind is dropped when it arrives.</summary>
     private int _reads;
 
-    /// <summary>Type-ahead (AF-3.6): the letters typed within a second of each other, gathered into one prefix as File Explorer gathers them, and when the last came.</summary>
-    private string _typed = string.Empty;
-    private long _typedAt;
-    private const int TypeAheadMs = 1000;
 
     /// <summary>The folder shown when it is one on disk; null before one is shown and at This PC, which is no path a window can start on (AF-3.10).</summary>
     private string? RealFolder => _folder is { } folder && !FolderListing.IsThisPC(folder) ? folder : null;
@@ -210,60 +206,6 @@ public sealed partial class FileForm
     }
 
     /// <summary>
-    /// Letters typed in the folder list (AF-3.6), as File Explorer takes them: typed within a second of each other
-    /// they build one prefix, "cha", which <see cref="FolderListing.TypeAhead"/> finds among the shown entries (a run
-    /// of one letter cycles through the names starting with it); a new prefix starts after a second's pause. The edge
-    /// earcon when no name starts with it. The list's own one-letter jump gives way to this. NVDA reads the entry selected.
-    /// </summary>
-    private void OnListKeyPress(object? sender, KeyPressEventArgs e)
-    {
-        if (char.IsControl(e.KeyChar) || _shown.Count == 0)
-        {
-            // Enter, Escape, Backspace and the Ctrl letters are keys of their own (ProcessWindowKey), not type-ahead.
-            return;
-        }
-
-        e.Handled = true;
-        var now = Environment.TickCount64;
-        _typed = now - _typedAt > TypeAheadMs ? e.KeyChar.ToString() : _typed + e.KeyChar;
-        _typedAt = now;
-        var index = FolderListing.TypeAhead(_shown, _typed, _list.SelectedIndex);
-        if (index >= 0)
-        {
-            _list.SelectedIndex = index;
-        }
-        else
-        {
-            // No name starts with it: the edge earcon, not a sentence (AF-3.6).
-            Sounds.Edge();
-        }
-    }
-
-    /// <summary>
-    /// Up or Home at the first entry, Down or End at the last (AF-3.6), in either list: the key moves nothing, so the
-    /// edge earcon sounds instead of silence; false when the key moves and stays the list's own.
-    /// </summary>
-    private bool AtEdge(Keys key)
-    {
-        var list = _pane.Focused ? _pane : _list;
-        var index = list.SelectedIndex;
-        if (index < 0 || list.Items.Count == 0)
-        {
-            return false;
-        }
-
-        var first = key is AxFileKeys.FirstItem or AxFileKeys.FirstItemAlso && index == 0;
-        var last = key is AxFileKeys.LastItem or AxFileKeys.LastItemAlso && index == list.Items.Count - 1;
-        if (!first && !last)
-        {
-            return false;
-        }
-
-        Sounds.Edge();
-        return true;
-    }
-
-    /// <summary>
     /// An operation's end (AF-4.5): in the folder it ran in, when that is still the one shown, the list read again with
     /// the result selected and <paramref name="said"/> announced (unless <paramref name="sayInView"/> is off: a caller
     /// that goes on with the result, New text file's rename box, says its own); when the user has gone to another
@@ -312,7 +254,7 @@ public sealed partial class FileForm
     private void FillList(string? select)
     {
         // A new list starts the type-ahead afresh (AF-3.6).
-        _typed = string.Empty;
+        _list.ResetTypeAhead();
         _list.BeginUpdate();
         _list.Items.Clear();
         _list.Items.AddRange(_shown.Select(entry => (object)ItemText(entry)).ToArray());

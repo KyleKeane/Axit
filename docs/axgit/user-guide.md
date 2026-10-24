@@ -23,7 +23,7 @@ The list at the top has three views, each named with what it holds:
 - **Log** (Ctrl+2): the last 200 commits, "3a1f2c0 2026-10-18 Kyle: Release 2.11.0".
 - **Branches** (Ctrl+3): your branches, "main, current, origin/main, 1 ahead".
 
-Arrow keys move through the items and nothing happens until you press a key. Pressing a view's key while the view already shows says its name again, so you always know where you are. F5 refreshes the view after you changed something outside axGIT.
+Arrow keys move through the items and nothing happens until you press a key. Type the start of an item to jump to it; the same letter again goes to the next one, and Shift with a letter goes backwards. Pressing a view's key while the view already shows says its name again, so you always know where you are. F5 refreshes the view after you changed something outside axGIT.
 
 Under the list is the details text, which Tab, Ctrl+Tab or F6 reach. It holds the last thing you asked to see: a diff, a commit, or what git answered. Arrow keys read it line by line; Ctrl+F finds text in it; Page Up and Page Down move a screen; Ctrl+Up and Ctrl+Down move by paragraph.
 

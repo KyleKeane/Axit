@@ -146,35 +146,6 @@ public static class FolderListing
     /// <summary>"name", "date", "size": the order's word for the announcement and the menu.</summary>
     public static string SortName(SortBy by) => by.ToString().ToLowerInvariant();
 
-    /// <summary>
-    /// Where a typed name jumps (AF-3.6), as File Explorer takes it: the first shown entry whose name starts with
-    /// <paramref name="typed"/>, searched from the entry in hand and round the end. A run of one letter ("a", "aa")
-    /// cycles instead through the names starting with that letter, from the next entry on, while any other prefix is
-    /// searched whole, so that a name with a doubled letter inside it ("aab") is found (until 2026-10-23 the doubled
-    /// letter made the one-letter cycle); -1 when no name starts with it.
-    /// </summary>
-    public static int TypeAhead(IReadOnlyList<Entry> shown, string typed, int current)
-    {
-        if (shown.Count == 0 || typed.Length == 0)
-        {
-            return -1;
-        }
-
-        var cycling = typed.All(letter => char.ToUpperInvariant(letter) == char.ToUpperInvariant(typed[0]));
-        var prefix = cycling ? typed[..1] : typed;
-        var from = Math.Clamp(current, 0, shown.Count - 1) + (cycling ? 1 : 0);
-        for (var step = 0; step < shown.Count; step++)
-        {
-            var i = (from + step) % shown.Count;
-            if (shown[i].Name.StartsWith(prefix, StringComparison.OrdinalIgnoreCase))
-            {
-                return i;
-            }
-        }
-
-        return -1;
-    }
-
     /// <summary>The editor Ctrl+E opens a file in (AF-1.3): axJSON's verb for .json, axDown's for anything else.</summary>
     public static string EditorOf(string path) =>
         System.IO.Path.GetExtension(path).Equals(".json", StringComparison.OrdinalIgnoreCase) ? Dispatch.AxJSON : Dispatch.AxDown;

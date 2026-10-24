@@ -79,7 +79,7 @@ public sealed class MediaPlayer : IDisposable
     /// <summary>
     /// The state a pause, a resume or a stop asked for, until the engine's event says it is reached: MFPlay applies
     /// them a moment later, and GetState answered the old state in between, so the status bar said "Playing" after a
-    /// pause, and a key pressed at once acted on the old state (found by tools/AxitDrive, 2026-10-23).
+    /// pause, and a key pressed at once acted on the old state (found by tools/AxAutomate, 2026-10-23).
     /// </summary>
     private PlayerState? _asked;
 

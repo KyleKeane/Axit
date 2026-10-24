@@ -1,4 +1,4 @@
-name: Idea
+﻿name: Idea
 description: A feature, a key, or a change to how an app reads.
 labels: [idea]
 body:
@@ -16,6 +16,7 @@ body:
         - axMedia
         - axPreview
         - axStart
+        - axProcess
         - axList
         - The bundle, or a new app
     validations:

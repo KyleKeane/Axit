@@ -1,5 +1,6 @@
-using System.Runtime.InteropServices;
+﻿using System.Runtime.InteropServices;
 using AxClaude;
+using AxProcess;
 using AxList;
 using AxDown;
 using AxFile;
@@ -72,6 +73,10 @@ internal static class Program
             case Dispatch.AxStart:
                 SetAppId("Axit.AxStart");
                 AxStartApp.Run(launch.Arguments);
+                break;
+            case Dispatch.AxProcess:
+                SetAppId("Axit.AxProcess");
+                AxProcessApp.Run(launch.Arguments);
                 break;
             case Dispatch.AxList:
                 SetAppId("Axit.AxList");

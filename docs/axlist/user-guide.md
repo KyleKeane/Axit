@@ -16,7 +16,7 @@ axList opens on the list you had last, or on the folder of lists. The folder is 
 - **Items** (Ctrl+2): the open list, one line per item: "Milk, task, not done", "Eggs, task, done", "1. Preheat the oven", "Butter", "Heading: Shopping". A nested item ends in "level 2". Escape or Backspace goes back to the lists.
 - **Tasks** (Ctrl+3): every task not yet done, from every list: "Fix the tap, in Home". Space checks one off; Enter opens its list on it.
 
-Pressing a view's key while it shows says its name again. F5 reads everything again, for a list you changed in another program.
+Pressing a view's key while it shows says its name again. Tab and Shift+Tab move to the next and the previous view. In any view, type the start of an item to jump to it; the same letter again goes to the next one, and Shift with a letter goes backwards. At the first or the last item, Up, Down, Home and End play a short low sound. F5 reads everything again, for a list you changed in another program.
 
 ## Changing a list
 
@@ -52,10 +52,14 @@ A line with `- [ ]` is a task, `- [x]` a done task, `-` (or `*`, `+`) a plain it
 
 ## Menus
 
-- **List**: Open (Enter), New list, New item (Ctrl+N), Show in axFile (Ctrl+E), Open in axDown, Refresh (F5), Exit.
-- **Item**: Check or uncheck (Space), Change (Enter), Make a task or not (Ctrl+T), Remove (Delete), Move up, Move down, Indent, Outdent, Undo (Ctrl+Z), Copy text (Ctrl+C).
+- **Folder**: Lists folder, Refresh (F5), Exit.
+- **List**: Open (Enter), New list (Ctrl+N), Show in axFile (Ctrl+E), Open in axDown, Copy name (Ctrl+C).
+- **Item**: Check or uncheck (Space), Change (Enter), New item (Ctrl+N), Make a task or not (Ctrl+T), Remove (Delete), Move up, Move down, Indent, Outdent, Undo (Ctrl+Z), Copy text (Ctrl+C), Show in axFile, Edit in axDown.
+- **Task**: Check off (Space), Go to its list (Enter), Undo, Copy text.
+
+Only the menu of the view you are in can be opened, so an item's commands are never at hand among the lists. Shift+F10, or the Applications key, opens it.
 - **View**: Lists (Ctrl+1), Items (Ctrl+2), Tasks (Ctrl+3), Hide done tasks (Ctrl+Shift+D).
-- **Options**: Lists folder, Text (font and size), General (the update check), Developer (the settings file, diagnostics).
+- **Options**: Text (font and size), General (the update check), Developer (the settings file, diagnostics).
 - **Axit**: new windows of every app, the files and folders closed lately, the open windows, updates, About.
 - **Help**: Keyboard shortcuts (F1), this guide, List resources.
 

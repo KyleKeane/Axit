@@ -57,7 +57,7 @@ public sealed partial class GitForm : AxitForm
     private readonly string? _startPath;
     private readonly MenuStrip _menu = new();
     private readonly ToolStripMenuItem _recentItem = new("Open &recent repository");
-    private readonly ListBox _list = new();
+    private readonly AxitList _list = new();
     private readonly TextBox _details = new();
     private readonly StatusStrip _status = new();
     private readonly ToolStripStatusLabel _stateLabel;
@@ -897,7 +897,7 @@ public sealed partial class GitForm : AxitForm
 
         if (_busy is not null)
         {
-            // A stage or its refresh still runs: the count below is the one before it (found by tools/AxitDrive,
+            // A stage or its refresh still runs: the count below is the one before it (found by tools/AxAutomate,
             // 2026-10-23: Space then Ctrl+Enter said "Nothing staged").
             Announce("Working…", true);
             return;

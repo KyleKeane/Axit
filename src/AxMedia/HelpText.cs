@@ -19,7 +19,7 @@ public static class HelpText
           Alt+A: the Axit menu: the command palette, a new window of any app, the files and folders closed lately, the open Axit windows, most recent first (Alt+A, O, 1 is the one you were in last) and by type, Close all windows, Check for updates, and About
 
         ## The queue
-          Arrow keys, Home, End, Page Up, Page Down: move through the files; a typed letter jumps to the next name starting with it. The one playing reads "(playing)" after its name
+          Arrow keys, Home, End, Page Up, Page Down: move through the files; type the start of a name to jump to it, Shift with a letter backwards. The one playing reads "(playing)" after its name
           Enter: play this file; the rest of the queue follows in order
           Delete: take this file out of the queue; the one playing goes on to the next
           Ctrl+I: the file's place, "3 of 12", and its position while it plays

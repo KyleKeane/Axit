@@ -39,6 +39,16 @@ public static class AxListKeys
 
     public const Keys BackAlso = Keys.Back;
 
+    /// <summary>The views in turn, as axProcess's (the window has one control; the user's ask, 2026-10-24).</summary>
+    public const Keys NextView = Keys.Tab;
+
+    public const Keys PreviousView = Keys.Shift | Keys.Tab;
+
+    /// <summary>In the list: the view's menu from the bar, List, Item or Task (the window base's OpenBarMenu).</summary>
+    public const Keys ItemMenu = Keys.Shift | Keys.F10;
+
+    public const Keys ItemMenuAlso = Keys.Apps;
+
     /// <summary>Every key of the window with its name, for the collision test and the F1 text.</summary>
     public static readonly IReadOnlyList<(string Name, Keys Key)> All =
     [
@@ -61,5 +71,9 @@ public static class AxListKeys
         ("Refresh", Refresh),
         ("Back to the lists", Back),
         ("Back to the lists (Backspace)", BackAlso),
+        ("Next view", NextView),
+        ("Previous view", PreviousView),
+        ("Item menu (in the list)", ItemMenu),
+        ("Item menu (in the list, the Applications key)", ItemMenuAlso),
     ];
 }

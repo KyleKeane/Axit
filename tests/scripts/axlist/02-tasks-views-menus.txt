@@ -1,0 +1,74 @@
+# axList: the Tasks view, the Tab round of the views, the view's menu alone, a new list (docs/axlist/nvda-test-plan.md
+# sections 1 and 3; SPEC LI-2.2, LI-3.2, LI-5, LI-6.4).
+file home\Axit\axlist.json {"checkForUpdates": false}
+mkdir lists
+file lists\Home.md # Home\n- [ ] Fix the tap\n- [x] Paint\n
+file lists\Work.md 1. [ ] Write the report\n
+
+start list {temp}\lists
+expect focus Lists, 2
+
+# 1.7 Tab with no list open passes over the Items view: Lists, Tasks, Lists.
+keys tab
+expect said ! Tasks, 2 open. Fix the tap, in Home
+keys tab
+expect said ! Lists, 2.
+keys shift+tab
+expect said ! Tasks, 2 open.
+
+# 6.4 Only the view's menu: in the Tasks view, no item command among the menus.
+expect commands Check off
+refuse commands Move up
+refuse commands New list
+
+# 3.1 Space checks a task off in its file; it leaves the view; Ctrl+Z brings it back.
+keys space
+expect said ! Done: Fix the tap
+expect focus Tasks, 1 open
+run findstr /l /c:"- [x] Fix the tap" lists\Home.md
+keys ctrl+z
+expect said ! Undone: Done: Fix the tap
+run findstr /l /c:"- [ ] Fix the tap" lists\Home.md
+
+# 3.2 Enter on a task opens its list on it, and the Item menu is the one enabled.
+keys ctrl+3
+expect said ! Tasks, 2 open.
+keys enter
+expect said ! Home, 3 items.
+expect focus Fix the tap, task, not done
+expect commands Move up
+refuse commands Check off
+refuse commands New list
+
+# 1.7 With a list open, Tab goes round all three: Items, Tasks, Lists, Items.
+keys tab
+expect said ! Tasks, 2 open.
+keys tab
+expect said ! Lists, 2.
+expect commands New list
+keys tab
+expect said ! Home, 3 items.
+
+# 3.3 A new list: its name refused when it is taken, made otherwise, opened with its heading.
+keys ctrl+1
+expect said ! Lists, 2.
+keys ctrl+n
+expect state "notice":"New list"
+type Home
+wait 1200
+keys enter
+expect said ! There is a list called Home already
+expect state "notice":"New list"
+keys ctrl+a
+type Ideas
+keys enter
+expect said ! Made Ideas
+expect state Ideas - axList
+run findstr /l /c:"# Ideas" lists\Ideas.md
+
+# F1: the shortcuts, with the new keys named.
+keys f1
+expect state "notice":"Keyboard shortcuts"
+expect state Tab, Shift+Tab
+keys escape
+expect state "notice":null

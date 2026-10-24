@@ -26,7 +26,10 @@ public sealed class ListForm : AxitForm
 
     private readonly ListSettings _settings;
     private readonly MenuStrip _menu = new();
-    private readonly ListBox _list = new();
+    private readonly AxitList _list = new();
+    private readonly ToolStripMenuItem _listMenu = new("&List");
+    private readonly ToolStripMenuItem _itemMenu = new("&Item");
+    private readonly ToolStripMenuItem _taskMenu = new("&Task");
     private readonly StatusStrip _status = new();
     private readonly ToolStripStatusLabel _nameLabel;
     private readonly ToolStripStatusLabel _folderLabel;
@@ -43,36 +46,51 @@ public sealed class ListForm : AxitForm
     private ListDocument? _document;
     private IReadOnlyList<int> _shown = [];
 
+    /// <summary>The file line the Items view was on when another view took its place; null after another list opens.</summary>
+    private int? _itemsLine;
+
     public ListForm(string? path, ListSettings settings, string? settingsError)
         : base(AxListApp.Name, settings, ListSettings.DefaultPath, settingsError)
     {
         _settings = settings;
 
         // ---- menus (LI-6.4); the keys are handled in ProcessWindowKey from the tables, the items only show them ----
-        var list = new ToolStripMenuItem("&List");
-        list.DropDownItems.Add(Item("&Open", Act, AxListKeys.Act));
-        list.DropDownItems.Add(new ToolStripMenuItem("New &list...", null, (_, _) => NewList()));
-        list.DropDownItems.Add(Item("New &item...", NewItem, AxListKeys.New));
-        list.DropDownItems.Add(Item("Show in ax&File", ShowInAxFile, AxListKeys.ShowInAxFile));
-        list.DropDownItems.Add(new ToolStripMenuItem("Open in ax&Down", null, (_, _) => OpenInAxDown()));
-        list.DropDownItems.Add(new ToolStripSeparator());
-        list.DropDownItems.Add(Item("&Refresh", () => Refresh(announce: true), AxListKeys.Refresh));
-        list.DropDownItems.Add(new ToolStripSeparator());
-        list.DropDownItems.Add(CreateExitItem());
+        // The first menu holds what every view has; each view has a menu of its own, and only the menu of the view
+        // shown is enabled, so that an item's command is never at hand among the lists (axProcess's lesson, the user's
+        // ask of 2026-10-24; UpdateViewMenus).
+        var folder = new ToolStripMenuItem("&Folder");
+        folder.DropDownItems.Add(new ToolStripMenuItem("Lists &folder...", null, (_, _) => ChooseListsFolder()));
+        folder.DropDownItems.Add(Item("&Refresh", () => Refresh(announce: true), AxListKeys.Refresh));
+        folder.DropDownItems.Add(new ToolStripSeparator());
+        folder.DropDownItems.Add(CreateExitItem());
 
-        var item = new ToolStripMenuItem("&Item");
-        item.DropDownItems.Add(Item("&Check or uncheck", Check, AxListKeys.Check));
-        item.DropDownItems.Add(Item("C&hange...", ChangeItem, AxListKeys.Act));
-        item.DropDownItems.Add(Item("Make a &task or not", MakeTask, AxListKeys.MakeTask));
-        item.DropDownItems.Add(Item("&Remove", RemoveItem, AxListKeys.Remove));
-        item.DropDownItems.Add(new ToolStripSeparator());
-        item.DropDownItems.Add(Item("Move &up", () => MoveItem(-1), AxListKeys.MoveUp));
-        item.DropDownItems.Add(Item("Move &down", () => MoveItem(1), AxListKeys.MoveDown));
-        item.DropDownItems.Add(Item("&Indent", () => IndentItem(1), AxListKeys.Indent));
-        item.DropDownItems.Add(Item("&Outdent", () => IndentItem(-1), AxListKeys.Outdent));
-        item.DropDownItems.Add(new ToolStripSeparator());
-        item.DropDownItems.Add(Item("U&ndo", Undo, AxListKeys.Undo));
-        item.DropDownItems.Add(Item("Co&py text", CopyText, AxListKeys.CopyText));
+        _listMenu.DropDownItems.Add(Item("&Open", Act, AxListKeys.Act));
+        _listMenu.DropDownItems.Add(Item("New &list...", NewList, AxListKeys.New));
+        _listMenu.DropDownItems.Add(Item("Show in ax&File", ShowInAxFile, AxListKeys.ShowInAxFile));
+        _listMenu.DropDownItems.Add(new ToolStripMenuItem("Open in ax&Down", null, (_, _) => OpenInAxDown()));
+        _listMenu.DropDownItems.Add(Item("&Copy name", CopyText, AxListKeys.CopyText));
+
+        _itemMenu.DropDownItems.Add(Item("&Check or uncheck", Check, AxListKeys.Check));
+        _itemMenu.DropDownItems.Add(Item("C&hange...", ChangeItem, AxListKeys.Act));
+        _itemMenu.DropDownItems.Add(Item("Ne&w item...", NewItem, AxListKeys.New));
+        _itemMenu.DropDownItems.Add(Item("Make a &task or not", MakeTask, AxListKeys.MakeTask));
+        _itemMenu.DropDownItems.Add(Item("&Remove", RemoveItem, AxListKeys.Remove));
+        _itemMenu.DropDownItems.Add(new ToolStripSeparator());
+        _itemMenu.DropDownItems.Add(Item("Move &up", () => MoveItem(-1), AxListKeys.MoveUp));
+        _itemMenu.DropDownItems.Add(Item("Move &down", () => MoveItem(1), AxListKeys.MoveDown));
+        _itemMenu.DropDownItems.Add(Item("&Indent", () => IndentItem(1), AxListKeys.Indent));
+        _itemMenu.DropDownItems.Add(Item("&Outdent", () => IndentItem(-1), AxListKeys.Outdent));
+        _itemMenu.DropDownItems.Add(new ToolStripSeparator());
+        _itemMenu.DropDownItems.Add(Item("U&ndo", Undo, AxListKeys.Undo));
+        _itemMenu.DropDownItems.Add(Item("Co&py text", CopyText, AxListKeys.CopyText));
+        _itemMenu.DropDownItems.Add(Item("Show in ax&File", ShowInAxFile, AxListKeys.ShowInAxFile));
+        _itemMenu.DropDownItems.Add(new ToolStripMenuItem("&Edit in axDown", null, (_, _) => OpenInAxDown()));
+
+        _taskMenu.DropDownItems.Add(Item("&Check off", Check, AxListKeys.Check));
+        _taskMenu.DropDownItems.Add(Item("&Go to its list", Act, AxListKeys.Act));
+        _taskMenu.DropDownItems.Add(new ToolStripSeparator());
+        _taskMenu.DropDownItems.Add(Item("U&ndo", Undo, AxListKeys.Undo));
+        _taskMenu.DropDownItems.Add(Item("Co&py text", CopyText, AxListKeys.CopyText));
 
         var view = new ToolStripMenuItem("&View");
         view.DropDownItems.Add(Item("&Lists", () => ShowView(View.Lists), AxListKeys.ViewLists));
@@ -83,9 +101,8 @@ public sealed class ListForm : AxitForm
         _hideDoneItem.Checked = settings.HideDone;
         view.DropDownItems.Add(_hideDoneItem);
 
-        // Options, as the other windows' (AX-6): the window's own items first.
+        // Options, as the other windows' (AX-6).
         var options = new ToolStripMenuItem("&Options");
-        options.DropDownItems.Add(new ToolStripMenuItem("Lists &folder...", null, (_, _) => ChooseListsFolder()));
         options.DropDownItems.Add(CreateTextMenu());
         options.DropDownItems.Add(CreateGeneralMenu());
         options.DropDownItems.Add(CreateDeveloperMenu());
@@ -93,11 +110,25 @@ public sealed class ListForm : AxitForm
         var help = CreateHelpMenu(HelpText.UserGuide, "List &resources",
             [("&Markdown task lists", "https://docs.github.com/en/get-started/writing-on-github/working-with-advanced-formatting/about-tasklists")]);
 
-        _menu.Items.AddRange([list, item, view, options, CreateAxitMenu(), help]);
+        _menu.Items.AddRange([folder, _listMenu, _itemMenu, _taskMenu, view, options, CreateAxitMenu(), help]);
         MainMenuStrip = _menu;
 
-        _list.IntegralHeight = false;
+        // The bundle's list (AX-8.6): type-to-find with Shift backwards and the edge earcon, built in.
         _list.Dock = DockStyle.Fill;
+        _list.MouseDown += (_, e) =>
+        {
+            if (e.Button == MouseButtons.Right && _list.IndexFromPoint(e.Location) is var index && index >= 0)
+            {
+                _list.SelectedIndex = index;
+            }
+        };
+        _list.MouseUp += (_, e) =>
+        {
+            if (e.Button == MouseButtons.Right)
+            {
+                OpenViewMenu();
+            }
+        };
         _list.TabIndex = 0;
 
         (_nameLabel, _folderLabel) = StatusLayout.Pair(_status);
@@ -221,6 +252,16 @@ public sealed class ListForm : AxitForm
                 case AxListKeys.Remove:
                     RemoveItem();
                     return true;
+                case AxListKeys.NextView:
+                    ShowView(Cycled(1));
+                    return true;
+                case AxListKeys.PreviousView:
+                    ShowView(Cycled(-1));
+                    return true;
+                case AxListKeys.ItemMenu:
+                case AxListKeys.ItemMenuAlso:
+                    OpenViewMenu();
+                    return true;
                 case AxListKeys.Back:
                 case AxListKeys.BackAlso:
                     if (_view == View.Items)
@@ -237,6 +278,30 @@ public sealed class ListForm : AxitForm
     }
 
     // ---- the folder and the views (LI-1, LI-2) ----
+
+    /// <summary>The view after or before the one shown, round from Tasks to Lists (Tab, Shift+Tab; LI-2.2); the Items view is passed over while no list is open.</summary>
+    private View Cycled(int step)
+    {
+        var next = _view;
+        do
+        {
+            next = (View)(((int)next + step + 3) % 3);
+        }
+        while (next == View.Items && _openPath is null);
+
+        return next;
+    }
+
+    /// <summary>Shift+F10, the Applications key, a right click: the view's menu from the bar, List, Item or Task.</summary>
+    private void OpenViewMenu() => OpenBarMenu(_view switch { View.Items => 'I', View.Tasks => 'T', _ => 'L' });
+
+    /// <summary>The menu of the view shown enabled, the other two not (LI-6.4): the bar's arrows pass over a disabled menu and the palette leaves its items out.</summary>
+    private void UpdateViewMenus()
+    {
+        _listMenu.Enabled = _view == View.Lists;
+        _itemMenu.Enabled = _view == View.Items;
+        _taskMenu.Enabled = _view == View.Tasks;
+    }
 
     private string Folder => _settings.ListsFolder;
 
@@ -277,6 +342,7 @@ public sealed class ListForm : AxitForm
             return false;
         }
 
+        _itemsLine = null;
         _settings.LastList = Path.GetFileName(path);
         SaveSettings();
         _view = View.Items;
@@ -310,6 +376,12 @@ public sealed class ListForm : AxitForm
             return;
         }
 
+        if (_view == View.Items)
+        {
+            // The line the Items view was on, for the way back to it (Escape, then Ctrl+2 or Tab).
+            _itemsLine = SelectedLine();
+        }
+
         _view = view;
         switch (view)
         {
@@ -318,9 +390,8 @@ public sealed class ListForm : AxitForm
                 Fill(_openPath);
                 break;
             case View.Items:
-                var line = SelectedLine();
                 ReadOpen(_openPath!);
-                Fill(line);
+                Fill(_itemsLine);
                 break;
             default:
                 _tasks = ListFolder.OpenTasks(Folder);
@@ -416,6 +487,7 @@ public sealed class ListForm : AxitForm
         _list.Items.AddRange(labels.Select(label => (object)label).ToArray());
         _list.EndUpdate();
         _list.AccessibleName = name;
+        UpdateViewMenus();
         if (_list.Items.Count > 0)
         {
             _list.SelectedIndex = Math.Clamp(index, 0, _list.Items.Count - 1);

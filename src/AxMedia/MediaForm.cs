@@ -19,7 +19,7 @@ public sealed class MediaForm : AxitForm
     private readonly HandOver? _start;
     private readonly MenuStrip _menu = new();
     private readonly ToolStripMenuItem _recentItem = new("Open &recent");
-    private readonly ListBox _list = new();
+    private readonly AxitList _list = new();
     private readonly Panel _video = new();
     private readonly StatusStrip _status = new();
     private readonly ToolStripStatusLabel _stateLabel;
@@ -108,6 +108,8 @@ public sealed class MediaForm : AxitForm
         _list.Items.Add(PlayQueue.EmptyText);
         _list.SelectedIndex = 0;
         _list.DoubleClick += (_, _) => PlaySelected();
+        // The bundle's list (AX-8.6): the empty queue's one line is no item to type to.
+        _list.Names = () => _queue.Count == 0 ? [] : _list.Items.Cast<object>().Take(_queue.Count).Select(item => item.ToString() ?? string.Empty).ToList();
 
         // ---- the video area (AM-2.4): a plain surface at the top, shown while a video plays, never focused ----
         _video.Dock = DockStyle.Top;

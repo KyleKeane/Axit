@@ -1,0 +1,23 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <!-- axProcess's window side, as a class library inside Axit.exe (docs/axit/SPEC.md AX-1.7): the window, its key
+       table and its texts; the pure code is AxProcess.Core. -->
+  <PropertyGroup>
+    <TargetFramework>$(AxitDotNet)-windows</TargetFramework>
+    <UseWindowsForms>true</UseWindowsForms>
+    <RootNamespace>AxProcess</RootNamespace>
+    <AssemblyName>axProcess</AssemblyName>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\AxProcess.Core\AxProcess.Core.csproj" />
+    <ProjectReference Include="..\Axit.Core\Axit.Core.csproj" />
+    <ProjectReference Include="..\Axit.Forms\Axit.Forms.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <!-- Help, User guide shows this file. -->
+    <EmbeddedResource Include="..\..\docs\axprocess\user-guide.md" LogicalName="UserGuide.md" />
+  </ItemGroup>
+
+</Project>

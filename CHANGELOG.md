@@ -1,8 +1,10 @@
-# Changelog
+﻿# Changelog
 
 ## Unreleased
 
+- axProcess: a new app, what runs on the computer as one list with three views. Ctrl+1 the processes with their memory and processor use, largest first; Ctrl+2 the services with their state and start type; Ctrl+3 the programs that start at sign-in. Enter shows an item's details with what can be done to it, Delete ends a process after a question, a service's details start, stop or restart it, Ctrl+E shows a program in axFile, Ctrl+Q says the summary. Nothing refreshes by itself: F5 reads again. Start menu `Axit axProcess`, command `axprocess`.
 - axList: a new app, lists of things to remember and to do, each a plain Markdown file in a folder of lists. Ctrl+1 the lists, Ctrl+2 a list's items, Ctrl+3 the open tasks of every list. Space checks a task off, Enter changes an item, Ctrl+N adds one of the same kind, Delete removes it with what is nested under it, Alt+Up and Alt+Down move it, Alt+Right and Alt+Left indent it, Ctrl+T makes it a task, Ctrl+Shift+D hides the done ones, Ctrl+Z undoes. Every change is written to the file at once, after reading it again, so a list open in axDown or changed by a script is never written over. Start menu `Axit axList`, command `axlist`, Open with Axit on `.md` files.
+- For developers: the automated checks' runner, `tools/AxitDrive`, is called axAutomate now: `tools/AxAutomate`, run as `dotnet run --project tools\AxAutomate`.
 
 ## 3.5.0 - 2026-10-23
 

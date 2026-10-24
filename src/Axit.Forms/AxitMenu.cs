@@ -76,7 +76,7 @@ public sealed class AxitMenu : ToolStripMenuItem
             var item = closed[i];
             if (Dispatch.Apps.FirstOrDefault(a => string.Equals(a.Name, item.App, StringComparison.OrdinalIgnoreCase)) is { } app)
             {
-                _recentlyClosed.DropDownItems.Add(new ToolStripMenuItem(AxitWindows.Label(i, RecentlyClosed.Title(item)), null, (_, _) => Start(app.Verb, item.Path)));
+                _recentlyClosed.DropDownItems.Add(new ToolStripMenuItem(AxitWindows.Label(i, RecentlyClosed.Title(item)), null, (_, _) => Start(app.Verb, item.Path.Length == 0 ? null : item.Path)));
             }
         }
 

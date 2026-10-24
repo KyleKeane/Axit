@@ -18,14 +18,14 @@ day that Claude drops an early Enter (axClaude FR-2.1).
 ## 2. The windows driven from inside: the automation channel
 
 Built 2026-10-23: `Axit.Forms/AutomationChannel` (started by the window base when it first shows), `AXIT_HOME` in
-`AppPaths`, `tools/AxitDrive` with the test desktop, and the first scripts in `tests/scripts` (axDown's notices and
+`AppPaths`, `tools/AxAutomate` (axAutomate; called AxitDrive until 2026-10-24) with the test desktop, and the first scripts in `tests/scripts` (axDown's notices and
 palette, axClaude's message and its set of two questions), all passing.
 
 Run one:
 
 ```
 dotnet build src\Axit\Axit.csproj -c Release
-dotnet run --project tools\AxitDrive -c Release -- tests\scripts --build --report report.md
+dotnet run --project tools\AxAutomate -c Release -- tests\scripts --build --report report.md
 ```
 
 For the windows' own behaviour: keys, focus, announcements, notices, menus, the control area. Runs any time,
@@ -57,7 +57,7 @@ including while the user works, because nothing takes the foreground.
   - `state`: the title, the status bar's texts, whether a notice shows and its title, the control area's name.
   - `menu <name>`: runs a menu command by the name the command palette knows it by.
   - `close`: closes the window as Alt+F4 does.
-- **Scripts**: `tools/AxitDrive` starts an app with the channel on and runs a script of steps (`mkdir`, `start`,
+- **Scripts**: `tools/AxAutomate` starts an app with the channel on and runs a script of steps (`mkdir`, `start`,
   `use`, `keys`, `type`, `menu`, `said`, `expect said|focus|state <text>`, `try said <text>` with `iffound <step>` for
   what may not come, such as Claude's trust question, `wait <ms>`, `close`; the header of its `Program.cs` lists them),
   each step's result in a report; what a window said stays queued until an expectation takes it; a failing step prints what was said and focused instead. The NVDA test plans become scripts in
@@ -65,7 +65,7 @@ including while the user works, because nothing takes the foreground.
 
 ### What the scripts cover, and what stays manual (2026-10-23)
 
-The NVDA test plans of axDown, axJSON, axPreview, axFile, axGIT, axTerminal and axMedia are scripts in
+The NVDA test plans of axDown, axJSON, axPreview, axFile, axGIT, axTerminal, axMedia and axProcess (2026-10-24; the services only read, never started or stopped, since a run with administrator rights would do it for real) are scripts in
 `tests/scripts/<app>`, one per section of the plan, about two thousand steps, all passing; axClaude's are being written,
 on Haiku. Every step a script cannot drive is a `#` line naming the plan step and why. What stays manual, for now:
 
@@ -100,13 +100,13 @@ NVDA refuses to be started from the assistant's process ("Access is denied"), so
 - **The same scripts**, run with `--nvda`: the window is activated, the keys go through `SendInput` as a keyboard's
   do, and `expect spoken <text>` reads the capture file.
 
-Built 2026-10-23: `--nvda` in `tools/AxitDrive` (the windows on the user's desktop, brought to the front through the
+Built 2026-10-23: `--nvda` in `tools/AxAutomate` (the windows on the user's desktop, brought to the front through the
 channel's `activate`, keys and characters through `SendInput`, `expect spoken`, `refuse spoken` and `spoken` over the
 capture log, the capture switched on for the run and its log deleted after it). The NVDA scripts live apart, in
 `tests/nvda-scripts`, so that a run of `tests/scripts` never takes the machine:
 
 ```
-dotnet run --project tools\AxitDrive -c Release -- tests\nvda-scripts --build --nvda --report nvda-report.md
+dotnet run --project tools\AxAutomate -c Release -- tests\nvda-scripts --build --nvda --report nvda-report.md
 ```
 
 ## Rules

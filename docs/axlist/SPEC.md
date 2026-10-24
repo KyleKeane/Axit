@@ -56,11 +56,13 @@ open in axDown".
 
 ### LI-2 The window and its views
 
-- LI-2.1 From the top: the menu bar; one list box, named with its view and count; the status bar. A notice takes the
+- LI-2.1 From the top: the menu bar; one list box, the bundle's `AxitList`, named with its view and count, with type-to-find
+  (Shift with a letter backwards) and the edge earcon at its ends built in (AX-8.6); the status bar. A notice takes the
   list box's place while it shows (AX-6.4).
 - LI-2.2 Views (View menu): Ctrl+1 **Lists**, the folder's lists; Ctrl+2 **Items**, the open list's items; Ctrl+3
   **Tasks**, the open tasks of every list. The key says the view's name and the selected item, also when the view
-  already shows (axClaude D26); Ctrl+2 with no list open says "No list open: Ctrl+1, then Enter".
+  already shows (axClaude D26); Ctrl+2 with no list open says "No list open: Ctrl+1, then Enter". Tab and Shift+Tab go to the next and the previous view,
+  passing over the Items view while no list is open (axProcess's way, 2026-10-24).
 - LI-2.3 The title is "<list name> - axList" while a list is open and "Lists - axList" without one. The status bar's
   left label is the view's name and count; the right one the folder of lists. No AccessibleName, no Spring.
 - LI-2.4 F5 reads the folder and the open list again and says "Refreshed: <the list box's name>", keeping the
@@ -148,17 +150,21 @@ in any editor and axList reads it the same way.
 
 ## 6. Menus, keys, texts
 
-- LI-6.4 Menus (AX-6): **List (L):** Open Enter | New list… | New item… Ctrl+N | Show in axFile Ctrl+E | Open in
-  axDown | ─ | Refresh F5 | ─ | Exit Alt+F4. **Item (I):** Check or uncheck Space | Change… Enter | Make
-  a task or not Ctrl+T | Remove Delete | ─ | Move up Alt+Up | Move down Alt+Down | Indent Alt+Right | Outdent
-  Alt+Left | ─ | Undo Ctrl+Z | Copy text Ctrl+C. **View (V):** Lists Ctrl+1 | Items Ctrl+2 | Tasks Ctrl+3 | ─ | Hide
-  done tasks Ctrl+Shift+D ✓. **Options (O):** Lists folder… | Text ▸ | General ▸ | Developer ▸. **Axit (A)**
+- LI-6.4 Menus (AX-6): **Folder (F):** Lists folder… | Refresh F5 | ─ | Exit Alt+F4. **List (L):** Open Enter | New
+  list… Ctrl+N | Show in axFile Ctrl+E | Open in axDown | Copy name Ctrl+C. **Item (I):** Check or uncheck Space |
+  Change… Enter | New item… Ctrl+N | Make a task or not Ctrl+T | Remove Delete | ─ | Move up Alt+Up | Move down
+  Alt+Down | Indent Alt+Right | Outdent Alt+Left | ─ | Undo Ctrl+Z | Copy text Ctrl+C | Show in axFile Ctrl+E | Edit in
+  axDown. **Task (T):** Check off Space | Go to its list Enter | ─ | Undo Ctrl+Z | Copy text Ctrl+C. Only the menu of the
+  view shown is enabled, the other two not, so that an item's command is never at hand among the lists (axProcess's
+  way, 2026-10-24); Shift+F10, the Applications key and a right click in the list open it (the window base's
+  `OpenBarMenu`). **View (V):** Lists Ctrl+1 | Items Ctrl+2 | Tasks Ctrl+3 | ─ | Hide
+  done tasks Ctrl+Shift+D ✓. **Options (O):** Text ▸ | General ▸ | Developer ▸. **Axit (A)**
   (AX-9). **Help (H):** Keyboard shortcuts F1 | User guide | ─ | List resources ▸ (Markdown task lists). Every item has
   a mnemonic (AX-7.4). New list and New item are one key, Ctrl+N, by the view (the Lists view makes a list).
 - LI-6.5 Keys (AX-8). Bundle-wide: F1, Ctrl+Shift+P, Ctrl+F, F3, Shift+F3, Ctrl+S ("Nothing to save here: every
   change is written at once"), Ctrl+Plus, Ctrl+Minus, Alt+F4. Window-specific (`AxListKeys`): Ctrl+1, Ctrl+2, Ctrl+3,
   Enter, Space, Ctrl+N, Delete, Alt+Up, Alt+Down, Alt+Right, Alt+Left, Ctrl+T, Ctrl+Shift+D, Ctrl+Z, Ctrl+C, Ctrl+E,
-  F5, Escape and Backspace. Alt+Up is axFile's Up a folder too, the same gesture with this window's
+  F5, Escape and Backspace, Tab and Shift+Tab, Shift+F10 and the Applications key. Alt+Up is axFile's Up a folder too, the same gesture with this window's
   meaning (AX-8.4's list of keys used differently). An item command in the Lists view says "Open a list first:
   Enter".
 - LI-6.6 The F1 text (`HelpText.Shortcuts`) names them all; `docs/axlist/user-guide.md` is embedded (Help, User

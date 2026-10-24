@@ -19,7 +19,7 @@ The window is named after the file playing: "03 Chapter 3.mp3 - axMedia", or "ax
 
 ## The queue
 
-The list is the one control, named with its count, "Queue, 12 items". Arrow keys, Home, End, Page Up and Page Down move through the files; a typed letter jumps to the next name starting with it; nothing is spoken until you ask. The file playing reads "(playing)" after its name. An empty queue shows one line, "Queue is empty".
+The list is the one control, named with its count, "Queue, 12 items". Arrow keys, Home, End, Page Up and Page Down move through the files; typing the start of a name jumps to it, the same letter again to the next one, and Shift with a letter goes backwards; nothing is spoken until you ask. The file playing reads "(playing)" after its name. An empty queue shows one line, "Queue is empty".
 
 - **Enter** plays the file you are on, "Playing 03 Chapter 3.mp3"; when it ends the next file plays, to the end of the queue: "End of queue" with the done chime. Files already played stay in the list until you clear it or remove them.
 - **Delete** takes the file out of the queue, "Removed 03 Chapter 3.mp3"; the one playing goes on to the next, or stops at the end.

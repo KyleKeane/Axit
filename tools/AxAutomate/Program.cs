@@ -1,17 +1,17 @@
-// AxitDrive: runs scripts of user steps against Axit's windows through their automation channel
+// AxAutomate: runs scripts of user steps against Axit's windows through their automation channel
 // (docs/axit/automation.md, tier 2). The windows are started on a desktop of the runner's own ("axit-tests"), so that
 // they never take the user's keyboard or foreground; the keys go into each window's own message queue, the sounds are
 // recorded and not played, and the windows keep their settings and logs in the run's own folder (AXIT_HOME).
 //
 // Usage:
-//   AxitDrive <script or folder of scripts> [--exe <Axit.exe> | --build] [--report <file.md>] [--keep]
+//   AxAutomate <script or folder of scripts> [--exe <Axit.exe> | --build] [--report <file.md>] [--keep]
 //   --build      builds src\Axit in Release into the run's own folder first (the running app's bin is never touched)
 //   --exe        the Axit.exe to drive (default: src\Axit\bin\Release\net10.0-windows\Axit.exe)
 //   --report     writes every script's steps and its whole timeline, with times, to a Markdown file
 //   --nvda       the NVDA tier (tier 3): the windows open on the user's own desktop and come to the front, the keys go
 //                through SendInput as a keyboard's do, and NVDA's speech is read from its capture add-on
 //                (tools/nvda-capture). It takes over the machine: only at the user's word, with the user away.
-//   --keep       keeps %TEMP%\axit-drive\<process id>, the run's folder ({temp} in a script), with its logs
+//   --keep       keeps %TEMP%\axit-automate\<process id>, the run's folder ({temp} in a script), with its logs
 //   A folder runs every *.txt under it, one after another, each with fresh windows and a fresh {temp}; the exit code
 //   is the number of scripts that failed.
 //
@@ -57,7 +57,7 @@ using System.Runtime.InteropServices;
 using System.Text;
 using System.Text.Json;
 
-namespace AxitDrive;
+namespace AxAutomate;
 
 internal static class Program
 {
@@ -65,7 +65,7 @@ internal static class Program
     {
         if (args.Length == 0)
         {
-            Console.Error.WriteLine("Usage: AxitDrive <script or folder> [--exe <Axit.exe> | --build] [--report <file.md>] [--keep]");
+            Console.Error.WriteLine("Usage: AxAutomate <script or folder> [--exe <Axit.exe> | --build] [--report <file.md>] [--keep]");
             return 2;
         }
 
@@ -92,7 +92,7 @@ internal static class Program
 
         // The process id and the time: a reused process id never meets an old folder (git's read-only objects in it
         // stopped a run once).
-        var root = Path.Combine(Path.GetTempPath(), "axit-drive", $"{Environment.ProcessId}-{DateTime.Now:HHmmss}");
+        var root = Path.Combine(Path.GetTempPath(), "axit-automate", $"{Environment.ProcessId}-{DateTime.Now:HHmmss}");
         Directory.CreateDirectory(root);
         var repository = FindRepository();
         if (build)
@@ -122,7 +122,7 @@ internal static class Program
             File.WriteAllText(Speech.FlagPath, string.Empty);
         }
 
-        var report = new StringBuilder($"# AxitDrive report\n\n{DateTime.Now:yyyy-MM-dd HH:mm}, {exe}\n\n");
+        var report = new StringBuilder($"# AxAutomate report\n\n{DateTime.Now:yyyy-MM-dd HH:mm}, {exe}\n\n");
         var failed = new List<string>();
         var clock = Stopwatch.StartNew();
         foreach (var script in scripts)

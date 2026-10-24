@@ -43,6 +43,17 @@ public sealed class RecentlyClosedTests
         Assert.Equal(title, RecentlyClosed.Title(new(app, path)));
 
     [Fact]
+    public void An_app_that_holds_no_file_is_kept_by_its_name_once()
+    {
+        IReadOnlyList<ClosedItem> items = [];
+        items = RecentlyClosed.Add(items, new("axProcess", string.Empty));
+        items = RecentlyClosed.Add(items, new("axDown", @"C:\work\a.md"));
+        items = RecentlyClosed.Add(items, new("axProcess", string.Empty));
+        Assert.Equal(["axProcess", "axDown"], items.Select(i => i.App));
+        Assert.Equal("axProcess", RecentlyClosed.Title(items[0]));
+    }
+
+    [Fact]
     public void The_file_round_trips_and_a_missing_file_is_an_empty_list()
     {
         var folder = TempFolder();

@@ -20,6 +20,7 @@ public static class HelpText
           Alt+A: the Axit menu: the command palette, a new window of any app, the files and folders closed lately, the open Axit windows, most recent first (Alt+A, O, 1 is the one you were in last) and by type, Close all windows, Check for updates, and About
 
         ## axGIT
+          Type the start of an item to jump to it, the same letter again to the next; Shift with a letter backwards
           Ctrl+O: open a repository (the Windows folder picker; any folder inside it will do)
           F5: refresh the list and the status bar
           Ctrl+W: show the repository's folder in File Explorer

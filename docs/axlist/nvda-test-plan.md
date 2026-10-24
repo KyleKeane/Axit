@@ -1,6 +1,6 @@
 # axList NVDA test plan
 
-Run with NVDA before a release, after `run-axlist.ps1 <folder>` on a scratch folder (or `.\run.ps1 -App list <folder>`), never on the folder of your real lists. Make two files in it first: `Shopping.md` with the lines `# Shopping`, `- [ ] Milk`, `- [x] Eggs`, `  - [ ] Free range`, `- Butter`, `1. One`, `2. Two`; and `Home.md` with `- [ ] Fix the tap`. Every step says what NVDA should read; a step that reads differently is a defect. The specification is `docs/axlist/SPEC.md` (LI-n.m).
+Run with NVDA before a release, on the files of `manual_tests/axlist` (made and reset by `.\manual_tests\prepare.ps1 axlist`), after `.\run-axlist.ps1 manual_tests\axlist\lists`, never on the folder of your real lists. The folder holds `Shopping.md` (`# Shopping`, `- [ ] Milk`, `- [x] Eggs`, `  - [ ] Free range`, `- Butter`, `1. One`, `2. Two`) and `Home.md` (`- [ ] Fix the tap`). Every step says what NVDA should read; a step that reads differently is a defect. The specification is `docs/axlist/SPEC.md` (LI-n.m).
 
 ## 1. Start and the views (LI-1, LI-2, LI-3)
 
@@ -10,6 +10,9 @@ Run with NVDA before a release, after `run-axlist.ps1 <folder>` on a scratch fol
 4. Ctrl+3: "Tasks, 3 open. Fix the tap, in Home". Ctrl+3 again: the same words.
 5. NVDA+End: the status bar: the view's name and the folder.
 6. Ctrl+S: "Nothing to save here: every change is written at once".
+7. Tab in the Lists view with no list open: "Tasks, …"; Tab: "Lists, …". Open Shopping, then Tab: "Tasks, …", Tab: "Lists, …", Tab: "Shopping, …". Shift+Tab goes back.
+8. Home, then Up: the low edge sound. End, then Down: the same. Type `s`: the first list starting with s; Shift+S: the one before.
+9. In each view, Shift+F10: its menu (List, Item or Task) opens and NVDA reads its first item. Alt, then Right along the bar: Folder, the view's menu, View, Options, Axit, Help; the other two view menus are passed over.
 
 ## 2. Changing items (LI-4)
 

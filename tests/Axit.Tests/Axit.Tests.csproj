@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <!-- The bundle's tests: the shared pure code, the layout rules, and the key tables of every window (AX-8.4), which
        is why this project references the window projects; LayoutTests constrains src/, not tests/. -->
@@ -19,6 +19,7 @@
     <ProjectReference Include="..\..\src\AxMedia\AxMedia.csproj" />
     <ProjectReference Include="..\..\src\AxPreview\AxPreview.csproj" />
     <ProjectReference Include="..\..\src\AxStart\AxStart.csproj" />
+    <ProjectReference Include="..\..\src\AxProcess\AxProcess.csproj" />
     <ProjectReference Include="..\..\src\AxList\AxList.csproj" />
   </ItemGroup>
 

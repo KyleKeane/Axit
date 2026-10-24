@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <OutputType>WinExe</OutputType>
@@ -13,13 +13,13 @@
     <ApplicationIcon>AxClaude.ico</ApplicationIcon>
     <Version>3.5.0</Version>
     <Product>Axit</Product>
-    <Description>Accessible Windows apps for screen reader users: axClaude, a front end for the Claude Code CLI, axDown, a text editor, axJSON, a JSON editor, axGIT, a git manager, axTerminal, a terminal, axFile, a file manager, axMedia, a player, axPreview, a viewer, axStart, a program launcher, and axList, lists and tasks in Markdown files</Description>
+    <Description>Accessible Windows apps for screen reader users: axClaude, a front end for the Claude Code CLI, axDown, a text editor, axJSON, a JSON editor, axGIT, a git manager, axTerminal, a terminal, axFile, a file manager, axMedia, a player, axPreview, a viewer, axStart, a program launcher, and axProcess, a view of the processes, services and startup programs, and axList, lists and tasks in Markdown files</Description>
     <Authors>Dr. Kyle Keane</Authors>
     <Company>Dr. Kyle Keane, www.kylekeane.com</Company>
     <Copyright>Copyright (c) 2026 Dr. Kyle Keane (www.kylekeane.com). MIT License.</Copyright>
   </PropertyGroup>
 
-  <!-- One .ico per app next to this file (AxDown.ico to AxList.ico; tools/make-icon.ps1 draws them) are the apps'
+  <!-- One .ico per app next to this file (AxDown.ico to AxProcess.ico; tools/make-icon.ps1 draws them) are the apps'
        icons for their Start menu and File Explorer entries (the executable's own icon is axClaude's). publish.ps1
        copies every one of them next to the executable, since a single-file publish would bundle a project item
        into the executable, and install.ps1 copies them on. -->
@@ -34,6 +34,7 @@
     <ProjectReference Include="..\AxMedia\AxMedia.csproj" />
     <ProjectReference Include="..\AxPreview\AxPreview.csproj" />
     <ProjectReference Include="..\AxStart\AxStart.csproj" />
+    <ProjectReference Include="..\AxProcess\AxProcess.csproj" />
     <ProjectReference Include="..\AxList\AxList.csproj" />
     <ProjectReference Include="..\Axit.Core\Axit.Core.csproj" />
   </ItemGroup>
