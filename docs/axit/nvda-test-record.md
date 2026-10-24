@@ -6,6 +6,19 @@ What was checked with NVDA, against which version, and with what result. When a 
 
 Add a section under this one, above the earlier passes, so that the newest comes first: the date, the version, the commit tested, who ran it and how the result was given, and the environment: the NVDA version, the synthesizer and the Windows build (so that a regression is dated to an NVDA release rather than to some time). Under it, one table per app with a line per section of its plan: the steps run and the result, Passed, Failed (with what was heard) or Not run. A step that fails gets a line of its own with what NVDA said and what it should have said, and the bug's fix names the step. When a plan gains or loses steps, the next pass lists them as the plan has them then.
 
+## Owed: merged to main on 2026-10-24 before their pass (the branch `calc-clip`)
+
+Merged at the user's word ahead of the rule, so that main holds them; no release until these have passed.
+
+- axCalc, `docs/axcalc/nvda-test-plan.md`: every section (new app; its history became the bundle's list at the merge).
+- axClip, `docs/axclip/nvda-test-plan.md`: every section (new app).
+- axStart, `docs/axstart/nvda-test-plan.md`: the typing, the keys in the field and the edge sound, hiding and the
+  hotkey (its window moved onto `HotkeyForm`, and the search field into it).
+- The cleanups of `docs/axit/inventory-2026-10-24.md`, meant to change nothing a key does: axGIT's and axProcess's
+  views (`ListViewState`), the copy keys of axFile, axPass, axProcess, axCalc and axClaude (`CopyText`), the Show
+  current folder in submenus of every window (the names now axGIT, axTerminal, axFile), axDown's and axPreview's
+  Markdown keys (`MarkdownKeys`), axFile's Go to folder completion and Open with (moved files).
+
 ## 2026-10-24, axTask and axPass (the branch `axtask`, before its merge)
 
 - Run by the user with NVDA on builds of `axtask` up to cffd363, over the day's rounds of asks; the result given as
