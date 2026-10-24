@@ -1,0 +1,130 @@
+# axPass: unlocking, the levels, an entry's fields, a change and its undo, an entry added and archived, a group's
+# question, locking (docs/axpass/nvda-test-plan.md sections 1, 2, 4 and 5; SPEC PW-4, PW-6). Needs KeePassXC installed:
+# the database is made by its own tool, the master password a test value. The copies (Ctrl+B, Ctrl+C) are left to the
+# NVDA pass, since they would change the clipboard of whoever runs this.
+file home\Axit\axpass.json {"checkForUpdates": false}
+file twice.txt test-master-1\ntest-master-1\n
+file once.txt test-master-1\n
+run "C:\Program Files\KeePassXC\keepassxc-cli.exe" db-create -q -p test.kdbx < twice.txt
+run "C:\Program Files\KeePassXC\keepassxc-cli.exe" mkdir -q test.kdbx Email < once.txt
+run "C:\Program Files\KeePassXC\keepassxc-cli.exe" mkdir -q test.kdbx Work < once.txt
+run "C:\Program Files\KeePassXC\keepassxc-cli.exe" add -q -u sam --url https://mail.example.com test.kdbx Email/Gmail < once.txt
+run "C:\Program Files\KeePassXC\keepassxc-cli.exe" add -q -u top test.kdbx "Top entry" < once.txt
+
+# 1.1 The unlock notice; a wrong password asks again.
+start pass {temp}\test.kdbx
+expect state Unlock test
+expect focus Master password
+type wrong
+keys enter
+expect said ! Unlocking test
+expect state The password does not open test.
+
+# 1.2 The right one: the top level.
+type test-master-1
+keys enter
+expect said ! test, 3 items, Email, group, 1 item
+expect state test - axPass
+
+# 2.1 Right into Email; Right on an entry: the edge sound; Left back.
+keys right
+expect said ! Email, 1 item, Gmail
+keys right
+expect said ♪ Edge
+keys left
+expect said ! test, 3 items, Email, group, 1 item
+keys right
+
+# 2.2 Enter on Gmail: its fields, the password hidden.
+keys enter
+expect focus Title, text, Gmail
+keys down
+expect focus UserName, user name, sam
+keys down
+expect focus Password, password, hidden
+keys down
+expect focus URL, text, https://mail.example.com
+
+# 2.4 The row reads its user name once read.
+keys escape
+expect focus Gmail, sam
+
+# 4.1 A user name changed, and undone.
+keys tab
+keys home
+keys down
+keys enter
+type sam2
+keys enter
+expect said ! UserName: sam2
+expect focus UserName, user name, sam2
+keys ctrl+z
+expect said ! Undone: UserName: sam2
+
+# 4.4 The set of fields stays KeePass's.
+keys ctrl+n
+expect said ! An entry has KeePass's own fields here
+
+# 4.5 A slash in a title is refused; a rename.
+keys escape
+keys f2
+type a/b
+keys enter
+expect said ! A name cannot hold a slash
+keys escape
+keys f2
+type Gmail personal
+keys enter
+expect said ! Renamed Gmail personal
+expect focus Gmail personal
+
+# 4.6 A new entry, to the Recycle Bin, and back.
+keys ctrl+n
+type Bank
+keys enter
+expect said ! Added Bank
+expect focus Bank
+keys delete
+expect said ! Moved Bank to the Recycle Bin
+keys ctrl+z
+expect said ! Undone: Moved Bank to the Recycle Bin
+expect focus Bank
+
+# 4.2 A generated password set; 4.3 two typed ones that differ change nothing.
+keys up
+expect focus Gmail personal
+keys tab
+keys home
+keys down
+keys down
+expect focus Password, password, hidden
+keys enter
+expect focus New password
+keys alt+g
+expect said ! Generated a password of 20 characters
+keys enter
+expect said ! Password set for Gmail personal
+keys enter
+type one
+keys enter
+type two
+keys enter
+expect said ! The two passwords differ: nothing changed
+keys escape
+type b
+
+# 4.7 A group asks first; Cancel is the default.
+keys left
+type w
+expect focus Work, group
+keys delete
+expect state Move the group
+keys enter
+expect state test - axPass
+
+# 1.3 Ctrl+L locks.
+keys ctrl+l
+expect said ! Locked
+expect state Unlock test
+keys escape
+expect focus test, locked: Enter unlocks

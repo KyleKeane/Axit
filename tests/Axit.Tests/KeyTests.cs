@@ -24,6 +24,7 @@ public sealed class KeyTests
             ["axStart"] = AxStart.AxStartKeys.All,
             ["axProcess"] = AxProcess.AxProcessKeys.All,
             ["axTask"] = AxTask.AxTaskKeys.All,
+            ["axPass"] = AxPass.AxPassKeys.All,
         };
 
     /// <summary>
@@ -85,6 +86,7 @@ public sealed class KeyTests
         ["axStart"] = AxStart.HelpText.Shortcuts,
         ["axProcess"] = AxProcess.HelpText.Shortcuts,
         ["axTask"] = AxTask.HelpText.Shortcuts,
+        ["axPass"] = AxPass.HelpText.Shortcuts,
     };
 
     /// <summary>

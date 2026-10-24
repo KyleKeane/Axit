@@ -1,0 +1,15 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <!-- axPass's pure code (docs/axpass/SPEC.md): KeePassXC's command-line tool run as a process with the password on a
+       pipe, its output read into groups, entries and fields, a field's change into the tool's arguments, the
+       settings; no window. -->
+  <PropertyGroup>
+    <TargetFramework>$(AxitDotNet)</TargetFramework>
+    <RootNamespace>AxPass.Core</RootNamespace>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Axit.Core\Axit.Core.csproj" />
+  </ItemGroup>
+
+</Project>

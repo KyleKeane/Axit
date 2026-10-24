@@ -1,14 +1,14 @@
 # Makes the files for the manual NVDA tests, and puts them back as they were after a test changed them.
 # Every app folder is emptied except its _main.md, then filled again. Git ignores everything made here.
 # Usage: .\manual_tests\prepare.ps1            (all apps)
-#        .\manual_tests\prepare.ps1 axfile     (one app: axclaude, axdown, axjson, axgit, axterminal, axfile, axmedia, axpreview, axtask)
+#        .\manual_tests\prepare.ps1 axfile     (one app: axclaude, axdown, axjson, axgit, axterminal, axfile, axmedia, axpreview, axtask, axpass)
 # Close the Axit windows that have these files open first: a file in use cannot be replaced.
 
 param([string]$App = '')
 
 $ErrorActionPreference = 'Stop'
 $root = $PSScriptRoot
-$apps = @('axclaude', 'axdown', 'axjson', 'axgit', 'axterminal', 'axfile', 'axmedia', 'axpreview', 'axtask')
+$apps = @('axclaude', 'axdown', 'axjson', 'axgit', 'axterminal', 'axfile', 'axmedia', 'axpreview', 'axtask', 'axpass')
 if ($App -ne '') {
     if ($apps -notcontains $App) { throw "Unknown app '$App'. One of: $($apps -join ', ')" }
     $apps = @($App)
@@ -413,6 +413,21 @@ function Build-AxTask([string]$d) {
     Write-Text (Join-Path $house 'notes.txt') 'Not an item: the list counts it as a file not shown.'
 }
 
+function Build-AxPass([string]$d) {
+    # A throwaway KeePass database made by KeePassXC's own tool; the master password is a test value, in _main.md.
+    $cli = Join-Path $env:ProgramFiles 'KeePassXC\keepassxc-cli.exe'
+    if (-not (Test-Path $cli)) { Write-Host '  KeePassXC is not installed: no test database (winget install KeePassXCTeam.KeePassXC)'; return }
+    $db = Join-Path $d 'test.kdbx'
+    $pw = 'test-master-1'
+    # The tool writes its prompts to standard error even with -q; Windows PowerShell would take them for a failure.
+    $ErrorActionPreference = 'Continue'
+    "$pw`n$pw" | & $cli db-create -q -p $db 2>$null | Out-Null
+    $pw | & $cli mkdir -q $db 'Email' 2>$null | Out-Null
+    $pw | & $cli mkdir -q $db 'Work' 2>$null | Out-Null
+    "$pw`nentry-secret-1`nentry-secret-1" | & $cli add -q -u 'sam' --url 'https://mail.example.com' --notes "line one`nline two" -p $db 'Email/Gmail' 2>$null | Out-Null
+    $pw | & $cli add -q -u 'top' $db 'Top entry' 2>$null | Out-Null
+}
+
 function Build-AxDown([string]$d) {
     Write-Text (Join-Path $d 'plain.txt') $plain
     Write-Text (Join-Path $d 'bom.md') "# UTF-8 with a byte order mark`n`nLF line endings only. Saved, it keeps both." (New-Object Text.UTF8Encoding $true) -Lf
@@ -511,6 +526,7 @@ foreach ($name in $apps) {
         'axmedia' { Build-AxMedia $folder }
         'axpreview' { Build-AxPreview $folder }
         'axtask' { Build-AxTask $folder }
+        'axpass' { Build-AxPass $folder }
     }
 }
 

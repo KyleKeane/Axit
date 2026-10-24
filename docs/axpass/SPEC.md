@@ -12,7 +12,7 @@ axPass's code and documents, "SPEC.md" means this file.
 
 One database per window. The navigator is its groups and entries, moved through as axTask moves through lists and
 items: Right into a group, Left back up, Enter or Tab to an entry's fields. An entry's fields are KeePass's own: Title,
-UserName, Password, URL and Notes, read "UserName, user name, kyle" and "Password, password, hidden". Ctrl+B copies
+UserName, Password, URL and Notes, read "UserName, user name, sam" and "Password, password, hidden". Ctrl+B copies
 the user name and Ctrl+C the password, which the clipboard loses again after 30 seconds. Ctrl+L locks: the window
 forgets the master password and shows only the notice that asks for it.
 
@@ -34,7 +34,7 @@ forgets the master password and shows only the notice that asks for it.
    stars. Type it, Enter: "mine, 3 groups, Email, group, 4 entries".
 2. Right on Email: "Email, 4 entries, Gmail". Ctrl+B: "Copied the user name of Gmail". Ctrl+C: "Copied the password
    of Gmail; the clipboard clears in 30 seconds".
-3. Tab: "Fields of Gmail, Title, text, Gmail". Down: "UserName, user name, kyle", "Password, password, hidden".
+3. Tab: "Fields of Gmail, Title, text, Gmail". Down: "UserName, user name, sam", "Password, password, hidden".
    Enter on Password: the notice "Change Password" with a hidden field and a Generate button.
 4. Ctrl+L: "Locked"; the unlock notice in place of the panes.
 
@@ -67,9 +67,11 @@ forgets the master password and shows only the notice that asks for it.
   (`password`), URL (`text`), Notes (`longtext`); then the entry's custom attributes, read only (Enter: "Change it in
   KeePassXC"). New field (Ctrl+N in the detail pane) says the same.
 - **PW-6.2 The two extra types.** `username` reads and changes as `text`. `password` reads "hidden"; Ctrl+Q on it
-  says "hidden: Ctrl+C copies it"; Enter changes it in a hidden field, with Generate (Ctrl+G) filling it from
-  `generate` (20 characters, upper and lower case, digits, signs), and asks it twice.
-- **PW-6.3 The row summary** (IA-6): the title and the user name, "Gmail, kyle".
+  reads it as hidden too; Enter changes it in a hidden field, with Generate (Alt+G) filling it from `generate` (20
+  characters, upper and lower case, digits, signs), and asks a typed one twice. Ctrl+Z does not bring an old password
+  back: axPass never knew it.
+- **PW-6.3 The row summary** (IA-6): the title, and the user name once the entry has been read ("Gmail, sam"): `ls`
+  gives titles only, and each entry is read with `show` when it is first selected, off the UI thread.
 - **PW-6.4 Delete** moves the entry or the group to KeePass's Recycle Bin group (`rm` or `rmdir`, which make the group
   on first use); Ctrl+Z moves an entry back with `mv`; a group cannot come back that way (the tool moves entries only), so
   Delete on a group asks first and says that KeePassXC's own window brings it back. In the Recycle Bin, Delete removes
@@ -84,7 +86,7 @@ On top of IA-3, in `AxPassKeys`:
 | Ctrl+B | anywhere | copy the user name of the selected entry |
 | Ctrl+C | anywhere | copy the password; cleared after 30 seconds |
 | Ctrl+U | anywhere | open the URL in the browser |
-| Ctrl+G | in a password's notice | generate a password |
+| Alt+G | in a password's notice | Generate, the notice's button (a notice holds the window's own keys) |
 | Ctrl+L | anywhere | lock |
 | Ctrl+O | anywhere | open another database |
 
@@ -109,6 +111,5 @@ On top of IA-3, in `AxPassKeys`:
 
 ## 10. Status
 
-Specified, not built. The build starts when the tool runs on this computer (it needs the Visual C++ runtime, which
-needs administrator rights) and section 9 is settled. With it, the shared pieces of axTask's window move to
-`Axit.Core` and `Axit.Forms`, one per commit (IA-D5).
+Built 2026-10-24 on the branch `axtask`, after KeePassXC 2.8.0 was installed and its tool tried (kdbx-notes 8); not yet
+heard under NVDA. axTask's window and the item format moved to `Axit.Forms/ItemForm` and `Axit.Core` first (IA-D5).
