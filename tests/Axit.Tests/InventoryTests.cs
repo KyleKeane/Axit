@@ -55,7 +55,6 @@ public sealed class InventoryTests
             Expect(name, File.Exists(Path.Combine(root, "src", "Axit", $"{name}.ico")), "icon in src/Axit");
             Expect(name, File.Exists(Path.Combine(root, $"run-{lower}.ps1")), $"run-{lower}.ps1");
             Expect(name, Text("run.ps1").Contains($"'{app.Verb}'", StringComparison.Ordinal), "run.ps1's verb");
-            Expect(name, Text("install.ps1").Contains($"Name = '{shown}'", StringComparison.Ordinal), "install.ps1's block");
             Expect(name, Text("tools/make-icon.ps1").Contains($"'{name}.ico'", StringComparison.Ordinal), "make-icon.ps1's line");
             Expect(name, Text("src/Axit/Program.cs").Contains($"{name}App.Run", StringComparison.Ordinal), "Program.cs's call");
             Expect(name, Text("src/Axit/Axit.csproj").Contains(shown, StringComparison.Ordinal), "Axit.csproj's description");

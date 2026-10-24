@@ -1,3 +1,5 @@
+using System.Text.Json;
+
 namespace Axit.Core;
 
 /// <summary>What a command line starts: an app's verb (<see cref="Dispatch.AxClaude"/> and the rest, or
@@ -14,8 +16,31 @@ public sealed record Launch(string App, string[] Arguments, string? Error = null
 /// separator between them); <paramref name="Opens"/> what it opens from a path; <paramref name="ShowIn"/> whether every
 /// window's Show current folder in submenu offers it (AX-9.10). Every list of apps in the windows reads these, so a new
 /// app is in the Axit menu, Open in Axit, the Show in submenus and Recently closed by its line in <see cref="Dispatch.Apps"/>.
+/// The properties below are for the scripts (docs/axit/app-kit.md AK-4.1): the installer reads them through
+/// <c>Axit.exe apps</c> (<see cref="Dispatch.Listing"/>), tools/make-icon.ps1 and run.ps1 off this file.
 /// </summary>
-public sealed record App(string Name, string Verb, string Project, AppGroup Group, Opens Opens, bool ShowIn = false);
+public sealed record App(string Name, string Verb, string Project, AppGroup Group, Opens Opens, bool ShowIn = false)
+{
+    /// <summary>The Start menu entry's description (AX-2.2): the name, a comma, what the app is.</summary>
+    public string Description { get; init; } = "";
+
+    /// <summary>The icon's letters and colour, which tools/make-icon.ps1 draws into src/Axit/&lt;Project&gt;.ico.</summary>
+    public AppIcon Icon { get; init; } = new("Ax", 31, 78, 121);
+
+    /// <summary>What File Explorer's Open with Axit submenu offers the app on (AX-2.3), when it is not <see cref="Opens"/>.</summary>
+    public Opens? Explorer { get; init; }
+
+    /// <summary>The file types the submenu's file entry is shown on; every file when empty.</summary>
+    public IReadOnlyList<string> Types { get; init; } = [];
+
+    /// <summary>The file types the app is a program for under Windows' Open with (AX-2.3, B-9), with the type name Windows shows for them.</summary>
+    public IReadOnlyList<string> OpenWith { get; init; } = [];
+
+    public string TypeName { get; init; } = "";
+}
+
+/// <summary>An app's icon: two letters in white on a rounded square of the colour.</summary>
+public sealed record AppIcon(string Letters, int Red, int Green, int Blue);
 
 /// <summary>The groups of the apps, in the Axit menu's order (AX-9.2).</summary>
 public enum AppGroup
@@ -72,27 +97,106 @@ public static class Dispatch
     /// <summary>Not an app: the AI tools' broker, started by an MCP client and speaking to it on standard input and output (docs/axit/mcp.md MC-1.1).</summary>
     public const string Mcp = "mcp";
 
+    /// <summary>Not an app: the apps of <see cref="Apps"/> as JSON on standard output, for install.ps1 (AX-1.4, AX-2.3).</summary>
+    public const string Listing = "apps";
+
     /// <summary>
     /// The apps, in the order every list of the windows shows them, by group (AX-9.2, 2026-10-24): one line here puts an
-    /// app in the Axit menu, axFile's Open in Axit, the Show in submenus and Recently closed.
+    /// app in the Axit menu, axFile's Open in Axit, the Show in submenus and Recently closed, and with its properties in
+    /// the installer's Start menu, File Explorer and Open with entries and the icon script. tools/new-app.ps1 writes a
+    /// new app's line; each entry starts with <c>new("name", Verb, "Project", ...</c> on a line of its own, which the
+    /// scripts read (tools/apps.ps1).
     /// </summary>
     public static readonly IReadOnlyList<App> Apps =
     [
-        new("axClaude", AxClaude, "AxClaude", AppGroup.Code, Opens.Folders, ShowIn: true),
-        new("axTerminal", AxTerminal, "AxTerminal", AppGroup.Code, Opens.Folders, ShowIn: true),
-        new("axGIT", AxGit, "AxGit", AppGroup.Code, Opens.FilesAndFolders, ShowIn: true),
-        new("axFile", AxFile, "AxFile", AppGroup.Files, Opens.FilesAndFolders, ShowIn: true),
-        new("axDown", AxDown, "AxDown", AppGroup.Files, Opens.Files),
-        new("axJSON", AxJSON, "AxJSON", AppGroup.Files, Opens.Files),
-        new("axPreview", AxPreview, "AxPreview", AppGroup.Files, Opens.Files),
-        new("axMedia", AxMedia, "AxMedia", AppGroup.Files, Opens.FilesAndFolders),
-        new("axTask", AxTask, "AxTask", AppGroup.Organise, Opens.Folders),
-        new("axPass", AxPass, "AxPass", AppGroup.Organise, Opens.Files),
-        new("axStart", AxStart, "AxStart", AppGroup.Utilities, Opens.Nothing),
-        new("axClip", AxClip, "AxClip", AppGroup.Utilities, Opens.Nothing),
-        new("axCalc", AxCalc, "AxCalc", AppGroup.Utilities, Opens.Nothing),
-        new("axProcess", AxProcess, "AxProcess", AppGroup.Utilities, Opens.Nothing),
+        new("axClaude", AxClaude, "AxClaude", AppGroup.Code, Opens.Folders, ShowIn: true)
+        {
+            Description = "axClaude, an accessible front end for Claude Code", Icon = new("Ax", 31, 78, 121),
+        },
+        new("axTerminal", AxTerminal, "AxTerminal", AppGroup.Code, Opens.Folders, ShowIn: true)
+        {
+            Description = "axTerminal, a shell as a transcript", Icon = new("At", 40, 40, 40),
+        },
+        new("axGIT", AxGit, "AxGit", AppGroup.Code, Opens.FilesAndFolders, ShowIn: true)
+        {
+            Description = "axGIT, a git manager for one repository", Icon = new("Ag", 110, 40, 40), Explorer = Opens.Folders,
+        },
+        new("axFile", AxFile, "AxFile", AppGroup.Files, Opens.FilesAndFolders, ShowIn: true)
+        {
+            Description = "axFile, a file manager for one folder", Icon = new("Af", 90, 50, 130),
+        },
+        new("axDown", AxDown, "AxDown", AppGroup.Files, Opens.Files)
+        {
+            Description = "axDown, a plain editor for Markdown and text files", Icon = new("Ad", 31, 110, 70),
+            OpenWith = [".md", ".markdown", ".txt"], TypeName = "Text document (axDown)",
+        },
+        new("axJSON", AxJSON, "AxJSON", AppGroup.Files, Opens.Files)
+        {
+            Description = "axJSON, an editor for JSON files", Icon = new("Aj", 120, 70, 20),
+            Types = [".json"], OpenWith = [".json"], TypeName = "JSON document (axJSON)",
+        },
+        new("axPreview", AxPreview, "AxPreview", AppGroup.Files, Opens.Files)
+        {
+            Description = "axPreview, a read-only viewer for text files", Icon = new("Ap", 70, 70, 140),
+            OpenWith = [".txt", ".md", ".markdown", ".log", ".json"], TypeName = "Text file (axPreview)",
+        },
+        new("axMedia", AxMedia, "AxMedia", AppGroup.Files, Opens.FilesAndFolders)
+        {
+            Description = "axMedia, a player for sound and video files", Icon = new("Am", 20, 100, 110), Explorer = Opens.Files,
+            Types = [.. MediaFiles.SoundExtensions, .. MediaFiles.VideoExtensions], OpenWith = [.. MediaFiles.SoundExtensions, .. MediaFiles.VideoExtensions],
+            TypeName = "Media file (axMedia)",
+        },
+        new("axTask", AxTask, "AxTask", AppGroup.Organise, Opens.Folders)
+        {
+            Description = "axTask, tasks and lists", Icon = new("Ak", 30, 120, 80),
+        },
+        new("axPass", AxPass, "AxPass", AppGroup.Organise, Opens.Files)
+        {
+            Description = "axPass, a KeePass password database", Icon = new("Aw", 20, 40, 100),
+            Types = [".kdbx"], OpenWith = [".kdbx"], TypeName = "KeePass database (axPass)",
+        },
+        new("axStart", AxStart, "AxStart", AppGroup.Utilities, Opens.Nothing)
+        {
+            Description = "axStart, a program launcher behind a hotkey", Icon = new("As", 150, 90, 20),
+        },
+        new("axClip", AxClip, "AxClip", AppGroup.Utilities, Opens.Nothing)
+        {
+            Description = "axClip, a clipboard history behind a hotkey", Icon = new("Ab", 160, 50, 50),
+        },
+        new("axCalc", AxCalc, "AxCalc", AppGroup.Utilities, Opens.Nothing)
+        {
+            Description = "axCalc, a calculator with a history", Icon = new("Ac", 90, 100, 30),
+        },
+        new("axProcess", AxProcess, "AxProcess", AppGroup.Utilities, Opens.Nothing)
+        {
+            Description = "axProcess, the processes, services and startup programs", Icon = new("Ar", 120, 40, 90),
+        },
     ];
+
+    /// <summary>
+    /// What <c>Axit.exe apps</c> prints (AX-1.4): one JSON object per app of <see cref="Apps"/>, in its order, with the
+    /// installer's words for File Explorer's submenu ("folders", "files"). install.ps1 builds its Start menu entries,
+    /// commands, submenu entries and Open with registrations from it, so the installer keeps no list of its own.
+    /// </summary>
+    public static string ListingJson() => JsonSerializer.Serialize(
+        Apps.Select(app => new
+        {
+            name = app.Name,
+            verb = app.Verb,
+            project = app.Project,
+            description = app.Description,
+            explorer = (app.Explorer ?? app.Opens) switch
+            {
+                Opens.Folders => new[] { "folders" },
+                Opens.Files => ["files"],
+                Opens.FilesAndFolders => ["folders", "files"],
+                _ => [],
+            },
+            types = app.Types,
+            openWith = app.OpenWith,
+            typeName = app.TypeName,
+        }),
+        new JsonSerializerOptions { WriteIndented = true });
 
     /// <summary>The app of a verb.</summary>
     public static App Of(string verb) => Apps.First(app => app.Verb == verb);
@@ -130,6 +234,7 @@ public static class Dispatch
           Axit <file>                 the same as Axit down <file>, Axit json <file> for a .json file, Axit pass <file> for a .kdbx file, or Axit media <file> for a sound or video file
           Axit                        axClaude on the current folder
           Axit mcp                    the AI tools' server, for an MCP client to start (Axit menu, AI tools)
+          Axit apps                   the apps as JSON on standard output, for the installer and other scripts
           --help, --version           this text, or the version
 
         The installed console commands axit, axclaude, axdown, axjson, axgit, axterminal, axfile, axmedia, axpreview, axstart, axprocess, axtask, axpass, axcalc and axclip stand for Axit, Axit claude, Axit down, Axit json, Axit git, Axit terminal, Axit file, Axit media, Axit preview, Axit start, Axit process, Axit task, Axit pass, Axit calc and Axit clip.
@@ -166,6 +271,11 @@ public static class Dispatch
         if (string.Equals(first, Mcp, StringComparison.OrdinalIgnoreCase))
         {
             return new Launch(Mcp, args[1..]);
+        }
+
+        if (string.Equals(first, Listing, StringComparison.OrdinalIgnoreCase))
+        {
+            return new Launch(Listing, args[1..]);
         }
 
         if (first.StartsWith("--", StringComparison.Ordinal))

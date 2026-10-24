@@ -53,6 +53,13 @@ internal static class Program
             // No window: MCP on standard input and output until the client closes it (docs/axit/mcp.md MC-1.1).
             Axit.Forms.McpBroker.Run();
         }
+        else if (launch.App == Dispatch.Listing)
+        {
+            // No window: the apps for the installer, which reads standard output (AX-1.4). A program without a
+            // console writes to the handle it was given; started from a console with nothing to catch it, nothing shows.
+            using var output = new StreamWriter(Console.OpenStandardOutput(), new System.Text.UTF8Encoding(false));
+            output.WriteLine(Dispatch.ListingJson());
+        }
         else
         {
             // --help or --version for the bundle itself (AX-1.4).

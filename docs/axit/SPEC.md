@@ -115,8 +115,11 @@ The apps are named ax and a word, the ax in lower case and the word as it is wri
 - AX-1.3 Without any argument, `Axit.exe` starts axClaude on the current folder, which is what `axclaude` does today
   (B-8). axClaude keeps its own rule for a current folder that is the program's own folder.
 - AX-1.4 `--help` and `--version` answer for the bundle and list the verbs; `Axit.exe claude --help` is the app's own
-  usage text. One verb is not an app: `mcp`, the AI tools' broker an MCP client starts, with no window
-  (`docs/axit/mcp.md` MC-1.1).
+  usage text. Two verbs are not apps: `mcp`, the AI tools' broker an MCP client starts, with no window
+  (`docs/axit/mcp.md` MC-1.1); and `apps`, with no window either, which writes `Dispatch.Apps` as JSON to standard
+  output (each app's name, verb, project, Start menu description, File Explorer submenu entries, file types and Open
+  with types), which `install.ps1` builds its entries from (AX-2.2, AX-2.3; `docs/axit/app-kit.md` AK-4.1). The
+  installation keeps that listing as `apps.json`, which an uninstall reads when the program cannot be run.
 - AX-1.5 The dispatch is pure code in `Axit.Core` (`Dispatch`): arguments in, app name and arguments out. It is unit
   tested and has no knowledge of the apps beyond their names.
 - AX-1.6 Each process sets a Windows application id before its window opens (`Axit.AxClaude`, `Axit.AxDown`, `Axit.AxJSON`, `Axit.AxGit`, `Axit.AxTerminal`, `Axit.AxFile`, `Axit.AxMedia`, `Axit.AxPreview`, `Axit.AxStart`, `Axit.AxProcess`, `Axit.AxTask`, `Axit.AxPass`, `Axit.AxCalc`, `Axit.AxClip`), so the
