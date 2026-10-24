@@ -22,34 +22,6 @@ public sealed partial class GitForm : AxitForm
         Branches,
     }
 
-    /// <summary>
-    /// One view of the list (AG-2.2): the list's name with its count, its items and their keys (the file's path, the
-    /// commit's hash, the branch's name), whether it has been read in this repository since it was last made stale,
-    /// and the key of the item selected in it, kept while the window is open. The three records are the whole state
-    /// of the list (one record since 2026-10-23; five fields and a dictionary before).
-    /// </summary>
-    private sealed class ViewState
-    {
-        public string Name { get; private set; } = string.Empty;
-
-        public IReadOnlyList<string> Labels { get; private set; } = [];
-
-        public IReadOnlyList<string> Keys { get; private set; } = [];
-
-        /// <summary>Whether the view's list is current: read in this repository, and not made stale since by a commit, a switch, a fetch.</summary>
-        public bool Loaded { get; set; }
-
-        /// <summary>The key of the item selected in the view, taken before the list changes under it; null before one was chosen.</summary>
-        public string? SelectedKey { get; set; }
-
-        public void Set(string name, IEnumerable<string> labels, IEnumerable<string> keys)
-        {
-            Name = name;
-            Labels = labels.ToList();
-            Keys = keys.ToList();
-            Loaded = true;
-        }
-    }
 
     private const int UntrackedLimit = 200 * 1024;
 
@@ -67,7 +39,8 @@ public sealed partial class GitForm : AxitForm
     private readonly List<ToolStripMenuItem> _gitItems = [];
 
     /// <summary>The three views, indexed by <see cref="View"/>; <see cref="Current"/> is the one the list shows.</summary>
-    private readonly ViewState[] _views = [new(), new(), new()];
+    /// <summary>The three views of the list (AG-2.2), the whole state of the list: keys the file's path, the commit's hash, the branch's name; made stale by a commit, a switch, a fetch.</summary>
+    private readonly ListViewState[] _views = [new(), new(), new()];
 
     private string? _root;
     private View _view = View.Changes;
@@ -371,7 +344,7 @@ public sealed partial class GitForm : AxitForm
         _root = root;
         for (var i = 0; i < _views.Length; i++)
         {
-            _views[i] = new ViewState();
+            _views[i] = new ListViewState();
         }
 
         _repo = RepositoryStatus.Empty;
@@ -548,7 +521,7 @@ public sealed partial class GitForm : AxitForm
 
     // ---- the views (AG-2.2): three records, one list ----
 
-    private ViewState Current => _views[(int)_view];
+    private ListViewState Current => _views[(int)_view];
 
     /// <summary>F5, and every command's end: the status read again, the view shown read again with it, the list refilled on the item it had.</summary>
     private async Task RefreshAsync(bool announce)
@@ -660,35 +633,10 @@ public sealed partial class GitForm : AxitForm
     }
 
     /// <summary>The list's items for the view shown, named with the view and the count, the selection on the view's key when it is still listed, else the first item.</summary>
-    private void FillList()
-    {
-        var view = Current;
-        _list.BeginUpdate();
-        _list.Items.Clear();
-        _list.Items.AddRange(view.Labels.Select(label => (object)label).ToArray());
-        _list.EndUpdate();
-        _list.AccessibleName = view.Name;
-        var index = -1;
-        for (var i = 0; view.SelectedKey is { } key && i < view.Keys.Count && index < 0; i++)
-        {
-            if (view.Keys[i] == key)
-            {
-                index = i;
-            }
-        }
+    private void FillList() => Current.FillInto(_list);
 
-        if (_list.Items.Count > 0)
-        {
-            _list.SelectedIndex = index >= 0 ? index : 0;
-        }
-    }
-
-    /// <summary>The key of the item selected in the view shown, kept in its record before the list changes under it (a refresh, a view switch); the key kept stays when nothing is selected.</summary>
-    private void RememberSelection() => Current.SelectedKey = CurrentKey() ?? Current.SelectedKey;
-
-    /// <summary>The key of the selected item of the view shown; null with nothing selected.</summary>
-    private string? CurrentKey() =>
-        _list.SelectedIndex is var i && i >= 0 && i < Current.Keys.Count ? Current.Keys[i] : null;
+    /// <summary>The key of the item selected in the view shown, kept in its record before the list changes under it (a refresh, a view switch).</summary>
+    private void RememberSelection() => Current.Remember(_list);
 
     private ChangedFile? CurrentFile() =>
         _view == View.Changes && _list.SelectedIndex is var i && i >= 0 && i < _repo.Files.Count ? _repo.Files[i] : null;
