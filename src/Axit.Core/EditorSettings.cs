@@ -10,10 +10,9 @@ public sealed class EditorSettings : WindowSettings
 {
     public bool WordWrap { get; set; } = true;
 
-    /// <summary>The last files opened or saved under a name, newest first, for File → Open recent file (AD-4.1); at most <see cref="MaxRecentFiles"/>.</summary>
+    /// <summary>The last files opened or saved under a name, newest first, for File → Open recent file (AD-4.1); at most <see cref="RecentPaths.Max"/>.</summary>
     public List<string> RecentFiles { get; set; } = [];
 
-    public const int MaxRecentFiles = 10;
 
     /// <summary>Loads the file, or returns defaults. <paramref name="error"/> describes an unreadable file.</summary>
     public static EditorSettings Load(string path, out string? error)
@@ -25,12 +24,12 @@ public sealed class EditorSettings : WindowSettings
 
     public override void Save(string path) => SettingsFile.Save(path, this);
 
-    /// <summary>Puts the file at the front of <see cref="RecentFiles"/>, once, and keeps the list to <see cref="MaxRecentFiles"/>.</summary>
-    public void RememberFile(string path) => RecentPaths.Remember(RecentFiles, path, MaxRecentFiles);
+    /// <summary>Puts the file at the front of <see cref="RecentFiles"/>, once, and keeps the list to <see cref="RecentPaths.Max"/>.</summary>
+    public void RememberFile(string path) => RecentPaths.Remember(RecentFiles, path);
 
     private void Sanitize()
     {
         SanitizeWindow();
-        RecentFiles = RecentPaths.Sanitize(RecentFiles, MaxRecentFiles);
+        RecentFiles = RecentPaths.Sanitize(RecentFiles);
     }
 }

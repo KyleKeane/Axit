@@ -11,7 +11,6 @@ namespace AxFile.Core;
 /// </summary>
 public sealed class FileSettings : WindowSettings
 {
-    public const int MaxRecentFolders = 10;
 
     /// <summary>The folder the window had when it closed, for the start without a path.</summary>
     public string? LastFolder { get; set; }
@@ -45,17 +44,17 @@ public sealed class FileSettings : WindowSettings
 
     public override void Save(string path) => SettingsFile.Save(path, this);
 
-    /// <summary>Puts the folder at the front of <see cref="RecentFolders"/>, once, keeps the list to <see cref="MaxRecentFolders"/>, and makes it the last folder.</summary>
+    /// <summary>Puts the folder at the front of <see cref="RecentFolders"/>, once, keeps the list to <see cref="RecentPaths.Max"/>, and makes it the last folder.</summary>
     public void RememberFolder(string folder)
     {
         LastFolder = folder;
-        RecentPaths.Remember(RecentFolders, folder, MaxRecentFolders);
+        RecentPaths.Remember(RecentFolders, folder);
     }
 
     private void Sanitize()
     {
         SanitizeWindow();
-        RecentFolders = RecentPaths.Sanitize(RecentFolders, MaxRecentFolders);
+        RecentFolders = RecentPaths.Sanitize(RecentFolders);
         if (string.IsNullOrWhiteSpace(LastFolder))
         {
             LastFolder = null;

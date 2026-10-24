@@ -87,8 +87,6 @@ public static partial class LineClassifier
     /// <summary>The key-hint row of the feedback card, <c>1 to review · 2 to send · 0 to dismiss</c> (D33).</summary>
     public static bool IsFeedbackCardHint(string text) => FeedbackCardHintRegex().IsMatch(text);
 
-    /// <summary>The first row of the feedback card, which names the draft: <c>Product feedback drafted: &lt;title&gt;</c>.</summary>
-    public static bool IsFeedbackCardTitle(string text) => FeedbackCardTitle(text) is not null;
 
     /// <summary>A heading /feedback puts between its drafts: <c>This session</c>, <c>Other sessions</c> (2.1.302).</summary>
     public static bool IsDraftsHeading(string text) => text is "This session" or "Other sessions";

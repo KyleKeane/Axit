@@ -157,7 +157,7 @@ public class FeedbackCardTests
         Assert.True(LineClassifier.IsChrome(hint));
         Assert.True(LineClassifier.IsFeedbackCardHint(hint));
         Assert.Null(ScreenReader.Keys(hint));
-        Assert.True(LineClassifier.IsFeedbackCardTitle("Product feedback drafted: Fixture card test"));
+        Assert.NotNull(LineClassifier.FeedbackCardTitle("Product feedback drafted: Fixture card test"));
     }
 
     [Fact]

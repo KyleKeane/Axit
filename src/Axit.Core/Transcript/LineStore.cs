@@ -208,7 +208,7 @@ public abstract class LineStore
     }
 
     /// <summary>The line's row was discarded (a row pushed out of a scroll region by an insert, or a deleted row): the line goes.</summary>
-    protected internal virtual void Remove(Line line)
+    protected internal void Remove(Line line)
     {
         var index = _lines.LastIndexOf(line);
         if (index >= 0)

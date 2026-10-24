@@ -18,7 +18,7 @@ public sealed class RecentlyClosedList
 /// </summary>
 public static class RecentlyClosed
 {
-    public const int Capacity = 10;
+    public const int Capacity = RecentPaths.Max;
 
     /// <summary>The list with the item at the front and its earlier entry, same app and path, gone; at most <see cref="Capacity"/> entries.</summary>
     public static IReadOnlyList<ClosedItem> Add(IReadOnlyList<ClosedItem> items, ClosedItem item) =>

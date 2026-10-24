@@ -556,7 +556,7 @@ public abstract partial class AxitForm : Form
     }
 
     /// <summary>Options → Developer → Copy diagnostics: the versions, the window's own lines and the end of the log, to the clipboard.</summary>
-    protected virtual void CopyDiagnostics()
+    private void CopyDiagnostics()
     {
         var text = string.Join("\r\n",
         [

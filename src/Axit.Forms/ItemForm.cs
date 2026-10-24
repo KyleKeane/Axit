@@ -140,7 +140,7 @@ public abstract partial class ItemForm : AxitForm
     protected virtual string SpokenValue(ItemRow? row, ItemField field) => FieldTypes.Spoken(field);
 
     /// <summary>A type's name read out.</summary>
-    protected virtual string SpokenType(string type) => FieldTypes.Spoken(type);
+    private static string SpokenType(string type) => FieldTypes.Spoken(type);
 
     /// <summary>Enter on a field of the app's own type (a link, a password); true when the app took it.</summary>
     protected virtual bool ChangeSpecial(ItemRow row, int index, ItemField field) => false;
@@ -149,7 +149,7 @@ public abstract partial class ItemForm : AxitForm
     protected virtual string? FieldsFixed => null;
 
     /// <summary>The types New field offers.</summary>
-    protected virtual IReadOnlyList<string> NewFieldTypes => FieldTypes.All;
+    private static IReadOnlyList<string> NewFieldTypes => FieldTypes.All;
 
     /// <summary>The app's own keys, asked first; true when taken.</summary>
     protected virtual bool ProcessItemKey(Keys keyData) => false;
