@@ -1,5 +1,6 @@
 using System.ComponentModel;
 using System.Runtime.InteropServices;
+using static Axit.Forms.User32;
 
 namespace AxFile;
 
@@ -99,7 +100,7 @@ internal static class Shell
         {
             // Selects the first item for the keyboard before the menu's loop takes over, as the shell does for Shift+F10.
             s_tracking = parts.Handler;
-            PostMessageW(owner, WmKeyDown, VkDown, 0);
+            PostMessage(owner, WmKeyDown, VkDown, 0);
             var id = TrackPopupMenuEx(parts.Menu, TpmReturnCmd, at.X, at.Y, owner, 0);
             s_tracking = null;
             if (id == 0)
@@ -474,10 +475,6 @@ internal static class Shell
 
     [DllImport("user32.dll", ExactSpelling = true)]
     private static extern uint TrackPopupMenuEx(nint menu, uint flags, int x, int y, nint owner, nint parameters);
-
-    [DllImport("user32.dll", ExactSpelling = true)]
-    [return: MarshalAs(UnmanagedType.Bool)]
-    private static extern bool PostMessageW(nint window, int message, nint wParam, nint lParam);
 
     [StructLayout(LayoutKind.Sequential, CharSet = CharSet.Unicode)]
     private struct OpenAsInfo

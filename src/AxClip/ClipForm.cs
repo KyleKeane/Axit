@@ -2,6 +2,7 @@ using System.Runtime.InteropServices;
 using AxClip.Core;
 using Axit.Core;
 using Axit.Forms;
+using static Axit.Forms.User32;
 
 namespace AxClip;
 
@@ -601,9 +602,6 @@ public sealed class ClipForm : HotkeyForm
     [DllImport("user32.dll", SetLastError = true)]
     [return: MarshalAs(UnmanagedType.Bool)]
     private static extern bool RemoveClipboardFormatListener(nint hwnd);
-
-    [DllImport("user32.dll")]
-    private static extern nint GetForegroundWindow();
 
     [DllImport("user32.dll", SetLastError = true, CharSet = CharSet.Unicode)]
     private static extern uint RegisterClipboardFormat(string name);

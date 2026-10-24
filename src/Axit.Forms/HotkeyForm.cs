@@ -1,5 +1,6 @@
 using System.Runtime.InteropServices;
 using Axit.Core;
+using static Axit.Forms.User32;
 
 namespace Axit.Forms;
 
@@ -430,20 +431,10 @@ public abstract class HotkeyForm : AxitForm
     [DllImport("user32.dll")]
     private static extern bool UnregisterHotKey(nint hWnd, int id);
 
-    [DllImport("user32.dll")]
-    private static extern nint GetForegroundWindow();
-
-    [DllImport("user32.dll")]
-    private static extern bool SetForegroundWindow(nint hWnd);
 
     [DllImport("user32.dll")]
     private static extern bool IsWindow(nint hWnd);
 
-    [DllImport("user32.dll")]
-    private static extern bool IsWindowVisible(nint hWnd);
-
-    [DllImport("user32.dll")]
-    private static extern uint GetWindowThreadProcessId(nint hWnd, out uint processId);
 
     [DllImport("user32.dll")]
     private static extern short GetKeyState(int key);

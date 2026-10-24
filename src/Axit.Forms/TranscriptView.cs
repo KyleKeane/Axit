@@ -1,6 +1,7 @@
 using System.Runtime.InteropServices;
 using System.Text;
 using Axit.Core.Transcript;
+using static Axit.Forms.User32;
 
 namespace Axit.Forms;
 
@@ -13,8 +14,6 @@ namespace Axit.Forms;
 public sealed class TranscriptView : TextBox
 {
     private const int WM_SETREDRAW = 0x000B;
-    private const int EM_SCROLLCARET = 0x00B7;
-    private const int EM_GETLINECOUNT = 0x00BA;
     private const int EM_LINEINDEX = 0x00BB;
     private const int EM_LINELENGTH = 0x00C1;
     private const int EM_GETLINE = 0x00C4;
@@ -596,13 +595,10 @@ public sealed class TranscriptView : TextBox
         // EM_GETLINE takes the buffer's size in its first character and does not end the text with a null.
         var buffer = new char[Math.Max(length, 1)];
         buffer[0] = (char)length;
-        var copied = (int)SendMessage(Handle, EM_GETLINE, row, buffer);
+        var copied = (int)SendLineMessage(Handle, EM_GETLINE, row, buffer);
         return new string(buffer, 0, Math.Clamp(copied, 0, length)).TrimEnd('\r', '\n');
     }
 
-    [DllImport("user32.dll")]
-    private static extern IntPtr SendMessage(IntPtr hWnd, int msg, IntPtr wParam, IntPtr lParam);
-
-    [DllImport("user32.dll", CharSet = CharSet.Unicode)]
-    private static extern IntPtr SendMessage(IntPtr hWnd, int msg, IntPtr wParam, [In, Out] char[] buffer);
+    [DllImport("user32.dll", CharSet = CharSet.Unicode, EntryPoint = "SendMessageW")]
+    private static extern IntPtr SendLineMessage(IntPtr hWnd, int msg, IntPtr wParam, [In, Out] char[] buffer);
 }

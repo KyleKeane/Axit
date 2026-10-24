@@ -1,6 +1,7 @@
 using System.Runtime.InteropServices;
 using System.Text;
 using Axit.Core;
+using static Axit.Forms.User32;
 
 namespace Axit.Forms;
 
@@ -147,9 +148,6 @@ public static class AppMessage
 
     [DllImport("user32.dll", CharSet = CharSet.Unicode)]
     private static extern nint SendMessageTimeoutW(nint hWnd, uint msg, nint wParam, ref CopyData lParam, uint flags, uint timeout, out nint result);
-
-    [DllImport("user32.dll")]
-    private static extern uint GetWindowThreadProcessId(nint hWnd, out uint processId);
 
     [DllImport("user32.dll")]
     private static extern bool AllowSetForegroundWindow(uint processId);

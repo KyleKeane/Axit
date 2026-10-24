@@ -4,6 +4,7 @@ using System.Text;
 using System.Text.Encodings.Web;
 using System.Text.Json;
 using Axit.Core;
+using static Axit.Forms.User32;
 
 namespace Axit.Forms;
 
@@ -23,8 +24,6 @@ internal sealed class AutomationChannel : IMessageFilter
     /// <summary>The modifiers of each posted key press, in order, applied when its key down reaches the message loop.</summary>
     private readonly Queue<Keys> _modifiers = new();
 
-    private const int WM_KEYDOWN = 0x0100;
-    private const int WM_KEYUP = 0x0101;
     private const int WM_CHAR = 0x0102;
     private const int WM_SYSKEYDOWN = 0x0104;
     private const int WM_SYSKEYUP = 0x0105;
@@ -424,14 +423,7 @@ internal sealed class AutomationChannel : IMessageFilter
     [DllImport("user32.dll")]
     private static extern nint GetFocus();
 
-    [DllImport("user32.dll")]
-    private static extern bool SetForegroundWindow(nint hWnd);
 
-    [DllImport("user32.dll")]
-    private static extern nint GetForegroundWindow();
-
-    [DllImport("user32.dll")]
-    private static extern bool PostMessage(nint hWnd, int msg, nint wParam, nint lParam);
 
     [DllImport("user32.dll")]
     private static extern bool GetKeyboardState(byte[] state);

@@ -1,5 +1,6 @@
 using System.Diagnostics;
 using Axit.Core;
+using static Axit.Forms.User32;
 
 namespace Axit.Forms;
 
@@ -17,7 +18,6 @@ namespace Axit.Forms;
 /// </summary>
 public abstract partial class AxitForm : Form
 {
-    private const int WM_SYSCOMMAND = 0x0112;
     private const int SC_KEYMENU = 0xF100;
     private const int VK_MENU = 0x12;
 
@@ -253,14 +253,9 @@ public abstract partial class AxitForm : Form
 
     private static bool IsDown(int key) => (GetAsyncKeyState(key) & 0x8000) != 0;
 
-    private const int WM_KEYDOWN = 0x0100;
-    private const int WM_KEYUP = 0x0101;
     private const int VK_SHIFT = 0x10;
     private const int VK_F10 = 0x79;
     private const int VK_APPS = 0x5D;
-
-    [System.Runtime.InteropServices.DllImport("user32.dll")]
-    private static extern bool PostMessage(nint window, int message, nint wParam, nint lParam);
 
     // ---- the window ----
 

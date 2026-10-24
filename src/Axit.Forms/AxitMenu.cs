@@ -3,6 +3,7 @@ using System.Runtime.InteropServices;
 using System.Text;
 using Axit.Core;
 using Axit.Core.Updates;
+using static Axit.Forms.User32;
 
 namespace Axit.Forms;
 
@@ -214,7 +215,6 @@ public sealed class AxitMenu : ToolStripMenuItem
 
     private const uint GW_OWNER = 4;
     private const int SW_RESTORE = 9;
-    private const uint WM_SYSCOMMAND = 0x0112;
     private const nint SC_CLOSE = 0xF060;
 
     private delegate bool EnumWindowsProc(nint hWnd, nint lParam);
@@ -223,13 +223,7 @@ public sealed class AxitMenu : ToolStripMenuItem
     private static extern bool EnumWindows(EnumWindowsProc callback, nint lParam);
 
     [DllImport("user32.dll")]
-    private static extern bool IsWindowVisible(nint hWnd);
-
-    [DllImport("user32.dll")]
     private static extern nint GetWindow(nint hWnd, uint cmd);
-
-    [DllImport("user32.dll")]
-    private static extern uint GetWindowThreadProcessId(nint hWnd, out uint processId);
 
     [DllImport("user32.dll", CharSet = CharSet.Unicode)]
     private static extern int GetWindowTextLength(nint hWnd);
@@ -242,10 +236,4 @@ public sealed class AxitMenu : ToolStripMenuItem
 
     [DllImport("user32.dll")]
     private static extern bool ShowWindow(nint hWnd, int cmd);
-
-    [DllImport("user32.dll")]
-    private static extern bool SetForegroundWindow(nint hWnd);
-
-    [DllImport("user32.dll")]
-    private static extern bool PostMessage(nint hWnd, uint msg, nint wParam, nint lParam);
 }
