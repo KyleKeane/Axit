@@ -1,0 +1,48 @@
+# axProcess: the Services and Startup views (docs/axprocess/nvda-test-plan.md sections 3 and 4; SPEC PR-4, PR-5).
+# Read only: no service is started or stopped here, since a run with administrator rights would do it for real.
+file home\Axit\axprocess.json {"checkForUpdates": false}
+start process
+# The first read done: the status bar says "Reading…" until then, and a view key meanwhile says "Working…" (PR-2.3).
+expect state "status":["Processes,
+
+# 3.1 Ctrl+2: the services, said with the first one; every Windows has the event log running.
+keys ctrl+2
+expect said ! Services,
+expect focus Services,
+
+# 3.2 Its details: the name, the state, the start type; Escape closes them.
+keys ctrl+f
+expect state Find
+type (EventLog)
+keys enter
+expect focus Windows Event Log (EventLog), running
+keys enter
+expect state "notice":"Windows Event Log"
+expect state Name EventLog
+expect state State running
+keys escape
+expect state "notice":null
+
+# 3.3 A command of the Processes view in the Services view says which view first.
+keys delete
+expect said ! Processes view first: Ctrl+1
+keys ctrl+e
+expect said ! Processes view first: Ctrl+1
+
+# 3.4 Ctrl+2 again names the view; Ctrl+1 back to the processes.
+keys ctrl+2
+expect said ! Services,
+keys ctrl+1
+expect said ! Processes,
+
+# 4.1 Ctrl+3: the startup programs, whatever this computer starts (it may be none).
+keys ctrl+3
+expect said ! Startup,
+expect focus Startup,
+
+# 5.3 F1: the shortcuts; Escape.
+keys f1
+expect state "notice":"Keyboard shortcuts"
+expect state Ctrl+1, Ctrl+2, Ctrl+3
+keys escape
+expect state "notice":null
