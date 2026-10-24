@@ -28,16 +28,23 @@ public sealed class StartForm : HotkeyForm
     {
         _settings = settings;
 
-        // ---- menus (AS-5.2); the keys are handled in ProcessWindowKey from the table, the items only show them ----
+        // ---- menus and keys (AS-3.3, AS-5.2, AS-5.3): one command list (docs/axit/app-kit.md AK-2), each key from the
+        // table; the match keys first, as the switch had them ----
+        AddMatchKeys(AxStartKeys.NextMatch, AxStartKeys.PreviousMatch, AxStartKeys.FirstMatch, AxStartKeys.LastMatch);
         var start = new ToolStripMenuItem("ax&Start");
-        start.DropDownItems.Add(Item("&Start", () => StartSelected(administrator: false), AxStartKeys.Start));
-        start.DropDownItems.Add(Item("Start as &administrator", () => StartSelected(administrator: true), AxStartKeys.StartAsAdministrator));
-        start.DropDownItems.Add(Item("Open file &location", OpenFileLocation, AxStartKeys.OpenFileLocation));
-        start.DropDownItems.Add(Item("&Information", SayInformation, AxStartKeys.Information));
+        Add(start, new Command("&Start", AxStartKeys.Start, () => StartSelected(administrator: false)) { Mark = CommandMark.Act });
+        Add(start, new Command("Start as &administrator", AxStartKeys.StartAsAdministrator, () => StartSelected(administrator: true)) { Mark = CommandMark.Act });
+        Add(start, new Command("Open file &location", AxStartKeys.OpenFileLocation, OpenFileLocation) { Mark = CommandMark.Open });
+        Add(start, new Command("&Information", AxStartKeys.Information, SayInformation) { Mark = CommandMark.Read });
         start.DropDownItems.Add(new ToolStripSeparator());
-        start.DropDownItems.Add(Item("&Refresh programs", () => Do(() => RefreshAsync(announce: true)), AxStartKeys.Refresh));
+        Add(start, new Command("&Refresh programs", AxStartKeys.Refresh, () => Do(() => RefreshAsync(announce: true))) { Mark = CommandMark.Read });
         start.DropDownItems.Add(new ToolStripSeparator());
-        start.DropDownItems.Add(Item("&Hide", () => HideWindow(), AxStartKeys.Hide));
+        // AS-3.4: hidden at once, whatever the field holds (asked 2026-10-22); the next showing starts empty.
+        Add(start, new Command("&Hide", AxStartKeys.Hide, () =>
+        {
+            Log.Info("Hidden: Hide");
+            HideWindow();
+        }));
         start.DropDownItems.Add(new ToolStripMenuItem("&Quit axStart", null, (_, _) => Quit()));
 
         var options = new ToolStripMenuItem("&Options");
@@ -146,42 +153,6 @@ public sealed class StartForm : HotkeyForm
         base.OnHandleCreated(e);
         SignInStart.Apply(AxStartApp.Name, Dispatch.AxStart, _settings.StartWithWindows);
         Do(() => RefreshAsync(announce: false));
-    }
-
-    // ---- keys (AS-3.3, AS-5.3): every key comes from BundleKeys or AxStartKeys, and is handled here only ----
-
-    protected override bool ProcessWindowKey(Keys keyData)
-    {
-        if (ProcessMatchKey(keyData, AxStartKeys.NextMatch, AxStartKeys.PreviousMatch, AxStartKeys.FirstMatch, AxStartKeys.LastMatch))
-        {
-            return true;
-        }
-
-        switch (keyData)
-        {
-            case AxStartKeys.Start:
-                StartSelected(administrator: false);
-                return true;
-            case AxStartKeys.StartAsAdministrator:
-                StartSelected(administrator: true);
-                return true;
-            case AxStartKeys.OpenFileLocation:
-                OpenFileLocation();
-                return true;
-            case AxStartKeys.Information:
-                SayInformation();
-                return true;
-            case AxStartKeys.Refresh:
-                Do(() => RefreshAsync(announce: true));
-                return true;
-            case AxStartKeys.Hide:
-                // AS-3.4: hidden at once, whatever the field holds (asked 2026-10-22); the next showing starts empty.
-                Log.Info("Hidden: Escape");
-                HideWindow();
-                return true;
-        }
-
-        return false;
     }
 
     // ---- the matches (AS-2.2, AS-3.2, AS-3.3) ----
