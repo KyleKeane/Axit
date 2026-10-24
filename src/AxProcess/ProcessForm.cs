@@ -53,6 +53,9 @@ public sealed class ProcessForm : AxitForm
     private readonly ToolStripStatusLabel _memoryLabel;
     private readonly ViewState[] _views = [new(), new(), new()];
     private readonly Dictionary<ProcessSort, ToolStripMenuItem> _sortItems = [];
+    private readonly ToolStripMenuItem _processMenu = new("&Process");
+    private readonly ToolStripMenuItem _serviceMenu = new("&Service");
+    private readonly ToolStripMenuItem _startupMenu = new("S&tartup");
 
     private View _view = View.Processes;
     private IReadOnlyList<ProcessRow> _processes = [];
@@ -72,23 +75,28 @@ public sealed class ProcessForm : AxitForm
         Text = "This computer - " + AxProcessApp.Name;
 
         // ---- menus (PR-6.1); the keys are handled in ProcessWindowKey from the tables, the items only show them ----
-        var process = new ToolStripMenuItem("&Process");
-        process.DropDownItems.Add(Item("&Details", () => Do(ActAsync), AxProcessKeys.Act));
-        process.DropDownItems.Add(Item("&End process...", () => EndProcess(tree: false), AxProcessKeys.End));
-        process.DropDownItems.Add(new ToolStripMenuItem("End process &tree...", null, (_, _) => EndProcess(tree: true)));
-        process.DropDownItems.Add(Item("Show program in ax&File", ShowProgram, AxProcessKeys.ShowProgram));
-        process.DropDownItems.Add(Item("&Copy line", CopyLine, AxProcessKeys.CopyLine));
-        process.DropDownItems.Add(new ToolStripSeparator());
-        process.DropDownItems.Add(Item("&Refresh", () => Do(() => RefreshAsync(announce: true)), AxProcessKeys.Refresh));
-        process.DropDownItems.Add(Item("&Summary", SaySummary, AxProcessKeys.Summary));
-        process.DropDownItems.Add(new ToolStripSeparator());
-        process.DropDownItems.Add(CreateExitItem());
+        // The first menu holds what every view has (AX-6: the thing worked on, then Exit); each view has a menu of its
+        // own, and only the menu of the view shown is enabled, so that a process command is never at hand among the
+        // services (the user's ask, 2026-10-24; UpdateViewMenus).
+        var computer = new ToolStripMenuItem("&Computer");
+        computer.DropDownItems.Add(Item("&Refresh", () => Do(() => RefreshAsync(announce: true)), AxProcessKeys.Refresh));
+        computer.DropDownItems.Add(Item("&Summary", SaySummary, AxProcessKeys.Summary));
+        computer.DropDownItems.Add(Item("&Copy line", CopyLine, AxProcessKeys.CopyLine));
+        computer.DropDownItems.Add(new ToolStripSeparator());
+        computer.DropDownItems.Add(CreateExitItem());
 
-        var service = new ToolStripMenuItem("&Service");
-        service.DropDownItems.Add(new ToolStripMenuItem("&Details", null, (_, _) => ServiceDetailsFromMenu()));
-        service.DropDownItems.Add(new ToolStripMenuItem("&Start", null, (_, _) => ControlSelectedService(ServiceAction.Start)));
-        service.DropDownItems.Add(new ToolStripMenuItem("S&top", null, (_, _) => ControlSelectedService(ServiceAction.Stop)));
-        service.DropDownItems.Add(new ToolStripMenuItem("&Restart", null, (_, _) => ControlSelectedService(ServiceAction.Restart)));
+        _processMenu.DropDownItems.Add(Item("&Details", () => Do(ActAsync), AxProcessKeys.Act));
+        _processMenu.DropDownItems.Add(Item("&End process...", () => EndProcess(tree: false), AxProcessKeys.End));
+        _processMenu.DropDownItems.Add(new ToolStripMenuItem("End process &tree...", null, (_, _) => EndProcess(tree: true)));
+        _processMenu.DropDownItems.Add(Item("Show program in ax&File", ShowProgram, AxProcessKeys.ShowProgram));
+
+        _serviceMenu.DropDownItems.Add(Item("&Details", () => Do(ActAsync), AxProcessKeys.Act));
+        _serviceMenu.DropDownItems.Add(new ToolStripMenuItem("&Start", null, (_, _) => ControlSelectedService(ServiceAction.Start)));
+        _serviceMenu.DropDownItems.Add(new ToolStripMenuItem("S&top", null, (_, _) => ControlSelectedService(ServiceAction.Stop)));
+        _serviceMenu.DropDownItems.Add(new ToolStripMenuItem("&Restart", null, (_, _) => ControlSelectedService(ServiceAction.Restart)));
+
+        _startupMenu.DropDownItems.Add(Item("&Details", () => Do(ActAsync), AxProcessKeys.Act));
+        _startupMenu.DropDownItems.Add(Item("Show program in ax&File", ShowProgram, AxProcessKeys.ShowProgram));
 
         var view = new ToolStripMenuItem("&View");
         view.DropDownItems.Add(Item("&Processes", () => Do(() => ShowViewAsync(View.Processes)), AxProcessKeys.ViewProcesses));
@@ -118,7 +126,8 @@ public sealed class ProcessForm : AxitForm
         ]);
 
         // The bundle's Axit menu (AX-9) sits before Help in every window.
-        _menu.Items.AddRange([process, service, view, options, CreateAxitMenu(), help]);
+        _menu.Items.AddRange([computer, _processMenu, _serviceMenu, _startupMenu, view, options, CreateAxitMenu(), help]);
+        UpdateViewMenus();
         MainMenuStrip = _menu;
 
         // ---- the list (PR-2.1) ----
@@ -126,6 +135,20 @@ public sealed class ProcessForm : AxitForm
         _list.Dock = DockStyle.Fill;
         _list.TabIndex = 0;
         _list.AccessibleName = "Processes, reading";
+        _list.MouseDown += (_, e) =>
+        {
+            if (e.Button == MouseButtons.Right && _list.IndexFromPoint(e.Location) is var index && index >= 0)
+            {
+                _list.SelectedIndex = index;
+            }
+        };
+        _list.MouseUp += (_, e) =>
+        {
+            if (e.Button == MouseButtons.Right)
+            {
+                OpenViewMenu();
+            }
+        };
 
         (_nameLabel, _memoryLabel) = StatusLayout.Pair(_status);
 
@@ -174,6 +197,13 @@ public sealed class ProcessForm : AxitForm
         Do(() => RefreshAsync(announce: false));
     }
 
+    protected override void OnFormClosing(FormClosingEventArgs e)
+    {
+        // AX-9.4: the window joins the bundle's Recently closed list by its name, holding no file.
+        RecentlyClosed.Remember(AxProcessApp.Name, string.Empty);
+        base.OnFormClosing(e);
+    }
+
     // ---- keys (PR-6.2): every key comes from BundleKeys or AxProcessKeys, and is handled here only ----
 
     protected override bool ProcessWindowKey(Keys keyData)
@@ -214,7 +244,7 @@ public sealed class ProcessForm : AxitForm
 
         if (_list.Focused)
         {
-            // Enter and Delete act in the list; returning true keeps it from dinging.
+            // Enter, Delete and the menu keys act in the list; returning true keeps it from dinging.
             switch (keyData)
             {
                 case AxProcessKeys.Act:
@@ -223,10 +253,62 @@ public sealed class ProcessForm : AxitForm
                 case AxProcessKeys.End:
                     EndProcess(tree: false);
                     return true;
+                case AxProcessKeys.NextView:
+                    Do(() => ShowViewAsync(Cycled(1)));
+                    return true;
+                case AxProcessKeys.PreviousView:
+                    Do(() => ShowViewAsync(Cycled(-1)));
+                    return true;
+                case AxProcessKeys.ItemMenu:
+                case AxProcessKeys.ItemMenuAlso:
+                    OpenViewMenu();
+                    return true;
+            }
+
+            if (AtEdge(keyData))
+            {
+                return true;
             }
         }
 
         return false;
+    }
+
+    /// <summary>The view after or before the one shown, round from Startup to Processes (Tab, Shift+Tab; PR-2.2).</summary>
+    private View Cycled(int step) => (View)(((int)_view + step + 3) % 3);
+
+    /// <summary>Shift+F10, the Applications key, a right click (PR-6.1): the view's menu from the bar, Process, Service or Startup.</summary>
+    private void OpenViewMenu() => OpenBarMenu(_view switch { View.Services => 'S', View.Startup => 'T', _ => 'P' });
+
+    /// <summary>The menu of the view shown enabled, the other two not (PR-6.1): WinForms skips a disabled menu on the bar's arrows and the palette leaves its items out.</summary>
+    private void UpdateViewMenus()
+    {
+        _processMenu.Enabled = _view == View.Processes;
+        _serviceMenu.Enabled = _view == View.Services;
+        _startupMenu.Enabled = _view == View.Startup;
+    }
+
+    /// <summary>
+    /// Up or Home on the first item, Down or End on the last (PR-2.6, as axFile's AF-3.6): the key moves nothing, so the
+    /// bundle's edge earcon sounds instead of silence; false when the key moves, and it stays the list's own.
+    /// </summary>
+    private bool AtEdge(Keys key)
+    {
+        var index = _list.SelectedIndex;
+        if (index < 0 || _list.Items.Count == 0)
+        {
+            return false;
+        }
+
+        var first = key is AxProcessKeys.PreviousItem or AxProcessKeys.FirstItem && index == 0;
+        var last = key is AxProcessKeys.NextItem or AxProcessKeys.LastItem && index == _list.Items.Count - 1;
+        if (!first && !last)
+        {
+            return false;
+        }
+
+        Sounds.Edge();
+        return true;
     }
 
     // ---- the views (PR-2.2, PR-2.3) ----
@@ -349,6 +431,7 @@ public sealed class ProcessForm : AxitForm
         _list.Items.AddRange(view.Labels.Select(label => (object)label).ToArray());
         _list.EndUpdate();
         _list.AccessibleName = view.Name;
+        UpdateViewMenus();
         var index = view.SelectedKey is { } key ? IndexOf(view.Keys, key) : -1;
         if (_list.Items.Count > 0)
         {
@@ -678,14 +761,6 @@ public sealed class ProcessForm : AxitForm
     {
         var stop = ServiceManager.Stop(name);
         return stop.Done ? ServiceManager.Start(name) : stop;
-    }
-
-    private void ServiceDetailsFromMenu()
-    {
-        if (InView(View.Services))
-        {
-            ShowServiceDetails();
-        }
     }
 
     // ---- the status bar (PR-2.4) ----

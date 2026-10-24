@@ -47,6 +47,8 @@ process after a question. Nothing refreshes by itself: F5 reads the computer aga
   entry. Any argument is reported with the usage text (`AppHost`).
 - PR-1.2 `AxProcessApp.Run(args)` is the entry point (AX-1.7): the host's log (`axprocess.log`), crash handling,
   `--help` and `--version`, the settings (`axprocess.json`), then `ProcessForm`.
+- PR-1.4 Closing the window puts axProcess in the Axit menu's Recently closed list, by its name, since it holds no file
+  (AX-9.4); Enter there starts it again.
 - PR-1.3 axProcess runs as the user, never elevated. What Windows refuses to a user (ending a system process,
   starting most services) is said as such (PR-3.3, PR-4.3).
 
@@ -54,7 +56,8 @@ process after a question. Nothing refreshes by itself: F5 reads the computer aga
 
 - PR-2.1 From the top: the menu bar; the list, named with its view and count ("Processes, 214", "Services, 280",
   "Startup, 9"); the status bar. A notice takes the list's place while it shows (AX-6.4). The focus starts in the list.
-- PR-2.2 Views: Ctrl+1 Processes, Ctrl+2 Services, Ctrl+3 Startup (View menu). The key says the list's name and the
+- PR-2.2 Views: Ctrl+1 Processes, Ctrl+2 Services, Ctrl+3 Startup (View menu), and Tab and Shift+Tab to the next and the
+  previous view, round from Startup to Processes (the window has one control; the user's ask, 2026-10-24). The key says the list's name and the
   item the selection is on, also when the list already shows the view (axClaude D26). A view is read the first time it
   shows and on F5; each keeps its selection by the item's key (the process ID, the service's name, the startup entry's
   name and place) across a refresh, as axGIT's views do (AG-2.2).
@@ -64,7 +67,8 @@ process after a question. Nothing refreshes by itself: F5 reads the computer aga
   memory in use ("Memory 57% in use"). No AccessibleName, no Spring (`StatusLayout`).
 - PR-2.5 Ctrl+Q says the summary: the number of processes, the memory in use of the total and its percentage, and the
   processor's use over the last read ("214 processes. Memory 9.1 of 15.9 GB in use, 57%. Processor 12%").
-- PR-2.6 Ctrl+C copies the selected item's line ("Copied"); Ctrl+F finds an item by its text, F3 and Shift+F3 the next
+- PR-2.6 Up or Home on the first item and Down or End on the last play the bundle's edge earcon (`Sounds.Edge`), since the
+  key moves nothing (as axFile's AF-3.6; 2026-10-24). Ctrl+C copies the selected item's line ("Copied"); Ctrl+F finds an item by its text, F3 and Shift+F3 the next
   and the previous, wrapping once (the bundle's find in a list).
 
 ### PR-3 Processes
@@ -112,15 +116,20 @@ process after a question. Nothing refreshes by itself: F5 reads the computer aga
 
 ### PR-6 Menus, keys, texts
 
-- PR-6.1 Menus (AX-6): **Process (P):** Details Enter | End process… Delete | End process tree… | Show program in
-  axFile Ctrl+E | Copy line Ctrl+C | ─ | Refresh F5 | Summary Ctrl+Q | ─ | Exit Alt+F4. **Service (S):** Details |
-  Start | Stop | Restart. **View (V):** Processes Ctrl+1 | Services Ctrl+2 | Startup Ctrl+3 | ─ | Sort processes by ▸
+- PR-6.1 Menus (AX-6): **Computer (C):** Refresh F5 | Summary Ctrl+Q | Copy line Ctrl+C | ─ | Exit Alt+F4. **Process
+  (P):** Details Enter | End process… Delete | End process tree… | Show program in axFile Ctrl+E. **Service (S):**
+  Details Enter | Start | Stop | Restart. **Startup (T):** Details Enter | Show program in axFile Ctrl+E. Only the menu
+  of the view shown is enabled, the other two not, so that a process command is never at hand among the services and
+  the reverse (the user's ask, 2026-10-24): the bar's arrows pass over a disabled menu and the command palette leaves
+  its items out. **View (V):** Processes Ctrl+1 | Services Ctrl+2 | Startup Ctrl+3 | ─ | Sort processes by ▸
   (Memory ✓ | Processor | Name). **Options (O):** Text ▸ | General ▸ | Developer ▸. **Axit (A)** (AX-9). **Help (H):**
   Keyboard shortcuts F1 | User guide | ─ | Windows resources ▸ (Task Manager | Services). Every item has a mnemonic
-  (AX-7.4). The Startup view's Details and Show program are the Process menu's, which act on the view shown.
+  (AX-7.4). Shift+F10, the Applications key and a right click in the list open the view's menu from the bar, as Alt and its letter open it, so that NVDA reads its first item (the window base's `OpenBarMenu`,
+  axFile's AF-D13; 2026-10-24).
 - PR-6.2 Keys (AX-8). Bundle-wide: F1, Ctrl+Shift+P, Ctrl+F, F3, Shift+F3, Ctrl+S ("Nothing to save here. F5
   refreshes, Delete ends a process"), Ctrl+Plus, Ctrl+Minus, Alt+F4. Window-specific (`AxProcessKeys`): Ctrl+1,
-  Ctrl+2, Ctrl+3, F5, Enter, Delete, Ctrl+E, Ctrl+C, Ctrl+Q. Enter and Delete act while the list has the focus. A
+  Ctrl+2, Ctrl+3, Tab, Shift+Tab, F5, Enter, Delete, Ctrl+E, Ctrl+C, Ctrl+Q, Shift+F10 and the Applications key, and Up,
+  Down, Home and End at the ends of the list. Enter and Delete act while the list has the focus. A
   command of one view asked for in another says which view first: "Processes view first: Ctrl+1", "Services view first:
   Ctrl+2".
 - PR-6.3 The F1 text (`HelpText.Shortcuts`) names them all; `docs/axprocess/user-guide.md` is embedded (Help, User

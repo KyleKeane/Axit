@@ -10,6 +10,11 @@ Run with NVDA before a release, after `run-axprocess.ps1` (or `.\run.ps1 -App pr
 4. Ctrl+Q: "N processes. Memory x of y GB in use, z%. Processor n%".
 5. Wait ten seconds without a key: nothing is spoken and the item under the cursor stays the same.
 6. F5: "Refreshed: Processes, N"; the selection is on the same process.
+7. Home, then Up: the low edge sound, nothing spoken. End, then Down: the same.
+8. Tab: "Services, N. <service>"; Tab: "Startup, N. <entry>"; Tab: "Processes, N. <process>". Shift+Tab: "Startup, …".
+9. On a process, Shift+F10: the Process menu opens and NVDA reads "Details Enter". Escape. Ctrl+2, Shift+F10: the Service menu; Ctrl+3, Shift+F10: the Startup menu. The Applications key does the same.
+9a. In the Processes view, Alt, then Right along the bar: Computer, Process, View, Options, Axit, Help; Service and Startup are passed over. Ctrl+2, Alt, Right: Computer, Service, View…
+10. Close axProcess, then in another Axit window Alt+A, R: "1. axProcess" is in Recently closed; Enter starts it.
 7. Alt+F4 closes the window without a question.
 
 ## 2. Processes (PR-3)

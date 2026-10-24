@@ -46,3 +46,32 @@ expect state "notice":"Keyboard shortcuts"
 expect state Ctrl+1, Ctrl+2, Ctrl+3
 keys escape
 expect state "notice":null
+
+# 2.2 Tab and Shift+Tab go round the views, said as their keys say them.
+keys ctrl+1
+expect said ! Processes,
+keys tab
+expect said ! Services,
+keys tab
+expect said ! Startup,
+keys tab
+expect said ! Processes,
+keys shift+tab
+expect said ! Startup,
+
+# 6.1 Only the menu of the view shown is enabled: no service command among the startup programs, no process command
+# among the services (the palette's list is the menus' enabled items).
+refuse commands Restart
+refuse commands End process tree
+keys ctrl+2
+expect said ! Services,
+expect commands Restart
+refuse commands End process tree
+
+# 2.6 Up on the first item and Down on the last: the edge earcon, nothing said.
+keys home
+keys up
+expect said ♪ Edge
+keys end
+keys down
+expect said ♪ Edge

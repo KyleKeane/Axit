@@ -16,13 +16,14 @@ The window is called "This computer - axProcess". It opens on the Processes view
 - **Services** (Ctrl+2): every Windows service, "Windows Update (wuauserv), running, manual": its name, its short name, whether it runs, and how it starts.
 - **Startup** (Ctrl+3): what starts when you sign in, "OneDrive, enabled, current user's Run key": its name, whether Task Manager has turned it off, and where it is set.
 
-Pressing a view's key while the view already shows says its name again. **F5** reads the view again and says "Refreshed". **Ctrl+Q** says the summary: how many processes run, how much memory is in use, and how busy the processor was.
+Tab and Shift+Tab move to the next and the previous view, round from Startup back to Processes. Pressing a view's key while the view already shows says its name again. At the first or the last item, Up, Down, Home and End play a short low sound, since there is nowhere to move. **F5** reads the view again and says "Refreshed". **Ctrl+Q** says the summary: how many processes run, how much memory is in use, and how busy the processor was.
 
 ## Acting on an item
 
 - **Enter** shows the item's details in a notice, with buttons for what can be done to it. Escape closes it.
 - **Delete** on a process ends it, after a question: "End notepad (process 4410)? Anything unsaved in it is lost." Process, End process tree ends it with the programs it started.
 - **Ctrl+E** opens axFile on the program's file, selected in its folder.
+- **Shift+F10**, or the Applications key, opens the menu of the view you are in: Process, Service or Startup.
 - **Ctrl+C** copies the line. **Ctrl+F** finds an item by its text; F3 finds the next.
 - A service's details offer **Start**, **Stop** and **Restart**. Windows lets only an administrator start and stop most services, and axProcess runs as you, so expect "access is denied" for those; axProcess says so plainly.
 
@@ -30,8 +31,12 @@ The Startup view is for reading: axProcess does not turn startup programs on or 
 
 ## Menus
 
-- **Process**: Details (Enter), End process (Delete), End process tree, Show program in axFile (Ctrl+E), Copy line (Ctrl+C), Refresh (F5), Summary (Ctrl+Q), Exit.
-- **Service**: Details, Start, Stop, Restart.
+- **Computer**: Refresh (F5), Summary (Ctrl+Q), Copy line (Ctrl+C), Exit.
+- **Process**: Details (Enter), End process (Delete), End process tree, Show program in axFile (Ctrl+E).
+- **Service**: Details (Enter), Start, Stop, Restart.
+- **Startup**: Details (Enter), Show program in axFile (Ctrl+E).
+
+Only the menu of the view you are in can be opened; the other two are unavailable, so that you never end a process from the services or the reverse.
 - **View**: Processes (Ctrl+1), Services (Ctrl+2), Startup (Ctrl+3), Sort processes by.
 - **Options**: Text (font and size), General (the update check), Developer (the settings file, diagnostics).
 - **Axit**: new windows of every app, the files and folders closed lately, the open windows, updates, About.
