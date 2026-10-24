@@ -5,6 +5,17 @@ is a window with a verb; everything else below exists so that the app can be bui
 rest of the bundle in context (`docs/axit/SPEC.md` 5.3). Work in this order: the spec first, then the pure code with
 its tests, then the window, then the installer.
 
+Since 2026-10-24 one run does the mechanical part (`docs/axit/app-kit.md` AK-1.2, AK-4):
+
+```
+.\tools\new-app.ps1 axThing thing Utilities Files -Description 'axThing, what it is' [-IconLetters At -IconRgb 60,90,40]
+```
+
+on a branch of its own, from a clean working tree; then `git diff`, a build and `test.ps1`. It writes everything
+marked **(script)** below, prints the rest, and `InventoryTests` fails until the text places have the app. What
+reads `Dispatch.Apps` needs no step at all, marked **(automatic)**. The sections below say what each place is, for
+the review of what the script wrote and for the steps it leaves.
+
 ## 1. Decide
 
 - The name (`AxThing`), the verb `Axit.exe` takes (`thing`), the console command (`axthing`), the Start menu entry
@@ -13,6 +24,8 @@ its tests, then the window, then the installer.
 - What is in version one and what waits. Barebones first (axDown AD-D2).
 
 ## 2. Documents (`docs/axthing/`)
+
+The script writes the three as stubs with the headings below; the words are the app's author's.
 
 - `SPEC.md`: summary, goals and non-goals, scenarios, requirements numbered `AT-n.m`, the keys (every key marked
   bundle-wide or window-specific, AX-8), notices and announcements (the list of everything spoken), settings, status
@@ -25,6 +38,8 @@ its tests, then the window, then the installer.
 
 ## 3. Pure code (`src/AxThing.Core/`, `tests/AxThing.Tests/`)
 
+The script writes the project, `ThingSettings`, a first pure class (`ThingLines`, the list's lines and the title), their tests and the notes.
+
 - `AxThing.Core.csproj` (net10.0), referencing `Axit.Core` only. Everything that needs no window goes here.
 - `ThingSettings`: a plain class of properties with defaults, `DefaultPath => AppPaths.SettingsFile("axthing")`,
   `Load` through `SettingsFile.Load` plus a `Sanitize`, `Save` through `SettingsFile.Save`.
@@ -32,6 +47,8 @@ its tests, then the window, then the installer.
 - `CLAUDE.md`: what is here, the commands, the gotchas.
 
 ## 4. The window (`src/AxThing/`)
+
+The script writes a window of the new kind below on `AxitForm`, as small as axCalc's: `AxThingApp` (with or without a path, by what the app opens), `ThingForm` with one list, the menus of the bundle's frame and find in the list, an empty `AxThingKeys`, `HelpText` and the notes. An editor or a console app replaces it as this section says.
 
 A text editor app, one more file type, has no window of its own: it is an `EditorApp` record (name, verb, settings
 file, file filter, F1 text, guide, the `TextJump` pairs of its outline, its resources pages, its commands on the text)
@@ -86,36 +103,52 @@ the base's. The rest of this section is for a window of a new kind.
 
 ## 5. Wiring
 
-- `Axit.Core/Dispatch`: the verb constant, the usage text, and the entry in `Apps`, placed in its group (the name, the
-  verb, the project, the `AppGroup`, what it `Opens`, and `ShowIn` for an app that works in a folder), which `Decide`
-  loops over and which gives the app its item under New window, its submenu in Open windows by type, its place in
-  axFile's Open in Axit and the Show in submenus, and its line in About, Version (AX-9.2); `DispatchTests` and
-  `BundleAboutTests` cover every entry by themselves.
-- `src/Axit/Program.cs`: `case Dispatch.AxThing: SetAppId("Axit.AxThing"); AxThingApp.Run(launch.Arguments);`.
-- `src/Axit/Axit.csproj`: the project reference. `Axit.sln`: the two projects (`dotnet sln add`).
-- `tests/Axit.Tests`: the project reference and the window's table in `KeyTests.Windows`.
-- `run.ps1`: the verb in `-App`'s `ValidateSet` and a branch that starts it; a `run-axthing.ps1` next to the
-  others that calls `run.ps1 -App thing @args`.
+- `Axit.Core/Dispatch` **(script)**: the verb constant, the usage text (the app's line, the verb in the first line,
+  the console command), and the entry in `Apps`, placed in its group: the name, the verb, the project, the
+  `AppGroup`, what it `Opens`, `ShowIn` for an app that works in a folder, and for the scripts its `Description`
+  (the Start menu entry's), its `Icon` (two letters and a colour), `Explorer` when File Explorer's Open with Axit
+  submenu should offer it on other things than it `Opens`, the `Types` that submenu shows it on, and the `OpenWith`
+  types with their `TypeName`. The script writes the name, verb, project, group, opens, description and icon; the
+  rest is by hand, as is a rule in `Decide` when a path alone should open the app (AX-1.2). The entry gives the app
+  its item under New window, its submenu in Open windows by type, its place in axFile's Open in Axit and the Show in
+  submenus, and its line in About, Version (AX-9.2) **(automatic)**; `DispatchTests` and `BundleAboutTests` cover
+  every entry by themselves, and the app order `DispatchTests` expects is rewritten by the script.
+- `src/Axit/Program.cs` **(script)**: the line `[Dispatch.AxThing] = AxThingApp.Run,` in `Runs`, and its `using`;
+  the taskbar id `Axit.AxThing` follows from the project name (AX-1.6).
+- The project references **(automatic)**: `src/Axit/Axit.csproj` and `tests/Axit.Tests` reference every project of
+  `src` by a glob. `Axit.sln`: the three projects **(script**, `dotnet sln add`**)**.
+- `tests/Axit.Tests/KeyTests` **(script)**: the window's table in `Windows` and its F1 text in `F1Texts`; by hand,
+  the known keys and the overrides when the window's keys meet another window's.
+- `run.ps1` **(automatic)**: `-App` takes any verb of `Dispatch.Apps`, read off `Dispatch.cs` by `tools/apps.ps1`,
+  and leaves the path out for an app that opens nothing. `run-axthing.ps1` **(script)** calls `run.ps1 -App thing
+  @args`; `tests/scripts/axthing/01-start.txt` **(script)** is a first `tools/AxAutomate` script. By hand: the
+  examples in `run.ps1`'s help, and its restart of a background app (`start|clip`).
 
 ## 6. Installer and release
 
-- `tools/make-icon.ps1`: a line at the end with the app's letters and colour; run it; `publish.ps1` copies the icon
-  next to the executable (a project item would be bundled into the single file).
-- `install.ps1`: one block in `$apps` (the name, the verb, the description, the icon, what the app opens from File
-  Explorer's Open with Axit submenu: folders, files, or both, and the file types a files entry is shown on; the file
-  types it is a program for under Open with, with their type name). The Start menu entry, the shim, the submenu
-  entries, the ProgID, the icon's copy, the removal and the `Say` lines all follow from the block (AX-2.3). A
-  `-Start…` parameter for the updater if the app should come back on what it had open, and the matching argument
-  in `Updater.LaunchInstaller`.
-- `docs/axit/README.md` (the zip's guide): the app in the list, its Start entry, its command. `README.md` (the
-  repository's page): the app in its list. `.github/ISSUE_TEMPLATE/bug.yml` and `idea.yml`: the app among the
-  choices. `src/Axit/Axit.csproj`: the `<Description>`.
-- `docs/axit/SPEC.md` section 3: the app, and its verb in AX-1.1. `CLAUDE.md` (root): the map line. `CHANGELOG.md`:
-  bullets with the app's name in front.
-- `tests/Axit.Tests/InventoryTests` checks every place above for every app of `Dispatch.Apps` (the folders, the
-  three documents, the notes, the icon, the installer's block, the icon script, the templates, the pages, the map,
-  the spec, the program's dispatch and `run.ps1`) and fails until the new app has them all (axStart was missing from
-  nine of them on 2026-10-23).
+- The icon: `src/Axit/AxThing.ico` **(script**, through `tools/make-icon.ps1 -Out`**)**; `make-icon.ps1` without
+  arguments draws every app's icon from its `Icon` in `Dispatch.Apps` **(automatic)**; `publish.ps1` copies every
+  `.ico` next to the executable (a project item would be bundled into the single file) **(automatic)**.
+- `install.ps1` **(automatic)**: it builds its table from `Axit.exe apps` (AX-1.4), which prints `Dispatch.Apps` as
+  JSON, and keeps the listing as `apps.json` in the installation for an uninstall that cannot run the program. The
+  Start menu entry, the shim, the submenu entries, the ProgID, the icon's copy, the removal and the `Say` lines all
+  follow (AX-2.3). By hand: a background app's line in `$background`; a `-Start…` parameter for the updater if the
+  app should come back on what it had open, and the matching argument in `Updater.LaunchInstaller`; the header
+  comment's list of commands.
+- `.github/ISSUE_TEMPLATE/bug.yml` and `idea.yml`: the app among the choices; `src/Axit/Axit.csproj`: the
+  `<Description>`; `docs/axit/SPEC.md`: the verb in AX-1.1 and the taskbar id in AX-1.6 **(script)**.
+- The text places **(script, as drafts to rewrite in real words)**: `README.md` (the repository's page) and
+  `docs/axit/README.md` (the zip's guide), the app in the list; `docs/axit/SPEC.md` section 3, the app's entry; the
+  root `CLAUDE.md`, the map line; `CHANGELOG.md`, a bullet with the app's name in front under Unreleased. By hand:
+  the app in the root `CLAUDE.md`'s opening paragraph and Commands paragraph, `docs/axit/SPEC.md`'s summary, the
+  zip guide's Start entries and commands, and its removal from `docs/axit/plan.md`'s Still to come.
+- The documents and the code the script wrote are a first draft: the spec, the guide and the test plan are stubs,
+  and the window is one list. The first build writes the new test project's `packages.lock.json` and changes
+  `tests/Axit.Tests/packages.lock.json`; commit both.
+- `tests/Axit.Tests/InventoryTests` checks the places that stay text or code for every app of `Dispatch.Apps` (the
+  folders, the three documents, the notes, the key table, the icon, the issue forms, the pages, the map, the spec,
+  the program's line, the executable's description, the changelog) and fails until the new app has them all
+  (axStart was missing from nine of them on 2026-10-23).
 - Build to a scratch folder, run every test project, run the `accessibility-review` skill on the window, probe the
   window off screen (see `src/AxDown/CLAUDE.md`), publish without installing and check the zip, then install and run
   the app's NVDA test plan before the release.

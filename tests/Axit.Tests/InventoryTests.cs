@@ -4,10 +4,11 @@ namespace Axit.Tests;
 
 /// <summary>
 /// Every app of the bundle (<see cref="Dispatch.Apps"/>) has its places in the repository (docs/axit/SPEC.md 5.3 M1,
-/// docs/axit/adding-an-app.md): its folders, its three documents, its notes, its icon, its block in the installer and
-/// its line in the icon script, its place in the issue forms, the pages, the map and the spec, its call in the
-/// program and its branch in run.ps1. Read off the files, so that a new app that is missing somewhere fails here
-/// rather than at its release (axStart was missing from nine of these on 2026-10-23).
+/// docs/axit/adding-an-app.md): its folders, its three documents, its notes, its icon, its place in the issue forms,
+/// the pages, the map and the spec, and its call in the program. Read off the files, so that a new app that is
+/// missing somewhere fails here rather than at its release (axStart was missing from nine of these on 2026-10-23).
+/// The installer, the icon script and run.ps1 read <see cref="Dispatch.Apps"/> itself since 2026-10-24
+/// (docs/axit/app-kit.md AK-4.1), so they have no place to miss; tools/new-app.ps1 writes the places it can.
 /// </summary>
 public sealed class InventoryTests
 {
@@ -54,9 +55,6 @@ public sealed class InventoryTests
 
             Expect(name, File.Exists(Path.Combine(root, "src", "Axit", $"{name}.ico")), "icon in src/Axit");
             Expect(name, File.Exists(Path.Combine(root, $"run-{lower}.ps1")), $"run-{lower}.ps1");
-            Expect(name, Text("run.ps1").Contains($"'{app.Verb}'", StringComparison.Ordinal), "run.ps1's verb");
-            Expect(name, Text("install.ps1").Contains($"Name = '{shown}'", StringComparison.Ordinal), "install.ps1's block");
-            Expect(name, Text("tools/make-icon.ps1").Contains($"'{name}.ico'", StringComparison.Ordinal), "make-icon.ps1's line");
             Expect(name, Text("src/Axit/Program.cs").Contains($"{name}App.Run", StringComparison.Ordinal), "Program.cs's call");
             Expect(name, Text("src/Axit/Axit.csproj").Contains(shown, StringComparison.Ordinal), "Axit.csproj's description");
             Expect(name, Text("CLAUDE.md").Contains($"**{shown}**", StringComparison.Ordinal), "the root CLAUDE.md map");

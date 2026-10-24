@@ -58,7 +58,9 @@ change; the one spoken change is axStart saying "Reading the programs" when noth
    test project, `KeyTests` twice, `make-icon.ps1`). `InventoryTests` catches a missing one, but each merge of two
    app branches conflicts in all of them (both merges of this day did). Proposal: let `run.ps1` and `install.ps1`
    read the apps from one data file the build also reads, and let the spec's lists point to `Dispatch.Apps` rather
-   than repeat it. Needs a decision: it moves facts out of the documents.
+   than repeat it. Needs a decision: it moves facts out of the documents. Done in part the same day
+   (`app-kit.md` AK-4.3): the program, the installer, `run.ps1`, the icon script and the project references read
+   `Dispatch.Apps`, and `tools/new-app.ps1` writes the places that stay text or code.
 2. **Finding a program on the PATH, written four times** (`ShellLauncher.FindOnPath`, `KeePassCli.Find`,
    `ClaudeLauncher`, and `ProgramInstall.OnPath` on the unmerged branch `installs`), with
    `ClaudeLauncher.InstallCommand` repeating `ProgramInstall.ClaudeCode`. Waits for `installs` to merge, then one

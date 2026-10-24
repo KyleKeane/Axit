@@ -5,7 +5,8 @@
 .DESCRIPTION
   Run it from the folder that holds Axit.exe: the extracted zip, or publish\win-x64 after publish.ps1.
   Axit is one program with several apps inside (docs/axit/SPEC.md AX-2). It copies Axit to
-  %LOCALAPPDATA%\Programs\Axit and creates the ways to start each app, all from the table $apps below:
+  %LOCALAPPDATA%\Programs\Axit and creates the ways to start each app, all from the list of apps that Axit.exe apps
+  prints (Dispatch.Apps; $apps below):
     - a Start menu entry per app, "Axit axClaude", "Axit axDown" and so on (type axit in the Start menu to list them),
     - one submenu in File Explorer's right-click menu, "Open with Axit", on folders (and on a folder's background) and
       on files, listing the apps that open what was right-clicked: axClaude, axGIT, axTerminal and axFile on folders,
@@ -90,31 +91,50 @@ $classes = 'HKCU:\Software\Classes'
 # The entry in Settings, Apps (Add or remove programs) for this user; its Uninstall runs install.cmd -Uninstall.
 $appsKey = 'HKCU:\Software\Microsoft\Windows\CurrentVersion\Uninstall\Axit'
 
-# The apps (AX-2), one block each; a new app of the bundle adds a block here and nothing else. Name: the app's name,
-# which gives the Start menu entry "Axit <Name>", the console command <name> and the ProgID Axit.<Name>. Verb: what
-# Axit.exe takes. Icon: the file the Start menu entry and the File Explorer entries show. Opens: what the app opens
-# from File Explorer's "Open with Axit" submenu (AX-2.3): 'folders' (a folder, and a folder's background), 'files',
-# or both. Types: the file types a files entry is shown on; every file when absent. OpenWith: the file types the app
-# is registered as a program for, under Windows' own "Open with" and in Settings, Default apps (B-9), with the
-# TypeName that Windows shows for them.
-# The sound and video kinds axMedia plays: the same list as Axit.Core/MediaFiles (docs/axmedia/SPEC.md AM-4.1).
-$mediaTypes = '.mp3', '.wav', '.wma', '.m4a', '.m4b', '.aac', '.flac', '.ogg', '.opus', '.aiff', '.mp4', '.m4v', '.mov', '.avi', '.wmv', '.mkv', '.webm'
-$apps = @(
-    @{ Name = 'axClaude'; Verb = 'claude'; Description = 'axClaude, an accessible front end for Claude Code'; Icon = $exe; Opens = 'folders' },
-    @{ Name = 'axDown'; Verb = 'down'; Description = 'axDown, a plain editor for Markdown and text files'; Icon = (Join-Path $target 'AxDown.ico'); Opens = 'files'; OpenWith = '.md', '.markdown', '.txt'; TypeName = 'Text document (axDown)' },
-    @{ Name = 'axJSON'; Verb = 'json'; Description = 'axJSON, an editor for JSON files'; Icon = (Join-Path $target 'AxJSON.ico'); Opens = 'files'; Types = '.json'; OpenWith = '.json'; TypeName = 'JSON document (axJSON)' },
-    @{ Name = 'axGIT'; Verb = 'git'; Description = 'axGIT, a git manager for one repository'; Icon = (Join-Path $target 'AxGit.ico'); Opens = 'folders' },
-    @{ Name = 'axTerminal'; Verb = 'terminal'; Description = 'axTerminal, a shell as a transcript'; Icon = (Join-Path $target 'AxTerminal.ico'); Opens = 'folders' },
-    @{ Name = 'axFile'; Verb = 'file'; Description = 'axFile, a file manager for one folder'; Icon = (Join-Path $target 'AxFile.ico'); Opens = 'folders', 'files' },
-    @{ Name = 'axMedia'; Verb = 'media'; Description = 'axMedia, a player for sound and video files'; Icon = (Join-Path $target 'AxMedia.ico'); Opens = 'files'; Types = $mediaTypes; OpenWith = $mediaTypes; TypeName = 'Media file (axMedia)' },
-    @{ Name = 'axStart'; Verb = 'start'; Description = 'axStart, a program launcher behind a hotkey'; Icon = (Join-Path $target 'AxStart.ico') },
-    @{ Name = 'axProcess'; Verb = 'process'; Description = 'axProcess, the processes, services and startup programs'; Icon = (Join-Path $target 'AxProcess.ico') },
-    @{ Name = 'axTask'; Verb = 'task'; Description = 'axTask, tasks and lists'; Icon = (Join-Path $target 'AxTask.ico'); Opens = 'folders' },
-    @{ Name = 'axPass'; Verb = 'pass'; Description = 'axPass, a KeePass password database'; Icon = (Join-Path $target 'AxPass.ico'); Opens = 'files'; Types = '.kdbx'; OpenWith = '.kdbx'; TypeName = 'KeePass database (axPass)' },
-    @{ Name = 'axCalc'; Verb = 'calc'; Description = 'axCalc, a calculator with a history'; Icon = (Join-Path $target 'AxCalc.ico') },
-    @{ Name = 'axClip'; Verb = 'clip'; Description = 'axClip, a clipboard history behind a hotkey'; Icon = (Join-Path $target 'AxClip.ico') },
-    @{ Name = 'axPreview'; Verb = 'preview'; Description = 'axPreview, a read-only viewer for text files'; Icon = (Join-Path $target 'AxPreview.ico'); Opens = 'files'; OpenWith = '.txt', '.md', '.markdown', '.log', '.json'; TypeName = 'Text file (axPreview)' }
-)
+# The apps (AX-2), from the program itself: Axit.exe apps prints Dispatch.Apps (src/Axit.Core/Dispatch.cs) as JSON,
+# so a new app of the bundle needs nothing here (docs/axit/app-kit.md AK-4.1). The installation keeps that listing as
+# apps.json, which an uninstall reads when the program next to it cannot be run. Per app: Name, which gives the Start
+# menu entry "Axit <Name>", the console command <name> and the ProgID Axit.<Name>. Verb: what Axit.exe takes. Icon:
+# the file the Start menu entry and the File Explorer entries show, <Project>.ico. Opens: what the app opens from
+# File Explorer's "Open with Axit" submenu (AX-2.3): 'folders' (a folder, and a folder's background), 'files', or
+# both. Types: the file types a files entry is shown on; every file when absent. OpenWith: the file types the app is
+# registered as a program for, under Windows' own "Open with" and in Settings, Default apps (B-9), with the TypeName
+# that Windows shows for them.
+$listingFile = 'apps.json'
+function Get-AppListing {
+    $program = Join-Path $source 'Axit.exe'
+    $json = $null
+    if (Test-Path -LiteralPath $program) {
+        # Through a process with its output redirected: the program has no console of its own, so & would neither
+        # wait for it nor catch what it writes.
+        try {
+            $start = New-Object System.Diagnostics.ProcessStartInfo $program
+            $start.Arguments = 'apps'
+            $start.UseShellExecute = $false
+            $start.RedirectStandardOutput = $true
+            $start.CreateNoWindow = $true
+            $start.WorkingDirectory = $source
+            $process = [System.Diagnostics.Process]::Start($start)
+            $json = $process.StandardOutput.ReadToEnd()
+            if (-not $process.WaitForExit(30000) -or $process.ExitCode -ne 0) { $json = $null }
+        } catch { $json = $null }
+    }
+    if (-not $json -and (Test-Path -LiteralPath (Join-Path $source $listingFile))) {
+        $json = Get-Content -LiteralPath (Join-Path $source $listingFile) -Raw
+    }
+    if (-not $json) { throw "the list of apps could not be read from $program (Axit.exe apps)" }
+    return $json
+}
+$listingJson = Get-AppListing
+$apps = @()
+foreach ($entry in ($listingJson | ConvertFrom-Json)) {
+    $iconFile = "$($entry.project).ico"
+    $app = @{ Name = $entry.name; Verb = $entry.verb; Description = $entry.description; Opens = @($entry.explorer)
+        Icon = if (Test-Path -LiteralPath (Join-Path $source $iconFile)) { Join-Path $target $iconFile } else { $exe } }
+    if (@($entry.types).Count -gt 0) { $app.Types = @($entry.types) }
+    if (@($entry.openWith).Count -gt 0) { $app.OpenWith = @($entry.openWith); $app.TypeName = $entry.typeName }
+    $apps += $app
+}
 # The places that follow from the name.
 foreach ($app in $apps) {
     $app.Start = Join-Path $programs "Axit $($app.Name).lnk"
@@ -262,7 +282,7 @@ if (-not $sameFolder) {
     }
 
     New-Item -ItemType Directory -Force $target | Out-Null
-    $files = @('Axit.exe', 'README.md', 'LICENSE', 'install.ps1', 'install.cmd') + @($apps | ForEach-Object { Split-Path -Leaf $_.Icon }) | Select-Object -Unique
+    $files = @('Axit.exe', 'README.md', 'LICENSE', 'install.ps1', 'install.cmd', $listingFile) + @($apps | ForEach-Object { Split-Path -Leaf $_.Icon }) | Select-Object -Unique
     foreach ($name in $files) {
         $file = Join-Path $source $name
         if (-not (Test-Path -LiteralPath $file)) { continue }
@@ -289,6 +309,9 @@ if (-not $sameFolder) {
         }
     }
 }
+
+# The list of apps this installation was made from, for an uninstall that cannot run the program (Get-AppListing).
+[System.IO.File]::WriteAllText((Join-Path $target $listingFile), $listingJson)
 
 # Files extracted from a downloaded zip carry the "downloaded from the internet" mark, which makes SmartScreen warn
 # about an unknown publisher on every start. The installed copies lose the mark, so the warning does not come back.

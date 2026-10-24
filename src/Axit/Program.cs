@@ -42,75 +42,53 @@ internal static class Program
             return;
         }
 
-        switch (launch.App)
+        if (Runs.TryGetValue(launch.App, out var run))
         {
-            case Dispatch.AxClaude:
-                SetAppId("Axit.AxClaude");
-                AxClaudeApp.Run(launch.Arguments);
-                break;
-            case Dispatch.AxDown:
-                SetAppId("Axit.AxDown");
-                AxDownApp.Run(launch.Arguments);
-                break;
-            case Dispatch.AxJSON:
-                SetAppId("Axit.AxJSON");
-                AxJSONApp.Run(launch.Arguments);
-                break;
-            case Dispatch.AxGit:
-                SetAppId("Axit.AxGit");
-                AxGitApp.Run(launch.Arguments);
-                break;
-            case Dispatch.AxTerminal:
-                SetAppId("Axit.AxTerminal");
-                AxTerminalApp.Run(launch.Arguments);
-                break;
-            case Dispatch.AxFile:
-                SetAppId("Axit.AxFile");
-                AxFileApp.Run(launch.Arguments);
-                break;
-            case Dispatch.AxMedia:
-                SetAppId("Axit.AxMedia");
-                AxMediaApp.Run(launch.Arguments);
-                break;
-            case Dispatch.AxPreview:
-                SetAppId("Axit.AxPreview");
-                AxPreviewApp.Run(launch.Arguments);
-                break;
-            case Dispatch.AxStart:
-                SetAppId("Axit.AxStart");
-                AxStartApp.Run(launch.Arguments);
-                break;
-            case Dispatch.AxProcess:
-                SetAppId("Axit.AxProcess");
-                AxProcessApp.Run(launch.Arguments);
-                break;
-            case Dispatch.AxTask:
-                SetAppId("Axit.AxTask");
-                AxTaskApp.Run(launch.Arguments);
-                break;
-            case Dispatch.AxPass:
-                SetAppId("Axit.AxPass");
-                AxPassApp.Run(launch.Arguments);
-                break;
-            case Dispatch.AxCalc:
-                SetAppId("Axit.AxCalc");
-                AxCalcApp.Run(launch.Arguments);
-                break;
-            case Dispatch.AxClip:
-                SetAppId("Axit.AxClip");
-                AxClipApp.Run(launch.Arguments);
-                break;
-            case Dispatch.Mcp:
-                // No window: MCP on standard input and output until the client closes it (docs/axit/mcp.md MC-1.1).
-                Axit.Forms.McpBroker.Run();
-                break;
-            default:
-                // --help or --version for the bundle itself (AX-1.4).
-                var text = launch.Arguments[0] == "--version" ? $"Axit {BundleInfo.Version}" : $"Axit {BundleInfo.Version}\n\n{Dispatch.Usage}";
-                MessageBox.Show(text, "Axit", MessageBoxButtons.OK, MessageBoxIcon.Information);
-                break;
+            // AX-1.6: the taskbar's id is the app's project name, Axit.AxClaude and so on.
+            SetAppId("Axit." + Dispatch.Of(launch.App).Project);
+            run(launch.Arguments);
+        }
+        else if (launch.App == Dispatch.Mcp)
+        {
+            // No window: MCP on standard input and output until the client closes it (docs/axit/mcp.md MC-1.1).
+            Axit.Forms.McpBroker.Run();
+        }
+        else if (launch.App == Dispatch.Listing)
+        {
+            // No window: the apps for the installer, which reads standard output (AX-1.4). A program without a
+            // console writes to the handle it was given; started from a console with nothing to catch it, nothing shows.
+            using var output = new StreamWriter(Console.OpenStandardOutput(), new System.Text.UTF8Encoding(false));
+            output.WriteLine(Dispatch.ListingJson());
+        }
+        else
+        {
+            // --help or --version for the bundle itself (AX-1.4).
+            var text = launch.Arguments[0] == "--version" ? $"Axit {BundleInfo.Version}" : $"Axit {BundleInfo.Version}\n\n{Dispatch.Usage}";
+            MessageBox.Show(text, "Axit", MessageBoxButtons.OK, MessageBoxIcon.Information);
         }
     }
+
+    /// <summary>
+    /// Every app's entry point by its verb (AX-1.7), one line per app of <see cref="Dispatch.Apps"/>; a new app adds
+    /// its line here (tools/new-app.ps1 does), and <c>InventoryTests</c> fails on an app without one.
+    /// </summary>
+    private static readonly Dictionary<string, Action<string[]>> Runs = new()
+    {
+        [Dispatch.AxClaude] = AxClaudeApp.Run,
+        [Dispatch.AxDown] = AxDownApp.Run,
+        [Dispatch.AxJSON] = AxJSONApp.Run,
+        [Dispatch.AxGit] = AxGitApp.Run,
+        [Dispatch.AxTerminal] = AxTerminalApp.Run,
+        [Dispatch.AxFile] = AxFileApp.Run,
+        [Dispatch.AxMedia] = AxMediaApp.Run,
+        [Dispatch.AxPreview] = AxPreviewApp.Run,
+        [Dispatch.AxStart] = AxStartApp.Run,
+        [Dispatch.AxProcess] = AxProcessApp.Run,
+        [Dispatch.AxTask] = AxTaskApp.Run,
+        [Dispatch.AxPass] = AxPassApp.Run,
+        [Dispatch.AxCalc] = AxCalcApp.Run,
+        [Dispatch.AxClip] = AxClipApp.Run,
+    };
 
     /// <summary>
     /// AX-2.8: an update installed in place renames the program file that was running to Axit.old.exe, since a

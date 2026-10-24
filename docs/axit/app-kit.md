@@ -56,6 +56,19 @@ After the kit:
   project references (an MSBuild glob), `Program.cs` (one table), `KeyTests` (one entry per app).
 - AK-4.2 Kept as text, checked by `InventoryTests`: the READMEs, the root notes, the issue forms, the changelog, the
   specs' lists (which point to `Dispatch.Apps` rather than repeat it, at the user's word).
+- AK-4.3 **Built 2026-10-24** (branch `app-kit`). `Dispatch.Apps` carries the description, the icon's letters and
+  colour, File Explorer's entries (`Explorer`, `Types`) and Open with (`OpenWith`, `TypeName`). Read from it now:
+  `Program.cs` (one table, verb to `Run`, the taskbar id from the project name); `install.ps1` through `Axit.exe
+  apps`, which prints the list as JSON (AX-1.4), since the installer runs from the zip without the source, with the
+  listing kept as `apps.json` for an uninstall that cannot run the program; `run.ps1` and `make-icon.ps1` off
+  `Dispatch.cs` itself through `tools/apps.ps1`, since they run before a build; the project references of `Axit` and
+  `Axit.Tests`, by a glob over `src`. `tools/new-app.ps1` writes the rest of a new app's places: the folders and a
+  first window (one list on `AxitForm`), the documents as stubs, the run and AxAutomate scripts, the icon, the
+  `Dispatch.Apps` entry with its verb and usage, the line in `Program.cs`, the `KeyTests` and `DispatchTests`
+  entries, the solution, the issue forms, AX-1.1 and AX-1.6, and drafts of the README, map, spec and changelog lines;
+  it prints what stays by hand (`adding-an-app.md` marks each place). Still a copy: `KeyTests`' two entries per app,
+  which reference the window's classes and so are code, not data; install.ps1's `$background` table and run.ps1's
+  restart of the two background apps; the prose of the documents.
 
 ## 5. Order, one step per commit, each shippable
 
@@ -63,6 +76,6 @@ After the kit:
 2. axCalc on them (the smallest), then axProcess, then axGIT moving the views flow into `ListWindow`, then axMedia.
 3. axTask and axPass through `ItemForm`, axStart and axClip through `HotkeyForm`, axTerminal and axClaude, the editors.
 4. axFile last (the most states).
-5. In parallel, the registration places of AK-4, then `tools/new-app.ps1`.
+5. In parallel, the registration places of AK-4, then `tools/new-app.ps1` (done 2026-10-24, AK-4.3).
 
 Every step: the app's NVDA test plan passed before the next, as the bundle's rule says.

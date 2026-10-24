@@ -7,23 +7,10 @@
     <UseWindowsForms>true</UseWindowsForms>
   </PropertyGroup>
 
+  <!-- Every project of src but the executable (docs/axit/app-kit.md AK-4.1), so that a new app's key table is in reach
+       of KeyTests by being there. -->
   <ItemGroup>
-    <ProjectReference Include="..\..\src\Axit.Core\Axit.Core.csproj" />
-    <ProjectReference Include="..\..\src\Axit.Forms\Axit.Forms.csproj" />
-    <ProjectReference Include="..\..\src\AxDown\AxDown.csproj" />
-    <ProjectReference Include="..\..\src\AxJSON\AxJSON.csproj" />
-    <ProjectReference Include="..\..\src\AxGit\AxGit.csproj" />
-    <ProjectReference Include="..\..\src\AxClaude\AxClaude.csproj" />
-    <ProjectReference Include="..\..\src\AxTerminal\AxTerminal.csproj" />
-    <ProjectReference Include="..\..\src\AxFile\AxFile.csproj" />
-    <ProjectReference Include="..\..\src\AxMedia\AxMedia.csproj" />
-    <ProjectReference Include="..\..\src\AxPreview\AxPreview.csproj" />
-    <ProjectReference Include="..\..\src\AxStart\AxStart.csproj" />
-    <ProjectReference Include="..\..\src\AxProcess\AxProcess.csproj" />
-    <ProjectReference Include="..\..\src\AxTask\AxTask.csproj" />
-    <ProjectReference Include="..\..\src\AxPass\AxPass.csproj" />
-    <ProjectReference Include="..\..\src\AxCalc\AxCalc.csproj" />
-    <ProjectReference Include="..\..\src\AxClip\AxClip.csproj" />
+    <ProjectReference Include="..\..\src\*\*.csproj" Exclude="..\..\src\Axit\Axit.csproj" />
   </ItemGroup>
 
 </Project>

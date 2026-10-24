@@ -221,6 +221,40 @@ public sealed class DispatchTests
         }
     }
 
+    /// <summary>AX-1.4: <c>Axit apps</c> is the bundle's, never an app, and lists every app for the installer.</summary>
+    [Fact]
+    public void The_apps_verb_lists_every_app_as_json()
+    {
+        Assert.Equal(Dispatch.Listing, Dispatch.Decide(["apps"]).App);
+        Assert.Equal(Dispatch.Listing, Dispatch.Decide(["APPS"]).App);
+        Assert.DoesNotContain(Dispatch.Apps, app => app.Verb == Dispatch.Listing);
+        Assert.Contains("Axit apps", Dispatch.Usage);
+
+        var listing = System.Text.Json.Nodes.JsonNode.Parse(Dispatch.ListingJson())!.AsArray();
+        Assert.Equal(Dispatch.Apps.Select(app => app.Verb), listing.Select(node => (string)node!["verb"]!));
+        var git = listing.Single(node => (string)node!["verb"]! == Dispatch.AxGit)!;
+        Assert.Equal(["folders"], git["explorer"]!.AsArray().Select(node => (string)node!));
+        var media = listing.Single(node => (string)node!["verb"]! == Dispatch.AxMedia)!;
+        Assert.Equal(["files"], media["explorer"]!.AsArray().Select(node => (string)node!));
+        Assert.Equal(MediaFiles.Extensions.Order(), media["openWith"]!.AsArray().Select(node => (string)node!).Order());
+        var calc = listing.Single(node => (string)node!["verb"]! == Dispatch.AxCalc)!;
+        Assert.Empty(calc["explorer"]!.AsArray());
+    }
+
+    /// <summary>AX-2.2, AX-2.3: every app has what the installer and the icon script take from it, and no two icons look alike.</summary>
+    [Fact]
+    public void Every_app_has_its_description_and_icon()
+    {
+        foreach (var app in Dispatch.Apps)
+        {
+            Assert.StartsWith(app.Name + ", ", app.Description);
+            Assert.Equal(2, app.Icon.Letters.Length);
+            Assert.Equal(app.OpenWith.Count > 0, app.TypeName.Length > 0);
+        }
+
+        Assert.Equal(Dispatch.Apps.Count, Dispatch.Apps.Select(app => app.Icon.Letters).Distinct().Count());
+    }
+
     /// <summary>AX-9.2: the apps of a group stand together, in the groups' order, so that the menus' separators fall between groups; a new app is placed by its group.</summary>
     [Fact]
     public void The_apps_stand_in_their_groups_in_order()

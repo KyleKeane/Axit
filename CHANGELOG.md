@@ -5,6 +5,7 @@
 - Axit: in every window, AI tools such as Claude Code can read what the Axit windows show and open apps, once you turn it on in the Axit menu, AI tools, which also adds Axit to Claude Code for you, and allow each tool in the notice it brings up. It is off by default; a tool cannot change or delete anything, never reads axPass or axClip, and every call is in `mcp-audit.log`. Forget AI tools takes every pairing back.
 - axPass: F5 reads the database again, as File → Refresh does; it used to show the list read before.
 - For developers: every window's keys are one list of commands (`Axit.Forms/Command`, `docs/axit/app-kit.md` AK-2), each making its menu item and its key from one record, with a mark of what it does for the planned AI access; the windows' key switches are gone. New scripts for axStart and axClip in `tests/scripts`.
+- For developers: a new app is registered by its line in `Dispatch.Apps` and a run of `tools/new-app.ps1`, which writes its folders, a first window, its documents and its registration places (`docs/axit/app-kit.md` AK-4.3). The installer reads the apps from `Axit.exe apps`, `run.ps1` and `tools/make-icon.ps1` from `Dispatch.cs`, `Program.cs` starts them from one table, and the executable references the projects of `src` by a glob.
 
 ## 3.7.0 - 2026-10-24
 
