@@ -45,7 +45,7 @@ Window-specific keys, in one table per app (AX-8); the ones here are the same in
 | Escape | — | back to the navigator |
 | Ctrl+N | new item in this list | new field |
 | Ctrl+Shift+N | new list here | — |
-| F2 | rename (the Title field) | rename the field |
+| F2 | rename in place (the Title field; bundle AX-8.7) | rename the field in place |
 | Delete | delete the item or list (IA-D4) | remove the field (never Title) |
 | Alt+Up, Alt+Down | — | move the field |
 | Ctrl+Z | undo the last change | the same |

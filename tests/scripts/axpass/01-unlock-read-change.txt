@@ -2,7 +2,8 @@
 # question, locking (docs/axpass/nvda-test-plan.md sections 1, 2, 4 and 5; SPEC PW-4, PW-6). Needs KeePassXC installed:
 # the database is made by its own tool, the master password a test value. The copies (Ctrl+B, Ctrl+C) are left to the
 # NVDA pass, since they would change the clipboard of whoever runs this.
-file home\Axit\axpass.json {"checkForUpdates": false}
+# The idle lock off: it counts real input only, which the runner's keys are not, so it would lock mid-run when nobody is at the computer.
+file home\Axit\axpass.json {"checkForUpdates": false, "lockMinutes": 0}
 file twice.txt test-master-1\ntest-master-1\n
 file once.txt test-master-1\n
 run "C:\Program Files\KeePassXC\keepassxc-cli.exe" db-create -q -p test.kdbx < twice.txt

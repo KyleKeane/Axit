@@ -26,7 +26,7 @@ public static class HelpText
           Enter: open: a group shows what is in it, an entry moves to its fields. On a locked window, Enter unlocks
           Tab: to the detail pane
           Ctrl+N: a new entry here. Ctrl+Shift+N: a new group here
-          F2: rename the entry. Delete: move it to the Recycle Bin; Ctrl+Z brings it back
+          F2: rename the entry in place: a box over the line, Enter keeps the new title, Escape the old. Delete: move it to the Recycle Bin; Ctrl+Z brings it back
           Ctrl+Q: read every field of the entry; the password is never read
           Shift+F10 or the Applications key: the menu of the selection
 

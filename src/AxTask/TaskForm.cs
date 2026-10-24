@@ -48,7 +48,7 @@ public sealed partial class TaskForm : ItemForm
         _listMenu.DropDownItems.Add(Item("New &item...", NewItem, ItemKeys.New));
         _listMenu.DropDownItems.Add(Item("New &list...", NewList, ItemKeys.NewList));
         _listMenu.DropDownItems.Add(new ToolStripMenuItem("New &smart list...", null, (_, _) => NewSmartList()));
-        _listMenu.DropDownItems.Add(Item("&Rename...", () => WithRow(RenameRow), ItemKeys.Rename));
+        _listMenu.DropDownItems.Add(Item("&Rename", RenameSelected, ItemKeys.Rename));
         _listMenu.DropDownItems.Add(Item("Ar&chive", () => WithRow(DeleteRow), ItemKeys.Delete));
         _listMenu.DropDownItems.Add(Item("Move to s&ection...", MoveToSection, AxTaskKeys.MoveToSection));
         _listMenu.DropDownItems.Add(Item("Pre&vious section", () => JumpSection(-1), ItemKeys.PreviousSection));
@@ -64,7 +64,7 @@ public sealed partial class TaskForm : ItemForm
         _itemMenu.DropDownItems.Add(Item("&Done or not done", () => CheckInNavigator(SelectedRow()), ItemKeys.Check));
         _itemMenu.DropDownItems.Add(Item("&Read in full", ReadAll, ItemKeys.ReadAll));
         _itemMenu.DropDownItems.Add(Item("New &item...", NewItem, ItemKeys.New));
-        _itemMenu.DropDownItems.Add(Item("Rena&me...", () => WithRow(RenameRow), ItemKeys.Rename));
+        _itemMenu.DropDownItems.Add(Item("Rena&me", RenameSelected, ItemKeys.Rename));
         _itemMenu.DropDownItems.Add(Item("Ar&chive", () => WithRow(DeleteRow), ItemKeys.Delete));
         _itemMenu.DropDownItems.Add(new ToolStripMenuItem("Use these fields for &new items", null, (_, _) => UseAsTemplate()));
         _itemMenu.DropDownItems.Add(new ToolStripSeparator());
@@ -75,7 +75,7 @@ public sealed partial class TaskForm : ItemForm
         _fieldMenu.DropDownItems.Add(Item("&Done or not done", CheckField, ItemKeys.Check));
         _fieldMenu.DropDownItems.Add(Item("&Read in full", ReadAll, ItemKeys.ReadAll));
         _fieldMenu.DropDownItems.Add(Item("&New field...", NewField, ItemKeys.New));
-        _fieldMenu.DropDownItems.Add(Item("Ren&ame field...", RenameField, ItemKeys.Rename));
+        _fieldMenu.DropDownItems.Add(Item("Ren&ame field", RenameField, ItemKeys.Rename));
         _fieldMenu.DropDownItems.Add(Item("Re&move field", RemoveField, ItemKeys.Delete));
         _fieldMenu.DropDownItems.Add(Item("Move &up", () => MoveField(-1), ItemKeys.MoveFieldUp));
         _fieldMenu.DropDownItems.Add(Item("Move do&wn", () => MoveField(1), ItemKeys.MoveFieldDown));

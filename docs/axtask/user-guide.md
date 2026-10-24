@@ -54,7 +54,8 @@ In the navigator:
 - Ctrl+N adds an item to the list shown. It gets the fields the list gives new items: Done, Start and Due unless
   you choose others.
 - Ctrl+Shift+N makes a new list.
-- F2 renames the item or the list. Links to it from other items are kept.
+- F2 renames the item or the list in place: a box over the line holds the name; type the new one and press Enter,
+  or Escape to keep the old. Links to it from other items are kept.
 - Delete moves the item or the list into the Archive: an archived list is under **Archived lists**, archived items
   under its line "Archived items". Ctrl+Z brings it back.
   To delete something for good, show it in axFile with Ctrl+E and delete it there.
@@ -68,7 +69,7 @@ In the detail pane:
   - a long text is a field of several lines: Enter makes a new line, Tab and then Enter on Save keeps it;
   - a link takes the title of the item it points to, in any list.
 - Ctrl+N adds a field after the selected one: its title, then its type from a list; a choice then asks its options.
-- F2 renames the field, Delete removes it, Alt+Up and Alt+Down move it. The Title field stays.
+- F2 renames the field in place, Delete removes it, Alt+Up and Alt+Down move it. The Title field stays.
 - Item, Use these fields for new items gives the list's new items the fields of the item selected.
 
 Every change is written to the file at once, and Ctrl+Z takes back the last ones, one at a time. If another program

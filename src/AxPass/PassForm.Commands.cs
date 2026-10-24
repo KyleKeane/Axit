@@ -85,20 +85,13 @@ public sealed partial class PassForm
         });
     }
 
-    protected override void RenameRow(ItemRow row)
-    {
-        if (row.Tag is PassNode { IsGroup: true })
-        {
-            Announce("A group is renamed in KeePassXC's own window: its tool has no command for it", true);
-            return;
-        }
+    /// <summary>F2 in the navigator (AX-8.7): an entry's title in place; a group is renamed in KeePassXC's own window.</summary>
+    protected override string? RenameRefused(ItemRow row) =>
+        row.Tag is PassNode { IsGroup: true } ? "A group is renamed in KeePassXC's own window: its tool has no command for it" : null;
 
-        if (row.Tag is PassNode entry)
-        {
-            AskText("Rename " + entry.Name, string.Empty, "Title:", "Title", entry.Name, "&Rename", title => RenameItem(row, title.Trim()), PassTree.RefusedName);
-        }
-    }
+    protected override string? RefusedName(ItemRow row, string name) => PassTree.RefusedName(name);
 
+    protected override void RenameTo(ItemRow row, string name) => RenameItem(row, name);
     /// <summary>
     /// Delete (PW-6.4): an entry to the Recycle Bin, back with Ctrl+Z; a group after a question, since only KeePassXC
     /// brings a group back; in the Recycle Bin, for good after a question.
@@ -228,6 +221,12 @@ public sealed partial class PassForm
             }
 
             _entries.Clear();
+            if (step.Select is { } path && !path.EndsWith('/') && await Cli("show", null, [path]) is { } shown)
+            {
+                // The entry read again before the words, so that its fields are there for the next key.
+                _entries[path] = EntryFields.Parse(shown.Output);
+            }
+
             await ReloadAsync(step.Select ?? SelectedKey());
             Announce("Undone: " + step.Said, true);
         });

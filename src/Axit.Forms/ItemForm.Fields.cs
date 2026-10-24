@@ -228,10 +228,26 @@ public abstract partial class ItemForm
             return;
         }
 
+        // In place, as every rename in a list (AX-8.7).
         var shown = _shown.Document;
-        AskText("Rename " + field.Title, string.Empty, "Field title:", "Field title", field.Title, "&Rename",
-            title => ChangeShown(document => (document.WithFieldTitle(index, title.Trim()), $"Renamed {field.Title} to {title.Trim()}"), index),
-            typed => typed.Trim().Length == 0 ? "Type the field's title" : shown.IndexOf(typed.Trim()) is var i && i >= 0 && i != index ? $"There is a field called {typed.Trim()} already" : null);
+        DetailPane.BeginRename(field.Title, field.Title.Length, title =>
+        {
+            if (title == field.Title)
+            {
+                DetailPane.EndRename();
+                Announce("Name unchanged", true);
+                return;
+            }
+
+            if (title.Length == 0 || (shown.IndexOf(title) is var i && i >= 0 && i != index))
+            {
+                Announce(title.Length == 0 ? "Type the field's title" : $"There is a field called {title} already", true);
+                return;
+            }
+
+            DetailPane.EndRename();
+            ChangeShown(document => (document.WithFieldTitle(index, title), $"Renamed {field.Title} to {title}"), index);
+        });
     }
 
     /// <summary>Delete in the detail pane: the field removed; never the Title (IA-3).</summary>

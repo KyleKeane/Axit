@@ -164,46 +164,48 @@ public sealed partial class TaskForm
         });
     }
 
-    /// <summary>F2 in the navigator: an item's Title (its file renamed with it, IA-4.5) or a list's name; the links to them kept (IA-D3).</summary>
-    protected override void RenameRow(ItemRow row)
+    /// <summary>F2 in the navigator (AX-8.7): an item's Title (its file renamed with it, IA-4.5) or a list's name, in place; the links to them kept (IA-D3).</summary>
+    protected override string? RenameRefused(ItemRow row) => row switch
     {
-        switch (row)
+        { Tag: SectionTag { Custom: true } } => "A section is renamed by moving its lists: Ctrl+M on each",
+        { Tag: SectionTag } => "This section keeps its name",
+        { Tag: SmartList { Path: null } } => "All tasks is built in and keeps its name",
+        { Tag: SmartList } => "Rename a smart list's file in axFile: Ctrl+E",
+        { Tag: ItemFile } => null,
+        _ when ReferenceEquals(row.Tag, ArchivedItemsTag) || IsArchiveFolder(row.Key) => "The Archive keeps its name",
+        _ => null,
+    };
+
+    protected override string? RefusedName(ItemRow row, string name)
+    {
+        if (row.Tag is ItemFile)
         {
-            case { Tag: SectionTag { Custom: true } }:
-                Announce("A section is renamed by moving its lists: Ctrl+M on each", true);
-                return;
-            case { Tag: SectionTag }:
-                Announce("This section keeps its name", true);
-                return;
-            case { Tag: var tag } when ReferenceEquals(tag, ArchivedItemsTag):
-                Announce("The Archive keeps its name", true);
-                return;
-            case { Tag: ItemFile item }:
-                AskText("Rename " + row.Name, string.Empty, "Title:", "Title", item.Document.Title, "&Rename", title => RenameItem(row, title.Trim()),
-                    typed => typed.Trim().Length == 0 ? "Type the item's title" : null);
-                return;
-            case { Tag: SmartList { Path: null } }:
-                Announce("All tasks is built in and keeps its name", true);
-                return;
-            case { Tag: SmartList }:
-                Announce("Rename a smart list's file in axFile: Ctrl+E", true);
-                return;
-            case var list when IsArchiveFolder(list.Key):
-                Announce("The Archive keeps its name", true);
-                return;
-            default:
-                var parent = Path.GetDirectoryName(row.Key)!;
-                AskText("Rename " + row.Name, string.Empty, "Name:", "Name", row.Name, "&Rename", name =>
-                {
-                    var to = Path.Combine(parent, name.Trim());
-                    var parts = new List<FileChange> { FileChange.Move(row.Key, to) };
-                    parts.AddRange(Links.AfterMove(ItemFolder.AllItems(TopFolder), row.Key, to));
-                    Commit(new Step(parts, $"Renamed {row.Name} to {name.Trim()}"), to);
-                }, typed => typed.Trim().Equals(row.Name, StringComparison.Ordinal) ? "That is its name already" : ItemFolder.RefusedListName(parent, typed) is { } why && !typed.Trim().Equals(row.Name, StringComparison.OrdinalIgnoreCase) ? why : null);
-                return;
+            return name.Length == 0 ? "Type the item's title" : null;
         }
+
+        if (name.Equals(row.Name, StringComparison.OrdinalIgnoreCase))
+        {
+            // A change of case only: the same folder.
+            return null;
+        }
+
+        return ItemFolder.RefusedListName(Path.GetDirectoryName(row.Key)!, name)
+            ?? (name.Equals(ItemFolder.ArchiveName, StringComparison.OrdinalIgnoreCase) ? "Archive is the archive's own name" : null);
     }
 
+    protected override void RenameTo(ItemRow row, string name)
+    {
+        if (row.Tag is ItemFile)
+        {
+            RenameItem(row, name);
+            return;
+        }
+
+        var to = Path.Combine(Path.GetDirectoryName(row.Key)!, name);
+        var parts = new List<FileChange> { FileChange.Move(row.Key, to) };
+        parts.AddRange(Links.AfterMove(ItemFolder.AllItems(TopFolder), row.Key, to));
+        Commit(new Step(parts, $"Renamed {row.Name} to {name}"), to);
+    }
     protected override void RenameItem(ItemRow row, string title)
     {
         if (row.Tag is not ItemFile item)

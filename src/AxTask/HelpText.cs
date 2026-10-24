@@ -29,7 +29,7 @@ public static class HelpText
           Space: done or not done, on a task
           Ctrl+N: a new item in this list. Ctrl+Shift+N: a new list, in the section of the line selected
           Ctrl+M on a list: move it to a section, or to a new one; its Section field in the detail pane does the same
-          F2: rename. Delete: move to the Archive list; Ctrl+Z brings it back
+          F2: rename in place: a box over the line, Enter keeps the new name, Escape the old. Delete: move to the Archive; Ctrl+Z brings it back
           Ctrl+Q: read every field of the item
           Ctrl+1: All tasks, every task not done
           Ctrl+Shift+D: hide or show the done tasks of a list
@@ -39,7 +39,7 @@ public static class HelpText
           It shows the fields of the item selected in the navigator, or the details of the list
           Up, Down: move through the fields
           Enter: change the field. Space: done or not done, on a check
-          Ctrl+N: a new field. F2: rename the field. Delete: remove it. Alt+Up, Alt+Down: move it
+          Ctrl+N: a new field. F2: rename the field in place. Delete: remove it. Alt+Up, Alt+Down: move it
           Ctrl+Q: read the field's whole value
           Escape, Tab or Shift+Tab: back to the navigator
 

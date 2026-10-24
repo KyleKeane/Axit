@@ -64,7 +64,7 @@ public sealed partial class PassForm : ItemForm
         _entryMenu.DropDownItems.Add(Item("Open U&RL", OpenEntryUrl, AxPassKeys.OpenUrl));
         _entryMenu.DropDownItems.Add(Item("Read in &full", ReadAll, ItemKeys.ReadAll));
         _entryMenu.DropDownItems.Add(Item("New &entry...", NewItem, ItemKeys.New));
-        _entryMenu.DropDownItems.Add(Item("Rena&me...", () => WithRow(RenameRow), ItemKeys.Rename));
+        _entryMenu.DropDownItems.Add(Item("Rena&me", RenameSelected, ItemKeys.Rename));
         _entryMenu.DropDownItems.Add(Item("To the Recycle &Bin", () => WithRow(DeleteRow), ItemKeys.Delete));
 
         _fieldMenu.DropDownItems.Add(Item("&Change...", ChangeField, ItemKeys.Open));

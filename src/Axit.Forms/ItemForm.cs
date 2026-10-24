@@ -109,8 +109,14 @@ public abstract partial class ItemForm : AxitForm
     /// <summary>An item's Title changed, from the detail pane's Title field: the app renames it as F2 does.</summary>
     protected abstract void RenameItem(ItemRow row, string title);
 
-    /// <summary>F2 in the navigator.</summary>
-    protected abstract void RenameRow(ItemRow row);
+    /// <summary>F2 in the navigator (AX-8.7): why this row cannot be renamed, said instead of the box; null when it can.</summary>
+    protected abstract string? RenameRefused(ItemRow row);
+
+    /// <summary>Why a typed name is refused for the row, said with the box kept open; null when it is fine.</summary>
+    protected abstract string? RefusedName(ItemRow row, string name);
+
+    /// <summary>The row renamed to a name <see cref="RefusedName"/> took, once the box has closed.</summary>
+    protected abstract void RenameTo(ItemRow row, string name);
 
     /// <summary>Delete in the navigator (IA-D4).</summary>
     protected abstract void DeleteRow(ItemRow row);
@@ -196,6 +202,12 @@ public abstract partial class ItemForm : AxitForm
 
     protected override bool ProcessWindowKey(Keys keyData)
     {
+        if (Navigator.Renaming || DetailPane.Renaming)
+        {
+            // The rename box has its own keys (AX-8.7): Enter, Escape, Ctrl+Z on the typing.
+            return false;
+        }
+
         if (ProcessItemKey(keyData))
         {
             return true;
@@ -258,7 +270,7 @@ public abstract partial class ItemForm : AxitForm
                     NewItem();
                     return true;
                 case ItemKeys.Rename:
-                    WithRow(RenameRow);
+                    RenameSelected();
                     return true;
                 case ItemKeys.Delete:
                     WithRow(DeleteRow);
@@ -326,6 +338,38 @@ public abstract partial class ItemForm : AxitForm
             Announce("Nothing selected", true);
         }
     }
+
+    /// <summary>
+    /// F2 in the navigator (AX-8.7): the bundle's rename box over the row with its name selected; Enter takes a name
+    /// the app does not refuse, Escape keeps the old one.
+    /// </summary>
+    protected void RenameSelected() => WithRow(row =>
+    {
+        if (RenameRefused(row) is { } why)
+        {
+            Announce(why, true);
+            return;
+        }
+
+        Navigator.BeginRename(row.Name, row.Name.Length, name =>
+        {
+            if (name == row.Name)
+            {
+                Navigator.EndRename();
+                Announce("Name unchanged", true);
+                return;
+            }
+
+            if (RefusedName(row, name) is { } refused)
+            {
+                Announce(refused, true);
+                return;
+            }
+
+            Navigator.EndRename();
+            RenameTo(row, name);
+        });
+    });
 
     /// <summary>Shift+F10, the Applications key, a right click: the menu of the selection.</summary>
     protected void OpenPaneMenu()

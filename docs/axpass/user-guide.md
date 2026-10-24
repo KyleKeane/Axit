@@ -45,7 +45,7 @@ The password is never spoken, never shown and never written anywhere by axPass.
   Enter makes a new line and Tab then Enter on Save keeps it.
 - Enter on Password: type a new one, then type it again; or press Generate (Alt+G) for one of 20 letters, digits and
   signs, then Enter. Ctrl+Z does not bring an old password back.
-- Ctrl+N makes a new entry here, Ctrl+Shift+N a new group. F2 renames an entry. A title cannot hold a slash.
+- Ctrl+N makes a new entry here, Ctrl+Shift+N a new group. F2 renames an entry in place: type the new title over the old and press Enter, or Escape. A title cannot hold a slash.
 - Delete moves an entry to the Recycle Bin group; Ctrl+Z brings it back. A group moves there after a question, and
   only KeePassXC's own window brings a group back. In the Recycle Bin, Delete removes for good after a question.
 - Fields other than KeePass's own ones are shown and are changed in KeePassXC's own window. A group is renamed there
