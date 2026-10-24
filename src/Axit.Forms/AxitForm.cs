@@ -599,7 +599,8 @@ public abstract partial class AxitForm : Form
             string.Empty,
             Log.Tail(200),
         ]);
-        CopyText(text, "Copied diagnostics");
+        // S-20: meant for a public bug report, so the account's name and paths, e-mail addresses and ids are replaced.
+        CopyText(Redaction.Redact(text), "Copied diagnostics");
     }
 
     /// <summary>

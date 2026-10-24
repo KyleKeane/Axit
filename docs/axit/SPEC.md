@@ -295,7 +295,7 @@ The apps are named ax and a word, the ax in lower case and the word as it is wri
   Windows font picker (the choice said), the window's place and size, the settings saving and the notice for a
   settings file that could not be read, the Axit menu with the
   update check, the update notice and the install in place (AX-3), find in a text box, in a list, in a transcript
-  and in a notice's text (one Find notice, one last text), Copy diagnostics, `OpenUrl`, `OpenInExplorer`, the
+  and in a notice's text (one Find notice, one last text), Copy diagnostics (the account's name, its paths, e-mail addresses and ids replaced by `Redaction`, since it is meant for a public bug report, security audit S-20), `OpenUrl`, `OpenInExplorer`, the
   Windows folder picker (`ChooseFolder`), `Do` (a command's task with an escaped exception turned into a notice),
   the hand-over from a starting process of the app (`AppMessage`, answered at once and applied after), the submenus
   and the menu every window has (Options → Text, General and Developer; Help: `CreateTextMenu`,

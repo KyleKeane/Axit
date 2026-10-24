@@ -14,7 +14,7 @@
 
 using System.Diagnostics;
 using System.Text;
-using AxClaude.Core.Privacy;
+using Axit.Core;
 using AxClaude.Core.Pty;
 using AxClaude.Core.Transcript;
 using Axit.Core.Pty;
