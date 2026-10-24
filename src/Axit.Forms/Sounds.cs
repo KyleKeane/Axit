@@ -219,7 +219,7 @@ public static class Sounds
     /// </summary>
     public static event Action<string>? Played;
 
-    private static readonly bool Silent = !string.IsNullOrEmpty(Environment.GetEnvironmentVariable("AXIT_AUTOMATION"));
+    private static readonly bool Silent = AutomationEnvironment.Requested;
 
     private static void Play(string name, Action play)
     {

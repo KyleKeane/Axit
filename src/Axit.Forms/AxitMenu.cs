@@ -201,6 +201,8 @@ public sealed class AxitMenu : ToolStripMenuItem
         }
 
         var info = new ProcessStartInfo(exe) { UseShellExecute = false };
+        // A new window of a test run joins the run; nothing else ever inherits its variables (security audit S-11).
+        AutomationEnvironment.PassTo(info);
         info.ArgumentList.Add(verb);
         foreach (var argument in arguments)
         {

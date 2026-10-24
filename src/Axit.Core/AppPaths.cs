@@ -27,10 +27,10 @@ public static class AppPaths
     public static string InstalledExe => Path.Combine(InstallFolder, "Axit.exe");
 
     /// <summary>
-    /// The folder the settings, the recently closed list and the logs live under: the user's, or <c>AXIT_HOME</c> when
-    /// it is set, which a test run sets to a folder of its own so that its windows neither read nor write the user's
-    /// files (docs/axit/automation.md).
+    /// The folder the settings, the recently closed list and the logs live under: the user's, or a test run's own
+    /// (<see cref="AutomationEnvironment.Home"/>), so that its windows neither read nor write the user's files
+    /// (docs/axit/automation.md); a run's folder counts only with the run's secret (security audit S-11).
     /// </summary>
     private static string Home(Environment.SpecialFolder folder) =>
-        Environment.GetEnvironmentVariable("AXIT_HOME") is { Length: > 0 } home ? home : Environment.GetFolderPath(folder);
+        AutomationEnvironment.Home ?? Environment.GetFolderPath(folder);
 }

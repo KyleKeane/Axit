@@ -62,6 +62,12 @@ another project on its second use, the bullet says so.
   globalization, where `string.Normalize` returns its input; `TextMatch.Fold` and axFile's lookalike names use it. The
   test projects run in invariant mode too (`tests/Directory.Build.props`), which is what found both.
 
+## Safety (docs/axit/security-audit-2026-10-24.md)
+
+- `SystemPrograms` (S-1): Windows' own programs by full path, and `OnPath`, the PATH searched in its full folders only; every process an app starts is named through it or by a full path it found itself.
+- `AutomationEnvironment` (S-11): a test run's secret and folder, read once in `Main` and taken out of the environment; only a new Axit window of the run gets them (`PassTo`).
+- `Redaction` (S-20; from AxClaude.Core on its second use, Copy diagnostics): e-mail addresses, the account's paths, pipe names, ids and the account name replaced by placeholders, for text to be shown or shared.
+
 ## Background apps
 
 - `SignInStart` (docs/axstart/SPEC.md AS-1.3; from axStart, axClip, 2026-10-23): a background app's value under the

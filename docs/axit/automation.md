@@ -31,13 +31,23 @@ dotnet run --project tools\AxAutomate -c Release -- tests\scripts --build --repo
 For the windows' own behaviour: keys, focus, announcements, notices, menus, the control area. Runs any time,
 including while the user works, because nothing takes the foreground.
 
-- **On only for a test run.** A window starts its channel when the environment variable `AXIT_AUTOMATION` names a
-  pipe (`axit-auto-<run id>`); without it, no pipe exists and nothing is recorded. A window in a test run is shown
-  without activation, so it never takes the keyboard from the user, and focus moves inside it with the thread's own
-  active window.
+- **On only for a test run, and only for the runner** (security audit S-11, 2026-10-24). The runner makes a secret of
+  256 random bits for each run and gives it to the windows it starts as `AXIT_AUTOMATION`; a window opens its channel
+  only with a secret of 32 characters or more, and the client's first line must be that secret (compared in constant
+  time), or the client is let go. `Axit.Core/AutomationEnvironment` reads the variables once, as the process starts,
+  and takes them out of its environment: a shell in axTerminal, Claude, git or the user's own programs never inherit
+  them; only a new Axit window of the same run gets them (`AxitMenu.StartWith`). Without a secret, no pipe exists and
+  nothing is recorded. A window in a test run is shown without activation, so it never takes the keyboard from the
+  user, and focus moves inside it with the thread's own active window.
 - **Its own files.** The runner sets `AXIT_HOME` to a folder of the run's, under which the windows keep their
-  settings, their logs and the recently closed list (`AppPaths`), so that a run neither reads nor writes the user's.
-- **One named pipe per window**, `\\.\pipe\<name>-<process id>`, one command per line, one answer per line (JSON).
+  settings, their logs and the recently closed list (`AppPaths`), so that a run neither reads nor writes the user's;
+  the folder counts only together with the run's secret.
+- **One named pipe per window**, `\\.\pipe\axit-auto-<process id>`, for the current user alone and refused to
+  clients over the network (its access list); the runner connects with `CurrentUserOnly`, so a pipe another program
+  made under the name is refused. A pipe already taken ends the channel, never the window. One command per line, one
+  answer per line (JSON).
+- **Secrets never leave**: a password field reads "protected" in `focus`, `text` and the timeline, as NVDA says it
+  (S-12).
 - **The timeline** (2026-10-23, the user's ask for full diagnostics): every window records, with the milliseconds
   since it opened, each announcement (with whether it interrupts), each sound by name (`Sounds.Played`; in a test
   run the sounds are recorded and not played, so a run is silent on the user's speakers), each move of the focus to
