@@ -43,21 +43,26 @@ public sealed class ClipForm : HotkeyForm
         _settings = settings;
         _history = new ClipHistory(settings.History);
 
-        // ---- menus (CP-5.1); the keys are handled in ProcessWindowKey from the table, the items only show them ----
+        // ---- menus and keys (CP-2.4, CP-5.1, CP-5.2): one command list (docs/axit/app-kit.md AK-2), each key from the
+        // table; the match keys first, as the switch had them ----
+        AddMatchKeys(AxClipKeys.NextMatch, AxClipKeys.PreviousMatch, AxClipKeys.FirstMatch, AxClipKeys.LastMatch);
         var clip = new ToolStripMenuItem("ax&Clip");
-        clip.DropDownItems.Add(Item("&Paste", Paste, AxClipKeys.Paste));
-        clip.DropDownItems.Add(Item("&Copy without pasting", CopyOnly, AxClipKeys.CopyOnly));
-        clip.DropDownItems.Add(Item("&Read in full", ReadInFull, AxClipKeys.ReadInFull));
-        clip.DropDownItems.Add(Item("Re&move", RemoveSelected, AxClipKeys.Remove));
-        clip.DropDownItems.Add(Item("C&lear history...", ClearHistory, AxClipKeys.ClearHistory));
+        Add(clip, new Command("&Paste", AxClipKeys.Paste, Paste) { Mark = CommandMark.Act });
+        Add(clip, new Command("&Copy without pasting", AxClipKeys.CopyOnly, CopyOnly));
+        Add(clip, new Command("&Read in full", AxClipKeys.ReadInFull, ReadInFull) { Mark = CommandMark.Read });
+        Add(clip, new Command("Re&move", AxClipKeys.Remove, RemoveSelected));
+        Add(clip, new Command("C&lear history...", AxClipKeys.ClearHistory, ClearHistory) { Mark = CommandMark.Act });
         clip.DropDownItems.Add(new ToolStripSeparator());
-        clip.DropDownItems.Add(Item("&Hide", () => HideWindow(), AxClipKeys.Hide));
+        Add(clip, new Command("&Hide", AxClipKeys.Hide, () =>
+        {
+            Log.Info("Hidden: Hide");
+            HideWindow();
+        }));
         clip.DropDownItems.Add(new ToolStripMenuItem("&Quit axClip", null, (_, _) => Quit()));
 
         var options = new ToolStripMenuItem("&Options");
         options.DropDownItems.Add(new ToolStripMenuItem("&Hotkey...", null, (_, _) => ShowHotkeyNotice()));
-        _pauseItem = Item("&Pause recording", TogglePause, AxClipKeys.PauseRecording);
-        options.DropDownItems.Add(_pauseItem);
+        _pauseItem = Add(options, new Command("&Pause recording", AxClipKeys.PauseRecording, TogglePause));
         options.DropDownItems.Add(Toggle("&Keep history between runs", settings.KeepHistory, v =>
         {
             // CP-3.4: off, the file's history is emptied by the save that follows.
@@ -193,44 +198,6 @@ public sealed class ClipForm : HotkeyForm
         }
 
         base.WndProc(ref m);
-    }
-
-    // ---- keys (CP-5.2): every key comes from BundleKeys or AxClipKeys, and is handled here only ----
-
-    protected override bool ProcessWindowKey(Keys keyData)
-    {
-        if (ProcessMatchKey(keyData, AxClipKeys.NextMatch, AxClipKeys.PreviousMatch, AxClipKeys.FirstMatch, AxClipKeys.LastMatch))
-        {
-            return true;
-        }
-
-        switch (keyData)
-        {
-            case AxClipKeys.Paste:
-                Paste();
-                return true;
-            case AxClipKeys.CopyOnly:
-                CopyOnly();
-                return true;
-            case AxClipKeys.ReadInFull:
-                ReadInFull();
-                return true;
-            case AxClipKeys.Remove:
-                RemoveSelected();
-                return true;
-            case AxClipKeys.ClearHistory:
-                ClearHistory();
-                return true;
-            case AxClipKeys.PauseRecording:
-                TogglePause();
-                return true;
-            case AxClipKeys.Hide:
-                Log.Info("Hidden: Escape");
-                HideWindow();
-                return true;
-        }
-
-        return false;
     }
 
     // ---- what is kept (CP-3) ----

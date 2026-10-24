@@ -1,0 +1,82 @@
+# axClip: the search field, the match keys and the commands that stay inside the window (docs/axclip/nvda-test-plan.md;
+# SPEC CP-2, CP-4, CP-5.2). Every key here is a command of the window's one list (docs/axit/app-kit.md AK-2), the match
+# keys HotkeyForm's, so this script is also the check that the list does what the key switch did before it. The hotkey
+# is one nobody uses, so that the run never takes the user's; Start with Windows stays on, which a development build
+# never writes (SignInStart), since off would remove the user's own sign-in value.
+#
+# The test desktop shares the clipboard with the user's session: the script copies three texts of its own, which stay
+# on the clipboard after the run, and every step filters on them, so that nothing the user copies is ever said here.
+file home\Axit\axclip.json {"checkForUpdates": false, "hotkey": "Ctrl+Alt+Shift+F10", "sayFirstMatch": false}
+
+start clip
+expect focus Search the clipboard
+
+run <nul set /p =axkitclip alpha| clip
+wait 500
+run <nul set /p =axkitclip beta| clip
+wait 500
+run <nul set /p =axkitclip gamma| clip
+wait 500
+
+# CP-2.4: Down and Up move the selection, newest first, with the caret kept in the field; at an end the edge sound,
+# and the item said.
+type axkitclip
+keys down
+expect said axkitclip beta, 2 of 3
+keys up
+expect said axkitclip gamma, 1 of 3
+keys up
+expect said ♪ Edge
+expect said axkitclip gamma, 1 of 3
+
+# Ctrl+End the oldest (Down there is the edge), Ctrl+Home the newest; Page Down and Page Up by a page.
+keys ctrl+end
+expect said axkitclip alpha, 3 of 3
+keys down
+expect said ♪ Edge
+keys ctrl+home
+expect said axkitclip gamma, 1 of 3
+keys pagedown
+expect said axkitclip alpha, 3 of 3
+keys pageup
+expect said axkitclip gamma, 1 of 3
+
+# CP-4.3: Ctrl+Q the whole text in a notice; Escape closes it.
+keys ctrl+q
+expect state "notice":"Clipboard text, 1 line"
+keys escape
+expect state "notice":null
+
+# Ctrl+P pauses the recording and starts it again.
+keys ctrl+p
+expect said ! Recording paused
+expect state Paused
+keys ctrl+p
+expect said ! Recording
+expect state Recording
+
+# Delete removes the selected item.
+keys delete
+expect said ! Removed
+keys ctrl+end
+expect said , 2 of 2
+
+# Ctrl+Shift+Delete asks first; Clear empties the history.
+keys ctrl+shift+delete
+expect state "notice":"Clear the clipboard history?"
+keys enter
+expect said ! Clipboard history cleared
+keys down
+expect said ♪ Edge
+
+# Enter (Paste into the program in front) and Shift+Enter (Copy without pasting) put an item on the clipboard and
+# act outside the window: not run here, they stay for the NVDA plan.
+
+# Escape hides the window whatever the field holds; a second start shows it again with the field empty.
+keys escape
+launch clip
+expect focus "name":"Search the clipboard","role":"Text","value":""
+
+# Quit axClip, the one close that ends the process.
+menu Quit axClip
+expect closed
