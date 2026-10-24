@@ -20,12 +20,15 @@ public static class HelpText
 
         ## The navigator, on the left
           Up, Down, Home, End: move; the edge sound at an end. Type the start of a name to jump to it, Shift with a letter backwards
-          Right: into a list or a smart list. On an item, nothing: the edge sound
-          Left or Backspace: up a level
+          The top level is in sections: Smart lists, User lists, your own sections, Archived lists, each under a header line
+          Ctrl+Up, Ctrl+Down: the section before or after; the edge sound past the first or the last
+          Right: into a list or a smart list. On an item or a section's header, nothing: the edge sound
+          Left or Backspace: back to the sections
           Enter: open: a list shows its items, an item moves to its fields
           Tab: to the detail pane
           Space: done or not done, on a task
-          Ctrl+N: a new item in this list. Ctrl+Shift+N: a new list here
+          Ctrl+N: a new item in this list. Ctrl+Shift+N: a new list, in the section of the line selected
+          Ctrl+M on a list: move it to a section, or to a new one; its Section field in the detail pane does the same
           F2: rename. Delete: move to the Archive list; Ctrl+Z brings it back
           Ctrl+Q: read every field of the item
           Ctrl+1: All tasks, every task not done

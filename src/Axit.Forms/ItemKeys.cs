@@ -13,6 +13,11 @@ public static class ItemKeys
     public const Keys Up = Keys.Left;
     public const Keys UpAlso = Keys.Back;
 
+    /// <summary>In the navigator, the section header before or after (IA-2.3a); in an edit control the same keys move by paragraph (AX-8.2), the same idea.</summary>
+    public const Keys PreviousSection = Keys.Control | Keys.Up;
+
+    public const Keys NextSection = Keys.Control | Keys.Down;
+
     /// <summary>Open (IA-D2): a list opens, an item's fields take the focus; in the detail pane, change the field.</summary>
     public const Keys Open = Keys.Return;
 
@@ -56,6 +61,8 @@ public static class ItemKeys
         ("Into a list", Into),
         ("Up a level", Up),
         ("Up a level (Backspace)", UpAlso),
+        ("Previous section", PreviousSection),
+        ("Next section", NextSection),
         ("Open, or change the field", Open),
         ("To the other pane", OtherPane),
         ("To the other pane, back", OtherPaneBack),

@@ -7,12 +7,17 @@ file tasks\Shopping\Milk.json {"format": "axit-item 1", "fields": [{"title": "Ti
 file tasks\Shopping\Washer.json {"format": "axit-item 1", "fields": [{"title": "Title", "type": "text", "value": "Washer"}, {"title": "Done", "type": "check", "value": false}]}
 
 start task {temp}\tasks
+expect focus Smart lists, section, 1 smart list
+keys down
 expect focus All tasks, 2 not done
 
 # 1.8 A list's details: its fields, then the fields its new items get.
 keys down
+keys down
 expect focus Home, list, 2 items
 keys tab
+expect focus Section, text, empty
+keys down
 expect focus Notes, long text, empty
 keys down
 expect focus Fields of a new item: Done, Start, Due
@@ -107,6 +112,7 @@ file tasks\Soon.filter.json {"format": "axit-filter 1", "match": "all", "conditi
 keys left
 keys f5
 keys home
+keys down
 keys down
 expect focus Odd, smart list, a condition not understood
 keys down

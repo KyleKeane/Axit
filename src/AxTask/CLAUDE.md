@@ -21,11 +21,12 @@ The bundle rules are in the root `CLAUDE.md`.
   `Axit.Forms/ItemForm` (since axPass, its second use); `TaskForm` derives from it and fills in what is axTask's.
 - `TaskForm.cs`: the menus (Folder; List, Item and Field, only the one for the selection enabled, `UpdateRowMenus`;
   View, Options, Axit, Help), axTask's own keys (`ProcessItemKey`), the levels of the folder (`Start`, `EnterList`,
-  `LeaveList`, `ShowAllTasks`, `ReadLevel` with the rows' `Tag`: an `ItemFile`, a `SmartList`, or nothing for a
-  list) and the detail (`DetailOf`, with a `FileSource` to save to; a link read by `SpokenValue`).
+  `LeaveList`, which goes straight back to the top, `ShowAllTasks`, `ReadLevel` with the rows' `Tag`: an `ItemFile`, a
+  `SmartList`, a `SectionTag` on a header, `ArchivedItemsTag`, or nothing for a list; the top level in sections is
+  `ReadSections`, TK-3a) and the detail (`DetailOf`, with a `FileSource` to save to; a link read by `SpokenValue`).
 - `TaskForm.Commands.cs`: the commands and the one way a file changes: `Commit` (a `Step` applied, kept for Ctrl+Z,
   the panes filled, its words said), `CheckFresh` (the file still as shown, IA-5.5), `SaveFields` (the shared field
-  commands' change, written), the link's notice (`ChangeSpecial`). Rename and Archive add `Links.AfterMove`'s writes,
+  commands' change, written), `MoveToSection` and `SetSection` (TK-3a.3), `NewList` in the selected row's section, the link's notice (`ChangeSpecial`). Rename and Archive add `Links.AfterMove`'s writes,
   so links follow what moved.
 - `AxTaskKeys`: the window's keys, `Axit.Forms/ItemKeys.All` and its own; `All` feeds the collision test and the F1 text names the same keys.
 - `HelpText`: the F1 text and the embedded guide; About is the bundle's.

@@ -13,13 +13,19 @@ public sealed class FolderTests : IDisposable
     public FolderTests()
     {
         Directory.CreateDirectory(Path.Combine(_top, "Home"));
-        Directory.CreateDirectory(Path.Combine(_top, "Work", "Course plan"));
+        Directory.CreateDirectory(Path.Combine(_top, "Work", "Nested"));
+        Directory.CreateDirectory(Path.Combine(_top, "Course plan"));
+        Directory.CreateDirectory(Path.Combine(_top, "Archive", "Old list"));
         Directory.CreateDirectory(Path.Combine(_top, "Archive"));
         Directory.CreateDirectory(Path.Combine(_top, ".hidden"));
         Item("Home", "Fix the tap", done: false, due: "2026-10-30");
         Item("Home", "Water plants", done: true, due: "2026-10-20");
         Item("Work", "Report", done: false, due: "2026-10-22");
-        Item(Path.Combine("Work", "Course plan"), "Week one", done: false, due: null);
+        Item("Course plan", "Week one", done: false, due: null);
+        Item(Path.Combine("Work", "Nested"), "Never shown", done: false, due: null);
+        Item(Path.Combine("Archive", "Old list"), "Old task", done: false, due: null);
+        File.WriteAllText(Path.Combine(_top, "Loose.json"), ItemDocument.NewItem("Loose", []).ToText());
+        File.WriteAllText(Path.Combine(_top, "Course plan", ItemDocument.ListFile), ItemDocument.NewList([]).WithField(-1, ItemFolder.SectionField, FieldTypes.Text, []).WithValue(1, System.Text.Json.Nodes.JsonValue.Create(" Work ")).ToText());
         Item("Archive", "Old thing", done: false, due: null);
         File.WriteAllText(Path.Combine(_top, "Home", "notes.txt"), "not an item");
         File.WriteAllText(Path.Combine(_top, "Home", "broken.json"), "{ nope");
@@ -31,11 +37,18 @@ public sealed class FolderTests : IDisposable
     [Fact]
     public void ReadsALevel()
     {
-        var top = ItemFolder.Read(_top, isTop: true);
-        Assert.Equal(["Home", "Work", "Archive"], top.Lists.Select(Path.GetFileName));
-        var home = ItemFolder.Read(Path.Combine(_top, "Home"), isTop: false);
+        var top = ItemFolder.ReadTop(_top);
+        Assert.Equal(["Course plan", "Home", "Work"], top.Lists.Select(Path.GetFileName));
+        Assert.Equal(["Old list"], top.ArchivedLists.Select(Path.GetFileName));
+        Assert.Equal(1, top.ArchivedItems);
+        Assert.Equal(1, top.NotShown);
+        var home = ItemFolder.Read(Path.Combine(_top, "Home"));
         Assert.Equal(["Fix the tap", "Milk", "Water plants"], home.Items.Select(ItemFolder.NameOf));
         Assert.Equal(2, home.NotShown);
+        // TK-D4: a list holds items, not lists; the folder inside it is counted, not shown.
+        Assert.Equal(1, ItemFolder.Read(Path.Combine(_top, "Work")).NotShown);
+        Assert.Equal("Work", ItemFolder.SectionOf(Path.Combine(_top, "Course plan")));
+        Assert.Equal(string.Empty, ItemFolder.SectionOf(Path.Combine(_top, "Home")));
     }
 
     [Fact]
@@ -58,7 +71,7 @@ public sealed class FolderTests : IDisposable
         Assert.NotNull(lists[0].NotUnderstood);
         Assert.Empty(lists[0].Items(_top, Today));
         Assert.Equal(["Report"], lists[1].Items(_top, Today).Select(ItemFolder.NameOf));
-        Assert.DoesNotContain(ItemFolder.Read(_top, isTop: true).Items, item => item.Path.EndsWith(".filter.json"));
+        Assert.Equal(1, ItemFolder.ReadTop(_top).NotShown);
     }
 
     [Fact]
@@ -72,11 +85,11 @@ public sealed class FolderTests : IDisposable
     [Fact]
     public void SummariesSayDoneDueAndOverdue()
     {
-        var home = ItemFolder.Read(Path.Combine(_top, "Home"), isTop: false).Items;
+        var home = ItemFolder.Read(Path.Combine(_top, "Home")).Items;
         Assert.Equal(", due 30 October", TaskRules.Summary(home[0].Document, Today));
         Assert.Equal(string.Empty, TaskRules.Summary(home[1].Document, Today));
         Assert.Equal(", done, due 20 October", TaskRules.Summary(home[2].Document, Today));
-        var report = ItemFolder.Read(Path.Combine(_top, "Work"), isTop: false).Items[0];
+        var report = ItemFolder.Read(Path.Combine(_top, "Work")).Items[0];
         Assert.Equal(", overdue since 22 October", TaskRules.Summary(report.Document, Today));
     }
 

@@ -6,12 +6,27 @@ file "tasks\Home\Water plants.json" {"format": "axit-item 1", "fields": [{"title
 file tasks\Home\notes.txt not an item
 file tasks\Shopping\Milk.json {"format": "axit-item 1", "fields": [{"title": "Title", "type": "text", "value": "Milk"}]}
 file tasks\Shopping\Washer.json {"format": "axit-item 1", "fields": [{"title": "Title", "type": "text", "value": "Washer"}, {"title": "Done", "type": "check", "value": false}]}
-file "tasks\Work\Course plan\Week one.json" {"format": "axit-item 1", "fields": [{"title": "Title", "type": "text", "value": "Week one"}, {"title": "Done", "type": "check", "value": false}]}
+file "tasks\Course plan\Week one.json" {"format": "axit-item 1", "fields": [{"title": "Title", "type": "text", "value": "Week one"}, {"title": "Done", "type": "check", "value": false}]}
 
-# 1.1 The top level: All tasks, then the lists.
+# 1.1 The top level in sections (TK-3a): Smart lists with All tasks, then User lists; Ctrl+Up and Ctrl+Down between them.
 start task {temp}\tasks
 expect state Lists - axTask
+expect focus Smart lists, section, 1 smart list
+keys down
 expect focus All tasks, 3 not done
+keys ctrl+down
+expect focus User lists, section, 3 lists
+keys ctrl+down
+expect said ♪ Edge
+keys ctrl+up
+expect focus Smart lists, section
+keys ctrl+up
+expect said ♪ Edge
+keys right
+expect said ! A section: Down goes into it
+keys ctrl+down
+keys down
+expect focus Course plan, list, 1 item
 keys down
 expect focus Home, list, 2 items
 
@@ -26,7 +41,7 @@ expect focus Water plants, done
 keys right
 expect said ♪ Edge
 keys left
-expect said ! Lists, 3 items, Home, list, 2 items
+expect said ! Lists, 3 lists, Home, list, 2 items
 keys left
 expect said ♪ Edge
 

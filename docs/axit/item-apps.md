@@ -26,6 +26,8 @@ file that axJSON opens, so the app's editor is a convenience, never the only way
 - **IA-2.3 The detail pane.** Filled silently whenever the navigator's selection changes: on an item, its fields; on a
   list, the list's details (section 4.3). Nothing is spoken until the user goes there. It is named "Fields of Fix the
   tap" or "Details of Home".
+- **IA-2.3a Sections.** A level may be in sections, each under a header row ("User lists, section, 2"); Ctrl+Up and
+  Ctrl+Down go from header to header. A header is no list: Right and Enter on it play the edge sound.
 - **IA-2.4 One announcement per move between levels**, axFile's words: "Home, 4 items, Fix the tap".
 
 ## 3. Keys
@@ -35,6 +37,7 @@ Window-specific keys, in one table per app (AX-8); the ones here are the same in
 | Key | In the navigator | In the detail pane |
 | --- | --- | --- |
 | Up, Down, Home, End | move; the edge earcon at an end | move through the fields |
+| Ctrl+Up, Ctrl+Down | the section before or after, on a level in sections (axTask's top level, TK-3a); the edge earcon past the ends | — |
 | Right | on a list: open it. On an item: nothing, the edge earcon (axFile's Right on a file) | nothing |
 | Left, Backspace | up a level | nothing |
 | Enter | open: a list opens its items; an item moves to its fields, as Tab (IA-D2) | change the field (section 5) |

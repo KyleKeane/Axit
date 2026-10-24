@@ -8,5 +8,5 @@ Start with `.\run-axtask.ps1 manual_tests\axtask\tasks`.
 
 - `tasks\Home`: `Fix the tap` (a task due 2026-10-30) and `Water plants` (done), and `notes.txt`, not an item, counted as a file not shown. Section 1.
 - `tasks\Shopping`: `Milk` (a plain item, no Done) and `Washer` (a task without a due date). Sections 2 and 3.
-- `tasks\Work\Course plan`: `Week one`, with a long text of two lines in Notes. Section 1, step 7, and section 2.
+- `tasks\Course plan`: `Week one`, with a long text of two lines in Notes; the list is in the section Work (its Section field). Sections 1 and 2.
 - The Archive list appears with the first Delete; prepare.ps1 removes it again.

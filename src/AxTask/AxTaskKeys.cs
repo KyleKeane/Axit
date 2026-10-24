@@ -15,6 +15,9 @@ public static class AxTaskKeys
     public const Keys HideDone = Keys.Control | Keys.Shift | Keys.D;
     public const Keys AllTasks = Keys.Control | Keys.D1;
 
+    /// <summary>On a list among the sections: its section chosen (TK-3a.3).</summary>
+    public const Keys MoveToSection = Keys.Control | Keys.M;
+
     /// <summary>Every key of the window with its name, for the collision test and the F1 text.</summary>
     public static readonly IReadOnlyList<(string Name, Keys Key)> All =
     [
@@ -23,5 +26,6 @@ public static class AxTaskKeys
         ("Show in axFile", ShowInAxFile),
         ("Hide or show done tasks", HideDone),
         ("All tasks", AllTasks),
+        ("Move the list to a section", MoveToSection),
     ];
 }

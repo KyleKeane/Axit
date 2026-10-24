@@ -15,8 +15,9 @@ The window is `src/AxTask`, with its own `CLAUDE.md`.
 - The item format itself (`ItemDocument`, `ItemField`, `FieldTypes`, `Parsed`: an item or a list's `list.json` as JSON
   kept whole, every change a new document; the types read out and typed) is `Axit.Core`'s since axPass, its second
   use (IA-D5), with its tests in `tests/Axit.Tests`.
-- `ItemFolder` and `ItemFile`, `FolderLevel` (IA-4, IA-D4): a level's lists and items (`Read`; hidden and dot entries
-  left out; the Archive last at the top; files that are not items counted), `ReadItem` (with the text read, for
+- `ItemFolder` and `ItemFile`, `FolderLevel`, `TopLevel` (IA-4, IA-D4, TK-3a, TK-D4): a list's items (`Read`; a
+  folder inside a list, hidden and dot entries left out, what is not an item counted), the top folder's lists and the
+  Archive's (`ReadTop`), a list's section (`SectionOf`, from the `SectionField` of its details), `ReadItem` (with the text read, for
   `CheckFresh`), `ReadList`, `NameOf`, `FileStem` and `FreePath` (IA-4.5), `RefusedListName`, `AllItems` (the Archive
   left out), `ArchiveFolder`, `IsArchive`, `ListName`, `LinkTo` and `Resolve` (IA-D3).
 - `Changes`, `Step` and `FileChange` (IA-5.4): a change as parts, writes and moves, `Apply`, `CheckUndo` (every path

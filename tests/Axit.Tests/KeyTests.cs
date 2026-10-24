@@ -30,12 +30,17 @@ public sealed class KeyTests
     /// <summary>
     /// The window keys that take a bundle key's place on purpose, each with its spec line (bundle AX-8.4). axTerminal's
     /// command field: Ctrl+Up and Ctrl+Down go through the history instead of by paragraph (AT-3.9, the user's choice
-    /// on 2026-10-23 over Up and Down on the field's first and last line).
+    /// on 2026-10-23 over Up and Down on the field's first and last line). The item apps' navigator: the same keys go by
+    /// section (docs/axit/item-apps.md IA-2.3a, the user's ask of 2026-10-24); a list has no paragraphs.
     /// </summary>
     private static readonly HashSet<(string Window, Keys Key)> Overrides =
     [
         ("axTerminal", Keys.Control | Keys.Up),
         ("axTerminal", Keys.Control | Keys.Down),
+        ("axTask", Keys.Control | Keys.Up),
+        ("axTask", Keys.Control | Keys.Down),
+        ("axPass", Keys.Control | Keys.Up),
+        ("axPass", Keys.Control | Keys.Down),
     ];
 
     [Fact]
@@ -157,7 +162,7 @@ public sealed class KeyTests
     {
         string[] known =
         [
-            "Alt+Up", "Ctrl+J", "Ctrl+Shift+N", "F2", "Left", "Right", "Shift+Tab", "Tab",
+            "Alt+Up", "Ctrl+Down", "Ctrl+J", "Ctrl+Shift+N", "Ctrl+Up", "F2", "Left", "Right", "Shift+Tab", "Tab",
             "Apps", "Backspace", "Ctrl+1", "Ctrl+2", "Ctrl+3", "Ctrl+C", "Ctrl+E", "Ctrl+Enter", "Ctrl+G", "Ctrl+I", "Ctrl+K", "Ctrl+L",
             "Ctrl+N", "Ctrl+O", "Ctrl+P", "Ctrl+Q", "Ctrl+Shift+A", "Ctrl+Shift+C", "Ctrl+Shift+F", "Ctrl+Shift+H", "Ctrl+Shift+I",
             "Ctrl+Shift+K", "Ctrl+Shift+L", "Ctrl+Shift+Q", "Ctrl+Shift+R", "Ctrl+Shift+S", "Ctrl+Shift+T", "Ctrl+Shift+W", "Ctrl+T",

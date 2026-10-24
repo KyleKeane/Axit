@@ -13,8 +13,9 @@ folder. It is part of Axit, a bundle of apps for people who use a screen reader;
 
 Two panes side by side, and a status bar.
 
-- **The navigator**, on the left, where the focus starts. At the top: **All tasks**, then your smart lists, then
-  your lists, then any items kept at the top. Up and Down move; type the start of a name to jump to it.
+- **The navigator**, on the left, where the focus starts. Its top level is in sections, each under a header line:
+  **Smart lists** (All tasks and your saved filters), **User lists**, your own sections, and **Archived lists**.
+  Ctrl+Up and Ctrl+Down go to the section before or after. Up and Down move; type the start of a name to jump to it.
 - **The detail pane**, on the right. It shows what the navigator's selection holds, without saying anything until
   you go there with Tab:
   - on an item, its fields: "Due, date, 30 October 2026, Friday";
@@ -23,12 +24,20 @@ Two panes side by side, and a status bar.
 
 ## Moving around
 
-- Right goes into a list. Left or Backspace goes back up, with the list you came from selected.
+- Right goes into a list. Left or Backspace goes back to the sections, with the list you came from selected. A list
+  holds items, not other lists: your own sections group the lists instead.
 - Right on an item does nothing; you hear the edge sound, as in axFile on a file.
 - Enter opens: on a list it shows the list's items; on an item it moves you to the item's fields, as Tab does.
 - Tab goes to the detail pane. Escape, Tab or Shift+Tab come back to the navigator.
 - Ctrl+1 goes to All tasks from anywhere.
 - At either end of a pane, Up or Down plays the edge sound.
+
+## Sections of your own
+
+- On a list, Ctrl+M (List, Move to section) chooses its section: User lists, one of your sections, or a new one.
+- The same is the Section field, first in a list's details: Tab on the list, Enter on Section, type the name.
+- A new list (Ctrl+Shift+N) joins the section of the line selected.
+- A section exists while a list is in it; to rename one, move its lists.
 
 ## Tasks and plain lists
 
@@ -44,9 +53,10 @@ In the navigator:
 
 - Ctrl+N adds an item to the list shown. It gets the fields the list gives new items: Done, Start and Due unless
   you choose others.
-- Ctrl+Shift+N makes a new list here.
+- Ctrl+Shift+N makes a new list.
 - F2 renames the item or the list. Links to it from other items are kept.
-- Delete moves the item or the list into the **Archive** list, at the end of the top level. Ctrl+Z brings it back.
+- Delete moves the item or the list into the Archive: an archived list is under **Archived lists**, archived items
+  under its line "Archived items". Ctrl+Z brings it back.
   To delete something for good, show it in axFile with Ctrl+E and delete it there.
 
 In the detail pane:
@@ -102,7 +112,7 @@ Each item is a JSON file named after its title, a list of fields each with a tit
 }
 ```
 
-A list is a folder; its details are `list.json` in it. Ctrl+J opens the item, the list's details or a smart list in
+A list is a folder in the top folder; its details are `list.json` in it, its section among them. Ctrl+J opens the item, the list's details or a smart list in
 axJSON; Ctrl+E shows it in axFile. Anything axTask does not know in a file is kept as it is.
 
 ## Keys

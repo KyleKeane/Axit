@@ -2,8 +2,12 @@ using Axit.Core;
 
 namespace Axit.Forms;
 
-/// <summary>A line of an item app's navigator (docs/axit/item-apps.md IA-2.2): a list (or group, or smart list) Right goes into, or an item; its key for the selection (a path), its name for type-to-find, its words, and what the app keeps with it.</summary>
-public sealed record ItemRow(bool IsList, string Key, string Name, string Label, object? Tag = null);
+/// <summary>
+/// A line of an item app's navigator (docs/axit/item-apps.md IA-2.2): a list (or group, or smart list) Right goes
+/// into, or an item; its key for the selection (a path), its name for type-to-find, its words, and what the app keeps
+/// with it. A section's header (IA-2.3a) has <see cref="IsSection"/>: Ctrl+Up and Ctrl+Down go from one to the next.
+/// </summary>
+public sealed record ItemRow(bool IsList, string Key, string Name, string Label, object? Tag = null, bool IsSection = false);
 
 /// <summary>A line of the detail pane after the fields: its words, and what Enter on it does (nothing when null).</summary>
 public sealed record ItemDetailLine(string Label, Action? Enter = null);
@@ -234,6 +238,12 @@ public abstract partial class ItemForm : AxitForm
                 case ItemKeys.UpAlso:
                     UpLevel();
                     return true;
+                case ItemKeys.PreviousSection:
+                    JumpSection(-1);
+                    return true;
+                case ItemKeys.NextSection:
+                    JumpSection(1);
+                    return true;
                 case ItemKeys.Open:
                     OpenSelected();
                     return true;
@@ -331,7 +341,11 @@ public abstract partial class ItemForm : AxitForm
     /// <summary>Right: into a list; on an item, nothing but the edge sound (IA-3, axFile's Right on a file).</summary>
     protected void Into()
     {
-        if (SelectedRow() is { IsList: true } row)
+        if (SelectedRow() is { IsSection: true })
+        {
+            OnSectionHeader();
+        }
+        else if (SelectedRow() is { IsList: true } row)
         {
             OpenList(row);
         }
@@ -349,6 +363,9 @@ public abstract partial class ItemForm : AxitForm
             case null:
                 Announce(_rows.Count == 0 ? "Nothing here: Ctrl+N adds an item" : "Nothing selected", true);
                 return;
+            case { IsSection: true }:
+                OnSectionHeader();
+                return;
             case { IsList: false }:
                 DetailPane.Select();
                 return;
@@ -356,6 +373,32 @@ public abstract partial class ItemForm : AxitForm
                 OpenList(row);
                 return;
         }
+    }
+
+    /// <summary>Right or Enter on a section's header (IA-2.3a): nothing to go into.</summary>
+    private void OnSectionHeader()
+    {
+        Sounds.Edge();
+        Announce("A section: Down goes into it", true);
+    }
+
+    /// <summary>
+    /// Ctrl+Up, Ctrl+Down (IA-2.3a): the section header before or after the selection, as a screen reader's heading
+    /// keys go; the edge sound past the first or the last. NVDA reads the header as the selection moves to it.
+    /// </summary>
+    protected void JumpSection(int direction)
+    {
+        var at = Navigator.SelectedIndex;
+        for (var i = at + direction; i >= 0 && i < _rows.Count; i += direction)
+        {
+            if (_rows[i].IsSection)
+            {
+                Navigator.SelectedIndex = i;
+                return;
+            }
+        }
+
+        Sounds.Edge();
     }
 
     private void OpenList(ItemRow row)

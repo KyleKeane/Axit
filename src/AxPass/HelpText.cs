@@ -22,6 +22,7 @@ public static class HelpText
           Up, Down, Home, End: move; the edge sound at an end. Type the start of a name to jump to it, Shift with a letter backwards
           Right: into a group. On an entry, nothing: the edge sound
           Left or Backspace: up a level
+          Ctrl+Up, Ctrl+Down: the section before or after, on a level in sections (the other item apps'); here the edge sound
           Enter: open: a group shows what is in it, an entry moves to its fields. On a locked window, Enter unlocks
           Tab: to the detail pane
           Ctrl+N: a new entry here. Ctrl+Shift+N: a new group here

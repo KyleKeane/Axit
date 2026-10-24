@@ -1,0 +1,85 @@
+# axTask: the top level's sections (docs/axtask/SPEC.md TK-3a, TK-D4, TK-D5): a list moved to a section of the user's
+# own with Ctrl+M, a new section, the Section field, a new list joining the selected section, the Archived lists
+# section, Ctrl+Up and Ctrl+Down across them, a folder inside a list not shown.
+file home\Axit\axtask.json {"checkForUpdates": false}
+file tasks\Home\Tap.json {"format": "axit-item 1", "fields": [{"title": "Title", "type": "text", "value": "Tap"}, {"title": "Done", "type": "check", "value": false}]}
+file tasks\Shopping\Milk.json {"format": "axit-item 1", "fields": [{"title": "Title", "type": "text", "value": "Milk"}]}
+file tasks\Work\Report.json {"format": "axit-item 1", "fields": [{"title": "Title", "type": "text", "value": "Report"}, {"title": "Done", "type": "check", "value": false}]}
+file tasks\Work\Nested\Hidden.json {"format": "axit-item 1", "fields": [{"title": "Title", "type": "text", "value": "Hidden"}]}
+
+start task {temp}\tasks
+expect focus Smart lists, section, 1 smart list
+keys ctrl+down
+expect focus User lists, section, 3 lists
+
+# TK-3a.3 Ctrl+M on Work: a new section, Jobs.
+type w
+expect focus Work, list, 1 item
+keys ctrl+m
+expect focus User lists
+keys end
+expect focus A new section
+keys enter
+type Jobs
+keys enter
+expect said ! Moved Work to Jobs
+expect focus Work, list, 1 item
+run findstr /l /c:"Jobs" tasks\Work\list.json
+keys up
+expect focus Jobs, section, 1 list
+
+# TK-3a.2 Ctrl+Up back to User lists; Ctrl+Down past Jobs, the last: the edge sound.
+keys ctrl+up
+expect focus User lists, section, 2 lists
+keys ctrl+down
+expect focus Jobs, section
+keys ctrl+down
+expect said ♪ Edge
+
+# TK-3a.3 A new list joins the section selected.
+keys ctrl+shift+n
+type Clients
+keys enter
+expect said ! Made Clients
+expect focus Clients, list, 0 items
+keys up
+expect focus Jobs, section, 2 lists
+
+# The Section field: Home joins Jobs from its details, then back to User lists with Ctrl+M.
+keys ctrl+up
+keys down
+expect focus Home, list, 1 item
+keys tab
+expect focus Section, text, empty
+keys enter
+type Jobs
+keys enter
+expect said ! Section: Jobs
+keys escape
+expect focus Home, list, 1 item
+keys ctrl+up
+expect focus Jobs, section, 3 lists
+type h
+expect focus Home, list, 1 item
+keys ctrl+m
+expect focus Jobs
+keys home
+keys enter
+expect said ! Moved Home to User lists
+
+# TK-D4: a folder inside a list is counted, not shown.
+type w
+expect focus Work, list, 1 item
+keys right
+expect said ! Work, 1 item, 1 file not shown, Report
+
+# IA-D4: an archived list goes to Archived lists, its own section.
+keys left
+keys delete
+expect said ! Archived Work
+keys end
+expect focus Work, list, 1 item
+keys up
+expect focus Archived lists, section, 1 list
+keys ctrl+z
+expect said ! Undone: Archived Work

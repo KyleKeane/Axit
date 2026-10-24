@@ -404,7 +404,8 @@ function Build-AxTask([string]$d) {
     $t = New-Folder (Join-Path $d 'tasks')
     $house = New-Folder (Join-Path $t 'Home')
     $shop = New-Folder (Join-Path $t 'Shopping')
-    $plan = New-Folder (Join-Path $t 'Work\Course plan')
+    $plan = New-Folder (Join-Path $t 'Course plan')
+    Write-Text (Join-Path $plan 'list.json') "{`r`n  ""format"": ""axit-list 1"",`r`n  ""fields"": [`r`n    { ""title"": ""Section"", ""type"": ""text"", ""value"": ""Work"" },`r`n    { ""title"": ""Notes"", ""type"": ""longtext"", ""value"": """" }`r`n  ]`r`n}`r`n"
     Write-Item (Join-Path $house 'Fix the tap.json') 'Fix the tap' 'false' '2026-10-30'
     Write-Item (Join-Path $house 'Water plants.json') 'Water plants' 'true' '2026-10-20'
     Write-Item (Join-Path $shop 'Milk.json') 'Milk' '' '-'

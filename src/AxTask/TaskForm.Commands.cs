@@ -54,6 +54,13 @@ public sealed partial class TaskForm
             return;
         }
 
+        if (AtTop || IsArchiveFolder(_folder))
+        {
+            // TK-D4: items live in lists; the Archive keeps what was moved there.
+            Announce(AtTop ? "Items go in a list: Right on a list, then Ctrl+N" : "The Archive keeps what was archived: open a list to add an item", true);
+            return;
+        }
+
         var folder = _folder;
         AskText("New item", $"In {(AtTop ? "the top folder" : Path.GetFileName(folder))}.", "Title:", "Title", string.Empty, "&Add", title =>
         {
@@ -63,23 +70,74 @@ public sealed partial class TaskForm
         }, typed => typed.Trim().Length == 0 ? "Type the item's title" : null);
     }
 
-    /// <summary>Ctrl+Shift+N: a new list in the folder shown, with the template of the list it is in.</summary>
+    /// <summary>
+    /// Ctrl+Shift+N: a new list in the top folder (TK-D4), in the section of the row selected (TK-3a.3) and with the
+    /// template of the list selected or shown; the sections shown after, with the new list selected.
+    /// </summary>
     protected override void NewList()
     {
-        var folder = _smart is not null ? TopFolder : _folder;
-        AskText("New list", $"A folder in {(folder.Equals(TopFolder, StringComparison.OrdinalIgnoreCase) ? "the top folder" : Path.GetFileName(folder))}.", "Name:", "Name", string.Empty, "&Make", name =>
+        var folder = TopFolder;
+        var section = SelectedRow() switch
+        {
+            { Tag: SectionTag { Custom: true } header } => header.Name,
+            { IsList: true, Tag: null } list when !ItemFolder.IsArchive(TopFolder, list.Key) => ItemFolder.SectionOf(list.Key),
+            _ => AtTop || _smart is not null || IsArchiveFolder(_folder) ? string.Empty : ItemFolder.SectionOf(_folder),
+        };
+        var templateFrom = SelectedRow() is { IsList: true, Tag: null } selected ? selected.Key : AtTop || _smart is not null ? null : _folder;
+        AskText("New list", section.Length == 0 ? "In User lists." : $"In the section {section}.", "Name:", "Name", string.Empty, "&Make", name =>
         {
             var trimmed = name.Trim();
             var listFile = Path.Combine(folder, trimmed, ItemDocument.ListFile);
-            var template = TaskRules.TemplateOf(ItemFolder.ReadList(folder));
-            if (_smart is not null)
+            var template = TaskRules.TemplateOf(templateFrom is null ? null : ItemFolder.ReadList(templateFrom));
+            var details = WithSectionField(ItemDocument.NewList(template));
+            details = details.WithValue(details.IndexOf(ItemFolder.SectionField), JsonValue.Create(section));
+            _smart = null;
+            _folder = TopFolder;
+            Commit(new Step([FileChange.WriteInNewFolder(listFile, details.ToText())], "Made " + trimmed), Path.Combine(folder, trimmed));
+        }, typed => ItemFolder.RefusedListName(folder, typed) ?? (typed.Trim().Equals(ItemFolder.ArchiveName, StringComparison.OrdinalIgnoreCase) ? "Archive is the archive's own name" : null));
+    }
+
+    /// <summary>
+    /// List, Move to section (Ctrl+M, TK-3a.3): the list's Section field set from a list of the sections there are,
+    /// User lists, and a new one.
+    /// </summary>
+    private void MoveToSection()
+    {
+        if (SelectedRow() is not { IsList: true, Tag: null } row || ItemFolder.IsArchive(TopFolder, row.Key) || !AtTop)
+        {
+            Announce("Select a list among the sections first", true);
+            return;
+        }
+
+        var current = ItemFolder.SectionOf(row.Key);
+        var sections = ItemFolder.ReadTop(TopFolder).Lists.Select(ItemFolder.SectionOf).Where(name => name.Length > 0)
+            .Distinct(StringComparer.OrdinalIgnoreCase).OrderBy(name => name, NaturalOrder.Instance).ToList();
+        List<string> choices = ["User lists", .. sections, "A new section"];
+        var start = current.Length == 0 ? 0 : Math.Max(0, choices.FindIndex(choice => choice.Equals(current, StringComparison.OrdinalIgnoreCase)));
+        ChooseFromList("Move " + row.Name, $"Now in {(current.Length == 0 ? "User lists" : current)}.", "Section", choices, start, chosen =>
+        {
+            if (chosen == choices.Count - 1)
             {
-                _smart = null;
-                _folder = TopFolder;
+                AskText("New section", $"The section {row.Name} moves to.", "Name:", "Section name", string.Empty, "&Move", typed => SetSection(row, typed.Trim()),
+                    typed => typed.Trim().Length == 0 ? "Type the section's name" : choices.Contains(typed.Trim(), StringComparer.OrdinalIgnoreCase) ? $"There is a section called {typed.Trim()} already" : null);
+                return;
             }
 
-            Commit(new Step([FileChange.WriteInNewFolder(listFile, ItemDocument.NewList(template).ToText())], "Made " + trimmed), Path.Combine(folder, trimmed));
-        }, typed => ItemFolder.RefusedListName(folder, typed));
+            SetSection(row, chosen == 0 ? string.Empty : choices[chosen]);
+        });
+    }
+
+    /// <summary>The list's Section field written (TK-3a.3).</summary>
+    private void SetSection(ItemRow row, string section)
+    {
+        var listFile = Path.Combine(row.Key, ItemDocument.ListFile);
+        var read = ItemFolder.ReadItem(listFile);
+        var details = WithSectionField(read?.Document ?? ItemDocument.NewList(TaskRules.DefaultTemplate));
+        details = details.WithValue(details.IndexOf(ItemFolder.SectionField), JsonValue.Create(section));
+        if (CheckFresh(listFile, read?.Text))
+        {
+            Commit(new Step([FileChange.Write(listFile, read?.Text, details.ToText())], $"Moved {row.Name} to {(section.Length == 0 ? "User lists" : section)}"), row.Key);
+        }
     }
 
     /// <summary>List, New smart list (TK-5.3): a filter file with All tasks' conditions, opened in axJSON.</summary>
@@ -111,6 +169,15 @@ public sealed partial class TaskForm
     {
         switch (row)
         {
+            case { Tag: SectionTag { Custom: true } }:
+                Announce("A section is renamed by moving its lists: Ctrl+M on each", true);
+                return;
+            case { Tag: SectionTag }:
+                Announce("This section keeps its name", true);
+                return;
+            case { Tag: var tag } when ReferenceEquals(tag, ArchivedItemsTag):
+                Announce("The Archive keeps its name", true);
+                return;
             case { Tag: ItemFile item }:
                 AskText("Rename " + row.Name, string.Empty, "Title:", "Title", item.Document.Title, "&Rename", title => RenameItem(row, title.Trim()),
                     typed => typed.Trim().Length == 0 ? "Type the item's title" : null);
@@ -169,6 +236,12 @@ public sealed partial class TaskForm
             return;
         }
 
+        if (row.Tag is SectionTag)
+        {
+            Announce("A section goes when its lists leave it: Ctrl+M on each", true);
+            return;
+        }
+
         if (IsArchiveFolder(row.Key) || ItemFolder.IsArchive(TopFolder, Path.GetDirectoryName(row.Key)!))
         {
             Announce(IsArchiveFolder(row.Key) ? "The Archive stays" : "Already in the Archive: Ctrl+E shows it in axFile, which deletes it for good", true);
@@ -190,7 +263,7 @@ public sealed partial class TaskForm
     /// <summary>TK-4.2: the list in hand made a checklist (Done on every item and in its template) or a plain list.</summary>
     private void SwitchList(bool done)
     {
-        var folder = SelectedRow() is { IsList: true, Tag: null } row && !DetailPane.Focused ? row.Key : _smart is null ? _folder : null;
+        var folder = SelectedRow() is { IsList: true, Tag: null } row && !DetailPane.Focused ? row.Key : _smart is null && !AtTop ? _folder : null;
         if (folder is null)
         {
             Announce("Open a list first", true);
@@ -199,7 +272,7 @@ public sealed partial class TaskForm
 
         var parts = new List<FileChange>();
         var changed = 0;
-        foreach (var item in ItemFolder.Read(folder, folder.Equals(TopFolder, StringComparison.OrdinalIgnoreCase)).Items)
+        foreach (var item in ItemFolder.Read(folder).Items)
         {
             var switched = done ? TaskRules.WithDone(item.Document) : TaskRules.WithoutDone(item.Document);
             if (!ReferenceEquals(switched, item.Document))

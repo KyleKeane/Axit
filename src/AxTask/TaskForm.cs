@@ -50,6 +50,9 @@ public sealed partial class TaskForm : ItemForm
         _listMenu.DropDownItems.Add(new ToolStripMenuItem("New &smart list...", null, (_, _) => NewSmartList()));
         _listMenu.DropDownItems.Add(Item("&Rename...", () => WithRow(RenameRow), ItemKeys.Rename));
         _listMenu.DropDownItems.Add(Item("Ar&chive", () => WithRow(DeleteRow), ItemKeys.Delete));
+        _listMenu.DropDownItems.Add(Item("Move to s&ection...", MoveToSection, AxTaskKeys.MoveToSection));
+        _listMenu.DropDownItems.Add(Item("Pre&vious section", () => JumpSection(-1), ItemKeys.PreviousSection));
+        _listMenu.DropDownItems.Add(Item("Ne&xt section", () => JumpSection(1), ItemKeys.NextSection));
         _listMenu.DropDownItems.Add(new ToolStripSeparator());
         _listMenu.DropDownItems.Add(new ToolStripMenuItem("Add &Done to every item", null, (_, _) => SwitchList(done: true)));
         _listMenu.DropDownItems.Add(new ToolStripMenuItem("Remove Do&ne from every item", null, (_, _) => SwitchList(done: false)));
@@ -128,6 +131,9 @@ public sealed partial class TaskForm : ItemForm
                 return true;
             case AxTaskKeys.AllTasks:
                 ShowAllTasks();
+                return true;
+            case AxTaskKeys.MoveToSection when Navigator.Focused:
+                MoveToSection();
                 return true;
         }
 
@@ -225,8 +231,9 @@ public sealed partial class TaskForm : ItemForm
         }
         else
         {
+            // One level of lists (TK-D4): out of any list straight to the sections.
             select = _folder;
-            _folder = Path.GetDirectoryName(_folder) ?? TopFolder;
+            _folder = TopFolder;
         }
 
         RememberLevel();
@@ -274,27 +281,14 @@ public sealed partial class TaskForm : ItemForm
 
             name = smart.NotUnderstood is { } why ? $"{smart.Name}, a condition not understood: {why}" : $"{smart.Name}, {Count(items.Count, "item")}";
         }
+        else if (AtTop)
+        {
+            name = ReadSections(rows, today);
+        }
         else
         {
-            var top = AtTop;
-            if (top)
-            {
-                var all = ItemFolder.AllItems(TopFolder);
-                rows.Add(SmartRow(SmartList.AllTasks, all, today));
-                foreach (var filter in SmartList.InFolder(TopFolder))
-                {
-                    rows.Add(SmartRow(filter, all, today));
-                }
-            }
-
-            var level = ItemFolder.Read(_folder, top);
-            foreach (var list in level.Lists)
-            {
-                var inside = ItemFolder.Read(list, isTop: false);
-                var listName = Path.GetFileName(list);
-                rows.Add(new ItemRow(true, list, listName, $"{listName}, list, {Count(inside.Lists.Count + inside.Items.Count, "item")}"));
-            }
-
+            // A list's level: its items only (TK-D4).
+            var level = ItemFolder.Read(_folder);
             var hidden = 0;
             foreach (var item in level.Items)
             {
@@ -308,8 +302,7 @@ public sealed partial class TaskForm : ItemForm
                 rows.Add(new ItemRow(false, item.Path, itemName, itemName + TaskRules.Summary(item.Document, today), item));
             }
 
-            var shownCount = rows.Count(row => row.Tag is not SmartList);
-            name = (top ? "Lists" : Path.GetFileName(_folder)) + ", " + (shownCount == 0 && !top ? "empty: Ctrl+N adds an item" : Count(shownCount, "item"));
+            name = ListTitle() + ", " + (rows.Count == 0 && hidden == 0 ? "empty: Ctrl+N adds an item" : Count(rows.Count, "item"));
             if (hidden > 0)
             {
                 name += $", {hidden} done hidden";
@@ -321,10 +314,78 @@ public sealed partial class TaskForm : ItemForm
             }
         }
 
-        var title = _smart?.Name ?? (AtTop ? "Lists" : ItemFolder.ListName(TopFolder, _folder));
+        var title = _smart?.Name ?? (AtTop ? "Lists" : ListTitle());
         return (rows, name, title, TopFolder);
     }
 
+    /// <summary>"Home"; the Archive's own items are "Archived items".</summary>
+    private string ListTitle() => IsArchiveFolder(_folder) ? ArchivedItemsName : ItemFolder.ListName(TopFolder, _folder);
+
+    private const string ArchivedItemsName = "Archived items";
+
+    /// <summary>A section's header row (TK-3a.1): its name, and whether it is one of the user's own.</summary>
+    private sealed record SectionTag(string Name, bool Custom);
+
+    /// <summary>The Tag of the "Archived items" row, which opens the Archive's own items.</summary>
+    private static readonly object ArchivedItemsTag = new();
+
+    /// <summary>
+    /// The top level in sections (TK-3a.1): Smart lists, User lists, the user's own sections by name, Archived lists;
+    /// each under a header row. The navigator's name is returned.
+    /// </summary>
+    private string ReadSections(List<ItemRow> rows, DateOnly today)
+    {
+        var top = ItemFolder.ReadTop(TopFolder);
+        var all = top.Lists.SelectMany(list => ItemFolder.Read(list).Items).ToList();
+        var smart = new List<ItemRow> { SmartRow(SmartList.AllTasks, all, today) };
+        smart.AddRange(SmartList.InFolder(TopFolder).Select(filter => SmartRow(filter, all, today)));
+        AddSection(rows, "Smart lists", custom: false, smart, "smart list");
+
+        var bySection = top.Lists.GroupBy(ItemFolder.SectionOf, StringComparer.OrdinalIgnoreCase).ToDictionary(group => group.Key, group => group.ToList(), StringComparer.OrdinalIgnoreCase);
+        var plain = bySection.GetValueOrDefault(string.Empty) ?? [];
+        if (plain.Count == 0)
+        {
+            rows.Add(new ItemRow(false, SectionKey("User lists"), "User lists", "User lists, section, none: Ctrl+Shift+N makes one", new SectionTag("User lists", false), IsSection: true));
+        }
+        else
+        {
+            AddSection(rows, "User lists", custom: false, plain.Select(ListRow).ToList(), "list");
+        }
+
+        foreach (var section in bySection.Keys.Where(key => key.Length > 0).OrderBy(key => key, Axit.Core.NaturalOrder.Instance))
+        {
+            AddSection(rows, section, custom: true, bySection[section].Select(ListRow).ToList(), "list");
+        }
+
+        if (top.ArchivedLists.Count > 0 || top.ArchivedItems > 0)
+        {
+            var archived = top.ArchivedLists.Select(ListRow).ToList();
+            if (top.ArchivedItems > 0)
+            {
+                archived.Add(new ItemRow(true, ItemFolder.ArchiveFolder(TopFolder), ArchivedItemsName, $"{ArchivedItemsName}, {top.ArchivedItems}", ArchivedItemsTag));
+            }
+
+            AddSection(rows, "Archived lists", custom: false, archived, "list");
+        }
+
+        var name = $"Lists, {Count(top.Lists.Count, "list")}";
+        return top.NotShown > 0 ? name + $", {Count(top.NotShown, "file")} not shown" : name;
+    }
+
+    private static void AddSection(List<ItemRow> rows, string name, bool custom, IReadOnlyList<ItemRow> inside, string noun)
+    {
+        rows.Add(new ItemRow(false, SectionKey(name), name, $"{name}, section, {Count(inside.Count, noun)}", new SectionTag(name, custom), IsSection: true));
+        rows.AddRange(inside);
+    }
+
+    private static string SectionKey(string name) => "section:" + name;
+
+    /// <summary>"Home, list, 2 items".</summary>
+    private static ItemRow ListRow(string list)
+    {
+        var listName = Path.GetFileName(list);
+        return new ItemRow(true, list, listName, $"{listName}, list, {Count(ItemFolder.Read(list).Items.Count, "item")}");
+    }
     private ItemRow SmartRow(SmartList smart, IReadOnlyList<ItemFile> all, DateOnly today)
     {
         var count = smart.NotUnderstood is null ? all.Count(item => smart.Matches(item, TopFolder, today)) : 0;
@@ -345,6 +406,21 @@ public sealed partial class TaskForm : ItemForm
                     [new ItemDetailLine(Rows.Count == 0 ? "Nothing in this list: Ctrl+N in the navigator adds an item" : "Nothing selected")]);
             case { Tag: ItemFile item }:
                 return new ItemDetail("Fields of " + row.Name, item.Path, item.Document, [], new FileSource(item.Path, item.Text));
+            case { Tag: SectionTag section }:
+                return new ItemDetail("Details of " + section.Name, row.Key, null,
+                [
+                    new ItemDetailLine(row.Label),
+                    new ItemDetailLine(section.Name switch
+                    {
+                        "Smart lists" => "All tasks and your saved filters; List, New smart list makes one",
+                        "Archived lists" => "What Delete moved away; Ctrl+Z brings back the last, axFile deletes for good",
+                        "User lists" => "Lists in no section of your own; Ctrl+M on a list moves it to a section",
+                        _ => "A section of your own: a list joins it by its Section field, or Ctrl+M",
+                    }),
+                ]);
+            case { Tag: var tag } when ReferenceEquals(tag, ArchivedItemsTag):
+                return new ItemDetail("Details of " + ArchivedItemsName, row.Key, null,
+                    [new ItemDetailLine(row.Label), new ItemDetailLine("Items Delete moved out of their lists; Right shows them")]);
             case { Tag: SmartList smart }:
                 var lines = new List<ItemDetailLine>
                 {
@@ -364,8 +440,25 @@ public sealed partial class TaskForm : ItemForm
                 var templateLine = new ItemDetailLine(template.Count == 0
                     ? "Fields of a new item: only its title, a plain list"
                     : "Fields of a new item: " + string.Join(", ", template.Select(field => field.Title)), ExplainTemplate);
-                return new ItemDetail("Details of " + row.Name, listFile, read?.Document ?? ItemDocument.NewList(TaskRules.DefaultTemplate), [templateLine], new FileSource(listFile, read?.Text));
+                return new ItemDetail("Details of " + row.Name, listFile, WithSectionField(read?.Document ?? ItemDocument.NewList(TaskRules.DefaultTemplate)), [templateLine], new FileSource(listFile, read?.Text));
         }
+    }
+
+    /// <summary>TK-3a.3: a list's details with the Section field first, made empty when the file has none.</summary>
+    private static ItemDocument WithSectionField(ItemDocument details)
+    {
+        if (details.IndexOf(ItemFolder.SectionField) >= 0)
+        {
+            return details;
+        }
+
+        var withField = details.WithField(-1, ItemFolder.SectionField, FieldTypes.Text, []);
+        for (var i = withField.Fields.Count - 1; i > 0; i--)
+        {
+            withField = withField.WithFieldMoved(i, -1)!;
+        }
+
+        return withField;
     }
 
     /// <summary>Enter on a list's "Fields of a new item" line: how they change.</summary>
