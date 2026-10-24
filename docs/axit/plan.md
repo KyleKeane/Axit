@@ -192,6 +192,30 @@ library dependency (B-10: `git.exe` and the file system through the APIs already
   **AxCalendar**, dates and reminders (shared with AxTask's reminders); **AxCalc**, a calculator as a field with a
   history; **AxClip**, a clipboard history; **AxSettings**, a plain list of the Windows settings a user changes most.
   Each would keep the same rule: local first (B-15), plain files, clear formats an AI can work with.
+- **Apps suggested on 2026-10-23, recorded at the user's ask** (no specs; ranked by daily use and fit with the
+  bundle's rules). The two picked to start with, if any: axClip, then axCalc or axHTTP as a small app that follows
+  `adding-an-app.md`.
+  1. **axClip** (above), in detail: axStart's hotkey and search list over what was copied; typing filters, Enter
+     pastes, a key reads an item in full. The Windows clipboard history (Windows+V) reads poorly with NVDA.
+  2. **axOCR**, text from a screenshot, an image file or the window in front, through Windows' offline OCR engine
+     (`Windows.Media.Ocr`), the text opened in axPreview: images, scanned PDFs, dialogs that read badly, screenshots
+     people send. To agree first: the engine needs the Windows SDK target in the project file (a Microsoft reference
+     pack, not a NuGet package) against the no-dependencies rule. The local counterpart of AxSee above, which
+     describes a screen through the AI service.
+  3. **axHTTP**, a REST client: requests with a history, the reply as a transcript, a JSON body opened in axJSON.
+     Postman and the like are web views. .NET's own HTTP client; the second app with network use after axClaude, only
+     on the user's command.
+  4. **axSQL**, a SQLite browser: the tables, a query field, the result as a list read row by row with a key for the
+     whole row. Windows ships SQLite (`winsqlite3.dll`), so no library; the shared database planned above could use it.
+  5. **axProcess**, processes, services and startup items (named so, since AxTask is the to-do manager): a filtered
+     list with memory and CPU, keys to end, restart and show the program file in axFile. Task Manager's lists read
+     only in part. Windows APIs only.
+  6. **axCalc** (above), in detail: a field for an expression, each answer a line of a transcript to arrow through
+     and copy, hex, binary and units for development. The smallest of these.
+  7. **axMail** (above): the largest daily need and the largest build (IMAP, SMTP, OAuth sign-in for Gmail and
+     Outlook), so it waits until the small apps have proved their patterns.
+  Not planned: a full browser (a web view, B-10; AxWeb above is a reader) and a PDF reader (Windows has no built-in
+  way to pull text from a PDF; axOCR covers scanned pages).
 - The order the user set: the spec, then the infrastructure, then the build; axTerminal first, since its
   infrastructure is the moves; axFile next; the two engines verified before their specs are written.
 
