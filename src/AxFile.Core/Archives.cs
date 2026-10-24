@@ -58,7 +58,13 @@ public static class Archives
     }
 
     private static int CountFiles(string path) =>
-        Directory.Exists(path) ? Directory.EnumerateFileSystemEntries(path).Sum(CountFiles) : 1;
+        Directory.Exists(path) ? Directory.EnumerateFileSystemEntries(path).Where(child => !IsLink(child)).Sum(CountFiles) : 1;
+
+    /// <summary>
+    /// A link or a junction inside a folder being compressed: left out, never followed, since it can lead anywhere,
+    /// into the user's own private folders or to a share (security audit S-8). A link the user chose itself is kept.
+    /// </summary>
+    private static bool IsLink(string path) => (File.GetAttributes(path) & FileAttributes.ReparsePoint) != 0;
 
     private static void Add(ZipArchive archive, string path, string name, Action fileDone)
     {
@@ -70,7 +76,7 @@ public static class Archives
         }
 
         var any = false;
-        foreach (var child in Directory.EnumerateFileSystemEntries(path))
+        foreach (var child in Directory.EnumerateFileSystemEntries(path).Where(child => !IsLink(child)))
         {
             Add(archive, child, name + "/" + System.IO.Path.GetFileName(child), fileDone);
             any = true;
@@ -95,6 +101,7 @@ public static class Archives
         var root = System.IO.Path.GetFullPath(target + System.IO.Path.DirectorySeparatorChar);
         var total = archive.Entries.Count(entry => !IsFolderEntry(entry));
         var done = 0;
+        var zone = DownloadMark(zip);
         Directory.CreateDirectory(target);
         foreach (var entry in archive.Entries)
         {
@@ -112,10 +119,46 @@ public static class Archives
 
             Directory.CreateDirectory(System.IO.Path.GetDirectoryName(destination)!);
             entry.ExtractToFile(destination, overwrite: false);
+            if (zone is not null)
+            {
+                MarkAsDownloaded(destination, zone);
+            }
+
             progress?.Invoke(++done, total);
         }
 
         return target;
+    }
+
+    /// <summary>
+    /// The zip's mark of the web (its <c>Zone.Identifier</c> stream), which Windows puts on a downloaded file; null
+    /// when there is none or the drive keeps no such streams. Each extracted file gets it too, as File Explorer does,
+    /// so that SmartScreen and Office's Protected View still warn about a file that came from the internet (security
+    /// audit S-7).
+    /// </summary>
+    public static string? DownloadMark(string path)
+    {
+        try
+        {
+            var mark = path + ":Zone.Identifier";
+            return File.Exists(mark) ? File.ReadAllText(mark) : null;
+        }
+        catch (Exception ex) when (ex is IOException or UnauthorizedAccessException or NotSupportedException)
+        {
+            return null;
+        }
+    }
+
+    private static void MarkAsDownloaded(string path, string zone)
+    {
+        try
+        {
+            File.WriteAllText(path + ":Zone.Identifier", zone);
+        }
+        catch (Exception ex) when (ex is IOException or UnauthorizedAccessException or NotSupportedException)
+        {
+            // A drive without streams (FAT, a share that refuses them): the file stays unmarked, as Explorer leaves it.
+        }
     }
 
     /// <summary>A folder entry ends in a slash; older Windows tools wrote a backslash.</summary>
