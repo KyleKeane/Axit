@@ -16,7 +16,7 @@ The window is called "This computer - axProcess". It opens on the Processes view
 - **Services** (Ctrl+2): every Windows service, "Windows Update (wuauserv), running, manual": its name, its short name, whether it runs, and how it starts.
 - **Startup** (Ctrl+3): what starts when you sign in, "OneDrive, enabled, current user's Run key": its name, whether Task Manager has turned it off, and where it is set.
 
-Tab and Shift+Tab move to the next and the previous view, round from Startup back to Processes. Pressing a view's key while the view already shows says its name again. At the first or the last item, Up, Down, Home and End play a short low sound, since there is nowhere to move. **F5** reads the view again and says "Refreshed". **Ctrl+Q** says the summary: how many processes run, how much memory is in use, and how busy the processor was.
+Type the start of a name to jump to it, as in File Explorer: letters typed within a second of each other build one search, the same letter again goes to the next name starting with it, and Shift with a letter goes backwards. Tab and Shift+Tab move to the next and the previous view, round from Startup back to Processes. Pressing a view's key while the view already shows says its name again. At the first or the last item, Up, Down, Home and End play a short low sound, since there is nowhere to move. **F5** reads the view again and says "Refreshed". **Ctrl+Q** says the summary: how many processes run, how much memory is in use, and how busy the processor was.
 
 ## Acting on an item
 

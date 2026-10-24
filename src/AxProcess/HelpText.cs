@@ -23,6 +23,7 @@ public static class HelpText
           Tab, Shift+Tab: the next or the previous view, round from Startup to Processes
           F5: read the view again; nothing changes by itself
           Ctrl+Q: the summary: the processes, the memory in use, the processor
+          Type the start of an item to jump to it, the same letter again to the next; Shift with a letter backwards
           In the list
             Enter: the item's details, with what can be done to it: end a process, start or stop a service
             Delete: end the process, after a question

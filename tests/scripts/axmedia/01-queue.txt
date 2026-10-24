@@ -63,6 +63,8 @@ keys home
 expect said · alpha.wav (playing)
 type g
 expect said · gamma.wav
+# Letters within a second build one prefix (AX-8.6): a pause, and b is a search of its own.
+wait 1100
 type b
 expect said · beta.wav
 expect quiet 300

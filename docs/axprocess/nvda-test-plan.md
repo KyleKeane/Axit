@@ -14,6 +14,7 @@ Run with NVDA before a release, after `run-axprocess.ps1` (or `.\run.ps1 -App pr
 8. Tab: "Services, N. <service>"; Tab: "Startup, N. <entry>"; Tab: "Processes, N. <process>". Shift+Tab: "Startup, …".
 9. On a process, Shift+F10: the Process menu opens and NVDA reads "Details Enter". Escape. Ctrl+2, Shift+F10: the Service menu; Ctrl+3, Shift+F10: the Startup menu. The Applications key does the same.
 9a. In the Processes view, Alt, then Right along the bar: Computer, Process, View, Options, Axit, Help; Service and Startup are passed over. Ctrl+2, Alt, Right: Computer, Service, View…
+9b. Type `svc`: the first process starting with svc; `s` again after a pause: the next name starting with s; Shift+S: back to the one before.
 10. Close axProcess, then in another Axit window Alt+A, R: "1. axProcess" is in Recently closed; Enter starts it.
 7. Alt+F4 closes the window without a question.
 

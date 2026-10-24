@@ -75,3 +75,15 @@ expect said ♪ Edge
 keys end
 keys down
 expect said ♪ Edge
+
+# AX-8.6 Type-to-find in the services: a prefix lands on its item; Shift with the letter goes back the other way.
+keys ctrl+2
+expect said ! Services,
+type windows event l
+expect focus Windows Event Log (EventLog)
+# From the last item a letter goes round the end to the first name with it. Shift with a letter (backwards) is not run:
+# the channel's keys make no typed character, and its type has no Shift; TypeAheadTests and the NVDA plan cover it.
+keys end
+wait 1100
+type w
+expect focus "value":"W

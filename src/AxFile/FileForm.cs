@@ -143,7 +143,8 @@ public sealed partial class FileForm : AxitForm
         _list.AccessibleName = "No folder";
         _list.DoubleClick += (_, _) => OpenSelected();
         // AF-3.6: File Explorer's type-ahead, several letters into one prefix, in place of the list's one-letter jump.
-        _list.KeyPress += OnListKeyPress;
+        _typeAhead = ListTypeAhead.Attach(_list, () => _shown.Select(entry => entry.Name).ToList());
+        ListTypeAhead.Attach(_pane, () => _pane.Items.Cast<object>().Select(item => item.ToString() ?? string.Empty).ToList());
         // AF-4.6, AF-D13: a right click opens the menu bar's Item menu on the entry under it, selected first as File
         // Explorer does; Shift+F10 and the Applications key open the same menu from the key switch.
         _list.MouseDown += (_, e) =>

@@ -335,6 +335,14 @@ The apps are named ax and a word, the ax in lower case and the word as it is wri
   A key of the number row ends in a full stop ("Ctrl+1."): NVDA speaks the shortcut directly before the position of
   the item in the menu ("1 of 9"), and the synthesizer runs "Ctrl+1  1 of 9" together into "Ctrl+11 of 9"; the full
   stop is a pause between the two.
+- AX-8.6 Type-to-find in every list a user moves through by typing (2026-10-24; File Explorer's way, axFile's AF-3.6
+  since 2026-10-22): letters typed within a second of each other build one prefix and select the first item that starts
+  with it from the one in hand, round the end; the same letter again goes on to the next item starting with it; Shift
+  with a letter searches the same way backwards (the user's ask; the case of the letters never matters, so a capital
+  only says the direction); the edge earcon when no item starts with it; nothing is said but what NVDA reads of the
+  selection. One piece for every window: `Axit.Core/TypeAhead` and `Axit.Forms/ListTypeAhead`, in axFile's two lists,
+  axGIT's list, axMedia's queue and axProcess's list; a list whose letters are keys of their own (a question's answers,
+  axClaude D33) keeps them.
 
 ### AX-9 The Axit menu
 

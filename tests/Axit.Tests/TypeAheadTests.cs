@@ -21,4 +21,21 @@ public sealed class TypeAheadTests
         Assert.Equal(-1, TypeAhead.Find(shown, "z", 0));
         Assert.Equal(-1, TypeAhead.Find([], "a", 0));
     }
+
+    [Fact]
+    public void Shift_searches_the_same_way_backwards()
+    {
+        IReadOnlyList<string> shown = ["aardvark", "apple", "apricot", "banana"];
+        // One letter backwards: the name before that starts with it, round the start.
+        Assert.Equal(1, TypeAhead.Find(shown, "A", 2, backward: true));
+        Assert.Equal(2, TypeAhead.Find(shown, "a", 0, backward: true));
+        Assert.Equal(3, TypeAhead.Find(shown, "B", 0, backward: true));
+        // A prefix backwards: from the item in hand up to the first, then round the end.
+        Assert.Equal(2, TypeAhead.Find(shown, "Apr", 2, backward: true));
+        Assert.Equal(2, TypeAhead.Find(shown, "ap", 3, backward: true));
+        Assert.Equal(3, TypeAhead.Find(shown, "ban", 0, backward: true));
+        Assert.Equal(-1, TypeAhead.Find(shown, "Z", 1, backward: true));
+        // Capitals typed forwards find the same names: the case never matters.
+        Assert.Equal(TypeAhead.Find(shown, "ap", 0), TypeAhead.Find(shown, "AP", 0));
+    }
 }

@@ -108,6 +108,8 @@ public sealed class MediaForm : AxitForm
         _list.Items.Add(PlayQueue.EmptyText);
         _list.SelectedIndex = 0;
         _list.DoubleClick += (_, _) => PlaySelected();
+        // Type-to-find over the queue's items (AX-8.6); the empty queue's one line is no item.
+        ListTypeAhead.Attach(_list, () => _queue.Count == 0 ? [] : _list.Items.Cast<object>().Take(_queue.Count).Select(item => item.ToString() ?? string.Empty).ToList());
 
         // ---- the video area (AM-2.4): a plain surface at the top, shown while a video plays, never focused ----
         _video.Dock = DockStyle.Top;

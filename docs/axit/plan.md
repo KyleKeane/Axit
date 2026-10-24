@@ -217,6 +217,7 @@ library dependency (B-10: `git.exe` and the file system through the APIs already
      Outlook), so it waits until the small apps have proved their patterns.
   Not planned: a full browser (a web view, B-10; AxWeb above is a reader) and a PDF reader (Windows has no built-in
   way to pull text from a PDF; axOCR covers scanned pages).
+- **Type-to-find in the branches' lists** (AX-8.6, 2026-10-24): axCalc's history and axList's list attach `Axit.Forms/ListTypeAhead` when their branches merge; it is on main through the axprocess branch.
 - The order the user set: the spec, then the infrastructure, then the build; axTerminal first, since its
   infrastructure is the moves; axFile next; the two engines verified before their specs are written.
 

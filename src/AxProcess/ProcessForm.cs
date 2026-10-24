@@ -135,6 +135,8 @@ public sealed class ProcessForm : AxitForm
         _list.Dock = DockStyle.Fill;
         _list.TabIndex = 0;
         _list.AccessibleName = "Processes, reading";
+        // Type-to-find over the view's items, Shift with a letter backwards (AX-8.6; the user's ask, 2026-10-24).
+        ListTypeAhead.Attach(_list, () => Current.Labels);
         _list.MouseDown += (_, e) =>
         {
             if (e.Button == MouseButtons.Right && _list.IndexFromPoint(e.Location) is var index && index >= 0)
