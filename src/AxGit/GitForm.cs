@@ -57,7 +57,7 @@ public sealed partial class GitForm : AxitForm
     private readonly string? _startPath;
     private readonly MenuStrip _menu = new();
     private readonly ToolStripMenuItem _recentItem = new("Open &recent repository");
-    private readonly ListBox _list = new();
+    private readonly AxitList _list = new();
     private readonly TextBox _details = new();
     private readonly StatusStrip _status = new();
     private readonly ToolStripStatusLabel _stateLabel;
@@ -151,8 +151,6 @@ public sealed partial class GitForm : AxitForm
         _list.Height = 200;
         _list.TabIndex = 0;
         _list.AccessibleName = "No repository";
-        // Type-to-find over the view's items (AX-8.6).
-        ListTypeAhead.Attach(_list, () => Current.Labels);
 
         _details.Multiline = true;
         _details.ReadOnly = true;

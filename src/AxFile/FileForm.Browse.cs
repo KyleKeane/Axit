@@ -32,8 +32,6 @@ public sealed partial class FileForm
     /// <summary>The number of the latest read: a slow read of a folder left behind is dropped when it arrives.</summary>
     private int _reads;
 
-    /// <summary>Type-ahead (AF-3.6): the bundle's, over the shown entries' names; Shift with a letter searches backwards (AX-8.6).</summary>
-    private ListTypeAhead? _typeAhead;
 
     /// <summary>The folder shown when it is one on disk; null before one is shown and at This PC, which is no path a window can start on (AF-3.10).</summary>
     private string? RealFolder => _folder is { } folder && !FolderListing.IsThisPC(folder) ? folder : null;
@@ -120,7 +118,7 @@ public sealed partial class FileForm
     private async Task<bool> ShowFolderAsync(string folder, string? select, bool remember, bool announce = true)
     {
         // A rename box left open over the list that is about to change renames the wrong entry (AF-4.2).
-        CancelRename();
+        EndRename();
         var read = ++_reads;
         var changed = !string.Equals(folder, _folder, StringComparison.OrdinalIgnoreCase);
         Listing listing;
@@ -208,30 +206,6 @@ public sealed partial class FileForm
     }
 
     /// <summary>
-    /// Up or Home at the first entry, Down or End at the last (AF-3.6), in either list: the key moves nothing, so the
-    /// edge earcon sounds instead of silence; false when the key moves and stays the list's own.
-    /// </summary>
-    private bool AtEdge(Keys key)
-    {
-        var list = _pane.Focused ? _pane : _list;
-        var index = list.SelectedIndex;
-        if (index < 0 || list.Items.Count == 0)
-        {
-            return false;
-        }
-
-        var first = key is AxFileKeys.FirstItem or AxFileKeys.FirstItemAlso && index == 0;
-        var last = key is AxFileKeys.LastItem or AxFileKeys.LastItemAlso && index == list.Items.Count - 1;
-        if (!first && !last)
-        {
-            return false;
-        }
-
-        Sounds.Edge();
-        return true;
-    }
-
-    /// <summary>
     /// An operation's end (AF-4.5): in the folder it ran in, when that is still the one shown, the list read again with
     /// the result selected and <paramref name="said"/> announced (unless <paramref name="sayInView"/> is off: a caller
     /// that goes on with the result, New text file's rename box, says its own); when the user has gone to another
@@ -280,7 +254,7 @@ public sealed partial class FileForm
     private void FillList(string? select)
     {
         // A new list starts the type-ahead afresh (AF-3.6).
-        _typeAhead?.Reset();
+        _list.ResetTypeAhead();
         _list.BeginUpdate();
         _list.Items.Clear();
         _list.Items.AddRange(_shown.Select(entry => (object)ItemText(entry)).ToArray());

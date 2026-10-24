@@ -1,0 +1,23 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <!-- axPass's window side, as a class library inside Axit.exe (docs/axit/SPEC.md AX-1.7): the window, its key table
+       and its texts; the pure code is AxPass.Core. -->
+  <PropertyGroup>
+    <TargetFramework>$(AxitDotNet)-windows</TargetFramework>
+    <UseWindowsForms>true</UseWindowsForms>
+    <RootNamespace>AxPass</RootNamespace>
+    <AssemblyName>axPass</AssemblyName>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\AxPass.Core\AxPass.Core.csproj" />
+    <ProjectReference Include="..\Axit.Core\Axit.Core.csproj" />
+    <ProjectReference Include="..\Axit.Forms\Axit.Forms.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <!-- Help, User guide shows this file. -->
+    <EmbeddedResource Include="..\..\docs\axpass\user-guide.md" LogicalName="UserGuide.md" />
+  </ItemGroup>
+
+</Project>

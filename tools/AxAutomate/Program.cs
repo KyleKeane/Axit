@@ -17,7 +17,7 @@
 //
 // Script steps, one per line, '#' starts a comment:
 //   mkdir <name>              a fresh folder {temp}\<name>
-//   file <name> <text>        a file {temp}\<name> holding the text (\n for a new line)
+//   file <name> <text>        a file {temp}\<name> holding the text (\n for a new line); "<name>" in quotes with a space
 //   silence <name> <ms>       a silent WAV file {temp}\<name> of that length, for axMedia without a sound
 //   run <command line>        a command through cmd.exe in {temp}, waited for up to 60 s (git init, git commit ...)
 //   start <arguments>         Axit.exe with these arguments, on the test desktop; the window becomes the current one
@@ -310,10 +310,15 @@ internal sealed class Run(string exe, string temp)
                 Directory.CreateDirectory(Path.Combine(temp, rest));
                 return (true, null);
             case "file":
-                var at = rest.IndexOf(' ');
-                var path = Path.Combine(temp, at < 0 ? rest : rest[..at]);
+                // The path ends at the first space, or, in quotes, at the closing quote: axTask's items are named
+                // after their titles ("Fix the tap.json").
+                var quoted = rest.StartsWith('"') && rest.IndexOf('"', 1) > 0;
+                var at = quoted ? rest.IndexOf('"', 1) + 1 : rest.IndexOf(' ');
+                var name = quoted ? rest[1..(at - 1)] : at < 0 ? rest : rest[..at];
+                var content = at < 0 || at >= rest.Length ? string.Empty : rest[(at + 1)..];
+                var path = Path.Combine(temp, name);
                 Directory.CreateDirectory(Path.GetDirectoryName(path)!);
-                File.WriteAllText(path, at < 0 ? string.Empty : rest[(at + 1)..].Replace("\\n", "\r\n"), new UTF8Encoding(false));
+                File.WriteAllText(path, content.Replace("\\n", "\r\n"), new UTF8Encoding(false));
                 return (true, null);
             case "silence":
                 var parts = rest.Split(' ', 2);

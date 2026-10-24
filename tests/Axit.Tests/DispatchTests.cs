@@ -141,6 +141,21 @@ public sealed class DispatchTests
     }
 
     [Fact]
+    public void KeePassDatabaseGoesToAxPass()
+    {
+        var file = Path.Combine(Folder, $"axit-dispatch-{Guid.NewGuid():N}.kdbx");
+        File.WriteAllBytes(file, [0x03, 0xD9, 0xA2, 0x9A]);
+        try
+        {
+            Assert.Equal(Dispatch.AxPass, Dispatch.Decide([file]).App);
+        }
+        finally
+        {
+            File.Delete(file);
+        }
+    }
+
+    [Fact]
     public void JsonFileGoesToAxJSONAndSoDoesTheVerb()
     {
         var file = Path.Combine(Folder, $"axit-dispatch-{Guid.NewGuid():N}.JSON");
@@ -159,7 +174,7 @@ public sealed class DispatchTests
         Assert.Equal(Dispatch.AxJSON, Dispatch.Decide(["json", "x.json"]).App);
         Assert.Equal(["x.json"], Dispatch.Decide(["JSON", "x.json"]).Arguments);
         Assert.Contains("Axit json", Dispatch.Usage);
-        Assert.Equal(["axClaude", "axDown", "axJSON", "axGIT", "axTerminal", "axFile", "axMedia", "axPreview", "axStart", "axProcess"], Dispatch.Apps.Select(a => a.Name));
+        Assert.Equal(["axClaude", "axDown", "axJSON", "axGIT", "axTerminal", "axFile", "axMedia", "axPreview", "axStart", "axProcess", "axTask", "axPass"], Dispatch.Apps.Select(a => a.Name));
     }
 
     [Fact]

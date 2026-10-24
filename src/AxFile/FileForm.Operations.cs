@@ -381,39 +381,19 @@ public sealed partial class FileForm
         }
 
         _renaming = entry;
-        _renameBox.Bounds = _list.GetItemRectangle(_list.SelectedIndex);
-        _renameBox.Text = entry.Name;
-        // The selection goes before the focus: a text box that gets the focus selects everything unless one was set.
-        _renameBox.Select(0, wholeName || entry.IsFolder ? entry.Name.Length : Path.GetFileNameWithoutExtension(entry.Name).Length);
-        _renameBox.Visible = true;
-        _renameBox.BringToFront();
-        _renameBox.Select();
-    }
-
-    /// <summary>Enter and Escape in the box are the box's own, as a notice's field's (AF-6.2).</summary>
-    private void OnRenameKey(object? sender, KeyEventArgs e)
-    {
-        if (e.KeyData == Keys.Return)
-        {
-            e.SuppressKeyPress = true;
-            CommitRename();
-        }
-        else if (e.KeyData == Keys.Escape)
-        {
-            e.SuppressKeyPress = true;
-            CancelRename();
-        }
+        // The bundle's rename box over the entry (AX-8.7): Enter commits, Escape or leaving it keeps the name.
+        _list.BeginRename(entry.Name, wholeName || entry.IsFolder ? entry.Name.Length : Path.GetFileNameWithoutExtension(entry.Name).Length,
+            CommitRename, () => _renaming = null);
     }
 
     /// <summary>The typed name checked and applied: "Renamed to <name>", the entry selected under its new name.</summary>
-    private void CommitRename()
+    private void CommitRename(string name)
     {
         if (_renaming is not { } entry || _folder is not { } folder)
         {
             return;
         }
 
-        var name = _renameBox.Text.Trim();
         if (CheckNewName(name, entry) is { } problem)
         {
             Announce(problem, true);
@@ -431,28 +411,7 @@ public sealed partial class FileForm
             new Outcome($"Renamed {entry.Name} to {name}", new Operation(OperationKind.Rename, [entry.Path], [FileOperations.Rename(entry.Path, name)]), name, $"Renamed to {name}")));
     }
 
-    /// <summary>The box closed with the name kept; the list's reading of the entry is the feedback.</summary>
-    private void CancelRename()
-    {
-        if (_renaming is null)
-        {
-            return;
-        }
-
-        EndRename();
-    }
-
-    private void EndRename()
-    {
-        _renaming = null;
-        // The focus goes back first, so that hiding the box does not send it somewhere of WinForms' choosing.
-        if (!IsDisposed && _list.Visible && !NoticeOpen && !_list.Focused)
-        {
-            _list.Select();
-        }
-
-        _renameBox.Visible = false;
-    }
+    private void EndRename() => _list.EndRename();
 
     // ---- delete (AF-4.3) and the path (AF-4.4) ----
 

@@ -22,8 +22,7 @@ public sealed partial class FileForm : AxitForm
     private readonly ToolStripMenuItem _favoritesItem = new("Fa&vorites");
     private readonly ToolStripMenuItem _drivesMenu = new("Driv&es");
     private readonly List<(SortBy By, ToolStripMenuItem Item)> _sortItems = [];
-    private readonly ListBox _list = new();
-    private readonly TextBox _renameBox = new();
+    private readonly AxitList _list = new();
     private readonly StatusStrip _status = new();
     private readonly ToolStripStatusLabel _stateLabel;
     private readonly ToolStripStatusLabel _pathLabel;
@@ -143,8 +142,8 @@ public sealed partial class FileForm : AxitForm
         _list.AccessibleName = "No folder";
         _list.DoubleClick += (_, _) => OpenSelected();
         // AF-3.6: File Explorer's type-ahead, several letters into one prefix, in place of the list's one-letter jump.
-        _typeAhead = ListTypeAhead.Attach(_list, () => _shown.Select(entry => entry.Name).ToList());
-        ListTypeAhead.Attach(_pane, () => _pane.Items.Cast<object>().Select(item => item.ToString() ?? string.Empty).ToList());
+        // The bundle's list (AX-8.6) types over the shown entries' names, not the empty folder's or the Not shown line.
+        _list.Names = () => _shown.Select(entry => entry.Name).ToList();
         // AF-4.6, AF-D13: a right click opens the menu bar's Item menu on the entry under it, selected first as File
         // Explorer does; Shift+F10 and the Applications key open the same menu from the key switch.
         _list.MouseDown += (_, e) =>
@@ -161,14 +160,6 @@ public sealed partial class FileForm : AxitForm
                 ShowItemMenu();
             }
         };
-
-        // ---- the rename box (AF-4.2): a child of the list, placed over the entry while a rename runs, hidden otherwise ----
-        _renameBox.Visible = false;
-        _renameBox.AccessibleName = "New name";
-        _renameBox.BorderStyle = BorderStyle.FixedSingle;
-        _renameBox.KeyDown += OnRenameKey;
-        _renameBox.Leave += (_, _) => CancelRename();
-        _list.Controls.Add(_renameBox);
 
         // ---- the Actions list (AF-9): always under the folder list, "No actions yet" until the first operation ----
         SetUpActions();
@@ -253,7 +244,7 @@ public sealed partial class FileForm : AxitForm
 
     protected override void HideForNotice()
     {
-        CancelRename();
+        EndRename();
         _list.Visible = false;
         _pane.Visible = false;
     }
@@ -274,7 +265,6 @@ public sealed partial class FileForm : AxitForm
     protected override void ApplyFont(Font font)
     {
         _list.Font = font;
-        _renameBox.Font = font;
         _pane.Font = font;
         FitPane();
     }
@@ -393,7 +383,7 @@ public sealed partial class FileForm : AxitForm
                 ShowProperties();
                 return true;
             case AxFileKeys.Undo:
-                if (_renameBox.Focused)
+                if (_list.Renaming)
                 {
                     // The rename box's own undo of the typing (AF-6.2).
                     return false;
@@ -428,12 +418,6 @@ public sealed partial class FileForm : AxitForm
 
                 ShowItemMenu();
                 return true;
-        }
-
-        if ((_list.Focused || _pane.Focused) && AtEdge(keyData))
-        {
-            // Up or Home at the first entry, Down or End at the last (AF-3.6): the edge earcon, since the key moves nothing.
-            return true;
         }
 
         if (_pane.Focused)

@@ -6,6 +6,20 @@ What was checked with NVDA, against which version, and with what result. When a 
 
 Add a section under this one, above the earlier passes, so that the newest comes first: the date, the version, the commit tested, who ran it and how the result was given, and the environment: the NVDA version, the synthesizer and the Windows build (so that a regression is dated to an NVDA release rather than to some time). Under it, one table per app with a line per section of its plan: the steps run and the result, Passed, Failed (with what was heard) or Not run. A step that fails gets a line of its own with what NVDA said and what it should have said, and the bug's fix names the step. When a plan gains or loses steps, the next pass lists them as the plan has them then.
 
+## 2026-10-24, axTask and axPass (the branch `axtask`, before its merge)
+
+- Run by the user with NVDA on builds of `axtask` up to cffd363, over the day's rounds of asks; the result given as
+  "all tests pass for all pending requests". NVDA version, synthesizer and Windows build not given.
+- axTask, `docs/axtask/nvda-test-plan.md`: Passed, after its rounds were built and heard again: the sections of the
+  top level with Ctrl+Up and Ctrl+Down (1.1), Ctrl+M and the Section field (1.9), one level of lists, F2 in place.
+- axPass, `docs/axpass/nvda-test-plan.md`: Passed, with KeePassXC 2.8.0: unlocking, the fields, the copies, Ctrl+M,
+  the password fields named as instructions (4.9) and the backups (4.10).
+- The shared pieces on the branch, heard through these apps: `AxitList` (type-to-find, the edge earcon, the rename in
+  place moved from axFile), `ItemForm`, the hidden notice field. axFile's rename in place and the edge sound in axGIT
+  and axMedia were among the pending requests the user's words cover; not listed step by step.
+- Automated alongside: `tests/scripts/axtask` (three scripts), `tests/scripts/axpass`, `tests/scripts/axfile`, all
+  passing; every test project.
+
 ## 2026-10-24, axProcess (the branch `axprocess`, before its merge)
 
 - Run by the user with NVDA on a Debug build of `axprocess` at 479792e, started from a scratch folder; the result given

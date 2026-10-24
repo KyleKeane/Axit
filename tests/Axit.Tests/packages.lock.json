@@ -179,6 +179,20 @@
           "Axit.Core": "[1.0.0, )"
         }
       },
+      "axpass": {
+        "type": "Project",
+        "dependencies": {
+          "AxPass.Core": "[1.0.0, )",
+          "Axit.Core": "[1.0.0, )",
+          "Axit.Forms": "[1.0.0, )"
+        }
+      },
+      "axpass.core": {
+        "type": "Project",
+        "dependencies": {
+          "Axit.Core": "[1.0.0, )"
+        }
+      },
       "axpreview": {
         "type": "Project",
         "dependencies": {
@@ -216,6 +230,20 @@
         }
       },
       "axstart.core": {
+        "type": "Project",
+        "dependencies": {
+          "Axit.Core": "[1.0.0, )"
+        }
+      },
+      "axtask": {
+        "type": "Project",
+        "dependencies": {
+          "AxTask.Core": "[1.0.0, )",
+          "Axit.Core": "[1.0.0, )",
+          "Axit.Forms": "[1.0.0, )"
+        }
+      },
+      "axtask.core": {
         "type": "Project",
         "dependencies": {
           "Axit.Core": "[1.0.0, )"

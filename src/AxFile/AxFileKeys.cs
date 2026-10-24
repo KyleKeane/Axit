@@ -98,7 +98,7 @@ public static class AxFileKeys
     /// <summary>The newest operation of this window taken back (AF-4.14); in the Actions list, the line under the selection (AF-9.3).</summary>
     public const Keys Undo = Keys.Control | Keys.Z;
 
-    /// <summary>In either list, at the first entry: the edge earcon (AF-3.6, `AtEdge`); the list's own key everywhere else. In the Go to folder field: the previous completion (AF-3.3).</summary>
+    /// <summary>In either list, at the first entry: the edge earcon (AF-3.6; the bundle's `AxitList` since 2026-10-24); the list's own key everywhere else. In the Go to folder field: the previous completion (AF-3.3).</summary>
     public const Keys FirstItem = Keys.Up;
 
     /// <summary>The Go to folder field's previous completion (AF-3.3): the same key as <see cref="FirstItem"/>, in the field.</summary>
