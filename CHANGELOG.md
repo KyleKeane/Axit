@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased
+## 3.5.0 - 2026-10-23
 
 - axTerminal: Ctrl+Up and Ctrl+Down in the command field go through the recent commands, with a short earcon on each; past the newest comes what you typed or last changed. The plain arrows only move the caret.
 - axTerminal: Speak output is all lines by default, so a command's output is read as it arrives; a settings file that already says none keeps none (Options, Speech, Speak output: all lines changes it).

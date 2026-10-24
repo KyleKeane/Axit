@@ -6,20 +6,9 @@ What was checked with NVDA, against which version, and with what result. When a 
 
 Add a section under this one, above the earlier passes, so that the newest comes first: the date, the version, the commit tested, who ran it and how the result was given, and the environment: the NVDA version, the synthesizer and the Windows build (so that a regression is dated to an NVDA release rather than to some time). Under it, one table per app with a line per section of its plan: the steps run and the result, Passed, Failed (with what was heard) or Not run. A step that fails gets a line of its own with what NVDA said and what it should have said, and the bug's fix names the step. When a plan gains or loses steps, the next pass lists them as the plan has them then.
 
-## Owed: the branch `palette` (2026-10-23, unreleased)
+## 2026-10-23, Axit 3.5.0 (the branch `palette`)
 
-Not yet checked with NVDA, at commit f733b6d of `palette`; this section becomes the pass's section when it is run.
-The list is `docs/axit/review-2026-10-23.md` section 9, in short:
-
-- Every window: the focus after a notice (one rule of the window base now), F1 and Escape in a notice, the heading
-  letters and Ctrl+F in a notice's text, the command palette (Ctrl+Shift+P: AxDown plan section 6 step 6, AxFile plan
-  section 5 step 6).
-- AxClaude: plan section 12 steps 18 to 21 and step 4a of the questions section; the console window shared with
-  AxTerminal (reading while output arrives, sending, find, export, the sounds); the help section's steps 5 and 8.
-- AxTerminal: the continuation rows, New session's fresh screen, the unrecorded command's status, the stop at once.
-- AxFile: steps 2a, 10a, 12b, 13a, 6, 3a, 6a, 7 and 9.
-- AxGit: steps 4a and 5. AxMedia: steps 1a and 2a. AxDown: step 6. AxPreview: step 9a.
-- AxStart: its whole plan, owed since 3.4.0, with step 5a and section 2 steps 2, 3 and 5.
+- Run by the user with NVDA, step by step in batches, on `palette` from 0d46e82 to the release; the fixes the pass asked for went in as it ran, each heard again. The user stopped tired before the last apps and released; still owed, for the next pass: axGIT steps 4a and 5, axMedia steps 1a and 2a, axPreview step 9a (all passing in the automated scripts), axStart section 1 step 7 and section 5 steps 1, 2 and 4 (the Start menu, sign-in and the update in place, on the installed release), the help section's steps 5 and 8 of axClaude.
 
 Run so far, by the user with NVDA, 2026-10-23, on `palette` after 0d46e82:
 
