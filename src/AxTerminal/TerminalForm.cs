@@ -98,55 +98,6 @@ internal sealed partial class TerminalForm : ConsoleForm
         return true;
     }
 
-    /// <summary>The window's own keys, after the console's shared ones (the focus keys, find, the bookmark, read to the end) and the base's (the text size keys, F1, the palette, Ctrl+S).</summary>
-    protected override bool ProcessConsoleKey(Keys keyData)
-    {
-        switch (keyData)
-        {
-            case AxTerminalKeys.GoToField:
-                GoTo(BottomControl);
-                return true;
-            case AxTerminalKeys.GoToTerminal:
-                GoTo(Transcript);
-                return true;
-            case AxTerminalKeys.LatestOutput:
-                Transcript.JumpToLatestResponse();
-                return true;
-            case AxTerminalKeys.NewSession:
-                NewSession();
-                return true;
-            case AxTerminalKeys.RestartShell:
-                RestartShell();
-                return true;
-            case AxTerminalKeys.ClearTranscript:
-                ClearTranscript();
-                return true;
-            case AxTerminalKeys.RecentCommands:
-                ShowRecentCommands();
-                return true;
-            case AxTerminalKeys.WhatIsRunning:
-                SayWhatIsRunning();
-                return true;
-            case AxTerminalKeys.SayFolder:
-                SayFolder();
-                return true;
-            case AxTerminalKeys.ToggleMusic:
-                ToggleMusic();
-                return true;
-            case AxTerminalKeys.ShowInExplorer:
-                ShowInExplorer();
-                return true;
-            case AxTerminalKeys.Interrupt:
-                Interrupt();
-                return true;
-            case AxTerminalKeys.SendEscape:
-                SendEscape();
-                return true;
-        }
-
-        return false;
-    }
-
     // ---- what the window base and the console window ask for (bundle AX-6.5) ----
 
     protected override string Shortcuts => HelpText.Shortcuts;
