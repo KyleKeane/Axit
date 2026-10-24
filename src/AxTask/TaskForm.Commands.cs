@@ -322,7 +322,7 @@ public sealed partial class TaskForm
         }
 
         var from = source.Path;
-        var current = FieldTypes.TextOf(field.Value) is { Length: > 0 } link && ItemFolder.ReadItem(ItemFolder.Resolve(from, link)) is { } linked ? ItemFolder.NameOf(linked) : string.Empty;
+        var current = FieldTypes.TextOf(field.Value) is { Length: > 0 } link && ItemFolder.Resolve(from, link) is { } linkedPath && ItemFolder.ReadItem(linkedPath) is { } linked ? ItemFolder.NameOf(linked) : string.Empty;
         ItemFile? target = null;
         AskText("Change " + field.Title, "The title of the item to link to, in any list. Empty for none.", "Title:", "Title", current, "&Link",
             _ => SetValue(index, field, JsonValue.Create(target is null ? string.Empty : ItemFolder.LinkTo(from, target.Path))),

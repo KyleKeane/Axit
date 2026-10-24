@@ -36,7 +36,11 @@ public static class Links
                     continue;
                 }
 
-                var target = ItemFolder.Resolve(item.Path, link);
+                if (ItemFolder.Resolve(item.Path, link) is not { } target)
+                {
+                    continue;
+                }
+
                 var newLink = ItemFolder.LinkTo(newPath, Remap(target, from, to));
                 if (newLink != link)
                 {
@@ -57,7 +61,7 @@ public static class Links
     public static string Spoken(string fromItem, string link)
     {
         var target = ItemFolder.Resolve(fromItem, link);
-        return ItemFolder.ReadItem(target) is { } item ? ItemFolder.NameOf(item) : "missing: " + Path.GetFileNameWithoutExtension(target);
+        return target is not null && ItemFolder.ReadItem(target) is { } item ? ItemFolder.NameOf(item) : "missing: " + Path.GetFileNameWithoutExtension(target ?? link);
     }
 
     /// <summary>Where a path is after the move: itself, or under <paramref name="to"/> when it was <paramref name="from"/> or under it.</summary>
