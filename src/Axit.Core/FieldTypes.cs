@@ -22,7 +22,12 @@ public static class FieldTypes
     public const string Choice = "choice";
     public const string Link = "link";
 
-    /// <summary>Every type, in the order New field offers them.</summary>
+    /// <summary>axPass's two (docs/axit/item-apps.md section 6): a user name, read and typed as text; a password, never read out.</summary>
+    public const string UserName = "username";
+
+    public const string Password = "password";
+
+    /// <summary>Every type, in the order New field offers them; axPass's two are not offered there.</summary>
     public static readonly IReadOnlyList<string> All = [Text, LongText, Number, Date, DateTime, Check, Choice, Link];
 
     private static readonly CultureInfo English = CultureInfo.InvariantCulture;
@@ -32,10 +37,11 @@ public static class FieldTypes
     {
         LongText => "long text",
         DateTime => "date and time",
+        UserName => "user name",
         _ => type,
     };
 
-    public static bool Known(string type) => All.Contains(type);
+    public static bool Known(string type) => All.Contains(type) || type is UserName or Password;
 
     /// <summary>The empty value of a type (IA-4.2): false for a check, an empty string otherwise.</summary>
     public static JsonNode? Empty(string type, IReadOnlyList<string> options) => type == Check ? JsonValue.Create(false) : JsonValue.Create(string.Empty);
@@ -46,6 +52,9 @@ public static class FieldTypes
         var text = TextOf(field.Value);
         switch (field.Type)
         {
+            case Password:
+                // Never read out, whatever the value holds.
+                return text.Length == 0 && field.Value is null ? "empty" : "hidden";
             case Check:
                 return IsTrue(field.Value) ? "done" : "not done";
             case Date when ReadDate(field.Value) is { } date:
@@ -81,7 +90,7 @@ public static class FieldTypes
         var text = typed.Trim();
         switch (type)
         {
-            case Text:
+            case Text or UserName or Password:
                 return text.Contains('\n') ? new Parsed(null, "A text field holds one line") : new Parsed(JsonValue.Create(text), null);
             case LongText:
                 return new Parsed(JsonValue.Create(typed.ReplaceLineEndings("\n").TrimEnd('\n')), null);

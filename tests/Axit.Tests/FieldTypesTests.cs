@@ -68,6 +68,17 @@ public class FieldTypesTests
     }
 
     [Fact]
+    public void APasswordIsNeverReadOut()
+    {
+        Assert.Equal("hidden", FieldTypes.Spoken(new ItemField("Password", FieldTypes.Password, JsonValue.Create("secret"), [])));
+        Assert.Equal("hidden", FieldTypes.Spoken(new ItemField("Password", FieldTypes.Password, JsonValue.Create(string.Empty), [])));
+        Assert.Equal("kyle", FieldTypes.Spoken(new ItemField("UserName", FieldTypes.UserName, JsonValue.Create("kyle"), [])));
+        Assert.Equal("user name", FieldTypes.Spoken(FieldTypes.UserName));
+        Assert.True(FieldTypes.Known(FieldTypes.Password));
+        Assert.DoesNotContain(FieldTypes.Password, FieldTypes.All);
+    }
+
+    [Fact]
     public void ATextFieldHoldsOneLine() =>
         Assert.NotNull(FieldTypes.Parse(FieldTypes.Text, "one\ntwo", [], Today).Refused);
 }
