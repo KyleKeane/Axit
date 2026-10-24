@@ -1,5 +1,9 @@
 # Changelog
 
+## Unreleased
+
+- axProcess: a new app, what runs on the computer as one list with three views. Ctrl+1 the processes with their memory and processor use, largest first; Ctrl+2 the services with their state and start type; Ctrl+3 the programs that start at sign-in. Enter shows an item's details with what can be done to it, Delete ends a process after a question, a service's details start, stop or restart it, Ctrl+E shows a program in axFile, Ctrl+Q says the summary. Nothing refreshes by itself: F5 reads again. Start menu `Axit axProcess`, command `axprocess`.
+
 ## 3.5.0 - 2026-10-23
 
 - axTerminal: Ctrl+Up and Ctrl+Down in the command field go through the recent commands, with a short earcon on each; past the newest comes what you typed or last changed. The plain arrows only move the caret.

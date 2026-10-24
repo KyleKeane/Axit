@@ -208,7 +208,7 @@ library dependency (B-10: `git.exe` and the file system through the APIs already
      on the user's command.
   4. **axSQL**, a SQLite browser: the tables, a query field, the result as a list read row by row with a key for the
      whole row. Windows ships SQLite (`winsqlite3.dll`), so no library; the shared database planned above could use it.
-  5. **axProcess**, processes, services and startup items (named so, since AxTask is the to-do manager): a filtered
+  5. **axProcess** (built 2026-10-23 on the branch `axprocess`, `docs/axprocess/SPEC.md`, NVDA pass owed), processes, services and startup items (named so, since AxTask is the to-do manager): a filtered
      list with memory and CPU, keys to end, restart and show the program file in axFile. Task Manager's lists read
      only in part. Windows APIs only.
   6. **axCalc** (above), in detail: a field for an expression, each answer a line of a transcript to arrow through

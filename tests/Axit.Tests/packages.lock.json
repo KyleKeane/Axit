@@ -193,6 +193,20 @@
           "Axit.Core": "[1.0.0, )"
         }
       },
+      "axprocess": {
+        "type": "Project",
+        "dependencies": {
+          "AxProcess.Core": "[1.0.0, )",
+          "Axit.Core": "[1.0.0, )",
+          "Axit.Forms": "[1.0.0, )"
+        }
+      },
+      "axprocess.core": {
+        "type": "Project",
+        "dependencies": {
+          "Axit.Core": "[1.0.0, )"
+        }
+      },
       "axstart": {
         "type": "Project",
         "dependencies": {
