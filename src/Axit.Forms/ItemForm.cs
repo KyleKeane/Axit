@@ -493,7 +493,8 @@ public abstract partial class ItemForm : AxitForm
         _rows = [.. rows];
         Navigator.BeginUpdate();
         Navigator.Items.Clear();
-        Navigator.Items.AddRange(_rows.Select(row => (object)row.Label).ToArray());
+        // S-42: titles from a shared folder or database with their hidden characters made visible.
+        Navigator.Items.AddRange(_rows.Select(row => (object)DisplayText.Visible(row.Label)).ToArray());
         Navigator.EndUpdate();
         Navigator.AccessibleName = name;
         Navigator.ResetTypeAhead();
@@ -549,7 +550,7 @@ public abstract partial class ItemForm : AxitForm
         _lines = lines;
         DetailPane.BeginUpdate();
         DetailPane.Items.Clear();
-        DetailPane.Items.AddRange(lines.Select(line => (object)line.Line.Label).ToArray());
+        DetailPane.Items.AddRange(lines.Select(line => (object)DisplayText.Visible(line.Line.Label)).ToArray());
         DetailPane.EndUpdate();
         DetailPane.AccessibleName = detail.Name;
         DetailPane.ResetTypeAhead();

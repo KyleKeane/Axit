@@ -347,7 +347,8 @@ public sealed partial class FileForm
     }
 
     /// <summary>The list item of an entry (AF-2.2): its label, with ", selected" while it is (AF-3.7).</summary>
-    private string ItemText(Entry entry) => _marks.Contains(entry.Path) ? entry.Label + ", selected" : entry.Label;
+    // S-42: a name's hidden direction marks and control characters made visible.
+    private string ItemText(Entry entry) => DisplayText.Visible(_marks.Contains(entry.Path) ? entry.Label + ", selected" : entry.Label);
 
     // ---- the selection (AF-3.7): the marks, one pure piece (Marks), applied here to the items and the Actions list ----
     // Every change of the marks is a line of the Actions list's Selection section (AF-9.2), which Ctrl+Z on the line

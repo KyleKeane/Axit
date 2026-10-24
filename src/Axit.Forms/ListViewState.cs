@@ -1,3 +1,5 @@
+using Axit.Core;
+
 namespace Axit.Forms;
 
 /// <summary>
@@ -40,7 +42,8 @@ public sealed class ListViewState
     {
         list.BeginUpdate();
         list.Items.Clear();
-        list.Items.AddRange(Labels.Select(label => (object)label).ToArray());
+        // S-42: text from outside (a commit's subject, a file's name) with its hidden characters made visible.
+        list.Items.AddRange(Labels.Select(label => (object)DisplayText.Visible(label)).ToArray());
         list.EndUpdate();
         list.AccessibleName = Name;
         var index = -1;
