@@ -235,6 +235,8 @@ internal sealed class AutomationChannel : IMessageFilter
     {
         ListBox { SelectedItem: { } item } => item.ToString(),
         ListBox => string.Empty,
+        // A hidden field (axPass's passwords) is never read out, as NVDA reads it: protected.
+        TextBox { UseSystemPasswordChar: true } => "protected",
         TextBoxBase box => CaretLine(box),
         _ => control.Text,
     };
