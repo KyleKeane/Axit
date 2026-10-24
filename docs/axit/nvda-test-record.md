@@ -33,6 +33,13 @@ Automated in `tests/scripts/mcp` (the runner as the client); by ear with NVDA, i
 - A pairing while another notice is open shows nothing and the client hears "ask again".
 - Forget AI tools: "AI tools forgotten"; the next call asks again.
 
+## Owed: the installer reads the apps from Axit.exe (3.7.0, `docs/axit/app-kit.md` AK-4.1)
+
+- On a computer with Axit installed (not the development machine), update to 3.7.0 or run install.cmd from its zip:
+  every app is in the Start menu ("Axit axCalc" and the rest), the console commands start them, File Explorer's
+  "Open with Axit" lists the same apps as before on a folder, a file, a .json file and a sound file, and Settings,
+  Apps, Axit, Uninstall removes it all.
+
 ## Owed: Install it now (3.7.0, `docs/axit/SPEC.md` AX-2.9, after the review of 2026-10-24)
 
 - axGIT without Git, axPass without KeePassXC, axClaude without Claude Code: the notice's last line says "Enter:
