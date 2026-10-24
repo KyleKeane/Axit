@@ -150,35 +150,8 @@ public static class AppMessage
     private static bool IsThisProgram(nint window)
     {
         GetWindowThreadProcessId(window, out var processId);
-        var process = OpenProcess(ProcessQueryLimitedInformation, false, processId);
-        if (process == 0)
-        {
-            return false;
-        }
-
-        try
-        {
-            var size = 1024;
-            var path = new StringBuilder(size);
-            return QueryFullProcessImageNameW(process, 0, path, ref size)
-                && string.Equals(path.ToString(), Environment.ProcessPath, StringComparison.OrdinalIgnoreCase);
-        }
-        finally
-        {
-            CloseHandle(process);
-        }
+        return ThisProgram.Runs(processId);
     }
-
-    private const uint ProcessQueryLimitedInformation = 0x1000;
-
-    [DllImport("kernel32.dll")]
-    private static extern nint OpenProcess(uint access, bool inherit, uint processId);
-
-    [DllImport("kernel32.dll", CharSet = CharSet.Unicode)]
-    private static extern bool QueryFullProcessImageNameW(nint process, uint flags, StringBuilder path, ref int size);
-
-    [DllImport("kernel32.dll")]
-    private static extern bool CloseHandle(nint handle);
 
     /// <summary>COPYDATASTRUCT: a number of the sender's choosing, the byte count, and the bytes.</summary>
     [StructLayout(LayoutKind.Sequential)]

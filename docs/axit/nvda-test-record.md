@@ -19,6 +19,19 @@ automated scripts of every app pass. Heard with NVDA, a short round in each app'
 - axStart, axClip: the six match keys, Escape hiding, and the window coming back on the hotkey with the field empty.
 - axGIT: Enter in each view: the diff in Changes, the switch in Branches, the commit in Log.
 
+## Owed: the AI tools, first stage (the branch `app-kit`, `docs/axit/mcp.md` MC-6)
+
+Automated in `tests/scripts/mcp` (the runner as the client); by ear with NVDA, in any window:
+
+- Options, General: "Let AI tools read and open Axit (MCP)" read with its checked state; turning it on shows the notice
+  with the command and the argument to add to the client; turning it off says "AI tools off".
+- With Claude Code given the server (the command from the notice, the argument `mcp`): its first call brings the
+  pairing notice with its chime into the newest Axit window, which flashes when it is not in front; the title names
+  the client, the text its program; Enter at once does nothing for a moment, then Deny; Tab to Allow, Enter: "Claude
+  Code may read Axit".
+- A pairing while another notice is open shows nothing and the client hears "ask again".
+- Forget AI tools: "AI tools forgotten"; the next call asks again.
+
 ## Owed: merged to main on 2026-10-24 before their pass (the branch `calc-clip`)
 
 Merged at the user's word ahead of the rule, so that main holds them; no release until these have passed.

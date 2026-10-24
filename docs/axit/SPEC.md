@@ -115,7 +115,8 @@ The apps are named ax and a word, the ax in lower case and the word as it is wri
 - AX-1.3 Without any argument, `Axit.exe` starts axClaude on the current folder, which is what `axclaude` does today
   (B-8). axClaude keeps its own rule for a current folder that is the program's own folder.
 - AX-1.4 `--help` and `--version` answer for the bundle and list the verbs; `Axit.exe claude --help` is the app's own
-  usage text.
+  usage text. One verb is not an app: `mcp`, the AI tools' broker an MCP client starts, with no window
+  (`docs/axit/mcp.md` MC-1.1).
 - AX-1.5 The dispatch is pure code in `Axit.Core` (`Dispatch`): arguments in, app name and arguments out. It is unit
   tested and has no knowledge of the apps beyond their names.
 - AX-1.6 Each process sets a Windows application id before its window opens (`Axit.AxClaude`, `Axit.AxDown`, `Axit.AxJSON`, `Axit.AxGit`, `Axit.AxTerminal`, `Axit.AxFile`, `Axit.AxMedia`, `Axit.AxPreview`, `Axit.AxStart`, `Axit.AxProcess`, `Axit.AxTask`, `Axit.AxPass`, `Axit.AxCalc`, `Axit.AxClip`), so the
@@ -309,7 +310,9 @@ The apps are named ax and a word, the ax in lower case and the word as it is wri
   the hand-over from a starting process of the app (`AppMessage`, answered at once and applied after), the submenus
   and the menu every window has (Options → Text, General and Developer; Help: `CreateTextMenu`,
   `CreateGeneralMenu`, `CreateDeveloperMenu`, `CreateHelpMenu`, each with the window's own items in their place;
-  `Toggle` for a checked setting; `CreateExitItem` for the last item of the first menu), the window role for NVDA
+  General ends with the AI tools' two items, Let AI tools read and open Axit and Forget AI tools, in every window,
+  `mcp.md` MC-6.1; `Toggle` for a checked setting; `CreateExitItem` for the last item of the first menu), the
+  window's pipe for the AI tools (`McpChannel`, MC-6.2), the window role for NVDA
   (AX-7.1) and the common part of the key switch (the text size keys everywhere, F1, the palette, Ctrl+S). A
   window adds its controls (the `Overlay` first) and fills in the hooks: the F1 text, what to hide for a notice and
   what to show after, the control the focus falls back to after one (`FocusTarget`), whether the chime follows a

@@ -68,6 +68,17 @@ another project on its second use, the bullet says so.
 - `AutomationEnvironment` (S-11): a test run's secret and folder, read once in `Main` and taken out of the environment; only a new Axit window of the run gets them (`PassTo`).
 - `Redaction` (S-20; from AxClaude.Core on its second use, Copy diagnostics): e-mail addresses, the account's paths, pipe names, ids and the account name replaced by placeholders, for text to be shown or shared.
 
+## The AI tools (docs/axit/mcp.md MC-6, 2026-10-24)
+
+- `Mcp/McpAccess` with `McpSettings` and `McpClient`: the bundle's one setting in `%APPDATA%\Axit\mcp.json` (off
+  until the user turns it on, the paired clients by their program file), read again at every connection; the key in
+  `%LOCALAPPDATA%\Axit\mcp.key` through `UserSecret`, `NewChallenge`, `Proof` and `Proves` (HMAC-SHA256).
+- `Mcp/McpProtocol`: MCP's JSON-RPC as the broker speaks it, one line in, one line out, the tools from two functions;
+  `Text` reads a string a client sent without trusting its type. `McpTool` and `McpResult`.
+- `Mcp/McpTools`: the first stage's tools, `NeverRead` (axPass, axClip) and `NeverOpened` (axClaude, axTerminal),
+  and `OpenArguments`, the check of `axit_open`'s app and path. `Mcp/McpAudit` (one line a call, the arguments
+  hashed) and `McpRate` (ten calls a second). The pipes and the broker are `Axit.Forms`' (`McpChannel`, `McpBroker`).
+
 ## Background apps
 
 - `SignInStart` (docs/axstart/SPEC.md AS-1.3; from axStart, axClip, 2026-10-23): a background app's value under the

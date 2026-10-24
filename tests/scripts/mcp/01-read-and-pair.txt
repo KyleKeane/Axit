@@ -1,0 +1,78 @@
+# The AI tools' first stage (docs/axit/mcp.md MC-6): off by default, turned on from the menu, a client paired in the
+# window, the reads, the refusals, off again. The runner is the MCP client (mcp start, mcp call, expect mcp); it never
+# calls axit_open on an app it may open, which would start a window on the user's own desktop.
+file home\Axit\axdown.json {"checkForUpdates": false}
+file notes.md First line of the notes.\nSecond line, for the AI tools.
+start down {temp}\notes.md
+
+# MC-6.1: off until the user turns it on; every call is refused before anything else.
+mcp start
+mcp call axit_windows
+expect mcp error: Axit's AI tools access is off
+
+# On from Options, General: the key made, the notice naming what to add to the client.
+menu Let AI tools read and open Axit
+expect state "notice":"AI tools on"
+expect state Arguments: mcp
+keys escape
+
+# MC-6.4: a client not paired is asked about in the window; Deny is the default, so Escape refuses.
+mcp call axit_windows
+expect state "notice":"axAutomate asks to use Axit"
+wait 1500
+keys escape
+expect mcp error: The user did not allow axAutomate
+
+# A Deny holds for a minute: asked again at once, the client is refused without a notice.
+mcp call axit_windows
+expect mcp not asked again within a minute
+refuse state asks to use Axit
+
+# A new session of the client (a new broker) is asked again; Allow pairs, and the call that waited goes on.
+mcp start
+mcp call axit_windows
+expect state "notice":"axAutomate asks to use Axit"
+wait 1500
+# The focus is on the notice's text; Tab moves to its first button.
+keys tab
+expect focus &Allow
+keys enter
+expect said axAutomate may read Axit
+expect mcp "app": "axDown"
+
+# MC-6.5: the reads, by the id axit_windows gave.
+mcp call axit_window_text {"window":"{window}"}
+expect mcp First line of the notes.
+mcp call axit_window_state {"window":"{window}"}
+expect mcp notes.md
+mcp call axit_window_commands {"window":"{window}"}
+expect mcp "label": "Save as..."
+mcp call axit_apps
+expect mcp "verb": "pass"
+mcp call axit_window_said {"window":"{window}"}
+expect mcp axAutomate may read Axit
+
+# MC-4.1: an axPass window serves no pipe, so it is never listed.
+file home\Axit\axpass.json {"checkForUpdates": false}
+start pass
+use 1
+mcp call axit_windows
+refuse mcp axPass
+expect mcp "title": "notes.md - axDown"
+
+# The refusals: an app that starts a program, a window that is not there, a path that is not a full one.
+mcp call axit_open {"app":"claude"}
+expect mcp error: axClaude starts a program
+mcp call axit_window_text {"window":"0000000000000000"}
+expect mcp error: No such window
+mcp call axit_open {"app":"down","path":"notes.md"}
+expect mcp error: The path must be a full path
+
+# MC-6.6: every call in the log, by its tool.
+run findstr /c:"axit_window_text" home\Axit\mcp-audit.log
+
+# Off again from the menu: the next call is refused at once.
+menu Let AI tools read and open Axit
+expect said AI tools off
+mcp call axit_windows
+expect mcp error: Axit's AI tools access is off

@@ -69,6 +69,9 @@ public static class Dispatch
     /// <summary>Not an app: the executable answers <c>--help</c> and <c>--version</c>, or reports <see cref="Launch.Error"/>.</summary>
     public const string Bundle = "axit";
 
+    /// <summary>Not an app: the AI tools' broker, started by an MCP client and speaking to it on standard input and output (docs/axit/mcp.md MC-1.1).</summary>
+    public const string Mcp = "mcp";
+
     /// <summary>
     /// The apps, in the order every list of the windows shows them, by group (AX-9.2, 2026-10-24): one line here puts an
     /// app in the Axit menu, axFile's Open in Axit, the Show in submenus and Recently closed.
@@ -126,6 +129,7 @@ public static class Dispatch
           Axit <folder>               the same as Axit claude <folder>
           Axit <file>                 the same as Axit down <file>, Axit json <file> for a .json file, Axit pass <file> for a .kdbx file, or Axit media <file> for a sound or video file
           Axit                        axClaude on the current folder
+          Axit mcp                    the AI tools' server, for an MCP client to start (Options, General, Let AI tools read and open Axit)
           --help, --version           this text, or the version
 
         The installed console commands axit, axclaude, axdown, axjson, axgit, axterminal, axfile, axmedia, axpreview, axstart, axprocess, axtask, axpass, axcalc and axclip stand for Axit, Axit claude, Axit down, Axit json, Axit git, Axit terminal, Axit file, Axit media, Axit preview, Axit start, Axit process, Axit task, Axit pass, Axit calc and Axit clip.
@@ -157,6 +161,11 @@ public static class Dispatch
         if (IsHelpFlag(first) || first == "--version")
         {
             return new Launch(Bundle, args);
+        }
+
+        if (string.Equals(first, Mcp, StringComparison.OrdinalIgnoreCase))
+        {
+            return new Launch(Mcp, args[1..]);
         }
 
         if (first.StartsWith("--", StringComparison.Ordinal))

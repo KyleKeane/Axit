@@ -69,6 +69,10 @@ including while the user works, because nothing takes the foreground.
   - `close`: closes the window as Alt+F4 does.
   - `problems`: what is wrong with the window's command list (app-kit AK-2.4): a key of its own the F1 text does not
     name, a command an earlier one shadows. Every app's first script runs it as `check commands`, after its start.
+- **The AI tools**: the runner can be the MCP client itself (`mcp start`, `mcp call`, `expect mcp`, `refuse mcp`):
+  `Axit.exe mcp` as its child with the run's secret and folder, so that it reads the run's settings and key and never
+  the user's. `tests/scripts/mcp` turns the access on, pairs the runner in the window's notice and reads the window
+  (`docs/axit/mcp.md` MC-6). It never opens an app through `axit_open`, which would start it on the user's desktop.
 - **Scripts**: `tools/AxAutomate` starts an app with the channel on and runs a script of steps (`mkdir`, `start`,
   `use`, `keys`, `type`, `menu`, `said`, `expect said|focus|state <text>`, `try said <text>` with `iffound <step>` for
   what may not come, such as Claude's trust question, `wait <ms>`, `close`; `file <path> <text>` writes a file, its

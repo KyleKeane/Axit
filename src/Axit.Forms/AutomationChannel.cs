@@ -79,7 +79,7 @@ internal sealed class AutomationChannel : IMessageFilter
     {
         var handle = GetFocus();
         var control = Control.FromChildHandle(handle);
-        var value = control is null ? null : ValueOf(control);
+        var value = control is null ? null : WindowReading.ValueOf(control);
         if (handle != _focused)
         {
             _focused = handle;
@@ -119,7 +119,7 @@ internal sealed class AutomationChannel : IMessageFilter
         {
             try
             {
-                using var pipe = NamedPipeServerStreamAcl.Create($"axit-auto-{Environment.ProcessId}", PipeDirection.InOut, 1, PipeTransmissionMode.Byte, PipeOptions.None, 0, 0, PipeSecurityForUser());
+                using var pipe = NamedPipeServerStreamAcl.Create($"axit-auto-{Environment.ProcessId}", PipeDirection.InOut, 1, PipeTransmissionMode.Byte, PipeOptions.None, 0, 0, UserPipe.Security());
                 pipe.WaitForConnection();
                 using var reader = new StreamReader(pipe, new UTF8Encoding(false));
                 using var writer = new StreamWriter(pipe, new UTF8Encoding(false)) { AutoFlush = true };
@@ -163,18 +163,6 @@ internal sealed class AutomationChannel : IMessageFilter
                 Thread.Sleep(Math.Min(2000, 50 * failures));
             }
         }
-    }
-
-    /// <summary>The pipe for the current user alone, and never for a client over the network (S-11).</summary>
-    private static PipeSecurity PipeSecurityForUser()
-    {
-        var security = new PipeSecurity();
-        using var identity = WindowsIdentity.GetCurrent();
-        var user = identity.User ?? throw new InvalidOperationException("No user for the automation channel");
-        security.SetOwner(user);
-        security.AddAccessRule(new PipeAccessRule(new SecurityIdentifier(WellKnownSidType.NetworkSid, null), PipeAccessRights.FullControl, AccessControlType.Deny));
-        security.AddAccessRule(new PipeAccessRule(user, PipeAccessRights.ReadWrite | PipeAccessRights.CreateNewInstance, AccessControlType.Allow));
-        return security;
     }
 
     /// <summary>Whether the first line is the run's secret, compared in constant time.</summary>
@@ -265,54 +253,16 @@ internal sealed class AutomationChannel : IMessageFilter
             return new { name = (string?)null };
         }
 
-        return new { name = control.AccessibleName, role = control.AccessibilityObject.Role.ToString(), value = ValueOf(control) };
+        return new { name = control.AccessibleName, role = control.AccessibilityObject.Role.ToString(), value = WindowReading.ValueOf(control) };
     }
-
-    /// <summary>What NVDA reads of a control besides its name: the selected item of a list, the caret's line of a text, the text of the rest.</summary>
-    private static string? ValueOf(Control control) => control switch
-    {
-        ListBox { SelectedItem: { } item } => item.ToString(),
-        ListBox => string.Empty,
-        // A hidden field (axPass's passwords) is never read out, as NVDA reads it: protected (S-12).
-        TextBoxBase box when IsSecret(box) => "protected",
-        TextBoxBase box => CaretLine(box),
-        _ => control.Text,
-    };
-
-    /// <summary>Whether a text control hides what is typed in it (a password field): its text never leaves the window through the channel (S-12).</summary>
-    internal static bool IsSecret(Control control) =>
-        control is TextBox { UseSystemPasswordChar: true } or TextBox { PasswordChar: not '\0' };
 
     /// <summary>The focused list's items, or the list named, with the selected index: a question's answers, axFile's entries, axGIT's views.</summary>
     private static AxitForm? _formForList;
 
-    private static ListBox? FirstVisibleList(Control? parent)
-    {
-        if (parent is null)
-        {
-            return null;
-        }
-
-        foreach (Control child in parent.Controls)
-        {
-            if (child is ListBox { Visible: true } list)
-            {
-                return list;
-            }
-
-            if (child.Visible && FirstVisibleList(child) is { } inner)
-            {
-                return inner;
-            }
-        }
-
-        return null;
-    }
-
     private static object List()
     {
         // The focused list, or else the window's first visible list (a window shown without activation has no focus).
-        if ((Control.FromChildHandle(GetFocus()) as ListBox ?? FirstVisibleList(_formForList)) is not ListBox list)
+        if ((Control.FromChildHandle(GetFocus()) as ListBox ?? WindowReading.FirstVisibleList(_formForList)) is not ListBox list)
         {
             return new { error = "no list" };
         }
@@ -332,37 +282,13 @@ internal sealed class AutomationChannel : IMessageFilter
         }
 
         // S-12: a hidden field's text is never read out, by this command or any other; NVDA says "protected".
-        if (IsSecret(box))
+        if (WindowReading.IsSecret(box))
         {
             return new { lines = new[] { "protected" }, caretLine = 0, count = 1 };
         }
 
         var lines = box.Lines;
-        return new { lines = lines.Skip(Math.Max(0, lines.Length - 60)).ToArray(), caretLine = LogicalLine(box), count = lines.Length };
-    }
-
-    /// <summary>The caret's line as the text has it (up to a line break), not the wrapped row GetLineFromCharIndex counts.</summary>
-    private static int LogicalLine(TextBoxBase box)
-    {
-        var text = box.Text;
-        var end = Math.Min(box.SelectionStart, text.Length);
-        var line = 0;
-        for (var i = 0; i < end; i++)
-        {
-            if (text[i] == '\n')
-            {
-                line++;
-            }
-        }
-
-        return line;
-    }
-
-    private static string CaretLine(TextBoxBase box)
-    {
-        var line = LogicalLine(box);
-        var lines = box.Lines;
-        return line < lines.Length ? lines[line] : string.Empty;
+        return new { lines = lines.Skip(Math.Max(0, lines.Length - 60)).ToArray(), caretLine = WindowReading.LogicalLine(box), count = lines.Length };
     }
 
     private object Said()
@@ -468,9 +394,6 @@ internal sealed class AutomationChannel : IMessageFilter
 
     [DllImport("user32.dll")]
     private static extern nint SetWinEventHook(uint eventMin, uint eventMax, nint module, WinEventProc callback, uint processId, uint threadId, uint flags);
-
-    [DllImport("user32.dll")]
-    private static extern nint GetFocus();
 
 
 

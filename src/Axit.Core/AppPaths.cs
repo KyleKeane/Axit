@@ -14,6 +14,18 @@ public static class AppPaths
     public static string RecentlyClosedFile { get; } =
         Path.Combine(Home(Environment.SpecialFolder.ApplicationData), "Axit", "recently-closed.json");
 
+    /// <summary>The AI tools' access (docs/axit/mcp.md MC-6.1): on or off, and the clients the user paired.</summary>
+    public static string McpFile { get; } =
+        Path.Combine(Home(Environment.SpecialFolder.ApplicationData), "Axit", "mcp.json");
+
+    /// <summary>The key the broker proves itself with to the windows (MC-6.3), kept with DPAPI; never roamed, so under the local folder.</summary>
+    public static string McpKeyFile { get; } =
+        Path.Combine(Home(Environment.SpecialFolder.LocalApplicationData), "Axit", "mcp.key");
+
+    /// <summary>Every call of an AI tool, one line each (MC-6.6).</summary>
+    public static string McpAuditFile { get; } =
+        Path.Combine(Home(Environment.SpecialFolder.LocalApplicationData), "Axit", "mcp-audit.log");
+
     public static string LogsFolder { get; } =
         Path.Combine(Home(Environment.SpecialFolder.LocalApplicationData), "Axit", "logs");
 

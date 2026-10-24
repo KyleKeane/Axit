@@ -214,6 +214,8 @@ public abstract partial class AxitForm : Form
         var menu = new ToolStripMenuItem("&General");
         menu.DropDownItems.Add(Toggle("Check for &updates at start", Settings.CheckForUpdates, v => Settings.CheckForUpdates = v));
         menu.DropDownItems.AddRange(own);
+        // The AI tools' two items, in every window (docs/axit/mcp.md MC-6.1).
+        AddMcpItems(menu);
         return menu;
     }
 
@@ -289,6 +291,7 @@ public abstract partial class AxitForm : Form
     {
         base.OnShown(e);
         AutomationChannel.StartIfRequested(this);
+        StartMcp();
         StartUpWork();
     }
 

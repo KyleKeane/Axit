@@ -32,4 +32,8 @@ public static class User32
 
     [DllImport("user32.dll")]
     public static extern uint GetWindowThreadProcessId(nint hWnd, out uint processId);
+
+    /// <summary>The control with the keyboard focus in the calling thread's windows, active or not.</summary>
+    [DllImport("user32.dll")]
+    public static extern nint GetFocus();
 }

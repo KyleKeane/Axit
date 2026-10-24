@@ -1,7 +1,8 @@
 # Axit over MCP: every feature to a client the user allowed
 
 Asked by the user on 2026-10-24: "programmatic access to all the features with very well defined MCP APIs but with
-absolute protection". Specification first (the user's order: spec, infrastructure, build); nothing of this is built.
+absolute protection". Specification first (the user's order: spec, infrastructure, build); the first stage, read and
+open, is built (section 7, 2026-10-24); change and act tools are not.
 It depends on two things before it: the security fixes of `security-audit-2026-10-24.md` (S-11 to S-13 above all),
 and the command lists of `app-kit.md`, which are what the tools are made from. Requirements are numbered MC-n.m.
 
@@ -32,7 +33,7 @@ and the command lists of `app-kit.md`, which are what the tools are made from. R
 
 ## 3. Pairing and authentication
 
-- MC-2.1 **Off by default.** Options → General → "Let AI tools use Axit (MCP)" in every window, one setting for the
+- MC-2.1 **Off by default.** Options → General → "Let AI tools read and open Axit (MCP)" in every window, one setting for the
   bundle. Off: the broker answers every call with "Axit's MCP access is off" and nothing else.
 - MC-2.2 **Pairing**: the first call of a client that is not paired shows a notice in the Axit window in front (or
   opens axStart's): "Claude Code asks to use Axit. It can: <the scopes asked>. Allow?", with Allow and Deny; Enter on
@@ -82,7 +83,66 @@ and the command lists of `app-kit.md`, which are what the tools are made from. R
   and their kinds, the result, whether the user confirmed. Axit menu → "MCP clients…" → "Read the log" opens it in
   axPreview.
 
-## 7. Built in this order
+## 7. The first stage as built (2026-10-24, the branch `app-kit`): read and open
+
+Step 3 of section 8, with the choices it needed; what is not here waits for the later steps.
+
+- MC-6.1 **The setting**: `%APPDATA%\Axit\mcp.json`, `{"enabled": false, "clients": []}`, one for the bundle; Options →
+  General → "Let AI tools read and open Axit (MCP)" in every window turns it on or off. Turning it on makes the key
+  (MC-6.3) and shows a notice with what to add to the client: the command, this `Axit.exe`, and the argument `mcp`.
+  Options → General → "Forget AI tools" forgets every paired client at once. Off, every window refuses every
+  connection before anything else, so that turning it off in one window ends every client's access at its next call.
+  The file carries a seal, HMAC-SHA256 of the setting and the clients under the key (MC-6.3); a file whose seal does
+  not check, written by hand or by an AI tool's own file writing, reads as off with no clients, so that turning the
+  access on or pairing takes code that runs as the user, not a written file (the review of 2026-10-24).
+- MC-6.2 **The windows' pipes**: every window serves its own pipe, `\\.\pipe\Axit-mcp-<user SID>-<random>`, for the
+  current user alone and refused over the network (the access list of S-11). The broker finds them by listing the
+  pipes with that prefix, so no file names them. A window of axPass or axClip serves none (MC-4.1, MC-4.2): those apps
+  are not reachable at all in this stage. The test channel stays apart (MC-1.3).
+- MC-6.3 **Both ends prove who they are**: the window answers only a client whose process runs this very program file
+  (`GetNamedPipeClientProcessId`, its image path, as the hand-over checks, S-13), and the broker talks only to a pipe
+  whose server process runs it (`GetNamedPipeServerProcessId`). Then the window sends a fresh random challenge and the
+  broker answers it with HMAC-SHA256 under the key, `%LOCALAPPDATA%\Axit\mcp.key`: 32 random bytes kept with DPAPI for
+  this user (`UserSecret`); then the broker sends a challenge of its own and the window answers it, so that a pipe of
+  another user's copy of the same `Axit.exe` cannot pass for this user's window. The key itself never crosses the
+  pipe; the broker connects at the Identification level, so a window can never act as the user it serves. A line
+  longer than 64 KB is not read; a request waits at most ten seconds for the window's thread; whatever fails is the
+  call's answer and never ends the window's process or the broker.
+- MC-6.4 **Pairing**: a client is known by the program file of the broker's parent process (the client that started
+  it), with the name it gives in `initialize` for display only. The first tool call of a client not paired asks the
+  newest Axit window: a notice "<name> asks to use Axit (<program>). It can read what the Axit windows show and open
+  apps; it cannot change or delete anything. Allow?", with Allow and Deny, the window flashing on the taskbar when it
+  is not in front. The broker waits up to two minutes for the answer; Deny, or no answer, refuses the call. With no
+  Axit window open, the call is refused with "Open any Axit window to allow <name>"; a window that shows a notice
+  already shows no pairing (a notice replaces the one shown, which the user may be answering) and the call is refused
+  with "ask again once it is answered". An unanswered notice is closed when the call stops waiting, and its Allow then
+  pairs nothing; after a Deny the same broker asks no more for a minute. A program that runs whatever script it is
+  given (cmd, PowerShell, Windows Script Host, Python, mshta, rundll32, Explorer: `McpAccess.RefusedHosts`) is never
+  paired. The name is the client's own word, its hidden characters made visible (`DisplayText`). What a window
+  announces is kept for `axit_window_said` only from the first call that proved the key, never from before.
+  The limits, said plainly: a pairing trusts every process of that program file (every script `node` runs, when the
+  client is a `node` program), and a program of the same user can start `Axit.exe mcp` itself, even with a forged
+  parent process that names a paired client. Against code already running as the user there is no absolute
+  protection here, nor anywhere on Windows: such code can read every window through UI Automation without Axit at all.
+  This is why this stage reads and opens only, and why change and act tools will ask at every call.
+- MC-6.5 **The tools** (all `read` but the last): `axit_apps` (the apps and what each opens), `axit_windows` (the
+  open windows that serve a pipe: an id, the app, the title), and for one window by its id `axit_window_state` (title,
+  status bar, the notice shown and its text, the focused control and its value, a secret field as "protected"),
+  `axit_window_list` (the focused list's items, or the window's first list), `axit_window_text` (the focused text's
+  lines, or the window's main text, at most 1 MB), `axit_window_commands` (the window's command list: label, key,
+  mark; running one is the next stage) and `axit_window_said` (what the window announced since the last call, the
+  last 50). `axit_open` (`open`): an app by its verb, on a path or none, but axClaude and axTerminal, which start a program as they open (an act, MC-3.1); the path fully qualified, on this computer
+  (`LocalPaths`), through no link (a junction or a symbolic link, which may lead to a share; asked part by part
+  before anything follows it), existing, and of a kind the app opens (`Dispatch.PathFor`); started as
+  `Axit.exe <verb> <path>` with the arguments as a list, through ShellExecute on the program file itself, never through
+  a command interpreter (ShellExecute hands the new window none of the broker's handles).
+- MC-6.6 **Limits and the log**: at most 10 calls a second; every call in `%LOCALAPPDATA%\Axit\mcp-audit.log`, one
+  line: the time, the client's name and program, the tool, the first 16 hex digits of the SHA-256 of its arguments,
+  and the result (done, refused and why, failed). The arguments themselves are not written.
+- MC-6.7 **Not in this stage**: change and act tools and their confirmation (MC-3.3), the "MCP clients…" list with
+  scopes per app and folders (MC-2.3, MC-3.4), the reads counted in the status bar (MC-5.1), axPass's titles (MC-4.1).
+
+## 8. Built in this order
 
 1. The security fixes S-11 to S-13 (the channel's secret, `IsSecret`, the hand-over pipe).
 2. The command lists of `app-kit.md` in the first apps, with their scope marks.

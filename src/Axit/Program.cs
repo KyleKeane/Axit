@@ -100,6 +100,10 @@ internal static class Program
                 SetAppId("Axit.AxClip");
                 AxClipApp.Run(launch.Arguments);
                 break;
+            case Dispatch.Mcp:
+                // No window: MCP on standard input and output until the client closes it (docs/axit/mcp.md MC-1.1).
+                Axit.Forms.McpBroker.Run();
+                break;
             default:
                 // --help or --version for the bundle itself (AX-1.4).
                 var text = launch.Arguments[0] == "--version" ? $"Axit {BundleInfo.Version}" : $"Axit {BundleInfo.Version}\n\n{Dispatch.Usage}";

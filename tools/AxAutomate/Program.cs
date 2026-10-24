@@ -34,6 +34,11 @@
 //                             commands, the window's state (title, notice and its text, status bar), the focus
 //   check commands            fails when the window's command list has a problem: a key the F1 text does not name, a
 //                             command that never runs because an earlier one takes its key everywhere (app-kit AK-2.4)
+//   mcp start                 (after a start) the runner becomes an MCP client: Axit.exe mcp as its child, with the
+//                             run's settings and key (docs/axit/mcp.md MC-6)
+//   mcp call <tool> [<json>]  sends a tools/call without waiting; {window} is the id the last axit_windows answer named
+//   expect mcp <text>         waits up to 60 s for an answer holding the text (a refusal reads "error: ...")
+//   refuse mcp <text>         fails when an answer waiting holds the text after 2 s (an axPass window listed)
 //   expect said <text>        waits up to 60 s until the timeline holds the text (an announcement, "♪ Edge" for a
 //                             sound, "→ Conversation" for a focus move); takes it and what came before it
 //   expect focus|state|list|text|commands <text>   waits up to 10 s until that answer holds the text
@@ -300,6 +305,7 @@ internal sealed class Run(string exe, string temp)
     private readonly string _home = Path.Combine(temp, "home");
     private Window? _current;
     private bool _found;
+    private Broker? _broker;
 
     public (bool Ok, string? Detail) Step(string line)
     {
@@ -367,6 +373,15 @@ internal sealed class Run(string exe, string temp)
             case "text" or "list" or "commands" or "state" or "focus":
                 var answer = Current.Send(verb);
                 return (!answer.Contains("\"error\""), answer);
+            case "mcp" when rest == "start":
+                // The runner as an MCP client, after a start: the broker gets the run's variables (Broker).
+                _broker?.Dispose();
+                _broker = Broker.Start(exe);
+                return (true, null);
+            case "mcp" when rest.StartsWith("call ", StringComparison.Ordinal) && _broker is not null:
+                var call = rest[5..].Trim();
+                var gap = call.IndexOf(' ');
+                return (true, _broker.Call(gap < 0 ? call : call[..gap], gap < 0 ? string.Empty : call[(gap + 1)..]));
             case "check" when rest == "commands":
                 // The window's command list (docs/axit/app-kit.md AK-2.4): every key in the F1 text, none shadowed.
                 var problems = Current.Send("problems");
@@ -463,6 +478,23 @@ internal sealed class Run(string exe, string temp)
             return Current.WaitClosed(10_000) ? (true, null) : (false, "the window is still open after 10 s");
         }
 
+        if (what == "mcp")
+        {
+            // A pairing waits on the window's notice, a window's answer on its thread: up to 60 s, as said does.
+            var waited = Stopwatch.StartNew();
+            while (waited.ElapsedMilliseconds < 60_000)
+            {
+                if (_broker?.Take(text) is { } answer)
+                {
+                    return (true, answer.Length > 400 ? answer[..400] + " …" : answer);
+                }
+
+                Thread.Sleep(100);
+            }
+
+            return (false, $"no MCP answer holds it; pending: {_broker?.Pending()}");
+        }
+
         if (what == "spoken")
         {
             var until = Stopwatch.StartNew();
@@ -532,6 +564,12 @@ internal sealed class Run(string exe, string temp)
         {
             var answer = Current.Send(verb);
             return Matches(answer, text) ? (false, answer) : (true, null);
+        }
+
+        if (verb == "mcp")
+        {
+            // An answer that must not come (an axPass window listed): the answers waiting, none taken.
+            return _broker?.Waiting(text) is { } seen ? (false, seen) : (true, null);
         }
 
         if (rest.StartsWith("spoken", StringComparison.Ordinal))
@@ -660,6 +698,8 @@ internal sealed class Run(string exe, string temp)
     public List<string> Finish()
     {
         var problems = new List<string>();
+        _broker?.Dispose();
+        _broker = null;
         foreach (var window in _windows)
         {
             if (window.EndedByItself)
