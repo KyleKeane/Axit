@@ -628,15 +628,7 @@ public sealed class ProcessForm : AxitForm
             return;
         }
 
-        try
-        {
-            Clipboard.SetText(line);
-            Announce("Copied", true);
-        }
-        catch (Exception ex) when (ex is System.Runtime.InteropServices.ExternalException or InvalidOperationException)
-        {
-            Fail("The clipboard could not be written: " + ex.Message);
-        }
+        CopyText(line, "Copied");
     }
 
     /// <summary>Ctrl+Q (PR-2.5): the processes of the last read, or counted now, the memory now, the processor of the last read.</summary>

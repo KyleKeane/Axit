@@ -453,7 +453,7 @@ public sealed class ClipForm : HotkeyForm
             return;
         }
 
-        if (!PutOnClipboard(entry.Text))
+        if (!CopyText(entry.Text, null))
         {
             return;
         }
@@ -486,24 +486,9 @@ public sealed class ClipForm : HotkeyForm
             return;
         }
 
-        if (PutOnClipboard(entry.Text))
+        if (CopyText(entry.Text, "Copied"))
         {
-            Announce("Copied", true);
             HideWindow();
-        }
-    }
-
-    private bool PutOnClipboard(string text)
-    {
-        try
-        {
-            Clipboard.SetText(text);
-            return true;
-        }
-        catch (Exception ex) when (ex is ExternalException or InvalidOperationException)
-        {
-            Fail("The clipboard could not be written: " + ex.Message);
-            return false;
         }
     }
 

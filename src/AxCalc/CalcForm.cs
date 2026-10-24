@@ -326,18 +326,7 @@ public sealed class CalcForm : AxitForm
         }
     }
 
-    private void Copy(string text)
-    {
-        try
-        {
-            Clipboard.SetText(text);
-            Announce("Copied " + text, true);
-        }
-        catch (Exception ex) when (ex is System.Runtime.InteropServices.ExternalException or InvalidOperationException)
-        {
-            Fail("The clipboard could not be written: " + ex.Message);
-        }
-    }
+    private void Copy(string text) => CopyText(text, "Copied " + text);
 
     // ---- the history (AC-5) ----
 

@@ -482,15 +482,7 @@ public sealed partial class FileForm
             return;
         }
 
-        try
-        {
-            Clipboard.SetText(string.Join("\r\n", targets.Select(target => target.Path)));
-            Announce(targets.Count == 1 ? "Copied path" : $"Copied {targets.Count} paths", true);
-        }
-        catch (Exception ex) when (ex is ExternalException or InvalidOperationException)
-        {
-            Failed("Copy failed", ex.Message);
-        }
+        CopyText(string.Join("\r\n", targets.Select(target => target.Path)), targets.Count == 1 ? "Copied path" : $"Copied {targets.Count} paths");
     }
 
     // ---- the clipboard (AF-4.8): the entries as files on it, in File Explorer's formats, and its files pasted into the folder ----

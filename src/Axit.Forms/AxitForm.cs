@@ -567,14 +567,31 @@ public abstract partial class AxitForm : Form
             string.Empty,
             Log.Tail(200),
         ]);
+        CopyText(text, "Copied diagnostics");
+    }
+
+    /// <summary>
+    /// The one way a window puts text on the clipboard: <paramref name="said"/> announced when it is there (null says
+    /// nothing), and a clipboard another program holds for a moment reported through <see cref="Fail"/> rather than as a
+    /// crash; false then.
+    /// </summary>
+    protected bool CopyText(string text, string? said)
+    {
         try
         {
             Clipboard.SetText(text);
-            Announce("Copied diagnostics", true);
         }
         catch (Exception ex) when (ex is System.Runtime.InteropServices.ExternalException or InvalidOperationException)
         {
             Fail("The clipboard could not be written: " + ex.Message);
+            return false;
         }
+
+        if (said is not null)
+        {
+            Announce(said, true);
+        }
+
+        return true;
     }
 }

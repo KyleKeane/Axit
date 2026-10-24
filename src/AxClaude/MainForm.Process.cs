@@ -124,10 +124,7 @@ internal sealed partial class MainForm
         [
             new OverlayChoice("Copy install &command", () =>
             {
-                if (CopyToClipboard(ClaudeLauncher.InstallCommand))
-                {
-                    Announce("Copied. Paste it into PowerShell", true);
-                }
+                CopyText(ClaudeLauncher.InstallCommand, "Copied. Paste it into PowerShell");
             }, StaysOpen: true),
             new OverlayChoice("&Open install instructions", () => OpenUrl(ClaudeLauncher.InstallUrl), StaysOpen: true),
             new OverlayChoice("&Locate claude.exe...", LocateClaude, StaysOpen: true),
@@ -158,21 +155,6 @@ internal sealed partial class MainForm
         StartClaude();
     }
 
-    /// <summary>Another program can hold the clipboard for a moment; that is announced rather than reported as a crash (FR-13.1).</summary>
-    private bool CopyToClipboard(string text)
-    {
-        try
-        {
-            Clipboard.SetText(text);
-            return true;
-        }
-        catch (System.Runtime.InteropServices.ExternalException ex)
-        {
-            Log.Error("The clipboard could not be written", ex);
-            Announce("Could not copy. Try again", true);
-            return false;
-        }
-    }
 
     /// <summary>Claude's process ended, its last output in and the process stopped: the explanation shown, the default --continue retried as a new conversation (FR-9.1), or "Claude stopped".</summary>
     protected override void OnProcessExited(int code)

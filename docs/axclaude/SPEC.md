@@ -378,7 +378,8 @@ While a notice shows: Tab / Shift+Tab between text, field and buttons; Enter the
 | A reply, with speech on | the lines that became final in the frame, as one notification (FR-7.4) |
 | A tool call, with Speak each tool call on | the `tool:` row as printed, as soon as it arrives, in the same notification as a reply line of the frame (FR-7.4) |
 | Sounds | see FR-7.3, FR-7.8 and FR-7.9 |
-| Copy (Ctrl+C in the conversation, Copy diagnostics) | `Copied`; `Could not copy. Try again` |
+| Copy (Ctrl+C in the conversation) | `Copied`; `Could not copy. Try again` |
+| Copy diagnostics, Copy install command | `Copied diagnostics`, `Copied. Paste it into PowerShell`; a system line "The clipboard could not be written: …" (the bundle's `CopyText`, FR-13.1) |
 | Escape with a selection | `Selection cleared` |
 | Send | `Sent` / `Queued`; `Sending now` / `Nothing queued` for Send queued messages now (FR-2.8) |
 | Reply begins | `Responding` |

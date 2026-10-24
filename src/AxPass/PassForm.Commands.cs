@@ -405,15 +405,7 @@ public sealed partial class PassForm
             return;
         }
 
-        try
-        {
-            Clipboard.SetText(user);
-            Announce("Copied the user name of " + entry.Name, true);
-        }
-        catch (Exception ex) when (ex is System.Runtime.InteropServices.ExternalException or InvalidOperationException)
-        {
-            Fail("The clipboard could not be written: " + ex.Message);
-        }
+        CopyText(user, "Copied the user name of " + entry.Name);
     }
 
     /// <summary>Ctrl+C: the password on the clipboard by the tool's <c>clip</c>, which clears it after 30 seconds (PW-5.4, PW-D4).</summary>
