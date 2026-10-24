@@ -6,6 +6,19 @@ What was checked with NVDA, against which version, and with what result. When a 
 
 Add a section under this one, above the earlier passes, so that the newest comes first: the date, the version, the commit tested, who ran it and how the result was given, and the environment: the NVDA version, the synthesizer and the Windows build (so that a regression is dated to an NVDA release rather than to some time). Under it, one table per app with a line per section of its plan: the steps run and the result, Passed, Failed (with what was heard) or Not run. A step that fails gets a line of its own with what NVDA said and what it should have said, and the bug's fix names the step. When a plan gains or loses steps, the next pass lists them as the plan has them then.
 
+## 2026-10-24, axProcess (the branch `axprocess`, before its merge)
+
+- Run by the user with NVDA on a Debug build of `axprocess` at 479792e, started from a scratch folder; the result given
+  as "axprocess seems to be working and all my tests pass".
+- axProcess, `docs/axprocess/nvda-test-plan.md`, every section: Passed, after the first round's asks were built and
+  heard again: the edge earcon at the ends of the lists (1.7), Tab and Shift+Tab round the views (1.8), Shift+F10 and
+  the Applications key opening the view's menu (1.9), only the view's menu enabled (1.9a), type-to-find with Shift and a
+  letter backwards (1.9b), axProcess in Recently closed (1.10).
+- In the same build and so heard with it: type-to-find with Shift backwards in axFile's folder and Actions lists,
+  axGIT's list and axMedia's queue (AX-8.6), and axFile's Shift+F10 through the window base's `OpenBarMenu`; not run
+  as their own plans' steps.
+- Automated alongside: `tests/scripts/axprocess` (two scripts) and the axFile, axGIT and axMedia scripts, all passing.
+
 ## 2026-10-23, Axit 3.5.0 (the branch `palette`)
 
 - Run by the user with NVDA, step by step in batches, on `palette` from 0d46e82 to the release; the fixes the pass asked for went in as it ran, each heard again. The user stopped tired before the last apps and released; still owed, for the next pass: axGIT steps 4a and 5, axMedia steps 1a and 2a, axPreview step 9a (all passing in the automated scripts), axStart section 1 step 7 and section 5 steps 1, 2 and 4 (the Start menu, sign-in and the update in place, on the installed release), the help section's steps 5 and 8 of axClaude.

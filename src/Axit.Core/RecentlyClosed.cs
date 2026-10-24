@@ -1,6 +1,6 @@
 namespace Axit.Core;
 
-/// <summary>A file or folder a window of the bundle held when it closed or replaced it: the app's name and the path.</summary>
+/// <summary>A file or folder a window of the bundle held when it closed or replaced it: the app's name and the path; an empty path for an app that holds none (axProcess), reopened by its name alone.</summary>
 public sealed record ClosedItem(string App, string Path);
 
 /// <summary>The shape of the file: one list, the newest first.</summary>
@@ -39,7 +39,7 @@ public static class RecentlyClosed
 
     /// <summary>The list for the menu: the entries whose file or folder still exists, the newest first; one on a share is listed without the check, which could wait for the network (<see cref="LocalPaths"/>).</summary>
     public static IReadOnlyList<ClosedItem> Load() =>
-        Read(AppPaths.RecentlyClosedFile).Where(i => LocalPaths.ExistsQuickly(i.Path, path => File.Exists(path) || Directory.Exists(path))).ToList();
+        Read(AppPaths.RecentlyClosedFile).Where(i => i.Path.Length == 0 || LocalPaths.ExistsQuickly(i.Path, path => File.Exists(path) || Directory.Exists(path))).ToList();
 
     public static IReadOnlyList<ClosedItem> Read(string file) => SettingsFile.Load<RecentlyClosedList>(file, out _).Items;
 
@@ -49,6 +49,12 @@ public static class RecentlyClosed
     /// <summary>"notes.md (C:\notes\notes.md) - axDown", "myproject (C:\src\myproject) - axClaude": the name, the full path in parentheses, the app (AX-9.5).</summary>
     public static string Title(ClosedItem item)
     {
+        if (item.Path.Length == 0)
+        {
+            // An app that holds no file (axProcess): its window by its name.
+            return item.App;
+        }
+
         var name = PathName.Of(item.Path);
         return (name == item.Path ? item.Path : $"{name} ({item.Path})") + " - " + item.App;
     }

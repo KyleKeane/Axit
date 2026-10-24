@@ -65,7 +65,7 @@ including while the user works, because nothing takes the foreground.
 
 ### What the scripts cover, and what stays manual (2026-10-23)
 
-The NVDA test plans of axDown, axJSON, axPreview, axFile, axGIT, axTerminal and axMedia are scripts in
+The NVDA test plans of axDown, axJSON, axPreview, axFile, axGIT, axTerminal, axMedia and axProcess (2026-10-24; the services only read, never started or stopped, since a run with administrator rights would do it for real) are scripts in
 `tests/scripts/<app>`, one per section of the plan, about two thousand steps, all passing; axClaude's are being written,
 on Haiku. Every step a script cannot drive is a `#` line naming the plan step and why. What stays manual, for now:
 

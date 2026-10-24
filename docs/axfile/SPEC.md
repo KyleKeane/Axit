@@ -153,8 +153,10 @@ folder of the file or project in hand, and sends back. It works entirely offline
   first entry whose name starts with it is selected, searched from the entry in hand and round the end, NVDA reading
   it; a new prefix begins after a second's pause and is searched from the next entry on; a run of the same letter ("a",
   "aa") cycles through the names starting with it, from the next entry on, as File Explorer does, while any other
-  prefix is searched whole, so that a name with a doubled letter inside it ("aab") is found (`FolderListing.TypeAhead`,
-  tested; until 2026-10-23 the doubled letter made the one-letter cycle); the edge earcon when no name starts with it. The list box's own
+  prefix is searched whole, so that a name with a doubled letter inside it ("aab") is found (`Axit.Core/TypeAhead`,
+  tested, the bundle's since 2026-10-24, AX-8.6; until 2026-10-23 the doubled letter made the one-letter cycle); Shift
+  with a letter searches the same way backwards (2026-10-24); the edge earcon when no name starts with it. The Actions
+  list takes typed letters the same way. The list box's own
   one-letter jump gives way to this (`OnListKeyPress`); Space is the selection's key (AF-3.7), so a name is typed up
   to its first space. At the ends, where a key moves nothing, the window sounds the **edge earcon** rather than
   nothing (asked 2026-10-22, an earcon rather than words, since "First item" and the entry again were noise): one

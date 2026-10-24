@@ -1,0 +1,89 @@
+# axProcess: the Services and Startup views (docs/axprocess/nvda-test-plan.md sections 3 and 4; SPEC PR-4, PR-5).
+# Read only: no service is started or stopped here, since a run with administrator rights would do it for real.
+file home\Axit\axprocess.json {"checkForUpdates": false}
+start process
+# The first read done: the status bar says "Reading…" until then, and a view key meanwhile says "Working…" (PR-2.3).
+expect state "status":["Processes,
+
+# 3.1 Ctrl+2: the services, said with the first one; every Windows has the event log running.
+keys ctrl+2
+expect said ! Services,
+expect focus Services,
+
+# 3.2 Its details: the name, the state, the start type; Escape closes them.
+keys ctrl+f
+expect state Find
+type (EventLog)
+keys enter
+expect focus Windows Event Log (EventLog), running
+keys enter
+expect state "notice":"Windows Event Log"
+expect state Name EventLog
+expect state State running
+keys escape
+expect state "notice":null
+
+# 3.3 A command of the Processes view in the Services view says which view first.
+keys delete
+expect said ! Processes view first: Ctrl+1
+keys ctrl+e
+expect said ! Processes view first: Ctrl+1
+
+# 3.4 Ctrl+2 again names the view; Ctrl+1 back to the processes.
+keys ctrl+2
+expect said ! Services,
+keys ctrl+1
+expect said ! Processes,
+
+# 4.1 Ctrl+3: the startup programs, whatever this computer starts (it may be none).
+keys ctrl+3
+expect said ! Startup,
+expect focus Startup,
+
+# 5.3 F1: the shortcuts; Escape.
+keys f1
+expect state "notice":"Keyboard shortcuts"
+expect state Ctrl+1, Ctrl+2, Ctrl+3
+keys escape
+expect state "notice":null
+
+# 2.2 Tab and Shift+Tab go round the views, said as their keys say them.
+keys ctrl+1
+expect said ! Processes,
+keys tab
+expect said ! Services,
+keys tab
+expect said ! Startup,
+keys tab
+expect said ! Processes,
+keys shift+tab
+expect said ! Startup,
+
+# 6.1 Only the menu of the view shown is enabled: no service command among the startup programs, no process command
+# among the services (the palette's list is the menus' enabled items).
+refuse commands Restart
+refuse commands End process tree
+keys ctrl+2
+expect said ! Services,
+expect commands Restart
+refuse commands End process tree
+
+# 2.6 Up on the first item and Down on the last: the edge earcon, nothing said.
+keys home
+keys up
+expect said ♪ Edge
+keys end
+keys down
+expect said ♪ Edge
+
+# AX-8.6 Type-to-find in the services: a prefix lands on its item; Shift with the letter goes back the other way.
+keys ctrl+2
+expect said ! Services,
+type windows event l
+expect focus Windows Event Log (EventLog)
+# From the last item a letter goes round the end to the first name with it. Shift with a letter (backwards) is not run:
+# the channel's keys make no typed character, and its type has no Shift; TypeAheadTests and the NVDA plan cover it.
+keys end
+wait 1100
+type w
+expect focus "value":"W

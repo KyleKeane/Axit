@@ -22,6 +22,7 @@ public sealed class KeyTests
             ["axMedia"] = AxMedia.AxMediaKeys.All,
             ["axPreview"] = AxPreview.AxPreviewKeys.All,
             ["axStart"] = AxStart.AxStartKeys.All,
+            ["axProcess"] = AxProcess.AxProcessKeys.All,
         };
 
     /// <summary>
@@ -81,6 +82,7 @@ public sealed class KeyTests
         ["axMedia"] = AxMedia.HelpText.Shortcuts,
         ["axPreview"] = AxPreview.HelpText.Shortcuts,
         ["axStart"] = AxStart.HelpText.Shortcuts,
+        ["axProcess"] = AxProcess.HelpText.Shortcuts,
     };
 
     /// <summary>
@@ -151,10 +153,10 @@ public sealed class KeyTests
     {
         string[] known =
         [
-            "Backspace", "Ctrl+1", "Ctrl+2", "Ctrl+3", "Ctrl+C", "Ctrl+E", "Ctrl+Enter", "Ctrl+G", "Ctrl+I", "Ctrl+K", "Ctrl+L",
+            "Apps", "Backspace", "Ctrl+1", "Ctrl+2", "Ctrl+3", "Ctrl+C", "Ctrl+E", "Ctrl+Enter", "Ctrl+G", "Ctrl+I", "Ctrl+K", "Ctrl+L",
             "Ctrl+N", "Ctrl+O", "Ctrl+P", "Ctrl+Q", "Ctrl+Shift+A", "Ctrl+Shift+C", "Ctrl+Shift+F", "Ctrl+Shift+H", "Ctrl+Shift+I",
             "Ctrl+Shift+K", "Ctrl+Shift+L", "Ctrl+Shift+Q", "Ctrl+Shift+R", "Ctrl+Shift+S", "Ctrl+Shift+T", "Ctrl+Shift+W", "Ctrl+T",
-            "Ctrl+W", "Ctrl+Z", "Delete", "Down", "Enter", "Escape", "F5", "O", "Shift+Escape", "Space", "Up",
+            "Ctrl+W", "Ctrl+Z", "Delete", "Down", "Enter", "Escape", "F5", "O", "Shift+Escape", "Shift+F10", "Space", "Up",
         ];
         var differing = Windows.SelectMany(w => w.Value.Select(k => (Window: w.Key, k.Name, k.Key)))
             .GroupBy(k => k.Key)
