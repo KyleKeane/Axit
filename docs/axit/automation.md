@@ -59,7 +59,8 @@ including while the user works, because nothing takes the foreground.
   - `close`: closes the window as Alt+F4 does.
 - **Scripts**: `tools/AxAutomate` starts an app with the channel on and runs a script of steps (`mkdir`, `start`,
   `use`, `keys`, `type`, `menu`, `said`, `expect said|focus|state <text>`, `try said <text>` with `iffound <step>` for
-  what may not come, such as Claude's trust question, `wait <ms>`, `close`; the header of its `Program.cs` lists them),
+  what may not come, such as Claude's trust question, `wait <ms>`, `close`; `file <path> <text>` writes a file, its
+  path in quotes when it holds a space; the header of its `Program.cs` lists them),
   each step's result in a report; what a window said stays queued until an expectation takes it; a failing step prints what was said and focused instead. The NVDA test plans become scripts in
   `tests/scripts/<app>/`, one per section, with Claude always on `--model haiku`.
 
