@@ -37,7 +37,7 @@ Type the command in the field and press Enter. You hear "Sent" with a low note. 
 - Shift+Enter starts a new line in the field. A command of several lines goes to the shell line by line; for PowerShell one more Enter follows, which its console host wants to end a block.
 - An empty field sends a plain Enter.
 - Ctrl+Enter sends the text without recording it: no Input and Output lines, not in the recent commands, not in the log. Use it for a passphrase or a token a program asks for.
-- Ctrl+R lists the recent commands of this window, newest first; Enter puts one back in the field, Escape goes back to the field. Up and Down in the field only move the caret.
+- Ctrl+R lists the recent commands of this window, newest first; Enter puts one back in the field, Escape goes back to the field. Up on the field's first line brings back the previous command and Down on its last line the next one, as in PowerShell, and Down past the newest gives back what you had typed; inside a command of several lines they move between its lines.
 - Enter on a line of the terminal copies that line into the field, to run it again or change it.
 - Ctrl+Shift+C interrupts (it sends Ctrl+C to the shell). Shift+Escape sends Escape. The Shell menu's Send key sends Up, Down or Ctrl+D for a program that wants them.
 - Escape in the field does nothing but remind you of those two keys.

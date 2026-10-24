@@ -25,6 +25,46 @@ internal sealed partial class TerminalForm
                 e.SuppressKeyPress = true;
                 Announce(EscapeGuardText, true);
                 break;
+            case AxTerminalKeys.OlderCommand when Input.GetLineFromCharIndex(Input.SelectionStart) == 0:
+                e.Handled = e.SuppressKeyPress = true;
+                Recall(_history.Older(Input.Text.Replace("\r\n", "\n")));
+                break;
+            case AxTerminalKeys.NewerCommand when Input.GetLineFromCharIndex(Input.SelectionStart) == Input.GetLineFromCharIndex(Input.TextLength):
+                e.Handled = e.SuppressKeyPress = true;
+                Recall(_history.Newer());
+                break;
+        }
+    }
+
+    /// <summary>
+    /// Up on the field's first line and Down on its last (AT-3.9): a command of the recent list in the field, as
+    /// PowerShell's own line editor does, the caret at its start so that Up again goes further back; said once. The
+    /// edge earcon when there is none further, and Down while the field holds the user's own text moves nothing.
+    /// </summary>
+    private void Recall(string? command)
+    {
+        if (command is null)
+        {
+            Sounds.Edge();
+            return;
+        }
+
+        _recalling = true;
+        Input.Text = command.Replace("\n", "\r\n");
+        _recalling = false;
+        Input.Select(0, 0);
+        Announce(command.Length == 0 ? "blank" : command.Replace("\n", " "), true);
+    }
+
+    /// <summary>Set while <see cref="Recall"/> fills the field, so that the change is not taken as the user's own typing.</summary>
+    private bool _recalling;
+
+    /// <summary>Anything else that changes the field (typing, a paste, a sent command, a line copied in) makes it the user's own text again.</summary>
+    private void OnInputChanged(object? sender, EventArgs e)
+    {
+        if (!_recalling)
+        {
+            _history.Reset();
         }
     }
 

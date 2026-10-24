@@ -16,6 +16,7 @@ public static class HelpText
           Tab, Shift+Tab, Ctrl+Tab or F6: switch between the command field (or the recent commands list in its place) and the terminal
           Ctrl+Shift+C: interrupt, that is send Ctrl+C to the shell
           Shift+Escape: send Escape to the shell
+          Up on the field's first line, Down on its last: the previous and the next command, as in PowerShell
           Ctrl+R: the recent commands of this window as a list; Enter puts one back in the field
           Ctrl+Q: say what is running, for how long, and the prompt; the shell too while idle
           Ctrl+P: say the current folder, the full path

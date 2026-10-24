@@ -64,6 +64,7 @@ internal sealed partial class TerminalForm : ConsoleForm
         _model.CommandFinished += OnCommandFinished;
         _asks.Tick += (_, _) => CheckForQuestion();
         Input.KeyDown += OnInputKeyDown;
+        Input.TextChanged += OnInputChanged;
         Transcript.LineChosen += CopyLineToField;
         BuildMenus();
         SetStatus("Starting", CurrentDirectory);

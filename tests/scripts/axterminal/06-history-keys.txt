@@ -1,0 +1,35 @@
+# axTerminal, Up and Down in the command field (AT-3.9, 2026-10-23): PowerShell's own history keys over the recent list.
+file home\Axit\axterminal.json {"checkForUpdates": false}
+mkdir myproject
+start terminal {temp}\myproject
+expect said Ready
+type echo one
+keys enter
+expect said Done
+type echo two
+keys enter
+expect said Done
+
+# Up on the first line goes back, the newest first; at the oldest the low note.
+type half
+keys up
+expect said ! echo two
+keys up
+expect said ! echo one
+keys up
+expect said ♪ Edge
+
+# Down comes forward, and past the newest gives back what was typed.
+keys down
+expect said ! echo two
+keys down
+expect said ! half
+keys down
+expect said ♪ Edge
+
+# Typing makes the field the user's own again: Up starts from the newest.
+keys up
+expect said ! echo two
+type x
+keys up
+expect said ! echo two
