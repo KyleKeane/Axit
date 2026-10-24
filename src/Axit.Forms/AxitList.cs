@@ -27,6 +27,9 @@ public class AxitList : ListBox
     private string _typed = string.Empty;
     private long _typedAt;
 
+    /// <summary>Set while type-to-find itself moves the selection, so that only another move starts a new search.</summary>
+    private bool _jumping;
+
     public AxitList()
     {
         IntegralHeight = false;
@@ -42,6 +45,17 @@ public class AxitList : ListBox
     {
         _typed = string.Empty;
         _typedAt = 0;
+    }
+
+    /// <summary>Any move of the selection but the search's own (an arrow, a command, the list filled anew) starts a new search, as in File Explorer: a letter typed just after it never continues the letters before (found by axAutomate, 2026-10-24: "s", then keys, then "b" within the second searched "sb").</summary>
+    protected override void OnSelectedIndexChanged(EventArgs e)
+    {
+        if (!_jumping)
+        {
+            ResetTypeAhead();
+        }
+
+        base.OnSelectedIndexChanged(e);
     }
 
     protected override void OnKeyDown(KeyEventArgs e)
@@ -73,16 +87,26 @@ public class AxitList : ListBox
             return;
         }
 
-        e.Handled = true;
         var now = Environment.TickCount64;
-        _typed = now - _typedAt > PauseMs ? e.KeyChar.ToString() : _typed + e.KeyChar;
+        var fresh = now - _typedAt > PauseMs || _typed.Length == 0;
+        if (fresh && e.KeyChar == ' ')
+        {
+            // A space continues a name ("windows event") but never starts a search: it is a window's key (axGIT's stage,
+            // axList's check) that may still arrive as a character.
+            return;
+        }
+
+        e.Handled = true;
+        _typed = fresh ? e.KeyChar.ToString() : _typed + e.KeyChar;
         _typedAt = now;
         // Shift with a letter searches backwards; with a digit or a sign it only makes another character.
         var backward = char.IsLetter(e.KeyChar) && (ModifierKeys & Keys.Shift) != 0;
         var index = TypeAhead.Find(names, _typed, SelectedIndex, backward);
         if (index >= 0)
         {
+            _jumping = true;
             SelectedIndex = index;
+            _jumping = false;
         }
         else
         {
