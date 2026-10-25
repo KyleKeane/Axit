@@ -21,11 +21,11 @@ check); the workflow step would differ, the rest of this plan would not.
 | Functionality described on the download page | The release page and `README.md` |
 | Own project: the signing team develops it and owns the repository | Yes (the maintainer) |
 | No hacking tools, nothing that circumvents security measures | Yes. Axit installs per user, never elevated; the AI tools are off until the user turns them on |
-| Privacy: data sent elsewhere needs a privacy policy shown at install, and a way to turn it off | The update check asks GitHub for the latest release (a setting, on by default, AX-3); axClaude runs the user's own Claude Code; nothing else leaves the computer. A privacy policy (section 3) states this |
-| System changes come with clear warnings; uninstall is provided | The installer says each place it writes (Start menu, File Explorer, Open with, PATH); Settings, Apps has Uninstall (AX-2.5) |
-| Multi-factor sign-in for every team member on SignPath and GitHub | The user turns it on for GitHub (already an open item of the audit) and for SignPath |
-| Roles: authors, reviewers, approvers | The maintainer is all three; listed in the code signing policy |
-| A "Code signing policy" on the home page and the release pages | Section 3, added once SignPath accepts the project |
+| Privacy: data sent elsewhere needs a privacy policy shown at install, and a way to turn it off | Done 2026-10-25: `PRIVACY.md` (every network contact and outside program, per app), in the zip, in every window (About, Privacy), summarised in the README, and said by the installer before it changes anything; the update check has its setting |
+| System changes come with clear warnings; uninstall is provided | Done: the installer's first lines say every place it writes before it writes them; Settings, Apps has Uninstall (AX-2.5) |
+| Multi-factor sign-in for every team member on SignPath and GitHub | The user turns it on for GitHub and for SignPath (`GOVERNANCE.md` commits to it) |
+| Roles: authors, reviewers, approvers | Done: `GOVERNANCE.md` and the README's code signing policy (the maintainer, all three) |
+| A "Code signing policy" on the home page and the release pages | Done: the README's section, linked from every release page's notes (the release workflow); its one sentence about SignPath changes once they accept |
 | Product name and version in the file's metadata, the same on every build | `src/Axit/Axit.csproj`: `<Product>Axit</Product>`, `<Version>` set by `release.ps1` |
 | Built from source by an automated build; each release approved by hand | The release workflow builds the tag; the maintainer approves each signing in SignPath's web page |
 
@@ -43,7 +43,7 @@ Nothing found that disqualifies Axit; SignPath decides on the application.
    secret `SIGNPATH_API_TOKEN`, and the organisation id as the variable `SIGNPATH_ORGANIZATION_ID`.
 5. Tell Claude in this repository "SignPath is set up", and it does section 4.
 
-## 3. The code signing policy (to add to `README.md` and the release notes once accepted)
+## 3. The code signing policy (in `README.md` since 2026-10-25; the first paragraph's wording once accepted)
 
 > **Code signing policy.** Free code signing provided by SignPath.io, certificate by SignPath Foundation.
 > Team: Dr. Kyle Keane (www.kylekeane.com): author, reviewer and approver. Every release is built from this repository

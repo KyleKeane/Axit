@@ -24,6 +24,18 @@ Axit is built for people who use a screen reader, and every change is judged by 
 
 Small commits with imperative subject lines; `main` is always releasable, and larger work runs on a branch until its NVDA checks pass.
 
+## Licence of contributions, review and conduct
+
+- A contribution is made under the project's licence, MIT (`LICENSE`): by opening a pull request you agree that your
+  change is published under it, and that you have the right to give it (your own work, or work under a compatible
+  licence named in the pull request and added to `THIRD-PARTY-NOTICES.md`).
+- No third-party package, no binary and no code whose licence is not open source enters the repository.
+- Every change from someone other than the maintainer is reviewed before it is merged; the roles are in
+  `GOVERNANCE.md`.
+- A change that makes Axit contact anything new over the network, or start a program it did not start before,
+  updates `PRIVACY.md` in the same pull request.
+- Everyone here follows `CODE_OF_CONDUCT.md`.
+
 ## Releases
 
 Releases are made by the maintainer with `release.ps1` (README, Release). The version is one number for the whole bundle.

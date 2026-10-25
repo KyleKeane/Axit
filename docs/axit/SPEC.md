@@ -294,7 +294,11 @@ The apps are named ax and a word, the ax in lower case and the word as it is wri
   Axit's `bin\Debug` is never written); `release.ps1` and `run.ps1 -Test` call it.
 - AX-4.5 The repository's own pages (2026-10-22): `README.md` (what Axit is, the apps, install, build, test, release,
   where things are), `CONTRIBUTING.md` (how a change is made: spec first, one app's folders, tests, the NVDA plan and
-  its record, the changelog), `SECURITY.md` (private reports through GitHub's security advisories), issue forms in
+  its record, the changelog, the licence of contributions), `SECURITY.md` (private reports through GitHub's security
+  advisories), and since 2026-10-25 `PRIVACY.md` (every network contact and outside program, also in the zip and About),
+  `GOVERNANCE.md` (the roles, how releases are made, the maintainer's commitments), `CODE_OF_CONDUCT.md` and
+  `THIRD-PARTY-NOTICES.md` (the .NET runtime and Windows Forms in the program, under MIT), with the README's code signing
+  policy linked from every release page (`docs/axit/code-signing.md`); issue forms in
   `.github/ISSUE_TEMPLATE` (a bug asks for the app, the versions and the test plan step), a pull request checklist,
   and Dependabot (`.github/dependabot.yml`) keeping the workflow actions and the test packages current, monthly; the
   apps themselves have no packages (G4, B-10).
@@ -495,7 +499,10 @@ The apps are named ax and a word, the ax in lower case and the word as it is wri
   the same in every window (`Axit.Core/BundleAbout`), each shown as a notice of the window: **Version** (V; the
   version, the apps, the latest release as the window knows it, the releases page, the settings and logs folders),
   **Licence** (L; MIT, and the warranty and liability disclaimer in full words; the LICENSE file is the binding text),
-  **Attribution** (A; the maker, the Anthropic note, what Axit is built with), **Axit guide** (G; `docs/axit/README.md`,
+  **Attribution** (A; the maker, the Anthropic note, what Axit is built with), **Privacy** (P; `PRIVACY.md`, embedded:
+  everything Axit contacts over the network and when, the outside programs it runs, what stays on the computer; since
+  2026-10-25), **Third-party notices** (N; `THIRD-PARTY-NOTICES.md`, embedded: the .NET runtime and Windows Forms in
+  the program under MIT, the Unicode data), **Axit guide** (G; `docs/axit/README.md`,
   the zip's guide, embedded by `Axit.Core`: install, start, update, remove; its headings take the window's heading
   keys, AX-7.2), and **Axit on GitHub** (H; the repository page, `UpdateCheck.RepositoryPage`, in the browser).
 - AX-9.10 **Show current folder in ▸** (2026-10-24, one builder, `AxitForm.CreateShowInMenu`): the window's File
@@ -664,7 +671,7 @@ November 2028; the move to the next LTS is those two files and a run of the test
 
 ```
 CLAUDE.md               the map of the bundle and its rules (short); each project has its own CLAUDE.md with its notes
-README.md, CONTRIBUTING.md, SECURITY.md   the repository's own pages (AX-4.5)
+README.md, CONTRIBUTING.md, SECURITY.md, PRIVACY.md, GOVERNANCE.md, CODE_OF_CONDUCT.md, THIRD-PARTY-NOTICES.md   the repository's own pages (AX-4.5)
 docs/axit/              SPEC.md (this), README.md (the zip's guide: install, the apps, uninstall), adding-an-app.md, plan.md,
                         nvda-test-record.md (every NVDA pass, by step), axfile-split.md (the inventory of the split),
                         review-2026-10-23.md (the review of the code and documents), inventory-2026-10-24.md (the copies and drift, and what is open) and longevity.md (the practices for the years ahead)

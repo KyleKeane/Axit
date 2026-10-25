@@ -69,6 +69,9 @@ jobs:
           .\tools\release-notes.ps1 -Version $env:VERSION | Set-Content -Path notes.md -Encoding utf8
           # The SDK that built this release, so that a rebuild years later knows what to reproduce (docs/axit/longevity.md).
           Add-Content -Path notes.md -Value "`nBuilt with the .NET SDK $(dotnet --version)." -Encoding utf8
+          # Every release page links the code signing policy, the privacy page and the governance, as the signing
+          # service's terms ask of the download pages (docs/axit/code-signing.md).
+          Add-Content -Path notes.md -Value "`nCode signing policy, privacy and governance: https://github.com/KyleKeane/Axit#code-signing-policy, https://github.com/KyleKeane/Axit/blob/main/PRIVACY.md and https://github.com/KyleKeane/Axit/blob/main/GOVERNANCE.md" -Encoding utf8
           "$env:TAG" | Set-Content -Path tag.txt -Encoding ascii
 
       - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2

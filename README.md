@@ -31,6 +31,29 @@ Download `install.cmd`, or the zip, from the [latest release](https://github.com
 
 Needs Windows 10 1809 or later. axClaude also needs [Claude Code](https://code.claude.com/docs/en/setup); every other app works offline.
 
+## Privacy, and what Axit works with
+
+Axit collects nothing: no telemetry, no analytics, no accounts. On its own it makes one network request, the update check, which asks GitHub for the latest release when a window starts and can be turned off (Options, General, Check for updates at start). Everything else happens only when you ask:
+
+- **axClaude** runs Claude Code, Anthropic's program, which you install; what you type goes to Anthropic through it, under Anthropic's terms.
+- **axGIT** runs your git, which reaches your repository's remotes when you fetch, pull or push.
+- **axTerminal** runs your own shells; **axPass** runs KeePassXC's command-line tool, on your computer.
+- **Install it now**, when an app needs Git, KeePassXC, PowerShell 7 or Claude Code, installs it through Windows' winget or Anthropic's installer, when you choose.
+- **The AI tools** (off unless you turn them on) let an AI tool you pair, such as Claude Code, read Axit's windows through local pipes, never the network.
+- Help menus and links open in your browser.
+
+[PRIVACY.md](PRIVACY.md) says all of it in full, per app, with what stays on your computer. It is also in the zip and in every window: Axit menu, About, Privacy.
+
+## Code signing policy
+
+Every release is built by GitHub Actions from this repository's source, with GitHub's attestation of where it was built, and approved by the maintainer before it is published. Its zip is signed with Axit's release key, which never leaves the maintainer's computer; the installed apps and `install.cmd` install nothing whose signature does not check ([docs/axit/SPEC.md](docs/axit/SPEC.md) AX-3.4).
+
+Windows code signing of `Axit.exe` (Authenticode, which Windows' Smart App Control checks) has been prepared for SignPath Foundation's free signing of open-source projects ([docs/axit/code-signing.md](docs/axit/code-signing.md)). Once SignPath accepts the project, this section reads: free code signing provided by SignPath.io, certificate by SignPath Foundation; every release's `Axit.exe` then carries that signature, and each signing is approved by hand.
+
+Team and roles ([GOVERNANCE.md](GOVERNANCE.md)): Dr. Kyle Keane (www.kylekeane.com), author, reviewer and approver.
+
+Privacy: Axit transfers no information to other networked systems unless the user asks it to, except the update check above, which the user can turn off ([PRIVACY.md](PRIVACY.md)).
+
 ## Build and run
 
 Needs the .NET 10 SDK, and NVDA for the manual checks.
@@ -77,10 +100,10 @@ Without GitHub Actions (a runner image or an action changed under the workflow, 
 
 ## Contributing
 
-See [CONTRIBUTING.md](CONTRIBUTING.md). Report a bug or an idea with the [issue forms](https://github.com/KyleKeane/Axit/issues/new/choose); report a security problem privately, as [SECURITY.md](SECURITY.md) says.
+See [CONTRIBUTING.md](CONTRIBUTING.md). Report a bug or an idea with the [issue forms](https://github.com/KyleKeane/Axit/issues/new/choose); report a security problem privately, as [SECURITY.md](SECURITY.md) says. How the project is run and what its maintainer commits to: [GOVERNANCE.md](GOVERNANCE.md); how people treat each other here: [CODE_OF_CONDUCT.md](CODE_OF_CONDUCT.md).
 
 ## Licence
 
-MIT, see [LICENSE](LICENSE). Axit is made by Dr. Kyle Keane (www.kylekeane.com). Use it, change it and pass it on; keep that notice with it.
+MIT, see [LICENSE](LICENSE). Axit is made by Dr. Kyle Keane (www.kylekeane.com). Use it, change it and pass it on; keep that notice with it. What the program carries from others, the .NET runtime and Windows Forms under MIT among it: [THIRD-PARTY-NOTICES.md](THIRD-PARTY-NOTICES.md).
 
 The software is provided "as is", without warranty of any kind, and the developer accepts no liability for its use; the full wording is in `LICENSE`. Axit is an independent project, not affiliated with or endorsed by Anthropic or NV Access.

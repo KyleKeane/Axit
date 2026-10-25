@@ -46,6 +46,10 @@ If you had axClaude installed before Axit existed, the installer removes it firs
 
 Each app offers new versions itself (Axit menu, Check for updates and Update to). You can also run `install.cmd` again. Either way the old version is removed completely first and the new one is installed fresh. Your settings stay.
 
+## Privacy
+
+Axit collects nothing and has no telemetry. On its own it makes one network request: when a window starts, it asks GitHub for the latest release, which Options, General, Check for updates at start turns off. Everything else, Claude Code in axClaude, git's remotes in axGIT, the installers of Install it now, links you open, happens only when you ask. `PRIVACY.md` next to the program says all of it, and every window shows it: Axit menu, About, Privacy.
+
 ## Remove
 
 Settings, Apps, Installed apps, Axit, Uninstall (or Add or remove programs in the Control Panel). Close the apps first: while one runs, nothing is removed and the window says so. A console window says what was removed; press a key to close it. Your settings stay in `%APPDATA%\Axit` and the logs in `%LOCALAPPDATA%\Axit`. From a console, `"%LOCALAPPDATA%\Programs\Axit\install.cmd" -Uninstall` does the same.

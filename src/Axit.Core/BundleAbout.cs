@@ -31,8 +31,18 @@ public static class BundleAbout
     public const string Attribution = """
         Axit is made by Dr. Kyle Keane, www.kylekeane.com.
         Everything you type in axClaude goes to Claude Code and, through it, to Anthropic under Anthropic's own terms; the developer has no access to it. Axit is an independent project, not affiliated with or endorsed by Anthropic. Claude and Claude Code are products of Anthropic.
-        Axit is built with .NET and Windows Forms and uses no third-party packages.
+        Axit is built with .NET and Windows Forms and uses no third-party packages; About, Third-party notices names what the program carries from others, and About, Privacy everything Axit contacts.
         """;
+
+    public const string PrivacyTitle = "Privacy";
+
+    /// <summary>PRIVACY.md, embedded by Axit.Core.csproj (2026-10-25): what Axit sends anywhere and when, the same page as the repository's and the zip's.</summary>
+    public static string Privacy() => EmbeddedText.Read(typeof(BundleAbout).Assembly, "Privacy.md", "PRIVACY.md");
+
+    public const string NoticesTitle = "Third-party notices";
+
+    /// <summary>THIRD-PARTY-NOTICES.md, embedded by Axit.Core.csproj (2026-10-25): the .NET runtime and Windows Forms inside the program, and their licence.</summary>
+    public static string Notices() => EmbeddedText.Read(typeof(BundleAbout).Assembly, "ThirdPartyNotices.md", "THIRD-PARTY-NOTICES.md");
 
     public const string GuideTitle = "Axit guide";
 

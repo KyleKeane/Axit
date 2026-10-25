@@ -27,4 +27,28 @@ public sealed class BundleAboutTests
         Assert.Contains("Dr. Kyle Keane", BundleAbout.Attribution);
         Assert.Contains("no third-party packages", BundleAbout.Attribution);
     }
+
+    [Fact]
+    public void Privacy_and_the_notices_are_the_shipped_pages()
+    {
+        // The pages the zip ships, embedded whole (2026-10-25): the update check, its setting, and .NET's licence.
+        Assert.StartsWith("# Privacy", BundleAbout.Privacy());
+        Assert.Contains("Check for updates at start", BundleAbout.Privacy());
+        Assert.Contains("Copyright (c) .NET Foundation and Contributors", BundleAbout.Notices());
+    }
+
+    [Fact]
+    public void The_privacy_page_names_the_addresses_the_code_contacts()
+    {
+        // The page follows the code: the update check's address and the installers Install it now runs, from the
+        // places that hold them, so that changing one without the page fails here.
+        var privacy = BundleAbout.Privacy();
+        Assert.Contains(UpdateCheck.LatestReleaseApi, privacy);
+        Assert.Contains(ProgramInstall.ClaudeCode.PowerShellCommand!, privacy);
+        Assert.Contains("--source winget", privacy);
+        foreach (var program in new[] { ProgramInstall.Git, ProgramInstall.KeePassXC, ProgramInstall.PowerShell7, ProgramInstall.ClaudeCode })
+        {
+            Assert.Contains(program.Name, privacy);
+        }
+    }
 }

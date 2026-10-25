@@ -1,5 +1,10 @@
 # Changelog
 
+## 3.7.6 - 2026-10-25
+
+- Axit: a privacy page says everything Axit contacts over the network and when, the programs it runs, and what stays on your computer; it is in the zip, on GitHub and in every window (Axit menu, About, Privacy), and the installer says it before it changes anything, with what it changes. About, Third-party notices names the .NET runtime and Windows Forms the program carries, under their MIT licence.
+- For developers: the repository's governance (`GOVERNANCE.md`: roles, how releases are made, the maintainer's commitments), a code of conduct, the code signing policy in the README and every release page, how contributions are licensed in `CONTRIBUTING.md`, and the plan for free Windows code signing through SignPath Foundation (`docs/axit/code-signing.md`).
+
 ## 3.7.5 - 2026-10-25
 
 - Axit: an update that Windows will not let run (Smart App Control's "An Application Control policy has blocked this file") stops before it changes anything, and says why; the version you have keeps working. Until now the update installed the blocked program and failed at the end. A background app that cannot be started again after an update is said rather than failing it.

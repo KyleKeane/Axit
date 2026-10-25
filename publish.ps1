@@ -4,7 +4,7 @@
   the bundle's README, zipped for sending, and installs it for the current user unless -NoInstall is given.
 
 .DESCRIPTION
-  Output: publish\win-x64\ (Axit.exe, the apps' icons, install.cmd, install.ps1, README.md, LICENSE) and publish\Axit-<version>-win-x64.zip.
+  Output: publish\win-x64\ (Axit.exe, the apps' icons, install.cmd, install.ps1, README.md, LICENSE, PRIVACY.md, THIRD-PARTY-NOTICES.md, apps.json) and publish\Axit-<version>-win-x64.zip.
   Send the zip to someone: they extract it and double-click install.cmd (see README.md inside). Without -NoInstall the
   script then runs install.ps1 from publish\win-x64 on this machine (Start menu entries, File Explorer entries and
   the console commands; see install.ps1 -? for details and -Uninstall).
@@ -45,6 +45,9 @@ Get-ChildItem (Join-Path $root 'src\Axit') -Filter '*.ico' | Copy-Item -Destinat
 Copy-Item (Join-Path $root 'install.ps1') $out -Force
 Copy-Item (Join-Path $root 'install.cmd') $out -Force
 Copy-Item (Join-Path $root 'LICENSE') $out -Force
+# What Axit sends anywhere, and the notices of what it contains (PRIVACY.md, THIRD-PARTY-NOTICES.md), beside the licence.
+Copy-Item (Join-Path $root 'PRIVACY.md') $out -Force
+Copy-Item (Join-Path $root 'THIRD-PARTY-NOTICES.md') $out -Force
 # The bundle's guide: install, the apps, update, remove. Each app's own guide is inside it, under Help.
 Copy-Item (Join-Path $root 'docs\axit\README.md') (Join-Path $out 'README.md') -Force
 Get-ChildItem $out -Filter '*.pdb' | Remove-Item -Force
