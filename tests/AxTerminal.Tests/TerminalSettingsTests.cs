@@ -26,36 +26,29 @@ public sealed class TerminalSettingsTests
     [Fact]
     public void Nonsense_falls_back_and_values_round_trip()
     {
-        var dir = Path.Combine(Path.GetTempPath(), "axterminal-tests-" + Guid.NewGuid().ToString("N"));
-        Directory.CreateDirectory(dir);
+        using var temp = new TempFolder("axterminal-tests");
+        var dir = temp.Path;
         var path = Path.Combine(dir, "axterminal.json");
-        try
-        {
-            File.WriteAllText(path, """{"shell":"fish","ptyColumns":3,"ptyRows":9000,"maxTranscriptLines":5,"recentFolders":["", "C:\\src"],"outputSpeech":7}""");
-            var settings = TerminalSettings.Load(path, out var error);
-            Assert.Null(error);
-            Assert.Null(settings.Shell);
-            Assert.Equal(240, settings.PtyColumns);
-            Assert.Equal(50, settings.PtyRows);
-            Assert.Equal(20000, settings.MaxTranscriptLines);
-            Assert.Equal(["C:\\src"], settings.RecentFolders);
-            Assert.Equal(OutputSpeechMode.All, settings.OutputSpeech);
+        File.WriteAllText(path, """{"shell":"fish","ptyColumns":3,"ptyRows":9000,"maxTranscriptLines":5,"recentFolders":["", "C:\\src"],"outputSpeech":7}""");
+        var settings = TerminalSettings.Load(path, out var error);
+        Assert.Null(error);
+        Assert.Null(settings.Shell);
+        Assert.Equal(240, settings.PtyColumns);
+        Assert.Equal(50, settings.PtyRows);
+        Assert.Equal(20000, settings.MaxTranscriptLines);
+        Assert.Equal(["C:\\src"], settings.RecentFolders);
+        Assert.Equal(OutputSpeechMode.All, settings.OutputSpeech);
 
-            settings.Shell = "cmd";
-            settings.OutputSpeech = OutputSpeechMode.All;
-            settings.RememberFolder("C:\\work");
-            settings.RememberFolder("C:\\src");
-            settings.Save(path);
-            var again = TerminalSettings.Load(path, out error);
-            Assert.Null(error);
-            Assert.Equal(ShellKind.CommandPrompt, again.ShellKind);
-            Assert.Equal(OutputSpeechMode.All, again.OutputSpeech);
-            Assert.Equal(["C:\\src", "C:\\work"], again.RecentFolders);
-            Assert.Equal("C:\\src", again.LastFolder);
-        }
-        finally
-        {
-            Directory.Delete(dir, true);
-        }
+        settings.Shell = "cmd";
+        settings.OutputSpeech = OutputSpeechMode.All;
+        settings.RememberFolder("C:\\work");
+        settings.RememberFolder("C:\\src");
+        settings.Save(path);
+        var again = TerminalSettings.Load(path, out error);
+        Assert.Null(error);
+        Assert.Equal(ShellKind.CommandPrompt, again.ShellKind);
+        Assert.Equal(OutputSpeechMode.All, again.OutputSpeech);
+        Assert.Equal(["C:\\src", "C:\\work"], again.RecentFolders);
+        Assert.Equal("C:\\src", again.LastFolder);
     }
 }
