@@ -20,6 +20,12 @@ public static class SystemPrograms
     /// <summary>Windows PowerShell 5.1, the one every Windows has.</summary>
     public static string PowerShell => Path.Combine(Environment.SystemDirectory, "WindowsPowerShell", "v1.0", "powershell.exe");
 
+    /// <summary>The characters cmd.exe acts on in an argument, quoted or not (the BatBadBut class of bug; S-3, from axFile's UserPrograms on its second use, the AI tools' claude.cmd, S-53, 2026-10-25).</summary>
+    public static readonly char[] CmdSpecials = ['&', '|', '<', '>', '^', '%', '!', '(', ')', ',', ';', '=', '"'];
+
+    /// <summary>Whether a text holds one of cmd.exe's special characters, so that it must not reach a batch program's command line.</summary>
+    public static bool HasCmdSpecials(string text) => text.IndexOfAny(CmdSpecials) >= 0;
+
     /// <summary>The first <paramref name="fileName"/> in the PATH's folders that are full paths; null when there is none.</summary>
     public static string? OnPath(string fileName) => OnPath(fileName, Environment.GetEnvironmentVariable("PATH"));
 

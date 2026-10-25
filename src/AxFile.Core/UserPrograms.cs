@@ -20,16 +20,13 @@ public static class UserPrograms
     public static bool IsBatchFile(string path) =>
         System.IO.Path.GetExtension(path).ToLowerInvariant() is ".bat" or ".cmd";
 
-    /// <summary>The characters cmd.exe acts on in an argument, quoted or not (the BatBadBut class of bug).</summary>
-    private static readonly char[] CmdSpecials = ['&', '|', '<', '>', '^', '%', '!', '(', ')', ',', ';', '=', '"'];
-
     /// <summary>
     /// A target a batch program must not be given (docs/axit/security-audit-2026-10-24.md S-3): a name holding one of
     /// cmd.exe's special characters, which would run what follows as a command; null when every target is safe or the
     /// program is no batch file.
     /// </summary>
     public static string? RefusedTarget(UserProgram program, IReadOnlyList<string> targets) =>
-        IsBatchFile(program.Path) ? targets.FirstOrDefault(target => target.IndexOfAny(CmdSpecials) >= 0) : null;
+        IsBatchFile(program.Path) ? targets.FirstOrDefault(SystemPrograms.HasCmdSpecials) : null;
 
     /// <summary>
     /// How the program is run on <paramref name="targets"/>, every path as one argument, in the first one's folder: a
