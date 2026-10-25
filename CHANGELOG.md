@@ -1,5 +1,9 @@
 # Changelog
 
+## 3.7.5 - 2026-10-25
+
+- Axit: an update that Windows will not let run (Smart App Control's "An Application Control policy has blocked this file") stops before it changes anything, and says why; the version you have keeps working. Until now the update installed the blocked program and failed at the end. A background app that cannot be started again after an update is said rather than failing it.
+
 ## 3.7.4 - 2026-10-25
 
 - Axit: a paste is heard in every window: Ctrl+V or Shift+Insert into the message field, an editor, a field or a notice's field says "Pasted", or "Pasted, 3 lines" for several; the text itself is never read out.

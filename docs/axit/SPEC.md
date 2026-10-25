@@ -254,7 +254,10 @@ The apps are named ax and a word, the ax in lower case and the word as it is wri
   `<email>` (`Updater.FailureDetails` over `Redaction`, tested); the app's log and `update.log` keep the whole text on
   the machine. The installer says where it failed: its last error names the line of `install.ps1` and the
   statement, and its first line names the version installed, in place or not, and Windows' and PowerShell's versions;
-  when the new program cannot give its list of apps (`Axit.exe apps`), it says why and reads the zip's `apps.json`.
+  when the new program answers its list of apps (`Axit.exe apps`) wrongly, it says why and reads the zip's `apps.json`; when
+  Windows will not start the new program at all (3.7.4 on one machine: Smart App Control, "An Application Control policy has
+  blocked this file"), it stops before anything is changed, the running version kept, and says so; an uninstall reads
+  `apps.json` then. A background app that cannot be started again after an install is said, not a failure.
 - AX-3.3 The 1.7.0 bridge (B-6): axClaude 1.7.0 accepts a download whose program file is not `AxClaude.exe`, so an
   installed axClaude updates into Axit through Help, Update now. The first Axit release is 2.0.0.
 - AX-3.4 The update check and the version comparison are pure code in `Axit.Core/Updates/UpdateCheck`, unit tested;

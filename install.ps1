@@ -143,6 +143,12 @@ function Get-AppListing {
                 $json = $null
             }
         } catch {
+            # Windows refused to start the new program (3.7.4 on one machine: "An Application Control policy has blocked
+            # this file", Smart App Control): installing it would leave a program that cannot start, so nothing is
+            # changed and the running version stays. An uninstall goes on with apps.json, which it only reads.
+            if (-not $Uninstall) {
+                throw "Windows will not run the new Axit.exe ($($_.Exception.Message)), so nothing was changed and this version stays. On Windows 11 this is most often Smart App Control, which blocks a program that is not code-signed"
+            }
             $reason = "it could not be run: $($_.Exception.Message)"
             $json = $null
         }
@@ -248,8 +254,13 @@ function Start-Background {
         if (Test-Path -LiteralPath $settingsFile) {
             try { if ((Get-Content -LiteralPath $settingsFile -Raw | ConvertFrom-Json).startWithWindows -eq $false) { continue } } catch { }
         }
-        Start-Process -FilePath $exe -ArgumentList @($app.Verb, '--hidden') -WorkingDirectory $target
-        Say $app.Started
+        # A background app that does not start is said, not a failed installation: the files are in place by now.
+        try {
+            Start-Process -FilePath $exe -ArgumentList @($app.Verb, '--hidden') -WorkingDirectory $target -ErrorAction Stop
+            Say $app.Started
+        } catch {
+            Say "$($app.Name) could not be started again: $($_.Exception.Message)"
+        }
     }
 }
 
