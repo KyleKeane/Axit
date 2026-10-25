@@ -150,6 +150,35 @@ public sealed class RenderersTests : IDisposable
     }
 
     [Fact]
+    public void A_document_that_unpacks_past_the_budget_is_not_loaded()
+    {
+        // A small file whose one part unpacks to more than 32 MB (security review S-47): stopped as it is read.
+        const string w = "xmlns:w=\"http://schemas.openxmlformats.org/wordprocessingml/2006/main\"";
+        var paragraph = "<w:p><w:r><w:t>" + new string('a', 1000) + "</w:t></w:r></w:p>";
+        var body = new StringBuilder($"<w:document {w}><w:body>");
+        for (var i = 0; i < 34_000; i++)
+        {
+            body.Append(paragraph);
+        }
+
+        var path = Zip("bomb.docx", ("word/document.xml", body.Append("</w:body></w:document>").ToString()));
+        Assert.True(new FileInfo(path).Length < 1024 * 1024);
+        var rendered = Renderers.Render(path);
+        Assert.Equal("Readable text", rendered.Kind);
+        Assert.Contains("unpacks to more than 32 MB", Lines(rendered)[0]);
+    }
+
+    [Fact]
+    public void A_document_that_declares_a_dtd_is_not_loaded()
+    {
+        // No entity expansion and nothing outside the part (S-48).
+        var path = Zip("entity.docx", ("word/document.xml", "<!DOCTYPE d [<!ENTITY e \"boom\">]><w:document xmlns:w=\"http://schemas.openxmlformats.org/wordprocessingml/2006/main\"><w:body><w:p><w:r><w:t>&e;</w:t></w:r></w:p></w:body></w:document>"));
+        var rendered = Renderers.Render(path);
+        Assert.Equal("Readable text", rendered.Kind);
+        Assert.StartsWith("entity.docx could not be read as a document", Lines(rendered)[0]);
+    }
+
+    [Fact]
     public void Any_other_file_shows_its_readable_runs_both_narrow_and_wide()
     {
         var bytes = new List<byte> { 0x4D, 0x5A, 0x00, 0x01 };

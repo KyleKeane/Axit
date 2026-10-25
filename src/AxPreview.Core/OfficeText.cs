@@ -1,6 +1,7 @@
 using System.IO.Compression;
 using System.Text;
 using System.Text.RegularExpressions;
+using System.Xml;
 using System.Xml.Linq;
 
 namespace AxPreview.Core;
@@ -53,27 +54,70 @@ public static class OfficeText
         public int Headings;
         public int Tables;
         public int Slides;
+
+        /// <summary>The bytes the document's parts have unpacked to so far.</summary>
+        public long Unpacked;
     }
 
-    /// <summary>The most a part of the document may unpack to: a file made to unpack to gigabytes is refused, not read.</summary>
-    private const long MaxPart = 256L * 1024 * 1024;
+    /// <summary>
+    /// The most all the parts of one document may unpack to, counted on the bytes as they are read rather than taken
+    /// from the zip's own record of their sizes: a file made to unpack to gigabytes stops here, and the readable text is
+    /// shown with the reason (security review S-47, 2026-10-25; until then each part might unpack to 256 MB and be held
+    /// whole, a few gigabytes for a file of a few hundred kilobytes). The editors' limit, as much text as a window holds.
+    /// </summary>
+    private const long MaxUnpacked = TextSniff.MaxBytes;
+
+    /// <summary>XML read without a DTD and without resolving anything outside the part (S-48): a part that declares one is refused, and the file is shown as its readable text.</summary>
+    private static readonly XmlReaderSettings Xml = new() { DtdProcessing = DtdProcessing.Prohibit, XmlResolver = null };
 
     /// <summary>A part by its name, a backslash taken as a slash: zips written by Windows PowerShell 5.1 name them so (found by the window's script, 2026-10-24).</summary>
-    private static XDocument? Part(ZipArchive zip, string name) =>
-        zip.Entries.FirstOrDefault(entry => EntryName(entry) == name) is { } entry ? Load(entry) : null;
+    private static XDocument? Part(ZipArchive zip, string name, Counts counts) =>
+        zip.Entries.FirstOrDefault(entry => EntryName(entry) == name) is { } entry ? Load(entry, counts) : null;
 
     private static string EntryName(ZipArchiveEntry entry) => entry.FullName.Replace('\\', '/');
 
-    /// <summary>One XML part, after its unpacked size is checked; the framework's reader refuses a DTD, so no outside entity is ever read.</summary>
-    private static XDocument Load(ZipArchiveEntry entry)
+    /// <summary>One XML part, its unpacked bytes counted against the document's budget.</summary>
+    private static XDocument Load(ZipArchiveEntry entry, Counts counts)
     {
-        if (entry.Length > MaxPart)
+        using var stream = new Budget(entry.Open(), counts);
+        using var reader = XmlReader.Create(stream, Xml);
+        return XDocument.Load(reader);
+    }
+
+    /// <summary>A part's stream that counts what it gives against <see cref="MaxUnpacked"/> for the whole document.</summary>
+    private sealed class Budget(Stream inner, Counts counts) : Stream
+    {
+        public override int Read(byte[] buffer, int offset, int count)
         {
-            throw new InvalidDataException($"{entry.FullName} unpacks to {entry.Length:N0} bytes, more than a document's text needs");
+            var read = inner.Read(buffer, offset, count);
+            counts.Unpacked += read;
+            if (counts.Unpacked > MaxUnpacked)
+            {
+                throw new InvalidDataException($"it unpacks to more than {MaxUnpacked / (1024 * 1024)} MB");
+            }
+
+            return read;
         }
 
-        using var stream = entry.Open();
-        return XDocument.Load(stream);
+        public override bool CanRead => true;
+        public override bool CanSeek => false;
+        public override bool CanWrite => false;
+        public override long Length => throw new NotSupportedException();
+        public override long Position { get => throw new NotSupportedException(); set => throw new NotSupportedException(); }
+        public override void Flush() { }
+        public override long Seek(long offset, SeekOrigin origin) => throw new NotSupportedException();
+        public override void SetLength(long value) => throw new NotSupportedException();
+        public override void Write(byte[] buffer, int offset, int count) => throw new NotSupportedException();
+
+        protected override void Dispose(bool disposing)
+        {
+            if (disposing)
+            {
+                inner.Dispose();
+            }
+
+            base.Dispose(disposing);
+        }
     }
 
     // ---- Word: word/document.xml, the body's paragraphs and tables in order ----
@@ -81,7 +125,7 @@ public static class OfficeText
     private static List<string> Word(ZipArchive zip, Counts counts)
     {
         var lines = new List<string>();
-        if (Part(zip, "word/document.xml")?.Root?.Element(W + "body") is not { } body)
+        if (Part(zip, "word/document.xml", counts)?.Root?.Element(W + "body") is not { } body)
         {
             return lines;
         }
@@ -183,7 +227,7 @@ public static class OfficeText
             counts.Slides++;
             counts.Headings++;
             lines.Add($"## Slide {counts.Slides}");
-            var document = Load(slide);
+            var document = Load(slide, counts);
             foreach (var paragraph in document.Descendants(A + "p"))
             {
                 var text = string.Concat(paragraph.Descendants(A + "t").Select(t => t.Value)).Trim();
@@ -205,7 +249,7 @@ public static class OfficeText
     private static List<string> OpenDocument(ZipArchive zip, Counts counts)
     {
         var lines = new List<string>();
-        if (Part(zip, "content.xml")?.Root?.Element(OfficeNs + "body")?.Element(OfficeNs + "text") is { } body)
+        if (Part(zip, "content.xml", counts)?.Root?.Element(OfficeNs + "body")?.Element(OfficeNs + "text") is { } body)
         {
             AddOpenDocumentBlocks(body, lines, counts, inList: false);
         }
