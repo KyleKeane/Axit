@@ -214,6 +214,10 @@ and an error naming a file that could not be opened.
 - AP-7.3 **The way out follows the renderer** (Ctrl+E, AP-1.4): Edit in axDown or axJSON for a text; Play in axMedia
   for sound and video; Open in Windows' program for everything else (the program Windows has for the kind, axFile's
   Enter, and Windows' Open with dialog when it has none). The File menu's item is named after it as the file opens.
+  A file whose kind runs when opened (a program, a script, a shortcut, an installer: Windows' own list,
+  `AssocIsDangerous`, through `Axit.Core/DangerousFiles`) is never handed to Windows to open, by Ctrl+E or by Open with's
+  Windows' program: the notice "Not run from axPreview" says so and where to run it if trusted (security review S-46,
+  2026-10-25); Choose another program stays, the user picking the program.
   **File → Open with ▸** (the user's choice of 2026-10-24, over a list of defaults of Axit's own): the Axit apps that
   are programs for the file's type (their Open with types of `Dispatch.Apps`) and axDown for any text, numbered
   ("&1. axDown"), then Windows' program for it and Choose another program… (Windows' own dialog,
