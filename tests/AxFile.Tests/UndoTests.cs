@@ -6,37 +6,28 @@ namespace AxFile.Tests;
 /// <summary>Undo (docs/axfile/SPEC.md AF-4.14): the history, each operation's inverse over a temporary folder, and the Recycle Bin's records; the Recycle Bin itself is not exercised.</summary>
 public sealed class UndoTests : IDisposable
 {
-    private readonly string _folder = Path.Combine(Path.GetTempPath(), "axfile-undo-" + Guid.NewGuid().ToString("N"));
+    private readonly TempFolder _folder = new("axfile-undo");
 
     public UndoTests()
     {
-        Directory.CreateDirectory(Path.Combine(_folder, "docs"));
-        File.WriteAllText(Path.Combine(_folder, "notes.md"), "# Notes");
+        Directory.CreateDirectory(Path.Combine(_folder.Path, "docs"));
+        File.WriteAllText(Path.Combine(_folder.Path, "notes.md"), "# Notes");
     }
 
-    public void Dispose()
-    {
-        try
-        {
-            Directory.Delete(_folder, recursive: true);
-        }
-        catch (IOException)
-        {
-        }
-    }
+    public void Dispose() => _folder.Dispose();
 
-    private string In(string name) => Path.Combine(_folder, name);
+    private string In(string name) => Path.Combine(_folder.Path, name);
 
     [Fact]
     public void An_operation_knows_its_folder_its_entry_and_its_texts()
     {
         var rename = new Operation(OperationKind.Rename, [In("notes.md")], [In("todo.md")]);
-        Assert.Equal(_folder, rename.Folder);
+        Assert.Equal(_folder.Path, rename.Folder);
         Assert.Equal("notes.md", rename.Select);
         Assert.Equal("Undone: renamed back to notes.md", rename.DoneText);
 
         var copy = new Operation(OperationKind.Copy, [@"C:\elsewhere\a.txt", @"C:\elsewhere\b.txt"], [In("a.txt"), In("b.txt")]);
-        Assert.Equal(_folder, copy.Folder);
+        Assert.Equal(_folder.Path, copy.Folder);
         Assert.Null(copy.Select);
         Assert.Equal("Undone: 2 items sent to the Recycle Bin", copy.DoneText);
 
@@ -44,7 +35,7 @@ public sealed class UndoTests : IDisposable
         Assert.Equal("notes.md", delete.Select);
         Assert.Equal("Undone: notes.md restored", delete.DoneText);
         Assert.Equal("Undone: docs removed", new Operation(OperationKind.NewFolder, [], [In("docs")]).DoneText);
-        Assert.Equal("Undone: moved back", new Operation(OperationKind.Move, [In("notes.md")], [Path.Combine(_folder, "docs", "notes.md")], In("docs")).DoneText);
+        Assert.Equal("Undone: moved back", new Operation(OperationKind.Move, [In("notes.md")], [Path.Combine(_folder.Path, "docs", "notes.md")], In("docs")).DoneText);
     }
 
     [Fact]
@@ -65,7 +56,7 @@ public sealed class UndoTests : IDisposable
     [Fact]
     public async Task A_new_folder_or_file_is_removed_while_still_empty()
     {
-        var made = FileOperations.CreateFolder(_folder, "new");
+        var made = FileOperations.CreateFolder(_folder.Path, "new");
         var folder = new Operation(OperationKind.NewFolder, [], [made]);
         File.WriteAllText(Path.Combine(made, "x.txt"), "x");
         Assert.Equal("Not undone: new has files now", FileOperations.CheckUndo(folder));
@@ -74,7 +65,7 @@ public sealed class UndoTests : IDisposable
         Assert.Null(await FileOperations.UndoAsync(folder));
         Assert.False(Directory.Exists(made));
 
-        var file = new Operation(OperationKind.NewFile, [], [FileOperations.CreateFile(_folder)]);
+        var file = new Operation(OperationKind.NewFile, [], [FileOperations.CreateFile(_folder.Path)]);
         Assert.Null(FileOperations.CheckUndo(file));
         File.WriteAllText(file.After[0], "typed");
         Assert.Equal("Not undone: New file.txt has content now", FileOperations.CheckUndo(file));
@@ -86,7 +77,7 @@ public sealed class UndoTests : IDisposable
     [Fact]
     public async Task A_move_into_a_new_folder_goes_back_and_the_folder_goes_when_empty()
     {
-        var made = FileOperations.CreateFolder(_folder, "bundle");
+        var made = FileOperations.CreateFolder(_folder.Path, "bundle");
         var sources = new[] { In("notes.md") };
         var destinations = FileOperations.Destinations(sources, made);
         Assert.Null(await FileOperations.CopyOrMoveAsync(sources, destinations, move: true));
@@ -104,13 +95,13 @@ public sealed class UndoTests : IDisposable
         var operation = new Operation(OperationKind.Rename, [In("notes.md")], [renamed]);
         Assert.Null(FileOperations.CheckUndo(operation));
         Assert.Null(await FileOperations.UndoAsync(operation));
-        Assert.Equal(["docs", "notes.md"], Directory.EnumerateFileSystemEntries(_folder).Select(Path.GetFileName).Order());
+        Assert.Equal(["docs", "notes.md"], Directory.EnumerateFileSystemEntries(_folder.Path).Select(Path.GetFileName).Order());
     }
 
     [Fact]
     public void A_folder_where_the_new_file_was_is_a_change()
     {
-        var file = new Operation(OperationKind.NewFile, [], [FileOperations.CreateFile(_folder)]);
+        var file = new Operation(OperationKind.NewFile, [], [FileOperations.CreateFile(_folder.Path)]);
         File.Delete(file.After[0]);
         Directory.CreateDirectory(file.After[0]);
         Assert.Equal("Not undone: New file.txt has changed", FileOperations.CheckUndo(file));

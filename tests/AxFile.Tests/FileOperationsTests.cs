@@ -5,25 +5,15 @@ namespace AxFile.Tests;
 /// <summary>The operations over a temporary folder (docs/axfile/SPEC.md AF-4); the Recycle Bin itself is not exercised.</summary>
 public sealed class FileOperationsTests : IDisposable
 {
-    private readonly string _folder = Path.Combine(Path.GetTempPath(), "axfile-ops-" + Guid.NewGuid().ToString("N"));
+    private readonly TempFolder _folder = new("axfile-ops");
 
     public FileOperationsTests()
     {
-        Directory.CreateDirectory(_folder);
-        File.WriteAllText(Path.Combine(_folder, "notes.md"), "# Notes");
-        Directory.CreateDirectory(Path.Combine(_folder, "docs"));
+        File.WriteAllText(Path.Combine(_folder.Path, "notes.md"), "# Notes");
+        Directory.CreateDirectory(Path.Combine(_folder.Path, "docs"));
     }
 
-    public void Dispose()
-    {
-        try
-        {
-            Directory.Delete(_folder, recursive: true);
-        }
-        catch (IOException)
-        {
-        }
-    }
+    public void Dispose() => _folder.Dispose();
 
     [Theory]
     [InlineData("", "Type a name")]
@@ -49,10 +39,10 @@ public sealed class FileOperationsTests : IDisposable
     [Fact]
     public void A_new_folder_is_made_and_a_taken_name_is_an_error()
     {
-        var path = FileOperations.CreateFolder(_folder, " new ");
-        Assert.Equal(Path.Combine(_folder, "new"), path);
+        var path = FileOperations.CreateFolder(_folder.Path, " new ");
+        Assert.Equal(Path.Combine(_folder.Path, "new"), path);
         Assert.True(Directory.Exists(path));
-        var error = Assert.Throws<IOException>(() => FileOperations.CreateFolder(_folder, "notes.md"));
+        var error = Assert.Throws<IOException>(() => FileOperations.CreateFolder(_folder.Path, "notes.md"));
         Assert.Contains("already", error.Message);
     }
 
@@ -99,10 +89,10 @@ public sealed class FileOperationsTests : IDisposable
     [Fact]
     public void A_new_file_is_empty_and_the_next_one_gets_a_number()
     {
-        var first = FileOperations.CreateFile(_folder);
-        var second = FileOperations.CreateFile(_folder);
-        Assert.Equal(Path.Combine(_folder, "New file.txt"), first);
-        Assert.Equal(Path.Combine(_folder, "New file - 2.txt"), second);
+        var first = FileOperations.CreateFile(_folder.Path);
+        var second = FileOperations.CreateFile(_folder.Path);
+        Assert.Equal(Path.Combine(_folder.Path, "New file.txt"), first);
+        Assert.Equal(Path.Combine(_folder.Path, "New file - 2.txt"), second);
         Assert.Equal(0, new FileInfo(first).Length);
         Assert.True(File.Exists(second));
     }
@@ -110,15 +100,15 @@ public sealed class FileOperationsTests : IDisposable
     [Fact]
     public void A_file_and_a_folder_are_renamed_in_place()
     {
-        var file = FileOperations.Rename(Path.Combine(_folder, "notes.md"), "todo.md");
-        Assert.Equal(Path.Combine(_folder, "todo.md"), file);
+        var file = FileOperations.Rename(Path.Combine(_folder.Path, "notes.md"), "todo.md");
+        Assert.Equal(Path.Combine(_folder.Path, "todo.md"), file);
         Assert.True(File.Exists(file));
-        Assert.False(File.Exists(Path.Combine(_folder, "notes.md")));
+        Assert.False(File.Exists(Path.Combine(_folder.Path, "notes.md")));
 
         // A change of case only is a rename too.
-        var folder = FileOperations.Rename(Path.Combine(_folder, "docs"), "Docs");
-        Assert.Equal(Path.Combine(_folder, "Docs"), folder);
-        Assert.Equal(["Docs"], Directory.GetDirectories(_folder).Select(Path.GetFileName));
+        var folder = FileOperations.Rename(Path.Combine(_folder.Path, "docs"), "Docs");
+        Assert.Equal(Path.Combine(_folder.Path, "Docs"), folder);
+        Assert.Equal(["Docs"], Directory.GetDirectories(_folder.Path).Select(Path.GetFileName));
     }
 
     /// <summary>
@@ -129,13 +119,13 @@ public sealed class FileOperationsTests : IDisposable
     [Fact]
     public void A_folder_is_renamed_twice_in_a_row_and_a_current_directory_says_in_use()
     {
-        var first = FileOperations.Rename(Path.Combine(_folder, "docs"), "Docs 2");
-        FolderListing.Read(_folder, showHidden: false, showDotFiles: false);
+        var first = FileOperations.Rename(Path.Combine(_folder.Path, "docs"), "Docs 2");
+        FolderListing.Read(_folder.Path, showHidden: false, showDotFiles: false);
         var listing = FolderListing.Read(first, showHidden: false, showDotFiles: false);
         Assert.Empty(listing.Entries);
         FolderListing.Information(new Entry("Docs 2", first, true, 0, Directory.GetLastWriteTime(first)));
         var second = FileOperations.Rename(first, "Docs 3");
-        Assert.Equal(Path.Combine(_folder, "Docs 3"), second);
+        Assert.Equal(Path.Combine(_folder.Path, "Docs 3"), second);
         Assert.True(Directory.Exists(second));
         var third = FileOperations.Rename(second, "Docs 4");
         Assert.True(Directory.Exists(third));
@@ -171,27 +161,27 @@ public sealed class FileOperationsTests : IDisposable
     [Fact]
     public void A_rename_to_the_same_name_does_nothing_and_to_a_taken_name_is_an_error()
     {
-        var same = FileOperations.Rename(Path.Combine(_folder, "notes.md"), "notes.md");
-        Assert.Equal(Path.Combine(_folder, "notes.md"), same);
-        var error = Assert.Throws<IOException>(() => FileOperations.Rename(Path.Combine(_folder, "notes.md"), "docs"));
+        var same = FileOperations.Rename(Path.Combine(_folder.Path, "notes.md"), "notes.md");
+        Assert.Equal(Path.Combine(_folder.Path, "notes.md"), same);
+        var error = Assert.Throws<IOException>(() => FileOperations.Rename(Path.Combine(_folder.Path, "notes.md"), "docs"));
         Assert.Contains("already", error.Message);
     }
 
     [Fact]
     public async Task Files_and_folders_are_copied_and_moved_into_a_folder_by_the_shell()
     {
-        var docs = Path.Combine(_folder, "docs");
-        var notes = Path.Combine(_folder, "notes.md");
+        var docs = Path.Combine(_folder.Path, "docs");
+        var notes = Path.Combine(_folder.Path, "notes.md");
         Assert.Null(await CopyOrMoveAsync([notes], docs, move: false));
         Assert.True(File.Exists(Path.Combine(docs, "notes.md")));
         Assert.True(File.Exists(notes));
 
         // A name already there gets a dash and a number: both files stay.
-        Assert.Null(await CopyOrMoveAsync([Path.Combine(docs, "notes.md")], _folder, move: false));
-        Assert.True(File.Exists(Path.Combine(_folder, "notes - 2.md")));
+        Assert.Null(await CopyOrMoveAsync([Path.Combine(docs, "notes.md")], _folder.Path, move: false));
+        Assert.True(File.Exists(Path.Combine(_folder.Path, "notes - 2.md")));
         Assert.True(File.Exists(notes));
 
-        var sub = Path.Combine(_folder, "sub");
+        var sub = Path.Combine(_folder.Path, "sub");
         Directory.CreateDirectory(sub);
         File.WriteAllText(Path.Combine(sub, "inner.txt"), "x");
         Assert.Null(await CopyOrMoveAsync([sub], docs, move: true));
@@ -203,7 +193,7 @@ public sealed class FileOperationsTests : IDisposable
         Assert.Null(await CopyOrMoveAsync([sub], docs, move: true));
         Assert.True(Directory.Exists(Path.Combine(docs, "sub - 2")));
 
-        var reason = await CopyOrMoveAsync([Path.Combine(_folder, "nope.txt")], docs, move: false);
+        var reason = await CopyOrMoveAsync([Path.Combine(_folder.Path, "nope.txt")], docs, move: false);
         Assert.NotNull(reason);
     }
 
@@ -214,8 +204,8 @@ public sealed class FileOperationsTests : IDisposable
     [Fact]
     public async Task Two_copies_run_at_the_same_time_and_the_second_avoids_the_firsts_names()
     {
-        var docs = Path.Combine(_folder, "docs");
-        var notes = Path.Combine(_folder, "notes.md");
+        var docs = Path.Combine(_folder.Path, "docs");
+        var notes = Path.Combine(_folder.Path, "notes.md");
         var first = FileOperations.Destinations([notes], docs);
         var second = FileOperations.Destinations([notes], docs, reserved: first);
         Assert.Equal([Path.Combine(docs, "notes.md")], first);
@@ -232,21 +222,21 @@ public sealed class FileOperationsTests : IDisposable
     [Fact]
     public async Task Two_compresses_of_the_same_entry_take_different_names()
     {
-        var notes = Path.Combine(_folder, "notes.md");
+        var notes = Path.Combine(_folder.Path, "notes.md");
         var started = new ManualResetEventSlim();
         var release = new ManualResetEventSlim();
         // The first compress holds its name while it works; the second starts meanwhile.
-        var first = Task.Run(() => Archives.Compress([notes], _folder, (_, _) =>
+        var first = Task.Run(() => Archives.Compress([notes], _folder.Path, (_, _) =>
         {
             started.Set();
             release.Wait();
         }));
         started.Wait();
-        var second = Archives.Compress([notes], _folder);
+        var second = Archives.Compress([notes], _folder.Path);
         release.Set();
         var firstZip = await first;
-        Assert.Equal(Path.Combine(_folder, "notes.zip"), firstZip);
-        Assert.Equal(Path.Combine(_folder, "notes - 2.zip"), second);
+        Assert.Equal(Path.Combine(_folder.Path, "notes.zip"), firstZip);
+        Assert.Equal(Path.Combine(_folder.Path, "notes - 2.zip"), second);
         Assert.True(new FileInfo(firstZip).Length > 0);
         Assert.True(new FileInfo(second).Length > 0);
     }
@@ -254,21 +244,21 @@ public sealed class FileOperationsTests : IDisposable
     [Fact]
     public void A_free_name_adds_a_dash_and_a_number_and_destinations_avoid_each_other()
     {
-        Assert.Equal(Path.Combine(_folder, "new.txt"), FileOperations.FreeName(_folder, "new", ".txt"));
-        Assert.Equal(Path.Combine(_folder, "notes - 2.md"), FileOperations.FreeName(_folder, "notes", ".md"));
-        Assert.Equal(Path.Combine(_folder, "docs - 2"), FileOperations.FreeName(_folder, "docs", string.Empty));
-        Assert.Equal(Path.Combine(_folder, "docs - 3"), FileOperations.FreeName(_folder, "docs", string.Empty, [Path.Combine(_folder, "docs - 2")]));
+        Assert.Equal(Path.Combine(_folder.Path, "new.txt"), FileOperations.FreeName(_folder.Path, "new", ".txt"));
+        Assert.Equal(Path.Combine(_folder.Path, "notes - 2.md"), FileOperations.FreeName(_folder.Path, "notes", ".md"));
+        Assert.Equal(Path.Combine(_folder.Path, "docs - 2"), FileOperations.FreeName(_folder.Path, "docs", string.Empty));
+        Assert.Equal(Path.Combine(_folder.Path, "docs - 3"), FileOperations.FreeName(_folder.Path, "docs", string.Empty, [Path.Combine(_folder.Path, "docs - 2")]));
 
-        var other = Path.Combine(_folder, "docs", "notes.md");
+        var other = Path.Combine(_folder.Path, "docs", "notes.md");
         File.WriteAllText(other, "x");
-        var elsewhere = Path.Combine(_folder, "docs", "new.txt");
+        var elsewhere = Path.Combine(_folder.Path, "docs", "new.txt");
         File.WriteAllText(elsewhere, "x");
         Assert.Equal(
-            [Path.Combine(_folder, "notes - 2.md"), Path.Combine(_folder, "new.txt")],
-            FileOperations.Destinations([other, elsewhere], _folder));
+            [Path.Combine(_folder.Path, "notes - 2.md"), Path.Combine(_folder.Path, "new.txt")],
+            FileOperations.Destinations([other, elsewhere], _folder.Path));
         Assert.Equal(
-            [Path.Combine(_folder, "new.txt"), Path.Combine(_folder, "new - 2.txt")],
-            FileOperations.Destinations([elsewhere, elsewhere], _folder));
+            [Path.Combine(_folder.Path, "new.txt"), Path.Combine(_folder.Path, "new - 2.txt")],
+            FileOperations.Destinations([elsewhere, elsewhere], _folder.Path));
     }
 
     [Fact]

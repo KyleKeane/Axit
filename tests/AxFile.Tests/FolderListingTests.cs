@@ -5,44 +5,34 @@ namespace AxFile.Tests;
 /// <summary>A folder's entries as the list shows them (docs/axfile/SPEC.md AF-2.2, AF-2.4, AF-3.1 to AF-3.3), over a temporary folder.</summary>
 public sealed class FolderListingTests : IDisposable
 {
-    private readonly string _folder = Path.Combine(Path.GetTempPath(), "axfile-tests-" + Guid.NewGuid().ToString("N"));
+    private readonly TempFolder _folder = new("axfile-tests");
 
     public FolderListingTests()
     {
-        Directory.CreateDirectory(_folder);
-        Directory.CreateDirectory(Path.Combine(_folder, "b"));
-        Directory.CreateDirectory(Path.Combine(_folder, "a"));
-        File.WriteAllText(Path.Combine(_folder, "10.txt"), "ten");
-        File.WriteAllText(Path.Combine(_folder, "2.txt"), "two");
-        File.WriteAllText(Path.Combine(_folder, "Zed.mp3"), "not really");
-        var hidden = Path.Combine(_folder, "hidden.txt");
+        Directory.CreateDirectory(Path.Combine(_folder.Path, "b"));
+        Directory.CreateDirectory(Path.Combine(_folder.Path, "a"));
+        File.WriteAllText(Path.Combine(_folder.Path, "10.txt"), "ten");
+        File.WriteAllText(Path.Combine(_folder.Path, "2.txt"), "two");
+        File.WriteAllText(Path.Combine(_folder.Path, "Zed.mp3"), "not really");
+        var hidden = Path.Combine(_folder.Path, "hidden.txt");
         File.WriteAllText(hidden, "x");
         File.SetAttributes(hidden, FileAttributes.Hidden);
-        Directory.CreateDirectory(Path.Combine(_folder, ".config"));
-        File.WriteAllText(Path.Combine(_folder, ".env"), "x");
+        Directory.CreateDirectory(Path.Combine(_folder.Path, ".config"));
+        File.WriteAllText(Path.Combine(_folder.Path, ".env"), "x");
     }
 
-    public void Dispose()
-    {
-        try
-        {
-            Directory.Delete(_folder, recursive: true);
-        }
-        catch (IOException)
-        {
-        }
-    }
+    public void Dispose() => _folder.Dispose();
 
     [Fact]
     public void Folders_first_then_files_in_natural_order_without_hidden_or_dot_entries_which_are_counted()
     {
-        var listing = FolderListing.Read(_folder, showHidden: false, showDotFiles: false);
+        var listing = FolderListing.Read(_folder.Path, showHidden: false, showDotFiles: false);
         var entries = listing.Entries;
         Assert.Equal(["a", "b", "2.txt", "10.txt", "Zed.mp3"], entries.Select(e => e.Name));
         Assert.Equal(["a, folder", "b, folder", "2.txt", "10.txt", "Zed.mp3"], entries.Select(e => e.Label));
         Assert.True(entries[0].IsFolder);
         Assert.Equal(3, entries[2].Size);
-        Assert.Equal(Path.Combine(_folder, "2.txt"), entries[2].Path);
+        Assert.Equal(Path.Combine(_folder.Path, "2.txt"), entries[2].Path);
         Assert.Equal(1, listing.Hidden);
         Assert.Equal(2, listing.Dot);
     }
@@ -50,11 +40,11 @@ public sealed class FolderListingTests : IDisposable
     [Fact]
     public void Hidden_entries_and_dot_entries_show_when_asked()
     {
-        var hidden = FolderListing.Read(_folder, showHidden: true, showDotFiles: false);
+        var hidden = FolderListing.Read(_folder.Path, showHidden: true, showDotFiles: false);
         Assert.Contains(hidden.Entries, e => e.Name == "hidden.txt");
         Assert.Equal(0, hidden.Hidden);
         Assert.Equal(2, hidden.Dot);
-        var dot = FolderListing.Read(_folder, showHidden: false, showDotFiles: true);
+        var dot = FolderListing.Read(_folder.Path, showHidden: false, showDotFiles: true);
         Assert.Equal([".config", "a", "b", ".env", "2.txt", "10.txt", "Zed.mp3"], dot.Entries.Select(e => e.Name));
         Assert.Equal(0, dot.Dot);
     }
@@ -70,7 +60,7 @@ public sealed class FolderListingTests : IDisposable
     [Fact]
     public void A_missing_folder_throws()
     {
-        Assert.ThrowsAny<IOException>(() => FolderListing.Read(Path.Combine(_folder, "nope"), showHidden: false, showDotFiles: false));
+        Assert.ThrowsAny<IOException>(() => FolderListing.Read(Path.Combine(_folder.Path, "nope"), showHidden: false, showDotFiles: false));
     }
 
     [Fact]
@@ -170,12 +160,12 @@ public sealed class FolderListingTests : IDisposable
     [Fact]
     public void A_typed_path_resolves_with_variables_and_files()
     {
-        Environment.SetEnvironmentVariable("AXFILE_TEST_FOLDER", _folder);
-        Assert.Equal((_folder, (string?)null), FolderListing.Resolve("%AXFILE_TEST_FOLDER%"));
-        Assert.Equal((_folder, (string?)null), FolderListing.Resolve($"  \"{_folder}\\\"  "));
-        var file = Path.Combine(_folder, "2.txt");
-        Assert.Equal((_folder, file), FolderListing.Resolve(file));
-        Assert.Null(FolderListing.Resolve(Path.Combine(_folder, "nope")));
+        Environment.SetEnvironmentVariable("AXFILE_TEST_FOLDER", _folder.Path);
+        Assert.Equal((_folder.Path, (string?)null), FolderListing.Resolve("%AXFILE_TEST_FOLDER%"));
+        Assert.Equal((_folder.Path, (string?)null), FolderListing.Resolve($"  \"{_folder.Path}\\\"  "));
+        var file = Path.Combine(_folder.Path, "2.txt");
+        Assert.Equal((_folder.Path, file), FolderListing.Resolve(file));
+        Assert.Null(FolderListing.Resolve(Path.Combine(_folder.Path, "nope")));
         Assert.Null(FolderListing.Resolve(string.Empty));
         Assert.Null(FolderListing.Resolve("   "));
     }
