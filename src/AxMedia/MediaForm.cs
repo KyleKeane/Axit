@@ -301,24 +301,12 @@ public sealed partial class MediaForm : AxitForm
     {
         var lines = _queue.Lines(PlayerActive);
         _list.AccessibleName = _queue.ListName;
-        if (lines.Count == _list.Items.Count)
+        var index = _list.SelectedIndex;
+        if (_list.SetLines(lines))
         {
-            for (var i = 0; i < lines.Count; i++)
-            {
-                if (!string.Equals(_list.Items[i].ToString(), lines[i], StringComparison.Ordinal))
-                {
-                    _list.Items[i] = lines[i];
-                }
-            }
-
             return;
         }
 
-        var index = _list.SelectedIndex;
-        _list.BeginUpdate();
-        _list.Items.Clear();
-        _list.Items.AddRange(lines.Cast<object>().ToArray());
-        _list.EndUpdate();
         _list.SelectedIndex = Math.Clamp(index, 0, _list.Items.Count - 1);
         UpdateStatusBar();
     }

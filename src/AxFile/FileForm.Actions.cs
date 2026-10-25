@@ -59,31 +59,11 @@ public sealed partial class FileForm
             }
         }
 
-        if (rows.Count == _pane.Items.Count)
-        {
-            for (var i = 0; i < rows.Count; i++)
-            {
-                // The running line the user is on is left alone while it is the same line on the same row; a line
-                // that moved to this row is written (until 2026-10-23 the row was skipped by its number, and showed
-                // another operation's old text when a line ended and the rows shifted).
-                if (i == kept && keep!.State == ActionState.Running && i < _paneRows.Count && _paneRows[i] == keep)
-                {
-                    continue;
-                }
-
-                if (!string.Equals(_pane.Items[i].ToString(), rows[i].Line, StringComparison.Ordinal))
-                {
-                    _pane.Items[i] = rows[i].Line;
-                }
-            }
-        }
-        else
-        {
-            _pane.BeginUpdate();
-            _pane.Items.Clear();
-            _pane.Items.AddRange(rows.Select(row => (object)row.Line).ToArray());
-            _pane.EndUpdate();
-        }
+        // The running line the user is on is left alone while it is the same line on the same row; a line that moved to
+        // this row is written (until 2026-10-23 the row was skipped by its number, and showed another operation's old
+        // text when a line ended and the rows shifted).
+        _pane.SetLines(rows.Select(row => row.Line).ToList(),
+            i => i == kept && keep!.State == ActionState.Running && i < _paneRows.Count && _paneRows[i] == keep);
 
         _paneRows = rows.Select(row => row.Entry).ToList();
         var index = kept >= 0 ? kept
