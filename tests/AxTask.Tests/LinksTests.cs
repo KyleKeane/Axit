@@ -6,47 +6,47 @@ namespace AxTask.Tests;
 
 public sealed class LinksTests : IDisposable
 {
-    private readonly string _top = Path.Combine(Path.GetTempPath(), "axtask-links-" + Guid.NewGuid().ToString("N"));
+    private readonly TempFolder _top = new("axtask-links");
 
     public LinksTests()
     {
-        Directory.CreateDirectory(Path.Combine(_top, "Home"));
-        Directory.CreateDirectory(Path.Combine(_top, "Shopping"));
-        Write(Path.Combine(_top, "Shopping", "Washer.json"), ItemDocument.NewItem("Washer", []));
-        Write(Path.Combine(_top, "Home", "Fix the tap.json"), WithLink("Fix the tap", "../Shopping/Washer.json"));
-        Write(Path.Combine(_top, "Shopping", "Spanner.json"), WithLink("Spanner", "../Home/Fix the tap.json"));
+        Directory.CreateDirectory(Path.Combine(_top.Path, "Home"));
+        Directory.CreateDirectory(Path.Combine(_top.Path, "Shopping"));
+        Write(Path.Combine(_top.Path, "Shopping", "Washer.json"), ItemDocument.NewItem("Washer", []));
+        Write(Path.Combine(_top.Path, "Home", "Fix the tap.json"), WithLink("Fix the tap", "../Shopping/Washer.json"));
+        Write(Path.Combine(_top.Path, "Shopping", "Spanner.json"), WithLink("Spanner", "../Home/Fix the tap.json"));
     }
 
-    public void Dispose() => Directory.Delete(_top, recursive: true);
+    public void Dispose() => _top.Dispose();
 
     [Fact]
     public void AnItemMovedKeepsTheLinksToIt()
     {
-        var from = Path.Combine(_top, "Shopping", "Washer.json");
-        var to = Path.Combine(_top, "Archive", "Washer.json");
-        var writes = Links.AfterMove(ItemFolder.AllItems(_top), from, to);
+        var from = Path.Combine(_top.Path, "Shopping", "Washer.json");
+        var to = Path.Combine(_top.Path, "Archive", "Washer.json");
+        var writes = Links.AfterMove(ItemFolder.AllItems(_top.Path), from, to);
         var write = Assert.Single(writes);
-        Assert.Equal(Path.Combine(_top, "Home", "Fix the tap.json"), write.Path);
+        Assert.Equal(Path.Combine(_top.Path, "Home", "Fix the tap.json"), write.Path);
         Assert.Contains("../Archive/Washer.json", write.After);
     }
 
     [Fact]
     public void AListMovedDeeperKeepsTheLinksItHolds()
     {
-        var from = Path.Combine(_top, "Home");
-        var to = Path.Combine(_top, "Archive", "Home");
-        var writes = Links.AfterMove(ItemFolder.AllItems(_top), from, to);
+        var from = Path.Combine(_top.Path, "Home");
+        var to = Path.Combine(_top.Path, "Archive", "Home");
+        var writes = Links.AfterMove(ItemFolder.AllItems(_top.Path), from, to);
         Assert.Equal(2, writes.Count);
         var inside = writes.Single(write => write.Path == Path.Combine(to, "Fix the tap.json"));
         Assert.Contains("../../Shopping/Washer.json", inside.After);
-        var outside = writes.Single(write => write.Path == Path.Combine(_top, "Shopping", "Spanner.json"));
+        var outside = writes.Single(write => write.Path == Path.Combine(_top.Path, "Shopping", "Spanner.json"));
         Assert.Contains("../Archive/Home/Fix the tap.json", outside.After);
     }
 
     [Fact]
     public void ALinkReadsItsItemOrMissing()
     {
-        var from = Path.Combine(_top, "Home", "Fix the tap.json");
+        var from = Path.Combine(_top.Path, "Home", "Fix the tap.json");
         Assert.Equal("Washer", Links.Spoken(from, "../Shopping/Washer.json"));
         Assert.Equal("missing: Hose", Links.Spoken(from, "../Shopping/Hose.json"));
     }
@@ -67,12 +67,12 @@ public sealed class LinksTests : IDisposable
     [Fact]
     public void ANewListsFolderGoesWithItsUndo()
     {
-        var path = Path.Combine(_top, "Garden", ItemDocument.ListFile);
+        var path = Path.Combine(_top.Path, "Garden", ItemDocument.ListFile);
         var step = new Step([FileChange.WriteInNewFolder(path, ItemDocument.NewList(TaskRules.DefaultTemplate).ToText())], "Made Garden");
         Changes.Apply(step.Parts);
-        Assert.True(Directory.Exists(Path.Combine(_top, "Garden")));
+        Assert.True(Directory.Exists(Path.Combine(_top.Path, "Garden")));
         Changes.Undo(step);
-        Assert.False(Directory.Exists(Path.Combine(_top, "Garden")));
+        Assert.False(Directory.Exists(Path.Combine(_top.Path, "Garden")));
     }
 
     private static ItemDocument WithLink(string title, string link) =>

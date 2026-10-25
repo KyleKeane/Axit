@@ -8,88 +8,88 @@ public sealed class FolderTests : IDisposable
 {
     private static readonly DateOnly Today = new(2026, 10, 24);
 
-    private readonly string _top = Path.Combine(Path.GetTempPath(), "axtask-tests-" + Guid.NewGuid().ToString("N"));
+    private readonly TempFolder _top = new("axtask-tests");
 
     public FolderTests()
     {
-        Directory.CreateDirectory(Path.Combine(_top, "Home"));
-        Directory.CreateDirectory(Path.Combine(_top, "Work", "Nested"));
-        Directory.CreateDirectory(Path.Combine(_top, "Course plan"));
-        Directory.CreateDirectory(Path.Combine(_top, "Archive", "Old list"));
-        Directory.CreateDirectory(Path.Combine(_top, "Archive"));
-        Directory.CreateDirectory(Path.Combine(_top, ".hidden"));
+        Directory.CreateDirectory(Path.Combine(_top.Path, "Home"));
+        Directory.CreateDirectory(Path.Combine(_top.Path, "Work", "Nested"));
+        Directory.CreateDirectory(Path.Combine(_top.Path, "Course plan"));
+        Directory.CreateDirectory(Path.Combine(_top.Path, "Archive", "Old list"));
+        Directory.CreateDirectory(Path.Combine(_top.Path, "Archive"));
+        Directory.CreateDirectory(Path.Combine(_top.Path, ".hidden"));
         Item("Home", "Fix the tap", done: false, due: "2026-10-30");
         Item("Home", "Water plants", done: true, due: "2026-10-20");
         Item("Work", "Report", done: false, due: "2026-10-22");
         Item("Course plan", "Week one", done: false, due: null);
         Item(Path.Combine("Work", "Nested"), "Never shown", done: false, due: null);
         Item(Path.Combine("Archive", "Old list"), "Old task", done: false, due: null);
-        File.WriteAllText(Path.Combine(_top, "Loose.json"), ItemDocument.NewItem("Loose", []).ToText());
-        File.WriteAllText(Path.Combine(_top, "Course plan", ItemDocument.ListFile), ItemDocument.NewList([]).WithField(-1, ItemFolder.SectionField, FieldTypes.Text, []).WithValue(1, System.Text.Json.Nodes.JsonValue.Create(" Work ")).ToText());
+        File.WriteAllText(Path.Combine(_top.Path, "Loose.json"), ItemDocument.NewItem("Loose", []).ToText());
+        File.WriteAllText(Path.Combine(_top.Path, "Course plan", ItemDocument.ListFile), ItemDocument.NewList([]).WithField(-1, ItemFolder.SectionField, FieldTypes.Text, []).WithValue(1, System.Text.Json.Nodes.JsonValue.Create(" Work ")).ToText());
         Item("Archive", "Old thing", done: false, due: null);
-        File.WriteAllText(Path.Combine(_top, "Home", "notes.txt"), "not an item");
-        File.WriteAllText(Path.Combine(_top, "Home", "broken.json"), "{ nope");
-        File.WriteAllText(Path.Combine(_top, "Home", "Milk.json"), ItemDocument.NewItem("Milk", []).ToText());
+        File.WriteAllText(Path.Combine(_top.Path, "Home", "notes.txt"), "not an item");
+        File.WriteAllText(Path.Combine(_top.Path, "Home", "broken.json"), "{ nope");
+        File.WriteAllText(Path.Combine(_top.Path, "Home", "Milk.json"), ItemDocument.NewItem("Milk", []).ToText());
     }
 
-    public void Dispose() => Directory.Delete(_top, recursive: true);
+    public void Dispose() => _top.Dispose();
 
     [Fact]
     public void ReadsALevel()
     {
-        var top = ItemFolder.ReadTop(_top);
+        var top = ItemFolder.ReadTop(_top.Path);
         Assert.Equal(["Course plan", "Home", "Work"], top.Lists.Select(Path.GetFileName));
         Assert.Equal(["Old list"], top.ArchivedLists.Select(Path.GetFileName));
         Assert.Equal(1, top.ArchivedItems);
         Assert.Equal(1, top.NotShown);
-        var home = ItemFolder.Read(Path.Combine(_top, "Home"));
+        var home = ItemFolder.Read(Path.Combine(_top.Path, "Home"));
         Assert.Equal(["Fix the tap", "Milk", "Water plants"], home.Items.Select(ItemFolder.NameOf));
         Assert.Equal(2, home.NotShown);
         // TK-D4: a list holds items, not lists; the folder inside it is counted, not shown.
-        Assert.Equal(1, ItemFolder.Read(Path.Combine(_top, "Work")).NotShown);
-        Assert.Equal("Work", ItemFolder.SectionOf(Path.Combine(_top, "Course plan")));
-        Assert.Equal(string.Empty, ItemFolder.SectionOf(Path.Combine(_top, "Home")));
+        Assert.Equal(1, ItemFolder.Read(Path.Combine(_top.Path, "Work")).NotShown);
+        Assert.Equal("Work", ItemFolder.SectionOf(Path.Combine(_top.Path, "Course plan")));
+        Assert.Equal(string.Empty, ItemFolder.SectionOf(Path.Combine(_top.Path, "Home")));
     }
 
     [Fact]
     public void AllTasksLeavesOutTheDoneThePlainAndTheArchive()
     {
-        var tasks = SmartList.AllTasks.Items(_top, Today);
+        var tasks = SmartList.AllTasks.Items(_top.Path, Today);
         Assert.Equal(["Report", "Fix the tap", "Week one"], tasks.Select(ItemFolder.NameOf));
     }
 
     [Fact]
     public void ASmartListFilters()
     {
-        File.WriteAllText(Path.Combine(_top, "Work soon.filter.json"), """
+        File.WriteAllText(Path.Combine(_top.Path, "Work soon.filter.json"), """
             { "format": "axit-filter 1", "match": "all",
               "conditions": [ { "field": "Done", "is": false }, { "list": "Work" }, { "field": "Due", "before": "+7" } ] }
             """);
-        File.WriteAllText(Path.Combine(_top, "Odd.filter.json"), """{ "conditions": [ { "field": "Due", "soon": true } ] }""");
-        var lists = SmartList.InFolder(_top);
+        File.WriteAllText(Path.Combine(_top.Path, "Odd.filter.json"), """{ "conditions": [ { "field": "Due", "soon": true } ] }""");
+        var lists = SmartList.InFolder(_top.Path);
         Assert.Equal(["Odd", "Work soon"], lists.Select(list => list.Name));
         Assert.NotNull(lists[0].NotUnderstood);
-        Assert.Empty(lists[0].Items(_top, Today));
-        Assert.Equal(["Report"], lists[1].Items(_top, Today).Select(ItemFolder.NameOf));
-        Assert.Equal(1, ItemFolder.ReadTop(_top).NotShown);
+        Assert.Empty(lists[0].Items(_top.Path, Today));
+        Assert.Equal(["Report"], lists[1].Items(_top.Path, Today).Select(ItemFolder.NameOf));
+        Assert.Equal(1, ItemFolder.ReadTop(_top.Path).NotShown);
     }
 
     [Fact]
     public void ANewSmartListIsAllTasks()
     {
-        var path = Path.Combine(_top, "Mine.filter.json");
+        var path = Path.Combine(_top.Path, "Mine.filter.json");
         File.WriteAllText(path, SmartList.NewFileText());
-        Assert.Equal(SmartList.AllTasks.Items(_top, Today).Select(item => item.Path), SmartList.Read(path).Items(_top, Today).Select(item => item.Path));
+        Assert.Equal(SmartList.AllTasks.Items(_top.Path, Today).Select(item => item.Path), SmartList.Read(path).Items(_top.Path, Today).Select(item => item.Path));
     }
 
     [Fact]
     public void SummariesSayDoneDueAndOverdue()
     {
-        var home = ItemFolder.Read(Path.Combine(_top, "Home")).Items;
+        var home = ItemFolder.Read(Path.Combine(_top.Path, "Home")).Items;
         Assert.Equal(", due 30 October", TaskRules.Summary(home[0].Document, Today));
         Assert.Equal(string.Empty, TaskRules.Summary(home[1].Document, Today));
         Assert.Equal(", done, due 20 October", TaskRules.Summary(home[2].Document, Today));
-        var report = ItemFolder.Read(Path.Combine(_top, "Work")).Items[0];
+        var report = ItemFolder.Read(Path.Combine(_top.Path, "Work")).Items[0];
         Assert.Equal(", overdue since 22 October", TaskRules.Summary(report.Document, Today));
     }
 
@@ -103,20 +103,20 @@ public sealed class FolderTests : IDisposable
     [Fact]
     public void ATakenNameGetsANumber()
     {
-        var home = Path.Combine(_top, "Home");
+        var home = Path.Combine(_top.Path, "Home");
         Assert.Equal(Path.Combine(home, "Fix the tap - 2.json"), ItemFolder.FreePath(home, "Fix the tap", ".json"));
         var own = Path.Combine(home, "Fix the tap.json");
         Assert.Equal(own, ItemFolder.FreePath(home, "Fix the tap", ".json", own));
-        Assert.Equal("There is a list called home here already", ItemFolder.RefusedListName(_top, "home"));
-        Assert.NotNull(ItemFolder.RefusedListName(_top, "a/b"));
-        Assert.Null(ItemFolder.RefusedListName(_top, "Garden"));
+        Assert.Equal("There is a list called home here already", ItemFolder.RefusedListName(_top.Path, "home"));
+        Assert.NotNull(ItemFolder.RefusedListName(_top.Path, "a/b"));
+        Assert.Null(ItemFolder.RefusedListName(_top.Path, "Garden"));
     }
 
     [Fact]
     public void LinksArePathsFromTheItem()
     {
-        var from = Path.Combine(_top, "Home", "Fix the tap.json");
-        var to = Path.Combine(_top, "Work", "Report.json");
+        var from = Path.Combine(_top.Path, "Home", "Fix the tap.json");
+        var to = Path.Combine(_top.Path, "Work", "Report.json");
         Assert.Equal("../Work/Report.json", ItemFolder.LinkTo(from, to));
         Assert.Equal(to, ItemFolder.Resolve(from, "../Work/Report.json"));
     }
@@ -124,10 +124,10 @@ public sealed class FolderTests : IDisposable
     [Fact]
     public void AStepIsUndoneOnlyWhenNothingChangedIt()
     {
-        var path = Path.Combine(_top, "Home", "Fix the tap.json");
+        var path = Path.Combine(_top.Path, "Home", "Fix the tap.json");
         var before = File.ReadAllText(path).ReplaceLineEndings("\r\n");
         var after = ItemDocument.Parse(before).WithTitle("Fix the sink").ToText();
-        var moved = Path.Combine(_top, "Home", "Fix the sink.json");
+        var moved = Path.Combine(_top.Path, "Home", "Fix the sink.json");
         var step = new Step([FileChange.Write(path, before, after), FileChange.Move(path, moved)], "Renamed");
         Changes.Apply(step.Parts);
         Assert.False(File.Exists(path));
@@ -145,7 +145,7 @@ public sealed class FolderTests : IDisposable
     [Fact]
     public void AMadeFileIsRemovedByUndo()
     {
-        var path = Path.Combine(_top, "Garden", "Dig.json");
+        var path = Path.Combine(_top.Path, "Garden", "Dig.json");
         var step = new Step([FileChange.Write(path, null, ItemDocument.NewItem("Dig", []).ToText())], "Added Dig");
         Changes.Apply(step.Parts);
         Assert.True(File.Exists(path));
@@ -157,8 +157,8 @@ public sealed class FolderTests : IDisposable
     [Fact]
     public void AFolderMovesAndComesBack()
     {
-        var from = Path.Combine(_top, "Work");
-        var to = Path.Combine(_top, "Archive", "Work");
+        var from = Path.Combine(_top.Path, "Work");
+        var to = Path.Combine(_top.Path, "Archive", "Work");
         var step = new Step([FileChange.Move(from, to)], "Archived Work");
         Changes.Apply(step.Parts);
         Assert.True(Directory.Exists(to));
@@ -170,10 +170,10 @@ public sealed class FolderTests : IDisposable
     [Fact]
     public void TheArchiveIsKnown()
     {
-        Assert.True(ItemFolder.IsArchive(_top, Path.Combine(_top, "Archive")));
-        Assert.True(ItemFolder.IsArchive(_top, Path.Combine(_top, "archive", "x.json")));
-        Assert.False(ItemFolder.IsArchive(_top, Path.Combine(_top, "Archived")));
-        Assert.Equal("Work, Course plan", ItemFolder.ListName(_top, Path.Combine(_top, "Work", "Course plan")));
+        Assert.True(ItemFolder.IsArchive(_top.Path, Path.Combine(_top.Path, "Archive")));
+        Assert.True(ItemFolder.IsArchive(_top.Path, Path.Combine(_top.Path, "archive", "x.json")));
+        Assert.False(ItemFolder.IsArchive(_top.Path, Path.Combine(_top.Path, "Archived")));
+        Assert.Equal("Work, Course plan", ItemFolder.ListName(_top.Path, Path.Combine(_top.Path, "Work", "Course plan")));
     }
 
     private void Item(string list, string title, bool done, string? due)
@@ -185,6 +185,6 @@ public sealed class FolderTests : IDisposable
             document = document.WithValue(document.IndexOf("Due"), System.Text.Json.Nodes.JsonValue.Create(due));
         }
 
-        File.WriteAllText(Path.Combine(_top, list, title + ".json"), document.ToText());
+        File.WriteAllText(Path.Combine(_top.Path, list, title + ".json"), document.ToText());
     }
 }
