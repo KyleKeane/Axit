@@ -104,7 +104,12 @@ jobs:
           GH_TOKEN: ${{ github.token }}
           GH_REPO: ${{ github.repository }}
         run: |
-          tag=$(cat tag.txt)
+          # tag.txt comes from Windows with a CRLF ending: without tr the draft was made for the tag "v3.7.0\r".
+          tag=$(tr -d '\r\n' < tag.txt)
+          if ! [[ "$tag" =~ ^v[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+            echo "tag.txt does not hold a version tag."
+            exit 1
+          fi
           zip=$(ls publish/Axit-*-win-x64.zip)
           # A published release's files are never replaced (S-31); a draft's are, when the workflow runs again.
           if draft=$(gh release view "$tag" --json isDraft --jq .isDraft 2>/dev/null); then

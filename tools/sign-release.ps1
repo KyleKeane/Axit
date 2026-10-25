@@ -37,6 +37,7 @@ gh run watch $run --repo $repo --exit-status
 if ($LASTEXITCODE -ne 0) { throw "The release workflow of $tag failed; nothing was signed or published." }
 
 $draft = gh release view $tag --repo $repo --json isDraft --jq .isDraft
+if (-not $draft) { throw "No release for $tag was found on GitHub: look at the draft's tag name there (gh release list)." }
 if ($draft -ne 'true') { throw "Release $tag is not a draft: it was published without its signature. Look at it on GitHub before anything else." }
 
 $folder = Join-Path $env:TEMP ("axit-sign-" + [guid]::NewGuid().ToString('N'))
