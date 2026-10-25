@@ -308,7 +308,7 @@ public sealed class TranscriptView : TextBox
             // The start of the previous or next paragraph, with Shift selecting to there (FR-5): the control's own
             // keys scroll a row and leave the caret. A caret move like the arrows', not a jump for Backspace.
             e.Handled = e.SuppressKeyPress = true;
-            EditParagraphs.Move(this, e.KeyCode == Keys.Down ? 1 : -1, e.Shift);
+            EditKeys.Paragraph(this, e.KeyCode == Keys.Down ? 1 : -1, e.Shift);
             return;
         }
 
@@ -445,13 +445,13 @@ public sealed class TranscriptView : TextBox
 
     /// <summary>
     /// Page Up and Page Down move the caret by one screen of wrapped rows and reach the first and last row
-    /// (<see cref="EditPaging"/>, shared with the message field). The line left is remembered for Backspace (FR-3.12)
+    /// (<see cref="EditKeys.Page"/>, shared with the message field). The line left is remembered for Backspace (FR-3.12)
     /// when the caret moved. The screen reader reads the new row itself, so nothing is announced here.
     /// </summary>
     private void Page(int direction)
     {
         var from = _mirror.LineCount == 0 ? null : _mirror.LineAt(_mirror.LineIndexAt(SelectionStart));
-        if (EditPaging.Page(this, direction) && from is not null)
+        if (EditKeys.Page(this, direction) && from is not null)
         {
             RememberJump(from);
         }

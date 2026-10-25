@@ -500,7 +500,7 @@ public sealed class OverlayPanel : Panel
     /// <summary>A navigation key in the text (AX-7.2): the shared jump with the window's pairs.</summary>
     private void OnTextKeyDown(object? sender, KeyEventArgs e)
     {
-        if (TextJumps.Handle(_text, Jumps, e.KeyData, Announce))
+        if (TextJump.Handle(_text, Jumps, e.KeyData, Announce))
         {
             e.Handled = e.SuppressKeyPress = true;
             return;

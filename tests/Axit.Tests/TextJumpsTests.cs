@@ -22,19 +22,19 @@ public sealed class TextJumpsTests
         var (box, spoken, announce) = Editor();
         var jumps = AxDown.AxDownKeys.Jumps;
 
-        Assert.True(TextJumps.Handle(box, jumps, Axit.Forms.MarkdownKeys.NextHeading, announce));
+        Assert.True(TextJump.Handle(box, jumps, Axit.Forms.MarkdownKeys.NextHeading, announce));
         Assert.Equal(Text.IndexOf("## Two", StringComparison.Ordinal), box.SelectionStart);
         Assert.Equal(["Two, heading level 2"], spoken);
 
-        Assert.True(TextJumps.Handle(box, jumps, Axit.Forms.MarkdownKeys.PreviousLink, announce));
+        Assert.True(TextJump.Handle(box, jumps, Axit.Forms.MarkdownKeys.PreviousLink, announce));
         Assert.Equal(Text.IndexOf("[link]", StringComparison.Ordinal), box.SelectionStart);
         Assert.Equal("link, link", spoken[^1]);
 
-        Assert.True(TextJumps.Handle(box, jumps, Axit.Forms.MarkdownKeys.NextTable, announce));
+        Assert.True(TextJump.Handle(box, jumps, Axit.Forms.MarkdownKeys.NextTable, announce));
         Assert.Equal(Text.IndexOf("[link]", StringComparison.Ordinal), box.SelectionStart);   // the caret stays
         Assert.Equal("No next table", spoken[^1]);
 
-        Assert.False(TextJumps.Handle(box, jumps, Keys.Control | Keys.S, announce));
+        Assert.False(TextJump.Handle(box, jumps, Keys.Control | Keys.S, announce));
         Assert.Equal(3, spoken.Count);
     }
 
@@ -43,11 +43,11 @@ public sealed class TextJumpsTests
     public void The_heading_letters_work_in_a_notice_text()
     {
         var (box, spoken, announce) = Editor();
-        Assert.True(TextJumps.Handle(box, TextJump.HeadingLetters, Keys.D2, announce));
+        Assert.True(TextJump.Handle(box, TextJump.HeadingLetters, Keys.D2, announce));
         Assert.Equal(["Two, heading level 2"], spoken);
-        Assert.True(TextJumps.Handle(box, TextJump.HeadingLetters, Keys.Shift | Keys.H, announce));
+        Assert.True(TextJump.Handle(box, TextJump.HeadingLetters, Keys.Shift | Keys.H, announce));
         Assert.Equal("One, heading level 1", spoken[^1]);
-        Assert.False(TextJumps.Handle(box, TextJump.HeadingLetters, Keys.K, announce));
+        Assert.False(TextJump.Handle(box, TextJump.HeadingLetters, Keys.K, announce));
         Assert.Equal(AxClaude.AxClaudeKeys.Heading, TextJump.HeadingLetters[0].Next);
         Assert.Equal(AxClaude.AxClaudeKeys.HeadingLevel6, TextJump.HeadingLetters[6].Next);
     }
@@ -86,7 +86,7 @@ public sealed class TextJumpsTests
     [Fact]
     public void Menu_labels_carry_nvda_s_letter_as_the_mnemonic_and_differ_within_a_submenu()
     {
-        var labels = AxDown.AxDownKeys.Jumps.Select(TextJumps.MenuLabel).ToList();
+        var labels = AxDown.AxDownKeys.Jumps.Select(TextJump.MenuLabel).ToList();
         Assert.Equal(
         [
             "&Heading", "Heading level &1", "Heading level &2", "Heading level &3", "Heading level &4", "Heading level &5",

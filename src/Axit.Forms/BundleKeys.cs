@@ -29,11 +29,11 @@ public static class BundleKeys
     public const Keys SmallerText = Keys.Control | Keys.OemMinus;
     public const Keys SmallerTextNumpad = Keys.Control | Keys.Subtract;
 
-    /// <summary>One screen in an edit control, and to its ends, through <see cref="EditPaging"/>.</summary>
+    /// <summary>One screen in an edit control, and to its ends, through <see cref="EditKeys.Page"/>.</summary>
     public const Keys PageUp = Keys.PageUp;
     public const Keys PageDown = Keys.PageDown;
 
-    /// <summary>The start of the previous or next paragraph in an edit control, and with Shift the selection grown to there, through <see cref="EditParagraphs"/>.</summary>
+    /// <summary>The start of the previous or next paragraph in an edit control, and with Shift the selection grown to there, through <see cref="EditKeys.Paragraph"/>.</summary>
     public const Keys ParagraphUp = Keys.Control | Keys.Up;
     public const Keys ParagraphDown = Keys.Control | Keys.Down;
     public const Keys SelectParagraphUp = Keys.Control | Keys.Shift | Keys.Up;

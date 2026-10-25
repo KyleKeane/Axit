@@ -319,12 +319,12 @@ The apps are named ax and a word, the ax in lower case and the word as it is wri
   `NaturalOrder` and `MediaFiles` (File Explorer's order of names, and the sound and video kinds with the time and
   speed rules; from axFile on their second use, axMedia), `Palette` (the command palette's lines and search, AX-10), `MenuText` (a menu item's or a button's text as spoken: no mnemonic marker, no trailing dots; the palette, the notices' key line and the menu choices that announce themselves), `MarkdownOutline` (the headings, links, lists, block quotes and tables of a Markdown text, with next and previous from a caret position; axDown SPEC §9, shared since its second use), `AxitWindows` (the window lists of the Axit menu from the windows the system names, AX-9), `RecentlyClosed` (the bundle's list of closed files and folders, AX-9.4), `RecentPaths` (what every settings class does to its recent list: the newest first, once, ten at most, cleaned after loading; AX-9.5), `PathName` (the name of a path for a title or a label: the last part, or a drive's root itself), `BundleAbout` (the About sections and the embedded Axit guide, AX-9.9), and the console-to-transcript pieces that came from axClaude on their second use, axTerminal (2026-10-18, docs/axterminal/SPEC.md §5): `Pty/` (`PtyHost`, the ConPTY host, and `StreamRecorder`), `Vt/` (`VtParser`, `Screen`, `Wcwidth`) and `Transcript/` (`Line` and `LineKind`, `LineStore`, the base of each app's model: the lines the screen writes to, the decoder, the parser and the screen itself, the bookmarks and the cap, since 2026-10-23, `TranscriptMirror` and `Utterance`), tested in `tests/AxClaude.Tests` against its recordings.
 - AX-6.2 `Axit.Forms` (WinForms, checked with NVDA; the pure parts, `AppMessage`'s text form, `BundleKeys.Text` and
-  `TextJumps`, have unit tests in `tests/Axit.Tests`): `OverlayPanel` (the notices in the
+  `TextJump`, have unit tests in `tests/Axit.Tests`): `OverlayPanel` (the notices in the
   window, with the `Notice` record callers pass), `ControlArea` and `ListKeys` (a question's answers as a list or a
   field in the message field's place, with the number and page keys of every such list), `Sounds` (wave-out devices kept
-  open for the life of the process; `Notice` for every window, `Edge`, one short low note, for a key that moves nothing), `EditPaging` (Page Up and Page Down in an edit control), `EditParagraphs`
+  open for the life of the process; `Notice` for every window, `Edge`, one short low note, for a key that moves nothing), `EditKeys.Page` (Page Up and Page Down in an edit control), `EditKeys.Paragraph`
   (Ctrl+Up and Ctrl+Down by paragraph, with Shift selecting), `EditKeys` (the KeyDown handler that gives an edit
-  control both), `Announcer` (the UI Automation notification, AX-7.1), `TextJump` and `TextJumps` (a window's key pairs for the kinds of element in a text and the jump itself on an edit control, used by every notice text and by axDown's editor, AX-7.2), `StatusLayout`, the font
+  control both), `Announcer` (the UI Automation notification, AX-7.1), `TextJump` and `TextJump` (a window's key pairs for the kinds of element in a text and the jump itself on an edit control, used by every notice text and by axDown's editor, AX-7.2), `StatusLayout`, the font
   handling (text size and the font picker), `BundleKeys` (AX-8), `CommandPalette` (the menu bar read into the
   palette's entries, AX-10), `WindowAccessibleObject` (the window's client area as its UI Automation rectangle, so
   that NVDA+End finds the status bar), `AxitMenu` (the Axit menu every window has, AX-9), `RecentMenu` (the "Open recent …" submenus, AX-9.5), `AppMessage` (the hand-over from a starting process to the open window of an app that keeps one window, one `WM_COPYDATA` message with a verb and paths, found through the Axit menu's window list; axMedia and axPreview, docs/axmedia/SPEC.md AM-1.3, 2026-10-22; `SendTo` a window the caller found, axStart's hidden one, docs/axstart/SPEC.md AS-1.2), `TranscriptView` with `TranscriptKeys` and `QuickKey` (the read-only transcript of a console with its single-key navigation, the keys handed in by the window from its table; from axClaude on its second use, axTerminal, docs/axterminal/SPEC.md §5),
@@ -391,7 +391,7 @@ The apps are named ax and a word, the ax in lower case and the word as it is wri
   save says "Nothing to save here", axGIT adding the keys that do something, through the base's `SaveCommand`); Ctrl+Plus and Ctrl+Minus text size; Enter and Escape on a notice; Page Up and Page Down one screen in an
   edit control; Ctrl+Up and Ctrl+Down the start of the previous and next paragraph in an edit control, a paragraph
   starting at the first line or at a line with text directly after a blank line, and Ctrl+Shift+Up and
-  Ctrl+Shift+Down the selection grown to there, as in Word (`EditParagraphs`; the EDIT control's own keys scroll a
+  Ctrl+Shift+Down the selection grown to there, as in Word (`EditKeys.Paragraph`; the EDIT control's own keys scroll a
   row and leave the caret where it is, as Notepad's do, which a screen reader, reading at the caret after the key,
   reports as the same text again); Ctrl+Shift+P the command palette (AX-10); Alt+F4 exit; Alt and F10 the menu. Everything else is window-specific.
 - AX-8.3 Window-specific keys are defined once per window, in one table (`AxClaudeKeys`, `AxDownKeys`, `AxJSONKeys`, `AxGitKeys`, `AxTerminalKeys`, `AxFileKeys`, `AxMediaKeys`, `AxPreviewKeys`, `AxStartKeys`, `AxProcessKeys`, `AxTaskKeys`, `AxPassKeys`, `AxCalcKeys`, `AxClipKeys`), as constants
@@ -579,7 +579,7 @@ These are the rules of `docs/axclaude/SPEC.md` that are not about Claude; app sp
   `OverlayPanel.Jumps`; the letters of axClaude's transcript): h and Shift+H the next and the previous heading, 1 to 6
   and Shift with them a heading of that level, by the text's Markdown headings; an editor's notices take the editor's
   own Ctrl+letter pairs as well (every kind of axDown's section 9, JSON's kinds in axJSON), so that its convention
-  holds in its notices too. The jump is `TextJumps`, the code the editors use on their own text; the result is
+  holds in its notices too. The jump is `TextJump`, the code the editors use on their own text; the result is
   announced on the notice, "No next heading" and the like when there is none, and the caret stays. A notice's text
   is searched with the bundle's find keys (AX-8.2): Ctrl+F puts the Find notice in the notice's place, and Find next
   brings the notice back with the match selected and the focus in its text (Cancel brings it back as it was); F3 and
@@ -702,8 +702,8 @@ dialogs) is .NET's, shipped inside the executable, and every project is marked a
 - **`StrCmpLogicalW`**, `shlwapi` (`src/Axit.Core/NaturalOrder.cs`): Explorer's order of names, numbers compared as
   numbers, for axFile's entries and axMedia's queue. Stable; the fallback is a comparer of our own under the same
   tests.
-- **The EDIT control's messages**, `user32` (`SendMessage` and `GetCaretPos` in `src/Axit.Forms/EditPaging.cs`,
-  `EditParagraphs.cs` and `TranscriptView.cs`): line and caret positions and the scrolling of the views. As old as
+- **The EDIT control's messages**, `user32` (`SendMessage` and `GetCaretPos` in `src/Axit.Forms/EditKeys.Page.cs`,
+  `EditKeys.Paragraph.cs` and `TranscriptView.cs`): line and caret positions and the scrolling of the views. As old as
   Windows; WinForms' TextBox is the same control.
 - **`FlashWindowEx`**, `user32` (`src/Axit.Forms/ConsoleForm.Signals.cs`): the taskbar flash when Claude or the
   shell wants attention while the window is in the background. Stable; without it the sounds remain.
@@ -806,7 +806,7 @@ dialogs) is .NET's, shipped inside the executable, and every project is marked a
 - 2.3.0: the in-place install with one bar for download and install and the restart by the app itself (AX-2.8,
   AX-3.2); the user ran the full path from an older build with NVDA. 2.3.1: the documents pruned after the transition.
 - 2.9.0 (2026-10-18), developed on the branch `axit` and checked with NVDA by the user: `MarkdownOutline` and
-  `TextJumps` shared for axDown's letters and every notice text (AX-7.2); the Axit menu in every window (AX-9, B-14)
+  `TextJump` shared for axDown's letters and every notice text (AX-7.2); the Axit menu in every window (AX-9, B-14)
   with About in sections and the embedded Axit guide; axClaude's Session menu and axDown's menus in the same shape;
   an enabled item in every empty list (AX-9.5).
 - 2.9.1 (2026-10-18): axJSON, raw mode (`docs/axjson/SPEC.md`), on the text editor shell shared with axDown the same

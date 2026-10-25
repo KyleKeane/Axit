@@ -101,7 +101,7 @@ another project on its second use, the bullet says so.
 ## Text and the editors
 
 - `Paragraphs`: where Ctrl+Up and Ctrl+Down go in a text with `\r\n` line ends: the starts of its paragraphs, the
-  first line or a line with text after a blank line, for `Axit.Forms.EditParagraphs`.
+  first line or a line with text after a blank line, for `Axit.Forms.EditKeys.Paragraph`.
 - `TextLines` (docs/axdown/SPEC.md AD-6.4, AD-3.6; 2026-10-23): the caret's line and column in an edit control's text,
   and the index of a line and column put back, clamped to the line and never between a CR and its LF.
 - `MarkdownOutline` (docs/axdown/SPEC.md §9; from AxDown.Core): the elements of a Markdown text for navigation keys,

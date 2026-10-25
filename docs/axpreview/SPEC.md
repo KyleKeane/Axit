@@ -106,7 +106,7 @@ it, so that every file shows something and the details say what it is.
   the file loading behind it (2026-10-23).
 - AP-2.3 **Navigation**, the window-specific keys of `AxPreviewKeys` (AX-8), axDown's letters (axDown §9): Ctrl+H
   heading, Ctrl+1 to Ctrl+6 a heading of that level, Ctrl+K link, Ctrl+L list, Ctrl+I list item, Ctrl+Q block quote,
-  Ctrl+T table, each the next one and with Shift the previous one, through the bundle's `TextJumps` over
+  Ctrl+T table, each the next one and with Shift the previous one, through the bundle's `TextJump` over
   `MarkdownOutline`, announcing "Install, heading level 2" or "No next heading"; they work in every file (a plain
   text file has no headings, "No next heading"); Navigate → Next ▸ and Previous ▸ list them (axDown AD-D7). **`l`**
   says the line, "Line 12 of 40"; **Ctrl+G** Go to line, the field in the question area under the text (axDown

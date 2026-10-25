@@ -69,12 +69,12 @@ UTF-8, UTF-16 and the system code page; files that are not text; files over 32 M
   file's name (`notes.md`), or Untitled, so that NVDA says the name when the focus arrives (AX-7.1).
 - AD-2.2 The text is the file's, with line endings normalised to `\r\n` for the control; the original line ending
   is remembered and written back (AD-3.4).
-- AD-2.3 Page Up and Page Down move one screen and reach the ends through the bundle's `EditPaging` (as axClaude's
+- AD-2.3 Page Up and Page Down move one screen and reach the ends through the bundle's `EditKeys.Page` (as axClaude's
   FR-2.1): the control's own keys do nothing while the text fits. Ctrl+Up and Ctrl+Down move to the start of the
   previous and next paragraph, a paragraph starting at the first line or at a line with text directly after a blank
   line (Ctrl+Up from inside one goes to its start first, Ctrl+Down from the last to the end of the file), and
   Ctrl+Shift+Up and Ctrl+Shift+Down select to there from the selection's anchor, as in Word, through the bundle's
-  `EditParagraphs` (AX-8.2): the control's own keys scroll a row and leave the caret where it is, as Notepad's do,
+  `EditKeys.Paragraph` (AX-8.2): the control's own keys scroll a row and leave the caret where it is, as Notepad's do,
   which NVDA, reading at the caret after the key, reported as the same text again. NVDA reads the row the caret
   lands on or the selection change; the app says nothing.
 - AD-2.4 Turning word wrap off and on keeps the caret where it was. (WinForms recreates the control's handle on that

@@ -133,8 +133,8 @@ public sealed partial class TextEditorForm : AxitForm
         var previous = new ToolStripMenuItem("&Previous");
         foreach (var jump in _app.Jumps)
         {
-            Add(next, new Command(TextJumps.MenuLabel(jump), jump.Next, () => JumpTo(jump, 1)) { Mark = CommandMark.Read });
-            Add(previous, new Command(TextJumps.MenuLabel(jump), jump.Previous, () => JumpTo(jump, -1)) { Mark = CommandMark.Read });
+            Add(next, new Command(TextJump.MenuLabel(jump), jump.Next, () => JumpTo(jump, 1)) { Mark = CommandMark.Read });
+            Add(previous, new Command(TextJump.MenuLabel(jump), jump.Previous, () => JumpTo(jump, -1)) { Mark = CommandMark.Read });
         }
 
         navigate.DropDownItems.Add(next);
@@ -526,7 +526,7 @@ public sealed partial class TextEditorForm : AxitForm
     /// <summary>A Navigate menu item: the shared jump on the editor (AD-D7), then the status bar.</summary>
     private void JumpTo(TextJump jump, int direction)
     {
-        TextJumps.Jump(_editor, jump, direction, Announce);
+        TextJump.Jump(_editor, jump, direction, Announce);
         UpdateStatus();
     }
 
