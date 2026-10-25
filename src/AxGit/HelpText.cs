@@ -11,7 +11,7 @@ public static class HelpText
         "axGIT",
         [
             "Tab, Shift+Tab, Ctrl+Tab or F6: switch between the list and the details",
-            "Ctrl+F: find text in the details. F3 and Shift+F3: next or previous match",
+            "Ctrl+F: find in the list while the list has the focus, in the details otherwise. F3 and Shift+F3: next or previous match",
         ]) + """
         ## axGIT
           Type the start of an item to jump to it, the same letter again to the next; Shift with a letter backwards

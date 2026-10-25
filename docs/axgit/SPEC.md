@@ -111,7 +111,9 @@ opens in the editor for its type (AG-1.4, AG-D1).
   · up to date" / "main · no upstream"), then the counts ("3 changed, 1 staged"); "Working: pull…" while a command
   runs. The right label: the repository's full path. No AccessibleName, no Spring (axClaude §6.2).
 - AG-2.4 The details text: the bundle's edit keys (Page Up and Page Down, Ctrl+Up and Ctrl+Down by paragraph, AX-8.2),
-  Ctrl+A and Ctrl+C, find with Ctrl+F, F3 and Shift+F3 (the match selected, "Not found" when none). Nothing moves the
+  Ctrl+A and Ctrl+C, find with Ctrl+F, F3 and Shift+F3 (the match selected, "Not found" when none); with the focus in the
+  list, Ctrl+F, F3 and Shift+F3 find in the list's lines instead ("Name contains", the bundle's list find, as every list
+  window; since 2026-10-25, the user's choice; they always searched the details before). Nothing moves the
   caret but the user, except that Enter on a file or a commit puts the focus on the first line of what it loaded.
 
 ### AG-3 Changes

@@ -3,6 +3,7 @@
 ## 3.7.4 - 2026-10-25
 
 - axProcess: sizes are said as in every other app, one decimal from megabytes up ("350.4 MB"); they were whole megabytes.
+- axGIT: Ctrl+F, F3 and Shift+F3 find in the list while the list has the focus, as in every other list window, and in the details otherwise; they always searched the details.
 
 ## 3.7.3 - 2026-10-25
 

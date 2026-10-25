@@ -126,6 +126,12 @@ public sealed partial class GitForm : AxitForm
             AddKey(new Command("Switch between the list and the details", key, () => (_list.Focused ? (Control)_details : _list).Focus()) { Mark = CommandMark.Open });
         }
 
+        // AG-2.4 (2026-10-25, the user's choice, inventory item 10): find where the focus is, as every list window
+        // does: in the list by its lines while the list has the focus, in the details text otherwise.
+        AddKey(new Command("Find in the list", BundleKeys.Find, () => ShowFindInList(_list, ListLines)) { When = () => _list.Focused, Mark = CommandMark.Read });
+        AddKey(new Command("Find next in the list", BundleKeys.FindNext, () => FindInList(_list, ListLines, 1)) { When = () => _list.Focused, Mark = CommandMark.Read });
+        AddKey(new Command("Find previous in the list", BundleKeys.FindPrevious, () => FindInList(_list, ListLines, -1)) { When = () => _list.Focused, Mark = CommandMark.Read });
+        IReadOnlyList<string> ListLines() => _list.Items.Cast<object>().Select(item => item.ToString() ?? string.Empty).ToList();
         AddKey(new Command("Find in the details", BundleKeys.Find, () => ShowFind(_details)) { Mark = CommandMark.Read });
         AddKey(new Command("Find next", BundleKeys.FindNext, () => FindNext(_details, 1)) { Mark = CommandMark.Read });
         AddKey(new Command("Find previous", BundleKeys.FindPrevious, () => FindNext(_details, -1)) { Mark = CommandMark.Read });

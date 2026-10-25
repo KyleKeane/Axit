@@ -27,7 +27,7 @@ The list at the top has three views, each named with what it holds:
 
 Arrow keys move through the items and nothing happens until you press a key. Type the start of an item to jump to it; the same letter again goes to the next one, and Shift with a letter goes backwards. Pressing a view's key while the view already shows says its name again, so you always know where you are. F5 refreshes the view after you changed something outside axGIT.
 
-Under the list is the details text, which Tab, Ctrl+Tab or F6 reach. It holds the last thing you asked to see: a diff, a commit, or what git answered. Arrow keys read it line by line; Ctrl+F finds text in it; Page Up and Page Down move a screen; Ctrl+Up and Ctrl+Down move by paragraph.
+Under the list is the details text, which Tab, Ctrl+Tab or F6 reach. It holds the last thing you asked to see: a diff, a commit, or what git answered. Arrow keys read it line by line; Ctrl+F finds text in it; Page Up and Page Down move a screen; Ctrl+Up and Ctrl+Down move by paragraph. In the list, Ctrl+F finds a line of the list instead, and F3 and Shift+F3 go to the next and previous one.
 
 ## Changes
 
