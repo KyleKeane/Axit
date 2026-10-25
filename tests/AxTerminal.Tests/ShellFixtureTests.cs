@@ -93,7 +93,7 @@ public sealed class ShellFixtureTests
     {
         var model = Replay(fixture, SendsOf(fixture), subscribe: Configure(fixture));
         var actual = Render(model).Replace("\r\n", "\n").TrimEnd('\n');
-        var path = Path.Combine(FixtureDirectory(), fixture + ".expected.txt");
+        var path = Path.Combine(Fixtures.Folder(), fixture + ".expected.txt");
         if (Environment.GetEnvironmentVariable("AXTERMINAL_UPDATE_EXPECTED") == "1")
         {
             File.WriteAllText(path, actual + "\n");

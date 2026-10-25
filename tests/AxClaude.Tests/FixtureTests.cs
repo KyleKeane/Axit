@@ -10,7 +10,7 @@ namespace AxClaude.Tests;
 public class FixtureTests
 {
     public static IEnumerable<object[]> Fixtures() =>
-        Directory.GetFiles(FixtureDirectory(), "*-claude*.vt").OrderBy(f => f).Select(f => new object[] { Path.GetFileName(f) });
+        Directory.GetFiles(Axit.TestShared.Fixtures.Folder(), "*-claude*.vt").OrderBy(f => f).Select(f => new object[] { Path.GetFileName(f) });
 
     [Theory]
     [MemberData(nameof(Fixtures))]
@@ -19,7 +19,7 @@ public class FixtureTests
         var model = ParseFixture(name);
         // The golden file is the transcript as the reader sees it: wrapped reply rows joined on one line (FR-3.2a).
         var actual = TranscriptMirror.Render(model.Lines).Replace("\r\n", "\n") + "\n";
-        var expectedPath = Path.Combine(FixtureDirectory(), Path.ChangeExtension(name, ".expected.txt"));
+        var expectedPath = Path.Combine(Axit.TestShared.Fixtures.Folder(), Path.ChangeExtension(name, ".expected.txt"));
 
         if (Environment.GetEnvironmentVariable("AXCLAUDE_UPDATE_EXPECTED") == "1")
         {

@@ -29,26 +29,8 @@ internal static partial class TestHelpers
         "Reply with the number of lines in this message and the text of its last line.\nThis is the second line.",
     ];
 
-    /// <summary>The tests/fixtures folder, found above the test binary.</summary>
-    public static string FixtureDirectory()
-    {
-        var directory = new DirectoryInfo(AppContext.BaseDirectory);
-        while (directory is not null)
-        {
-            var candidate = Path.Combine(directory.FullName, "tests", "fixtures");
-            if (Directory.Exists(candidate))
-            {
-                return candidate;
-            }
-
-            directory = directory.Parent;
-        }
-
-        throw new DirectoryNotFoundException("tests/fixtures was not found above " + AppContext.BaseDirectory);
-    }
-
     /// <summary>The bytes of a recording in tests/fixtures.</summary>
-    public static byte[] Fixture(string name) => File.ReadAllBytes(Path.Combine(FixtureDirectory(), name));
+    public static byte[] Fixture(string name) => File.ReadAllBytes(Path.Combine(Fixtures.Folder(), name));
 
     /// <summary>The console size a fixture was recorded at, from its name (<c>-240x50.vt</c>).</summary>
     public static (int Columns, int Rows) FixtureSize(string name)
@@ -91,7 +73,7 @@ internal static partial class TestHelpers
     /// is skipped.
     /// </summary>
     public static List<(int Offset, int Length, int Ms)> Chunks(string fixture) =>
-        File.ReadAllLines(Path.Combine(FixtureDirectory(), fixture + ".chunks.txt"))
+        File.ReadAllLines(Path.Combine(Fixtures.Folder(), fixture + ".chunks.txt"))
             .Where(l => l.Length > 0 && char.IsDigit(l[0]))
             .Select(l => l.Split(' '))
             .Select(p => (Offset: int.Parse(p[0]), Length: int.Parse(p[1]), Ms: int.Parse(p[2])))
