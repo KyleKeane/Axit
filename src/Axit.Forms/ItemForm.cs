@@ -116,8 +116,8 @@ public abstract partial class ItemForm : AxitForm
     /// <summary>Why a typed name is refused for the row, said with the box kept open; null when it is fine.</summary>
     protected abstract string? RefusedName(ItemRow row, string name);
 
-    /// <summary>The row renamed to a name <see cref="RefusedName"/> took, once the box has closed.</summary>
-    protected abstract void RenameTo(ItemRow row, string name);
+    /// <summary>The row renamed to a name <see cref="RefusedName"/> took, once the box has closed; an item's rename by default, as its Title field's (axTask renames a list its own way).</summary>
+    protected virtual void RenameTo(ItemRow row, string name) => RenameItem(row, name);
 
     /// <summary>Delete in the navigator (IA-D4).</summary>
     protected abstract void DeleteRow(ItemRow row);
@@ -131,11 +131,38 @@ public abstract partial class ItemForm : AxitForm
     /// <summary>Ctrl+Z (IA-5.4).</summary>
     protected abstract void Undo();
 
-    /// <summary>The letter of the bar's menu Shift+F10 opens: the field menu in the detail pane, the item's or the list's in the navigator.</summary>
-    protected abstract char MenuLetter(bool inDetail, ItemRow? row);
+    // ---- the menus that act on the selection (inventory item 4, 2026-10-25: both apps wrote the same rule) ----
 
-    /// <summary>The menus that act on the selection enabled, the others not.</summary>
-    protected abstract void UpdateRowMenus(bool inDetail, ItemRow? row);
+    private ToolStripMenuItem? _listMenu;
+    private ToolStripMenuItem? _rowMenu;
+    private ToolStripMenuItem? _fieldMenu;
+
+    /// <summary>The app's three menus that act on the selection: a list's (axTask's List, axPass's Group), an item's (Item, Entry) and a field's; set once, with the menu bar.</summary>
+    protected void SelectionMenus(ToolStripMenuItem list, ToolStripMenuItem item, ToolStripMenuItem field) =>
+        (_listMenu, _rowMenu, _fieldMenu) = (list, item, field);
+
+    /// <summary>Whether the selection's menus act at all: axPass's only while the database is unlocked.</summary>
+    protected virtual bool SelectionMenusAvailable => true;
+
+    /// <summary>The menu for where the focus is and what is selected enabled, the other two not: the field menu in the detail pane, the item's or the list's in the navigator.</summary>
+    private void UpdateMenus()
+    {
+        var inDetail = DetailPane.Focused && _shown.Document is not null;
+        var onItem = SelectedRow() is { IsList: false };
+        var on = SelectionMenusAvailable;
+        _fieldMenu?.Enabled = on && inDetail;
+        _rowMenu?.Enabled = on && !inDetail && onItem;
+        _listMenu?.Enabled = on && !inDetail && !onItem;
+    }
+
+    /// <summary>The letter of the bar's menu Shift+F10 opens, the mnemonic of that menu's own name: the field menu in the detail pane, the item's or the list's in the navigator.</summary>
+    private char MenuLetter()
+    {
+        var menu = DetailPane.Focused ? _fieldMenu : SelectedRow() is { IsList: false } ? _rowMenu : _listMenu;
+        var text = menu?.Text ?? string.Empty;
+        var at = text.IndexOf('&');
+        return at >= 0 && at + 1 < text.Length ? char.ToUpperInvariant(text[at + 1]) : 'F';
+    }
 
     /// <summary>A field's value read out; the app's own types (a link, a password) here.</summary>
     protected virtual string SpokenValue(ItemRow? row, ItemField field) => FieldTypes.Spoken(field);
@@ -311,10 +338,9 @@ public abstract partial class ItemForm : AxitForm
     protected void OpenPaneMenu()
     {
         UpdateMenus();
-        OpenBarMenu(MenuLetter(DetailPane.Focused, SelectedRow()));
+        OpenBarMenu(MenuLetter());
     }
 
-    private void UpdateMenus() => UpdateRowMenus(DetailPane.Focused && _shown.Document is not null, SelectedRow());
 
     // ---- the levels (IA-2.2) ----
 

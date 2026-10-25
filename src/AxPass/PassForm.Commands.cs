@@ -91,7 +91,6 @@ public sealed partial class PassForm
 
     protected override string? RefusedName(ItemRow row, string name) => PassTree.RefusedName(name);
 
-    protected override void RenameTo(ItemRow row, string name) => RenameItem(row, name);
     /// <summary>
     /// Delete (PW-6.4): an entry to the Recycle Bin, back with Ctrl+Z; a group after a question, since only KeePassXC
     /// brings a group back; in the Recycle Bin, for good after a question.

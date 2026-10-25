@@ -119,6 +119,7 @@ public sealed partial class PassForm : ItemForm
             [("KeePass&XC", "https://keepassxc.org/"), ("The KDBX &format", "https://keepass.info/help/kb/kdbx.html")]);
 
         _menu.Items.AddRange([file, _groupMenu, _entryMenu, _fieldMenu, options, CreateAxitMenu(), help]);
+        SelectionMenus(_groupMenu, _entryMenu, _fieldMenu);
         PlaceControls(_menu);
 
         _lockTimer.Tick += (_, _) => LockWhenIdle();
@@ -231,16 +232,8 @@ public sealed partial class PassForm : ItemForm
         }
     }
 
-    protected override char MenuLetter(bool inDetail, ItemRow? row) => inDetail ? 'D' : row is { IsList: false } ? 'E' : 'G';
-
-    protected override void UpdateRowMenus(bool inDetail, ItemRow? row)
-    {
-        var unlocked = _password is not null;
-        var onEntry = row is { IsList: false };
-        _fieldMenu.Enabled = unlocked && inDetail;
-        _entryMenu.Enabled = unlocked && !inDetail && onEntry;
-        _groupMenu.Enabled = unlocked && !inDetail && !onEntry;
-    }
+    /// <summary>The selection's menus act only while the database is unlocked.</summary>
+    protected override bool SelectionMenusAvailable => _password is not null;
 
     /// <summary>PW-6.1: KeePass's own fields only.</summary>
     protected override string? FieldsFixed => "An entry has KeePass's own fields here; other fields are added in KeePassXC's own window";

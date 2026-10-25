@@ -19,7 +19,7 @@ The bundle rules are in the root `CLAUDE.md`.
 - `AxTaskApp`: the entry point `Run`, one call into `Axit.Forms/AppHost.Run` with the one folder or item file.
 - The panes, the moves between levels, the shared keys and every field command are the item apps' shared window,
   `Axit.Forms/ItemForm` (since axPass, its second use); `TaskForm` derives from it and fills in what is axTask's.
-- `TaskForm.cs`: the menus (Folder; List, Item and Field, only the one for the selection enabled, `UpdateRowMenus`;
+- `TaskForm.cs`: the menus (Folder; List, Item and Field, only the one for the selection enabled by `ItemForm` from `SelectionMenus`;
   View, Options, Axit, Help) with axTask's own keys as commands of the window's one command list (`Add`, each key's`r
   command at its first menu item; docs/axit/app-kit.md AK-2), the levels of the folder (`Start`, `EnterList`,
   `LeaveList`, which goes straight back to the top, `ShowAllTasks`, `ReadLevel` with the rows' `Tag`: an `ItemFile`, a

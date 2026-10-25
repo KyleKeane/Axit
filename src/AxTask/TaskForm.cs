@@ -94,6 +94,7 @@ public sealed partial class TaskForm : ItemForm
         var help = CreateHelpMenu(HelpText.UserGuide, "Item &resources", [("&JSON", "https://www.json.org/json-en.html")]);
 
         _menu.Items.AddRange([file, _listMenu, _itemMenu, _fieldMenu, view, options, CreateAxitMenu(), help]);
+        SelectionMenus(_listMenu, _itemMenu, _fieldMenu);
         PlaceControls(_menu);
 
         ApplyTextFont();
@@ -112,15 +113,6 @@ public sealed partial class TaskForm : ItemForm
     /// <summary>The folder of lists, for Recently closed (AX-9.4).</summary>
     protected override string? PathInHand => TopFolder;
 
-    protected override char MenuLetter(bool inDetail, ItemRow? row) => inDetail ? 'D' : row is { IsList: false } ? 'I' : 'L';
-
-    protected override void UpdateRowMenus(bool inDetail, ItemRow? row)
-    {
-        var onItem = row is { IsList: false };
-        _fieldMenu.Enabled = inDetail;
-        _itemMenu.Enabled = !inDetail && onItem;
-        _listMenu.Enabled = !inDetail && !onItem;
-    }
 
     /// <summary>A link reads the item it points to, or "missing: name" (IA-D3).</summary>
     protected override string SpokenValue(ItemRow? row, ItemField field) =>
