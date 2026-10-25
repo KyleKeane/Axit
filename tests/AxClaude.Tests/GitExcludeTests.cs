@@ -42,47 +42,35 @@ public class GitExcludeTests
     [Fact]
     public void Update_writes_into_the_repository_and_leaves_a_plain_folder_alone()
     {
-        var root = Directory.CreateTempSubdirectory("axclaude-exclude-").FullName;
-        try
-        {
-            Assert.Null(GitExclude.Update(root, on: true));
-            Directory.CreateDirectory(Path.Combine(root, ".git"));
-            var path = GitExclude.Update(root, on: true);
-            Assert.Equal(Path.Combine(root, ".git", "info", "exclude"), path);
-            Assert.Contains("axclaude-*.txt", File.ReadAllText(path!));
-            Assert.Null(GitExclude.Update(root, on: true));
-            GitExclude.Update(root, on: false);
-            Assert.DoesNotContain("axclaude", File.ReadAllText(path!));
-        }
-        finally
-        {
-            Directory.Delete(root, recursive: true);
-        }
+        using var temp = new TempFolder("axclaude-exclude");
+        var root = temp.Path;
+        Assert.Null(GitExclude.Update(root, on: true));
+        Directory.CreateDirectory(Path.Combine(root, ".git"));
+        var path = GitExclude.Update(root, on: true);
+        Assert.Equal(Path.Combine(root, ".git", "info", "exclude"), path);
+        Assert.Contains("axclaude-*.txt", File.ReadAllText(path!));
+        Assert.Null(GitExclude.Update(root, on: true));
+        GitExclude.Update(root, on: false);
+        Assert.DoesNotContain("axclaude", File.ReadAllText(path!));
     }
 
     [Fact]
     public void A_linked_worktree_writes_into_the_common_directory()
     {
-        var root = Directory.CreateTempSubdirectory("axclaude-exclude-").FullName;
-        try
-        {
-            // What git worktree add leaves behind: a .git file in the worktree, and a commondir file in its gitdir.
-            var repoGit = Path.Combine(root, "repo", ".git");
-            var worktreeGit = Path.Combine(repoGit, "worktrees", "feature");
-            var worktree = Path.Combine(root, "feature");
-            Directory.CreateDirectory(worktreeGit);
-            Directory.CreateDirectory(worktree);
-            File.WriteAllText(Path.Combine(worktree, ".git"), $"gitdir: {worktreeGit}\n");
-            File.WriteAllText(Path.Combine(worktreeGit, "commondir"), "../..\n");
+        using var temp = new TempFolder("axclaude-exclude");
+        var root = temp.Path;
+        // What git worktree add leaves behind: a .git file in the worktree, and a commondir file in its gitdir.
+        var repoGit = Path.Combine(root, "repo", ".git");
+        var worktreeGit = Path.Combine(repoGit, "worktrees", "feature");
+        var worktree = Path.Combine(root, "feature");
+        Directory.CreateDirectory(worktreeGit);
+        Directory.CreateDirectory(worktree);
+        File.WriteAllText(Path.Combine(worktree, ".git"), $"gitdir: {worktreeGit}\n");
+        File.WriteAllText(Path.Combine(worktreeGit, "commondir"), "../..\n");
 
-            var path = GitExclude.Update(worktree, on: true);
-            Assert.Equal(Path.Combine(repoGit, "info", "exclude"), path);
-            Assert.Contains("axclaude-*.txt", File.ReadAllText(path!));
-        }
-        finally
-        {
-            Directory.Delete(root, recursive: true);
-        }
+        var path = GitExclude.Update(worktree, on: true);
+        Assert.Equal(Path.Combine(repoGit, "info", "exclude"), path);
+        Assert.Contains("axclaude-*.txt", File.ReadAllText(path!));
     }
 
     [Fact]

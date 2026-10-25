@@ -8,28 +8,16 @@ public class ClaudeLauncherTests
     /// <summary>A fake claude.cmd with the body given, in a folder of its own that goes with the test.</summary>
     private sealed class FakeClaude : IDisposable
     {
-        private readonly string _dir = Path.Combine(Path.GetTempPath(), "axclaude-tests-" + Guid.NewGuid().ToString("N"));
+        private readonly TempFolder _dir = new("axclaude-tests");
 
         public FakeClaude(string body)
         {
-            Directory.CreateDirectory(_dir);
-            Command = Path.Combine(_dir, "claude.cmd");
-            File.WriteAllText(Command, "@echo off\r\n" + body + "\r\n");
+            Command = _dir.File("claude.cmd", "@echo off\r\n" + body + "\r\n");
         }
 
         public string Command { get; }
 
-        public void Dispose()
-        {
-            try
-            {
-                Directory.Delete(_dir, recursive: true);
-            }
-            catch (Exception ex) when (ex is IOException or UnauthorizedAccessException)
-            {
-                // A fake just ended holds its folder for a moment; Windows cleans the temp folder.
-            }
-        }
+        public void Dispose() => _dir.Dispose();
     }
 
     [Fact]
