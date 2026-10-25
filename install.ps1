@@ -104,25 +104,46 @@ $listingFile = 'apps.json'
 function Get-AppListing {
     $program = Join-Path $source 'Axit.exe'
     $json = $null
+    $reason = $null
     if (Test-Path -LiteralPath $program) {
         # Through a process with its output redirected: the program has no console of its own, so & would neither
-        # wait for it nor catch what it writes.
+        # wait for it nor catch what it writes. What went wrong is kept for the message: until 3.7.2 it was dropped,
+        # and a failed update said only that the list could not be read.
         try {
             $start = New-Object System.Diagnostics.ProcessStartInfo $program
             $start.Arguments = 'apps'
             $start.UseShellExecute = $false
             $start.RedirectStandardOutput = $true
+            $start.RedirectStandardError = $true
             $start.CreateNoWindow = $true
             $start.WorkingDirectory = $source
             $process = [System.Diagnostics.Process]::Start($start)
+            $errors = $process.StandardError.ReadToEndAsync()
             $json = $process.StandardOutput.ReadToEnd()
-            if (-not $process.WaitForExit(30000) -or $process.ExitCode -ne 0) { $json = $null }
-        } catch { $json = $null }
+            if (-not $process.WaitForExit(30000)) {
+                $reason = 'it did not end within 30 seconds'
+                $json = $null
+            } elseif ($process.ExitCode -ne 0) {
+                $reason = "it ended with exit code $($process.ExitCode)"
+                if ($errors.Result.Trim()) { $reason += ": $($errors.Result.Trim())" }
+                $json = $null
+            } elseif (-not $json -or -not $json.Trim().StartsWith('[')) {
+                $reason = "it ended without the list (it wrote $(if ($json) { $json.Length } else { 0 }) characters)"
+                $json = $null
+            }
+        } catch {
+            $reason = "it could not be run: $($_.Exception.Message)"
+            $json = $null
+        }
+    } else {
+        $reason = 'it is not there'
     }
-    if (-not $json -and (Test-Path -LiteralPath (Join-Path $source $listingFile))) {
-        $json = Get-Content -LiteralPath (Join-Path $source $listingFile) -Raw
+    $saved = Join-Path $source $listingFile
+    if (-not $json -and (Test-Path -LiteralPath $saved)) {
+        Say "Axit.exe apps did not answer ($reason); the list of apps is read from $listingFile instead."
+        $json = Get-Content -LiteralPath $saved -Raw
     }
-    if (-not $json) { throw "the list of apps could not be read from $program (Axit.exe apps)" }
+    if (-not $json) { throw "the list of apps could not be read from $program (Axit.exe apps): $reason, and there is no $listingFile beside it" }
     return $json
 }
 $listingJson = Get-AppListing
