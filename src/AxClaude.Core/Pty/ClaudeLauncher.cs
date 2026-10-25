@@ -84,40 +84,18 @@ public static class ClaudeLauncher
         {
             FileName = script ? SystemPrograms.Cmd : claudePath,
             Arguments = script ? $"/d /s /c \"\"{claudePath}\" --version\"" : "--version",
-            UseShellExecute = false,
-            RedirectStandardInput = true,
-            RedirectStandardOutput = true,
-            RedirectStandardError = true,
-            CreateNoWindow = true,
         };
         try
         {
-            using var process = Process.Start(start);
-            if (process is null)
+            // The bundle's run (Axit.Core/ProcessRun, 2026-10-25): both pipes read to their end, so that a full one
+            // cannot hold Claude, and a program Claude started that keeps them open is covered by the timeout.
+            var result = await ProcessRun.RunAsync(start, [], timeout).ConfigureAwait(false);
+            if (result.TimedOut)
             {
                 return null;
             }
 
-            process.StandardInput.Close();
-            // Both pipes are read to their end, so that a full one cannot hold Claude; a program Claude started could
-            // keep them open after it, which the timeout covers as it covers a hang.
-            var both = Task.WhenAll(process.StandardOutput.ReadToEndAsync(), process.StandardError.ReadToEndAsync());
-            if (await Task.WhenAny(both, Task.Delay(timeout)).ConfigureAwait(false) != both)
-            {
-                try
-                {
-                    process.Kill(entireProcessTree: true);
-                }
-                catch (Exception ex) when (ex is InvalidOperationException or Win32Exception)
-                {
-                    // Gone already.
-                }
-
-                return null;
-            }
-
-            var output = await both.ConfigureAwait(false);
-            var first = output[0].Split('\n')[0].Trim();
+            var first = result.Output.Split('\n')[0].Trim();
             return first.Length > 0 ? first : null;
         }
         catch (Exception ex) when (ex is Win32Exception or IOException or InvalidOperationException)

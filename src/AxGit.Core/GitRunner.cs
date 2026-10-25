@@ -85,11 +85,6 @@ public static class GitRunner
     {
         var info = new ProcessStartInfo(Program)
         {
-            UseShellExecute = false,
-            CreateNoWindow = true,
-            RedirectStandardInput = true,
-            RedirectStandardOutput = true,
-            RedirectStandardError = true,
             StandardOutputEncoding = new UTF8Encoding(false),
             StandardErrorEncoding = new UTF8Encoding(false),
         };
@@ -103,60 +98,29 @@ public static class GitRunner
         info.Environment["LC_ALL"] = "C.UTF-8";
         info.Environment["GIT_PAGER"] = "cat";
 
-        using var process = new Process { StartInfo = info };
+        // The run is the bundle's (Axit.Core/ProcessRun, since 2026-10-25): the reads under the timeout as well as the
+        // wait, since a program git started that outlives it (an agent, a hook's daemon) keeps the pipes open after git
+        // has exited, and a read with no end would hang the window; whether git itself had finished is taken before
+        // the kill (until 2026-10-23 it was read after, so every timeout read as the open-pipe case).
+        ProcessResult result;
         try
         {
-            process.Start();
+            result = await ProcessRun.RunAsync(info, [], timeout, cancellation);
         }
         catch (Win32Exception ex)
         {
             throw new GitNotFoundException("git was not found on the PATH.", ex);
         }
 
-        process.StandardInput.Close();
-        // The reads run under the timeout as well as the wait: a program git started that outlives it (an agent, a
-        // hook's daemon) keeps the pipes open after git has exited, and a read with no end would hang the window.
-        using var limit = CancellationTokenSource.CreateLinkedTokenSource(cancellation);
-        limit.CancelAfter(timeout);
-        var output = process.StandardOutput.ReadToEndAsync(limit.Token);
-        var error = process.StandardError.ReadToEndAsync(limit.Token);
-        try
+        if (!result.TimedOut)
         {
-            await process.WaitForExitAsync(limit.Token);
-            return new GitResult(process.ExitCode, await output, await error);
+            return new GitResult(result.ExitCode, result.Output, result.Error);
         }
-        catch (OperationCanceledException)
-        {
-            // Whether git itself had finished, taken before the kill, which ends it either way (until 2026-10-23 it
-            // was read after the kill, so every timeout read as the open-pipe case; the fake git's test found it).
-            var finished = process.HasExited;
-            try
-            {
-                process.Kill(entireProcessTree: true);
-            }
-            catch (Exception ex) when (ex is InvalidOperationException or Win32Exception)
-            {
-            }
 
-            cancellation.ThrowIfCancellationRequested();
-            var reason = finished
-                ? "git finished, but a program it started kept its output open; the output read so far is what there is."
-                : $"git did not finish within {timeout.TotalSeconds:0} seconds and was stopped.";
-            return new GitResult(finished ? process.ExitCode : -1, await ReadSoFar(output), reason);
-        }
-    }
-
-    /// <summary>What a cancelled read gave: nothing, since the read throws rather than return a part.</summary>
-    private static async Task<string> ReadSoFar(Task<string> read)
-    {
-        try
-        {
-            return await read;
-        }
-        catch (OperationCanceledException)
-        {
-            return string.Empty;
-        }
+        var reason = result.Finished
+            ? "git finished, but a program it started kept its output open; the output read so far is what there is."
+            : $"git did not finish within {timeout.TotalSeconds:0} seconds and was stopped.";
+        return new GitResult(result.ExitCode, result.Output, reason);
     }
 
     /// <summary>

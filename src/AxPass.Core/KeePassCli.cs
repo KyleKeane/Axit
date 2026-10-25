@@ -62,11 +62,6 @@ public static class KeePassCli
     {
         var info = new ProcessStartInfo(cli)
         {
-            UseShellExecute = false,
-            RedirectStandardInput = true,
-            RedirectStandardOutput = true,
-            RedirectStandardError = true,
-            CreateNoWindow = true,
             StandardOutputEncoding = Encoding.UTF8,
             StandardErrorEncoding = Encoding.UTF8,
             StandardInputEncoding = new UTF8Encoding(false),
@@ -76,23 +71,12 @@ public static class KeePassCli
             info.ArgumentList.Add(argument);
         }
 
-        using var process = Process.Start(info) ?? throw new IOException("KeePassXC's tool did not start");
-        var output = process.StandardOutput.ReadToEndAsync();
-        var error = process.StandardError.ReadToEndAsync();
-        foreach (var line in input)
-        {
-            process.StandardInput.Write(line);
-            process.StandardInput.Write('\n');
-        }
-
-        process.StandardInput.Close();
-        if (!process.WaitForExit(TimeoutMs))
-        {
-            process.Kill(entireProcessTree: true);
-            return new CliResult(-1, string.Empty, $"KeePassXC's tool took over {TimeoutMs / 1000} seconds and was ended");
-        }
-
-        return new CliResult(process.ExitCode, output.Result, error.Result);
+        // The bundle's run (Axit.Core/ProcessRun, 2026-10-25): the password lines on standard input, each ended by a
+        // line feed, the outputs read meanwhile, the tool ended with what it started after the timeout.
+        var result = ProcessRun.Run(info, input, TimeSpan.FromMilliseconds(TimeoutMs));
+        return result.TimedOut
+            ? new CliResult(-1, string.Empty, $"KeePassXC's tool took over {TimeoutMs / 1000} seconds and was ended")
+            : new CliResult(result.ExitCode, result.Output, result.Error);
     }
 
     /// <summary>

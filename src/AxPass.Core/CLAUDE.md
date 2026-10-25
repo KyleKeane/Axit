@@ -14,7 +14,7 @@ section 8. The window is `src/AxPass`, with its own `CLAUDE.md`. The item format
 ## Where things are
 
 - `KeePassCli` and `CliResult` (PW-5): `Find` (the path set, KeePassXC's install folder, the PATH), `Run` (one command,
-  the arguments in `ArgumentList`, the input lines on standard input, a timeout), `StartLasting` (`clip`, left running),
+  the arguments in `ArgumentList`, the input lines on standard input, a timeout; through `Axit.Core/ProcessRun` since 2026-10-25), `StartLasting` (`clip`, left running),
   `On` (the command, `-q`, the options, the database, the paths).
 - `PassTree` and `PassNode`: `ls -R -f` read into groups and entries (`Parse`), a group's `Level` (groups first, the
   Recycle Bin last at the top), `CountIn`, `HasGroup`, `HasEntry`, `InRecycleBin`, `Join`, `RefusedName` (a slash),
