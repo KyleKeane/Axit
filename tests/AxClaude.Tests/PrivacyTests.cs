@@ -31,6 +31,15 @@ public class PrivacyTests
         Assert.Equal(["/mnt/c/" + "Users/Someone"], Redaction.Find("see /mnt/c/" + "Users/Someone and /home/someone"));
     }
 
+    [Fact]
+    public void Redact_hides_a_work_onedrive_and_the_computer_and_domain_names()
+    {
+        Assert.Equal("D:\\OneDrive - <org>\\notes.md on <name>",
+            Redaction.Redact("D:\\OneDrive - Contoso Ltd\\notes.md on DESKTOP-Q7Z", ["DESKTOP-Q7Z"]));
+        Assert.Contains(Environment.MachineName, Redaction.DefaultNames());
+        Assert.Contains(Environment.UserDomainName, Redaction.DefaultNames());
+    }
+
     /// <summary>
     /// No file in the repository holds an e-mail address or a path into a Windows account: recordings of /status carry
     /// the account's address, and paths name the account. The licence line names the author and is the one exception.

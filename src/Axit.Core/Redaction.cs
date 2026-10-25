@@ -25,6 +25,10 @@ public static partial class Redaction
     [GeneratedRegex(@"\b[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}\b")]
     private static partial Regex IdRegex();
 
+    // A work OneDrive's folder names the organisation ("OneDrive - Contoso"; security review 2026-10-25).
+    [GeneratedRegex(@"OneDrive - [^\\/""'<>|:*?\r\n]+")]
+    private static partial Regex OneDriveRegex();
+
     /// <summary>
     /// The text with e-mail addresses, the account folder in paths under Users, pipe names, session ids and the
     /// given names (the Windows account name, by default) replaced by <c>&lt;email&gt;</c>, <c>&lt;user&gt;</c>,
@@ -35,6 +39,7 @@ public static partial class Redaction
         text = EmailRegex().Replace(text, "<email>");
         text = PipeRegex().Replace(text, "<pipe>");
         text = UserPathRegex().Replace(text, "$1<user>");
+        text = OneDriveRegex().Replace(text, "OneDrive - <org>");
         text = IdRegex().Replace(text, "<id>");
         foreach (var name in (names ?? DefaultNames()).Where(IsDistinctive))
         {
@@ -48,8 +53,8 @@ public static partial class Redaction
     public static IEnumerable<string> Find(string text) =>
         EmailRegex().Matches(text).Concat(UserPathRegex().Matches(text)).Select(match => match.Value);
 
-    /// <summary>The Windows account name, which paths and prompts can show.</summary>
-    public static IReadOnlyList<string> DefaultNames() => [Environment.UserName];
+    /// <summary>The Windows account name, which paths and prompts can show, and the computer's and the domain's names (2026-10-25).</summary>
+    public static IReadOnlyList<string> DefaultNames() => [Environment.UserName, Environment.MachineName, Environment.UserDomainName];
 
     // A name short or common enough to be part of ordinary words is not replaced.
     private static bool IsDistinctive(string name) =>
