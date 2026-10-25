@@ -186,13 +186,14 @@ expect focus Keyboard shortcuts
 keys escape
 expect state "notice":null
 expect focus Message to Claude
-# F1 from the conversation, then close: the focus is back on the same line.
+# F1 from the conversation, then close: the focus is back on the same line. The second line is the recording's system
+# line (--record above); until Claude Code 2.1.3xx it was Claude's "[Screen Reader Mode" banner, no longer printed there.
 keys ctrl+2 ctrl+home down
-expect focus "value":"[Screen Reader Mode
+expect focus "value":"System: Recording to 
 keys f1
 expect state "notice":"Keyboard shortcuts"
 keys escape
-expect focus "value":"[Screen Reader Mode
+expect focus "value":"System: Recording to 
 # Step 6: Help, User guide: "axClaude user guide" first; h moves by heading, "No next heading" at the end; Escape.
 menu User guide
 expect state "notice":"User guide"
