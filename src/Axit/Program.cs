@@ -27,6 +27,11 @@ internal static class Program
     [STAThread]
     private static void Main(string[] args)
     {
+        if (StartedAsOpenWithLink(args))
+        {
+            return;
+        }
+
         // First of all: a test run's variables read and taken out of the environment, so that nothing this process
         // starts inherits them (security audit S-11).
         AutomationEnvironment.Capture();
@@ -91,14 +96,51 @@ internal static class Program
     };
 
     /// <summary>
+    /// AX-2.3: Windows' Open with lists one program per program file, so the installer gives each app with file types a
+    /// hard link of Axit.exe under its own name (axDown.exe) for its ProgID. Started under such a name, the process
+    /// starts Axit.exe beside it with the same arguments and ends, so that every window runs as Axit.exe: the hand-over
+    /// to an open window, the window lists and the AI tools tell this program by its path. The new process may take the
+    /// foreground, which this one was given by the shell.
+    /// </summary>
+    private static bool StartedAsOpenWithLink(string[] args)
+    {
+        if (Environment.ProcessPath is not { } path
+            || string.Equals(Path.GetFileName(path), "Axit.exe", StringComparison.OrdinalIgnoreCase)
+            || !File.Exists(Path.Combine(AppContext.BaseDirectory, "Axit.exe")))
+        {
+            return false;
+        }
+
+        AllowSetForegroundWindow(AsfwAny);
+        var start = new System.Diagnostics.ProcessStartInfo(Path.Combine(AppContext.BaseDirectory, "Axit.exe"))
+        {
+            UseShellExecute = false,
+            WorkingDirectory = Environment.CurrentDirectory,
+        };
+        foreach (var arg in args)
+        {
+            start.ArgumentList.Add(arg);
+        }
+
+        System.Diagnostics.Process.Start(start)?.Dispose();
+        return true;
+    }
+
+    private const int AsfwAny = -1;
+
+    [DllImport("user32.dll")]
+    private static extern bool AllowSetForegroundWindow(int processId);
+
+    /// <summary>
     /// AX-2.8: an update installed in place renames the program file that was running to Axit.old.exe, since a
-    /// running file cannot be overwritten or deleted. The next start removes it; one still running waits for the next.
+    /// running file cannot be overwritten or deleted, and an app's Open with link the same way (axDown.old.exe). The next
+    /// start removes them; one still running waits for the next.
     /// </summary>
     private static void DeleteOldProgramFiles()
     {
         try
         {
-            foreach (var old in Directory.GetFiles(AppContext.BaseDirectory, "Axit.old*.exe"))
+            foreach (var old in Directory.GetFiles(AppContext.BaseDirectory, "*.old*.exe"))
             {
                 try
                 {

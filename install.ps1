@@ -140,7 +140,11 @@ foreach ($app in $apps) {
     $app.Start = Join-Path $programs "Axit $($app.Name).lnk"
     $app.Shim = Join-Path $bin ($app.Name.ToLower() + '.cmd')
     $app.ProgId = "Axit.$($app.Name)"
+    # Windows' Open with lists one program per program file, so an app with file types has a hard link of Axit.exe
+    # under its own name for its ProgID; started so, the program hands its arguments to Axit.exe (src/Axit/Program.cs).
+    $app.Link = Join-Path $target "$($app.Name).exe"
 }
+$linkNames = @($apps | Where-Object { $_.OpenWith } | ForEach-Object { Split-Path -Leaf $_.Link })
 
 # File Explorer's "Open with Axit" submenu (AX-2.3): on folders, on a folder's background and on files, each listing
 # the apps whose Opens says so, in the order of their names. The registry shows an app only where it belongs, so
@@ -205,7 +209,27 @@ function Start-Background {
 }
 
 function Test-Running {
-    [bool](Get-Process -Name Axit, axClaude -ErrorAction SilentlyContinue | Where-Object { $_.Path -eq $exe -or $_.Path -eq $oldExe })
+    $names = @('Axit', 'axClaude') + @($linkNames | ForEach-Object { [IO.Path]::GetFileNameWithoutExtension($_) })
+    [bool](Get-Process -Name $names -ErrorAction SilentlyContinue | Where-Object { $_.Path -eq $exe -or $_.Path -eq $oldExe -or ($_.Path -and (Split-Path -Parent $_.Path) -eq $target) })
+}
+
+# An app's Open with link (AX-2.3), made again on every install so that it is the Axit.exe just written: one still
+# running is the old program file and is renamed aside as the program file is, for the next start to remove.
+function Set-OpenWithLink($app) {
+    if (Test-Path -LiteralPath $app.Link) {
+        try { Remove-Item -LiteralPath $app.Link -Force -ErrorAction Stop }
+        catch {
+            $aside = Join-Path $target ("$($app.Name).old." + (Get-Date -Format 'HHmmss') + '.exe')
+            Move-Item -LiteralPath $app.Link -Destination $aside -Force
+        }
+    }
+    try {
+        New-Item -ItemType HardLink -Path $app.Link -Target $exe -ErrorAction Stop | Out-Null
+        return $app.Link
+    } catch {
+        # A drive without hard links: the ProgID names Axit.exe, and Windows' Open with lists only one of these apps.
+        return $exe
+    }
 }
 
 # Removes everything an installation put on the machine, whatever version made it. The settings and the logs stay.
@@ -304,7 +328,7 @@ if (-not $sameFolder) {
         foreach ($item in $oldTarget, $oldAppsKey, $oldStartMenu) {
             if (Test-Path -LiteralPath $item) { try { Remove-Item -LiteralPath $item -Recurse -Force } catch { } }
         }
-        foreach ($stale in Get-ChildItem -LiteralPath $target -File | Where-Object { $files -notcontains $_.Name -and $_.Name -notlike 'Axit.old*.exe' }) {
+        foreach ($stale in Get-ChildItem -LiteralPath $target -File | Where-Object { $files -notcontains $_.Name -and $linkNames -notcontains $_.Name -and $_.Name -notlike '*.old*.exe' }) {
             try { Remove-Item -LiteralPath $stale.FullName -Force } catch { }
         }
     }
@@ -387,6 +411,7 @@ if (-not $NoContextMenu) {
     # The ProgID that Open with and Default apps know an app by (AX-2.3, B-9): the user makes it the default, never
     # this script.
     foreach ($app in ($apps | Where-Object { $_.OpenWith })) {
+        $program = Set-OpenWithLink $app
         $progIdKey = "$classes\$($app.ProgId)"
         New-Item -Path $progIdKey -Force | Out-Null
         Set-ItemProperty -LiteralPath $progIdKey -Name '(default)' -Value $app.TypeName
@@ -397,7 +422,7 @@ if (-not $NoContextMenu) {
         Set-ItemProperty -LiteralPath (Join-Path $progIdKey 'Application') -Name 'ApplicationName' -Value $app.Name
         Set-ItemProperty -LiteralPath (Join-Path $progIdKey 'Application') -Name 'ApplicationIcon' -Value $app.Icon
         New-Item -Path (Join-Path $progIdKey 'shell\open\command') -Force | Out-Null
-        Set-ItemProperty -LiteralPath (Join-Path $progIdKey 'shell\open\command') -Name '(default)' -Value "`"$exe`" $($app.Verb) `"%1`""
+        Set-ItemProperty -LiteralPath (Join-Path $progIdKey 'shell\open\command') -Name '(default)' -Value "`"$program`" $($app.Verb) `"%1`""
         foreach ($extension in $app.OpenWith) {
             $openWith = "$classes\$extension\OpenWithProgids"
             New-Item -Path $openWith -Force | Out-Null

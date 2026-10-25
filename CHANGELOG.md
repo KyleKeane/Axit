@@ -1,5 +1,10 @@
 # Changelog
 
+## 3.7.1 - 2026-10-24
+
+- Axit: Windows' Open with lists each app for its file types on its own line: axDown and axPreview for `.md`, `.markdown` and `.txt`, axJSON and axPreview for `.json`, axMedia for sound and video, axPass for `.kdbx`. Only axPreview was offered before, since Windows lists one program per program file and every app is `Axit.exe`; the installer now gives each of these apps a link of `Axit.exe` under its own name (`axDown.exe` and the like), which hands the file to `Axit.exe`.
+- For developers: `tools/sign-release.ps1` parses again, and the release workflow no longer makes the draft for a tag ending in a carriage return.
+
 ## 3.7.0 - 2026-10-24
 
 - axClaude: a side answer (`/btw <question>`) and the other screens of Claude's that only inform (`/goal`, `/tasks` with nothing running) are read-only text in the window, its title the screen's and its text the answer, with Close (Enter or Escape, which closes the screen in Claude too) and a button for each of the screen's other keys (Copy, Fork, Browse); they used to be a list in the message field's place, with "waiting for your answer" in the status bar, which now says "showing a side answer". A second `/btw` in a session, whose keys Claude names with Shift and the arrows, is shown too, where it used to show nothing.

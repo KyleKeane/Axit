@@ -166,6 +166,14 @@ The apps are named ax and a word, the ax in lower case and the word as it is wri
   | axCalc | | | |
   | axClip | | | |
 
+  Windows' Open with lists one program per program file, under the name of the last ProgID registered for it
+  (measured 2026-10-24: axPreview alone was offered for `.md`, `.txt` and `.json`). So each app of the last column
+  has a hard link of `Axit.exe` under its own name in the installation folder (`axDown.exe`, `axJSON.exe`,
+  `axPreview.exe`, `axMedia.exe`, `axPass.exe`), made again on every install, and its ProgID runs
+  `<app>.exe <verb> "%1"`. Started under any name but `Axit.exe`, the program starts the `Axit.exe` beside it with
+  the same arguments, lets it take the foreground and ends, so every window runs as `Axit.exe` (`Program.cs`). A
+  link still running at an update is renamed aside as `<app>.old.<time>.exe`, as the program file is (AX-2.8).
+
   On Windows 11 the submenu is in the full menu (Shift+F10, or Show more options), as every program's own entries
   are. Up to 2.13.0 each app had an entry of its own (`Open in axClaude` and the like); the installer removes them.
 - AX-2.4 Console commands: `axit.cmd` and one `<app>.cmd` per app (`axclaude.cmd`, `axdown.cmd`, `axjson.cmd`,
