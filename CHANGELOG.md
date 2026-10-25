@@ -1,5 +1,9 @@
 # Changelog
 
+## 3.7.3 - 2026-10-25
+
+- Axit: a failed update's notice shows what went wrong (the versions, Windows' version, and what the installer said or the error) and has a Copy details button that puts it on the clipboard to send, with your account's name, your folders and any e-mail address left out. The installer's own log says which version it installs on which Windows, and where it failed.
+
 ## 3.7.2 - 2026-10-24
 
 - axPreview: a viewer for every file, in two panes: the file above, read as text, and a Details list under it (Tab or F6) with everything known about the file: its name, folder, size, type and dates, what is in it (the encoding and the words of a text, the files of a zip, the headings of a document), and every detail Windows has, like a picture's dimensions or a song's length. Ctrl+C copies a detail's value; Enter on the Folder line opens it in axFile.

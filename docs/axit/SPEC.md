@@ -246,6 +246,15 @@ The apps are named ax and a word, the ax in lower case and the word as it is wri
   closing included (axStart, `ClosingForUpdate`). Each app's close
   question after Update and restart (axClaude's Keep working, axDown's Cancel in the save question) keeps the window
   on the old program file and says "Update installed. It starts with the next axClaude" (or axDown).
+- AX-3.6 **A failed update's notice** (2026-10-24, the user's ask after 3.7.1's update failed on one machine with
+  "the list of apps could not be read" and nothing more): what failed, then the details to send (the versions,
+  Windows' version, and the installer's output or the error with its kind), with **Copy details** (D; the details on
+  the clipboard, "Copied the details", the notice staying), Open release page and Close. The details are generic:
+  the account's folder in every path, the account name and any e-mail address are replaced by `<user>`, `<name>` and
+  `<email>` (`Updater.FailureDetails` over `Redaction`, tested); the app's log and `update.log` keep the whole text on
+  the machine. The installer says where it failed: its last error names the line of `install.ps1` and the
+  statement, and its first line names the version installed, in place or not, and Windows' and PowerShell's versions;
+  when the new program cannot give its list of apps (`Axit.exe apps`), it says why and reads the zip's `apps.json`.
 - AX-3.3 The 1.7.0 bridge (B-6): axClaude 1.7.0 accepts a download whose program file is not `AxClaude.exe`, so an
   installed axClaude updates into Axit through Help, Update now. The first Axit release is 2.0.0.
 - AX-3.4 The update check and the version comparison are pure code in `Axit.Core/Updates/UpdateCheck`, unit tested;

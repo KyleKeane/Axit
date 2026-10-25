@@ -22,6 +22,19 @@ public static class Updater
     /// <summary>What the installer did after this process ended, for a bug report.</summary>
     public static string LogPath { get; } = Path.Combine(AppPaths.LogsFolder, "update.log");
 
+    /// <summary>
+    /// A failed update's details to send (AX-3.6): the versions, Windows' version and what went wrong, with the
+    /// account's folder in paths, the account name and any e-mail address replaced (<see cref="Redaction"/>), so that
+    /// what a user copies is generic. <paramref name="names"/> for a test; the Windows account name otherwise.
+    /// </summary>
+    public static string FailureDetails(string fromVersion, string toVersion, string appName, string what, IEnumerable<string>? names = null) =>
+        Redaction.Redact(string.Join("\n",
+        [
+            $"Axit {fromVersion} updating to {toVersion} ({appName})",
+            $"Windows {Environment.OSVersion.Version}, {(Environment.Is64BitOperatingSystem ? "64-bit" : "32-bit")}",
+            what.Trim(),
+        ]), names);
+
     /// <summary>The latest release, or null when none is published. Throws when GitHub cannot be reached.</summary>
     public static Task<ReleaseInfo?> CheckAsync(CancellationToken cancellation) => UpdateCheck.FetchLatestAsync(Http, cancellation);
 

@@ -217,12 +217,8 @@ public abstract partial class AxitForm
             {
                 Log.Error($"The installer failed with code {result.ExitCode}:\r\n{result.Output}");
                 UpdateNoted($"The installation of Axit {version} failed. This version keeps running.");
-                ShowNotice(new Notice($"Update to Axit {version}",
-                    $"The installer failed; this version keeps running.\n\n{result.Output}\n\nYou can download the zip from the release page and run install.cmd yourself.",
-                [
-                    ReleasePageChoice(release),
-                    OverlayChoice.Close,
-                ]));
+                ShowUpdateFailure(release, "The installer failed; this version keeps running.",
+                    $"The installer ended with exit code {result.ExitCode}. What it printed:\n{result.Output}");
                 return;
             }
 
@@ -249,17 +245,44 @@ public abstract partial class AxitForm
             if (!IsDisposed)
             {
                 UpdateNoted($"The update to Axit {version} failed: {ex.Message}");
-                ShowNotice(new Notice($"Update to Axit {version}",
-                    $"The update failed: {ex.Message}\nThis version keeps running. You can download the zip from the release page and run install.cmd yourself.",
-                [
-                    ReleasePageChoice(release),
-                    OverlayChoice.Close,
-                ]));
+                ShowUpdateFailure(release, $"The update failed: {ex.Message}\nThis version keeps running.",
+                    $"{ex.GetType().Name}: {ex.Message}{(ex.InnerException is { } inner ? $"\nCaused by {inner.GetType().Name}: {inner.Message}" : string.Empty)}");
             }
         }
         finally
         {
             SetUpdateBusy(false);
+        }
+    }
+
+    /// <summary>
+    /// A failed update's notice (AX-3.6): what failed, then the details to send, with Copy details, Open release page
+    /// and Close. The details (<see cref="Updater.FailureDetails"/>) are the versions, Windows' version and what went
+    /// wrong (the installer's output, or the error), generic, with nothing that names the user; the log keeps the whole text.
+    /// </summary>
+    private void ShowUpdateFailure(ReleaseInfo release, string summary, string what)
+    {
+        var version = release.Version.ToString(3);
+        var details = Updater.FailureDetails(BundleInfo.Version, version, AppName, what);
+        ShowNotice(new Notice($"Update to Axit {version}",
+            $"{summary}\n\nYou can download the zip from the release page and run install.cmd yourself. Copy details puts the lines below on the clipboard, with your account's name and folders left out, to send with a report.\n\n{details}",
+        [
+            new OverlayChoice("Copy &details", () => CopyUpdateDetails(details), StaysOpen: true),
+            ReleasePageChoice(release),
+            OverlayChoice.Close,
+        ]));
+    }
+
+    private void CopyUpdateDetails(string details)
+    {
+        try
+        {
+            Clipboard.SetText(details.Replace("\n", "\r\n"));
+            Announce("Copied the details", true);
+        }
+        catch (Exception ex) when (ex is System.Runtime.InteropServices.ExternalException or InvalidOperationException)
+        {
+            Announce("The clipboard is busy; try again", true);
         }
     }
 

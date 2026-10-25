@@ -69,7 +69,9 @@ function Say([string]$text) {
 # Any error that nothing below handles is said and logged: the updater runs this script without a window, so the
 # log is the only place it would show.
 trap {
-    Say "Axit was not installed: $($_.Exception.Message)"
+    # Where it failed, so that the log and the app's notice say which step it was (until 3.7.2, the message alone).
+    $where = if ($_.InvocationInfo -and $_.InvocationInfo.ScriptLineNumber) { " (install.ps1 line $($_.InvocationInfo.ScriptLineNumber): $($_.InvocationInfo.Line.Trim()))" } else { '' }
+    Say "Axit was not installed: $($_.Exception.Message)$where"
     exit 1
 }
 
@@ -101,6 +103,15 @@ $appsKey = 'HKCU:\Software\Microsoft\Windows\CurrentVersion\Uninstall\Axit'
 # registered as a program for, under Windows' own "Open with" and in Settings, Default apps (B-9), with the TypeName
 # that Windows shows for them.
 $listingFile = 'apps.json'
+
+# The first line of every installation's log, before any step that can fail: what is installed on what, for a report
+# when something goes wrong.
+if (-not $Uninstall) {
+    $newExe = Join-Path $source 'Axit.exe'
+    $newVersion = if (Test-Path -LiteralPath $newExe) { (Get-Item -LiteralPath $newExe).VersionInfo.FileVersion } else { 'with no Axit.exe beside install.ps1' }
+    Say "Installing Axit $newVersion$(if ($InPlace) { ' in place, the app running' }) on Windows $([Environment]::OSVersion.Version), PowerShell $($PSVersionTable.PSVersion)"
+}
+
 function Get-AppListing {
     $program = Join-Path $source 'Axit.exe'
     $json = $null
@@ -317,7 +328,6 @@ if (-not (Test-Path -LiteralPath $sourceExe)) {
     Say "Axit.exe was not found next to this script in $source."
     exit 1
 }
-
 Stop-Background
 $sameFolder = [string]::Equals((Resolve-Path $source).Path.TrimEnd('\'), $target.TrimEnd('\'), [StringComparison]::OrdinalIgnoreCase)
 if (-not $sameFolder) {
