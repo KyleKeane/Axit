@@ -111,7 +111,6 @@ internal static class Program
             return false;
         }
 
-        AllowSetForegroundWindow(AsfwAny);
         var start = new System.Diagnostics.ProcessStartInfo(Path.Combine(AppContext.BaseDirectory, "Axit.exe"))
         {
             UseShellExecute = false,
@@ -122,11 +121,16 @@ internal static class Program
             start.ArgumentList.Add(arg);
         }
 
-        System.Diagnostics.Process.Start(start)?.Dispose();
+        using var started = System.Diagnostics.Process.Start(start);
+        if (started is not null)
+        {
+            // S-50 (security review, 2026-10-25): the right to the foreground for that process alone, not for any
+            // program of the user's that asks in the same moment (ASFW_ANY until then).
+            AllowSetForegroundWindow(started.Id);
+        }
+
         return true;
     }
-
-    private const int AsfwAny = -1;
 
     [DllImport("user32.dll")]
     private static extern bool AllowSetForegroundWindow(int processId);
@@ -134,13 +138,21 @@ internal static class Program
     /// <summary>
     /// AX-2.8: an update installed in place renames the program file that was running to Axit.old.exe, since a
     /// running file cannot be overwritten or deleted, and an app's Open with link the same way (axDown.old.exe). The next
-    /// start removes them; one still running waits for the next.
+    /// start removes them; one still running waits for the next. Only in the installation folder and only the names the
+    /// installer makes (S-51, security review 2026-10-25): Axit.exe run from a folder of downloads would otherwise delete
+    /// another program's setup.old.exe.
     /// </summary>
     private static void DeleteOldProgramFiles()
     {
+        if (!string.Equals(Path.GetFullPath(AppContext.BaseDirectory).TrimEnd('\\'), Path.GetFullPath(AppPaths.InstallFolder).TrimEnd('\\'), StringComparison.OrdinalIgnoreCase))
+        {
+            return;
+        }
+
         try
         {
-            foreach (var old in Directory.GetFiles(AppContext.BaseDirectory, "*.old*.exe"))
+            var patterns = new[] { "Axit.old*.exe" }.Concat(Dispatch.Apps.Where(app => app.OpenWith.Count > 0).Select(app => app.Name + ".old.*.exe"));
+            foreach (var old in patterns.SelectMany(pattern => Directory.GetFiles(AppContext.BaseDirectory, pattern)).Distinct(StringComparer.OrdinalIgnoreCase))
             {
                 try
                 {
