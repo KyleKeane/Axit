@@ -102,6 +102,9 @@ automated 	ests/scripts/axpreview (five scripts) passing on the same build.
 | axPreview | 1.9 (every file opens) | Passed |
 | axPreview | 5 (Details list, kinds, Ctrl+E, Open with) | Passed |
 
+Afterwards, Tab to the Details list was reported missing on a build made a minute before the merge (it had no list);
+on 3.7.2's code, rebuilt from main, the user confirmed it: "success".
+
 ## 2026-10-24, axTask and axPass (the branch `axtask`, before its merge)
 
 - Run by the user with NVDA on builds of `axtask` up to cffd363, over the day's rounds of asks; the result given as
