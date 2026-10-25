@@ -5,32 +5,18 @@ namespace AxPreview.Tests;
 /// <summary>The Details list (docs/axpreview/SPEC.md AP-6.2) over a temporary file.</summary>
 public sealed class FileDetailsTests : IDisposable
 {
-    private readonly string _folder = Path.Combine(Path.GetTempPath(), "axpreview-details-" + Guid.NewGuid().ToString("N"));
+    private readonly TempFolder _folder = new("axpreview-details");
 
-    public FileDetailsTests()
-    {
-        Directory.CreateDirectory(_folder);
-    }
-
-    public void Dispose()
-    {
-        try
-        {
-            Directory.Delete(_folder, recursive: true);
-        }
-        catch (IOException)
-        {
-        }
-    }
+    public void Dispose() => _folder.Dispose();
 
     [Fact]
     public void The_file_group_names_the_file_its_folder_size_type_and_dates()
     {
-        var path = Path.Combine(_folder, "notes.txt");
+        var path = Path.Combine(_folder.Path, "notes.txt");
         File.WriteAllBytes(path, new byte[2048]);
         var lines = FileDetails.FileGroup(path);
         Assert.Equal("Name: notes.txt", lines[0]);
-        Assert.Equal($"Folder: {_folder}", lines[1]);
+        Assert.Equal($"Folder: {_folder.Path}", lines[1]);
         Assert.Equal("Size: 2 KB, 2,048 bytes", lines[2]);
         Assert.StartsWith("Type: ", lines[3]);
         Assert.EndsWith("(.txt)", lines[3]);
@@ -57,7 +43,7 @@ public sealed class FileDetailsTests : IDisposable
     [Fact]
     public void The_list_has_the_groups_in_order_and_windows_repeats_nothing_of_the_file_group()
     {
-        var path = Path.Combine(_folder, "readme.md");
+        var path = Path.Combine(_folder.Path, "readme.md");
         File.WriteAllText(path, "# Read me");
         var lines = FileDetails.Lines(path, ["Encoding: UTF-8"]);
         Assert.Equal(FileDetails.FileHeading, lines[0]);

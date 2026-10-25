@@ -6,30 +6,11 @@ namespace AxPreview.Tests;
 /// <summary>Whether a file reads as text (docs/axpreview/SPEC.md AP-2.2), over bytes and a temporary folder.</summary>
 public sealed class TextSniffTests : IDisposable
 {
-    private readonly string _folder = Path.Combine(Path.GetTempPath(), "axpreview-sniff-" + Guid.NewGuid().ToString("N"));
+    private readonly TempFolder _folder = new("axpreview-sniff");
 
-    public TextSniffTests()
-    {
-        Directory.CreateDirectory(_folder);
-    }
+    public void Dispose() => _folder.Dispose();
 
-    public void Dispose()
-    {
-        try
-        {
-            Directory.Delete(_folder, recursive: true);
-        }
-        catch (IOException)
-        {
-        }
-    }
-
-    private string Write(string name, byte[] bytes)
-    {
-        var path = Path.Combine(_folder, name);
-        File.WriteAllBytes(path, bytes);
-        return path;
-    }
+    private string Write(string name, byte[] bytes) => _folder.File(name, bytes);
 
     [Fact]
     public void The_editors_kinds_an_empty_file_and_a_utf16_mark_are_text()
@@ -58,13 +39,13 @@ public sealed class TextSniffTests : IDisposable
         // Since 2026-10-24 a file that is not text opens through its renderer (AP-7.5).
         Assert.Null(TextSniff.Refuse(Write("tool.exe", [0x4D, 0x5A, 0x90, 0x00, 0x03, 0x00, 0x00, 0x00])));
         // A file that cannot be read is left to the reader.
-        Assert.Null(TextSniff.Refuse(Path.Combine(_folder, "gone.txt")));
+        Assert.Null(TextSniff.Refuse(Path.Combine(_folder.Path, "gone.txt")));
     }
 
     [Fact]
     public void A_text_over_the_limit_is_refused_by_size_and_any_other_file_opens()
     {
-        var path = Path.Combine(_folder, "huge.log");
+        var path = Path.Combine(_folder.Path, "huge.log");
         using (var stream = File.Create(path))
         {
             stream.Write(Encoding.ASCII.GetBytes(new string('a', 8192)));
@@ -75,7 +56,7 @@ public sealed class TextSniffTests : IDisposable
         Assert.Equal("Too large", refusal!.Title);
         Assert.Equal("huge.log is 33,554,433 bytes, over the 32 MB a window can open.", refusal.Text);
 
-        var binary = Path.Combine(_folder, "huge.bin");
+        var binary = Path.Combine(_folder.Path, "huge.bin");
         using (var stream = File.Create(binary))
         {
             stream.SetLength(TextSniff.MaxBytes + 1);
