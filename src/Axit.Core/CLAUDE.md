@@ -37,6 +37,8 @@ another project on its second use, the bullet says so.
 - `LocalPaths` (AX-9.4, AX-9.5; 2026-10-23): whether a path is on a drive of this computer, where asking whether it
   exists answers at once, and `ExistsQuickly`, which asks of a local path only, since a share can take the network's
   timeout, which no menu may wait for.
+- `FileSize` (2026-10-24; from AxFile.Core's `FolderListing.FormatSize`, axPreview): a size as people say it,
+  "512 bytes", "12 KB", "1.2 MB", "3.5 GB".
 - `PathName` (AX-9.5): `Of`, the name of a path for a title, a label or an announcement, the last part or the drive's
   root itself (four copies until 2026-10-23).
 - `RecentPaths` (AX-9.5): what every settings class does to its recent-path list, `Remember` (the newest first, once

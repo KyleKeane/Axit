@@ -136,18 +136,6 @@ public sealed class FolderListingTests : IDisposable
         Assert.Equal("24 items", FolderListing.ListName(24, 24, string.Empty));
     }
 
-    [Theory]
-    [InlineData(0, "0 bytes")]
-    [InlineData(1, "1 byte")]
-    [InlineData(512, "512 bytes")]
-    [InlineData(12 * 1024, "12 KB")]
-    [InlineData(1258291, "1.2 MB")]
-    [InlineData(3758096384, "3.5 GB")]
-    public void Sizes_read_as_people_say_them(long bytes, string expected)
-    {
-        Assert.Equal(expected, FolderListing.FormatSize(bytes));
-    }
-
     [Fact]
     public void Information_names_the_size_or_the_folder_and_the_date()
     {

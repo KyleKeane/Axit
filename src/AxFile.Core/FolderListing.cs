@@ -171,7 +171,7 @@ public static class FolderListing
             try
             {
                 var drive = new DriveInfo(entry.Path);
-                return $"{entry.Name}, {FormatSize(drive.AvailableFreeSpace)} free of {FormatSize(drive.TotalSize)}";
+                return $"{entry.Name}, {FileSize.Text(drive.AvailableFreeSpace)} free of {FileSize.Text(drive.TotalSize)}";
             }
             catch (Exception ex) when (ex is IOException or UnauthorizedAccessException or ArgumentException)
             {
@@ -179,21 +179,7 @@ public static class FolderListing
             }
         }
 
-        return $"{entry.Name}, {(entry.IsFolder ? "folder" : FormatSize(entry.Size))}, modified {entry.Modified:yyyy-MM-dd HH:mm}";
-    }
-
-    /// <summary>"512 bytes", "12 KB", "1.2 MB", "3.5 GB".</summary>
-    public static string FormatSize(long bytes)
-    {
-        const double kilo = 1024;
-        return bytes switch
-        {
-            1 => "1 byte",
-            < 1024 => $"{bytes} bytes",
-            < 1024 * 1024 => $"{Math.Round(bytes / kilo)} KB",
-            < 1024 * 1024 * 1024 => $"{bytes / (kilo * kilo):0.#} MB",
-            _ => $"{bytes / (kilo * kilo * kilo):0.#} GB",
-        };
+        return $"{entry.Name}, {(entry.IsFolder ? "folder" : FileSize.Text(entry.Size))}, modified {entry.Modified:yyyy-MM-dd HH:mm}";
     }
 
     /// <summary>The folder above; null at a drive's root (AF-3.1).</summary>
