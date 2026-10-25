@@ -75,31 +75,24 @@ public class PassTests
     [Fact]
     public void BackupsGoBesideTheDatabaseAndTheOldestGo()
     {
-        var folder = Path.Combine(Path.GetTempPath(), "axpass-backups-" + Guid.NewGuid().ToString("N"));
-        Directory.CreateDirectory(folder);
-        try
+        using var temp = new TempFolder("axpass-backups");
+        var folder = temp.Path;
+        var db = Path.Combine(folder, "mine.kdbx");
+        File.WriteAllBytes(db, [1, 2, 3]);
+        var start = new DateTime(2026, 10, 24, 15, 30, 0);
+        for (var i = 0; i < Backups.Keep + 3; i++)
         {
-            var db = Path.Combine(folder, "mine.kdbx");
-            File.WriteAllBytes(db, [1, 2, 3]);
-            var start = new DateTime(2026, 10, 24, 15, 30, 0);
-            for (var i = 0; i < Backups.Keep + 3; i++)
-            {
-                Backups.Make(db, start.AddMinutes(i));
-            }
+            Backups.Make(db, start.AddMinutes(i));
+        }
 
-            var kept = Backups.List(db);
-            Assert.Equal(Backups.Keep, kept.Count);
-            Assert.Equal(Path.Combine(folder, "mine backups", "mine 2026-10-24 15-52-00.kdbx"), kept[0]);
-            Assert.EndsWith("mine 2026-10-24 15-33-00.kdbx", kept[^1]);
-            Assert.Equal([1, 2, 3], File.ReadAllBytes(kept[0]));
-            Assert.EndsWith(" - 2.kdbx", Backups.Make(db, start.AddMinutes(Backups.Keep + 2)));
-            Assert.True(Backups.Changes("edit"));
-            Assert.False(Backups.Changes("show"));
-        }
-        finally
-        {
-            Directory.Delete(folder, recursive: true);
-        }
+        var kept = Backups.List(db);
+        Assert.Equal(Backups.Keep, kept.Count);
+        Assert.Equal(Path.Combine(folder, "mine backups", "mine 2026-10-24 15-52-00.kdbx"), kept[0]);
+        Assert.EndsWith("mine 2026-10-24 15-33-00.kdbx", kept[^1]);
+        Assert.Equal([1, 2, 3], File.ReadAllBytes(kept[0]));
+        Assert.EndsWith(" - 2.kdbx", Backups.Make(db, start.AddMinutes(Backups.Keep + 2)));
+        Assert.True(Backups.Changes("edit"));
+        Assert.False(Backups.Changes("show"));
     }
 
     /// <summary>The tool itself on a throwaway database, when KeePassXC is installed (not on the build servers, where it passes without running).</summary>
@@ -111,24 +104,17 @@ public class PassTests
             return;
         }
 
-        var folder = Path.Combine(Path.GetTempPath(), "axpass-tests-" + Guid.NewGuid().ToString("N"));
-        Directory.CreateDirectory(folder);
-        try
-        {
-            var db = Path.Combine(folder, "test.kdbx");
-            const string pw = "test-master-1";
-            Assert.True(KeePassCli.Run(cli, KeePassCli.On("db-create", db, ["-p"]), [pw, pw]).Succeeded);
-            Assert.True(KeePassCli.Run(cli, KeePassCli.On("mkdir", db, null, "Email"), [pw]).Succeeded);
-            Assert.True(KeePassCli.Run(cli, KeePassCli.On("add", db, ["-u", "sam", "-p"], "Email/Gmail"), [pw, "entry-1", "entry-1"]).Succeeded);
-            var tree = PassTree.Parse(KeePassCli.Run(cli, KeePassCli.On("ls", db, ["-R", "-f"]), [pw]).Output);
-            Assert.True(tree.HasEntry("Email/Gmail"));
-            var entry = EntryFields.Parse(KeePassCli.Run(cli, KeePassCli.On("show", db, null, "Email/Gmail"), [pw]).Output);
-            Assert.Equal("sam", EntryFields.ValueOf(entry, EntryFields.UserName));
-            Assert.False(KeePassCli.Run(cli, KeePassCli.On("ls", db), ["wrong"]).Succeeded);
-        }
-        finally
-        {
-            Directory.Delete(folder, recursive: true);
-        }
+        using var temp = new TempFolder("axpass-tests");
+        var folder = temp.Path;
+        var db = Path.Combine(folder, "test.kdbx");
+        const string pw = "test-master-1";
+        Assert.True(KeePassCli.Run(cli, KeePassCli.On("db-create", db, ["-p"]), [pw, pw]).Succeeded);
+        Assert.True(KeePassCli.Run(cli, KeePassCli.On("mkdir", db, null, "Email"), [pw]).Succeeded);
+        Assert.True(KeePassCli.Run(cli, KeePassCli.On("add", db, ["-u", "sam", "-p"], "Email/Gmail"), [pw, "entry-1", "entry-1"]).Succeeded);
+        var tree = PassTree.Parse(KeePassCli.Run(cli, KeePassCli.On("ls", db, ["-R", "-f"]), [pw]).Output);
+        Assert.True(tree.HasEntry("Email/Gmail"));
+        var entry = EntryFields.Parse(KeePassCli.Run(cli, KeePassCli.On("show", db, null, "Email/Gmail"), [pw]).Output);
+        Assert.Equal("sam", EntryFields.ValueOf(entry, EntryFields.UserName));
+        Assert.False(KeePassCli.Run(cli, KeePassCli.On("ls", db), ["wrong"]).Succeeded);
     }
 }
