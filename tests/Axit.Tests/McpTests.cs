@@ -157,7 +157,11 @@ public sealed class McpTests
     [InlineData(@"C:\Windows\System32\cmd.exe", false)]
     [InlineData(@"C:\Windows\System32\WindowsPowerShell\v1.0\POWERSHELL.EXE", false)]
     [InlineData(@"C:\Python\python.exe", false)]
+    [InlineData(@"C:\Program Files\Git\usr\bin\bash.exe", false)]
+    [InlineData(@"C:\Windows\System32\wsl.exe", false)]
+    [InlineData(@"C:\Program Files\dotnet\dotnet.exe", false)]
     [InlineData(@"D:\Tools\claude\claude.exe", true)]
+    [InlineData(@"C:\Program Files\nodejs\node.exe", true)]
     public void Script_hosts_are_never_paired(string program, bool may)
     {
         Assert.Equal(may, McpAccess.MayPair(program));

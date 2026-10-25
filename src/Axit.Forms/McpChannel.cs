@@ -34,7 +34,7 @@ internal sealed class McpChannel
     private readonly string _name = Prefix + Convert.ToHexStringLower(RandomNumberGenerator.GetBytes(8));
 
     /// <summary>What the window announced lately, the last 50, taken by <c>said</c>; recorded only from the first call a client proved the key for, so that nothing said before any access is handed over.</summary>
-    private readonly Queue<string> _said = new();
+    private readonly Queue<(DateTime At, string Text)> _said = new();
     private readonly object _gate = new();
     private volatile bool _recording;
 
@@ -53,7 +53,7 @@ internal sealed class McpChannel
 
             lock (_gate)
             {
-                _said.Enqueue(text);
+                _said.Enqueue((DateTime.UtcNow, text));
                 while (_said.Count > 50)
                 {
                     _said.Dequeue();
@@ -126,6 +126,13 @@ internal sealed class McpChannel
         using var writer = new StreamWriter(pipe, new UTF8Encoding(false)) { AutoFlush = true };
         if (!McpAccess.Enabled)
         {
+            // S-49: nothing heard while access is off is kept for a later client.
+            _recording = false;
+            lock (_gate)
+            {
+                _said.Clear();
+            }
+
             writer.WriteLine(JsonSerializer.Serialize(new { error = "Axit's AI tools access is off: Axit menu, AI tools, Let AI tools read and open Axit." }, Plain));
             return;
         }
@@ -268,9 +275,12 @@ internal sealed class McpChannel
 
     private object Said()
     {
+        // S-49 (security review, 2026-10-25): only what was said since the setting last changed, so that what a window
+        // heard while access was off, or before this client was paired, is never handed over, in any Axit process.
+        var since = McpAccess.ChangedAtUtc;
         lock (_gate)
         {
-            var said = _said.ToArray();
+            var said = _said.Where(entry => entry.At > since).Select(entry => entry.Text).ToArray();
             _said.Clear();
             return said;
         }

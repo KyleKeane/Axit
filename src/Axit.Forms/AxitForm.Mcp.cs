@@ -172,7 +172,14 @@ public abstract partial class AxitForm
         };
         if (script)
         {
-            start.Arguments = "/d /s /c \"\"" + claude + "\" " + string.Join(' ', arguments.Select(a => a.Contains(' ') ? $"\"{a}\"" : a)) + "\"";
+            // S-53 (security review, 2026-10-25): cmd reads its special characters even inside quotes, so a path or an
+            // argument holding one (an Axit.exe under C:\R&D) is refused rather than run; every argument is quoted.
+            if (SystemPrograms.HasCmdSpecials(claude) || arguments.Any(SystemPrograms.HasCmdSpecials))
+            {
+                return (-1, "a path holds one of cmd's special characters (& | < > ^ % ! and the like), so claude.cmd is not run with it; add Axit by hand with the command line shown");
+            }
+
+            start.Arguments = "/d /s /c \"\"" + claude + "\" " + string.Join(' ', arguments.Select(a => $"\"{a}\"")) + "\"";
         }
         else
         {

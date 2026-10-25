@@ -29,10 +29,20 @@ public static class McpAccess
 {
     /// <summary>
     /// Programs that are never paired (MC-6.4): hosts that run whatever script they are given, so that a pairing would
-    /// trust every script; a client is a program of its own (Claude Code's).
+    /// trust every script; a client is a program of its own (Claude Code's). Node stays allowed, since Claude Code
+    /// installed through npm runs as node (MC-6.4); the shells, terminals and runtimes after it came with the security
+    /// review of 2026-10-25 (S-52).
     /// </summary>
     public static readonly IReadOnlyList<string> RefusedHosts =
-        ["cmd.exe", "powershell.exe", "pwsh.exe", "wscript.exe", "cscript.exe", "mshta.exe", "rundll32.exe", "regsvr32.exe", "python.exe", "pythonw.exe", "py.exe", "explorer.exe", "conhost.exe"];
+    [
+        "cmd.exe", "powershell.exe", "pwsh.exe", "wscript.exe", "cscript.exe", "mshta.exe", "rundll32.exe", "regsvr32.exe",
+        "python.exe", "pythonw.exe", "py.exe", "explorer.exe", "conhost.exe",
+        "bash.exe", "sh.exe", "wsl.exe", "mintty.exe", "git-bash.exe", "wt.exe", "openconsole.exe", "dotnet.exe",
+        "perl.exe", "ruby.exe", "java.exe", "javaw.exe", "bun.exe", "deno.exe",
+    ];
+
+    /// <summary>When the setting last changed (turned on or off, a pairing, Forget): what a window heard before it is never handed to a client (S-49).</summary>
+    public static DateTime ChangedAtUtc => File.Exists(AppPaths.McpFile) ? File.GetLastWriteTimeUtc(AppPaths.McpFile) : DateTime.MaxValue;
 
     /// <summary>Whether a program may be paired at all.</summary>
     public static bool MayPair(string program) =>
