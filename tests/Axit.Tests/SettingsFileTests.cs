@@ -58,51 +58,38 @@ public sealed class SettingsFileTests
     [Fact]
     public void Broken_file_gives_defaults_and_names_the_file()
     {
-        var folder = TempFolder();
+        using var temp = new TempFolder("axit-tests");
+        var folder = temp.Path;
         var path = Path.Combine(folder, "sample.json");
-        Directory.CreateDirectory(folder);
-        try
-        {
-            File.WriteAllText(path, "{ not json");
-            var loaded = SettingsFile.Load<SampleSettings>(path, out var error);
-            Assert.NotNull(error);
-            Assert.Contains(path, error);
-            Assert.Equal(3, loaded.Size);
+        File.WriteAllText(path, "{ not json");
+        var loaded = SettingsFile.Load<SampleSettings>(path, out var error);
+        Assert.NotNull(error);
+        Assert.Contains(path, error);
+        Assert.Equal(3, loaded.Size);
 
-            // The app saves soon after loading: the broken file is kept for mending, and the error says where.
-            Assert.Equal("{ not json", File.ReadAllText(path + ".bad"));
-            Assert.Contains(path + ".bad", error);
-        }
-        finally
-        {
-            Directory.Delete(folder, true);
-        }
+        // The app saves soon after loading: the broken file is kept for mending, and the error says where.
+        Assert.Equal("{ not json", File.ReadAllText(path + ".bad"));
+        Assert.Contains(path + ".bad", error);
     }
 
     [Fact]
     public void Old_file_is_copied_once_and_never_over_a_new_one()
     {
-        var folder = TempFolder();
+        using var temp = new TempFolder("axit-tests");
+        var folder = temp.Path;
         var oldPath = Path.Combine(folder, "old", "settings.json");
         var path = Path.Combine(folder, "new", "app.json");
         Directory.CreateDirectory(Path.GetDirectoryName(oldPath)!);
-        try
-        {
-            SettingsFile.TakeOverOldFile(oldPath, path);
-            Assert.False(File.Exists(path));
+        SettingsFile.TakeOverOldFile(oldPath, path);
+        Assert.False(File.Exists(path));
 
-            File.WriteAllText(oldPath, "{ \"size\": 7 }");
-            SettingsFile.TakeOverOldFile(oldPath, path);
-            Assert.Equal(7, SettingsFile.Load<SampleSettings>(path, out _).Size);
-            Assert.True(File.Exists(oldPath));
+        File.WriteAllText(oldPath, "{ \"size\": 7 }");
+        SettingsFile.TakeOverOldFile(oldPath, path);
+        Assert.Equal(7, SettingsFile.Load<SampleSettings>(path, out _).Size);
+        Assert.True(File.Exists(oldPath));
 
-            File.WriteAllText(path, "{ \"size\": 9 }");
-            SettingsFile.TakeOverOldFile(oldPath, path);
-            Assert.Equal(9, SettingsFile.Load<SampleSettings>(path, out _).Size);
-        }
-        finally
-        {
-            Directory.Delete(folder, true);
-        }
+        File.WriteAllText(path, "{ \"size\": 9 }");
+        SettingsFile.TakeOverOldFile(oldPath, path);
+        Assert.Equal(9, SettingsFile.Load<SampleSettings>(path, out _).Size);
     }
 }

@@ -14,8 +14,8 @@ public sealed class SystemProgramsTests
     [Fact]
     public void A_relative_path_entry_is_never_searched_as_it_would_be_the_current_folder()
     {
-        var folder = Path.Combine(Path.GetTempPath(), "axit-path-" + Guid.NewGuid().ToString("N"));
-        Directory.CreateDirectory(folder);
+        using var temp = new TempFolder("axit-path");
+        var folder = temp.Path;
         var current = Environment.CurrentDirectory;
         try
         {
@@ -27,7 +27,6 @@ public sealed class SystemProgramsTests
         finally
         {
             Environment.CurrentDirectory = current;
-            Directory.Delete(folder, recursive: true);
         }
     }
 }
