@@ -789,7 +789,7 @@ public sealed partial class FileForm
         }
         catch (Win32Exception ex) when (ex.NativeErrorCode == ErrorNoAssociation)
         {
-            if (Shell.OpenWith(Handle, entry.Path) is { } reason)
+            if (WindowsOpenWith.Show(Handle, entry.Path) is { } reason)
             {
                 Failed("Open with failed", reason);
             }

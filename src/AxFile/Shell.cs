@@ -29,9 +29,6 @@ internal static class Shell
     private const int VkDown = 0x28;
     private const uint SeeMaskInvokeIdList = 0x0000000C;
     private const uint SeeMaskFlagNoUi = 0x00000400;
-    private const int OaifAllowRegistration = 0x1;
-    private const int OaifRegisterExt = 0x2;
-    private const int OaifExec = 0x4;
     private const uint CmicMaskUnicode = 0x00004000;
     private const uint CmicMaskPtInvoke = 0x20000000;
     private const uint GcsVerbW = 0x00000004;
@@ -53,14 +50,6 @@ internal static class Shell
 
     /// <summary>The shell's menu being tracked, for <see cref="ForwardMenuMessage"/>; null otherwise.</summary>
     private static object? s_tracking;
-
-    /// <summary>The Windows "How do you want to open this file?" dialog for a file, and the program chosen runs it; the reason when Windows refuses, null otherwise.</summary>
-    public static string? OpenWith(nint owner, string path)
-    {
-        var info = new OpenAsInfo { File = path, Flags = OaifAllowRegistration | OaifRegisterExt | OaifExec };
-        var hr = SHOpenWithDialog(owner, in info);
-        return hr < 0 && hr != ErrorCancelled ? Reason(hr) : null;
-    }
 
     /// <summary>The Windows Properties sheet of a file or a folder, the one File Explorer shows; the reason when Windows refuses, null otherwise.</summary>
     public static string? Properties(nint owner, string path)
@@ -444,9 +433,6 @@ internal static class Shell
     [DllImport("shell32.dll", ExactSpelling = true)]
     private static extern int SHBindToParent(nint pidl, in Guid riid, out IShellFolder folder, out nint child);
 
-    [DllImport("shell32.dll", CharSet = CharSet.Unicode, ExactSpelling = true)]
-    private static extern int SHOpenWithDialog(nint owner, in OpenAsInfo info);
-
     [DllImport("shell32.dll", ExactSpelling = true)]
     private static extern int SHGetDesktopFolder(out IShellFolder folder);
 
@@ -475,18 +461,6 @@ internal static class Shell
 
     [DllImport("user32.dll", ExactSpelling = true)]
     private static extern uint TrackPopupMenuEx(nint menu, uint flags, int x, int y, nint owner, nint parameters);
-
-    [StructLayout(LayoutKind.Sequential, CharSet = CharSet.Unicode)]
-    private struct OpenAsInfo
-    {
-        [MarshalAs(UnmanagedType.LPWStr)]
-        public string File;
-
-        [MarshalAs(UnmanagedType.LPWStr)]
-        public string? Class;
-
-        public int Flags;
-    }
 
     [StructLayout(LayoutKind.Sequential, CharSet = CharSet.Unicode)]
     private struct ShellExecuteInfo

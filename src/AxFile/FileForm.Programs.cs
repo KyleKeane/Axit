@@ -142,7 +142,7 @@ public sealed partial class FileForm
             return;
         }
 
-        if (Shell.OpenWith(Handle, entry.Path) is { } reason)
+        if (WindowsOpenWith.Show(Handle, entry.Path) is { } reason)
         {
             Failed("Open with failed", reason);
         }
