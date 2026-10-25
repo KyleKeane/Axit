@@ -60,7 +60,8 @@ the restart by the app itself (2.3.0).
   (today "Not a text file"), and an Open with table of its own, file type to app, so that a user can route every file
   through axPreview for one screen-reader flow and go on to the app from there. The user expects to make the single
   apps the Windows default for some types, saving the extra key; axPreview's table is for those who want it for all.
-  Not specified yet.
+  The two panes (content and details) and the renderer table were specified the same day on the branch `preview`
+  (`docs/axpreview/SPEC.md` AP-6, AP-7); the user's Open with table is still an open question there (§9).
 - axDown and axJSON, a file changed outside the editor (asked and built 2026-10-18, AD-3.6): compared when the window
   becomes active again; reloaded with the caret kept when nothing is unsaved, said once otherwise, and Save offers
   Reload and lose mine. No watcher thread, no merging. A watcher for live reload while the window stays active is

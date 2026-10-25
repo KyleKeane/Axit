@@ -21,6 +21,13 @@ from File Explorer (Open with Axit on a file, and as the file's default program 
 Start menu, the Axit menu and the command line; a file opened while an axPreview window is open goes into that window
 rather than a new one (AP-1.2). It works entirely offline (bundle G6).
 
+Since the user's direction of 2026-10-24 axPreview is the general viewer, offered by Windows for every file type: two
+panes, the **content** above (the read-only text as before) and the **details** under it, a list of everything that
+can be read about the file (its size, its format, its dates, and whatever Windows' own property system and the
+file's renderer know). What the content pane shows is chosen by the file's kind through one table of **renderers**
+(AP-7): a text file's text, an archive's listing, a document's text, and for any other file the readable text inside
+it, so that every file shows something and the details say what it is.
+
 ## 2. Goals and non-goals
 
 - **G1 One text, native.** A read-only EDIT control NVDA reads line by line, a status bar, the bundle's notices
@@ -29,11 +36,12 @@ rather than a new one (AP-1.2). It works entirely offline (bundle G6).
   axPreview and edited in axDown is the same text under the same keys.
 - **G3 One viewer.** axFile hands files to the axPreview window that is open; a second window is a deliberate act (the
   Axit menu's New window).
-- **G4 Streamlined.** Text files in version one; other kinds wait (§9).
+- **G4 Every file, as text.** Text files in version one (3.3.1); since 2026-10-24 every kind, each through its
+  renderer into the same read-only text (AP-D6), with the details pane beside it in the reading order (AP-6).
 - **G5 Nothing spoken unprompted** (AX-7.3).
-- **Non-goals.** Editing of any kind (Ctrl+E is the way out); images, PDFs, office documents, archives (§9; axFile's
-  Enter hands them to Windows' own program); a rendering of Markdown (the text is the text; the navigation keys are
-  the structure); syntax colouring; tabs or a list of open files.
+- **Non-goals.** Editing of any kind (Ctrl+E is the way out); pictures, sound or video shown or played (the details
+  say what they are; axMedia plays, axOCR is planned for the text in a picture); a rendering of Markdown (the text is
+  the text; the navigation keys are the structure); syntax colouring; tabs or a list of open files.
 
 ## 3. Scenarios
 
@@ -147,16 +155,78 @@ text file", "Too large", Keyboard shortcuts, User guide, About, the update notic
 - AP-5.3 The log is `%LOCALAPPDATA%\Axit\logs\axpreview.log`: the start, the exit, the files that could not be read
   with Windows' message; no file names.
 
+### AP-6 The details pane (2026-10-24)
+
+- AP-6.1 **Two panes.** The content, the read-only text of AP-2, above; the details under it, the bundle's list
+  (`AxitList`, AX-8.6) named "Details", a third of the window's height, always there ("No file" as its one line in an
+  untitled window, "Reading details" until the read is done). Tab, Shift+Tab, F6 and Shift+F6 move between the two
+  (the read-only text takes no Tab); a file opened, reloaded or handed over puts the focus on the content, as now.
+  Folder-free: a folder handed to axPreview is the notice "Not a file", as now.
+- AP-6.2 **What it lists**, one line each, "Name: value", in three groups with a heading line each, as axFile's
+  Actions list has sections:
+  1. **File:** Name, Folder, Size ("12.1 KB, 12,345 bytes"), Type (Windows' name for the kind, "Markdown File", and
+     the extension), Modified, Created, Accessed (the dates as the bundle writes them, with the time), Attributes
+     (Read-only, Hidden, System, Archive, Compressed, Encrypted, Offline, a link; the line left out when none is set).
+  2. **Contents:** what the renderer found (AP-7): for a text, the encoding, the byte order mark, the line ending,
+     the lines, the words and the characters; for an archive, the entries, the files and folders, the packed and
+     unpacked sizes; for a document, the paragraphs or slides; for any other file, how much readable text was found.
+  3. **Windows:** every other property Windows' property system holds for the file, by its own display name and
+     formatted as Windows formats it (`SHGetPropertyStoreFromParsingName`, `PSGetPropertyDescription`,
+     `PSFormatForDisplay`): a picture's dimensions and resolution, a sound's length, bit rate, artist and album, a
+     video's frame size and rate, a document's author, title, pages and words, a program's version and company,
+     whatever the kind's property handler gives. Empty values and the ones already listed above are left out.
+- AP-6.3 **Keys in the pane:** the list's own (the arrows, Home, End, type-ahead, the edge earcon); Ctrl+C copies the
+  line's value ("Copied", the value alone, without its name); Enter on the Folder line opens the folder in axFile with
+  the file selected (AP-1.4's way out). Nothing is spoken on an arrow key beyond NVDA's own reading of the line.
+- AP-6.4 **Read off the UI thread** (bundle rule 3): the file group from the file system, the contents from the
+  renderer, the Windows group from the property store on a thread of its own (an STA thread, the property handlers
+  being COM objects), each filling its group when it is done; a read that comes back after another file was opened is
+  dropped. A property store that takes more than five seconds (a file on a slow share) leaves the Windows group with
+  the line "Windows' details took too long", the rest shown.
+- AP-6.5 Reload (F5) and the reload on coming back read the details again with the text; the line the user is on stays
+  by its name.
+
+### AP-7 The renderers (2026-10-24)
+
+- AP-7.1 **One table** (`Renderers` in `AxPreview.Core`): each renderer has a name ("Text", "Zip archive"), the file
+  types it takes by extension, an optional test of the first bytes (a zip's "PK"), and a function from the file to
+  what the content pane shows, a text and the lines of the Contents group (AP-6.2). The first renderer that takes a file
+  shows it; the last takes every file. A new kind is one entry and its tests; nothing in the window changes.
+- AP-7.2 **The renderers of the first build**, in the table's order:
+  1. **Text:** a file that reads as text by AP-2.2's rule, shown as before, with every key of AP-2.
+  2. **Word document** (`.docx`), **PowerPoint** (`.pptx`), **OpenDocument text** (`.odt`): the document's text, a
+     paragraph to a line, read from the XML inside the file (`System.IO.Compression`, no package added): headings
+     written as Markdown headings ("# ", "## ") where the document marks them, a slide as "## Slide 3" followed by
+     its text, so that Ctrl+H and the level keys move by heading and slide; tables as their cells separated by tabs.
+  3. **Zip archive** (`.zip` and any file that starts as one): the listing, one entry to a line, the path, the
+     unpacked size and the date ("docs/SPEC.md, 41 KB, 2026-10-24 14:02"), folders first.
+  4. **Picture, sound, video:** a short text that names the kind and says that its details are in the pane below, and
+     for sound and video that Ctrl+E plays it in axMedia; the content of these kinds is not text and their readable
+     strings are noise.
+  5. **Anything else:** the readable text inside the file, the runs of four or more printable characters (ASCII and
+     UTF-16) one to a line, under a first line "No preview for this kind yet; the readable text inside it follows.",
+     up to the editors' 32 MB of text, then "Shown up to 32 MB." A file with no readable text says so in one line.
+- AP-7.3 **The way out follows the renderer** (Ctrl+E, AP-1.4): Edit in axDown or axJSON for a text; Play in axMedia
+  for sound and video; Open with Windows' program for everything else (the program Windows has for the kind, axFile's
+  Enter). The File menu's item is named after it as the file opens.
+- AP-7.4 The status bar's right part is the renderer's: "Line n, Column m · encoding · line ending" for a text,
+  "Line n, Column m · Word document" for the others.
+- AP-7.5 The 32 MB file limit (AP-2.2) is the text renderer's; the others read the file as far as they need (an archive
+  its directory, a document its text parts) and stop at 32 MB of text. "Not a text file" goes: every file opens.
+
 ## 5. User interface
 
-The menu bar; the read-only text filling the window; the question area under it for Go to line; the status bar. The
-notices are the bundle's overlay in place of the text (AX-7.2). The window has the accessible role Window (AX-7.1).
+The menu bar; the read-only text above, the Details list under it (AP-6); the question area under the text for Go to
+line; the status bar. The notices are the bundle's overlay in place of the panes (AX-7.2). The window has the
+accessible role Window (AX-7.1).
 
 ## 6. Architecture
 
 ```
 src/AxPreview.Core/  class library (net10.0): TextSniff (whether a file's first bytes read as text, and the refusal
-                     texts; axFile's Preview.IsText moved); references Axit.Core
+                     texts; axFile's Preview.IsText moved); Renderers and Rendered (AP-7: the table, the text, the
+                     archive, the document, the media and the readable-text renderers); FileDetails (AP-6.2: the
+                     File group, and the Windows group through the property store by P/Invoke); references Axit.Core
 src/AxPreview/       class library (net10.0-windows): AxPreviewApp (Run, Usage, the hand-over to an open window, the
                      EditorApp record with ReadOnly and Refuse), AxPreviewKeys (axDown's navigation letters, the
                      viewer's keys from EditorKeys.Viewer), HelpText; references AxPreview.Core, Axit.Core, Axit.Forms
@@ -169,7 +239,10 @@ The window is `Axit.Forms/TextEditorForm`, the text editor shell, in its read-on
 viewer's commands (Reload, Edit in the editor, `l` for the line, the hand-over received through `AppMessage`); the
 settings are the editors' `EditorSettings` in `axpreview.json`. Nothing of the shell is copied; axDown and axJSON are
 unchanged. What the viewer adds to the shell is marked with the flag in the shell's code, the one place a change to
-the viewer is made (`src/Axit.Forms/CLAUDE.md`).
+the viewer is made (`src/Axit.Forms/CLAUDE.md`). Since 2026-10-24 the record also carries the viewer's two
+functions in place of `Refuse`: `Render` (a path to the text and the renderer, AP-7) and `Details` (a path to the
+details' lines, AP-6), and the shell's read-only mode adds the Details list under the text when `Details` is set
+(AP-D8).
 
 ## 7. Design decisions
 
@@ -192,11 +265,25 @@ the viewer is made (`src/Axit.Forms/CLAUDE.md`).
   window on the shared pieces: the smaller change (B-10), and the editors' reload on activation, Go to line, status
   bar, word wrap, recent files, find and jumps come for nothing. Nothing is copied; axDown and axJSON are unchanged.
 - **AP-D5 The hand-over is a window message** (axMedia's AM-D4), the same shared piece.
+- **AP-D6 Every kind becomes text** (2026-10-24). The content pane stays the one read-only EDIT control for every
+  file, and a renderer turns a kind into text: NVDA reads one control the same way whatever the file, every reading
+  key works on every kind, and no web view, picture control or third-party library enters the bundle (B-10).
+- **AP-D7 The details come from Windows and the renderer.** Windows' property system already knows a picture's
+  dimensions, a song's length and a document's author for every kind it has a handler for, through one API; the
+  pane lists all of it, the Details tab of File Explorer's Properties as one list, with what the renderer counted.
+- **AP-D8 Two panes in the shell's read-only mode**, not a window of axPreview's own: the details list is one more
+  control of the read-only mode, set by a function on the record, so AP-D4 holds and axDown and axJSON are unchanged.
+- **AP-D9 The routing is one table, first match** (the user's ask, "a way to route the correct file type to the
+  right renderer"): the renderers in order, each by its extensions and its first bytes, the last taking every file,
+  so that what opens a kind is one place to read and change.
 
 ## 8. Testing
 
 - `tests/AxPreview.Tests`: the text rule over bytes and over files in a temporary folder (`TextSniffTests`); the
-  settings are the editors' (`EditorSettingsTests` in `tests/Axit.Tests`).
+  settings are the editors' (`EditorSettingsTests` in `tests/Axit.Tests`); since 2026-10-24 `RenderersTests` (the
+  table's choice for each kind, and each renderer over files made in a temporary folder: a .docx, a .pptx and an .odt
+  written as their XML in a zip, a zip, a binary with strings in it, an empty file) and `FileDetailsTests` (the File
+  group of a temporary file, and that the Windows group of a text file holds at least its size and type).
 - `docs/axpreview/nvda-test-plan.md`: opening from axFile (Shift+Enter and Item → Preview, with and without a window
   open), from File Explorer (Open with Axit, and as the default for a kind) and the Start menu; the reading keys and the jumps on the tutorial file; `l`, Go to line, find; a
   binary file; a changed-on-disk reload; Ctrl+E into the editor; two viewer windows.
@@ -205,7 +292,11 @@ the viewer is made (`src/Axit.Forms/CLAUDE.md`).
 
 - The caret handed to the editor on Ctrl+E (a line argument for axDown and axJSON on the command line).
 - JSON's navigation keys in the viewer, once axJSON's outline is shared on this second use.
-- Other kinds: a PDF's text, an image's description, an archive's listing; each a way of reading that NVDA reads well.
+- Other kinds: a PDF's text (Windows has no text API for PDF; a reader of its own is a larger piece), an Excel
+  workbook's sheets, an e-book's chapters (an EPUB is a zip of XHTML), a picture's text through axOCR (planned).
+- The user's Open with table (2026-10-24): a table of axPreview's own, file type to app, so that a user who routes
+  every file through axPreview goes on to the app of their choice from there; Ctrl+E's way out (AP-7.3) is its first
+  step.
 - Markdown links followed (Enter on a link opening the browser or the linked file in this window).
 
 ## 10. Status
@@ -217,3 +308,5 @@ the viewer is made (`src/Axit.Forms/CLAUDE.md`).
   on the command line still goes to its editor (AP-1.1). axFile handed over and lost its preview pane in the next
   step of the inventory, the same day.
 - 2026-10-22: released in 3.3.1 (3.3.0 tagged, not published). The whole NVDA test plan marked passed at the user's word, no step reported failing; the record by step is `docs/axit/nvda-test-record.md`.
+- 2026-10-24: the general viewer specified at the user's ask on the branch `preview` (AP-6, AP-7, AP-D6 to AP-D9):
+  two panes, the details, the renderers. Not built yet.
