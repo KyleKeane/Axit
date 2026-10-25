@@ -1,3 +1,4 @@
+using Axit.Core;
 using AxProcess.Core;
 
 namespace AxProcess.Tests;
@@ -75,11 +76,12 @@ public sealed class ProcessTableTests
     }
 
     [Theory]
-    [InlineData(0L, "0 KB")]
+    [InlineData(0L, "0 bytes")]
     [InlineData(900L * 1024, "900 KB")]
     [InlineData(350L * 1024 * 1024, "350 MB")]
+    [InlineData(367420211L, "350.4 MB")]
     [InlineData(1288490189L, "1.2 GB")]
-    public void Sizes_read_as_spoken(long bytes, string expected) => Assert.Equal(expected, SizeText.Format(bytes));
+    public void Sizes_read_as_spoken(long bytes, string expected) => Assert.Equal(expected, FileSize.Text(bytes));
 
     [Fact]
     public void The_system_busy_share_leaves_the_idle_time_out()

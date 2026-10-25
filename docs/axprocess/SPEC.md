@@ -74,7 +74,7 @@ process after a question. Nothing refreshes by itself: F5 reads the computer aga
 ### PR-3 Processes
 
 - PR-3.1 Each process is "<name>, <memory>, <n>% CPU, process <id>": the name without `.exe`, the working set
-  ("350 MB", "1.2 GB", "900 KB"), the processor use over one second, rounded to a whole percent of the whole computer
+  ("350 MB", "350.4 MB", "1.2 GB", "900 KB": the bundle's `Axit.Core/FileSize`, one decimal from megabytes up, since 2026-10-25, the format every app says sizes in; whole megabytes before), the processor use over one second, rounded to a whole percent of the whole computer
   ("0% CPU" for an idle one; left out for a process Windows does not let the user measure), and the process ID.
 - PR-3.2 Sort by ▸ Memory (the default), Processor, Name (View menu; the choice is kept, PR-7.1). Memory and processor
   sort the largest first; ties go by name.

@@ -1,5 +1,9 @@
 # Changelog
 
+## 3.7.4 - 2026-10-25
+
+- axProcess: sizes are said as in every other app, one decimal from megabytes up ("350.4 MB"); they were whole megabytes.
+
 ## 3.7.3 - 2026-10-25
 
 - axClaude: in a side answer's text (`/btw`), the letters Claude names work as the buttons do: c copies, f forks. A long answer that arrives in parts keeps its first lines in the text instead of losing them off the top of the console.

@@ -1,3 +1,4 @@
+using Axit.Core;
 using System.ComponentModel;
 using System.Diagnostics;
 
@@ -11,8 +12,8 @@ public sealed record ProcessRow(int Id, string Name, long Memory, double? Proces
 {
     /// <summary>"chrome, 350 MB, 2% CPU, process 1234"; without the CPU part when it is unknown.</summary>
     public string Label => Processor is { } cpu
-        ? $"{Name}, {SizeText.Format(Memory)}, {Math.Round(cpu):0}% CPU, process {Id}"
-        : $"{Name}, {SizeText.Format(Memory)}, process {Id}";
+        ? $"{Name}, {FileSize.Text(Memory)}, {Math.Round(cpu):0}% CPU, process {Id}"
+        : $"{Name}, {FileSize.Text(Memory)}, process {Id}";
 }
 
 /// <summary>How the Processes view is ordered (PR-3.2).</summary>

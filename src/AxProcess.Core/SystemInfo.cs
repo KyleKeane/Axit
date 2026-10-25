@@ -1,3 +1,4 @@
+using Axit.Core;
 using System.ComponentModel;
 using System.Diagnostics;
 using System.Runtime.InteropServices;
@@ -67,7 +68,7 @@ public static class SystemInfo
         var lines = new List<string>
         {
             $"Process ID {row.Id}",
-            $"Memory {SizeText.Format(row.Memory)}",
+            $"Memory {FileSize.Text(row.Memory)}",
         };
         if (row.Processor is { } cpu)
         {
