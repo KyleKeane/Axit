@@ -252,7 +252,11 @@ public sealed partial class TextEditorForm : AxitForm
         items.Add(new ToolStripMenuItem("&Copy", null, (_, _) => _editor.Copy()) { ShortcutKeyDisplayString = "Ctrl+C" });
         if (!_app.ReadOnly)
         {
-            items.Add(new ToolStripMenuItem("&Paste", null, (_, _) => _editor.Paste()) { ShortcutKeyDisplayString = "Ctrl+V" });
+            items.Add(new ToolStripMenuItem("&Paste", null, (_, _) =>
+            {
+                _editor.Paste();
+                SayPasteAfter(_editor);
+            }) { ShortcutKeyDisplayString = "Ctrl+V" });
         }
 
         items.Add(new ToolStripMenuItem("Select &all", null, (_, _) => _editor.SelectAll()) { ShortcutKeyDisplayString = "Ctrl+A" });

@@ -589,6 +589,10 @@ These are the rules of `docs/axclaude/SPEC.md` that are not about Claude; app sp
 - AX-7.3 The caret never moves except as the direct result of the user's own command. The result of a navigation
   command is announced through a UI Automation notification, joined into one notification when several things arrive
   at once. Nothing speaks on a plain arrow key; information is given on demand.
+  A paste into an editable text, by Ctrl+V, Shift+Insert or an Edit menu's Paste, is said once the control has done it
+  (2026-10-25, the user's ask: the edit control's own paste is silent): "Pasted", "Pasted, 3 lines" for several into a
+  text of several lines, "Nothing to paste as text" when the clipboard holds none; never the text itself, which may be a
+  password (`AxitForm.SayPasteAfter`). A read-only text pastes nothing and says nothing.
 - AX-7.4 Enter and Escape reach a notice's buttons from every control (`AcceptButton`, `CancelButton`); handled keys
   set `SuppressKeyPress`; NVDA's own key combinations are never intercepted and no global keyboard hook is installed.
 - AX-7.5 The UI thread never blocks on I/O; background work is marshalled to the UI thread and batched.

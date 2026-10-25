@@ -405,6 +405,15 @@ public abstract partial class AxitForm : Form
                 return true;
         }
 
+        // AX-7.3 (2026-10-25, the user's ask): a paste into an editable text is said, since the edit control's own
+        // paste makes no sound and NVDA says nothing. The edit control's keys, not the bundle's: the paste is the
+        // control's, and axFile's list keeps Ctrl+V for files.
+        if (keyData is (Keys.Control | Keys.V) or (Keys.Shift | Keys.Insert)
+            && Control.FromChildHandle(User32.GetFocus()) is TextBoxBase { ReadOnly: false, Enabled: true } box && box.FindForm() == this)
+        {
+            SayPasteAfter(box);
+        }
+
         if (NoticeOpen)
         {
             if (Overlay.HasSearchableText)

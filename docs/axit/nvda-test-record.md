@@ -10,6 +10,7 @@ Add a section under this one, above the earlier passes, so that the newest comes
 
 Automated: every app's scripts pass on the branch. By ear:
 
+- Every window: Ctrl+V into axClaude's message field, axDown's text, axTerminal's command field, a Find or Go to line field says "Pasted" ("Pasted, 3 lines" for several lines into a text of several); with a picture on the clipboard, "Nothing to paste as text"; in axPreview's text, nothing.
 - axProcess: a process's size reads "350.4 MB" with one decimal.
 - axGIT: Ctrl+F in the list says "Name contains" and finds a line of the list; F3 the next; in the details, the text find as before.
 - axTask and axPass: Shift+F10 (and the Applications key) opens the List or Group menu on a list, the Item or Entry menu on an item, the Field menu in the detail pane, and NVDA reads its first item; a locked axPass's menus stay unavailable.

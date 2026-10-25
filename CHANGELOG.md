@@ -2,6 +2,7 @@
 
 ## 3.7.4 - 2026-10-25
 
+- Axit: a paste is heard in every window: Ctrl+V or Shift+Insert into the message field, an editor, a field or a notice's field says "Pasted", or "Pasted, 3 lines" for several; the text itself is never read out.
 - axProcess: sizes are said as in every other app, one decimal from megabytes up ("350.4 MB"); they were whole megabytes.
 - axPreview: Ctrl+E and Open with no longer run a program, a script or a shortcut you are only looking at: a notice says so, and where to run it if you trust it. A Word, PowerPoint or OpenDocument file made to unpack to gigabytes, or one that declares a DTD, is shown as its readable text instead of being loaded.
 - axGIT: Ctrl+F, F3 and Shift+F3 find in the list while the list has the focus, as in every other list window, and in the details otherwise; they always searched the details.

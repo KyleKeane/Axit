@@ -129,6 +129,43 @@ public abstract partial class AxitForm
         return control is null || control is ToolStrip || Overlay.Contains(control) ? null : control;
     }
 
+    /// <summary>
+    /// After a paste into an editable text (AX-7.3, 2026-10-25): the paste is the control's own, and this says it
+    /// once the control has done it, "Pasted" or "Pasted, 3 lines" (<see cref="PasteWords"/>); the text itself is never
+    /// read out, since it may be a password. A menu item that pastes calls it the same way.
+    /// </summary>
+    protected internal void SayPasteAfter(TextBoxBase box)
+    {
+        string? text = null;
+        try
+        {
+            if (Clipboard.ContainsText())
+            {
+                text = Clipboard.GetText();
+            }
+        }
+        catch (System.Runtime.InteropServices.ExternalException)
+        {
+            // The clipboard is held by another program for a moment: the paste is the control's, so say it plainly.
+            text = string.Empty;
+        }
+
+        var said = PasteWords(text, box.Multiline);
+        BeginInvoke(() => Announce(said, true));
+    }
+
+    /// <summary>What a paste says: "Pasted"; "Pasted, 3 lines" for several into a text of several lines; "Nothing to paste as text" when the clipboard holds none (a picture, files).</summary>
+    public static string PasteWords(string? text, bool multiline)
+    {
+        if (text is null)
+        {
+            return "Nothing to paste as text";
+        }
+
+        var lines = text.Replace("\r\n", "\n").TrimEnd('\n').Split('\n').Length;
+        return multiline && lines > 1 ? $"Pasted, {lines} lines" : "Pasted";
+    }
+
     /// <summary>An error the user must see: logged and shown as a notice; a console window adds a system line.</summary>
     protected virtual void Fail(string message)
     {
