@@ -11,7 +11,7 @@
     <ApplicationVisualStyles>true</ApplicationVisualStyles>
     <InvariantGlobalization>true</InvariantGlobalization>
     <ApplicationIcon>AxClaude.ico</ApplicationIcon>
-    <Version>3.7.5</Version>
+    <Version>3.7.6</Version>
     <Product>Axit</Product>
     <Description>Accessible Windows apps for screen reader users: axClaude, a front end for the Claude Code CLI, axDown, a text editor, axJSON, a JSON editor, axGIT, a git manager, axTerminal, a terminal, axFile, a file manager, axMedia, a player, axPreview, a viewer, axStart, a program launcher, axProcess, a view of the processes, services and startup programs, axTask, tasks and lists, axPass, a KeePass password database, axCalc, a calculator, and axClip, a clipboard history</Description>
     <Authors>Dr. Kyle Keane</Authors>
