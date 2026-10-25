@@ -63,8 +63,9 @@ change; the one spoken change is axStart saying "Reading the programs" when noth
    `Dispatch.Apps`, and `tools/new-app.ps1` writes the places that stay text or code.
 2. **Finding a program on the PATH, written four times** (`ShellLauncher.FindOnPath`, `KeePassCli.Find`,
    `ClaudeLauncher`, and `ProgramInstall.OnPath` on the unmerged branch `installs`), with
-   `ClaudeLauncher.InstallCommand` repeating `ProgramInstall.ClaudeCode`. Waits for `installs` to merge, then one
-   `OnPath` for all.
+   `ClaudeLauncher.InstallCommand` repeating `ProgramInstall.ClaudeCode`. Done with the merge of `installs` (3.7.0):
+   the PATH is searched through `SystemPrograms.OnPath` alone, and `ClaudeLauncher`'s install command reads
+   `ProgramInstall.ClaudeCode`.
 3. **Running a child process with a timeout, written three times** (`GitRunner.RunAsync`, `ClaudeLauncher.VersionAsync`,
    `KeePassCli.Run`): start, read both streams, time out, end the process tree. One `Axit.Core/ProcessRun`; medium
    risk, since git's case of a pipe left open by a child must be kept.
@@ -81,7 +82,8 @@ change; the one spoken change is axStart saying "Reading the programs" when noth
    searches, what Tab moves between), so a generator would take parameters; for now the tests pin the lines that must
    be the same.
 9. **Two size formats disagree**: axProcess says "350 MB", axFile "1.2 MB". One `Axit.Core` format needs the user's
-   choice of which.
+   choice of which. axFile's is `Axit.Core/FileSize` since 2026-10-25 (axPreview uses it too); axProcess's
+   `SizeText` stays its own until the user chooses.
 10. **axGIT's Find always searches the details**, where every other list window finds in the list when the list has
     the focus. A behaviour change; its spec first.
 11. **Small merges with little payoff**: `EditKeys`, `EditPaging` and `EditParagraphs` (three static classes for the
@@ -89,9 +91,13 @@ change; the one spoken change is axStart saying "Reading the programs" when noth
 12. **Tests**: the fixture-folder finder is written three times, the temporary-folder pattern about thirty times, and
     a few settings tests never delete their folders. One shared `TestFiles.cs` through `tests/Directory.Build.props`.
 
+The items still open (3, 4, 5, 7, 11, 12, and 9 and 10 for the user) are the work list of the cleanup run,
+`docs/axit/cleanup-run.md` (specified 2026-10-25, to be run on a long day).
+
 ## 4. Branches and leftovers
 
-- `installs` (Install it now for the programs an app needs) is unmerged; items 2 and 4 wait for it.
+- `installs` (Install it now for the programs an app needs) was merged in 3.7.0; so were `app-kit`, the `kit-*`
+  branches and `preview` (3.7.2). Their branches are kept on GitHub until the user deletes them.
 - `axlist` stays as the record of the first design of axTask and is never merged.
 - The main checkout holds empty `src/AxList`, `src/AxList.Core` and `tests/AxList.Tests` folders (build output left
   by switching branches); deleting them changes nothing tracked.

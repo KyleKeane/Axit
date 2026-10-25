@@ -189,13 +189,13 @@ later if wanted).
 
 Open:
 
-- **S-10** on the branch `installs` (winget pinned to its source, no PATH fallback): made with that branch's merge.
+- **S-10**: done with the merge of `installs` (3.7.0): winget only Windows' own from WindowsApps, with
+  `--source winget`, no PATH fallback (`Axit.Core/ProgramInstall`).
+- **The first signed release**: done, 3.7.0 on 2026-10-24; 3.7.1 and 3.7.2 followed signed (one release-workflow fix
+  each, `tools/sign-release.ps1` and the draft's tag).
 - **The account's own settings** (S-36), which no file can set: branch protection on `main` with required reviews and
   the build passing; tag protection for `v*`; GitHub's immutable releases; two-factor sign-in with a hardware key;
   signed commits and tags. Listed here for the maintainer.
-- **The first signed release**: the key was made on 2026-10-24 on the maintainer's machine
-  (`%LOCALAPPDATA%\Axit-release`); the first release after these commits is the first the apps check, and an
-  installed copy older than it updates once more unchecked, into the version that checks.
 - An outside review by a security professional (section 5).
 ## 4. Sound, as checked
 
