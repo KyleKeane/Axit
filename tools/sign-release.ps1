@@ -58,7 +58,7 @@ try {
     if ($LASTEXITCODE -ne 0) { throw 'The signature could not be uploaded.' }
     gh release edit $tag --repo $repo --draft=false
     if ($LASTEXITCODE -ne 0) { throw 'The release could not be published.' }
-    Write-Host "Signed and published $tag: https://github.com/$repo/releases/tag/$tag"
+    Write-Host "Signed and published ${tag}: https://github.com/$repo/releases/tag/$tag"
 }
 finally {
     Remove-Item -LiteralPath $folder -Recurse -Force -ErrorAction SilentlyContinue
