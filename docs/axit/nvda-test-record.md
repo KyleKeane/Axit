@@ -6,14 +6,6 @@ What was checked with NVDA, against which version, and with what result. When a 
 
 Add a section under this one, above the earlier passes, so that the newest comes first: the date, the version, the commit tested, who ran it and how the result was given, and the environment: the NVDA version, the synthesizer and the Windows build (so that a regression is dated to an NVDA release rather than to some time). Under it, one table per app with a line per section of its plan: the steps run and the result, Passed, Failed (with what was heard) or Not run. A step that fails gets a line of its own with what NVDA said and what it should have said, and the bug's fix names the step. When a plan gains or loses steps, the next pass lists them as the plan has them then.
 
-## Owed: axPreview as the general viewer (the branch `preview`, docs/axpreview/SPEC.md AP-6, AP-7)
-
-Two panes, the text and the Details list; every file opens through its renderer; Ctrl+E by kind and File, Open with.
-Automated in `tests/scripts/axpreview/04-details-and-kinds.txt` and step 1.9 of `01-start-and-the-text.txt`. By ear,
-axPreview's plan section 5 (new), step 1.9 (changed), and axDown's and axJSON's section 1, whose window is the same
-shell. Listen especially for: NVDA reading the Details line again after a reload (5.4); "Details, list" on Tab;
-nothing spoken on arrows beyond the lines.
-
 ## Owed: axClaude's side answer as read-only text (the branch `kit-j`, docs/axclaude/SPEC.md FR-2.11)
 
 `/btw` and the other screens that only inform (`/goal`, `/tasks` with nothing running) are a notice in the window, not
@@ -99,6 +91,17 @@ Merged at the user's word ahead of the rule, so that main holds them; no release
 - axClaude's `tests/scripts/axclaude/09-options.txt` fails at step 191 on main as on this branch (the second line of the
   conversation after a forced restart is the recording's line): an older break, most likely Claude Code's output, to be
   looked at with a recording.
+## 2026-10-24: axPreview as the general viewer (the branch `preview`, before 3.7.2)
+
+Commit 99ba45a, run from the checkout by the user, the result given as "nvda tests pass"; NVDA version, synthesizer and
+Windows build not given. axPreview's plan section 5 (the Details list and the kinds of file) and step 1.9, with the
+automated 	ests/scripts/axpreview (five scripts) passing on the same build.
+
+| App | Section | Result |
+| --- | --- | --- |
+| axPreview | 1.9 (every file opens) | Passed |
+| axPreview | 5 (Details list, kinds, Ctrl+E, Open with) | Passed |
+
 ## 2026-10-24, axTask and axPass (the branch `axtask`, before its merge)
 
 - Run by the user with NVDA on builds of `axtask` up to cffd363, over the day's rounds of asks; the result given as

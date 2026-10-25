@@ -324,5 +324,5 @@ details' lines, AP-6), and the shell's read-only mode adds the Details list unde
 - 2026-10-22: released in 3.3.1 (3.3.0 tagged, not published). The whole NVDA test plan marked passed at the user's word, no step reported failing; the record by step is `docs/axit/nvda-test-record.md`.
 - 2026-10-24: the general viewer specified at the user's ask on the branch `preview` (AP-6, AP-7, AP-D6 to AP-D10):
   two panes, the details, the renderers, the way on; built the same day on the branch, with `RenderersTests`,
-  `FileDetailsTests` and the script `tests/scripts/axpreview/04-details-and-kinds.txt`. NVDA pass owed (test plan
-  section 5, and step 1.9).
+  `FileDetailsTests` and the script `tests/scripts/axpreview/04-details-and-kinds.txt`. Checked with NVDA the
+  same day at the user's word (test plan section 5 and step 1.9, `docs/axit/nvda-test-record.md`); released in 3.7.2.
