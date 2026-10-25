@@ -7,35 +7,16 @@ namespace AxPreview.Tests;
 /// <summary>The renderer table's choice and each renderer (docs/axpreview/SPEC.md AP-7), over files made in a temporary folder.</summary>
 public sealed class RenderersTests : IDisposable
 {
-    private readonly string _folder = Path.Combine(Path.GetTempPath(), "axpreview-render-" + Guid.NewGuid().ToString("N"));
+    private readonly TempFolder _folder = new("axpreview-render");
 
-    public RenderersTests()
-    {
-        Directory.CreateDirectory(_folder);
-    }
+    public void Dispose() => _folder.Dispose();
 
-    public void Dispose()
-    {
-        try
-        {
-            Directory.Delete(_folder, recursive: true);
-        }
-        catch (IOException)
-        {
-        }
-    }
-
-    private string Write(string name, byte[] bytes)
-    {
-        var path = Path.Combine(_folder, name);
-        File.WriteAllBytes(path, bytes);
-        return path;
-    }
+    private string Write(string name, byte[] bytes) => _folder.File(name, bytes);
 
     /// <summary>A zip with the given parts, as Word, PowerPoint and OpenDocument files are.</summary>
     private string Zip(string name, params (string Entry, string Text)[] parts)
     {
-        var path = Path.Combine(_folder, name);
+        var path = Path.Combine(_folder.Path, name);
         using (var zip = ZipFile.Open(path, ZipArchiveMode.Create))
         {
             foreach (var (entry, text) in parts)

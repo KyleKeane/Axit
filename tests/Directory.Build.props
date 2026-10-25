@@ -26,4 +26,10 @@
     <Using Include="Xunit" />
   </ItemGroup>
 
+  <!-- What the test projects share (tests/Shared): a temporary folder that goes with the test, the fixture folder. -->
+  <ItemGroup>
+    <Compile Include="$(MSBuildThisFileDirectory)Shared\*.cs" Link="Shared\%(Filename)%(Extension)" />
+    <Using Include="Axit.TestShared" />
+  </ItemGroup>
+
 </Project>

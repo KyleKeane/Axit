@@ -88,34 +88,27 @@ public sealed class ClipHistoryTests
     [Fact]
     public void The_settings_keep_the_history_only_while_asked()
     {
-        var folder = Path.Combine(Path.GetTempPath(), "axclip-tests-" + Guid.NewGuid().ToString("N"));
-        Directory.CreateDirectory(folder);
-        try
-        {
-            var path = Path.Combine(folder, "axclip.json");
-            var settings = ClipSettings.Load(path, out var error);
-            Assert.Null(error);
-            Assert.Equal("Windows+Alt+V", settings.HotkeyText);
-            Assert.False(settings.KeepHistory);
-            settings.Keep([new ClipEntry("secret", Now)]);
-            Assert.Empty(settings.History);
+        using var temp = new TempFolder("axclip-tests");
+        var folder = temp.Path;
+        var path = Path.Combine(folder, "axclip.json");
+        var settings = ClipSettings.Load(path, out var error);
+        Assert.Null(error);
+        Assert.Equal("Windows+Alt+V", settings.HotkeyText);
+        Assert.False(settings.KeepHistory);
+        settings.Keep([new ClipEntry("secret", Now)]);
+        Assert.Empty(settings.History);
 
-            settings.KeepHistory = true;
-            settings.Keep([new ClipEntry("kept", Now)]);
-            settings.Save(path);
-            var back = ClipSettings.Load(path, out _);
-            Assert.Equal("kept", back.History.Single().Text);
-            // S-21: the file holds the history only encrypted for this Windows account.
-            Assert.DoesNotContain("kept", File.ReadAllText(path), StringComparison.Ordinal);
+        settings.KeepHistory = true;
+        settings.Keep([new ClipEntry("kept", Now)]);
+        settings.Save(path);
+        var back = ClipSettings.Load(path, out _);
+        Assert.Equal("kept", back.History.Single().Text);
+        // S-21: the file holds the history only encrypted for this Windows account.
+        Assert.DoesNotContain("kept", File.ReadAllText(path), StringComparison.Ordinal);
 
-            File.WriteAllText(path, """{ "hotkey": "Shift+V", "keepHistory": false, "history": [ { "text": "left over", "copied": "2026-10-23T14:00:00" } ] }""");
-            var mended = ClipSettings.Load(path, out _);
-            Assert.Equal("Windows+Alt+V", mended.HotkeyText);
-            Assert.Empty(mended.History);
-        }
-        finally
-        {
-            Directory.Delete(folder, recursive: true);
-        }
+        File.WriteAllText(path, """{ "hotkey": "Shift+V", "keepHistory": false, "history": [ { "text": "left over", "copied": "2026-10-23T14:00:00" } ] }""");
+        var mended = ClipSettings.Load(path, out _);
+        Assert.Equal("Windows+Alt+V", mended.HotkeyText);
+        Assert.Empty(mended.History);
     }
 }

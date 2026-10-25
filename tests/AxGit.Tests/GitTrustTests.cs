@@ -15,18 +15,11 @@ public sealed class GitTrustTests
     [Fact]
     public void A_hook_is_a_risk_and_a_sample_is_not()
     {
-        var hooks = Path.Combine(Path.GetTempPath(), "axgit-hooks-" + Guid.NewGuid().ToString("N"));
-        Directory.CreateDirectory(hooks);
-        try
-        {
-            File.WriteAllText(Path.Combine(hooks, "pre-commit.sample"), string.Empty);
-            File.WriteAllText(Path.Combine(hooks, "post-checkout"), string.Empty);
-            Assert.Equal(["hook post-checkout"], GitTrust.Risks(string.Empty, hooks));
-        }
-        finally
-        {
-            Directory.Delete(hooks, recursive: true);
-        }
+        using var temp = new TempFolder("axgit-hooks");
+        var hooks = temp.Path;
+        File.WriteAllText(Path.Combine(hooks, "pre-commit.sample"), string.Empty);
+        File.WriteAllText(Path.Combine(hooks, "post-checkout"), string.Empty);
+        Assert.Equal(["hook post-checkout"], GitTrust.Risks(string.Empty, hooks));
     }
 
     [Fact]

@@ -48,22 +48,15 @@ public sealed class EditorSettingsTests
     [Fact]
     public void Odd_values_are_put_right_after_loading()
     {
-        var path = Path.Combine(Path.GetTempPath(), "axdown-tests", Guid.NewGuid().ToString("N"), "axdown.json");
-        Directory.CreateDirectory(Path.GetDirectoryName(path)!);
-        try
-        {
-            File.WriteAllText(path, "{ \"fontFamily\": \"  \", \"fontSize\": 500, \"window\": { \"width\": 10, \"height\": 10 }, \"recentFiles\": [\" \", \"C:\\\\work\\\\a.md\"] }");
-            var settings = EditorSettings.Load(path, out var error);
-            Assert.Null(error);
-            Assert.Null(settings.FontFamily);
-            Assert.Equal(0, settings.FontSize);
-            Assert.Null(settings.Window);
-            Assert.Equal([@"C:\work\a.md"], settings.RecentFiles);
-        }
-        finally
-        {
-            Directory.Delete(Path.GetDirectoryName(path)!, true);
-        }
+        using var temp = new TempFolder("axdown-tests");
+        var path = Path.Combine(temp.Path, "axdown.json");
+        File.WriteAllText(path, "{ \"fontFamily\": \"  \", \"fontSize\": 500, \"window\": { \"width\": 10, \"height\": 10 }, \"recentFiles\": [\" \", \"C:\\\\work\\\\a.md\"] }");
+        var settings = EditorSettings.Load(path, out var error);
+        Assert.Null(error);
+        Assert.Null(settings.FontFamily);
+        Assert.Equal(0, settings.FontSize);
+        Assert.Null(settings.Window);
+        Assert.Equal([@"C:\work\a.md"], settings.RecentFiles);
     }
 
     /// <summary>File → Open recent file (docs/axdown/SPEC.md AD-4.1): the newest first, each path once whatever its case, ten at most.</summary>

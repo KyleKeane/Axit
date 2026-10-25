@@ -9,33 +9,19 @@ namespace AxGit.Tests;
 /// </summary>
 public sealed class GitRunnerProcessTests : IDisposable
 {
-    private readonly string _dir = Path.Combine(Path.GetTempPath(), "axgit-tests-" + Guid.NewGuid().ToString("N"));
+    private readonly TempFolder _dir = new("axgit-tests");
     private readonly string _program = GitRunner.Program;
-
-    public GitRunnerProcessTests()
-    {
-        Directory.CreateDirectory(_dir);
-    }
 
     public void Dispose()
     {
         GitRunner.Program = _program;
-        try
-        {
-            Directory.Delete(_dir, recursive: true);
-        }
-        catch (Exception ex) when (ex is IOException or UnauthorizedAccessException)
-        {
-            // A fake still running holds its folder for a moment; the temp folder is cleaned by Windows.
-        }
+        _dir.Dispose();
     }
 
     /// <summary>A fake git: a batch file with the body given, which the runner starts in git's place.</summary>
     private void Fake(string body)
     {
-        var path = Path.Combine(_dir, "git.cmd");
-        File.WriteAllText(path, "@echo off\r\n" + body + "\r\n");
-        GitRunner.Program = path;
+        GitRunner.Program = _dir.File("git.cmd", "@echo off\r\n" + body + "\r\n");
     }
 
     [Fact]

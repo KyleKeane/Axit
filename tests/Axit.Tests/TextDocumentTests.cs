@@ -127,66 +127,45 @@ public sealed class TextDocumentTests
     [Fact]
     public void Read_and_write_go_through_the_file()
     {
-        var folder = Path.Combine(Path.GetTempPath(), "axdown-tests", Guid.NewGuid().ToString("N"));
-        Directory.CreateDirectory(folder);
+        using var temp = new TempFolder("axdown-tests");
+        var folder = temp.Path;
         var path = Path.Combine(folder, "notes.md");
-        try
-        {
-            File.WriteAllBytes(path, Bytes([0xEF, 0xBB, 0xBF], Encoding.UTF8.GetBytes("# Title\n\ntext\n")));
-            var document = TextDocument.Read(path);
-            Assert.Equal("# Title\r\n\r\ntext\r\n", document.Text);
-            document.Write(path, "# Title\r\n\r\nmore text\r\n");
-            Assert.Equal(Bytes([0xEF, 0xBB, 0xBF], Encoding.UTF8.GetBytes("# Title\n\nmore text\n")), File.ReadAllBytes(path));
-        }
-        finally
-        {
-            Directory.Delete(folder, true);
-        }
+        File.WriteAllBytes(path, Bytes([0xEF, 0xBB, 0xBF], Encoding.UTF8.GetBytes("# Title\n\ntext\n")));
+        var document = TextDocument.Read(path);
+        Assert.Equal("# Title\r\n\r\ntext\r\n", document.Text);
+        document.Write(path, "# Title\r\n\r\nmore text\r\n");
+        Assert.Equal(Bytes([0xEF, 0xBB, 0xBF], Encoding.UTF8.GetBytes("# Title\n\nmore text\n")), File.ReadAllBytes(path));
     }
 
     [Fact]
     public void A_file_over_the_limit_is_refused_before_it_is_read()
     {
-        var folder = Path.Combine(Path.GetTempPath(), "axdown-tests", Guid.NewGuid().ToString("N"));
-        Directory.CreateDirectory(folder);
+        using var temp = new TempFolder("axdown-tests");
+        var folder = temp.Path;
         var path = Path.Combine(folder, "huge.txt");
-        try
+        using (var file = File.Create(path))
         {
-            using (var file = File.Create(path))
-            {
-                file.SetLength(TextDocument.MaxBytes + 1);
-            }
+            file.SetLength(TextDocument.MaxBytes + 1);
+        }
 
-            var error = Assert.Throws<InvalidOperationException>(() => TextDocument.Read(path));
-            Assert.Contains("huge.txt", error.Message);
-            Assert.Contains("32 MB", error.Message);
-        }
-        finally
-        {
-            Directory.Delete(folder, true);
-        }
+        var error = Assert.Throws<InvalidOperationException>(() => TextDocument.Read(path));
+        Assert.Contains("huge.txt", error.Message);
+        Assert.Contains("32 MB", error.Message);
     }
 
     [Fact]
     public void A_file_with_a_nul_character_is_not_text_and_is_refused()
     {
-        var folder = Path.Combine(Path.GetTempPath(), "axdown-tests", Guid.NewGuid().ToString("N"));
-        Directory.CreateDirectory(folder);
+        using var temp = new TempFolder("axdown-tests");
+        var folder = temp.Path;
         var path = Path.Combine(folder, "out.txt");
-        try
-        {
-            // UTF-16 without a mark (cmd /u), a PNG, a text file with one stray NUL: the edit control would keep only the text before it.
-            File.WriteAllBytes(path, Encoding.Unicode.GetBytes("dir\r\n"));
-            var error = Assert.Throws<InvalidOperationException>(() => TextDocument.Read(path));
-            Assert.Contains("out.txt", error.Message);
-            Assert.Contains("not a text file", error.Message);
+        // UTF-16 without a mark (cmd /u), a PNG, a text file with one stray NUL: the edit control would keep only the text before it.
+        File.WriteAllBytes(path, Encoding.Unicode.GetBytes("dir\r\n"));
+        var error = Assert.Throws<InvalidOperationException>(() => TextDocument.Read(path));
+        Assert.Contains("out.txt", error.Message);
+        Assert.Contains("not a text file", error.Message);
 
-            File.WriteAllBytes(path, Encoding.UTF8.GetBytes("plain text\r\n"));
-            Assert.Equal("plain text\r\n", TextDocument.Read(path).Text);
-        }
-        finally
-        {
-            Directory.Delete(folder, true);
-        }
+        File.WriteAllBytes(path, Encoding.UTF8.GetBytes("plain text\r\n"));
+        Assert.Equal("plain text\r\n", TextDocument.Read(path).Text);
     }
 }
