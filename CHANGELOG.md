@@ -2,6 +2,7 @@
 
 ## 3.7.3 - 2026-10-25
 
+- axClaude: in a side answer's text (`/btw`), the letters Claude names work as the buttons do: c copies, f forks. A long answer that arrives in parts keeps its first lines in the text instead of losing them off the top of the console.
 - Axit: a failed update's notice shows what went wrong (the versions, Windows' version, and what the installer said or the error) and has a Copy details button that puts it on the clipboard to send, with your account's name, your folders and any e-mail address left out. The installer's own log says which version it installs on which Windows, and where it failed.
 
 ## 3.7.2 - 2026-10-24

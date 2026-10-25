@@ -80,6 +80,62 @@ public static class ScreenActions
     /// <summary>The notice's text: the screen's lines, one per line.</summary>
     public static string NoticeText(ClaudeScreen screen) => string.Join("\n", screen.Lines);
 
+    /// <summary>
+    /// The lines of an information screen's notice when the screen shows again (FR-2.11, 2026-10-25): Claude's screen
+    /// holds only as many rows as the console has, so a long answer pushes its first rows off the top as it arrives or
+    /// is scrolled down, and Scroll up brings them back at the cost of the last ones. When the new rows overlap the
+    /// lines shown (the new screen's first rows are the last ones shown, or its last rows the first ones shown, two
+    /// lines at least with text in them), the two are joined, so that nothing read is lost; otherwise the screen's
+    /// rows replace them. The window starts afresh after a key that changes the answer (Browse).
+    /// </summary>
+    public static IReadOnlyList<string> Merge(IReadOnlyList<string> shown, IReadOnlyList<string> now)
+    {
+        if (shown.Count == 0 || now.SequenceEqual(shown))
+        {
+            return now;
+        }
+
+        // Scrolled down, or more arrived: the lines shown end with what the screen begins with.
+        for (var overlap = Math.Min(shown.Count, now.Count); overlap >= 2; overlap--)
+        {
+            if (Overlaps(shown, shown.Count - overlap, now, 0, overlap))
+            {
+                return [.. shown, .. now.Skip(overlap)];
+            }
+        }
+
+        // Scrolled up: the screen ends with what the lines shown begin with.
+        for (var overlap = Math.Min(shown.Count, now.Count); overlap >= 2; overlap--)
+        {
+            if (Overlaps(now, now.Count - overlap, shown, 0, overlap))
+            {
+                return [.. now, .. shown.Skip(overlap)];
+            }
+        }
+
+        return now;
+    }
+
+    /// <summary>Whether <paramref name="count"/> lines of <paramref name="a"/> from <paramref name="aStart"/> are those of <paramref name="b"/> from <paramref name="bStart"/>, and at least two of them have text: blank rows alone prove nothing.</summary>
+    private static bool Overlaps(IReadOnlyList<string> a, int aStart, IReadOnlyList<string> b, int bStart, int count)
+    {
+        var withText = 0;
+        for (var i = 0; i < count; i++)
+        {
+            if (a[aStart + i] != b[bStart + i])
+            {
+                return false;
+            }
+
+            if (a[aStart + i].Trim().Length > 0)
+            {
+                withText++;
+            }
+        }
+
+        return withText >= 2;
+    }
+
     /// <summary>What the status bar says the screen is after "Claude: showing": "a side answer" for /btw, else its title.</summary>
     public static string StatusName(ClaudeScreen screen) =>
         screen.Title.StartsWith("/btw", StringComparison.Ordinal) ? "a side answer" : screen.Title;

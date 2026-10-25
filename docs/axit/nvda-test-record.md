@@ -18,6 +18,8 @@ a list in the control area; automated in `tests/scripts/axclaude/14-side-answer.
 - A second `/btw`: Browse (Shift+Left) changes the text with the focus kept on the button.
 - From the conversation, the notice comes a second later; with Go to them at once off, nothing is cut off.
 - `/tasks` with nothing running: the notice "Background"; with a task, still the list.
+- Since 2026-10-25: c in the answer's text copies it, as the Copy button does (paste it somewhere); f forks. A long
+  answer that arrives in parts keeps its first lines in the text.
 
 ## Owed: the command list of every window (the branch `app-kit`, `docs/axit/app-kit.md` AK-2)
 

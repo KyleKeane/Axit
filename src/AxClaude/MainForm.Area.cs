@@ -462,7 +462,14 @@ internal sealed partial class MainForm
     private bool ScreenNoticeOpen => _screenNotice is not null && NoticeOpen && ReferenceEquals(Overlay.Shown, _screenNotice);
 
     /// <summary>The information screen's notice shows text that Claude's screen no longer has (a scroll, the answer arriving): the settle refreshes it.</summary>
-    private bool ScreenNoticeOutdated => ScreenNoticeShows(_model.PendingScreen) && ScreenActions.NoticeText(_model.PendingScreen!) != _screenNotice!.Text;
+    private bool ScreenNoticeOutdated => ScreenNoticeShows(_model.PendingScreen) && ScreenNoticeText(_model.PendingScreen!) != _screenNotice!.Text;
+
+    /// <summary>The lines the information screen's notice shows: the screen's rows joined with what was shown before when they overlap, so that a long answer keeps the rows that went off the top (<see cref="ScreenActions.Merge"/>).</summary>
+    private IReadOnlyList<string> _screenLines = [];
+
+    private IReadOnlyList<string> ScreenNoticeLines(ClaudeScreen screen) => ScreenActions.Merge(_screenLines, screen.Lines);
+
+    private string ScreenNoticeText(ClaudeScreen screen) => string.Join("\n", ScreenNoticeLines(screen));
 
     /// <summary>
     /// The notice showing is this information screen's: the same title. Not the whole signature, since the keys change
@@ -485,9 +492,12 @@ internal sealed partial class MainForm
         var signature = screen.Signature;
         if (ScreenNoticeShows(screen))
         {
-            if (ScreenActions.NoticeText(screen) != _screenNotice!.Text)
+            var lines = ScreenNoticeLines(screen);
+            var text = string.Join("\n", lines);
+            if (text != _screenNotice!.Text)
             {
-                Overlay.SetBody(ScreenActions.NoticeText(screen));
+                _screenLines = lines;
+                Overlay.SetBody(text);
                 _screenNotice = Overlay.Shown;
             }
 
@@ -560,14 +570,38 @@ internal sealed partial class MainForm
                 }
             }, IsDefault: true, IsCancel: true),
         };
-        choices.AddRange(ScreenActions.NoticeKeys(screen).Select(key => new OverlayChoice(ScreenActions.KeyItem(key), () => SendScreenKey(key.Send), StaysOpen: true)));
+        // A key of the screen's own (Copy, Fork, Browse) may change the answer shown: the text starts afresh from the
+        // screen's rows rather than being joined with the answer before (ScreenActions.Merge).
+        var keys = ScreenActions.NoticeKeys(screen);
+        void SendNoticeKey(ScreenKey key)
+        {
+            _screenLines = [];
+            SendScreenKey(key.Send);
+        }
+
+        choices.AddRange(keys.Select(key => new OverlayChoice(ScreenActions.KeyItem(key), () => SendNoticeKey(key), StaysOpen: true)));
         if (ScreenActions.Scrolls(screen))
         {
             choices.Add(new OverlayChoice("Scroll &down", () => SendScreenKey("\x1b[B"), StaysOpen: true));
             choices.Add(new OverlayChoice("Scroll &up", () => SendScreenKey("\x1b[A"), StaysOpen: true));
         }
 
-        var notice = new Notice(screen.Title, ScreenActions.NoticeText(screen), choices) { Unprompted = unprompted };
+        _screenLines = screen.Lines;
+        var notice = new Notice(screen.Title, ScreenActions.NoticeText(screen), choices)
+        {
+            Unprompted = unprompted,
+            // The hint row's letters typed in the text, as the buttons (c to copy, f to fork; FR-2.11).
+            Letter = letter =>
+            {
+                if (ScreenActions.LetterKey(screen, letter) is not { } key || !keys.Contains(key))
+                {
+                    return false;
+                }
+
+                SendNoticeKey(key);
+                return true;
+            },
+        };
         _screenNoticeOpening = true;
         try
         {
@@ -605,6 +639,7 @@ internal sealed partial class MainForm
         }
 
         _screenNotice = null;
+        _screenLines = [];
     }
 
     /// <summary>Sends a screen's key. The screen that shows next opens again even when its title and keys are the same (a moved selection, another tab).</summary>

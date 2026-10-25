@@ -57,6 +57,13 @@ public sealed record Notice(string Title, string Text, IReadOnlyList<OverlayChoi
     /// </summary>
     public bool Progress { get; init; }
 
+    /// <summary>
+    /// A plain letter typed in the text, after the text's jump keys have had it: true when the window acted on it
+    /// (axClaude's side answer: c copies, f forks, as the screen's hint row names them; 2026-10-25). Ignored while the
+    /// answering keys are held after a notice the user did not open.
+    /// </summary>
+    public Func<char, bool>? Letter { get; init; }
+
     /// <summary>A read-only text with a Close button: help texts, About and errors.</summary>
     public static Notice Plain(string title, string text) => new(title, text, [OverlayChoice.Close]);
 }
@@ -494,6 +501,14 @@ public sealed class OverlayPanel : Panel
     private void OnTextKeyDown(object? sender, KeyEventArgs e)
     {
         if (TextJumps.Handle(_text, Jumps, e.KeyData, Announce))
+        {
+            e.Handled = e.SuppressKeyPress = true;
+            return;
+        }
+
+        // A letter the notice gives a meaning (Notice.Letter), never one typed into the notice by accident.
+        if (e.Modifiers == Keys.None && e.KeyCode is >= Keys.A and <= Keys.Z && Shown?.Letter is { } letter
+            && !_hold.Holding && letter((char)('a' + (e.KeyCode - Keys.A))))
         {
             e.Handled = e.SuppressKeyPress = true;
         }

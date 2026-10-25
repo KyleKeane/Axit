@@ -132,4 +132,31 @@ public sealed class ScreenActionsTests
         Assert.True(ScreenActions.IsInformation(hook));
         Assert.Equal("&Go back", ScreenActions.LeaveButton(ScreenActions.LeaveKey(hook)));
     }
+
+    [Fact]
+    public void A_long_answer_keeps_its_first_rows_when_more_arrives_or_it_scrolls_down()
+    {
+        // The console shows four rows: the answer's first rows go off the top as it grows.
+        Assert.Equal(["one", "two", "three", "four", "five", "six"],
+            ScreenActions.Merge(["one", "two", "three", "four"], ["three", "four", "five", "six"]));
+        // Rows added below while the screen is not full yet: the new rows are the old ones and more.
+        Assert.Equal(["one", "two", "three"], ScreenActions.Merge(["one", "two"], ["one", "two", "three"]));
+    }
+
+    [Fact]
+    public void Scroll_up_brings_back_the_first_rows_and_keeps_the_last()
+    {
+        Assert.Equal(["one", "two", "three", "four", "five", "six"],
+            ScreenActions.Merge(["three", "four", "five", "six"], ["one", "two", "three", "four"]));
+    }
+
+    [Fact]
+    public void A_different_answer_or_an_overlap_of_blank_rows_replaces_the_text()
+    {
+        Assert.Equal(["another", "answer"], ScreenActions.Merge(["one", "two"], ["another", "answer"]));
+        // Two blank rows in common prove nothing: one line with text is not enough either.
+        Assert.Equal(["", "", "next"], ScreenActions.Merge(["first", "", ""], ["", "", "next"]));
+        Assert.Equal(["two", "", "x"], ScreenActions.Merge(["one", "two", ""], ["two", "", "x"]));
+        Assert.Equal(["same"], ScreenActions.Merge(["same"], ["same"]));
+    }
 }
