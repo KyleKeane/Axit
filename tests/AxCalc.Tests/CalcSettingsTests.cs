@@ -23,7 +23,8 @@ public sealed class CalcSettingsTests : IDisposable
     [Fact]
     public void The_history_and_the_variables_go_round_the_file()
     {
-        var path = Path.Combine(_folder.Path, "axcalc.json");
+        // A folder that does not exist yet: Save makes it, as the first start does.
+        var path = Path.Combine(_folder.Path, "Axit", "axcalc.json");
         var settings = new CalcSettings { Degrees = false };
         settings.Keep([new CalcEntry("2+3", "5", 5), new CalcEntry("rate = 1.25", "1.25", 1.25, "rate")], [new("rate", 1.25)]);
         settings.Save(path);
