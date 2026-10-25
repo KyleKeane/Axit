@@ -6,6 +6,17 @@ What was checked with NVDA, against which version, and with what result. When a 
 
 Add a section under this one, above the earlier passes, so that the newest comes first: the date, the version, the commit tested, who ran it and how the result was given, and the environment: the NVDA version, the synthesizer and the Windows build (so that a regression is dated to an NVDA release rather than to some time). Under it, one table per app with a line per section of its plan: the steps run and the result, Passed, Failed (with what was heard) or Not run. A step that fails gets a line of its own with what NVDA said and what it should have said, and the bug's fix names the step. When a plan gains or loses steps, the next pass lists them as the plan has them then.
 
+## Owed: the inventory and the review of 3.7.x (the branch `inventory`, 2026-10-25)
+
+Automated: every app's scripts pass on the branch. By ear:
+
+- axProcess: a process's size reads "350.4 MB" with one decimal.
+- axGIT: Ctrl+F in the list says "Name contains" and finds a line of the list; F3 the next; in the details, the text find as before.
+- axTask and axPass: Shift+F10 (and the Applications key) opens the List or Group menu on a list, the Item or Entry menu on an item, the Field menu in the detail pane, and NVDA reads its first item; a locked axPass's menus stay unavailable.
+- axPreview: Ctrl+E on an `.exe` or a `.lnk` gives the notice "Not run from axPreview"; on a picture, its program still opens.
+- axMedia and axFile: the queue and the Actions list still change one line at a time while something plays or copies, the line you are on kept.
+- Page Up, Page Down, Ctrl+Up and Ctrl+Down in axDown, the conversation and the notices, and the heading keys in a notice: as before (their code moved).
+
 ## Owed: axClaude's side answer as read-only text (the branch `kit-j`, docs/axclaude/SPEC.md FR-2.11)
 
 `/btw` and the other screens that only inform (`/goal`, `/tasks` with nothing running) are a notice in the window, not

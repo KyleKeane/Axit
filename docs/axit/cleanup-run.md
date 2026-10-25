@@ -74,19 +74,11 @@ use by reflection, the WinForms designer, a test, a script or `install.ps1`, and
 - Comments that describe code no longer there, and "until 2026-10-2x" history notes that only repeat the changelog;
   a note that explains **why** something is so stays.
 
-### 3.2 Copies to fold (from `inventory-2026-10-24.md` section 3, still open)
-- **A child process with a timeout, three times** (`GitRunner.RunAsync`, `ClaudeLauncher.VersionAsync`,
-  `KeePassCli.Run`): one `Axit.Core/ProcessRun` (start, read both streams, time out, end the process tree). Keep
-  git's case of a pipe a child leaves open. Medium risk: one commit for the piece, one per caller.
-- **The item apps' window** (inventory item 4): axTask's and axPass's same undo stack of twenty, the same
-  three-menu enabling (`MenuLetter`, `UpdateRowMenus`), two rename hooks where one would do, into `ItemForm`.
-- **A list refilled in place, twice** (axMedia's `FillList`, axFile's `FillPane`): `AxitList.SetLines`, keeping each
-  one's rule of which line stays selected.
-- **The tests' helpers** (item 12): the fixture-folder finder written three times, the temporary-folder pattern about
-  thirty times, settings tests that never delete their folders: one `tests/TestFiles.cs` through
-  `tests/Directory.Build.props`.
-- **The notes** (item 5): the apps' `CLAUDE.md` "Where things are" bullets that run to thousands of characters,
-  rewritten as one bullet per file or section, as `src/Axit.Core/CLAUDE.md` is; no content dropped.
+### 3.2 Copies to fold
+
+The inventory's list (`inventory-2026-10-24.md` section 3: the process runner, the item apps' menus, the list
+refill, the edit keys, the jumps, the tests' helpers and the notes) was done on 2026-10-25 before this run. What is
+left is what a fresh search finds:
 - Any further second copy the agents find (search for the same method body in two projects, and for comments
   saying "as axGIT's" or "like axFile's").
 
@@ -117,14 +109,13 @@ use by reflection, the WinForms designer, a test, a script or `install.ps1`, and
 - **Secrets**: nothing typed, copied or read from a conversation in a log; the clipboard writes of axPass private;
   the release key never in the repository.
 - Each finding is fixed in its own commit with a test where one can be written, and added to the audit document as
-  `S-46` onwards with its commit.
+  `S-54` onwards with its commit (S-46 to S-53 were the review of 3.7.x, 2026-10-25).
 
 ## 4. Order of the work
 
 1. Baseline gate (section 2), recorded.
 2. 3.1 Unused code, one project at a time, shared projects last.
-3. 3.2 Copies to fold, the lowest risk first (tests' helpers, then `AxitList.SetLines`, then `ItemForm`, then
-   `ProcessRun`).
+3. 3.2 Copies to fold that a fresh search finds, the lowest risk first.
 4. 3.3 Hacks, only the understood ones.
 5. 3.4 Attack surface.
 6. The final gate, then the report.
@@ -149,7 +140,6 @@ merge followed by the gate.
 - the commits, grouped by section of this document, each with one line of what and why;
 - the lines of code before and after, per project (`src/*`, `tests/*`);
 - what was looked at and left, with the reason;
-- the "needs the user" list: cleanups that would change behaviour, and decisions (such as inventory item 9, axProcess's
-  "350 MB" against axFile's "1.2 MB", and item 10, axGIT's Find);
+- the "needs the user" list: cleanups that would change behaviour, and decisions;
 - the NVDA sections a moved piece makes worth hearing again;
 - then the user decides: merge `cleanup` into `main` after those NVDA checks, and release.

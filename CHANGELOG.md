@@ -5,6 +5,8 @@
 - axProcess: sizes are said as in every other app, one decimal from megabytes up ("350.4 MB"); they were whole megabytes.
 - axPreview: Ctrl+E and Open with no longer run a program, a script or a shortcut you are only looking at: a notice says so, and where to run it if you trust it. A Word, PowerPoint or OpenDocument file made to unpack to gigabytes, or one that declares a DTD, is shown as its readable text instead of being loaded.
 - axGIT: Ctrl+F, F3 and Shift+F3 find in the list while the list has the focus, as in every other list window, and in the details otherwise; they always searched the details.
+- Axit: the AI tools hand a client nothing a window announced while access was off or before the client was paired, refuse more script hosts as clients (bash, WSL, the terminals, dotnet and other runtimes), and quote npm's claude.cmd command line safely. An app opened through Windows' Open with lets only itself take the foreground. Copy details also leaves out the computer's and the domain's names and a work OneDrive's organisation.
+- For developers: one runner for programs run to their end (`Axit.Core/ProcessRun`, from axGIT, axClaude and axPass), the item apps' selection menus in `ItemForm`, `AxitList.SetLines`, `EditKeys` and `TextJump` each one class, shared test helpers (`tests/Shared`), and the long code notes rewritten one bullet per file; the security review of 3.7.x is in `docs/axit/security-audit-2026-10-24.md` (S-46 to S-53).
 
 ## 3.7.3 - 2026-10-25
 

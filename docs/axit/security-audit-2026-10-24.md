@@ -197,6 +197,28 @@ Open:
   the build passing; tag protection for `v*`; GitHub's immutable releases; two-factor sign-in with a hardware key;
   signed commits and tags. Listed here for the maintainer.
 - An outside review by a security professional (section 5).
+## 3b. The review of 3.7.x (2026-10-25)
+
+A second review, of the code added after this audit in 3.7.0 to 3.7.3 (the AI tools, Install it now, the Open with
+links, axPreview's file readers, the update failure details, axClaude's notice letters). No high finding; each fixed
+on the branch `inventory`, one commit per finding or close set, with its tests:
+
+| Finding | Severity | Commit | What |
+|---|---|---|---|
+| S-46 | medium | 3c154f1 | axPreview's Ctrl+E and Open with handed any file to Windows to open, so a stranger's `.lnk`, `.hta` or `.exe` previewed and Ctrl+E'd ran; now `Axit.Core/DangerousFiles` (Windows' own `AssocIsDangerous`) and the notice "Not run from axPreview" |
+| S-47 | medium | 05c26c2 | a Word, PowerPoint or OpenDocument file could unpack each part to 256 MB and be held whole on the window's thread; now one 32 MB budget per document, counted on the stream |
+| S-48 | low | 05c26c2 | `XDocument.Load` parsed DTDs (internal entities expanded); now an `XmlReader` with DTDs prohibited and no resolver |
+| S-49 | low | 13cdc51 | the AI tools' record of announcements kept what was said while access was off; now only what came after the setting last changed, in every process |
+| S-50 | low | d6b38a4 | the Open with link allowed every process to take the foreground (`ASFW_ANY`); now its own `Axit.exe` alone |
+| S-51 | low | d6b38a4 | `*.old*.exe` deleted in whatever folder `Axit.exe` ran from; now the installer's names in the installation folder only |
+| S-52 | low | 13cdc51 | more script hosts never paired (bash, sh, wsl, mintty, wt, OpenConsole, dotnet, perl, ruby, java, bun, deno); node stays for npm's Claude Code |
+| S-53 | low | 13cdc51 | the `claude.cmd` command line quoted only arguments with spaces; now every one, and cmd's special characters refused (`SystemPrograms.CmdSpecials`, axFile's S-3 list on its second use) |
+
+The review's notes, unconfirmed: Windows' property handlers run inside axPreview's process for the Details list (a
+third-party handler that crashes on a malformed file ends it; a hung one is left after five seconds), as they run
+inside File Explorer; accepted. Copy details kept the computer's and the domain's names and a work OneDrive's
+organisation: `Redaction` hides them too since the same day.
+
 ## 4. Sound, as checked
 
 Arguments are passed as lists everywhere (no command line joined by hand), paths after `--` for git; the master and

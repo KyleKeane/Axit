@@ -68,31 +68,41 @@ change; the one spoken change is axStart saying "Reading the programs" when noth
    `ProgramInstall.ClaudeCode`.
 3. **Running a child process with a timeout, written three times** (`GitRunner.RunAsync`, `ClaudeLauncher.VersionAsync`,
    `KeePassCli.Run`): start, read both streams, time out, end the process tree. One `Axit.Core/ProcessRun`; medium
-   risk, since git's case of a pipe left open by a child must be kept.
+   risk, since git's case of a pipe left open by a child must be kept. Done 2026-10-25 (47b9912): `ProcessRun` with`r
+   `Finished` for that case; each caller keeps its messages, their tests unchanged.
 4. **The item apps' window does less than it could**: axTask and axPass each keep the same undo stack of twenty, the
    same three-menu enabling (`MenuLetter`, `UpdateRowMenus`), and two rename hooks where one would do. Into
-   `ItemForm`; after `installs` merges, which changes `PassForm`.
+   `ItemForm`; after `installs` merges, which changes `PassForm`. Done 2026-10-25 (f165409): the menus and their`r
+   Shift+F10 letter are `ItemForm`'s (`SelectionMenus`), `RenameTo` an item's rename by default; the undo stacks stay`r
+   each app's, their steps being of different types.
 5. **The notes of the apps are long single paragraphs** (axFile's "Where things are" bullet is about 6,000
-   characters). The same rewrite as `Axit.Core`'s, one bullet per file or section; no content change.
+   characters). The same rewrite as `Axit.Core`'s, one bullet per file or section; no content change. Done 2026-10-25`r
+   (the branch `inv-notes`, merged into `inventory`), every name, number, date and quote checked kept.
 6. **Recently closed is remembered by four windows' own closing code**; one `PathInHand` on the window base would do
    it once. Done the same day at the user's ask, with the app lists: every list of apps, the Show in submenus and
    Recently closed now follow from one line per app in `Dispatch.Apps` (AX-9.2, AX-9.4, AX-9.10).
-7. **A list refilled in place, written twice** (axMedia's `FillList`, axFile's `FillPane`): `AxitList.SetLines`.
+7. **A list refilled in place, written twice** (axMedia's `FillList`, axFile's `FillPane`): `AxitList.SetLines`. Done`r
+   2026-10-25 (66e26ad).
 8. **The F1 texts' bundle section is typed by hand in fourteen files.** Each app's lines differ on purpose (what Find
    searches, what Tab moves between), so a generator would take parameters; for now the tests pin the lines that must
    be the same.
 9. **Two size formats disagree**: axProcess says "350 MB", axFile "1.2 MB". One `Axit.Core` format needs the user's
    choice of which. axFile's is `Axit.Core/FileSize` since 2026-10-25 (axPreview uses it too); axProcess's
-   `SizeText` stays its own until the user chooses.
+   `SizeText` stays its own until the user chooses. Done 2026-10-25 at the user's choice of the 1.2 MB style (f0d352e):`r
+   axProcess says sizes through `FileSize`; `SizeText` keeps the summary's gigabytes.
 10. **axGIT's Find always searches the details**, where every other list window finds in the list when the list has
-    the focus. A behaviour change; its spec first.
+    the focus. A behaviour change; its spec first. Done 2026-10-25 at the user's choice (c973d4e): Ctrl+F, F3 and`r
+    Shift+F3 find in the list while it has the focus (AG-2.4).
 11. **Small merges with little payoff**: `EditKeys`, `EditPaging` and `EditParagraphs` (three static classes for the
-    edit control's keys); `TextJump` and `TextJumps`.
+    edit control's keys); `TextJump` and `TextJumps`. Done 2026-10-25 (670949c): `EditKeys` with `Page` and`r
+    `Paragraph`, `TextJump` with `Handle`, `Jump` and `MenuLabel`.
 12. **Tests**: the fixture-folder finder is written three times, the temporary-folder pattern about thirty times, and
-    a few settings tests never delete their folders. One shared `TestFiles.cs` through `tests/Directory.Build.props`.
+    a few settings tests never delete their folders. One shared `TestFiles.cs` through `tests/Directory.Build.props`.`r
+    Done 2026-10-25 (the branch `inv-tests`, merged into `inventory`): `tests/Shared/TempFolder.cs` and `Fixtures.cs`,`r
+    compiled into every test project; every test kept, the counts the same.
 
-The items still open (3, 4, 5, 7, 11, 12, and 9 and 10 for the user) are the work list of the cleanup run,
-`docs/axit/cleanup-run.md` (specified 2026-10-25, to be run on a long day).
+Every item is done or decided as of 2026-10-25 but 8 (the F1 texts' bundle section, kept by hand on purpose and
+pinned by tests). Further cleanup, beyond this list, is the cleanup run's (`docs/axit/cleanup-run.md`).
 
 ## 4. Branches and leftovers
 
