@@ -4,7 +4,7 @@ axPreview is a viewer for one text file, made for screen reader users: the file'
 
 ## Install
 
-axPreview is part of Axit. Installing Axit (see the Axit guide in the Axit menu, About) gives you a Start menu entry `Axit axPreview`, a console command `axpreview`, axPreview in the `Open with Axit` submenu when you right-click any file in File Explorer, and axPreview under Windows' own `Open with` for `.txt`, `.md`, `.markdown`, `.log` and `.json` files, so that you can make it the program that opens a kind when you press Enter on one: Settings, Apps, Default apps, axPreview, or right-click a file, Open with, Choose another app, axPreview, Always. Windows lets only you set that, never a program.
+axPreview is part of Axit. Installing Axit (see the Axit guide in the Axit menu, About) gives you a Start menu entry `Axit axPreview`, a console command `axpreview`, axPreview in the `Open with Axit` submenu when you right-click any file in File Explorer, and axPreview under Windows' own `Open with` for every kind of file, so that you can make it the program that opens a kind when you press Enter on one: Settings, Apps, Default apps, axPreview, or right-click a file, Open with, Choose another app, axPreview, Always. Windows lets only you set that, never a program.
 
 ## Start
 

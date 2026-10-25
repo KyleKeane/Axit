@@ -1,5 +1,10 @@
 # Changelog
 
+## 3.7.2 - 2026-10-24
+
+- axPreview: offered under Windows' Open with for every file type, not only text files, on the way to a general viewer.
+- Axit: the installer no longer removes other programs from Windows' Open with. Writing Axit's entry for a file type emptied the type's list in your own part of the registry first, taking the other programs registered there for you with it, for `.md`, `.txt`, `.json`, the sound and video types and `.kdbx`; programs registered for the whole computer were not touched. A program that went missing comes back when it is updated or repaired.
+
 ## 3.7.1 - 2026-10-24
 
 - Axit: Windows' Open with lists each app for its file types on its own line: axDown and axPreview for `.md`, `.markdown` and `.txt`, axJSON and axPreview for `.json`, axMedia for sound and video, axPass for `.kdbx`. Only axPreview was offered before, since Windows lists one program per program file and every app is `Axit.exe`; the installer now gives each of these apps a link of `Axit.exe` under its own name (`axDown.exe` and the like), which hands the file to `Axit.exe`.

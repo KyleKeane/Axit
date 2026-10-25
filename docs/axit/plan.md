@@ -55,6 +55,12 @@ the restart by the app itself (2.3.0).
   field management and editing (axTask and axPass, `docs/axit/item-apps.md`: a navigator, a pane of typed fields,
   Enter to change one), and gets a focused pass of its own later, since making it general for any JSON adds
   complexity to the interface and the interactions; not started before that pass.
+- axPreview as the general viewer (the user's direction, 2026-10-24): a program for every file type under Windows'
+  Open with (built the same day, AX-2.3), showing any file, the raw text or the file's details where it is not text
+  (today "Not a text file"), and an Open with table of its own, file type to app, so that a user can route every file
+  through axPreview for one screen-reader flow and go on to the app from there. The user expects to make the single
+  apps the Windows default for some types, saving the extra key; axPreview's table is for those who want it for all.
+  Not specified yet.
 - axDown and axJSON, a file changed outside the editor (asked and built 2026-10-18, AD-3.6): compared when the window
   becomes active again; reloaded with the caret kept when nothing is unsaved, said once otherwise, and Save offers
   Reload and lose mine. No watcher thread, no merging. A watcher for live reload while the window stays active is

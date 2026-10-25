@@ -59,8 +59,9 @@ rather than a new one (AP-1.2). It works entirely offline (bundle G6).
 - AP-1.1 `Axit.exe preview [<file>] [--new]`: the file shown; no path opens the window empty, named "Untitled" (Ctrl+O
   then); a path that does not exist is the notice "File not found" naming it, the window empty or keeping what it
   showed (decided 2026-10-23; it opened an empty window under the missing name, and Edit in axDown created the file). Start menu entry `Axit axPreview`, console command `axpreview`, File Explorer's Open with Axit ▸ axPreview on
-  every file, axPreview under Windows' own Open with for text kinds (`.txt`, `.md`, `.markdown`, `.log`, `.json`,
-  type name "Text file (axPreview)"), so that the user can make it the default program for a kind in Windows'
+  every file, axPreview under Windows' own Open with for every file type (since 3.7.2, the general viewer to come,
+  `docs/axit/plan.md`; the text kinds `.txt`, `.md`, `.markdown`, `.log`, `.json` until then; type name
+  "File (axPreview)"), so that the user can make it the default program for a kind in Windows'
   settings (AP-D2), the Axit menu's New window (AX-9). A file alone on the command line keeps going to its editor
   (AX-1.2); the viewer is chosen by name or by Windows' association.
 - AP-1.2 **One viewer.** A start with a file, from axFile, from File Explorer or from the command line, hands the

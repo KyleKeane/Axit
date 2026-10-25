@@ -164,6 +164,19 @@ $oldTarget = Join-Path $env:LOCALAPPDATA 'Programs\AxClaude'
 $oldExe = Join-Path $oldTarget 'AxClaude.exe'
 $oldAppsKey = 'HKCU:\Software\Microsoft\Windows\CurrentVersion\Uninstall\AxClaude'
 $oldStartMenu = Join-Path $programs 'AxClaude.lnk'
+# Open with values of earlier versions that this one does not write again: axPreview's own file types up to 3.7.1,
+# every file since.
+$oldOpenWith = @{ 'Axit.axPreview' = @('.txt', '.md', '.markdown', '.log', '.json') }
+function Remove-OldOpenWith {
+    foreach ($progId in $oldOpenWith.Keys) {
+        foreach ($extension in $oldOpenWith[$progId]) {
+            $key = "$classes\$extension\OpenWithProgids"
+            if ((Test-Path -LiteralPath $key) -and (Get-ItemProperty -LiteralPath $key).PSObject.Properties[$progId]) {
+                Remove-ItemProperty -LiteralPath $key -Name $progId
+            }
+        }
+    }
+}
 
 # Everything an installation puts on the machine, this version's and the earlier ones', so that one removal clears
 # all of them. The Open with values live inside the file types' own keys and are removed one by one
@@ -262,6 +275,7 @@ function Remove-Installation {
             }
         }
     }
+    Remove-OldOpenWith
 }
 
 if ($Uninstall) {
@@ -409,7 +423,8 @@ if (-not $NoContextMenu) {
     }
 
     # The ProgID that Open with and Default apps know an app by (AX-2.3, B-9): the user makes it the default, never
-    # this script.
+    # this script. The type * is every file (HKCU\Software\Classes\*\OpenWithProgids).
+    Remove-OldOpenWith
     foreach ($app in ($apps | Where-Object { $_.OpenWith })) {
         $program = Set-OpenWithLink $app
         $progIdKey = "$classes\$($app.ProgId)"
@@ -425,7 +440,9 @@ if (-not $NoContextMenu) {
         Set-ItemProperty -LiteralPath (Join-Path $progIdKey 'shell\open\command') -Name '(default)' -Value "`"$program`" $($app.Verb) `"%1`""
         foreach ($extension in $app.OpenWith) {
             $openWith = "$classes\$extension\OpenWithProgids"
-            New-Item -Path $openWith -Force | Out-Null
+            # Made only when missing: New-Item -Force on an existing key empties it, which took the other programs'
+            # values of the type with it, and axDown's when axPreview came next (up to 3.7.1; measured 2026-10-24).
+            if (-not (Test-Path -LiteralPath $openWith)) { New-Item -Path $openWith -Force | Out-Null }
             New-ItemProperty -LiteralPath $openWith -Name $app.ProgId -Value ([byte[]]@()) -PropertyType None -Force | Out-Null
         }
     }
@@ -455,7 +472,7 @@ if (-not $NoStartMenu) { Say "Start menu: $(($names | ForEach-Object { "Axit $_"
 if (-not $NoContextMenu) {
     $onFolders = @($apps | Where-Object { $_.Opens -contains 'folders' } | ForEach-Object { $_.Name }) -join ', '
     $onFiles = @($apps | Where-Object { $_.Opens -contains 'files' } | ForEach-Object { if ($_.Types) { "$($_.Name) on $($_.Types -join ', ')" } else { "$($_.Name) on every file" } }) -join ', '
-    $openWith = @($apps | Where-Object { $_.OpenWith } | ForEach-Object { "$($_.Name) for $($_.OpenWith -join ', ')" }) -join '; '
+    $openWith = @($apps | Where-Object { $_.OpenWith } | ForEach-Object { "$($_.Name) for $(if ($_.OpenWith -contains '*') { 'every file' } else { $_.OpenWith -join ', ' })" }) -join '; '
     Say "File Explorer: Open with Axit in the right-click menu: $onFolders on folders; $onFiles. Under Open with: $openWith"
 }
 Say "Console: $(($names | ForEach-Object { $_.ToLower() }) -join ', '), each taking a folder or file, or axit <folder or file> (shims in $bin)"

@@ -33,7 +33,7 @@ public sealed record App(string Name, string Verb, string Project, AppGroup Grou
     /// <summary>The file types the submenu's file entry is shown on; every file when empty.</summary>
     public IReadOnlyList<string> Types { get; init; } = [];
 
-    /// <summary>The file types the app is a program for under Windows' Open with (AX-2.3, B-9), with the type name Windows shows for them.</summary>
+    /// <summary>The file types the app is a program for under Windows' Open with (AX-2.3, B-9), with the type name Windows shows for them; <c>*</c> is every file.</summary>
     public IReadOnlyList<string> OpenWith { get; init; } = [];
 
     public string TypeName { get; init; } = "";
@@ -138,7 +138,7 @@ public static class Dispatch
         new("axPreview", AxPreview, "AxPreview", AppGroup.Files, Opens.Files)
         {
             Description = "axPreview, a read-only viewer for text files", Icon = new("Ap", 70, 70, 140),
-            OpenWith = [".txt", ".md", ".markdown", ".log", ".json"], TypeName = "Text file (axPreview)",
+            OpenWith = ["*"], TypeName = "File (axPreview)",
         },
         new("axMedia", AxMedia, "AxMedia", AppGroup.Files, Opens.FilesAndFolders)
         {

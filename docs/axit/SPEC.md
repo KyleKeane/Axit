@@ -68,7 +68,7 @@ The apps are named ax and a word, the ax in lower case and the word as it is wri
   axMedia window (`AppMessage`). Specification `docs/axmedia/SPEC.md`, guide `docs/axmedia/user-guide.md`, test plan
   `docs/axmedia/nvda-test-plan.md`.
 - **axPreview** (2026-10-22): `Axit.exe preview [<file>] [--new]`, Start entry `Axit axPreview`, Open with Axit on
-  every file and Open with for `.txt`, `.md`, `.markdown`, `.log`, `.json`, command `axpreview`. A read-only viewer for
+  every file and Open with for every file type (the text kinds alone up to 3.7.1), command `axpreview`. A read-only viewer for
   one text file: the text editor shell in its read-only mode, with axDown's navigation keys; a start with a file
   hands it to the open axPreview window. Specification `docs/axpreview/SPEC.md`, guide `docs/axpreview/user-guide.md`,
   test plan `docs/axpreview/nvda-test-plan.md`.
@@ -158,7 +158,7 @@ The apps are named ax and a word, the ax in lower case and the word as it is wri
   | axTerminal | yes | | |
   | axFile | yes | every file (its folder, the file selected) | |
   | axMedia | | the sound and video kinds (`MediaFiles.Extensions`, listed again in the block) | the same kinds (`Axit.AxMedia`) |
-  | axPreview | | every file | `.txt`, `.md`, `.markdown`, `.log`, `.json` (`Axit.AxPreview`) |
+  | axPreview | | every file | every file (`*`, `Axit.axPreview`; the text types alone up to 3.7.1) |
   | axStart | | | |
   | axProcess | | | |
   | axTask | folders | | |
@@ -172,7 +172,10 @@ The apps are named ax and a word, the ax in lower case and the word as it is wri
   `axPreview.exe`, `axMedia.exe`, `axPass.exe`), made again on every install, and its ProgID runs
   `<app>.exe <verb> "%1"`. Started under any name but `Axit.exe`, the program starts the `Axit.exe` beside it with
   the same arguments, lets it take the foreground and ends, so every window runs as `Axit.exe` (`Program.cs`). A
-  link still running at an update is renamed aside as `<app>.old.<time>.exe`, as the program file is (AX-2.8).
+  link still running at an update is renamed aside as `<app>.old.<time>.exe`, as the program file is (AX-2.8). A
+  type's `OpenWithProgids` key is made only when it is missing and Axit's value is added to it: `New-Item -Force` on
+  an existing key empties it, which up to 3.7.1 removed the other programs' values of the user's own registry for
+  these types, and axDown's when axPreview's came next.
 
   On Windows 11 the submenu is in the full menu (Shift+F10, or Show more options), as every program's own entries
   are. Up to 2.13.0 each app had an entry of its own (`Open in axClaude` and the like); the installer removes them.
