@@ -196,6 +196,11 @@ Open:
 - **The account's own settings** (S-36), which no file can set: branch protection on `main` with required reviews and
   the build passing; tag protection for `v*`; GitHub's immutable releases; two-factor sign-in with a hardware key;
   signed commits and tags. Listed here for the maintainer.
+- **Code signing for Windows** (2026-10-25): Smart App Control blocked 3.7.1's and 3.7.4's new `Axit.exe` on the
+  maintainer's second computer ("An Application Control policy has blocked this file"), since the program carries no
+  Authenticode signature (the release key signs the zip for the apps, which Windows does not know). The installer stops
+  cleanly since then (on main, unreleased at the user's choice). The fix is an Authenticode signature on every release,
+  for example through Microsoft's cloud signing service; the user sets up the account later.
 - An outside review by a security professional (section 5).
 ## 3b. The review of 3.7.x (2026-10-25)
 
