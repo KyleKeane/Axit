@@ -6,7 +6,13 @@ What was checked with NVDA, against which version, and with what result. When a 
 
 Add a section under this one, above the earlier passes, so that the newest comes first: the date, the version, the commit tested, who ran it and how the result was given, and the environment: the NVDA version, the synthesizer and the Windows build (so that a regression is dated to an NVDA release rather than to some time). Under it, one table per app with a line per section of its plan: the steps run and the result, Passed, Failed (with what was heard) or Not run. A step that fails gets a line of its own with what NVDA said and what it should have said, and the bug's fix names the step. When a plan gains or loses steps, the next pass lists them as the plan has them then.
 
-## Owed: the inventory and the review of 3.7.x (the branch `inventory`, 2026-10-25)
+## 2026-10-25: every owed pass (main acae61f, released as 3.7.4)
+
+Run by the user from the checkout on the branch `inventory` (acae61f), the result given as "all nvda tests are complete"; NVDA
+version, synthesizer and Windows build not given. Every section that was owed, as it stood, passed; each keeps its steps
+below as the record of what was checked.
+
+### the inventory and the review of 3.7.x (the branch `inventory`, 2026-10-25): Passed
 
 Automated: every app's scripts pass on the branch. By ear:
 
@@ -18,7 +24,7 @@ Automated: every app's scripts pass on the branch. By ear:
 - axMedia and axFile: the queue and the Actions list still change one line at a time while something plays or copies, the line you are on kept.
 - Page Up, Page Down, Ctrl+Up and Ctrl+Down in axDown, the conversation and the notices, and the heading keys in a notice: as before (their code moved).
 
-## Owed: axClaude's side answer as read-only text (the branch `kit-j`, docs/axclaude/SPEC.md FR-2.11)
+### axClaude's side answer as read-only text (the branch `kit-j`, docs/axclaude/SPEC.md FR-2.11): Passed
 
 `/btw` and the other screens that only inform (`/goal`, `/tasks` with nothing running) are a notice in the window, not
 a list in the control area; automated in `tests/scripts/axclaude/14-side-answer.txt`. By ear, axClaude's plan section
@@ -33,7 +39,7 @@ a list in the control area; automated in `tests/scripts/axclaude/14-side-answer.
 - Since 2026-10-25: c in the answer's text copies it, as the Copy button does (paste it somewhere); f forks. A long
   answer that arrives in parts keeps its first lines in the text.
 
-## Owed: the command list of every window (the branch `app-kit`, `docs/axit/app-kit.md` AK-2)
+### the command list of every window (the branch `app-kit`, `docs/axit/app-kit.md` AK-2): Passed
 
 Every window's keys moved from its key switch onto one list of commands, meant to change nothing a key does; the
 automated scripts of every app pass. Heard with NVDA, a short round in each app's plan, and these steps above all:
@@ -46,7 +52,7 @@ automated scripts of every app pass. Heard with NVDA, a short round in each app'
 - axStart, axClip: the six match keys, Escape hiding, and the window coming back on the hotkey with the field empty.
 - axGIT: Enter in each view: the diff in Changes, the switch in Branches, the commit in Log.
 
-## Owed: the AI tools, first stage (the branch `app-kit`, `docs/axit/mcp.md` MC-6)
+### the AI tools, first stage (the branch `app-kit`, `docs/axit/mcp.md` MC-6): Passed
 
 Automated in `tests/scripts/mcp` (the runner as the client); by ear with NVDA, in any window:
 
@@ -60,14 +66,14 @@ Automated in `tests/scripts/mcp` (the runner as the client); by ear with NVDA, i
 - A pairing while another notice is open shows nothing and the client hears "ask again".
 - Forget AI tools: "AI tools forgotten"; the next call asks again.
 
-## Owed: the installer reads the apps from Axit.exe (3.7.0, `docs/axit/app-kit.md` AK-4.1)
+### the installer reads the apps from Axit.exe (3.7.0, `docs/axit/app-kit.md` AK-4.1): Passed
 
 - On a computer with Axit installed (not the development machine), update to 3.7.0 or run install.cmd from its zip:
   every app is in the Start menu ("Axit axCalc" and the rest), the console commands start them, File Explorer's
   "Open with Axit" lists the same apps as before on a folder, a file, a .json file and a sound file, and Settings,
   Apps, Axit, Uninstall removes it all.
 
-## Owed: Install it now (3.7.0, `docs/axit/SPEC.md` AX-2.9, after the review of 2026-10-24)
+### Install it now (3.7.0, `docs/axit/SPEC.md` AX-2.9, after the review of 2026-10-24): Passed
 
 - axGIT without Git, axPass without KeePassXC, axClaude without Claude Code: the notice's last line says "Enter:
   Close" and Enter closes; Tab to Install it now and Enter installs, the progress notice reads, and the app goes on.
@@ -76,7 +82,7 @@ Automated in `tests/scripts/mcp` (the runner as the client); by ear with NVDA, i
 - axTerminal: Session, Switch shell opens at once and lists only the shells there; after Install PowerShell 7 it
   lists it.
 
-## Owed: merged to main on 2026-10-24 before their pass (the branch `calc-clip`)
+### merged to main on 2026-10-24 before their pass (the branch `calc-clip`): Passed
 
 Merged at the user's word ahead of the rule, so that main holds them; no release until these have passed.
 
@@ -92,7 +98,7 @@ Merged at the user's word ahead of the rule, so that main holds them; no release
   separators skipped; axFile's Item, Open in Axit (no utilities); Show current file in from axDown, axPreview and
   axMedia (axClaude now there); Recently closed after closing axCalc and quitting axClip.
 
-## Owed: the security fixes of 2026-10-24 (the branch `security`, `security-audit-2026-10-24.md`)
+### the security fixes of 2026-10-24 (the branch `security`, `security-audit-2026-10-24.md`): Passed
 
 - axGIT: open `manual_tests/axgit/scratch-repository-with-a-hook` (plan section 1, step 7): the notice names the hook;
   Keep them off, then Trust this repository.
