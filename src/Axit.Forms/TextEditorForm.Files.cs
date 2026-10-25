@@ -15,12 +15,12 @@ public sealed partial class TextEditorForm
     /// </summary>
     private bool LoadDocument(string? path, bool keepHistory = false)
     {
-        if (ReadDocument(path, keepHistory) is not var (document, writeTime, shown))
+        if (ReadDocument(path, keepHistory) is not var (document, writeTime, shown, page))
         {
             return false;
         }
 
-        ShowDocument(shown, document, writeTime, keepHistory);
+        ShowDocument(shown, document, writeTime, keepHistory, page);
         return true;
     }
 
@@ -31,20 +31,21 @@ public sealed partial class TextEditorForm
     /// the app refuses (the viewer's kinds), one that cannot be read on a reload (AD-3.6) or in the viewer at all,
     /// and in the viewer a path that does not exist (AP-1.1; until 2026-10-23 it opened an empty window under the
     /// missing name, and Edit in axDown created the file). In an editor a file that cannot be read on an open is the
-    /// notice and Untitled, so that Save cannot write the empty editor over it (AD-3.7).
+    /// notice and Untitled, so that Save cannot write the empty editor over it (AD-3.7). A viewer with renderers reads
+    /// the file through the one that takes it (AP-7), and the page comes with the document.
     /// </summary>
-    private (TextDocument Document, DateTime? WriteTime, string? Path)? ReadDocument(string? path, bool reloading)
+    private (TextDocument Document, DateTime? WriteTime, string? Path, ViewerPage? Page)? ReadDocument(string? path, bool reloading)
     {
         if (path is null)
         {
-            return (TextDocument.Empty(), null, null);
+            return (TextDocument.Empty(), null, null, null);
         }
 
         if (!File.Exists(path))
         {
             if (!_app.ReadOnly)
             {
-                return (TextDocument.Empty(), null, path);
+                return (TextDocument.Empty(), null, path, null);
             }
 
             Refused(Notice.Plain("File not found", $"{path} does not exist."));
@@ -59,9 +60,15 @@ public sealed partial class TextEditorForm
 
         try
         {
-            return (TextDocument.Read(path), File.GetLastWriteTimeUtc(path), path);
+            if (_app.Render is { } render)
+            {
+                var page = render(path);
+                return (page.Document, File.GetLastWriteTimeUtc(path), path, page);
+            }
+
+            return (TextDocument.Read(path), File.GetLastWriteTimeUtc(path), path, null);
         }
-        catch (Exception ex) when (ex is InvalidOperationException or IOException or UnauthorizedAccessException)
+        catch (Exception ex) when (ex is InvalidOperationException or IOException or UnauthorizedAccessException or InvalidDataException)
         {
             Fail($"{path} could not be {(reloading ? "reloaded" : "opened")}: {ex.Message}");
             if (reloading)
@@ -79,7 +86,7 @@ public sealed partial class TextEditorForm
                 return null;
             }
 
-            return (TextDocument.Empty(), null, null);
+            return (TextDocument.Empty(), null, null, null);
         }
     }
 
@@ -92,8 +99,9 @@ public sealed partial class TextEditorForm
     }
 
     /// <summary>The document into the editor under its path: the recent list and Recently closed, the history, the title and the status (AD-3, AD-4.1, AX-9.4).</summary>
-    private void ShowDocument(string? path, TextDocument document, DateTime? writeTime, bool keepHistory)
+    private void ShowDocument(string? path, TextDocument document, DateTime? writeTime, bool keepHistory, ViewerPage? page)
     {
+        _page = page;
         if (_path is { } old && !string.Equals(old, path, StringComparison.OrdinalIgnoreCase))
         {
             // AX-9.4: the file left behind joins the bundle's Recently closed list.
@@ -126,7 +134,8 @@ public sealed partial class TextEditorForm
         _changed = false;
         UpdateTitle();
         UpdateStatus();
-        Log.Info(path is null ? "New document" : $"Opened {path}: {_document.EncodingName}, {_document.LineEndingName}");
+        ReadDetails();
+        Log.Info(path is null ? "New document" : $"Opened {path}: {page?.Kind ?? "text"}, {_document.EncodingName}, {_document.LineEndingName}");
     }
 
     private void OnTextChanged(object? sender, EventArgs e)

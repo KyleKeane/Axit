@@ -10,13 +10,15 @@ public static class HelpText
     public static readonly string Shortcuts = BundleHelp.Section(
         "axPreview",
         [
+            "Tab, Ctrl+Tab or F6: between the file's text and the Details list under it",
             "Ctrl+F: find text. F3 and Shift+F3: next or previous match",
         ],
         navigateMenu: true) + """
         ## axPreview
-          Ctrl+O: open a file to read. Ctrl+N: a new axPreview window
+          Ctrl+O: open any file to read. Ctrl+N: a new axPreview window
           F5: read the file again; coming back to the window after another program changed it does the same by itself
-          Ctrl+E: open the same file in its editor, axDown, or axJSON for a .json file
+          Ctrl+E: go on with the file: a text in its editor, axDown, or axJSON for a .json file; a sound or video in axMedia; anything else in the program Windows has for it
+          File, Open with: the Axit apps for the file, Windows' program, or Windows' own list of programs, whose Always makes one the default
           Ctrl+W: show the file in File Explorer
           Ctrl+G: go to a line; the field also says where you are, like "Go to line (now line 12, column 4)"
           l: say the line, "Line 12 of 40"
@@ -32,10 +34,17 @@ public static class HelpText
           Ctrl+S: nothing to save here; axPreview says so
 
         ## The text
+          What any file shows: a text file its text; a Word document, a PowerPoint presentation or an OpenDocument text its text, with its headings and slides as headings; a zip its list of files; a picture, sound or video what it is; any other file the readable text inside it
           Arrow keys, Home, End, Ctrl+Home, Ctrl+End, Ctrl+Left, Ctrl+Right: move as in any text
           Page Up, Page Down: one screen up or down, or the first or last line
           Ctrl+Up, Ctrl+Down: the previous or next paragraph (the first line after a blank line)
           Shift with any of them, or Ctrl+A: select. Ctrl+C: copy. Typing changes nothing
+
+        ## The Details list
+          Everything known about the file, one line each: its name, folder, size, type and dates; what is in it, like the encoding and the number of words, or the files in a zip; and every detail Windows has, like a picture's dimensions or a song's length
+          Arrow keys and letters: move through the lines
+          Ctrl+C: copy the line's value, without its name
+          Enter on the Folder line: the folder in axFile, the file selected
 
         ## Notices
           axPreview's errors and help texts appear inside the window, in place of the text.

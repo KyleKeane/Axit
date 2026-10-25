@@ -1,0 +1,63 @@
+# axPreview, test plan section 5 (the Details list and the kinds of file, docs/axpreview/SPEC.md AP-6, AP-7), driven
+# from inside the window. Every window after the first is started with --new, since a start otherwise hands its file
+# to the open window (AP-1.2).
+# The run's own settings: no update check, whose network call logs an ERROR when GitHub cannot be reached.
+file home\Axit\axpreview.json {"checkForUpdates": false}
+file notes.md # Notes\n\nOne two three.
+run powershell -NoProfile -Command "Add-Type -AssemblyName System.IO.Compression.FileSystem; New-Item -ItemType Directory -Force 'docx\word' | Out-Null; [IO.File]::WriteAllText('docx\word\document.xml', '<w:document xmlns:w=''http://schemas.openxmlformats.org/wordprocessingml/2006/main''><w:body><w:p><w:pPr><w:pStyle w:val=''Heading1''/></w:pPr><w:r><w:t>Install</w:t></w:r></w:p><w:p><w:r><w:t>Run the installer.</w:t></w:r></w:p></w:body></w:document>'); [IO.Compression.ZipFile]::CreateFromDirectory('docx', 'report.docx'); [IO.Compression.ZipFile]::CreateFromDirectory('docx', 'bundle.zip')"
+run powershell -NoProfile -Command "[IO.File]::WriteAllBytes('song.mp3', [byte[]](73,68,51,3,0,0,0,0,0,0))"
+run powershell -NoProfile -Command "[IO.File]::WriteAllBytes('tool.bin', [byte[]](0,1,2) + [Text.Encoding]::ASCII.GetBytes('Readable inside') + [byte[]](0,0,7))"
+
+# 5.1: a text file opens on its text as before; its window's command list is whole (AK-2.4).
+start preview {temp}\notes.md
+check commands
+expect focus {"name":"notes.md","role":"Text","value":"# Notes"}
+expect state Line 1, Column 1 · UTF-8
+# 5.2: Tab moves to the Details list, on its first line, the File heading; Down reads the file's lines.
+keys tab
+expect focus {"name":"Details","role":"List","value":"File"}
+keys down
+expect focus "value":"Name: notes.md"
+keys down down
+expect focus "value":"Size: 25 bytes"
+# 5.3: Enter on a line that is not the Folder line says what Enter does; nothing opens.
+keys enter
+expect said ! Enter opens the Folder line in axFile
+# 5.4: the Contents group: the text's encoding and its words, found by typing its first letters.
+type wor
+expect focus "value":"Words: 5"
+# 5.5: F6 goes back to the text, where the caret was; F6 again, the list, on the same line.
+keys f6
+expect focus "name":"notes.md","role":"Text"
+keys f6
+expect focus "value":"Words: 5"
+# 5.5 manual: Ctrl+C on a line copies its value; the clipboard is the user's, shared with the test desktop.
+# 5.5 manual: Enter on the Folder line opens axFile, a window the runner does not reach.
+
+# 5.6: a Word document is its text, its heading a Markdown heading, so Ctrl+H finds it; the status bar names the kind.
+start preview --new {temp}\report.docx
+expect state "title":"report.docx - axPreview"
+expect focus {"name":"report.docx","role":"Text","value":"# Install"}
+expect state Word document
+keys ctrl+end
+keys ctrl+shift+h
+expect said ! Install, heading level 1
+expect commands "Open in Windows\u0027 program, File, Ctrl\u002BE"
+
+# 5.7: a zip is its listing, its contents counted in the Details list.
+start preview --new {temp}\bundle.zip
+expect focus word/document.xml, 
+keys tab
+type file
+expect focus "value":"Files: 1"
+
+# 5.8: a sound file says what it is and that Ctrl+E plays it; the item is named so.
+start preview --new {temp}\song.mp3
+expect focus song.mp3 is a sound file (MP3).
+expect commands "Play in axMedia, File, Ctrl\u002BE"
+
+# 5.9: any other file is its readable text, under the line that says so.
+start preview --new {temp}\tool.bin
+expect focus No preview for this kind yet; the readable text inside it follows.
+keys down
+expect focus "value":"Readable inside"

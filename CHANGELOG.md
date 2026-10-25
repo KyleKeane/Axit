@@ -2,7 +2,11 @@
 
 ## 3.7.2 - 2026-10-24
 
-- axPreview: offered under Windows' Open with for every file type, not only text files, on the way to a general viewer.
+- axPreview: a viewer for every file, in two panes: the file above, read as text, and a Details list under it (Tab or F6) with everything known about the file: its name, folder, size, type and dates, what is in it (the encoding and the words of a text, the files of a zip, the headings of a document), and every detail Windows has, like a picture's dimensions or a song's length. Ctrl+C copies a detail's value; Enter on the Folder line opens it in axFile.
+- axPreview: every kind of file opens, each through its own reader: a text file as before; a Word document, a PowerPoint presentation or an OpenDocument text as its text, with its headings and slides as headings for Ctrl+H; a zip as its list of files; a picture, sound or video as what it is; any other file as the readable text inside it. "Not a text file" is gone.
+- axPreview: Ctrl+E goes on with the file by its kind (its editor, axMedia, or the program Windows has for it), and File, Open with lists the Axit apps for the file, Windows' program and Windows' own list of programs, where Always sets a default.
+- axPreview: offered under Windows' Open with for every file type, not only text files.
+- For developers: `Axit.Core/FileSize` (axFile's size format) and `Axit.Forms/WindowsOpenWith` (axFile's Open with dialog) are shared on their second use.
 - Axit: the installer no longer removes other programs from Windows' Open with. Writing Axit's entry for a file type emptied the type's list in your own part of the registry first, taking the other programs registered there for you with it, for `.md`, `.txt`, `.json`, the sound and video types and `.kdbx`; programs registered for the whole computer were not touched. A program that went missing comes back when it is updated or repaired.
 
 ## 3.7.1 - 2026-10-24

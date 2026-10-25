@@ -14,7 +14,7 @@ Run with NVDA before a release, on a folder with `README.md` (headings, links, a
 6. NVDA+End: "README.md", then "Line 5, Column 1 · UTF-8 · CRLF" (the file's values). Ctrl+Shift+W: "Word wrap off", the caret where it was; again: "Word wrap on".
 7. Ctrl+S: "Nothing to save here". F1: the Keyboard shortcuts notice; Ctrl+H in it jumps to its headings; Escape.
 8. Ctrl+O: the Windows file picker on text files; pick `plain.txt`: the window shows it, the title "plain.txt - axPreview"; Ctrl+H: "No next heading". Alt+F, R: "Open recent file submenu", "1. plain.txt (…)", "2. README.md (…)"; 2: README.md is back.
-9. Ctrl+O, All files, pick the `.exe`: the notice "Not a text file" saying "<name> is not a text file. axFile's Enter opens it in the program Windows has for it."; Enter closes it and README.md is still there. Pick the file over 32 MB: the notice "Too large" naming the size. Pick `app.log`: it opens, since its bytes read as text.
+9. Ctrl+O, All files, pick the `.exe`: it opens, its text the readable text inside it under "No preview for this kind yet; the readable text inside it follows.", or "No readable text was found in <name>."; Ctrl+E is "Open in Windows' program" in the File menu (since 2026-10-24; the notice "Not a text file" before). Pick the file over 32 MB: the notice "Too large" naming the size. Pick `app.log`: it opens, since its bytes read as text.
 9a. Console: `axpreview gone.txt` (a file that does not exist): the notice "File not found" naming it, the window empty, "Untitled - axPreview"; Enter closes it; Ctrl+E: "No file yet". Ctrl+O on a file whose first eight kilobytes are text with a NUL further in (make one): the error notice, and README.md is still shown.
 10. Edit `README.md` in another program while axPreview is in the background, then Alt+Tab back: "Reloaded, README.md changed on disk", the caret on the same line. F5: "Reloaded".
 11. Ctrl+E on README.md: a new axDown window on it, the focus there; Alt+F4 closes it. On the `.json` file, Alt+F: the item reads "Edit in axJSON Ctrl+E"; Ctrl+E: axJSON. Ctrl+W: File Explorer with the file selected. Alt+F, I: File Explorer Ctrl+W, axGIT, axTerminal, axFile; Enter on axFile: axFile on the folder with the file selected.
@@ -35,3 +35,16 @@ Run with NVDA before a release, on a folder with `README.md` (headings, links, a
 2. Help, User guide: this guide; Ctrl+H moves through its headings; Escape.
 3. Alt+A: the Axit menu with New window (axPreview among the apps), Recently closed (the file an axPreview window had when it closed), Open windows, Open windows by type, Close all windows, Check for updates, About.
 4. Options, Developer, Copy diagnostics: "Copied diagnostics"; paste somewhere: the versions, the file with its encoding and the log's end. Alt+F4 closes without a question.
+
+## 5. The Details list and the kinds of file (AP-6, AP-7)
+
+Files: `README.md`, and a Word document, a zip, an MP3 and a picture of your own (any will do).
+
+1. Open `README.md`: NVDA reads the text as before. Tab: "Details, list", then "File". Down: "Name: README.md", then the folder, "Size: …, … bytes", "Type: …", the dates. Down further: "Contents", the encoding, the line ending, the lines, words and characters; then "Windows' details" with whatever Windows has. Nothing is spoken but the lines.
+2. Type `wor`: the Words line. Ctrl+C: "Copied"; paste into another program: the number alone. Enter: "Enter opens the Folder line in axFile". Up to the Folder line, Enter: axFile opens on the folder, README.md selected.
+3. F6: back in the text, the caret where it was; F6 again: the list, on the same line. Shift+Tab from the list: the text. With Go to line open (Ctrl+G), Tab goes text, field, list.
+4. F5 while in the list: "Reloaded"; the list stays on its line. Listen for whether NVDA reads the line again, and note it.
+5. Open the Word document: its text, headings starting with #; Ctrl+H moves by them; the status bar says "Word document"; the Details list's Contents group gives the paragraphs, headings and tables, and the Windows group its author or pages when Windows knows them. File menu: "Open in Windows' program" (Ctrl+E) opens Word or the program Windows has.
+6. Open the zip: one line per file with its size and date; the Details list counts files and folders and the packed and unpacked sizes.
+7. Open the MP3: "<name> is a sound file (MP3). …"; the Windows group gives its length, bit rate, artist; Ctrl+E plays it in axMedia. Open the picture: "… is a picture …"; the Windows group gives its dimensions; Ctrl+E opens it in Windows' program.
+8. File, Open with on the README: "1. axDown", then Windows' program for it and Choose another program…; Enter on axDown opens it there once. Choose another program…: Windows' own dialog; Escape closes it, nothing changed.

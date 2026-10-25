@@ -32,11 +32,15 @@ The text is the one control. Arrow keys, Home, End, Ctrl+Home, Ctrl+End, Ctrl+Le
 - **Ctrl+Shift+W** turns word wrap off and on (Options, Text); the caret stays where it was.
 - **Ctrl+S** says "Nothing to save here": nothing is ever changed, so nothing is ever lost.
 
-Any file whose first bytes read as text opens, up to 32 MB: the editors' kinds always, a log, a script, a file without an extension. A file that is not text gives the notice "Not a text file" and the window keeps what it had; axFile's Enter opens such a file in the program Windows has for it. A file over 32 MB gives "Too large".
+Every file opens. A text file, up to 32 MB, shows its text: the editors' kinds always, a log, a script, a file without an extension. A Word document, a PowerPoint presentation or an OpenDocument text shows its text, its headings and slides as headings, so that Ctrl+H moves through them. A zip shows its list of files. A picture, a sound or a video says what it is. Any other file shows the readable text inside it. A text file over 32 MB gives "Too large".
+
+## The Details list
+
+Under the text is the Details list: Tab or F6 moves there and back. It has everything known about the file, one line each: its name, folder, size, type and dates; what is in it, like the encoding and the number of words, or the files in a zip; and every detail Windows has, like a picture's dimensions, a song's length and artist, or a document's author. Letters jump to a line. Ctrl+C copies the line's value, without its name. Enter on the Folder line opens the folder in axFile with the file selected.
 
 ## Menus
 
-- **File**: New window (Ctrl+N), Open (Ctrl+O), Open recent, Reload (F5), Edit in axDown or Edit in axJSON (Ctrl+E), Show current file in (File Explorer Ctrl+W, axClaude, axTerminal, axGIT, axFile), Exit.
+- **File**: New window (Ctrl+N), Open (Ctrl+O), Open recent, Reload (F5), the way on (Ctrl+E: Edit in axDown or axJSON for a text, Play in axMedia for a sound or video, Open in Windows' program for anything else), Open with (the Axit apps for the file, Windows' program, or Choose another program…, Windows' own list, whose Always makes one the default), Show current file in (File Explorer Ctrl+W, axClaude, axTerminal, axGIT, axFile), Exit.
 - **Navigate**: Find (Ctrl+F), Find next (F3), Find previous (Shift+F3), Go to line (Ctrl+G), Next and Previous (heading, heading level 1 to 6, link, list, list item, block quote, table).
 - **Options**: Text (word wrap, font and size), General (the update check), Developer (the settings file, diagnostics).
 - **Axit**: new windows of every app, the files and folders closed lately, the open windows, updates, About.

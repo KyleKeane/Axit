@@ -51,28 +51,36 @@ public sealed class TextSniffTests : IDisposable
     }
 
     [Fact]
-    public void A_file_is_refused_when_it_is_not_text_and_opened_otherwise()
+    public void Every_file_under_the_limit_opens_text_or_not()
     {
         Assert.Null(TextSniff.Refuse(Write("notes.log", Encoding.UTF8.GetBytes("one\r\ntwo"))));
         Assert.Null(TextSniff.Refuse(Write("empty.bin", [])));
-        var refusal = TextSniff.Refuse(Write("tool.exe", [0x4D, 0x5A, 0x90, 0x00, 0x03, 0x00, 0x00, 0x00]));
-        Assert.Equal("Not a text file", refusal!.Title);
-        Assert.Equal("tool.exe is not a text file. axFile's Enter opens it in the program Windows has for it.", refusal.Text);
+        // Since 2026-10-24 a file that is not text opens through its renderer (AP-7.5).
+        Assert.Null(TextSniff.Refuse(Write("tool.exe", [0x4D, 0x5A, 0x90, 0x00, 0x03, 0x00, 0x00, 0x00])));
         // A file that cannot be read is left to the reader.
         Assert.Null(TextSniff.Refuse(Path.Combine(_folder, "gone.txt")));
     }
 
     [Fact]
-    public void A_file_over_the_limit_is_refused_by_size()
+    public void A_text_over_the_limit_is_refused_by_size_and_any_other_file_opens()
     {
         var path = Path.Combine(_folder, "huge.log");
         using (var stream = File.Create(path))
         {
+            stream.Write(Encoding.ASCII.GetBytes(new string('a', 8192)));
             stream.SetLength(TextSniff.MaxBytes + 1);
         }
 
         var refusal = TextSniff.Refuse(path);
         Assert.Equal("Too large", refusal!.Title);
         Assert.Equal("huge.log is 33,554,433 bytes, over the 32 MB a window can open.", refusal.Text);
+
+        var binary = Path.Combine(_folder, "huge.bin");
+        using (var stream = File.Create(binary))
+        {
+            stream.SetLength(TextSniff.MaxBytes + 1);
+        }
+
+        Assert.Null(TextSniff.Refuse(binary));
     }
 }

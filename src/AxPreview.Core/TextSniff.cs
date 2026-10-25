@@ -52,9 +52,10 @@ public static class TextSniff
     }
 
     /// <summary>
-    /// Why the file at <paramref name="path"/> is not shown, or null when it is: over the editors' limit ("<name> is
-    /// 33,554,433 bytes, over the 32 MB a window can open.", the editors' wording since 2026-10-23), or not text ("<name> is not a text file. axFile's Enter opens it in
-    /// the program Windows has for it."). A file that cannot be read is left to the reader, which reports it.
+    /// Why the file at <paramref name="path"/> is not shown, or null when it is: a text over the editors' limit ("<name>
+    /// is 33,554,433 bytes, over the 32 MB a window can open.", the editors' wording since 2026-10-23). Any other file
+    /// opens, through its renderer (SPEC.md AP-7.5; until 2026-10-24 a file that was not text was the notice "Not a
+    /// text file"). A file that cannot be read is left to the reader, which reports it.
     /// </summary>
     public static Refusal? Refuse(string path)
     {
@@ -62,14 +63,14 @@ public static class TextSniff
         try
         {
             using var stream = File.OpenRead(path);
-            if (stream.Length > MaxBytes)
+            if (stream.Length <= MaxBytes)
             {
-                return new Refusal("Too large", $"{name} is {stream.Length:N0} bytes, over the {MaxBytes / (1024 * 1024)} MB a window can open.");
+                return null;
             }
 
-            var bytes = new byte[Math.Min(stream.Length, Sample)];
+            var bytes = new byte[Sample];
             stream.ReadExactly(bytes);
-            return IsText(bytes, path) ? null : new Refusal("Not a text file", $"{name} is not a text file. axFile's Enter opens it in the program Windows has for it.");
+            return IsText(bytes, path) ? new Refusal("Too large", $"{name} is {stream.Length:N0} bytes, over the {MaxBytes / (1024 * 1024)} MB a window can open.") : null;
         }
         catch (Exception ex) when (ex is IOException or UnauthorizedAccessException)
         {

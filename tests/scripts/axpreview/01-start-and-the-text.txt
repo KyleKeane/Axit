@@ -161,16 +161,13 @@ expect focus plain.txt
 keys ctrl+h
 expect said ! No next heading
 
-# 1.9: the files Ctrl+O would pick, given at the start instead (the same read, AP-2.2): an .exe, "Not a text file",
-# the window keeping what it had (here nothing, Untitled); over 32 MB, "Too large" naming the size; a .log opens.
+# 1.9: the files Ctrl+O would pick, given at the start instead (the same read, AP-2.2): an .exe opens, as its readable
+# text (AP-7.2, since 2026-10-24; "Not a text file" before), this one having none; over 32 MB a text is "Too large",
+# naming the size; a .log opens.
 start preview --new {temp}\tool.exe
-expect state "notice":"Not a text file"
-expect state tool.exe is not a text file. axFile\u0027s Enter opens it in the program Windows has for it.
-# A notice that opens by itself holds the answering keys for a second (KeyHold), so the Enter waits.
-wait 1200
-keys enter
-expect state "notice":null
-expect state "title":"Untitled - axPreview"
+expect state "title":"tool.exe - axPreview"
+expect focus No readable text was found in tool.exe.
+expect commands "Open in Windows\u0027 program, File, Ctrl\u002BE"
 start preview --new {temp}\too-large.txt
 expect state "notice":"Too large"
 expect state too-large.txt is 34,000,000 bytes, over the 32 MB a window can open.

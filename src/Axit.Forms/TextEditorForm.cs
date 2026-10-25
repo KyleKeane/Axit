@@ -157,11 +157,12 @@ public sealed partial class TextEditorForm : AxitForm
         _menu.Items.AddRange(edit is null ? [file, navigate, options, CreateAxitMenu(), help] : [file, edit, navigate, options, CreateAxitMenu(), help]);
         MainMenuStrip = _menu;
 
-        // The keys without a menu item: one main control, the editor, or the Go to line field while it shows; the
-        // viewer's line number. The keys the edit control would act on first are OnEditorKeyDown's (AD-5.1).
+        // The keys without a menu item: one main control, the editor, or the Go to line field while it shows; in the
+        // viewer with its Details list, the text and the list in turn (AP-6.1); the viewer's line number. The keys the
+        // edit control would act on first are OnEditorKeyDown's (AD-5.1).
         foreach (var key in new[] { BundleKeys.NextControl, BundleKeys.PreviousControl, BundleKeys.NextControlAlso })
         {
-            AddKey(new Command("Back to the text or the Go to line field", key, () => (_area.Current ?? _editor).Focus()) { Mark = CommandMark.Open });
+            AddKey(new Command("Between the text and the details", key, SwitchPane) { Mark = CommandMark.Open });
         }
 
         if (_app.ReadOnly)
@@ -222,12 +223,14 @@ public sealed partial class TextEditorForm : AxitForm
         _area.TabIndex = 1;
         SizeChanged += (_, _) => _area.FitHeight();
 
-        // Docked from the last control to the first: the menu takes the top, the status bar the bottom, the question
-        // area the strip above it, and the editor (or the notice over it) what is left.
-        Controls.AddRange([Overlay, _editor, _area, _status, _menu]);
+        // Docked from the last control to the first: the menu takes the top, the status bar the bottom, the viewer's
+        // Details list the third above it (AP-6.1), the question area the strip above that, under the text, and the
+        // editor (or the notice over it) what is left.
+        Controls.AddRange(_details is null ? [Overlay, _editor, _area, _status, _menu] : [Overlay, _editor, _area, _details, _status, _menu]);
 
         ApplyTextFont();
         RestoreWindow();
+        FitDetails();
         LoadDocument(path);
     }
 
@@ -263,12 +266,20 @@ public sealed partial class TextEditorForm : AxitForm
     {
         _editor.Visible = false;
         _area.Visible = false;
+        if (_details is not null)
+        {
+            _details.Visible = false;
+        }
     }
 
     protected override void ShowAfterNotice()
     {
         _editor.Visible = true;
         _area.Visible = _area.Current is not null;
+        if (_details is not null)
+        {
+            _details.Visible = true;
+        }
     }
 
     /// <summary>The editor, or the Go to line field while it shows.</summary>
@@ -302,7 +313,7 @@ public sealed partial class TextEditorForm : AxitForm
         ? $"closes {_app.Name}, installs it and starts it again on the same file"
         : $"closes {_app.Name} (asking first when there are unsaved changes), installs it and starts it again on the same file";
 
-    protected override IEnumerable<string> DiagnosticsLines => [$"File: {_path ?? "(none)"} ({_document.EncodingName}, {_document.LineEndingName})"];
+    protected override IEnumerable<string> DiagnosticsLines => [$"File: {_path ?? "(none)"} ({_page?.Kind ?? "text"}, {_document.EncodingName}, {_document.LineEndingName})"];
 
     protected override void OnShown(EventArgs e)
     {
@@ -541,7 +552,10 @@ public sealed partial class TextEditorForm : AxitForm
     {
         var (line, column, _) = Position();
         _fileLabel.Text = DocumentName + (_changed ? ", unsaved changes" : string.Empty);
-        _positionLabel.Text = $"Line {line}, Column {column} · {_document.EncodingName} · {_document.LineEndingName}";
+        // AP-7.4: a text names its encoding and line ending; another kind's page its renderer's name.
+        _positionLabel.Text = _page is { IsText: false } page
+            ? $"Line {line}, Column {column} · {page.Kind}"
+            : $"Line {line}, Column {column} · {_document.EncodingName} · {_document.LineEndingName}";
         StatusLayout.Fit(_status, _fileLabel, _positionLabel);
     }
 

@@ -95,6 +95,14 @@ public sealed class RenderersTests : IDisposable
     }
 
     [Fact]
+    public void A_part_named_with_backslashes_is_found_as_windows_powershell_writes_them()
+    {
+        const string w = "xmlns:w=\"http://schemas.openxmlformats.org/wordprocessingml/2006/main\"";
+        var path = Zip("old.docx", ("word\\document.xml", $"<w:document {w}><w:body><w:p><w:r><w:t>Found</w:t></w:r></w:p></w:body></w:document>"));
+        Assert.Equal(["Found"], Lines(Renderers.Render(path)));
+    }
+
+    [Fact]
     public void A_presentation_gives_its_slides_in_number_order()
     {
         const string a = "xmlns:a=\"http://schemas.openxmlformats.org/drawingml/2006/main\"";

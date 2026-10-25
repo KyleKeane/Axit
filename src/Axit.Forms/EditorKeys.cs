@@ -47,6 +47,12 @@ public static class EditorKeys
     /// <summary>In the text: the line said, "Line 12 of 40" (AP-2.3); a plain letter, which a read-only text has no use for.</summary>
     public const Keys LineNumber = Keys.L;
 
+    /// <summary>In the Details list: the line's value copied, without its name (AP-6.3); the text's own Ctrl+C elsewhere.</summary>
+    public const Keys CopyDetail = Keys.Control | Keys.C;
+
+    /// <summary>In the Details list: Enter on the Folder line opens the folder in axFile with the file selected (AP-6.3).</summary>
+    public const Keys OpenDetail = Keys.Return;
+
     /// <summary>The viewer's keys with their names: the shell's keys that apply without editing (Ctrl+N is a new window there), and its own.</summary>
     public static readonly IReadOnlyList<(string Name, Keys Key)> Viewer =
     [
@@ -58,5 +64,7 @@ public static class EditorKeys
         ("Go to line", GoToLine),
         ("Word wrap", WordWrap),
         ("Line number", LineNumber),
+        ("Copy a detail's value", CopyDetail),
+        ("Open the folder of the Folder detail", OpenDetail),
     ];
 }

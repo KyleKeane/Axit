@@ -58,8 +58,11 @@ public static class OfficeText
     /// <summary>The most a part of the document may unpack to: a file made to unpack to gigabytes is refused, not read.</summary>
     private const long MaxPart = 256L * 1024 * 1024;
 
+    /// <summary>A part by its name, a backslash taken as a slash: zips written by Windows PowerShell 5.1 name them so (found by the window's script, 2026-10-24).</summary>
     private static XDocument? Part(ZipArchive zip, string name) =>
-        zip.GetEntry(name) is { } entry ? Load(entry) : null;
+        zip.Entries.FirstOrDefault(entry => EntryName(entry) == name) is { } entry ? Load(entry) : null;
+
+    private static string EntryName(ZipArchiveEntry entry) => entry.FullName.Replace('\\', '/');
 
     /// <summary>One XML part, after its unpacked size is checked; the framework's reader refuses a DTD, so no outside entity is ever read.</summary>
     private static XDocument Load(ZipArchiveEntry entry)
@@ -171,7 +174,7 @@ public static class OfficeText
     {
         var lines = new List<string>();
         var slides = zip.Entries
-            .Select(entry => (entry, match: Regex.Match(entry.FullName, @"^ppt/slides/slide(\d+)\.xml$")))
+            .Select(entry => (entry, match: Regex.Match(EntryName(entry), @"^ppt/slides/slide(\d+)\.xml$")))
             .Where(slide => slide.match.Success)
             .OrderBy(slide => int.Parse(slide.match.Groups[1].Value, System.Globalization.CultureInfo.InvariantCulture))
             .Select(slide => slide.entry);

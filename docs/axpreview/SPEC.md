@@ -143,8 +143,10 @@ line") and its first line; nothing of axPreview's own. Afterwards, one UI Automa
 or on the notice while one shows (AX-7.3): "Line n of m" (`l`, and after Go to line; "Not a line number"), "Install,
 heading level 2" and the other elements, "No next <kind>" / "No previous <kind>", "Not found", "Reloaded",
 "Reloaded, <name> changed on disk", "Word wrap on" / "Word wrap off", "Nothing to save here", "No file yet" (Ctrl+E,
-Ctrl+W, F5 and the ways out on Untitled), "Text size n", "Windows text size", "Copied diagnostics". The notices: "Not a
-text file", "Too large", Keyboard shortcuts, User guide, About, the update notice.
+Ctrl+W, F5 and the ways out on Untitled), "Text size n", "Windows text size", "Copied diagnostics"; in the Details
+list (AP-6.3) "Copied", "The clipboard is busy; try again" and "Enter opens the Folder line in axFile". The notices:
+"Too large" ("Not a text file" until 2026-10-24, AP-7.5), Keyboard shortcuts, User guide, About, the update notice,
+and an error naming a file that could not be opened.
 
 ### AP-5 Settings, status bar, title, log
 
@@ -159,14 +161,16 @@ text file", "Too large", Keyboard shortcuts, User guide, About, the update notic
 
 - AP-6.1 **Two panes.** The content, the read-only text of AP-2, above; the details under it, the bundle's list
   (`AxitList`, AX-8.6) named "Details", a third of the window's height, always there ("No file" as its one line in an
-  untitled window, "Reading details" until the read is done). Tab, Shift+Tab, F6 and Shift+F6 move between the two
-  (the read-only text takes no Tab); a file opened, reloaded or handed over puts the focus on the content, as now.
-  Folder-free: a folder handed to axPreview is the notice "Not a file", as now.
+  untitled window, "Reading details" while another file's are read; the same file's lines stay until the new ones
+  come, so that a reload does not move the user). Tab and Shift+Tab (the read-only text takes no Tab; the Go to line
+  field comes between while it shows), and the bundle's Ctrl+Tab, Ctrl+Shift+Tab and F6, move between the two; a file
+  opened or handed over puts the focus on the content, as now.
 - AP-6.2 **What it lists**, one line each, "Name: value", in three groups with a heading line each, as axFile's
   Actions list has sections:
   1. **File:** Name, Folder, Size ("12.1 KB, 12,345 bytes"), Type (Windows' name for the kind, "Markdown File", and
      the extension), Modified, Created, Accessed (the dates as the bundle writes them, with the time), Attributes
-     (Read-only, Hidden, System, Archive, Compressed, Encrypted, Offline, a link; the line left out when none is set).
+     (Read-only, Hidden, System, Compressed, Encrypted, Offline, a link; Archive and Normal, set on nearly every file,
+  are not said; the line left out when none is set).
   2. **Contents:** what the renderer found (AP-7): for a text, the encoding, the byte order mark, the line ending,
      the lines, the words and the characters; for an archive, the entries, the files and folders, the packed and
      unpacked sizes; for a document, the paragraphs or slides; for any other file, how much readable text was found.
@@ -205,10 +209,16 @@ text file", "Too large", Keyboard shortcuts, User guide, About, the update notic
      strings are noise.
   5. **Anything else:** the readable text inside the file, the runs of four or more printable characters (ASCII and
      UTF-16) one to a line, under a first line "No preview for this kind yet; the readable text inside it follows.",
-     up to the editors' 32 MB of text, then "Shown up to 32 MB." A file with no readable text says so in one line.
+     from the first 32 MB of the file (the editors' limit), then "Shown from the first 32 MB." for a larger one. A
+     file with no readable text says so in one line, "No readable text was found in <name>."
 - AP-7.3 **The way out follows the renderer** (Ctrl+E, AP-1.4): Edit in axDown or axJSON for a text; Play in axMedia
-  for sound and video; Open with Windows' program for everything else (the program Windows has for the kind, axFile's
-  Enter). The File menu's item is named after it as the file opens.
+  for sound and video; Open in Windows' program for everything else (the program Windows has for the kind, axFile's
+  Enter, and Windows' Open with dialog when it has none). The File menu's item is named after it as the file opens.
+  **File → Open with ▸** (the user's choice of 2026-10-24, over a list of defaults of Axit's own): the Axit apps that
+  are programs for the file's type (their Open with types of `Dispatch.Apps`) and axDown for any text, numbered
+  ("&1. axDown"), then Windows' program for it and Choose another program… (Windows' own dialog,
+  `Axit.Forms/WindowsOpenWith`). A choice opens the file once; a default is set where Windows keeps them, with that
+  dialog's Always or in Settings, Default apps (B-9), never in a table of axPreview's (AP-D10).
 - AP-7.4 The status bar's right part is the renderer's: "Line n, Column m · encoding · line ending" for a text,
   "Line n, Column m · Word document" for the others.
 - AP-7.5 The 32 MB file limit (AP-2.2) is the text renderer's; the others read the file as far as they need (an archive
@@ -276,6 +286,11 @@ details' lines, AP-6), and the shell's read-only mode adds the Details list unde
 - **AP-D9 The routing is one table, first match** (the user's ask, "a way to route the correct file type to the
   right renderer"): the renderers in order, each by its extensions and its first bytes, the last taking every file,
   so that what opens a kind is one place to read and change.
+- **AP-D10 Defaults stay Windows'** (2026-10-24). The user asked for an Edit with of axPreview's own, a list of
+  default programs like Windows' for the Axit apps, and a key to edit with the default or choose one, then asked for
+  the level that avoids feature creep. The recommendation, taken: Ctrl+E's one way out and an Open with submenu, with
+  Windows' dialog for any other program and for setting a default. A list of Axit's own would copy what Windows does
+  accessibly already, and would disagree with it whenever the user changed one and not the other.
 
 ## 8. Testing
 
@@ -294,9 +309,8 @@ details' lines, AP-6), and the shell's read-only mode adds the Details list unde
 - JSON's navigation keys in the viewer, once axJSON's outline is shared on this second use.
 - Other kinds: a PDF's text (Windows has no text API for PDF; a reader of its own is a larger piece), an Excel
   workbook's sheets, an e-book's chapters (an EPUB is a zip of XHTML), a picture's text through axOCR (planned).
-- The user's Open with table (2026-10-24): a table of axPreview's own, file type to app, so that a user who routes
-  every file through axPreview goes on to the app of their choice from there; Ctrl+E's way out (AP-7.3) is its first
-  step.
+- Rendering on a task of its own: a renderer runs on the UI thread, as the text read always has; a large binary's
+  readable text (up to 32 MB scanned) holds the window for a moment.
 - Markdown links followed (Enter on a link opening the browser or the linked file in this window).
 
 ## 10. Status
@@ -308,5 +322,7 @@ details' lines, AP-6), and the shell's read-only mode adds the Details list unde
   on the command line still goes to its editor (AP-1.1). axFile handed over and lost its preview pane in the next
   step of the inventory, the same day.
 - 2026-10-22: released in 3.3.1 (3.3.0 tagged, not published). The whole NVDA test plan marked passed at the user's word, no step reported failing; the record by step is `docs/axit/nvda-test-record.md`.
-- 2026-10-24: the general viewer specified at the user's ask on the branch `preview` (AP-6, AP-7, AP-D6 to AP-D9):
-  two panes, the details, the renderers. Not built yet.
+- 2026-10-24: the general viewer specified at the user's ask on the branch `preview` (AP-6, AP-7, AP-D6 to AP-D10):
+  two panes, the details, the renderers, the way on; built the same day on the branch, with `RenderersTests`,
+  `FileDetailsTests` and the script `tests/scripts/axpreview/04-details-and-kinds.txt`. NVDA pass owed (test plan
+  section 5, and step 1.9).

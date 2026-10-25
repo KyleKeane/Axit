@@ -29,7 +29,7 @@ public static class AxPreviewApp
         Name: Name,
         Verb: Dispatch.AxPreview,
         SettingsName: "axpreview",
-        FileFilter: "Text files (*.txt;*.md;*.markdown;*.log;*.json)|*.txt;*.md;*.markdown;*.log;*.json|All files (*.*)|*.*",
+        FileFilter: "All files (*.*)|*.*|Text files (*.txt;*.md;*.markdown;*.log;*.json)|*.txt;*.md;*.markdown;*.log;*.json",
         DefaultExtension: "txt",
         Shortcuts: HelpText.Shortcuts,
         UserGuide: HelpText.UserGuide,
@@ -42,7 +42,22 @@ public static class AxPreviewApp
         ],
         Commands: [],
         ReadOnly: true,
-        Refuse: path => TextSniff.Refuse(path) is { } refusal ? Notice.Plain(refusal.Title, refusal.Text) : null);
+        Refuse: path => TextSniff.Refuse(path) is { } refusal ? Notice.Plain(refusal.Title, refusal.Text) : null,
+        Render: Page,
+        Details: FileDetails.Lines);
+
+    /// <summary>The file through the renderer that takes it (SPEC.md AP-7), as the shell's page.</summary>
+    private static ViewerPage Page(string path)
+    {
+        var rendered = Renderers.Render(path);
+        var wayOut = rendered.WayOut switch
+        {
+            WayOut.Editor => ViewerWayOut.Editor,
+            WayOut.Player => ViewerWayOut.Player,
+            _ => ViewerWayOut.Windows,
+        };
+        return new ViewerPage(rendered.Document, rendered.Kind, rendered.Contents, wayOut);
+    }
 
     public static void Run(string[] args) =>
         AppHost.Run(Name, "axpreview", Usage, args, arguments =>

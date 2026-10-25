@@ -13,12 +13,12 @@ public static class ZipListing
     public static Rendered Render(string path)
     {
         using var zip = ZipFile.OpenRead(path);
-        var entries = zip.Entries.OrderBy(entry => entry.FullName, NaturalOrder.Instance).ToList();
+        var entries = zip.Entries.OrderBy(Name, NaturalOrder.Instance).ToList();
         var folders = entries.Count(IsFolder);
         var lines = entries
             .Select(entry => IsFolder(entry)
-                ? $"{entry.FullName}, folder"
-                : $"{entry.FullName}, {FileSize.Text(entry.Length)}, {entry.LastWriteTime.LocalDateTime:yyyy-MM-dd HH:mm}")
+                ? $"{Name(entry)}, folder"
+                : $"{Name(entry)}, {FileSize.Text(entry.Length)}, {entry.LastWriteTime.LocalDateTime:yyyy-MM-dd HH:mm}")
             .ToList();
         if (lines.Count == 0)
         {
@@ -36,6 +36,9 @@ public static class ZipListing
         ], WayOut.Windows);
     }
 
+    /// <summary>An entry's path with forward slashes, as the format has them; Windows PowerShell 5.1 writes backslashes.</summary>
+    private static string Name(ZipArchiveEntry entry) => entry.FullName.Replace('\\', '/');
+
     /// <summary>A folder entry: a name ending in a slash and nothing in it.</summary>
-    private static bool IsFolder(ZipArchiveEntry entry) => entry.FullName.EndsWith('/') && entry.Length == 0;
+    private static bool IsFolder(ZipArchiveEntry entry) => Name(entry).EndsWith('/') && entry.Length == 0;
 }
