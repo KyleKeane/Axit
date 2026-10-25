@@ -7,6 +7,7 @@
 - axPreview: Ctrl+E goes on with the file by its kind (its editor, axMedia, or the program Windows has for it), and File, Open with lists the Axit apps for the file, Windows' program and Windows' own list of programs, where Always sets a default.
 - axPreview: offered under Windows' Open with for every file type, not only text files.
 - For developers: `Axit.Core/FileSize` (axFile's size format) and `Axit.Forms/WindowsOpenWith` (axFile's Open with dialog) are shared on their second use.
+- Axit: an update no longer fails with "the list of apps could not be read": the zip carries the list as `apps.json`, which the installer reads when the new program cannot answer, and the message says why it could not (3.7.1's update failed so on one machine, with no reason given).
 - Axit: the installer no longer removes other programs from Windows' Open with. Writing Axit's entry for a file type emptied the type's list in your own part of the registry first, taking the other programs registered there for you with it, for `.md`, `.txt`, `.json`, the sound and video types and `.kdbx`; programs registered for the whole computer were not touched. A program that went missing comes back when it is updated or repaired.
 
 ## 3.7.1 - 2026-10-24

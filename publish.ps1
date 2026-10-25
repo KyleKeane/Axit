@@ -48,6 +48,22 @@ Copy-Item (Join-Path $root 'LICENSE') $out -Force
 # The bundle's guide: install, the apps, update, remove. Each app's own guide is inside it, under Help.
 Copy-Item (Join-Path $root 'docs\axit\README.md') (Join-Path $out 'README.md') -Force
 Get-ChildItem $out -Filter '*.pdb' | Remove-Item -Force
+# The list of apps (Axit.exe apps, AX-1.4) in the zip as apps.json, which install.ps1 reads when the program cannot
+# answer on the machine it installs on (3.7.1's update failed so on one machine, 2026-10-24). Asked of the program
+# just built, so that it is that version's list; a program that cannot answer here fails the publish.
+$start = New-Object System.Diagnostics.ProcessStartInfo $exe
+$start.Arguments = 'apps'
+$start.UseShellExecute = $false
+$start.RedirectStandardOutput = $true
+$start.CreateNoWindow = $true
+$process = [System.Diagnostics.Process]::Start($start)
+$listing = $process.StandardOutput.ReadToEnd()
+$process.WaitForExit()
+if ($process.ExitCode -ne 0 -or -not $listing.Trim().StartsWith('[')) {
+    Write-Host "Axit.exe apps did not answer (exit code $($process.ExitCode)); the zip was not made."
+    exit 1
+}
+[System.IO.File]::WriteAllText((Join-Path $out 'apps.json'), $listing)
 
 $version = (Get-Item $exe).VersionInfo.FileVersion
 if ($version -match '^(\d+\.\d+\.\d+)') { $version = $Matches[1] }
