@@ -14,6 +14,10 @@ public static class AppPaths
     public static string RecentlyClosedFile { get; } =
         Path.Combine(Home(Environment.SpecialFolder.ApplicationData), "Axit", "recently-closed.json");
 
+    /// <summary>What the user has agreed to (AX-11.5): each access layer's first connection to a program, and each update's terms.</summary>
+    public static string ConsentFile { get; } =
+        Path.Combine(Home(Environment.SpecialFolder.ApplicationData), "Axit", "consent.json");
+
     /// <summary>The AI tools' access (docs/axit/mcp.md MC-6.1): on or off, and the clients the user paired.</summary>
     public static string McpFile { get; } =
         Path.Combine(Home(Environment.SpecialFolder.ApplicationData), "Axit", "mcp.json");
