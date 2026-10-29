@@ -17,7 +17,10 @@ public static class AxitWindows
     public static string AppOf(string title)
     {
         var at = title.LastIndexOf(" - ", StringComparison.Ordinal);
-        return at < 0 ? title : title[(at + 3)..];
+        var app = at < 0 ? title : title[(at + 3)..];
+        // An access layer's title ends with its whole title, "axClaude, access layer for Claude Code" (AX-11.2); no app's name has a comma.
+        var comma = app.IndexOf(", ", StringComparison.Ordinal);
+        return comma < 0 ? app : app[..comma];
     }
 
     /// <summary>The Open windows list: the windows of the bundle's apps other than the current one, most recently used first.</summary>
@@ -40,9 +43,9 @@ public static class AxitWindows
         return mnemonic == '\0' ? text : $"&{mnemonic}. {text}";
     }
 
-    /// <summary>"ax&amp;Claude": the app's name with the letter after ax as the mnemonic.</summary>
+    /// <summary>"ax&amp;Claude, access layer for Claude Code": the app's title (AX-11.2) with the letter after ax as the mnemonic.</summary>
     public static string AppLabel(App app) =>
-        app.Name.StartsWith("ax", StringComparison.OrdinalIgnoreCase) ? app.Name[..2] + "&" + app.Name[2..] : "&" + app.Name;
+        app.Title.StartsWith("ax", StringComparison.OrdinalIgnoreCase) ? app.Title[..2] + "&" + app.Title[2..] : "&" + app.Title;
 
     private static bool IsApp(AxitWindow window) => Dispatch.Apps.Any(a => string.Equals(a.Name, window.App, StringComparison.OrdinalIgnoreCase));
 }

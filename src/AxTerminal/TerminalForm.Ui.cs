@@ -142,7 +142,7 @@ internal sealed partial class TerminalForm
     /// <summary>The title is the current directory's name (AT-2.3), which the Axit menu lists the window by.</summary>
     private void UpdateTitle()
     {
-        var text = $"{PathName.Of(CurrentDirectory)} - {ShellLauncher.Describe(_shell)} - {AxTerminalApp.Name}";
+        var text = $"{PathName.Of(CurrentDirectory)} - {ShellLauncher.Describe(_shell)} - {AppTitle}";
         if (Text != text)
         {
             Text = text;

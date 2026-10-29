@@ -172,7 +172,10 @@ $listingJson = Get-AppListing
 $apps = @()
 foreach ($entry in ($listingJson | ConvertFrom-Json)) {
     $iconFile = "$($entry.project).ico"
-    $app = @{ Name = $entry.name; Verb = $entry.verb; Description = $entry.description; Opens = @($entry.explorer)
+    # Title is the name as the user meets it, "axClaude, access layer for Claude Code" (AX-11.2); AccessLayer puts the app
+    # after the standalone apps in File Explorer's submenu (AX-11.3).
+    $app = @{ Name = $entry.name; Title = $(if ($entry.title) { $entry.title } else { $entry.name }); AccessLayer = [bool]$entry.accessLayer
+        Verb = $entry.verb; Description = $entry.description; Opens = @($entry.explorer)
         Icon = if (Test-Path -LiteralPath (Join-Path $source $iconFile)) { Join-Path $target $iconFile } else { $exe } }
     if (@($entry.types).Count -gt 0) { $app.Types = @($entry.types) }
     if (@($entry.openWith).Count -gt 0) { $app.OpenWith = @($entry.openWith); $app.TypeName = $entry.typeName }
@@ -180,7 +183,9 @@ foreach ($entry in ($listingJson | ConvertFrom-Json)) {
 }
 # The places that follow from the name.
 foreach ($app in $apps) {
-    $app.Start = Join-Path $programs "Axit $($app.Name).lnk"
+    $app.Start = Join-Path $programs "Axit $($app.Title).lnk"
+    # The entry by the name alone, as versions up to 3.7.6 made it for every app.
+    $app.OldStart = Join-Path $programs "Axit $($app.Name).lnk"
     $app.Shim = Join-Path $bin ($app.Name.ToLower() + '.cmd')
     $app.ProgId = "Axit.$($app.Name)"
     # Windows' Open with lists one program per program file, so an app with file types has a hard link of Axit.exe
@@ -226,7 +231,7 @@ function Remove-OldOpenWith {
 # (Remove-Installation).
 $places = @($target, $oldTarget, $appsKey, $oldAppsKey, $oldStartMenu) + @($menus | ForEach-Object { $_.Key }) + $oldMenuKeys +
     @($apps | Where-Object { $_.OpenWith } | ForEach-Object { "$classes\$($_.ProgId)" }) +
-    @($apps | ForEach-Object { $_.Start }) + @(Join-Path $bin 'axit.cmd') + @($apps | ForEach-Object { $_.Shim })
+    @($apps | ForEach-Object { $_.Start; $_.OldStart } | Select-Object -Unique) + @(Join-Path $bin 'axit.cmd') + @($apps | ForEach-Object { $_.Shim })
 
 function Get-Version([string]$path) {
     (Get-Item $path).VersionInfo.FileVersion -replace '^(\d+\.\d+\.\d+).*', '$1'
@@ -432,7 +437,7 @@ if (-not $NoStartMenu) {
     foreach ($app in $apps) {
         # Removed first: a file written over one of the same name keeps the old one's capitals, and the shortcut's
         # name is what the Start menu shows and NVDA reads ("Axit axClaude", once "Axit AxClaude").
-        Remove-Item -LiteralPath $app.Start -ErrorAction SilentlyContinue
+        Remove-Item -LiteralPath $app.Start, $app.OldStart -ErrorAction SilentlyContinue
         $link = $shell.CreateShortcut($app.Start)
         $link.TargetPath = $exe
         $link.Arguments = $app.Verb
@@ -457,10 +462,17 @@ if (-not $NoContextMenu) {
         Set-ItemProperty -LiteralPath $menu.Key -Name 'MUIVerb' -Value 'Open with Axit'
         Set-ItemProperty -LiteralPath $menu.Key -Name 'Icon' -Value "`"$exe`",0"
         Set-ItemProperty -LiteralPath $menu.Key -Name 'SubCommands' -Value ''
-        foreach ($app in ($apps | Where-Object { $_.Opens -contains $menu.Opens })) {
-            $key = Join-Path $menu.Key "shell\$($app.Name)"
+        # File Explorer orders the entries by their keys' names: "1 axFile" for a standalone app, "2 axClaude" for an
+        # access layer, so the access layers come last, after a separator (AX-11.3; ECF_SEPARATORBEFORE, 0x20).
+        $here = @($apps | Where-Object { $_.Opens -contains $menu.Opens })
+        $firstLayer = @($here | Where-Object { $_.AccessLayer } | Sort-Object { $_.Name }) | Select-Object -First 1
+        foreach ($app in $here) {
+            $key = Join-Path $menu.Key "shell\$(if ($app.AccessLayer) { '2' } else { '1' }) $($app.Name)"
             New-Item -Path (Join-Path $key 'command') -Force | Out-Null
-            Set-ItemProperty -LiteralPath $key -Name 'MUIVerb' -Value $app.Name
+            Set-ItemProperty -LiteralPath $key -Name 'MUIVerb' -Value $app.Title
+            if ($firstLayer -and $app.Name -eq $firstLayer.Name) {
+                New-ItemProperty -LiteralPath $key -Name 'CommandFlags' -Value 0x20 -PropertyType DWord -Force | Out-Null
+            }
             Set-ItemProperty -LiteralPath $key -Name 'Icon' -Value "`"$($app.Icon)`",0"
             if ($app.Types) {
                 Set-ItemProperty -LiteralPath $key -Name 'AppliesTo' -Value (($app.Types | ForEach-Object { "System.FileExtension:=`"$_`"" }) -join ' OR ')
@@ -481,7 +493,7 @@ if (-not $NoContextMenu) {
         New-Item -Path (Join-Path $progIdKey 'DefaultIcon') -Force | Out-Null
         Set-ItemProperty -LiteralPath (Join-Path $progIdKey 'DefaultIcon') -Name '(default)' -Value $app.Icon
         New-Item -Path (Join-Path $progIdKey 'Application') -Force | Out-Null
-        Set-ItemProperty -LiteralPath (Join-Path $progIdKey 'Application') -Name 'ApplicationName' -Value $app.Name
+        Set-ItemProperty -LiteralPath (Join-Path $progIdKey 'Application') -Name 'ApplicationName' -Value $app.Title
         Set-ItemProperty -LiteralPath (Join-Path $progIdKey 'Application') -Name 'ApplicationIcon' -Value $app.Icon
         New-Item -Path (Join-Path $progIdKey 'shell\open\command') -Force | Out-Null
         Set-ItemProperty -LiteralPath (Join-Path $progIdKey 'shell\open\command') -Name '(default)' -Value "`"$program`" $($app.Verb) `"%1`""

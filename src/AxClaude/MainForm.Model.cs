@@ -292,7 +292,7 @@ internal sealed partial class MainForm
     {
         // FR-8.4: the folder's name, then its full path in parentheses, so that the name comes first in speech and
         // two folders of one name are still told apart in Alt+Tab and in the Axit menu; announcements use the name.
-        Text = _folder is null ? "axClaude" : $"{PathName.Of(_folder)} ({_folder}) - axClaude";
+        Text = _folder is null ? AppTitle : $"{PathName.Of(_folder)} ({_folder}) - {AppTitle}";
         SetStatus(StateLabel.Text ?? string.Empty, _folder ?? "No project folder");
     }
 }

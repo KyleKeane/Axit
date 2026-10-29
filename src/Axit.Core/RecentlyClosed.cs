@@ -49,14 +49,16 @@ public static class RecentlyClosed
     /// <summary>"notes.md (C:\notes\notes.md) - axDown", "myproject (C:\src\myproject) - axClaude": the name, the full path in parentheses, the app (AX-9.5).</summary>
     public static string Title(ClosedItem item)
     {
+        // The app as the user meets it, an access layer with its keyword (AX-11.2).
+        var app = Dispatch.Apps.FirstOrDefault(a => string.Equals(a.Name, item.App, StringComparison.OrdinalIgnoreCase))?.Title ?? item.App;
         if (item.Path.Length == 0)
         {
             // An app that holds no file (axProcess): its window by its name.
-            return item.App;
+            return app;
         }
 
         var name = PathName.Of(item.Path);
-        return (name == item.Path ? item.Path : $"{name} ({item.Path})") + " - " + item.App;
+        return (name == item.Path ? item.Path : $"{name} ({item.Path})") + " - " + app;
     }
 
     private static bool Same(ClosedItem a, ClosedItem b) =>

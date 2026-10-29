@@ -184,7 +184,7 @@ public sealed class DispatchTests
         Assert.Equal(Dispatch.AxJSON, Dispatch.Decide(["json", "x.json"]).App);
         Assert.Equal(["x.json"], Dispatch.Decide(["JSON", "x.json"]).Arguments);
         Assert.Contains("Axit json", Dispatch.Usage);
-        Assert.Equal(["axClaude", "axTerminal", "axGIT", "axFile", "axDown", "axJSON", "axPreview", "axMedia", "axTask", "axPass", "axStart", "axClip", "axCalc", "axProcess"], Dispatch.Apps.Select(a => a.Name));
+        Assert.Equal(["axFile", "axDown", "axJSON", "axPreview", "axMedia", "axTask", "axStart", "axClip", "axCalc", "axProcess", "axClaude", "axTerminal", "axGIT", "axPass"], Dispatch.Apps.Select(a => a.Name));
     }
 
     [Fact]
@@ -264,6 +264,30 @@ public sealed class DispatchTests
         Assert.Equal(Enum.GetValues<AppGroup>(), groups.Distinct());
     }
 
+    /// <summary>AX-11.1 to AX-11.3: the access layers are the last group, each names its program in its title with the keyword, and a standalone app's title is its name.</summary>
+    [Fact]
+    public void Access_layers_come_last_and_carry_the_keyword()
+    {
+        foreach (var app in Dispatch.Apps)
+        {
+            Assert.Equal(app.Group == AppGroup.AccessLayers, app.IsAccessLayer);
+            if (app.IsAccessLayer)
+            {
+                Assert.Equal($"{app.Name}, access layer for {app.AccessLayerFor}", app.Title);
+                Assert.StartsWith(app.Title + ":", app.Description);
+            }
+            else
+            {
+                Assert.Equal(app.Name, app.Title);
+            }
+        }
+
+        Assert.Equal(
+            ["axClaude", "axTerminal", "axGIT", "axPass"],
+            Dispatch.Apps.Where(app => app.IsAccessLayer).Select(app => app.Name));
+        Assert.Equal(AppGroup.AccessLayers, Enum.GetValues<AppGroup>().Max());
+    }
+
     /// <summary>AX-9.10, AF-4.9: what an app is started on from a file or a folder in hand.</summary>
     [Fact]
     public void An_app_is_started_on_the_kind_of_path_it_opens()
@@ -282,7 +306,7 @@ public sealed class DispatchTests
     [Fact]
     public void Show_in_offers_the_folder_apps()
     {
-        Assert.Equal(["axClaude", "axTerminal", "axGIT", "axFile"], Dispatch.Apps.Where(app => app.ShowIn).Select(app => app.Name));
+        Assert.Equal(["axFile", "axClaude", "axTerminal", "axGIT"], Dispatch.Apps.Where(app => app.ShowIn).Select(app => app.Name));
         Assert.All(Dispatch.Apps.Where(app => app.ShowIn), app => Assert.NotEqual(Opens.Files, app.Opens));
     }
 }

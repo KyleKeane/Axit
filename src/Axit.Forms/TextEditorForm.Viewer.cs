@@ -217,7 +217,7 @@ public sealed partial class TextEditorForm
         var number = 0;
         foreach (var app in apps)
         {
-            _openWithItem.DropDownItems.Add(new ToolStripMenuItem($"&{++number}. {app.Name}", null, (_, _) => AxitMenu.Start(app.Verb, path)));
+            _openWithItem.DropDownItems.Add(new ToolStripMenuItem($"&{++number}. {app.Title}", null, (_, _) => AxitMenu.Start(app.Verb, path)));
         }
 
         if (_openWithItem.DropDownItems.Count > 0)

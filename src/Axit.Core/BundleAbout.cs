@@ -14,7 +14,10 @@ public static class BundleAbout
 
     /// <param name="latestRelease">The window's latest-release state: "Axit 2.9.0 (this version)", "not checked yet", "checking…".</param>
     public static string Version(string latestRelease) =>
-        $"Axit {BundleInfo.Version}: {string.Join(", ", Dispatch.Apps.Select(app => app.Name))}. The Axit guide below says what each app is.\n\n" +
+        $"Axit {BundleInfo.Version}.\n" +
+        $"Standalone apps, which need only Windows: {string.Join(", ", Dispatch.Apps.Where(app => !app.IsAccessLayer).Select(app => app.Name))}.\n" +
+        $"Access layers, which only show and pass on the work of a program you install, under its maker's terms: {string.Join(", ", Dispatch.Apps.Where(app => app.IsAccessLayer).Select(app => $"{app.Name} for {app.AccessLayerFor}"))}. About, Licence says who is responsible for what; About, Consents what you have agreed to.\n" +
+        "The Axit guide below says what each app is.\n\n" +
         $"Latest release on GitHub: {latestRelease}\nReleases: {UpdateCheck.ReleasesPage}\n\n" +
         $"Settings: {Path.GetDirectoryName(AppPaths.RecentlyClosedFile)}, one file per app ({string.Join(", ", Dispatch.Apps.Select(app => app.Name.ToLowerInvariant() + ".json"))})\nLogs: {AppPaths.LogsFolder}";
 

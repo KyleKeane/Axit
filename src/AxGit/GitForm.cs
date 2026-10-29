@@ -60,7 +60,7 @@ public sealed partial class GitForm : AxitForm
     {
         _settings = settings;
         _startPath = path;
-        Text = "No repository - " + AxGitApp.Name;
+        Text = "No repository - " + AppTitle;
 
         // ---- menus and keys (AG-6.1, AG-6.2): one command list (docs/axit/app-kit.md AK-2), each key from the tables ----
         // Repository is the thing worked on, in the standard order of a first menu (bundle AX-6): Open and the recent
@@ -276,7 +276,7 @@ public sealed partial class GitForm : AxitForm
         _repo = RepositoryStatus.Empty;
         _commits = [];
         _branches = [];
-        Text = $"{PathName.Of(root)} - {AxGitApp.Name}";
+        Text = $"{PathName.Of(root)} - {AppTitle}";
         _settings.RememberRepository(root);
         SaveSettings();
         Log.Info($"Opened {root}");
@@ -330,7 +330,7 @@ public sealed partial class GitForm : AxitForm
     {
         _root = null;
         _repo = RepositoryStatus.Empty;
-        Text = "No repository - " + AxGitApp.Name;
+        Text = "No repository - " + AppTitle;
         _list.Items.Clear();
         _list.AccessibleName = "No repository";
         UpdateStatusBar();

@@ -37,25 +37,40 @@ public sealed record App(string Name, string Verb, string Project, AppGroup Grou
     public IReadOnlyList<string> OpenWith { get; init; } = [];
 
     public string TypeName { get; init; } = "";
+
+    /// <summary>
+    /// The program an access layer works through ("Claude Code"), empty for a standalone app (AX-11.1): an app that
+    /// starts or talks to a program Axit does not include is an access layer, in <see cref="AppGroup.AccessLayers"/>.
+    /// </summary>
+    public string AccessLayerFor { get; init; } = "";
+
+    public bool IsAccessLayer => AccessLayerFor.Length > 0;
+
+    /// <summary>
+    /// The app's name wherever the user meets it (AX-11.2): the name alone for a standalone app, "axClaude, access layer
+    /// for Claude Code" for an access layer. Window titles, menus, About and the installer's entries use this, never
+    /// <see cref="Name"/> alone.
+    /// </summary>
+    public string Title => IsAccessLayer ? $"{Name}, {Dispatch.AccessLayer} for {AccessLayerFor}" : Name;
 }
 
 /// <summary>An app's icon: two letters in white on a rounded square of the colour.</summary>
 public sealed record AppIcon(string Letters, int Red, int Green, int Blue);
 
-/// <summary>The groups of the apps, in the Axit menu's order (AX-9.2).</summary>
+/// <summary>The groups of the apps, in the Axit menu's order (AX-9.2): the standalone apps' groups, then the access layers (AX-11.3).</summary>
 public enum AppGroup
 {
-    /// <summary>Claude, the shell and git: working in a folder.</summary>
-    Code,
-
     /// <summary>Files and what is in them: the file manager, the editors, the viewer, the player.</summary>
     Files,
 
-    /// <summary>Lists of one's own: tasks, passwords.</summary>
+    /// <summary>Lists of one's own: tasks.</summary>
     Organise,
 
     /// <summary>Small tools for the whole computer: the launcher, the clipboard, the calculator, the processes.</summary>
     Utilities,
+
+    /// <summary>The apps that work through a program Axit does not include (AX-11.1): Claude Code, Git, the shells, KeePassXC. Always last.</summary>
+    AccessLayers,
 }
 
 /// <summary>What an app opens from a path: a file's app given a folder is refused, a folder's app given a file gets the file's folder.</summary>
@@ -100,8 +115,12 @@ public static class Dispatch
     /// <summary>Not an app: the apps of <see cref="Apps"/> as JSON on standard output, for install.ps1 (AX-1.4, AX-2.3).</summary>
     public const string Listing = "apps";
 
+    /// <summary>The keyword of every access layer's title (AX-11.2): "axClaude, access layer for Claude Code".</summary>
+    public const string AccessLayer = "access layer";
+
     /// <summary>
-    /// The apps, in the order every list of the windows shows them, by group (AX-9.2, 2026-10-24): one line here puts an
+    /// The apps, in the order every list of the windows shows them, by group (AX-9.2, 2026-10-24), the standalone apps
+    /// first and the access layers last (AX-11.3, a test keeps it so): one line here puts an
     /// app in the Axit menu, axFile's Open in Axit, the Show in submenus and Recently closed, and with its properties in
     /// the installer's Start menu, File Explorer and Open with entries and the icon script. tools/new-app.ps1 writes a
     /// new app's line; each entry starts with <c>new("name", Verb, "Project", ...</c> on a line of its own, which the
@@ -109,18 +128,6 @@ public static class Dispatch
     /// </summary>
     public static readonly IReadOnlyList<App> Apps =
     [
-        new("axClaude", AxClaude, "AxClaude", AppGroup.Code, Opens.Folders, ShowIn: true)
-        {
-            Description = "axClaude, an accessible front end for Claude Code", Icon = new("Ax", 31, 78, 121),
-        },
-        new("axTerminal", AxTerminal, "AxTerminal", AppGroup.Code, Opens.Folders, ShowIn: true)
-        {
-            Description = "axTerminal, a shell as a transcript", Icon = new("At", 40, 40, 40),
-        },
-        new("axGIT", AxGit, "AxGit", AppGroup.Code, Opens.FilesAndFolders, ShowIn: true)
-        {
-            Description = "axGIT, a git manager for one repository", Icon = new("Ag", 110, 40, 40), Explorer = Opens.Folders,
-        },
         new("axFile", AxFile, "AxFile", AppGroup.Files, Opens.FilesAndFolders, ShowIn: true)
         {
             Description = "axFile, a file manager for one folder", Icon = new("Af", 90, 50, 130),
@@ -150,11 +157,6 @@ public static class Dispatch
         {
             Description = "axTask, tasks and lists", Icon = new("Ak", 30, 120, 80),
         },
-        new("axPass", AxPass, "AxPass", AppGroup.Organise, Opens.Files)
-        {
-            Description = "axPass, a KeePass password database", Icon = new("Aw", 20, 40, 100),
-            Types = [".kdbx"], OpenWith = [".kdbx"], TypeName = "KeePass database (axPass)",
-        },
         new("axStart", AxStart, "AxStart", AppGroup.Utilities, Opens.Nothing)
         {
             Description = "axStart, a program launcher behind a hotkey", Icon = new("As", 150, 90, 20),
@@ -171,6 +173,23 @@ public static class Dispatch
         {
             Description = "axProcess, the processes, services and startup programs", Icon = new("Ar", 120, 40, 90),
         },
+        new("axClaude", AxClaude, "AxClaude", AppGroup.AccessLayers, Opens.Folders, ShowIn: true)
+        {
+            AccessLayerFor = "Claude Code", Description = "axClaude, access layer for Claude Code: its conversation as plain text", Icon = new("Ax", 31, 78, 121),
+        },
+        new("axTerminal", AxTerminal, "AxTerminal", AppGroup.AccessLayers, Opens.Folders, ShowIn: true)
+        {
+            AccessLayerFor = "your shell", Description = "axTerminal, access layer for your shell: PowerShell, Command Prompt or Git Bash as a transcript", Icon = new("At", 40, 40, 40),
+        },
+        new("axGIT", AxGit, "AxGit", AppGroup.AccessLayers, Opens.FilesAndFolders, ShowIn: true)
+        {
+            AccessLayerFor = "Git", Description = "axGIT, access layer for Git: one repository's changes, log and branches", Icon = new("Ag", 110, 40, 40), Explorer = Opens.Folders,
+        },
+        new("axPass", AxPass, "AxPass", AppGroup.AccessLayers, Opens.Files)
+        {
+            AccessLayerFor = "KeePassXC", Description = "axPass, access layer for KeePassXC: a KeePass password database", Icon = new("Aw", 20, 40, 100),
+            Types = [".kdbx"], OpenWith = [".kdbx"], TypeName = "KeePass database (axPass)",
+        },
     ];
 
     /// <summary>
@@ -182,6 +201,8 @@ public static class Dispatch
         Apps.Select(app => new
         {
             name = app.Name,
+            title = app.Title,
+            accessLayer = app.IsAccessLayer,
             verb = app.Verb,
             project = app.Project,
             description = app.Description,

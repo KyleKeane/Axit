@@ -20,6 +20,8 @@ public sealed class AxitWindowsTests
     [InlineData("*notes.md - axDown", "axDown")]
     [InlineData("my - project - axClaude", "axClaude")]
     [InlineData("axClaude", "axClaude")]
+    [InlineData("my - project (C:\\my - project) - axClaude, access layer for Claude Code", "axClaude")]
+    [InlineData("axClaude, access layer for Claude Code", "axClaude")]
     public void The_app_is_what_the_title_ends_with(string title, string app) => Assert.Equal(app, AxitWindows.AppOf(title));
 
     [Fact]
@@ -44,7 +46,7 @@ public sealed class AxitWindowsTests
         Assert.Equal("&9. a", AxitWindows.Label(8, "a"));
         Assert.Equal("&a. a", AxitWindows.Label(9, "a"));
         Assert.Equal("&2. Q && A - axDown", AxitWindows.Label(1, "Q & A - axDown"));
-        Assert.Equal("ax&Claude", AxitWindows.AppLabel(Dispatch.Of(Dispatch.AxClaude)));
+        Assert.Equal("ax&Claude, access layer for Claude Code", AxitWindows.AppLabel(Dispatch.Of(Dispatch.AxClaude)));
         Assert.Equal("ax&Down", AxitWindows.AppLabel(Dispatch.Of(Dispatch.AxDown)));
     }
 }

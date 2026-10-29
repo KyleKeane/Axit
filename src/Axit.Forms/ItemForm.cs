@@ -31,7 +31,6 @@ public sealed record ItemDetail(string Name, string? Key, ItemDocument? Document
 /// </summary>
 public abstract partial class ItemForm : AxitForm
 {
-    private readonly string _appName;
     private readonly SplitContainer _split = new();
     private readonly StatusStrip _status = new();
     private readonly ToolStripStatusLabel _nameLabel;
@@ -45,7 +44,6 @@ public abstract partial class ItemForm : AxitForm
     protected ItemForm(string appName, WindowSettings settings, string settingsPath, string? settingsError)
         : base(appName, settings, settingsPath, settingsError)
     {
-        _appName = appName;
         Navigator.Dock = DockStyle.Fill;
         Navigator.TabIndex = 0;
         Navigator.Names = () => _rows.Select(row => row.Name).ToList();
@@ -466,7 +464,7 @@ public abstract partial class ItemForm : AxitForm
             Navigator.SelectedIndex = Math.Max(0, index);
         }
 
-        Text = title + " - " + _appName;
+        Text = title + " - " + AppTitle;
         _nameLabel.Text = name;
         _placeLabel.Text = place;
         StatusLayout.Fit(_status, _nameLabel, _placeLabel);

@@ -453,9 +453,9 @@ The apps are named ax and a word, the ax in lower case and the word as it is wri
 - AX-9.2 **New window ▸** (N): one item per app of the bundle (`Dispatch.Apps`), "axClaude", "axDown", with the letter
   after ax as the mnemonic. It starts `Axit.exe <verb>` with no arguments: a new process and a new window (B-2), the
   app starting as it does from its Start menu entry. The apps stand in four groups, a separator between them
-  (2026-10-24, the user's choice of a flat list over a submenu per group): Claude and code (axClaude, axTerminal,
-  axGIT), files (axFile, axDown, axJSON, axPreview, axMedia), one's own lists (axTask, axPass), utilities (axStart,
-  axClip, axCalc, axProcess). Every list of apps in the windows has this order and these separators: New window, Open
+  (2026-10-24, the user's choice of a flat list over a submenu per group; since 2026-10-29 the access layers last,
+  AX-11.3): files (axFile, axDown, axJSON, axPreview, axMedia), one's own lists (axTask), utilities (axStart,
+  axClip, axCalc, axProcess), then the access layers, each by its title (axClaude, axTerminal, axGIT, axPass). Every list of apps in the windows has this order and these separators: New window, Open
   windows by type, axFile's Open in Axit (`AxitMenu.AddApps`). A new app is one line in `Dispatch.Apps`, with its
   group, what it opens and whether Show in offers it; every list, Show in (AX-9.10) and Recently closed (AX-9.4)
   follow from that line.
@@ -512,7 +512,7 @@ The apps are named ax and a word, the ax in lower case and the word as it is wri
   the zip's guide, embedded by `Axit.Core`: install, start, update, remove; its headings take the window's heading
   keys, AX-7.2), and **Axit on GitHub** (H; the repository page, `UpdateCheck.RepositoryPage`, in the browser).
 - AX-9.10 **Show current folder in ▸** (2026-10-24, one builder, `AxitForm.CreateShowInMenu`): the window's File
-  Explorer item (Ctrl+W), then the apps that work in a folder (`App.ShowIn`: axClaude, axTerminal, axGIT, axFile, in
+  Explorer item (Ctrl+W), then the apps that work in a folder (`App.ShowIn`: axFile, then the access layers axClaude, axTerminal, axGIT, in
   that order) but the window's own, each a new window on the file or folder in hand: axClaude and axTerminal on a
   file's folder, axGIT on the repository that holds it, axFile on the folder or with the file selected
   (`Dispatch.PathFor`). The windows that hold a folder or a file have it: axClaude and axTerminal ("Show current folder

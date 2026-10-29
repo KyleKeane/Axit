@@ -37,8 +37,8 @@ public sealed class RecentlyClosedTests
 
     [Theory]
     [InlineData("axDown", @"C:\work\notes.md", @"notes.md (C:\work\notes.md) - axDown")]
-    [InlineData("axClaude", @"C:\work\myproject\", @"myproject (C:\work\myproject\) - axClaude")]
-    [InlineData("axClaude", @"C:\", @"C:\ - axClaude")]
+    [InlineData("axClaude", @"C:\work\myproject\", @"myproject (C:\work\myproject\) - axClaude, access layer for Claude Code")]
+    [InlineData("axClaude", @"C:\", @"C:\ - axClaude, access layer for Claude Code")]
     public void The_title_is_the_name_the_full_path_and_the_app(string app, string path, string title) =>
         Assert.Equal(title, RecentlyClosed.Title(new(app, path)));
 

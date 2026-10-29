@@ -30,8 +30,9 @@ param(
     [Parameter(Mandatory = $true, Position = 0)] [string]$Name,
     # What Axit.exe takes: list.
     [Parameter(Mandatory = $true, Position = 1)] [string]$Verb,
-    # Its group in the Axit menu (AX-9.2): Code, Files, Organise or Utilities.
-    [Parameter(Mandatory = $true, Position = 2)] [ValidateSet('Code', 'Files', 'Organise', 'Utilities')] [string]$Group,
+    # Its group in the Axit menu (AX-9.2): Files, Organise, Utilities, or AccessLayers for an app that works through a
+    # program Axit does not include (AX-11.1; its line in Dispatch.Apps then needs AccessLayerFor, which a test asks for).
+    [Parameter(Mandatory = $true, Position = 2)] [ValidateSet('Files', 'Organise', 'Utilities', 'AccessLayers')] [string]$Group,
     # What it opens from a path: Nothing, Folders, Files or FilesAndFolders.
     [Parameter(Mandatory = $true, Position = 3)] [ValidateSet('Nothing', 'Folders', 'Files', 'FilesAndFolders')] [string]$Opens,
     # The Start menu's description: the name, a comma, what the app is.
@@ -656,7 +657,7 @@ exit $LASTEXITCODE
 $written.Add("src\Axit\$Project.ico")
 
 # ---- the registration places ----
-$groups = 'Code', 'Files', 'Organise', 'Utilities'
+$groups = 'Files', 'Organise', 'Utilities', 'AccessLayers'
 Edit-TextFile 'src\Axit.Core\Dispatch.cs' {
     param($text, $nl)
     # The verb constant, after the last app's.
