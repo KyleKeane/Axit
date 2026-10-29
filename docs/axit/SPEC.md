@@ -576,6 +576,80 @@ name, so that a command is reached without knowing its menu or its key, and its 
   writes code for it beyond AX-10.5. Every window's F1 text names Ctrl+Shift+P. axGIT's Push, which held
   Ctrl+Shift+P, moved to Ctrl+Shift+H (docs/axgit/SPEC.md AG-5.4).
 
+### AX-11 Access layers and consent
+
+The user's ask of 2026-10-29, specified the same day, not built yet: so that no one can be confused about what Axit
+is, every app that works through another program or service says so wherever its name appears, and the user agrees,
+inside the window and before the first connection, that Axit is only the access layer and that the other program's
+terms are theirs to know. `NOTICE.md` ("Who is responsible for what") is the full text this section points to.
+
+- AX-11.1 **Two kinds of app.** A **standalone app** needs only Windows and works with the network off (axDown,
+  axJSON, axFile, axMedia, axPreview, axStart, axProcess, axTask, axCalc, axClip). An **access layer** shows what
+  another program does and passes the user's commands to it; that program does the work, under its maker's terms:
+  axClaude for Claude Code (and through it Anthropic's service), axGIT for Git (and the servers of a repository's
+  remotes), axTerminal for the user's shells (PowerShell, Command Prompt, Git Bash, PowerShell 7), axPass for
+  KeePassXC. `Dispatch.Apps` holds it: `App.AccessLayerFor`, the program's name ("Claude Code", "Git", "your shell",
+  "KeePassXC"), empty for a standalone app. A new app that starts or talks to a program Axit does not include is an
+  access layer.
+- AX-11.2 **The keyword.** An access layer's name is never shown alone: wherever the user meets it, it reads
+  "<name>, access layer for <program>" ("axClaude, access layer for Claude Code"), from one place,
+  `App.Title` (the name alone for a standalone app; the phrase "access layer" is one constant). That is: the window
+  title (wherever the app's name stands in it today), the Axit menu's New
+  window, Open windows, Show current folder in and Recently closed lists, axFile's Open in Axit, the command palette,
+  About, Version, the Start menu entry's name and description, File Explorer's Open with Axit submenu, Windows' Open
+  with list, the installer's lines, the first line of each access layer's user guide and F1 text, both READMEs and
+  `NOTICE.md`. The console commands (`axclaude`) and the verbs stay single words.
+- AX-11.3 **Grouped apart.** Every list of apps shows the standalone apps first, in their groups (AX-9.2), then the
+  access layers, with a separator before them (in File Explorer's submenu, the separator flag of its entry); the docs
+  list them the same way under "Standalone apps" and "Access layers". `Dispatch.Apps` is in that order, and a test
+  fails when an access layer stands before a standalone app.
+- AX-11.4 **The consent notice.** Before an access layer connects to a program or service for the first time, it shows
+  a notice in its own window (AX-7.2; the window's input waits behind it), titled "Before <app> connects to
+  <program>". Its text: what the app does ("axClaude is only an access layer: it shows what Claude Code does and passes
+  your commands to it"), what the other program does and under whose terms, with their address ("Claude Code and
+  Anthropic's service do the work, under Anthropic's terms, https://www.anthropic.com/legal"), and that
+  Axit gives no warranty and its author answers for none of it (NOTICE.md). Below the text, one check box, unchecked:
+  "I understand that <app> is only an access layer, and I take full responsibility for knowing and following the
+  terms of <program>". Buttons: **Connect** (Enter; with the box unchecked it says "Check the box first" and nothing
+  else happens), **Open their terms** (the browser; the notice stays), **Open Axit's terms** (`NOTICE.md` beside the
+  program, in axPreview; the notice stays) and **Not now** (Escape: the window stays, not connected, with one line
+  saying so and how to connect, the app's Restart or Open). The check box is a real `CheckBox` with that text as its
+  name, after the text and before the buttons in the Tab order; Space toggles it. `OverlayPanel` gains the check box
+  as an optional part of a notice (`Notice.Consent`), for every app.
+- AX-11.5 **When it is asked.** Once per access layer and program, the first time it connects, kept with its date and
+  Axit's version in `%APPDATA%\Axit\consent.json` (`Axit.Core/Consent`, unit tested); never again for the same pair,
+  updates included (AX-11.7 covers those). The pairs:
+  - axClaude, Claude Code: before it first starts Claude Code.
+  - axTerminal, each shell on its own: before it first starts PowerShell, Command Prompt, Git Bash or PowerShell 7,
+    those that come with Windows included.
+  - axGIT, Git: on first opening a repository; and each server on its own (github.com, a company's server), before
+    the first fetch, pull or push that reaches it, by the host of the remote's address, since that is a new service
+    with its own terms.
+  - axPass, KeePassXC: before it first opens a database.
+  - The AI tools (AX-9, `docs/axit/mcp.md`): before the first pairing of each AI tool.
+  - **Install it now** (AX-2.9): the missing program's notice carries the same check box for the program it installs
+    (its maker's installer and terms), and its acceptance counts for the app's first connection, so the user agrees
+    once, in the step they were already taking.
+- AX-11.6 **Reminders at sign-in.** Whenever the user is about to authenticate with a service through an access layer,
+  one line says whose account it is, without a check box: "You are signing in to Anthropic through Claude Code; the
+  account and its terms are between you and Anthropic" (axClaude, when Claude Code shows its login, recognised from a
+  recorded screen, `docs/axclaude/claude-screens.md`); "Git is asking for your sign-in to github.com; the account is
+  between you and github.com" (axGIT, when git's credential helper is about to ask: a fetch, pull or push that the
+  server refuses without one). The line is spoken once per sign-in and stays in the window's text.
+- AX-11.7 **Updates.** The update notice (AX-3.1) adds, above the release notes: "Installing this update means you
+  accept the terms of Axit <version>: its licence and NOTICE.md, linked in the release notes." Its first two buttons
+  read **I accept all terms, install and restart** (Enter) and **I accept all terms, install and close**; Open release
+  page and Later stay. The acceptance is kept in `consent.json` with the version and the date. Every release's notes
+  end with the same sentence and the links to `LICENSE` and `NOTICE.md` (`release.yml`, beside the code signing
+  policy line).
+- AX-11.8 **About.** About, Version lists the apps in the two kinds ("Standalone apps: axDown, … Access layers:
+  axClaude for Claude Code, …"). A new About section, **Consents** (C), lists what the user has agreed to, one line
+  each ("axClaude, Claude Code, 29 October 2026, Axit 3.8.0"; "Update to Axit 3.8.0, 29 October 2026"), each with
+  **Withdraw**, after which that app asks again at its next connection. About, Licence is `NOTICE.md` (AX-9.9).
+- AX-11.9 **Tests.** Every app with `AccessLayerFor` has its title with the keyword and a consent target; no window
+  title, menu label or installer entry is built from `App.Name` where `App.Title` is meant (a test reads the sources,
+  as `LayoutTests` does); `Consent` records, reads, withdraws and tolerates a missing or damaged file (asking again).
+
 ### AX-7 Accessibility rules every app follows
 
 These are the rules of `docs/axclaude/SPEC.md` that are not about Claude; app specifications refer to them by number.
