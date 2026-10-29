@@ -502,7 +502,9 @@ The apps are named ax and a word, the ax in lower case and the word as it is wri
   the same in every window (`Axit.Core/BundleAbout`), each shown as a notice of the window: **Version** (V; the
   version, the apps, the latest release as the window knows it, the releases page, the settings and logs folders),
   **Licence** (L; `NOTICE.md`, embedded: the GNU AGPL 3 notice, the additional terms of its section 7, the warranty
-  and liability disclaimer in full words and the risks app by app, since 2026-10-29; `LICENSE` beside it is the AGPL),
+  and liability disclaimer in full words, and who is responsible for what: the standalone apps, the connected apps
+  with what Axit, the other program and the user each do, and the bundle's services; since 2026-10-29; `LICENSE`
+  beside it is the AGPL),
   **Attribution** (A; the maker, the Anthropic note, what Axit is built with), **Privacy** (P; `PRIVACY.md`, embedded:
   everything Axit contacts over the network and when, the outside programs it runs, what stays on the computer; since
   2026-10-25), **Third-party notices** (N; `THIRD-PARTY-NOTICES.md`, embedded: the .NET runtime and Windows Forms in

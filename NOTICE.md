@@ -9,6 +9,9 @@ Axit, copyright (C) 2026 Dr. Kyle Keane (www.kylekeane.com).
 - If you share a changed version, or let people use a changed version over a network, you must offer them its full
   source code under the same licence, mark it as changed, and give it a name of its own.
 - It comes with no warranty. You use it at your own risk, and the author is not liable for what happens when you do.
+- Most apps are standalone: they need only Windows. Four are connected: axClaude, axGIT, axTerminal and axPass work
+  through another program or service you install, which does the real work under its maker's terms. "Who is
+  responsible for what" below says, app by app, what Axit does, what the other program does, and what is yours.
 - The official copies come only from <https://github.com/KyleKeane/Axit/releases>.
 
 The sections below are the binding terms. `LICENSE` is the licence; this file adds the terms that section 7 of that
@@ -90,47 +93,113 @@ warranty, a support agreement, a service level, or any other promise of their ow
 the author, the copyright holder and every contributor from and against any liability, claim, damages, cost and
 expense, including reasonable lawyers' fees, that those contractual assumptions directly impose on them.
 
-## Your responsibilities and the risks
+## Who is responsible for what
 
-Axit works on your own files, programs and accounts. You decide what it does, and you are responsible for it.
+Axit works on your own computer, files, programs and accounts. Three parties take part, and each answers only for
+its own part:
+
+- **Axit** shows you things, and passes on the commands you give it, as this file and each app's guide describe. It
+  does nothing on its own except the update check (below), and it gives no warranty for any of it.
+- **Other programs and services** that some apps work through (Claude Code and Anthropic, Git and the servers your
+  repositories use, your shells, KeePassXC) do the real work in those apps. Each is made, run and supported by its own
+  maker, under that maker's licence, terms and privacy policy, which you accept with that maker, not with Axit's
+  author. Axit's author has no control over them and is not responsible for what they do, keep, send or charge.
+- **You** decide what to do, install the other programs yourself, hold the accounts, and are responsible for the
+  commands you give, for checking their results, and for keeping backups.
+
+Axit's apps come in two kinds, kept apart below: standalone apps, which need nothing but Windows, and connected apps,
+which work through another program or service. A standalone app keeps working with the network off.
+
+## Standalone apps: Axit and Windows only
+
+These apps use only Windows' own parts. Nothing they do leaves your computer, except a link you choose to open in your
+browser, or a file you choose to hand to another program.
+
+- **axDown, axJSON and axPreview** open, show and (axDown and axJSON) save text files. Saving replaces the file on
+  disk; undo works only while the window is open. Your part: keep copies of files you cannot lose.
+- **axFile** deletes, moves, renames, copies, compresses and extracts files and folders, network shares among them
+  when you open one. Deleting sends to the Recycle Bin, but Windows may delete for good what its Recycle Bin cannot
+  hold, such as a very large file or one on a network drive, and Undo cannot bring back everything. Open with,
+  Properties and the Windows menu hand a file to Windows and to the program you choose, which then acts on its own.
+  Your part: check what is selected before a change, and keep backups.
+- **axMedia** plays sound and video files through Windows' own media player parts. It changes no file.
+- **axStart** starts the programs of your Start menu that you choose. The programs it starts act on their own.
+- **axProcess** ends processes, and stops, starts and changes services and startup programs, with your rights.
+  Ending a process can lose its unsaved work; stopping a service or a startup program can make Windows or a program
+  stop working. Your part: know what a process or service is before you end or change it.
+- **axTask** keeps tasks and lists as files in a folder you choose. Your part: keep backups of that folder.
+- **axCalc** calculates the expressions you type. Its results come with no warranty: check any result that matters
+  before relying on it.
+- **axClip** keeps a history of the text you copy, which can include passwords and other private text that a program
+  did not mark to be kept out of clipboard histories. It keeps the history in memory, and on disk, encrypted for your
+  Windows account, only when you turn on Keep history. Your part: pause recording (Options) before copying something
+  private, and clear the history when you need to.
+- **axStart** and **axClip** start with Windows and wait for their hotkeys until you turn them off or uninstall Axit.
+
+## Connected apps: through another program or service
+
+These apps are front ends: Axit shows what the other program does and passes your commands to it. The other program
+does the work, under its maker's terms. Each needs that program installed by you; Axit does not include it.
+
+- **axClaude** works through **Claude Code**, Anthropic's program, and through it **Anthropic's service**, under your
+  own Anthropic account.
+  - Axit: starts Claude Code in your folder, shows what it prints, and passes on what you type and answer. It keeps
+    no copy of your conversation, except a recording you turn on yourself (Options, Developer).
+  - Claude Code and Anthropic: everything you type goes to them, under Anthropic's terms and privacy policy. Claude
+    Code can create, change and delete files, run commands, and use your account's usage or money; its answers can
+    be wrong.
+  - You: what Claude Code may do (its permission questions are yours to answer), checking its changes, its costs, and
+    your agreement with Anthropic. Axit is not affiliated with Anthropic, and its author sees nothing you send.
+- **axGIT** works through **Git**, and, when you fetch, pull or push, the **server your repository uses** (GitHub or
+  another).
+  - Axit: runs Git commands on the repository in hand and shows their results.
+  - Git and the server: do the work; a push sends your commits to the server, under its terms.
+  - You: discarding changes, resetting and similar commands remove work for good; a push publishes. Check before
+    you confirm.
+- **axTerminal** works through **your own shell** (PowerShell, Command Prompt or Git Bash).
+  - Axit: shows what the shell prints and passes on what you type.
+  - The shell and the commands you run: do whatever those commands do, with your rights, on your computer and on
+    any network they reach.
+  - You: every command you type.
+- **axPass** works through **KeePassXC's command-line tool**, which does all the encryption.
+  - Axit: shows entries and passes your changes and your master password to the tool, on a pipe; it never stores a
+    password, and a password it copies is cleared from the clipboard after 30 seconds. Before the first change after
+    each unlock it backs up the database file beside it.
+  - KeePassXC: reads and writes your database, under its own licence.
+  - You: your master password, which no one can recover for you, and backups of the database. A wrong change, a full
+    disk, or another program writing the same file at the same time can damage a database.
+
+## Services of the whole bundle
+
+- **The update check** asks GitHub for the latest release when a window starts; turn it off in Options, General. An
+  update you choose downloads the release from this repository's releases page, checks its signature, and replaces
+  the program for your Windows account only.
+- **Install it now**, in a missing program's notice, installs Git, KeePassXC, PowerShell 7 or Claude Code only when
+  you choose it, through Windows' package manager or the maker's own installer. The program you install, and its
+  installer, are under the maker's terms.
+- **AI tools** (Axit menu, AI tools) are off until you turn them on. On, an AI tool on your computer that you pair can
+  read what Axit's windows show and open apps; axPass and axClip are never read. What the tool then does with what
+  it read is under its maker's terms.
+- **Links** in help menus, notices and files open in your browser only when you choose them.
+
+`PRIVACY.md` says in full what Axit contacts and when.
+
+## For every app
 
 - **Back up what matters.** Keep your own backups of your files, repositories, task lists and password databases.
-  Axit can make mistakes, and so can the programs it starts.
-- **axClaude** runs Claude Code, Anthropic's program, under your own Anthropic account and its terms. Claude Code can
-  create, change and delete files, run commands and spend your account's usage or money; what you allow it to do is
-  yours to decide and check. The author has no access to what you send it.
-- **axTerminal** runs the shell commands you type, with your rights.
-- **axGIT** runs Git on your repository: discarding changes, resetting, pushing and similar commands change or remove
-  work, locally or on a server.
-- **axFile** deletes, moves, renames, compresses and extracts files; Windows may delete for good what its Recycle Bin
-  cannot hold, such as a very large file or one on a network drive, and Undo cannot bring back everything.
-- **axProcess** ends processes and stops, starts and changes services and startup programs; doing so can lose unsaved
-  work or make Windows or a program stop working.
-- **axPass** reads and writes your KeePass database through KeePassXC's command-line tool, which you install and which
-  does the encryption. A wrong change, a full disk or another program writing the same file can damage a database:
-  keep backups and your master password, which no one can recover for you.
-- **axClip** keeps a history of what you copy, which can include passwords and other private text that a program did
-  not mark to be kept out of clipboard histories, and can keep it in a file on your computer between starts. Pause
-  its recording (Options) before copying something private.
-- **axStart** and **axClip** start with Windows and listen for their hotkeys until you turn them off or uninstall.
-- **Updates** download and run a new version from the official releases page; the update check can be turned off
-  (Options, General).
+  Axit can make mistakes, and so can the programs it works through.
 - **Not for critical use.** Axit is not designed, tested or certified for medical, safety-critical, legal, financial
   or emergency use, nor as an assistive technology on which access to anything essential depends; have another way
   to reach anything you cannot do without.
 - **Your use is yours.** You are responsible for using Axit in line with the law, your employer's rules and the terms
-  of every service you reach with it.
+  of every program and service you reach with it.
 
 ## Other programs and names
 
-Axit starts or works with programs it does not include, each under its own licence and terms: Claude Code
-(Anthropic), Git, KeePassXC, PowerShell, Windows' package manager and the programs of Windows itself. Their makers,
-not the author, are responsible for them. Axit is an independent project, not affiliated with, sponsored or endorsed
-by Anthropic, NV Access, Microsoft, GitHub, KeePassXC or any other company or project it names; their names and marks
-belong to them and are used only to say what Axit works with.
-
-What Axit contacts over the network and when is in `PRIVACY.md`; what the program carries from others is in
-`THIRD-PARTY-NOTICES.md`.
+The programs and services named above are not part of Axit and are not included in it; what the program file itself
+carries from others (the .NET runtime and Windows Forms) is in `THIRD-PARTY-NOTICES.md`. Axit is an independent
+project, not affiliated with, sponsored or endorsed by Anthropic, NV Access, Microsoft, GitHub, KeePassXC or any other
+company or project it names; their names and marks belong to them and are used only to say what Axit works with.
 
 ## Contributions
 

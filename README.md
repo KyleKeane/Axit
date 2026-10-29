@@ -8,20 +8,25 @@ Accessible Windows apps for screen reader users, built for and tested with NVDA,
 
 ## The apps
 
-- **axClaude**: Claude Code in screen reader mode, shown as a plain-text conversation that NVDA reads line by line, with single-key navigation, a message field, and Claude's questions as lists. You are still talking to the real Claude Code.
+### Standalone apps: Windows only, with the network off
+
 - **axDown**: a barebones editor for Markdown and text files that writes a file back exactly as it found it, with keys for headings, links, lists, quotes and tables.
 - **axJSON**: the same editor for JSON, with keys for keys, objects, arrays, items and errors, and a Format command that repairs what it can.
-- **axGIT**: a git manager for one repository: changes, the log and the branches as lists, staging, committing, fetch, pull and push.
-- **axTerminal**: PowerShell, Command Prompt or Git Bash as a transcript in axClaude's kind of window.
 - **axFile**: a file manager for one folder, with an Actions list of every operation that Ctrl+Z can take back, selection, zip files, favourites and the drives.
 - **axMedia**: a player for sound and video files with one queue, speed with the pitch kept, and seeking by key.
 - **axPreview**: a read-only viewer for one text file, with the editors' navigation keys.
 - **axStart**: a program launcher. One key from anywhere, Ctrl+Shift+Space unless you choose another, brings up a search field over the Start menu's programs; Down and Up move through the matches while the caret stays in the field.
 - **axProcess**: what runs on the computer, as one list with three views: the processes with their memory and processor use, the services, and the programs that start at sign-in. End a process after a question, start or stop a service; nothing refreshes by itself.
 - **axTask**: tasks and lists as a folder of small files, moved through as axFile moves through folders. Each item's fields (a due date, done, notes, links to other items) are in a pane beside the list; All tasks gathers every task not done.
-- **axPass**: a KeePass password database, read and changed by ear: groups and entries in the same two panes, the password never spoken, copied with Ctrl+C and cleared from the clipboard after 30 seconds. It runs KeePassXC's own command-line tool, so KeePassXC must be installed.
 - **axCalc**: a calculator as one field and a history: type an expression, Enter says the answer, and every answer stays as a line to read back, copy and recall; hexadecimal, binary and octal for development.
 - **axClip**: a clipboard history. It keeps the text of every copy while it runs, in memory unless you ask; Windows+Alt+V from anywhere brings up a search field over it, Down and Up move through it with the caret kept in the field, and Enter pastes into the program you were in.
+
+### Connected apps: through a program or service you install, which does the work under its maker's terms (`NOTICE.md` says who is responsible for what)
+
+- **axClaude**: Claude Code in screen reader mode, shown as a plain-text conversation that NVDA reads line by line, with single-key navigation, a message field, and Claude's questions as lists. You are still talking to the real Claude Code.
+- **axGIT**: a git manager for one repository: changes, the log and the branches as lists, staging, committing, fetch, pull and push.
+- **axTerminal**: PowerShell, Command Prompt or Git Bash as a transcript in axClaude's kind of window.
+- **axPass**: a KeePass password database, read and changed by ear: groups and entries in the same two panes, the password never spoken, copied with Ctrl+C and cleared from the clipboard after 30 seconds. It runs KeePassXC's own command-line tool, so KeePassXC must be installed.
 
 The apps reach each other: axFile hands a file to axMedia or axPreview, every window can show its folder in the others, and the Axit menu in every window lists the open windows and starts any app.
 
