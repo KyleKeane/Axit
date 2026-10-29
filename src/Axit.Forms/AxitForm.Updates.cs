@@ -131,21 +131,30 @@ public abstract partial class AxitForm
     /// <summary>The button that opens a release on GitHub and leaves the notice open.</summary>
     private OverlayChoice ReleasePageChoice(ReleaseInfo release) => new("&Open release page", () => OpenUrl(release.PageUrl), StaysOpen: true);
 
-    /// <summary>The release notes with Update and restart, Update and close, Open release page and Later; <paramref name="unprompted"/> when the check at startup found it.</summary>
+    /// <summary>The acceptance of the release's terms kept (AX-11.7), then the install.</summary>
+    private void AcceptAndInstall(ReleaseInfo release, bool restart)
+    {
+        Consent.Record(AppPaths.ConsentFile, Consent.UpdateApp, $"Axit {release.Version.ToString(3)}", BundleInfo.Version, DateTime.Now);
+        InstallUpdate(release, restart);
+    }
+
+    /// <summary>The release notes with I accept all terms, install and restart (or close), Open release page and Later; <paramref name="unprompted"/> when the check at startup found it.</summary>
     private void ShowUpdateNotice(ReleaseInfo release, bool unprompted = false)
     {
         var version = release.Version.ToString(3);
         var size = release.ZipSize > 0 ? $" The download is {release.ZipSize / (1024.0 * 1024.0):0} MB." : string.Empty;
+        // AX-11.7: installing means accepting the release's terms, said first and in the buttons' own words.
         var text =
-            $"You have Axit {BundleInfo.Version}. Axit {version} is available.\n\n" +
+            $"You have Axit {BundleInfo.Version}. Axit {version} is available.\n" +
+            $"Installing this update means you accept the terms of Axit {version}: its licence and NOTICE.md (who is responsible for what, the access layers and the disclaimer), linked in the release notes below and on the release page; About, Licence shows them once it is installed.\n\n" +
             (release.Notes.Length > 0 ? release.Notes + "\n\n" : string.Empty) +
-            $"Update and restart downloads the new version, {UpdateRestartText}. Update and close installs without starting it again. " +
+            $"I accept all terms, install and restart downloads the new version, {UpdateRestartText}. I accept all terms, install and close installs without starting it again. " +
             $"A progress bar shows the download.{size}\n" +
             "Later keeps this version; the Axit menu offers the update again.";
         ShowNotice(new Notice($"Update to Axit {version}", text,
         [
-            new OverlayChoice("Update and &restart", () => InstallUpdate(release, restart: true), IsDefault: true),
-            new OverlayChoice("Update and &close", () => InstallUpdate(release, restart: false)),
+            new OverlayChoice("I &accept all terms, install and restart", () => AcceptAndInstall(release, restart: true), IsDefault: true),
+            new OverlayChoice("I accept all terms, install and &close", () => AcceptAndInstall(release, restart: false)),
             ReleasePageChoice(release),
             new OverlayChoice("&Later", IsCancel: true),
         ])

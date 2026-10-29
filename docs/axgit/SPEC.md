@@ -9,6 +9,8 @@ AX-9 (the Axit menu), are cited by number and not repeated. In axGIT's code and 
 
 ## 1. Summary
 
+An **access layer** for Git (bundle AX-11, 2026-10-29): titled "axGIT, access layer for Git"; before Git first runs, the consent notice (AX-11.4); before the first fetch, pull or push to each server (the host of the remote's address, `AxGit.Core/GitRemote`), the consent for that server, and the first time a window reaches a server after it, the sign-in line (AX-11.6).
+
 A developer who works in axClaude and axDown wants to know the state of the repository under them and to act on it
 without a terminal: which files changed, what changed in one of them, stage some, commit with a message, look at the
 log, switch a branch, pull and push. axGIT opens one repository in one window, named after it. The window is one list

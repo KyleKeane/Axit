@@ -67,7 +67,7 @@ axJSON remembers the font, the text size, word wrap, the recent files and the wi
 
 ## Updates
 
-New versions of Axit are published on GitHub, and every app of Axit updates together. When axJSON starts, it asks GitHub once whether there is a newer one; if there is, a notice opens with four buttons. Update and restart downloads and installs the new version, then closes axJSON (asking first about unsaved changes) and starts the new version on the same file; Update and close installs it and closes without starting it again. Later keeps the version you have, and Axit, Update to Axit n offers it until you take it. Axit, Check for updates asks at any time. Axit, About, Version names the version you have and the latest release on GitHub.
+New versions of Axit are published on GitHub, and every app of Axit updates together. When axJSON starts, it asks GitHub once whether there is a newer one; if there is, a notice opens with four buttons. I accept all terms, install and restart downloads and installs the new version, then closes axJSON (asking first about unsaved changes) and starts the new version on the same file; I accept all terms, install and close installs it and closes without starting it again. Later keeps the version you have, and Axit, Update to Axit n offers it until you take it. Axit, Check for updates asks at any time. Axit, About, Version names the version you have and the latest release on GitHub.
 
 ## If something goes wrong
 

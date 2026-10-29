@@ -9,7 +9,7 @@ Axit, copyright (C) 2026 Dr. Kyle Keane (www.kylekeane.com).
 - If you share a changed version, or let people use a changed version over a network, you must offer them its full
   source code under the same licence, mark it as changed, and give it a name of its own.
 - It comes with no warranty. You use it at your own risk, and the author is not liable for what happens when you do.
-- Most apps are standalone: they need only Windows. Four are connected: axClaude, axGIT, axTerminal and axPass work
+- Most apps are standalone: they need only Windows. Four are access layers: axClaude, axGIT, axTerminal and axPass work
   through another program or service you install, which does the real work under its maker's terms. "Who is
   responsible for what" below says, app by app, what Axit does, what the other program does, and what is yours.
 - The official copies come only from <https://github.com/KyleKeane/Axit/releases>.
@@ -107,7 +107,7 @@ its own part:
 - **You** decide what to do, install the other programs yourself, hold the accounts, and are responsible for the
   commands you give, for checking their results, and for keeping backups.
 
-Axit's apps come in two kinds, kept apart below: standalone apps, which need nothing but Windows, and connected apps,
+Axit's apps come in two kinds, kept apart below: standalone apps, which need nothing but Windows, and access layers,
 which work through another program or service. A standalone app keeps working with the network off.
 
 ## Standalone apps: Axit and Windows only
@@ -136,12 +136,12 @@ browser, or a file you choose to hand to another program.
   private, and clear the history when you need to.
 - **axStart** and **axClip** start with Windows and wait for their hotkeys until you turn them off or uninstall Axit.
 
-## Connected apps: through another program or service
+## Access layers: through another program or service
 
-These apps are front ends: Axit shows what the other program does and passes your commands to it. The other program
+These apps are access layers: Axit shows what the other program does and passes your commands to it. The other program
 does the work, under its maker's terms. Each needs that program installed by you; Axit does not include it.
 
-- **axClaude** works through **Claude Code**, Anthropic's program, and through it **Anthropic's service**, under your
+- **axClaude, access layer for Claude Code** works through **Claude Code**, Anthropic's program, and through it **Anthropic's service**, under your
   own Anthropic account.
   - Axit: starts Claude Code in your folder, shows what it prints, and passes on what you type and answer. It keeps
     no copy of your conversation, except a recording you turn on yourself (Options, Developer).
@@ -150,18 +150,18 @@ does the work, under its maker's terms. Each needs that program installed by you
     be wrong.
   - You: what Claude Code may do (its permission questions are yours to answer), checking its changes, its costs, and
     your agreement with Anthropic. Axit is not affiliated with Anthropic, and its author sees nothing you send.
-- **axGIT** works through **Git**, and, when you fetch, pull or push, the **server your repository uses** (GitHub or
+- **axGIT, access layer for Git** works through **Git**, and, when you fetch, pull or push, the **server your repository uses** (GitHub or
   another).
   - Axit: runs Git commands on the repository in hand and shows their results.
   - Git and the server: do the work; a push sends your commits to the server, under its terms.
   - You: discarding changes, resetting and similar commands remove work for good; a push publishes. Check before
     you confirm.
-- **axTerminal** works through **your own shell** (PowerShell, Command Prompt or Git Bash).
+- **axTerminal, access layer for your shell** works through **your own shell** (PowerShell, Command Prompt or Git Bash).
   - Axit: shows what the shell prints and passes on what you type.
   - The shell and the commands you run: do whatever those commands do, with your rights, on your computer and on
     any network they reach.
   - You: every command you type.
-- **axPass** works through **KeePassXC's command-line tool**, which does all the encryption.
+- **axPass, access layer for KeePassXC** works through **KeePassXC's command-line tool**, which does all the encryption.
   - Axit: shows entries and passes your changes and your master password to the tool, on a pipe; it never stores a
     password, and a password it copies is cleared from the clipboard after 30 seconds. Before the first change after
     each unlock it backs up the database file beside it.

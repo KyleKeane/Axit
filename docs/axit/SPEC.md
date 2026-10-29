@@ -223,7 +223,7 @@ The apps are named ax and a word, the ax in lower case and the word as it is wri
 
 - AX-3.1 One version for the bundle, `<Version>` in `src/Axit/Axit.csproj`. A newer GitHub release is offered as
   axClaude does (`docs/axclaude/SPEC.md` FR-1.10, D25): asked once at startup when the setting is on, a notice with
-  the release notes and four buttons: Update and restart (Enter), Update and close, Open release page, Later
+  the release notes and four buttons: I accept all terms, install and restart (Enter), I accept all terms, install and close, Open release page, Later
   (Escape). A development build (Debug, as `run.ps1` makes it) does not ask at startup, since its version is whatever
   the working tree said when it was last built; Check for updates still asks. Every window's Axit menu ends with Check for updates (Axit <version>), always, naming the version in use
   and asking GitHub again every time, Update to Axit <version> below it while a newer release is known, and About, the
@@ -234,7 +234,7 @@ The apps are named ax and a word, the ax in lower case and the word as it is wri
   `%LOCALAPPDATA%\Axit\updates\<version>` (the bar to 80 percent; Cancel keeps the installed version), then the
   downloaded version's `install.ps1 -InPlace` runs while the app keeps running (AX-2.8; "Downloaded. Installing";
   the installer's lines move the bar to 100; Cancel no longer applies and says so), then the window closes
-  ("Installed. Restarting" or "Installed. Closing") and, after Update and restart, starts the installed program file
+  ("Installed. Restarting" or "Installed. Closing") and, after I accept all terms, install and restart, starts the installed program file
   itself with what it had open (axClaude: the folder, and `-- --continue` when a message was sent; axDown: the file,
   or nothing). A failed installer leaves the running version in place and shows its output in a notice. A download
   counts as complete when it holds `install.ps1` and a program file. Cancel counts until the download is unpacked, a
@@ -244,7 +244,7 @@ The apps are named ax and a word, the ax in lower case and the word as it is wri
   any other, a notice and the running version kept (2026-10-23: both escaped as a crash notice over the progress).
   The window's close for an installed update is a real close in every window, the one that otherwise hides on
   closing included (axStart, `ClosingForUpdate`). Each app's close
-  question after Update and restart (axClaude's Keep working, axDown's Cancel in the save question) keeps the window
+  question after I accept all terms, install and restart (axClaude's Keep working, axDown's Cancel in the save question) keeps the window
   on the old program file and says "Update installed. It starts with the next axClaude" (or axDown).
 - AX-3.6 **A failed update's notice** (2026-10-24, the user's ask after 3.7.1's update failed on one machine with
   "the list of apps could not be read" and nothing more): what failed, then the details to send (the versions,
@@ -502,12 +502,12 @@ The apps are named ax and a word, the ax in lower case and the word as it is wri
   the same in every window (`Axit.Core/BundleAbout`), each shown as a notice of the window: **Version** (V; the
   version, the apps, the latest release as the window knows it, the releases page, the settings and logs folders),
   **Licence** (L; `NOTICE.md`, embedded: the GNU AGPL 3 notice, the additional terms of its section 7, the warranty
-  and liability disclaimer in full words, and who is responsible for what: the standalone apps, the connected apps
+  and liability disclaimer in full words, and who is responsible for what: the standalone apps, the access layers
   with what Axit, the other program and the user each do, and the bundle's services; since 2026-10-29; `LICENSE`
   beside it is the AGPL),
   **Attribution** (A; the maker, the Anthropic note, what Axit is built with), **Privacy** (P; `PRIVACY.md`, embedded:
   everything Axit contacts over the network and when, the outside programs it runs, what stays on the computer; since
-  2026-10-25), **Third-party notices** (N; `THIRD-PARTY-NOTICES.md`, embedded: the .NET runtime and Windows Forms in
+  2026-10-25), **Consents ▸** (C; what the user has agreed to, each withdrawn from its item, AX-11.8), **Third-party notices** (N; `THIRD-PARTY-NOTICES.md`, embedded: the .NET runtime and Windows Forms in
   the program under MIT, the Unicode data), **Axit guide** (G; `docs/axit/README.md`,
   the zip's guide, embedded by `Axit.Core`: install, start, update, remove; its headings take the window's heading
   keys, AX-7.2), and **Axit on GitHub** (H; the repository page, `UpdateCheck.RepositoryPage`, in the browser).
@@ -578,7 +578,7 @@ name, so that a command is reached without knowing its menu or its key, and its 
 
 ### AX-11 Access layers and consent
 
-The user's ask of 2026-10-29, specified the same day, not built yet: so that no one can be confused about what Axit
+The user's ask of 2026-10-29, specified and built the same day (NVDA checks owed): so that no one can be confused about what Axit
 is, every app that works through another program or service says so wherever its name appears, and the user agrees,
 inside the window and before the first connection, that Axit is only the access layer and that the other program's
 terms are theirs to know. `NOTICE.md` ("Who is responsible for what") is the full text this section points to.
@@ -625,30 +625,39 @@ terms are theirs to know. `NOTICE.md` ("Who is responsible for what") is the ful
   - axGIT, Git: on first opening a repository; and each server on its own (github.com, a company's server), before
     the first fetch, pull or push that reaches it, by the host of the remote's address, since that is a new service
     with its own terms.
-  - axPass, KeePassXC: before it first opens a database.
-  - The AI tools (AX-9, `docs/axit/mcp.md`): before the first pairing of each AI tool.
-  - **Install it now** (AX-2.9): the missing program's notice carries the same check box for the program it installs
-    (its maker's installer and terms), and its acceptance counts for the app's first connection, so the user agrees
-    once, in the step they were already taking.
-- AX-11.6 **Reminders at sign-in.** Whenever the user is about to authenticate with a service through an access layer,
-  one line says whose account it is, without a check box: "You are signing in to Anthropic through Claude Code; the
-  account and its terms are between you and Anthropic" (axClaude, when Claude Code shows its login, recognised from a
-  recorded screen, `docs/axclaude/claude-screens.md`); "Git is asking for your sign-in to github.com; the account is
-  between you and github.com" (axGIT, when git's credential helper is about to ask: a fetch, pull or push that the
-  server refuses without one). The line is spoken once per sign-in and stays in the window's text.
-- AX-11.7 **Updates.** The update notice (AX-3.1) adds, above the release notes: "Installing this update means you
-  accept the terms of Axit <version>: its licence and NOTICE.md, linked in the release notes." Its first two buttons
-  read **I accept all terms, install and restart** (Enter) and **I accept all terms, install and close**; Open release
-  page and Later stay. The acceptance is kept in `consent.json` with the version and the date. Every release's notes
-  end with the same sentence and the links to `LICENSE` and `NOTICE.md` (`release.yml`, beside the code signing
-  policy line).
-- AX-11.8 **About.** About, Version lists the apps in the two kinds ("Standalone apps: axDown, … Access layers:
-  axClaude for Claude Code, …"). A new About section, **Consents** (C), lists what the user has agreed to, one line
-  each ("axClaude, Claude Code, 29 October 2026, Axit 3.8.0"; "Update to Axit 3.8.0, 29 October 2026"), each with
-  **Withdraw**, after which that app asks again at its next connection. About, Licence is `NOTICE.md` (AX-9.9).
-- AX-11.9 **Tests.** Every app with `AccessLayerFor` has its title with the keyword and a consent target; no window
-  title, menu label or installer entry is built from `App.Name` where `App.Title` is meant (a test reads the sources,
-  as `LayoutTests` does); `Consent` records, reads, withdraws and tolerates a missing or damaged file (asking again).
+  - axPass, KeePassXC: before the first master password goes to it (unlocking a database) and before File, New
+    database.
+  - The AI tools (AX-9, `docs/axit/mcp.md`): the pairing notice (MC-6.4) carries the check box, which Allow needs;
+    Deny stays its default. Forget AI tools withdraws these consents with the pairings.
+  - **Install it now** (AX-2.9): before an installer runs, the same notice for the program it installs, titled
+    "Before <app> installs <program>", with **Install** in place of Connect; its acceptance counts for the app's first
+    connection, so the user agrees once, in the step they were already taking.
+  The notice is the window base's (`AxitForm.WithConsent`), the programs' words and addresses `Axit.Core/ConsentTarget`.
+  A custom shell has no address for its terms: its notice says so and has no Open their terms.
+- AX-11.6 **Reminders at sign-in.** One line says whose account it is, without a check box: axClaude, on sending
+  `/login`: "You are signing in to Anthropic through Claude Code; the account and its terms are between you and
+  Anthropic", spoken after "Sent" and kept as a system line. axGIT, the first time a window reaches each server
+  after its consent (git's credential helper may then ask for a sign-in in its own window, which Axit cannot see
+  coming): "Connecting to github.com; if Git asks you to sign in, the account is between you and github.com". Still
+  to come: Claude Code's own login screen at its first start, recognised once it is recorded
+  (`docs/axclaude/claude-screens.md`).
+- AX-11.7 **Updates.** The update notice (AX-3.1) says first: "Installing this update means you accept the terms of
+  Axit <version>: its licence and NOTICE.md …, linked in the release notes below and on the release page". Its first
+  two buttons read **I accept all terms, install and restart** (Enter) and **I accept all terms, install and close**;
+  Open release page and Later stay. The acceptance is kept in `consent.json` with the version and the date. Every
+  release's notes carry the same sentence with the links to that tag's `LICENSE` and `NOTICE.md` (`release.yml`,
+  before the code signing policy line), so the update notice shows them too.
+- AX-11.8 **About.** About, Version lists the apps in the two kinds ("Standalone apps, which need only Windows: axFile,
+  … Access layers, which only show and pass on the work of a program you install, under its maker's terms: axClaude
+  for Claude Code, …"). **Consents ▸** (C), after Privacy, lists what the user has agreed to, numbered, one line each
+  ("axClaude, Claude Code, 29 October 2026, Axit 3.8.0"; "Update to Axit 3.8.0, 29 October 2026"), "Nothing agreed
+  to yet" when empty. Enter on one: the notice "Withdraw this consent?" with **Withdraw** (Enter) and **Keep**
+  (Escape); withdrawn, that app asks again at its next connection. An update's acceptance is a record only: its notice
+  says so. About, Licence is `NOTICE.md` (AX-9.9).
+- AX-11.9 **Tests.** The access layers are the last group and carry the keyword (`DispatchTests`); window titles are
+  read back to their app (`AxitWindowsTests`); `Consent` records, reads, withdraws and takes a damaged file as nothing
+  agreed (`ConsentTests`); the servers' hosts (`GitRemoteTests`); every program Install it now offers has its
+  consent target with an address (`ConsentTests`).
 
 ### AX-7 Accessibility rules every app follows
 
@@ -896,7 +905,7 @@ dialogs) is .NET's, shipped inside the executable, and every project is marked a
   Preceded by axClaude 1.7.0, the bridge (B-6). Both apps checked with NVDA by the user before the release.
 - 2.1.0: the key tables (`AxClaudeKeys`, `AxDownKeys`, `BundleKeys`) with the collision test (AX-8); heading
   navigation in axDown. 2.1.1: axDown's window spoken on opening (`AccessibleRole.Window`).
-- 2.2.0: the update notice with Update and restart, Update and close, and a progress bar for the download.
+- 2.2.0: the update notice with I accept all terms, install and restart, I accept all terms, install and close, and a progress bar for the download.
 - 2.3.0: the in-place install with one bar for download and install and the restart by the app itself (AX-2.8,
   AX-3.2); the user ran the full path from an older build with NVDA. 2.3.1: the documents pruned after the transition.
 - 2.9.0 (2026-10-18), developed on the branch `axit` and checked with NVDA by the user: `MarkdownOutline` and

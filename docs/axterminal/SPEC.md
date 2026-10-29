@@ -11,6 +11,8 @@ the same commit). Requirements are numbered `AT-n.m` and decisions `AT-Dn`; the 
 
 ## 1. Summary
 
+An **access layer** for the user's shells (bundle AX-11, 2026-10-29): titled "axTerminal, access layer for your shell"; before each shell's first start (Windows PowerShell, Command Prompt, Git Bash, PowerShell 7, a custom shell), the consent notice for that shell (AX-11.4; Not now leaves "Not connected to <shell>. Press Ctrl+N to start a shell.").
+
 axClaude turned Claude Code's console into a window a screen reader reads well: what the console prints becomes a
 line-by-line transcript in a read-only text view, the user types in a plain field at the bottom, each exchange gets
 its markers, and the end of a turn is spoken. axTerminal is the same window around a shell. The shell (PowerShell by

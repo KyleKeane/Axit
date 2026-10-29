@@ -117,7 +117,10 @@ Step 3 of section 8, with the choices it needed; what is not here waits for the 
 - MC-6.4 **Pairing**: a client is known by the program file of the broker's parent process (the client that started
   it), with the name it gives in `initialize` for display only. The first tool call of a client not paired asks the
   newest Axit window: a notice "<name> asks to use Axit (<program>). It can read what the Axit windows show and open
-  apps; it cannot change or delete anything. Allow?", with Allow and Deny, the window flashing on the taskbar when it
+  apps; it cannot change or delete anything. Allow?", with Allow and Deny, and since 2026-10-29 (bundle AX-11.5) the
+  text that Axit is only the access layer and the check box "I understand that Axit is only an access layer for
+  <name>, and I take full responsibility for knowing and following the terms of <name>", which Allow needs (Deny stays
+  the default), the consent kept in consent.json and withdrawn by Forget AI tools; the window flashing on the taskbar when it
   is not in front. The broker waits up to two minutes for the answer; Deny, or no answer, refuses the call. With no
   Axit window open, the call is refused with "Open any Axit window to allow <name>"; a window that shows a notice
   already shows no pairing (a notice replaces the one shown, which the user may be answering) and the call is refused

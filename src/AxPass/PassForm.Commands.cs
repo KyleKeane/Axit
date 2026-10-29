@@ -552,6 +552,13 @@ public sealed partial class PassForm
             return;
         }
 
+        if (!Consent.Given(AppPaths.ConsentFile, AppName, ConsentTarget.KeePassXC.Program))
+        {
+            // Bundle AX-11.5: a new database is made by KeePassXC's tool too.
+            WithConsent(ConsentTarget.KeePassXC, NewDatabase, () => Announce("Not connected to KeePassXC", true));
+            return;
+        }
+
         using var dialog = new SaveFileDialog
         {
             Title = "Make a KeePass database",

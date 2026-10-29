@@ -33,6 +33,15 @@ public abstract partial class AxitForm
             return;
         }
 
+        // The consent of AX-11.4 in the step the user is already taking (AX-11.5): agreed here, it counts for the app's
+        // first connection to the program too, so the user is asked once.
+        if (!Consent.Given(AppPaths.ConsentFile, AppName, program.Name))
+        {
+            ShowNotice(ConsentNotice(ConsentTarget.For(program.Name), $"Before {AppName} installs {program.Name}", "&Install",
+                () => InstallProgram(program, installed, then), () => Announce($"{program.Name} not installed", true)));
+            return;
+        }
+
         if (program.StartInfo() is not { } info)
         {
             OpenUrl(program.Page);

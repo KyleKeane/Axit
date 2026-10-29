@@ -3,8 +3,12 @@ using Axit.Core;
 
 namespace Axit.Forms;
 
-/// <summary>A button on a notice. Unless <see cref="StaysOpen"/> is set, the notice closes before the action runs.</summary>
-public sealed record OverlayChoice(string Text, Action? Action = null, bool IsDefault = false, bool IsCancel = false, bool StaysOpen = false)
+/// <summary>
+/// A button on a notice. Unless <see cref="StaysOpen"/> is set, the notice closes before the action runs. On a notice
+/// with a check box (<see cref="Notice.Consent"/>), the default button, unless it is also the cancel button, and any
+/// button with <paramref name="NeedsConsent"/> act only once the box is checked.
+/// </summary>
+public sealed record OverlayChoice(string Text, Action? Action = null, bool IsDefault = false, bool IsCancel = false, bool StaysOpen = false, bool NeedsConsent = false)
 {
     /// <summary>The single button of a plain notice: Enter and Escape both close it.</summary>
     public static readonly OverlayChoice Close = new("&Close", IsDefault: true, IsCancel: true);
@@ -64,6 +68,13 @@ public sealed record Notice(string Title, string Text, IReadOnlyList<OverlayChoi
     /// </summary>
     public Func<char, bool>? Letter { get; init; }
 
+    /// <summary>
+    /// A check box under the text with this as its text and name (AX-11.4, the consent before an access layer first
+    /// connects): unchecked each time the notice shows, after the text and before the buttons in the Tab order, Space
+    /// toggles it; the default button says "Check the box first" and does nothing else while it is unchecked. Null for none.
+    /// </summary>
+    public string? Consent { get; init; }
+
     /// <summary>A read-only text with a Close button: help texts, About and errors.</summary>
     public static Notice Plain(string title, string text) => new(title, text, [OverlayChoice.Close]);
 }
@@ -90,6 +101,7 @@ public sealed class OverlayPanel : Panel
     private readonly FlowLayoutPanel _buttons = new();
     private readonly ProgressBar _progress = new();
     private readonly ListBox _matches = new();
+    private readonly CheckBox _consent = new();
     private OverlayInput? _inputSpec;
     private Control? _custom;
     private string? _headLine;
@@ -158,11 +170,22 @@ public sealed class OverlayPanel : Panel
         _progress.AccessibleName = "Progress";
         _progress.Visible = false;
 
+        // The consent's check box (Notice.Consent), above the progress bar and the buttons; hidden otherwise. Its text
+        // wraps over a few lines, so it does not size itself.
+        _consent.Dock = DockStyle.Bottom;
+        _consent.AutoSize = false;
+        _consent.CheckAlign = ContentAlignment.TopLeft;
+        _consent.TextAlign = ContentAlignment.TopLeft;
+        _consent.UseMnemonic = false;
+        _consent.Padding = new Padding(0, 6, 0, 0);
+        _consent.TabIndex = 4;
+        _consent.Visible = false;
+
         // Docked controls are laid out from the last in the collection to the first: the buttons take the bottom,
-        // the progress bar the strip above them, the title the top, the field the strip under the title, then the
-        // text takes what is left, or, with a control of the window's own, a strip of a few lines with that control
-        // filling the rest under it (it is put first in the collection when a notice brings one).
-        Controls.AddRange([_matches, _text, _inputRow, _title, _progress, _buttons]);
+        // the progress bar and the check box the strips above them, the title the top, the field the strip under the
+        // title, then the text takes what is left, or, with a control of the window's own, a strip of a few lines with
+        // that control filling the rest under it (it is put first in the collection when a notice brings one).
+        Controls.AddRange([_matches, _text, _inputRow, _title, _consent, _progress, _buttons]);
     }
 
     /// <summary>A button was pressed. The window closes the notice (unless the choice stays open) and runs its action.</summary>
@@ -333,6 +356,12 @@ public sealed class OverlayPanel : Panel
             _progress.Style = ProgressBarStyle.Marquee;
         }
 
+        _consent.Checked = false;
+        _consent.Visible = notice.Consent is not null;
+        _consent.Text = notice.Consent ?? string.Empty;
+        _consent.AccessibleName = notice.Consent ?? string.Empty;
+        _consent.Height = (_consent.Font.Height * 3) + 12;
+
         _inputRow.Visible = input is not null;
         if (input is not null)
         {
@@ -460,6 +489,13 @@ public sealed class OverlayPanel : Panel
             // Nothing to act on yet (Find with an empty field): say so and stay.
             Announce(spec.EmptyMessage, true);
             _input.Select();
+            return;
+        }
+
+        if ((choice.NeedsConsent || (choice.IsDefault && !choice.IsCancel)) && Shown?.Consent is not null && !_consent.Checked)
+        {
+            // The consent not given yet (AX-11.4): say so and stay, the focus where it was.
+            Announce("Check the box first", true);
             return;
         }
 

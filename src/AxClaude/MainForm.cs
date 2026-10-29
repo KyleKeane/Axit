@@ -62,6 +62,9 @@ internal sealed partial class MainForm : ConsoleForm
     /// <summary>The slash command sent last, which the question that follows belongs to (QuestionRouter); null after a message.</summary>
     private SlashCommand? _lastCommand;
 
+    /// <summary>Bundle AX-11.6: the line said when the user signs in to Anthropic through Claude Code (/login, or Claude's error asking for it).</summary>
+    private const string SignInReminder = "You are signing in to Anthropic through Claude Code; the account and its terms are between you and Anthropic";
+
     /// <summary>A message kept out of a waiting question by the guard (FR-2.10, D33), sent after all when Enter is pressed again with the same text.</summary>
     private string? _keptMessage;
     private bool _readyAnnounced;

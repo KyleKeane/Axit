@@ -21,12 +21,12 @@ Accessible Windows apps for screen reader users, built for and tested with NVDA,
 - **axCalc**: a calculator as one field and a history: type an expression, Enter says the answer, and every answer stays as a line to read back, copy and recall; hexadecimal, binary and octal for development.
 - **axClip**: a clipboard history. It keeps the text of every copy while it runs, in memory unless you ask; Windows+Alt+V from anywhere brings up a search field over it, Down and Up move through it with the caret kept in the field, and Enter pastes into the program you were in.
 
-### Connected apps: through a program or service you install, which does the work under its maker's terms (`NOTICE.md` says who is responsible for what)
+### Access layers: through a program or service you install, which does the work under its maker's terms (`NOTICE.md` says who is responsible for what)
 
-- **axClaude**: Claude Code in screen reader mode, shown as a plain-text conversation that NVDA reads line by line, with single-key navigation, a message field, and Claude's questions as lists. You are still talking to the real Claude Code.
-- **axGIT**: a git manager for one repository: changes, the log and the branches as lists, staging, committing, fetch, pull and push.
-- **axTerminal**: PowerShell, Command Prompt or Git Bash as a transcript in axClaude's kind of window.
-- **axPass**: a KeePass password database, read and changed by ear: groups and entries in the same two panes, the password never spoken, copied with Ctrl+C and cleared from the clipboard after 30 seconds. It runs KeePassXC's own command-line tool, so KeePassXC must be installed.
+- **axClaude, access layer for Claude Code**: Claude Code in screen reader mode, shown as a plain-text conversation that NVDA reads line by line, with single-key navigation, a message field, and Claude's questions as lists. You are still talking to the real Claude Code.
+- **axGIT, access layer for Git**: a git manager for one repository: changes, the log and the branches as lists, staging, committing, fetch, pull and push.
+- **axTerminal, access layer for your shell**: PowerShell, Command Prompt or Git Bash as a transcript in axClaude's kind of window.
+- **axPass, access layer for KeePassXC**: a KeePass password database, read and changed by ear: groups and entries in the same two panes, the password never spoken, copied with Ctrl+C and cleared from the clipboard after 30 seconds. It runs KeePassXC's own command-line tool, so KeePassXC must be installed.
 
 The apps reach each other: axFile hands a file to axMedia or axPreview, every window can show its folder in the others, and the Axit menu in every window lists the open windows and starts any app.
 
@@ -40,9 +40,9 @@ Needs Windows 10 1809 or later. axClaude also needs [Claude Code](https://code.c
 
 Axit collects nothing: no telemetry, no analytics, no accounts. On its own it makes one network request, the update check, which asks GitHub for the latest release when a window starts and can be turned off (Options, General, Check for updates at start). Everything else happens only when you ask:
 
-- **axClaude** runs Claude Code, Anthropic's program, which you install; what you type goes to Anthropic through it, under Anthropic's terms.
-- **axGIT** runs your git, which reaches your repository's remotes when you fetch, pull or push.
-- **axTerminal** runs your own shells; **axPass** runs KeePassXC's command-line tool, on your computer.
+- **axClaude, access layer for Claude Code** runs Claude Code, Anthropic's program, which you install; what you type goes to Anthropic through it, under Anthropic's terms.
+- **axGIT, access layer for Git** runs your git, which reaches your repository's remotes when you fetch, pull or push.
+- **axTerminal, access layer for your shell** runs your own shells; **axPass** runs KeePassXC's command-line tool, on your computer.
 - **Install it now**, when an app needs Git, KeePassXC, PowerShell 7 or Claude Code, installs it through Windows' winget or Anthropic's installer, when you choose.
 - **The AI tools** (off unless you turn them on) let an AI tool you pair, such as Claude Code, read Axit's windows through local pipes, never the network.
 - Help menus and links open in your browser.

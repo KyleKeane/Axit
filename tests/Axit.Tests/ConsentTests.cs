@@ -39,6 +39,23 @@ public sealed class ConsentTests
         Directory.Delete(Path.GetDirectoryName(file)!, recursive: true);
     }
 
+    /// <summary>AX-11.5: a program installed from Install it now has its own target, so that agreeing there counts for the first connection; each says whose terms and where.</summary>
+    [Fact]
+    public void Every_program_install_has_its_consent_target()
+    {
+        foreach (var program in new[] { ProgramInstall.Git, ProgramInstall.KeePassXC, ProgramInstall.PowerShell7, ProgramInstall.ClaudeCode })
+        {
+            var target = ConsentTarget.For(program.Name);
+            Assert.Equal(program.Name, target.Program);
+            Assert.StartsWith("https://", target.TermsUrl);
+            Assert.NotEmpty(target.Work);
+        }
+
+        Assert.Same(ConsentTarget.ClaudeCode, ConsentTarget.For("Claude Code"));
+        Assert.Equal("github.com", ConsentTarget.Server("github.com").Program);
+        Assert.Empty(ConsentTarget.Shell("Custom shell").TermsUrl);
+    }
+
     [Fact]
     public void Each_agreement_reads_as_one_line()
     {

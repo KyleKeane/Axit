@@ -178,9 +178,9 @@ UTF-8, UTF-16 and the system code page; files that are not text; files over 32 M
   window closes or opens another); Open windows (the other open Axit windows, most recently used first), Open windows
   by type (axClaude and axDown, that app's windows, this one checked), Close all windows (every Axit window closes as
   on Alt+F4, asking about unsaved changes where there are any); Check for updates (Axit n) and, while a newer release
-  is known, Update to Axit n, as axClaude has them (FR-1.10 there, the bundle's `Updater`, AX-3: Update and restart,
-  Update and close, Open release page, Later; one progress bar for the download and the in-place install, Cancel
-  during the download; after Update and restart axDown starts the new version itself, on the file or empty), and
+  is known, Update to Axit n, as axClaude has them (FR-1.10 there, the bundle's `Updater`, AX-3: I accept all terms, install and restart,
+  I accept all terms, install and close, Open release page, Later; one progress bar for the download and the in-place install, Cancel
+  during the download; after I accept all terms, install and restart axDown starts the new version itself, on the file or empty), and
   About, the bundle's sections (AX-9.9: Version, Licence, Attribution, Axit guide, Axit on GitHub). Enter on a window
   brings it to the front, on a closed file opens it in a new window.
 - AD-4.6 Every menu item has a mnemonic and a shortcut or a shortcut text (AX-7.1); the Axit menu's window items,
@@ -216,7 +216,7 @@ never a separate window.
 
 - AD-6.1 Unsaved changes: "Save changes to notes.md?" with Save (default), Don't save and Cancel; before New, Open and
   Exit, and when Windows closes the window. Save with no name yet opens the file picker first. Cancel on the way out
-  after Update and restart keeps this window on the old program file and says "Update installed. It starts with the
+  after I accept all terms, install and restart keeps this window on the old program file and says "Update installed. It starts with the
   next axDown" (AX-3.2); until then a later Exit started the new version as if the restart had just been chosen.
 - AD-6.2 Changed on disk (AD-3.6); file errors (AD-3.7); the update notice (AX-3); Keyboard shortcuts; User guide;
   About. In the text of any of them, the navigation keys of section 9 work as in the editor (bundle AX-7.2).

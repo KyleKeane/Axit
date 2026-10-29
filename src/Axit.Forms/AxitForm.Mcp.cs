@@ -21,6 +21,9 @@ public abstract partial class AxitForm
     /// <summary>For the pipe's <c>hello</c>: the app's name.</summary>
     internal string AppNameForTools => AppName;
 
+    /// <summary>The App of an AI tool's consent in consent.json (bundle AX-11.5), the tool's name its target.</summary>
+    private const string McpConsentApp = "AI tools";
+
     private void StartMcp()
     {
         if (AppVerb is { } verb)
@@ -220,6 +223,11 @@ public abstract partial class AxitForm
         try
         {
             McpAccess.ForgetAll();
+            foreach (var item in Consent.Read(AppPaths.ConsentFile).Where(item => item.App == McpConsentApp))
+            {
+                Consent.Withdraw(AppPaths.ConsentFile, item.App, item.Target);
+            }
+
             Announce("AI tools forgotten: each asks again before it reads anything", true);
         }
         catch (Exception ex) when (ex is IOException or UnauthorizedAccessException)
@@ -253,9 +261,11 @@ public abstract partial class AxitForm
             return false;
         }
 
+        var target = ConsentTarget.AiTool(name);
         var text = $"{name} asks to use Axit. It runs as {program}.\n\n"
             + "It can read what the Axit windows show (their text, lists and status) and open apps. It cannot change or delete anything, and it never reads axPass or axClip.\n\n"
-            + "Allow it? Options, General, Forget AI tools takes this back.";
+            + $"Axit is only the access layer here: {target.Work} Those terms are between you and its maker; Axit's author is not a party to them and is not responsible for what {name} does with what it reads (Axit menu, About, Licence).\n\n"
+            + "To allow it, check the box, then Allow. Options, General, Forget AI tools takes this back.";
         ShowNotice(new Notice($"{name} asks to use Axit", text,
         [
             new OverlayChoice("&Allow", () =>
@@ -270,6 +280,7 @@ public abstract partial class AxitForm
                 try
                 {
                     McpAccess.Pair(program, name);
+                    Consent.Record(AppPaths.ConsentFile, McpConsentApp, name, BundleInfo.Version, DateTime.Now);
                     answer.TrySetResult(true);
                     Announce($"{name} may read Axit", true);
                 }
@@ -278,10 +289,13 @@ public abstract partial class AxitForm
                     answer.TrySetResult(false);
                     Fail("The pairing was not written: " + ex.Message);
                 }
-            }),
+            }, NeedsConsent: true),
             new OverlayChoice("&Deny", () => answer.TrySetResult(false), IsDefault: true, IsCancel: true),
         ])
-        { Unprompted = true });
+        {
+            Unprompted = true,
+            Consent = $"I understand that Axit is only an access layer for {name}, and I take full responsibility for knowing and following the terms of {name}",
+        });
         // The window closing refuses; the handler goes with the answer, so that requests do not pile handlers up.
         FormClosedEventHandler refuse = (_, _) => answer.TrySetResult(false);
         FormClosed += refuse;

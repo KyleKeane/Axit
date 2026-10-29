@@ -6,6 +6,18 @@ What was checked with NVDA, against which version, and with what result. When a 
 
 Add a section under this one, above the earlier passes, so that the newest comes first: the date, the version, the commit tested, who ran it and how the result was given, and the environment: the NVDA version, the synthesizer and the Windows build (so that a regression is dated to an NVDA release rather than to some time). Under it, one table per app with a line per section of its plan: the steps run and the result, Passed, Failed (with what was heard) or Not run. A step that fails gets a line of its own with what NVDA said and what it should have said, and the bug's fix names the step. When a plan gains or loses steps, the next pass lists them as the plan has them then.
 
+## Owed: access layers and consent (the branch `licence`, 2026-10-29, `docs/axit/SPEC.md` AX-11)
+
+Not run yet; before the branch merges:
+
+- The titles: each access layer's window title, New window, Open windows, Recently closed and Show in read "axClaude, access layer for Claude Code" and the like, after a separator below the standalone apps; F1 starts with the same line for the four.
+- The consent notice: axClaude's first start, axTerminal's first start of Windows PowerShell and of Command Prompt, axGIT's first open and first fetch to github.com, axPass's first unlock and New database. Each: the title "Before <app> connects to <program>", the text, Tab to "check box, not checked, I understand that …", Enter before checking says "Check the box first", Space checks, Enter connects; Open their terms and Open Axit's terms keep the notice; Not now leaves the line said in the spec. The second start asks nothing.
+- Install it now in each app: "Before <app> installs <program>" with Install, then the installer.
+- The AI tools' pairing notice: Allow before checking says "Check the box first"; Enter is still Deny.
+- The update notice: the terms sentence first, and the buttons "I accept all terms, install and restart" and "… install and close" (axClaude plan steps 138 to 140, axDown's update steps).
+- About, Consents: the numbered list, Withdraw on one, and that app asking again; "Nothing agreed to yet" when empty.
+- axClaude: /login says "Sent. You are signing in to Anthropic …"; axGIT: the first fetch of a window says "Connecting to github.com; …" and the result is still heard.
+
 ## 2026-10-25: every owed pass (main acae61f, released as 3.7.4)
 
 Run by the user from the checkout on the branch `inventory` (acae61f), the result given as "all nvda tests are complete"; NVDA

@@ -98,9 +98,9 @@ public sealed partial class GitForm : AxitForm
         Git(Add(branches, new Command("&Switch to branch", AxGitKeys.Act, () => Do(SwitchBranchAsync)) { When = () => _list.Focused && _view == View.Branches, Mark = CommandMark.Act }));
         Git(Add(branches, new Command("&New branch...", AxGitKeys.NewBranch, NewBranch) { Mark = CommandMark.Act }));
         branches.DropDownItems.Add(new ToolStripSeparator());
-        Git(Add(branches, new Command("&Fetch", AxGitKeys.Fetch, () => Do(FetchAsync)) { Mark = CommandMark.Act }));
-        Git(Add(branches, new Command("&Pull", AxGitKeys.Pull, () => Do(PullAsync)) { Mark = CommandMark.Act }));
-        Git(Add(branches, new Command("P&ush", AxGitKeys.Push, () => Do(PushAsync)) { Mark = CommandMark.Act }));
+        Git(Add(branches, new Command("&Fetch", AxGitKeys.Fetch, () => Do(() => ToServerAsync(FetchAsync))) { Mark = CommandMark.Act }));
+        Git(Add(branches, new Command("&Pull", AxGitKeys.Pull, () => Do(() => ToServerAsync(PullAsync))) { Mark = CommandMark.Act }));
+        Git(Add(branches, new Command("P&ush", AxGitKeys.Push, () => Do(() => ToServerAsync(PushAsync))) { Mark = CommandMark.Act }));
 
         var view = new ToolStripMenuItem("&View");
         Add(view, new Command("&Changes", AxGitKeys.ViewChanges, () => Do(() => ShowViewAsync(View.Changes))) { Mark = CommandMark.Open });
@@ -220,6 +220,21 @@ public sealed partial class GitForm : AxitForm
 
     private async Task StartAsync(string? path)
     {
+        if (!Consent.Given(AppPaths.ConsentFile, AppName, ConsentTarget.Git.Program))
+        {
+            // Bundle AX-11.5: Git runs nothing before the user's consent; Connect opens the repository.
+            WithConsent(ConsentTarget.Git, () => Do(() => StartAsync(path)), () =>
+            {
+                if (_root is null)
+                {
+                    SetNoRepository();
+                }
+
+                Announce("Not connected to Git. Ctrl+O opens a repository", true);
+            });
+            return;
+        }
+
         var target = path ?? _settings.RecentRepositories.FirstOrDefault(Directory.Exists);
         if (target is null)
         {

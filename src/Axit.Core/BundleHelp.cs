@@ -36,6 +36,12 @@ public static class BundleHelp
         }
 
         text.Append(". Ctrl+F finds, F3 and Shift+F3 the next and the previous match\r\n");
+        // AX-11.2: an access layer says what it is before its keys.
+        if (Dispatch.Apps.FirstOrDefault(a => string.Equals(a.Name, app, StringComparison.OrdinalIgnoreCase)) is { IsAccessLayer: true } layer)
+        {
+            text.Append($"{layer.Title}: {layer.Name} only shows what {layer.AccessLayerFor} does and passes your commands to it; {layer.AccessLayerFor} does the work under its maker's terms, which you agreed to know before the first connection. Axit menu, About, Licence says who is responsible for what\r\n");
+        }
+
         text.Append("\r\n");
         text.Append("## ").Append(heading).Append("\r\n");
         text.Append("  F1: this list\r\n");

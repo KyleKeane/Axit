@@ -80,6 +80,17 @@ internal sealed partial class MainForm
             return;
         }
 
+        if (!Consent.Given(AppPaths.ConsentFile, AppName, ConsentTarget.ClaudeCode.Program))
+        {
+            // Bundle AX-11.4: the first connection to Claude Code waits for the user's consent; Connect starts it.
+            WithConsent(ConsentTarget.ClaudeCode, StartClaude, () =>
+            {
+                _model.AddSystemLine("Not connected to Claude Code. Press Ctrl+Shift+R to connect.");
+                UpdateStatus();
+            });
+            return;
+        }
+
         if (_claudeVersion is null)
         {
             // Asked alongside the start, never before it: the version is for the log and the diagnostics (FR-13.2).

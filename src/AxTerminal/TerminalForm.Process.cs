@@ -29,6 +29,14 @@ internal sealed partial class TerminalForm
             return;
         }
 
+        // Bundle AX-11.5: each shell asks once before its first start, those that come with Windows included.
+        var target = Axit.Core.ConsentTarget.Shell(ShellLauncher.Describe(_shell));
+        if (!Axit.Core.Consent.Given(Axit.Core.AppPaths.ConsentFile, AppName, target.Program))
+        {
+            WithConsent(target, StartShell, () => _model.AddSystemLine($"Not connected to {target.Program}. Press Ctrl+N to start a shell."));
+            return;
+        }
+
         if (!StartProcess(new PtyOptions(commandLine, _folder, _model.Columns, _model.Rows, ShellLauncher.BuildEnvironment(_shell, nonce)), "The shell"))
         {
             return;

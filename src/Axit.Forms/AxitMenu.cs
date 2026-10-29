@@ -22,6 +22,7 @@ public sealed class AxitMenu : ToolStripMenuItem
     private readonly AxitForm _owner;
     private readonly ToolStripMenuItem _recentlyClosed = new("&Recently closed");
     private readonly ToolStripMenuItem _openWindows = new("&Open windows");
+    private readonly ToolStripMenuItem _consents = new("&Consents");
     private readonly List<(App App, ToolStripMenuItem Item)> _perApp = [];
 
     /// <param name="owner">The window: its handle is the one checked in the lists and closed last by Close all windows, its notices show the About sections (AX-7.2), and its latest-release state goes into About, Version.</param>
@@ -48,6 +49,8 @@ public sealed class AxitMenu : ToolStripMenuItem
         about.DropDownItems.Add(new ToolStripMenuItem("&Licence", null, (_, _) => ShowNotice(Notice.Plain(BundleAbout.LicenceTitle, BundleAbout.Licence()))));
         about.DropDownItems.Add(new ToolStripMenuItem("&Attribution", null, (_, _) => ShowNotice(Notice.Plain(BundleAbout.AttributionTitle, BundleAbout.Attribution))));
         about.DropDownItems.Add(new ToolStripMenuItem("&Privacy", null, (_, _) => ShowNotice(Notice.Plain(BundleAbout.PrivacyTitle, BundleAbout.Privacy()))));
+        // AX-11.8: what the user has agreed to, each withdrawn from its item.
+        about.DropDownItems.Add(CommandPalette.FilledOnOpening(_consents));
         about.DropDownItems.Add(new ToolStripMenuItem("Third-party &notices", null, (_, _) => ShowNotice(Notice.Plain(BundleAbout.NoticesTitle, BundleAbout.Notices()))));
         about.DropDownItems.Add(new ToolStripMenuItem("Axit &guide", null, (_, _) => ShowNotice(Notice.Plain(BundleAbout.GuideTitle, BundleAbout.Guide()))));
         about.DropDownItems.Add(new ToolStripMenuItem("Axit on Git&Hub", null, (_, _) => owner.OpenUrl(UpdateCheck.RepositoryPage)));
@@ -86,6 +89,16 @@ public sealed class AxitMenu : ToolStripMenuItem
 
         RecentMenu.NoneWhenEmpty(_recentlyClosed, "&Nothing recently closed");
 
+        _consents.DropDownItems.Clear();
+        var consents = Consent.Read(AppPaths.ConsentFile);
+        for (var i = 0; i < consents.Count; i++)
+        {
+            var item = consents[i];
+            _consents.DropDownItems.Add(new ToolStripMenuItem(AxitWindows.Label(i, Consent.Line(item)), null, (_, _) => ShowConsent(item)));
+        }
+
+        RecentMenu.NoneWhenEmpty(_consents, "&Nothing agreed to yet");
+
         var windows = OpenWindows();
         var current = Current();
         FillWindows(_openWindows, AxitWindows.Others(windows, current), current, "&No other open windows");
@@ -95,6 +108,28 @@ public sealed class AxitMenu : ToolStripMenuItem
             item.Text = $"{AxitWindows.AppLabel(app)} ({of.Count})";
             FillWindows(item, of, current, $"&No open {app.Name} windows");
         }
+    }
+
+    /// <summary>One consent of About, Consents (AX-11.8): what it was, and Withdraw, after which the app asks again at its next connection; an update's acceptance is a record only.</summary>
+    private void ShowConsent(ConsentRecord item)
+    {
+        var line = Consent.Line(item);
+        if (item.App == Consent.UpdateApp)
+        {
+            _owner.ShowNotice(Notice.Plain("Consent", $"{line}: you accepted the terms of that release when you installed it. It stays on record; removing Axit (Settings, Apps) ends its use."));
+            return;
+        }
+
+        _owner.ShowNotice(new Notice("Withdraw this consent?",
+            $"{line}.\nWithdrawn, {item.App} asks again before it next connects to {item.Target}. Nothing that already ran is undone.",
+        [
+            new OverlayChoice("&Withdraw", () =>
+            {
+                Consent.Withdraw(AppPaths.ConsentFile, item.App, item.Target);
+                _owner.ShowNotice(Notice.Plain("Consent withdrawn", $"Withdrawn: {item.App}, {item.Target}. {item.App} asks again before it next connects."));
+            }, IsDefault: true),
+            new OverlayChoice("&Keep", IsCancel: true),
+        ]));
     }
 
     private nint Current() => _owner.IsHandleCreated ? _owner.Handle : 0;

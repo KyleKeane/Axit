@@ -115,12 +115,12 @@ letter), and a `long.md` with headings and lines longer than the window.
 2. With an older build installed (set `<Version>` in `src/Axit/Axit.csproj` below the latest release, `.\publish.ps1`,
    set it back), open a file: the notice "Update to Axit <newest>" opens by itself with four buttons. Escape (Later):
    the Axit menu has "Update to Axit <newest>..." below Check for updates, and Check for updates asks GitHub again and opens
-   the notice once more. Enter (Update and restart): the notice "Updating to Axit <newest>" with a progress bar that
+   the notice once more. Enter (I accept all terms, install and restart): the notice "Updating to Axit <newest>" with a progress bar that
    NVDA reports by its progress bar settings; "Downloaded. Installing" at about 80 percent, then "Installed.
    Restarting"; axDown closes and comes back on the same file (or empty, as it was), Axit, About, Version naming the newest
    version. Again with the older build: Escape during the download says "Update cancelled" and keeps the version;
-   Update and close says "Installed. Closing" and axDown does not come back; the Start menu entry is the newest
-   version. With unsaved changes, Update and restart: the "Save changes?" question; Escape (Cancel): "Update
+   I accept all terms, install and close says "Installed. Closing" and axDown does not come back; the Start menu entry is the newest
+   version. With unsaved changes, I accept all terms, install and restart: the "Save changes?" question; Escape (Cancel): "Update
    installed. It starts with the next axDown", the window stays; a later Exit with Don't save closes without
    starting axDown again.
 3. Settings, Apps, Axit, Uninstall removes axDown's Start entry, its file menu entries, Open with, and `axdown.cmd`

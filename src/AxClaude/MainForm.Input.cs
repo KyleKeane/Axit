@@ -122,7 +122,14 @@ internal sealed partial class MainForm
             ResendEnterWhileHeld(text, attempt: 1);
         }
 
-        Announce(queued && !answer ? "Queued" : "Sent", false);
+        // Bundle AX-11.6: signing in goes to Anthropic through Claude Code, said once in the window's own words.
+        var signIn = !answer && _lastCommand?.Name == "login" ? SignInReminder : null;
+        if (signIn is not null)
+        {
+            _model.AddSystemLine(signIn);
+        }
+
+        Announce((queued && !answer ? "Queued" : "Sent") + (signIn is null ? string.Empty : ". " + signIn), false);
         if (_settings.SoundOnBell)
         {
             Sounds.Sent();

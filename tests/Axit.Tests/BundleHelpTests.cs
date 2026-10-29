@@ -60,8 +60,11 @@ public sealed class BundleHelpTests
         ];
         foreach (var text in texts)
         {
-            var lines = Lines(text);
-            Assert.StartsWith("In this text: h and Shift+H move by heading, 1 to 6 by level", lines[0]);
+            var all = Lines(text);
+            Assert.StartsWith("In this text: h and Shift+H move by heading, 1 to 6 by level", all[0]);
+            // An access layer's second line says what it is (AX-11.2); the rest is the same for every app.
+            var layer = Dispatch.Apps.FirstOrDefault(app => app.IsAccessLayer && all[1].StartsWith(app.Title + ": ", StringComparison.Ordinal));
+            var lines = layer is null ? all : [all[0], .. all[2..]];
             Assert.StartsWith("## ", lines[2]);
             Assert.Equal("  F1: this list", lines[3]);
             var axitMenu = Array.IndexOf(lines, "  " + BundleHelp.AxitMenuLine);
@@ -70,5 +73,7 @@ public sealed class BundleHelpTests
             Assert.Equal("", lines[axitMenu + 1]);
             Assert.StartsWith("## ", lines[axitMenu + 2]);
         }
+
+        Assert.Equal(4, texts.Count(text => Dispatch.Apps.Any(app => app.IsAccessLayer && Lines(text)[1].StartsWith(app.Title + ": ", StringComparison.Ordinal))));
     }
 }
