@@ -15,7 +15,7 @@ check); the workflow step would differ, the rest of this plan would not.
 
 | Condition | Axit |
 |---|---|
-| An OSI-approved licence, no commercial dual licensing | MIT (`LICENSE`) |
+| An OSI-approved licence, no commercial dual licensing | The GNU AGPL 3 only (`LICENSE`) since 2026-10-29, MIT before; the terms in `NOTICE.md` are those its section 7 allows. The contributor licence in `CONTRIBUTING.md` lets the copyright holder relicense; no other edition is sold today, and one sold later would need a new look at this condition |
 | Only open-source components, no proprietary code of the maintainer's | Yes: no packages; the .NET runtime inside the single file is Microsoft's, already signed by Microsoft |
 | Actively maintained, already released in the form to be signed | Yes: releases since 1.0.0, the zip on GitHub |
 | Functionality described on the download page | The release page and `README.md` |
@@ -34,7 +34,7 @@ Nothing found that disqualifies Axit; SignPath decides on the application.
 ## 2. What the user does (once)
 
 1. Turn on two-factor sign-in on GitHub, if not on yet (the audit's open item S-36).
-2. Apply at SignPath Foundation (signpath.org, Apply) for the project `KyleKeane/Axit`, an MIT-licensed bundle of
+2. Apply at SignPath Foundation (signpath.org, Apply) for the project `KyleKeane/Axit`, an AGPL-3.0-licensed bundle of
    accessible Windows apps built by GitHub Actions. Their review takes days to weeks.
 3. Once accepted: in SignPath, add the predefined GitHub.com trusted build system to the organisation and link it to
    the project; make a signing policy (for example `release-signing`) with the maintainer as approver; make an

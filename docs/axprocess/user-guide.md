@@ -56,7 +56,7 @@ axProcess's log is `%LOCALAPPDATA%\Axit\logs\axprocess.log`; it names every proc
 
 ## About axProcess
 
-axProcess is one app of Axit, by Dr. Kyle Keane (www.kylekeane.com), MIT licence. The Axit menu's About names the version and the licence.
+axProcess is one app of Axit, by Dr. Kyle Keane (www.kylekeane.com), GNU AGPL 3 licence. The Axit menu's About names the version and the licence.
 
 ## Disclaimer
 

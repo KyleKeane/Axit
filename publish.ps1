@@ -45,6 +45,8 @@ Get-ChildItem (Join-Path $root 'src\Axit') -Filter '*.ico' | Copy-Item -Destinat
 Copy-Item (Join-Path $root 'install.ps1') $out -Force
 Copy-Item (Join-Path $root 'install.cmd') $out -Force
 Copy-Item (Join-Path $root 'LICENSE') $out -Force
+# The terms of the licence's section 7 and the disclaimer, the Licence notice of About (NOTICE.md).
+Copy-Item (Join-Path $root 'NOTICE.md') $out -Force
 # What Axit sends anywhere, and the notices of what it contains (PRIVACY.md, THIRD-PARTY-NOTICES.md), beside the licence.
 Copy-Item (Join-Path $root 'PRIVACY.md') $out -Force
 Copy-Item (Join-Path $root 'THIRD-PARTY-NOTICES.md') $out -Force

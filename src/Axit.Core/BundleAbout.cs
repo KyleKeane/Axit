@@ -6,7 +6,7 @@ namespace Axit.Core;
 /// The About submenu of the Axit menu (docs/axit/SPEC.md AX-9.9), the same in every window: Version (with the
 /// window's latest-release state), Licence, Attribution and the Axit guide (docs/axit/README.md, embedded by
 /// Axit.Core.csproj), each the text of a notice; Axit on GitHub is <see cref="UpdateCheck.RepositoryPage"/>. The
-/// LICENSE file is the binding text; the licence notice repeats it in full words.
+/// Licence notice is NOTICE.md, the terms and the disclaimer; the LICENSE file beside it is the AGPL itself.
 /// </summary>
 public static class BundleAbout
 {
@@ -20,11 +20,8 @@ public static class BundleAbout
 
     public const string LicenceTitle = "Licence";
 
-    public const string Licence = """
-        Axit is free software under the MIT licence: use it, change it and pass it on, as long as the note that says who made it stays with it. The LICENSE file next to the program is the binding text; in full words:
-        Axit is provided "as is" and "as available", without warranty of any kind, express or implied, including but not limited to the implied warranties of merchantability, fitness for a particular purpose, title and non-infringement. The developer has no obligation to provide support, maintenance, updates or corrections. To the fullest extent permitted by law, the developer is not liable for any claim, damages or other liability, whether in contract, tort or otherwise, arising from or in connection with the software or its use, including loss of data or work and anything done, said or charged by Claude Code or the services behind it. You use Axit at your own risk.
-        Claude Code can create, change and delete files and run commands in your project folder: what you allow it to do is your responsibility.
-        """;
+    /// <summary>NOTICE.md, embedded by Axit.Core.csproj (2026-10-29): the AGPL notice, the additional terms of the licence's section 7 and the disclaimer in full words, the same page as the repository's and the zip's; LICENSE is the licence itself.</summary>
+    public static string Licence() => EmbeddedText.Read(typeof(BundleAbout).Assembly, "Notice.md", "NOTICE.md");
 
     public const string AttributionTitle = "Attribution";
 

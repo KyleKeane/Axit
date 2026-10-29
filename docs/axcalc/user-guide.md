@@ -65,7 +65,7 @@ axCalc's log is `%LOCALAPPDATA%\Axit\logs\axcalc.log`; it never holds what you c
 
 ## About axCalc
 
-axCalc is one app of Axit, by Dr. Kyle Keane (www.kylekeane.com), MIT licence. The Axit menu's About names the version and the licence.
+axCalc is one app of Axit, by Dr. Kyle Keane (www.kylekeane.com), GNU AGPL 3 licence. The Axit menu's About names the version and the licence.
 
 ## Disclaimer
 

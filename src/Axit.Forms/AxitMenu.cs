@@ -45,7 +45,7 @@ public sealed class AxitMenu : ToolStripMenuItem
 
         var about = new ToolStripMenuItem("&About");
         about.DropDownItems.Add(new ToolStripMenuItem("&Version", null, (_, _) => ShowNotice(Notice.Plain(BundleAbout.VersionTitle, BundleAbout.Version(owner.LatestReleaseState)))));
-        about.DropDownItems.Add(new ToolStripMenuItem("&Licence", null, (_, _) => ShowNotice(Notice.Plain(BundleAbout.LicenceTitle, BundleAbout.Licence))));
+        about.DropDownItems.Add(new ToolStripMenuItem("&Licence", null, (_, _) => ShowNotice(Notice.Plain(BundleAbout.LicenceTitle, BundleAbout.Licence()))));
         about.DropDownItems.Add(new ToolStripMenuItem("&Attribution", null, (_, _) => ShowNotice(Notice.Plain(BundleAbout.AttributionTitle, BundleAbout.Attribution))));
         about.DropDownItems.Add(new ToolStripMenuItem("&Privacy", null, (_, _) => ShowNotice(Notice.Plain(BundleAbout.PrivacyTitle, BundleAbout.Privacy()))));
         about.DropDownItems.Add(new ToolStripMenuItem("Third-party &notices", null, (_, _) => ShowNotice(Notice.Plain(BundleAbout.NoticesTitle, BundleAbout.Notices()))));

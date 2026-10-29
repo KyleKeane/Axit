@@ -2,7 +2,7 @@
 
 [![Build](https://github.com/KyleKeane/Axit/actions/workflows/build.yml/badge.svg)](https://github.com/KyleKeane/Axit/actions/workflows/build.yml)
 [![Latest release](https://img.shields.io/github/v/release/KyleKeane/Axit?label=release)](https://github.com/KyleKeane/Axit/releases/latest)
-[![Licence: MIT](https://img.shields.io/badge/licence-MIT-blue)](LICENSE)
+[![Licence: AGPL-3.0-only](https://img.shields.io/badge/licence-AGPL--3.0--only-blue)](LICENSE)
 
 Accessible Windows apps for screen reader users, built for and tested with NVDA, in one program with one installer and one updater. Every app is made of native Windows controls that NVDA reads reliably, works without a mouse, says the result of each command once, and keeps its questions and errors inside its own window.
 
@@ -104,6 +104,10 @@ See [CONTRIBUTING.md](CONTRIBUTING.md). Report a bug or an idea with the [issue 
 
 ## Licence
 
-MIT, see [LICENSE](LICENSE). Axit is made by Dr. Kyle Keane (www.kylekeane.com). Use it, change it and pass it on; keep that notice with it. What the program carries from others, the .NET runtime and Windows Forms under MIT among it: [THIRD-PARTY-NOTICES.md](THIRD-PARTY-NOTICES.md).
+Axit is free software by Dr. Kyle Keane (www.kylekeane.com) under the GNU Affero General Public License, version 3 only ([LICENSE](LICENSE)), with the additional terms of its section 7 in [NOTICE.md](NOTICE.md). Use it, study it, change it and share it. A changed version that is shared, or offered to people over a network, must offer its full source under the same licence, say that it is changed and by whom, keep the line "Based on Axit by Dr. Kyle Keane", and carry a name and icons of its own: the names Axit and its apps' names are not licensed. Versions up to 3.7.6 were released under the MIT licence.
 
-The software is provided "as is", without warranty of any kind, and the developer accepts no liability for its use; the full wording is in `LICENSE`. Axit is an independent project, not affiliated with or endorsed by Anthropic or NV Access.
+**No warranty, no liability.** Axit is given away without charge, "as is", without warranty of any kind. You use it at your own risk; to the fullest extent the law allows, its author and contributors are not liable for any loss or damage from its use, including lost files, passwords or work and anything done by the programs it starts. Keep backups. [NOTICE.md](NOTICE.md) has the terms in full and the risks app by app; every window shows it under Axit menu, About, Licence.
+
+**Official copies** come only from this repository's [releases page](https://github.com/KyleKeane/Axit/releases), signed as the code signing policy above says. A copy from anywhere else is not the author's.
+
+Axit is an independent project, not affiliated with or endorsed by Anthropic, NV Access, Microsoft or KeePassXC. What the program carries from others, the .NET runtime and Windows Forms under MIT among it: [THIRD-PARTY-NOTICES.md](THIRD-PARTY-NOTICES.md).

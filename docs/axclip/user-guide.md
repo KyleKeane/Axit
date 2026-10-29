@@ -53,7 +53,7 @@ axClip's log is `%LOCALAPPDATA%\Axit\logs\axclip.log`. If Enter does not paste, 
 
 ## About axClip
 
-axClip is one app of Axit, by Dr. Kyle Keane (www.kylekeane.com), MIT licence. The Axit menu's About names the version and the licence.
+axClip is one app of Axit, by Dr. Kyle Keane (www.kylekeane.com), GNU AGPL 3 licence. The Axit menu's About names the version and the licence.
 
 ## Disclaimer
 

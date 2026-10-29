@@ -1,6 +1,6 @@
 # Third-party notices
 
-Axit's own code is under the MIT licence in `LICENSE`. Axit uses no third-party packages. What it contains from others:
+Axit's own code is under the GNU Affero General Public License, version 3 only, in `LICENSE`, with the terms in `NOTICE.md`. Axit uses no third-party packages. What it contains from others:
 
 ## .NET and Windows Forms
 

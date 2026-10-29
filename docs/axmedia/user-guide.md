@@ -65,7 +65,7 @@ axMedia's log is `%LOCALAPPDATA%\Axit\logs\axmedia.log`; Options, Developer, Cop
 
 ## About axMedia
 
-axMedia is one app of Axit, by Dr. Kyle Keane (www.kylekeane.com), MIT licence. The Axit menu's About names the version and the licence.
+axMedia is one app of Axit, by Dr. Kyle Keane (www.kylekeane.com), GNU AGPL 3 licence. The Axit menu's About names the version and the licence.
 
 ## Disclaimer
 

@@ -114,6 +114,7 @@ if (-not $Uninstall) {
     # signing service's rule that system changes come with a warning and a privacy statement is shown at installation).
     Say "It installs for your Windows account only, without administrator rights: the program in $target, Start menu entries, console commands in $bin (added to your PATH), File Explorer's Open with Axit and Open with entries, axStart and axClip at sign-in, and an entry in Settings, Apps that uninstalls all of it."
     Say "Privacy: Axit collects nothing and has no telemetry. On its own it only asks GitHub for the latest release when a window starts; Options, General, Check for updates at start turns that off. PRIVACY.md beside the program says everything Axit contacts and when."
+    Say "Axit is free software under the GNU AGPL 3, with no warranty: you use it at your own risk, and its author is not liable for what happens when you do. Keep backups of what matters. NOTICE.md beside the program has the terms in full."
 }
 
 function Get-AppListing {
@@ -366,7 +367,7 @@ if (-not $sameFolder) {
     }
 
     New-Item -ItemType Directory -Force $target | Out-Null
-    $files = @('Axit.exe', 'README.md', 'LICENSE', 'PRIVACY.md', 'THIRD-PARTY-NOTICES.md', 'install.ps1', 'install.cmd', $listingFile) + @($apps | ForEach-Object { Split-Path -Leaf $_.Icon }) | Select-Object -Unique
+    $files = @('Axit.exe', 'README.md', 'LICENSE', 'NOTICE.md', 'PRIVACY.md', 'THIRD-PARTY-NOTICES.md', 'install.ps1', 'install.cmd', $listingFile) + @($apps | ForEach-Object { Split-Path -Leaf $_.Icon }) | Select-Object -Unique
     foreach ($name in $files) {
         $file = Join-Path $source $name
         if (-not (Test-Path -LiteralPath $file)) { continue }

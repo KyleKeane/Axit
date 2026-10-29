@@ -26,9 +26,20 @@ Small commits with imperative subject lines; `main` is always releasable, and la
 
 ## Licence of contributions, review and conduct
 
-- A contribution is made under the project's licence, MIT (`LICENSE`): by opening a pull request you agree that your
-  change is published under it, and that you have the right to give it (your own work, or work under a compatible
-  licence named in the pull request and added to `THIRD-PARTY-NOTICES.md`).
+- **The contributor licence.** By opening a pull request, or sending a change any other way, you agree to these terms
+  for that contribution:
+  1. You license it under the project's licence, the GNU Affero General Public License version 3 only (`LICENSE`),
+     with the additional terms in `NOTICE.md`.
+  2. You also grant Dr. Kyle Keane, the copyright holder, and anyone he passes the project on to, a perpetual,
+     worldwide, non-exclusive, no-charge, royalty-free, irrevocable licence to use, copy, modify, publish, distribute,
+     sublicense and relicense the contribution, under these or any other terms, including in a product or service
+     offered for a fee. You keep your copyright.
+  3. You have the right to give it: it is your own work, or work under a licence compatible with the AGPL that is
+     named in the pull request and added to `THIRD-PARTY-NOTICES.md`; your employer, if it could claim the work, has
+     agreed.
+  4. You give it "as is", without warranty or support.
+  These terms let the project be offered later in other forms, such as a service, without asking every contributor
+  again. A pull request whose author does not agree is not merged.
 - No third-party package, no binary and no code whose licence is not open source enters the repository.
 - Every change from someone other than the maintainer is reviewed before it is merged; the roles are in
   `GOVERNANCE.md`.

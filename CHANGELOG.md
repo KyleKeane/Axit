@@ -1,5 +1,10 @@
 # Changelog
 
+## 3.8.0
+
+- Axit: Axit is now under the GNU Affero General Public License, version 3 only, instead of MIT (versions up to 3.7.6 stay MIT). `NOTICE.md`, in the zip and in every window under Axit menu, About, Licence, has the licence's additional terms (no warranty, no liability, attribution kept, changed versions marked and given a name and icons of their own, no use of the author's name to promote them, indemnification) and the risks of each app in plain words. The installer says in one line that Axit comes with no warranty and is used at your own risk.
+- For developers: contributions come under a contributor licence (`CONTRIBUTING.md`, and a box in the pull request checklist): AGPL, plus a licence to the copyright holder to publish them under other terms as well.
+
 ## 3.7.6 - 2026-10-25
 
 - Axit: a privacy page says everything Axit contacts over the network and when, the programs it runs, and what stays on your computer; it is in the zip, on GitHub and in every window (Axit menu, About, Privacy), and the installer says it before it changes anything, with what it changes. About, Third-party notices names the .NET runtime and Windows Forms the program carries, under their MIT licence.

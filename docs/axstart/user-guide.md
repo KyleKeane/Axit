@@ -59,4 +59,4 @@ axStart offers a new Axit release as every Axit window does. An update stops axS
 
 ## About
 
-axStart is an app of the Axit bundle by Dr. Kyle Keane (www.kylekeane.com), released under the MIT licence. Axit menu, About has the version, the licence and the full disclaimer.
+axStart is an app of the Axit bundle by Dr. Kyle Keane (www.kylekeane.com), released under the GNU AGPL 3 licence. Axit menu, About has the version, the licence and the full disclaimer.

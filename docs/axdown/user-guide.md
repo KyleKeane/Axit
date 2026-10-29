@@ -68,8 +68,8 @@ New versions of Axit are published on GitHub, and every app of Axit updates toge
 
 ## About axDown
 
-axDown is part of Axit, made by Dr. Kyle Keane, www.kylekeane.com. It is free under the MIT licence: use it, change it and pass it on, as long as the note that says who made it stays with it (the `LICENSE` file next to the program).
+axDown is part of Axit, made by Dr. Kyle Keane, www.kylekeane.com. It is free software under the GNU AGPL 3 (the `LICENSE` file next to the program), with the terms in `NOTICE.md` (Axit menu, About, Licence): use it, study it, change it and share it; a changed version that is shared gives its source under the same licence and carries a name of its own.
 
 ## Disclaimer
 
-axDown is free software offered under the MIT licence. It is provided "as is" and "as available", without warranty of any kind, express or implied, including but not limited to the implied warranties of merchantability, fitness for a particular purpose, title and non-infringement. The developer has no obligation to provide support, maintenance, updates or corrections. To the fullest extent permitted by law, the developer is not liable for any claim, damages or other liability, whether in contract, tort or otherwise, arising from or in connection with the software or its use, including loss of data or work. You use axDown at your own risk.
+axDown is free software offered under the GNU AGPL 3, with the terms and the full disclaimer in `NOTICE.md` (Axit menu, About, Licence). It is provided "as is" and "as available", without warranty of any kind, express or implied, including but not limited to the implied warranties of merchantability, fitness for a particular purpose, title and non-infringement. The developer has no obligation to provide support, maintenance, updates or corrections. To the fullest extent permitted by law, the developer is not liable for any claim, damages or other liability, whether in contract, tort or otherwise, arising from or in connection with the software or its use, including loss of data or work. You use axDown at your own risk.

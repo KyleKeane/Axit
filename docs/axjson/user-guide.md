@@ -76,7 +76,7 @@ New versions of Axit are published on GitHub, and every app of Axit updates toge
 
 ## About axJSON
 
-axJSON is part of Axit, made by Dr. Kyle Keane, www.kylekeane.com. It is free under the MIT licence: use it, change it and pass it on, as long as the note that says who made it stays with it (the `LICENSE` file next to the program).
+axJSON is part of Axit, made by Dr. Kyle Keane, www.kylekeane.com. It is free software under the GNU AGPL 3 (the `LICENSE` file next to the program), with the terms in `NOTICE.md` (Axit menu, About, Licence): use it, study it, change it and share it; a changed version that is shared gives its source under the same licence and carries a name of its own.
 
 ## Disclaimer
 

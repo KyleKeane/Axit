@@ -90,7 +90,7 @@ Alt+A, Check for updates asks GitHub for a newer Axit; Update to installs it and
 
 ## About axTerminal
 
-axTerminal is part of Axit, made by Dr. Kyle Keane, www.kylekeane.com, free under the MIT licence. Alt+A, About has the version, the licence and the Axit guide.
+axTerminal is part of Axit, made by Dr. Kyle Keane, www.kylekeane.com, free under the GNU AGPL 3 licence. Alt+A, About has the version, the licence and the Axit guide.
 
 ## Disclaimer
 

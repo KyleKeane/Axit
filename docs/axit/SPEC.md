@@ -284,7 +284,8 @@ The apps are named ax and a word, the ax in lower case and the word as it is wri
   published once the files are up (since 2026-10-21: the update check reads the latest published release, and one
   made while the zip was still uploading had a window download a half-written zip, "The installer failed").
 - AX-4.2 `publish.ps1` publishes `src/Axit` self-contained, single file, into `publish\win-x64` with `install.cmd`,
-  `install.ps1`, `LICENSE` and `docs/axit/README.md` as `README.md`, and zips it.
+  `install.ps1`, `LICENSE`, `NOTICE.md`, `PRIVACY.md`, `THIRD-PARTY-NOTICES.md` and `docs/axit/README.md` as `README.md`,
+  and zips it.
 - AX-4.3 One `CHANGELOG.md`; every bullet starts with the app it concerns (`axClaude:`, `axDown:`, `Axit:` for the
   bundle itself, `For developers:` for the repository, the scripts and the tests); every released section's heading
   carries its date.
@@ -297,7 +298,9 @@ The apps are named ax and a word, the ax in lower case and the word as it is wri
   its record, the changelog, the licence of contributions), `SECURITY.md` (private reports through GitHub's security
   advisories), and since 2026-10-25 `PRIVACY.md` (every network contact and outside program, also in the zip and About),
   `GOVERNANCE.md` (the roles, how releases are made, the maintainer's commitments), `CODE_OF_CONDUCT.md` and
-  `THIRD-PARTY-NOTICES.md` (the .NET runtime and Windows Forms in the program, under MIT), with the README's code signing
+  `THIRD-PARTY-NOTICES.md` (the .NET runtime and Windows Forms in the program, under MIT), since 2026-10-29
+  `NOTICE.md` (the licence's section 7 terms, the disclaimer and the risks app by app; `LICENSE` is the GNU AGPL 3 only,
+  and `CONTRIBUTING.md` holds the contributor licence), with the README's code signing
   policy linked from every release page (`docs/axit/code-signing.md`); issue forms in
   `.github/ISSUE_TEMPLATE` (a bug asks for the app, the versions and the test plan step), a pull request checklist,
   and Dependabot (`.github/dependabot.yml`) keeping the workflow actions and the test packages current, monthly; the
@@ -498,7 +501,8 @@ The apps are named ax and a word, the ax in lower case and the word as it is wri
   window's own update items (AX-3.1), placed here by the window. **About ▸** (A) is the bundle's About in sections,
   the same in every window (`Axit.Core/BundleAbout`), each shown as a notice of the window: **Version** (V; the
   version, the apps, the latest release as the window knows it, the releases page, the settings and logs folders),
-  **Licence** (L; MIT, and the warranty and liability disclaimer in full words; the LICENSE file is the binding text),
+  **Licence** (L; `NOTICE.md`, embedded: the GNU AGPL 3 notice, the additional terms of its section 7, the warranty
+  and liability disclaimer in full words and the risks app by app, since 2026-10-29; `LICENSE` beside it is the AGPL),
   **Attribution** (A; the maker, the Anthropic note, what Axit is built with), **Privacy** (P; `PRIVACY.md`, embedded:
   everything Axit contacts over the network and when, the outside programs it runs, what stays on the computer; since
   2026-10-25), **Third-party notices** (N; `THIRD-PARTY-NOTICES.md`, embedded: the .NET runtime and Windows Forms in

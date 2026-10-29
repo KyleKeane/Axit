@@ -8,6 +8,7 @@
   <ItemGroup>
     <!-- The Axit menu's About, Axit guide shows this file (AX-9.9); publish.ps1 ships it in the zip as README.md. -->
     <EmbeddedResource Include="../../docs/axit/README.md" LogicalName="AxitGuide.md" />
+    <EmbeddedResource Include="../../NOTICE.md" LogicalName="Notice.md" />
     <EmbeddedResource Include="../../PRIVACY.md" LogicalName="Privacy.md" />
     <EmbeddedResource Include="../../THIRD-PARTY-NOTICES.md" LogicalName="ThirdPartyNotices.md" />
   </ItemGroup>

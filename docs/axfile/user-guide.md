@@ -97,7 +97,7 @@ axFile's log is `%LOCALAPPDATA%\Axit\logs\axfile.log`; Options, Developer, Copy 
 
 ## About axFile
 
-axFile is one app of Axit, by Dr. Kyle Keane (www.kylekeane.com), MIT licence. The Axit menu's About names the version and the licence.
+axFile is one app of Axit, by Dr. Kyle Keane (www.kylekeane.com), GNU AGPL 3 licence. The Axit menu's About names the version and the licence.
 
 ## Disclaimer
 

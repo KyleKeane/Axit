@@ -60,7 +60,7 @@ axPreview's log is `%LOCALAPPDATA%\Axit\logs\axpreview.log`; Options, Developer,
 
 ## About axPreview
 
-axPreview is one app of Axit, by Dr. Kyle Keane (www.kylekeane.com), MIT licence. The Axit menu's About names the version and the licence.
+axPreview is one app of Axit, by Dr. Kyle Keane (www.kylekeane.com), GNU AGPL 3 licence. The Axit menu's About names the version and the licence.
 
 ## Disclaimer
 

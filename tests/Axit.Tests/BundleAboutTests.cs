@@ -23,7 +23,10 @@ public sealed class BundleAboutTests
     [Fact]
     public void The_licence_and_attribution_name_the_maker_and_the_terms()
     {
-        Assert.Contains("MIT", BundleAbout.Licence);
+        // The licence notice is NOTICE.md (2026-10-29): the AGPL, its section 7 terms and the disclaimer.
+        Assert.StartsWith("# Licence, terms and disclaimer", BundleAbout.Licence());
+        Assert.Contains("GNU Affero General Public License", BundleAbout.Licence());
+        Assert.Contains("WITHOUT ANY WARRANTY", BundleAbout.Licence());
         Assert.Contains("Dr. Kyle Keane", BundleAbout.Attribution);
         Assert.Contains("no third-party packages", BundleAbout.Attribution);
     }
