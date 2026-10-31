@@ -53,4 +53,4 @@ Specifications are the source of truth: `docs/axit/SPEC.md` for the bundle (laun
 
 ## Manual verification
 
-Any change to focus handling, key handling, announcements or an edit control is checked with NVDA running, following the app's test plan (`docs/<app>/nvda-test-plan.md`) on the files of `manual_tests/<app>`. Every pass is written down in `docs/axit/nvda-test-record.md`, by step, with the version and the commit, newest first: when a bug comes up, it says when its step last passed.
+Any change to focus handling, key handling, announcements or an edit control is checked with NVDA running, following the app's test plan (`docs/<app>/nvda-test-plan.md`) on the files of `manual_tests/<app>`. Every pass is written down in `docs/axit/nvda-test-record.md`, by step, with the version and the commit, newest first: when a bug comes up, it says when its step last passed. The assistant can hear a change through NVDA itself: a script in `tests/nvda-scripts` run with `tools/AxAutomate --nvda`, NVDA's speech read from the `axitCapture` add-on, after asking the user through the question tool to step away (`docs/axit/automation.md` section 3, "From a Claude session").

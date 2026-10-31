@@ -127,6 +127,12 @@ internal static class Program
             // NVDA records only while this file exists (tools/nvda-capture); the log starts empty for the run.
             File.Delete(Speech.LogPath);
             File.WriteAllText(Speech.FlagPath, string.Empty);
+
+            // The user has stepped away at the assistant's question (automation.md, tier 3): a sound says the run takes
+            // the keyboard now, three seconds before the first key, and another says it is over.
+            Console.WriteLine("NVDA tier: hands off the keyboard and mouse until the second sound.");
+            Native.MessageBeep(0x40);
+            Thread.Sleep(3000);
         }
 
         var report = new StringBuilder($"# AxAutomate report\n\n{DateTime.Now:yyyy-MM-dd HH:mm}, {exe}\n\n");
@@ -150,6 +156,7 @@ internal static class Program
         {
             File.Delete(Speech.FlagPath);
             File.Delete(Speech.LogPath);
+            Native.MessageBeep(0x30);
         }
 
         if (reportPath is not null)
@@ -1033,6 +1040,10 @@ internal static class Native
 
     [DllImport("user32.dll")]
     public static extern bool CloseDesktop(nint desktop);
+
+    /// <summary>The NVDA tier's start and end sounds (Windows' Asterisk and Exclamation), for the user away from the keys.</summary>
+    [DllImport("user32.dll")]
+    public static extern bool MessageBeep(uint type);
 
     [DllImport("kernel32.dll", CharSet = CharSet.Unicode, SetLastError = true)]
     public static extern bool CreateProcessW(string? application, StringBuilder commandLine, nint processAttributes, nint threadAttributes,

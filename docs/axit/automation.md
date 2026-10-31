@@ -126,6 +126,27 @@ capture log, the capture switched on for the run and its log deleted after it). 
 dotnet run --project tools\AxAutomate -c Release -- tests\nvda-scripts --build --nvda --report nvda-report.md
 ```
 
+### From a Claude session (2026-10-31)
+
+The assistant runs this tier itself to hear a change as NVDA speaks it, in the same session as the change:
+
+1. Check the add-on is installed and current: `%APPDATA%\nvda\addons\axitCapture\globalPlugins\axitCapture.py` the
+   same lines as `tools/nvda-capture`'s (a changed add-on is copied by the user and NVDA restarted). Nothing else of
+   NVDA's is needed: not the Speech Viewer, not the user's own plugins in `%APPDATA%\nvda\globalPlugins` or the
+   scratchpad.
+2. Build `Axit.exe` and the runner into scratch folders (never the running app's `bin`), and write the script in
+   `tests/nvda-scripts`; a first run without `--nvda` on the test desktop finds the focus order and the texts without
+   taking the machine.
+3. Ask the user through the question tool to step away, saying how long. The answer is the go: the run starts at once.
+4. The run plays Windows' Asterisk sound, waits three seconds, takes the foreground and the keys, and plays the
+   Exclamation sound when it is over; the user comes back at the second sound.
+5. Read the result lines, filtered of account paths: each `expect spoken` prints what NVDA said up to the match,
+   `[cancel]` where NVDA cut its speech (a key press does). The capture is on only during the run and its log is
+   deleted after it.
+
+The first such run, the consent reminder's check box (`tests/nvda-scripts/consent-checkbox.txt`), heard NVDA say
+"checked" and "not checked" once each after the fix of AX-8.8.
+
 ## Rules
 
 - Claude sessions in tests use Haiku through `--model haiku` and leave the user's settings alone.

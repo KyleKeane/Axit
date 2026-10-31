@@ -6,6 +6,19 @@ What was checked with NVDA, against which version, and with what result. When a 
 
 Add a section under this one, above the earlier passes, so that the newest comes first: the date, the version, the commit tested, who ran it and how the result was given, and the environment: the NVDA version, the synthesizer and the Windows build (so that a regression is dated to an NVDA release rather than to some time). Under it, one table per app with a line per section of its plan: the steps run and the result, Passed, Failed (with what was heard) or Not run. A step that fails gets a line of its own with what NVDA said and what it should have said, and the bug's fix names the step. When a plan gains or loses steps, the next pass lists them as the plan has them then.
 
+## 2026-10-31: the consent box's state, by the assistant (branch `licence`, after c634215)
+
+Run by the assistant through the NVDA tier (`tests/nvda-scripts/consent-checkbox.txt`, `docs/axit/automation.md`
+section 3), the user away at its question; NVDA's speech read from the capture add-on. The user had reported that
+Space in the box said nothing.
+
+| Step | Result |
+|---|---|
+| axTerminal's first start: the reminder's title and text spoken | Passed |
+| Tab: "I understand that … check box not checked" | Passed |
+| Space: "checked", once | Passed |
+| Space again: "not checked", once | Passed |
+
 ## Owed: access layers and consent (the branch `licence`, 2026-10-29, `docs/axit/SPEC.md` AX-11)
 
 Not run yet; before the branch merges:
