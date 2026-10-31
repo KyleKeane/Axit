@@ -356,6 +356,10 @@ internal sealed class Run(string exe, string temp)
                 {
                     Native.AllowSetForegroundWindow(_current.ProcessId);
                     _current.Send("activate");
+                    // NVDA reads a window that comes to the front, and an announcement made meanwhile is lost under that
+                    // reading: the first step waits until the window is in front and NVDA has finished with it.
+                    InFront();
+                    Speech.WaitForQuiet(1500);
                 }
 
                 return (true, $"process {_current.ProcessId}");
@@ -409,10 +413,10 @@ internal sealed class Run(string exe, string temp)
                     Current.Closing();
                 }
 
-                Native.Keys(rest);
+                Native.Keys(rest, InFront);
                 return (true, null);
             case "type" when Nvda:
-                Native.Type(rest);
+                Native.Type(rest, InFront);
                 return (true, null);
             case "keys":
                 // One press at a time: each goes to the control that has the focus after the one before.
@@ -573,6 +577,40 @@ internal sealed class Run(string exe, string temp)
         }
 
         return (false, $"not within {timeout / 1000} s; seen: {seen}");
+    }
+
+    /// <summary>
+    /// The NVDA tier: whether a window of this run is in front, bringing the current one back (up to 3 s) when another
+    /// program's is, such as the user's own window after a test window closed.
+    /// </summary>
+    private bool InFront()
+    {
+        for (var attempt = 0; attempt < 30; attempt++)
+        {
+            var front = Native.ForegroundProcess();
+            if (_windows.Any(window => window.ProcessId == front))
+            {
+                return true;
+            }
+
+            if (_current is not null && attempt % 5 == 0)
+            {
+                try
+                {
+                    Native.AllowSetForegroundWindow(_current.ProcessId);
+                    _current.Send("activate");
+                }
+                catch (Exception error) when (error is IOException or InvalidOperationException or TimeoutException)
+                {
+                    // The current window has closed: nothing of the run to bring back.
+                    return false;
+                }
+            }
+
+            Thread.Sleep(100);
+        }
+
+        return false;
     }
 
     /// <summary>
@@ -1197,6 +1235,7 @@ internal static class Native
     // ---- the NVDA tier's keyboard: SendInput, as a keyboard types ----
 
     private const int INPUT_KEYBOARD = 1;
+    private const uint KEYEVENTF_EXTENDEDKEY = 0x0001;
     private const uint KEYEVENTF_KEYUP = 0x0002;
     private const uint KEYEVENTF_UNICODE = 0x0004;
 
@@ -1223,11 +1262,33 @@ internal static class Native
     [DllImport("user32.dll", SetLastError = true)]
     private static extern uint SendInput(uint count, INPUT[] inputs, int size);
 
-    /// <summary>Key presses as the channel's keys step spells them, "ctrl+shift+p escape down", each one pressed and released with its modifiers.</summary>
-    public static void Keys(string presses)
+    [DllImport("user32.dll")]
+    public static extern nint GetForegroundWindow();
+
+    [DllImport("user32.dll")]
+    public static extern int GetWindowThreadProcessId(nint window, out int processId);
+
+    /// <summary>The process of the window in front.</summary>
+    public static int ForegroundProcess()
+    {
+        GetWindowThreadProcessId(GetForegroundWindow(), out var id);
+        return id;
+    }
+
+    /// <summary>
+    /// Key presses as the channel's keys step spells them, "ctrl+shift+p escape down", each one pressed and released with
+    /// its modifiers. <paramref name="inFront"/> is asked before each press: a key goes only to a window of the run, never
+    /// to the user's own (keys reached the user's axClaude window between scripts on 2026-10-31).
+    /// </summary>
+    public static void Keys(string presses, Func<bool> inFront)
     {
         foreach (var press in presses.Split(' ', StringSplitOptions.RemoveEmptyEntries))
         {
+            if (!inFront())
+            {
+                throw new InvalidOperationException("no window of the run is in front; the key was not sent");
+            }
+
             var parts = press.Split('+');
             var modifiers = parts[..^1].Select(part => part.ToLowerInvariant() switch
             {
@@ -1247,11 +1308,16 @@ internal static class Native
         }
     }
 
-    /// <summary>Characters as typed, each a Unicode key press.</summary>
-    public static void Type(string text)
+    /// <summary>Characters as typed, each a Unicode key press, each only while a window of the run is in front.</summary>
+    public static void Type(string text, Func<bool> inFront)
     {
         foreach (var c in text)
         {
+            if (!inFront())
+            {
+                throw new InvalidOperationException("no window of the run is in front; the character was not sent");
+            }
+
             INPUT[] inputs =
             [
                 new INPUT { type = INPUT_KEYBOARD, ki = new KEYBDINPUT { wScan = c, dwFlags = KEYEVENTF_UNICODE } },
@@ -1262,8 +1328,20 @@ internal static class Native
         }
     }
 
-    private static INPUT Key(ushort vk, bool up) =>
-        new() { type = INPUT_KEYBOARD, ki = new KEYBDINPUT { wVk = vk, dwFlags = up ? KEYEVENTF_KEYUP : 0 } };
+    [DllImport("user32.dll")]
+    private static extern uint MapVirtualKeyW(uint code, uint mapType);
+
+    /// <summary>
+    /// One key as a keyboard sends it: its scan code, and the extended flag for Page Up to Delete and the arrows. Without
+    /// the flag those are the numeric keypad's keys, which NVDA's desktop layout takes for its review cursor and never
+    /// passes on (the first full NVDA pass, 2026-10-31: no caret moved).
+    /// </summary>
+    private static INPUT Key(ushort vk, bool up)
+    {
+        var extended = vk is >= 0x21 and <= 0x2E;
+        var flags = (up ? KEYEVENTF_KEYUP : 0) | (extended ? KEYEVENTF_EXTENDEDKEY : 0);
+        return new() { type = INPUT_KEYBOARD, ki = new KEYBDINPUT { wVk = vk, wScan = (ushort)MapVirtualKeyW(vk, 0), dwFlags = flags } };
+    }
 
     private static ushort VirtualKey(string name)
     {

@@ -17,12 +17,15 @@
   .\nvda-pass.ps1                 # every app's scripts and the NVDA-only scripts
   .\nvda-pass.ps1 axCalc          # tests\scripts\axcalc, and the NVDA-only scripts whose names start with axcalc
   .\nvda-pass.ps1 -NoBuild axDown # the last build again
+  .\nvda-pass.ps1 -Skip axClaude  # every app but axClaude
 #>
 [CmdletBinding()]
 param(
     # One app, by its folder name under tests\scripts (axCalc, axDown, ...); empty for all.
     [Parameter(Position = 0)]
     [string]$App = '',
+    # Apps left out of a run of all, by folder name (axClaude: slow, and its replies need the network).
+    [string[]]$Skip = @(),
     # Reuse the last build in %TEMP%\axit-nvda.
     [switch]$NoBuild
 )
@@ -55,7 +58,9 @@ if (-not $NoBuild) {
 $scripts = Join-Path $work 'scripts'
 if (Test-Path $scripts) { Remove-Item $scripts -Recurse -Force }
 New-Item -ItemType Directory -Force $scripts | Out-Null
-$apps = @(Get-ChildItem (Join-Path $root 'tests\scripts') -Directory | Where-Object { $App -eq '' -or $_.Name -eq $App.ToLowerInvariant() })
+$skipped = @($Skip | ForEach-Object { $_.ToLowerInvariant() })
+$apps = @(Get-ChildItem (Join-Path $root 'tests\scripts') -Directory |
+    Where-Object { ($App -eq '' -or $_.Name -eq $App.ToLowerInvariant()) -and $_.Name -notin $skipped })
 if ($App -ne '' -and $apps.Count -eq 0) {
     Write-Host "No scripts in tests\scripts\$($App.ToLowerInvariant())."
     exit 1

@@ -162,6 +162,13 @@ said. So the app scripts, written from the plans, are the plans as heard; a step
 the order of speech, a state NVDA reads from the control) goes into `tests/nvda-scripts` as `<app>-<what>.txt` with
 `expect spoken` and `refuse spoken`. The report is `%TEMP%\axit-nvda\report.md`; the console shows the result lines.
 
+Two things the first full pass taught (2026-10-31): a key is sent only while a window of the run is in front (the
+runner brings the current one back, and fails the step rather than type into the user's own window, which the
+foreground reached between scripts); and the navigation keys go with the extended flag and their scan codes, since
+without it Home, End, the arrows and the page keys are the numeric keypad's, which NVDA keeps for its review cursor.
+After a window starts, the first step waits until NVDA has finished reading it. `-Skip axClaude` leaves out the
+slowest app, whose replies need the network.
+
 When to run it: after a change to focus, keys, announcements or an edit control (the app's alone), and the whole pass
 before a merge or a release, in place of asking the user for a pass by ear. A pass is written into
 `docs/axit/nvda-test-record.md` as "run by the assistant through nvda-pass.ps1" with the commit. What stays the
