@@ -128,11 +128,12 @@ internal static class Program
             File.Delete(Speech.LogPath);
             File.WriteAllText(Speech.FlagPath, string.Empty);
 
-            // The user has stepped away at the assistant's question (automation.md, tier 3): a sound says the run takes
-            // the keyboard now, three seconds before the first key, and another says it is over.
-            Console.WriteLine("NVDA tier: hands off the keyboard and mouse until the second sound.");
-            Native.MessageBeep(0x40);
-            Thread.Sleep(3000);
+            // The user has stepped away at the assistant's question (automation.md, tier 3): Windows' own voice says the
+            // run takes the keyboard now, before the first key, and says when it is over. Not NVDA, so the capture holds
+            // only what the windows made NVDA say, and no window takes the focus.
+            Console.WriteLine("NVDA tier: hands off the keyboard and mouse until it says the tests are finished.");
+            HandsOff.Say("Running NVDA tests. Please do not touch the keyboard or mouse.");
+            Thread.Sleep(1000);
         }
 
         var report = new StringBuilder($"# AxAutomate report\n\n{DateTime.Now:yyyy-MM-dd HH:mm}, {exe}\n\n");
@@ -156,7 +157,7 @@ internal static class Program
         {
             File.Delete(Speech.FlagPath);
             File.Delete(Speech.LogPath);
-            Native.MessageBeep(0x30);
+            HandsOff.Say("NVDA tests finished. The keyboard is yours.");
         }
 
         if (reportPath is not null)
@@ -1014,6 +1015,30 @@ internal sealed class Window : IDisposable
     }
 }
 
+/// <summary>
+/// The NVDA tier's word to the user away from the keys, in Windows' own voice (SAPI's SpVoice through COM, no package),
+/// spoken to the end before the run goes on; NVDA never speaks it, so its capture stays the windows' alone. A computer
+/// without the voice gets a sound instead.
+/// </summary>
+internal static class HandsOff
+{
+    public static void Say(string text)
+    {
+        try
+        {
+            var type = Type.GetTypeFromProgID("SAPI.SpVoice") ?? throw new InvalidOperationException("No SAPI voice.");
+            var voice = Activator.CreateInstance(type)!;
+            type.InvokeMember("Speak", System.Reflection.BindingFlags.InvokeMethod, null, voice, [text, 0]);
+            Marshal.FinalReleaseComObject(voice);
+        }
+        catch (Exception error)
+        {
+            Console.WriteLine($"(Windows' voice is not available: {error.Message})");
+            Console.Beep();
+        }
+    }
+}
+
 internal static class Native
 {
     [StructLayout(LayoutKind.Sequential, CharSet = CharSet.Unicode)]
@@ -1041,9 +1066,6 @@ internal static class Native
     [DllImport("user32.dll")]
     public static extern bool CloseDesktop(nint desktop);
 
-    /// <summary>The NVDA tier's start and end sounds (Windows' Asterisk and Exclamation), for the user away from the keys.</summary>
-    [DllImport("user32.dll")]
-    public static extern bool MessageBeep(uint type);
 
     [DllImport("kernel32.dll", CharSet = CharSet.Unicode, SetLastError = true)]
     public static extern bool CreateProcessW(string? application, StringBuilder commandLine, nint processAttributes, nint threadAttributes,

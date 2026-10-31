@@ -138,8 +138,9 @@ The assistant runs this tier itself to hear a change as NVDA speaks it, in the s
    `tests/nvda-scripts`; a first run without `--nvda` on the test desktop finds the focus order and the texts without
    taking the machine.
 3. Ask the user through the question tool to step away, saying how long. The answer is the go: the run starts at once.
-4. The run plays Windows' Asterisk sound, waits three seconds, takes the foreground and the keys, and plays the
-   Exclamation sound when it is over; the user comes back at the second sound.
+4. The run says in Windows' own voice (SAPI, not NVDA, so the capture holds only what the windows made NVDA say, and no
+   window takes the focus) "Running NVDA tests. Please do not touch the keyboard or mouse.", then takes the foreground
+   and the keys, and says "NVDA tests finished. The keyboard is yours." when it is over.
 5. Read the result lines, filtered of account paths: each `expect spoken` prints what NVDA said up to the match,
    `[cancel]` where NVDA cut its speech (a key press does). The capture is on only during the run and its log is
    deleted after it.
