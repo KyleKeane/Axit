@@ -132,8 +132,10 @@ internal static class Program
             // run takes the keyboard now, before the first key, and says when it is over. Not NVDA, so the capture holds
             // only what the windows made NVDA say, and no window takes the focus.
             Console.WriteLine("NVDA tier: hands off the keyboard and mouse until it says the tests are finished.");
-            HandsOff.Say("Running NVDA tests. Please do not touch the keyboard or mouse.");
-            Thread.Sleep(1000);
+            Speech.WaitForQuiet(3000);
+            HandsOff.StartLoop("Running NVDA tests. Please do not touch the keyboard or mouse.");
+            Thread.Sleep(5000);
+            File.Delete(Speech.LogPath);
         }
 
         var report = new StringBuilder($"# AxAutomate report\n\n{DateTime.Now:yyyy-MM-dd HH:mm}, {exe}\n\n");
@@ -155,6 +157,10 @@ internal static class Program
 
         if (Run.Nvda)
         {
+            // The last windows have closed and NVDA reads what comes to the front: the end waits for it.
+            Speech.WaitForQuiet(4000);
+            HandsOff.StopLoop();
+            Thread.Sleep(500);
             File.Delete(Speech.FlagPath);
             File.Delete(Speech.LogPath);
             HandsOff.Say("NVDA tests finished. The keyboard is yours.");
@@ -749,6 +755,34 @@ internal sealed class Speech
     private long _read;
     private int _taken;
 
+    /// <summary>
+    /// Waits until NVDA has started nothing new for <paramref name="quietMs"/> (the log's length unchanged), at most
+    /// 30 s: Windows' voice never speaks over NVDA, whose ducking lowered it, and the end is said only after the windows
+    /// closing have been read (the user heard NVDA after "finished" on 2026-10-31). The log holds when a sequence starts,
+    /// not how long it lasts, so the quiet is long.
+    /// </summary>
+    public static void WaitForQuiet(int quietMs)
+    {
+        var clock = Stopwatch.StartNew();
+        var length = -1L;
+        var since = Stopwatch.StartNew();
+        while (clock.ElapsedMilliseconds < 30000)
+        {
+            var now = File.Exists(LogPath) ? new FileInfo(LogPath).Length : 0;
+            if (now != length)
+            {
+                length = now;
+                since.Restart();
+            }
+            else if (since.ElapsedMilliseconds >= quietMs)
+            {
+                return;
+            }
+
+            Thread.Sleep(200);
+        }
+    }
+
     public List<string> Pending()
     {
         if (File.Exists(LogPath))
@@ -1022,6 +1056,43 @@ internal sealed class Window : IDisposable
 /// </summary>
 internal static class HandsOff
 {
+    private static readonly string WavePath = Path.Combine(Path.GetTempPath(), "axit-nvda-hands-off.wav");
+
+    /// <summary>
+    /// The warning recorded once into a wave file in Windows' voice, with a pause after it, and played in a loop for
+    /// the whole run (the user's ask, 2026-10-31), until <see cref="StopLoop"/>.
+    /// </summary>
+    public static void StartLoop(string text)
+    {
+        try
+        {
+            var voiceType = Type.GetTypeFromProgID("SAPI.SpVoice") ?? throw new InvalidOperationException("No SAPI voice.");
+            var streamType = Type.GetTypeFromProgID("SAPI.SpFileStream") ?? throw new InvalidOperationException("No SAPI file stream.");
+            var voice = Activator.CreateInstance(voiceType)!;
+            var stream = Activator.CreateInstance(streamType)!;
+            // 3 is SSFMCreateForWrite; 8 is SVSFIsXML, for the pause after the words.
+            streamType.InvokeMember("Open", System.Reflection.BindingFlags.InvokeMethod, null, stream, [WavePath, 3, false]);
+            voiceType.InvokeMember("AudioOutputStream", System.Reflection.BindingFlags.SetProperty, null, voice, [stream]);
+            voiceType.InvokeMember("Speak", System.Reflection.BindingFlags.InvokeMethod, null, voice, [System.Security.SecurityElement.Escape(text) + "<silence msec=\"2500\"/>", 8]);
+            streamType.InvokeMember("Close", System.Reflection.BindingFlags.InvokeMethod, null, stream, null);
+            Marshal.FinalReleaseComObject(stream);
+            Marshal.FinalReleaseComObject(voice);
+            // SND_ASYNC | SND_LOOP | SND_FILENAME | SND_NODEFAULT.
+            Native.PlaySoundW(WavePath, 0, 0x0001 | 0x0008 | 0x00020000 | 0x0002);
+        }
+        catch (Exception error)
+        {
+            Console.WriteLine($"(Windows' voice is not available: {error.Message})");
+            Console.Beep();
+        }
+    }
+
+    public static void StopLoop()
+    {
+        Native.PlaySoundW(null, 0, 0);
+        File.Delete(WavePath);
+    }
+
     public static void Say(string text)
     {
         try
@@ -1041,6 +1112,9 @@ internal static class HandsOff
 
 internal static class Native
 {
+    [DllImport("winmm.dll", CharSet = CharSet.Unicode)]
+    public static extern bool PlaySoundW(string? sound, nint module, uint flags);
+
     [StructLayout(LayoutKind.Sequential, CharSet = CharSet.Unicode)]
     public struct STARTUPINFO
     {
