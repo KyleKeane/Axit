@@ -148,8 +148,24 @@ The assistant runs this tier itself to hear a change as NVDA speaks it, in the s
    `[cancel]` where NVDA cut its speech (a key press does). The capture is on only during the run and its log is
    deleted after it.
 
-The first such run, the consent reminder's check box (`tests/nvda-scripts/consent-checkbox.txt`), heard NVDA say
+The first such run, the consent reminder's check box (`tests/nvda-scripts/axterminal-consent-checkbox.txt`), heard NVDA say
 "checked" and "not checked" once each after the fix of AX-8.8.
+
+### The NVDA pass of every app: `nvda-pass.ps1` (2026-10-31)
+
+The NVDA test plans the user used to run by ear are run by the assistant: `.\nvda-pass.ps1 [<app>] [-NoBuild]` builds
+into `%TEMP%\axit-nvda`, gathers `tests/scripts/<app>` (every app without a name) and the scripts of
+`tests/nvda-scripts` whose names start with the app's, and runs them with `--nvda`. Under `--nvda` every
+`expect said` is an NVDA check as well: what the window announced or focused must also be spoken by NVDA within 5 s
+(the timeline's marks dropped; a sound passes as it is), and the step's line ends with "|| NVDA: " and what NVDA
+said. So the app scripts, written from the plans, are the plans as heard; a step only NVDA can show (a cancellation,
+the order of speech, a state NVDA reads from the control) goes into `tests/nvda-scripts` as `<app>-<what>.txt` with
+`expect spoken` and `refuse spoken`. The report is `%TEMP%\axit-nvda\report.md`; the console shows the result lines.
+
+When to run it: after a change to focus, keys, announcements or an edit control (the app's alone), and the whole pass
+before a merge or a release, in place of asking the user for a pass by ear. A pass is written into
+`docs/axit/nvda-test-record.md` as "run by the assistant through nvda-pass.ps1" with the commit. What stays the
+user's: sound and video quality, the Start menu and Explorer (outside the windows), and how a change feels to use.
 
 ## Rules
 

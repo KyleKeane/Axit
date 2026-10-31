@@ -2,6 +2,8 @@
 # on, as it is by default); GitHub's limit for unsigned requests, sixty an hour, can make the check fail, and the
 # window then logs an ERROR, which fails the run after its steps.
 mkdir upd
+# The access layers' reminders agreed to already (AX-11.5): this script is about what comes after them.
+file home\Axit\consent.json {"items":[{"app":"axClaude","target":"Claude Code","version":"0","when":"2026-10-31T00:00:00"},{"app":"axGIT","target":"Git","version":"0","when":"2026-10-31T00:00:00"},{"app":"axTerminal","target":"Windows PowerShell","version":"0","when":"2026-10-31T00:00:00"},{"app":"axTerminal","target":"PowerShell 7","version":"0","when":"2026-10-31T00:00:00"},{"app":"axTerminal","target":"Command Prompt","version":"0","when":"2026-10-31T00:00:00"},{"app":"axTerminal","target":"Git Bash","version":"0","when":"2026-10-31T00:00:00"},{"app":"axPass","target":"KeePassXC","version":"0","when":"2026-10-31T00:00:00"}]}
 start claude {temp}\upd -- --model haiku
 expect said trust
 wait 1500

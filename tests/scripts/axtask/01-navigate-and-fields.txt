@@ -1,7 +1,7 @@
 # axTask: the navigator, the detail pane and every change to a field (docs/axtask/nvda-test-plan.md sections 1 and 2;
 # docs/axit/item-apps.md IA-2, IA-3, IA-5). A scratch folder of lists; findstr checks what reached the file.
 file home\Axit\axtask.json {"checkForUpdates": false}
-file "tasks\Home\Fix the tap.json" {"format": "axit-item 1", "fields": [{"title": "Title", "type": "text", "value": "Fix the tap"}, {"title": "Done", "type": "check", "value": false}, {"title": "Start", "type": "date", "value": ""}, {"title": "Due", "type": "date", "value": "2026-10-30"}]}
+file "tasks\Home\Fix the tap.json" {"format": "axit-item 1", "fields": [{"title": "Title", "type": "text", "value": "Fix the tap"}, {"title": "Done", "type": "check", "value": false}, {"title": "Start", "type": "date", "value": ""}, {"title": "Due", "type": "date", "value": "2099-10-30"}]}
 file "tasks\Home\Water plants.json" {"format": "axit-item 1", "fields": [{"title": "Title", "type": "text", "value": "Water plants"}, {"title": "Done", "type": "check", "value": true}]}
 file tasks\Home\notes.txt not an item
 file tasks\Shopping\Milk.json {"format": "axit-item 1", "fields": [{"title": "Title", "type": "text", "value": "Milk"}]}
@@ -34,7 +34,7 @@ expect focus Home, list, 2 items
 
 # 1.2 Right into Home: its name, its count, the first row.
 keys right
-expect said ! Home, 2 items, 1 file not shown, Fix the tap, due 30 October
+expect said ! Home, 2 items, 1 file not shown, Fix the tap, due 30 October 2099
 expect state Home - axTask
 keys down
 expect focus Water plants, done
@@ -56,15 +56,15 @@ keys down
 expect focus Done, check, not done
 keys down
 keys down
-expect focus Due, date, 30 October 2026, Friday
+expect focus Due, date, 30 October 2099, Friday
 
 # 1.5 Escape back to the navigator; Tab to the fields and Shift+Tab back.
 keys escape
-expect focus Fix the tap, due 30 October
+expect focus Fix the tap, due 30 October 2099
 keys tab
-expect focus Due, date, 30 October 2026, Friday
+expect focus Due, date, 30 October 2099, Friday
 keys shift+tab
-expect focus Fix the tap, due 30 October
+expect focus Fix the tap, due 30 October 2099
 
 # 2.1 Space marks it done and not done, in the file too.
 keys space
@@ -73,19 +73,20 @@ run findstr /l /c:"\"value\": true" "tasks\Home\Fix the tap.json"
 keys space
 expect said ! Not done: Fix the tap
 
-# 2.2 A date typed as a weekday; a date refused keeps the notice.
+# 2.2 A date typed as a weekday (the next Friday from the day of the run); a date refused keeps the notice.
 keys tab
 keys enter
 expect focus Due
 type friday
 keys enter
-expect said ! Due: 30 October 2026, Friday
+expect said , Friday
 keys enter
 type 30 Febuary
 keys enter
 expect said ! Not a date: 30 Febuary
 keys escape
-expect focus Due, date, 30 October 2026, Friday
+expect focus Due, date, 
+expect focus , Friday
 
 # 2.3 A new field, a choice of two, chosen.
 keys ctrl+n
@@ -147,6 +148,6 @@ expect said ! Not a task
 
 # 1.7 Ctrl+1: All tasks, the soonest due first, each with its list.
 keys ctrl+1
-expect said ! All tasks, 4 items, Fix the sink, due 30 October, in Home
+expect said ! All tasks, 4 items, Fix the sink, due 
 keys left
 expect focus All tasks, 4 not done

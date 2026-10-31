@@ -1,5 +1,7 @@
 # axClaude: a fresh session with Haiku, a message, its reply and Done (docs/axclaude/nvda-test-plan.md sections 1 and 2).
 mkdir a
+# The access layers' reminders agreed to already (AX-11.5): this script is about what comes after them.
+file home\Axit\consent.json {"items":[{"app":"axClaude","target":"Claude Code","version":"0","when":"2026-10-31T00:00:00"},{"app":"axGIT","target":"Git","version":"0","when":"2026-10-31T00:00:00"},{"app":"axTerminal","target":"Windows PowerShell","version":"0","when":"2026-10-31T00:00:00"},{"app":"axTerminal","target":"PowerShell 7","version":"0","when":"2026-10-31T00:00:00"},{"app":"axTerminal","target":"Command Prompt","version":"0","when":"2026-10-31T00:00:00"},{"app":"axTerminal","target":"Git Bash","version":"0","when":"2026-10-31T00:00:00"},{"app":"axPass","target":"KeePassXC","version":"0","when":"2026-10-31T00:00:00"}]}
 start claude {temp}\a -- --model haiku
 try said trust
 iffound wait 1500

@@ -1,0 +1,27 @@
+# axTerminal: the reminder before a shell first starts (docs/axit/SPEC.md AX-11.4, AX-11.5; the Owed list of
+# docs/axit/nvda-test-record.md). Each shell is its own consent; the default shell here is Windows PowerShell or
+# PowerShell 7, so the texts name neither. With --nvda (nvda-pass.ps1) every expected line must be spoken by NVDA too.
+mkdir myproject
+file home\Axit\axterminal.json {"checkForUpdates": false}
+start terminal {temp}\myproject
+
+expect said Before axTerminal connects to
+keys tab
+expect said I understand that axTerminal
+keys enter
+expect said ! Check the box first
+keys space
+expect said ! checked
+keys space
+expect said ! not checked
+keys space
+expect said ! checked
+# Enter connects: the shell starts and says Ready.
+keys enter
+expect said Ready
+close
+
+# The second start asks nothing and starts the shell.
+start terminal {temp}\myproject
+expect said Ready
+refuse said Before axTerminal

@@ -1,6 +1,8 @@
 # axClaude: a set of two questions (docs/axclaude/nvda-test-plan.md section 12 step 19). The first question reads
 # itself; after its answer the second cuts in and reads itself, with nothing of the first read again.
 mkdir q
+# The access layers' reminders agreed to already (AX-11.5): this script is about what comes after them.
+file home\Axit\consent.json {"items":[{"app":"axClaude","target":"Claude Code","version":"0","when":"2026-10-31T00:00:00"},{"app":"axGIT","target":"Git","version":"0","when":"2026-10-31T00:00:00"},{"app":"axTerminal","target":"Windows PowerShell","version":"0","when":"2026-10-31T00:00:00"},{"app":"axTerminal","target":"PowerShell 7","version":"0","when":"2026-10-31T00:00:00"},{"app":"axTerminal","target":"Command Prompt","version":"0","when":"2026-10-31T00:00:00"},{"app":"axTerminal","target":"Git Bash","version":"0","when":"2026-10-31T00:00:00"},{"app":"axPass","target":"KeePassXC","version":"0","when":"2026-10-31T00:00:00"}]}
 start claude {temp}\q -- --model haiku
 try said trust
 iffound wait 1500

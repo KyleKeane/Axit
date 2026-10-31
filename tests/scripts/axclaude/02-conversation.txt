@@ -2,6 +2,8 @@
 # Options, Questions, "Answer from a list" off for steps 1 and 2, set in the run's own settings file before the start;
 # the update check off (GitHub's limit for unsigned requests made it fail and log an ERROR in runs).
 file home\Axit\axclaude.json {"checkForUpdates":false,"questionNotices":false}
+# The access layers' reminders agreed to already (AX-11.5): this script is about what comes after them.
+file home\Axit\consent.json {"items":[{"app":"axClaude","target":"Claude Code","version":"0","when":"2026-10-31T00:00:00"},{"app":"axGIT","target":"Git","version":"0","when":"2026-10-31T00:00:00"},{"app":"axTerminal","target":"Windows PowerShell","version":"0","when":"2026-10-31T00:00:00"},{"app":"axTerminal","target":"PowerShell 7","version":"0","when":"2026-10-31T00:00:00"},{"app":"axTerminal","target":"Command Prompt","version":"0","when":"2026-10-31T00:00:00"},{"app":"axTerminal","target":"Git Bash","version":"0","when":"2026-10-31T00:00:00"},{"app":"axPass","target":"KeePassXC","version":"0","when":"2026-10-31T00:00:00"}]}
 mkdir plain
 start claude {temp}\plain -- --model haiku
 # Step 1: the trust prompt as plain lines in the conversation, read with Down Arrow.

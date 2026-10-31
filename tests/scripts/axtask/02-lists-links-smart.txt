@@ -1,7 +1,7 @@
 # axTask: a list's details, plain lists and checklists, links, smart lists, a change on disk (docs/axtask/nvda-test-plan.md
 # sections 1.8, 2.4, 2.8 to 2.10, 3 and 4; docs/axit/item-apps.md IA-4.3, IA-5.5, IA-D3; SPEC TK-4, TK-5).
 file home\Axit\axtask.json {"checkForUpdates": false}
-file "tasks\Home\Fix the tap.json" {"format": "axit-item 1", "fields": [{"title": "Title", "type": "text", "value": "Fix the tap"}, {"title": "Done", "type": "check", "value": false}, {"title": "Due", "type": "date", "value": "2026-10-30"}, {"title": "Waits on", "type": "link", "value": ""}]}
+file "tasks\Home\Fix the tap.json" {"format": "axit-item 1", "fields": [{"title": "Title", "type": "text", "value": "Fix the tap"}, {"title": "Done", "type": "check", "value": false}, {"title": "Due", "type": "date", "value": "2099-10-30"}, {"title": "Waits on", "type": "link", "value": ""}]}
 file "tasks\Home\Water plants.json" {"format": "axit-item 1", "fields": [{"title": "Title", "type": "text", "value": "Water plants"}, {"title": "Done", "type": "check", "value": true}]}
 file tasks\Shopping\Milk.json {"format": "axit-item 1", "fields": [{"title": "Title", "type": "text", "value": "Milk"}]}
 file tasks\Shopping\Washer.json {"format": "axit-item 1", "fields": [{"title": "Title", "type": "text", "value": "Washer"}, {"title": "Done", "type": "check", "value": false}]}
@@ -38,7 +38,7 @@ expect said ! Notes: First line. Second line
 # 3.1 A link set by the other item's title; renamed, the link follows; archived, it still reads it.
 keys escape
 keys right
-expect focus Fix the tap, due 30 October
+expect focus Fix the tap, due 30 October 2099
 keys tab
 keys end
 expect focus Waits on, link, empty
@@ -92,10 +92,10 @@ run cmd /c if not exist tasks\Garden (exit 0) else (exit 1)
 type h
 keys right
 expect focus Fix the tap
-run cmd /c powershell -NoProfile -Command "(Get-Content -Raw 'tasks\Home\Fix the tap.json').Replace('2026-10-30','2026-11-02') | Set-Content -NoNewline 'tasks\Home\Fix the tap.json'"
+run cmd /c powershell -NoProfile -Command "(Get-Content -Raw 'tasks\Home\Fix the tap.json').Replace('2099-10-30','2099-11-02') | Set-Content -NoNewline 'tasks\Home\Fix the tap.json'"
 keys space
 expect said ! The item changed on disk; it has been read again
-expect focus Fix the tap, due 2 November
+expect focus Fix the tap, due 2 November 2099
 
 # 4.1 Done tasks hidden and shown.
 keys ctrl+shift+d
@@ -108,7 +108,7 @@ expect said ! Done tasks shown
 
 # 3.2 A smart list with a condition not understood shows nothing and says so.
 file tasks\Odd.filter.json {"conditions": [{"field": "Due", "soon": true}]}
-file tasks\Soon.filter.json {"format": "axit-filter 1", "match": "all", "conditions": [{"field": "Done", "is": false}, {"field": "Due", "before": "2026-11-30"}]}
+file tasks\Soon.filter.json {"format": "axit-filter 1", "match": "all", "conditions": [{"field": "Done", "is": false}, {"field": "Due", "before": "2099-11-30"}]}
 keys left
 keys f5
 keys home
@@ -118,4 +118,4 @@ expect focus Odd, smart list, a condition not understood
 keys down
 expect focus Soon, smart list, 1
 keys right
-expect said ! Soon, 1 item, Fix the tap, due 2 November, in Home
+expect said ! Soon, 1 item, Fix the tap, due 2 November 2099, in Home

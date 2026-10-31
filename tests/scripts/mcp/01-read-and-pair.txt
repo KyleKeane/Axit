@@ -35,7 +35,11 @@ mcp start
 mcp call axit_windows
 expect state "notice":"axAutomate asks to use Axit"
 wait 1500
-# The focus is on the notice's text; Tab moves to its first button.
+# The focus is on the notice's text; Tab moves to the reminder's box (AX-11.4), Space checks it, Tab to Allow.
+keys tab
+expect focus I understand
+keys space
+expect said ! checked
 keys tab
 expect focus &Allow
 keys enter

@@ -4,6 +4,8 @@
 # NVDA pass, since they would change the clipboard of whoever runs this.
 # The idle lock off: it counts real input only, which the runner's keys are not, so it would lock mid-run when nobody is at the computer.
 file home\Axit\axpass.json {"checkForUpdates": false, "lockMinutes": 0}
+# The access layers' reminders agreed to already (AX-11.5): this script is about what comes after them.
+file home\Axit\consent.json {"items":[{"app":"axClaude","target":"Claude Code","version":"0","when":"2026-10-31T00:00:00"},{"app":"axGIT","target":"Git","version":"0","when":"2026-10-31T00:00:00"},{"app":"axTerminal","target":"Windows PowerShell","version":"0","when":"2026-10-31T00:00:00"},{"app":"axTerminal","target":"PowerShell 7","version":"0","when":"2026-10-31T00:00:00"},{"app":"axTerminal","target":"Command Prompt","version":"0","when":"2026-10-31T00:00:00"},{"app":"axTerminal","target":"Git Bash","version":"0","when":"2026-10-31T00:00:00"},{"app":"axPass","target":"KeePassXC","version":"0","when":"2026-10-31T00:00:00"}]}
 file twice.txt test-master-1\ntest-master-1\n
 file once.txt test-master-1\n
 run "C:\Program Files\KeePassXC\keepassxc-cli.exe" db-create -q -p test.kdbx < twice.txt

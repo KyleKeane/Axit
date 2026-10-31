@@ -1,6 +1,8 @@
 # axClaude, docs/axclaude/nvda-test-plan.md section 13: the Axit menu (bundle AX-9).
 # The update check off (GitHub's limit for unsigned requests made it fail and log an ERROR in runs).
 file home\Axit\axclaude.json {"checkForUpdates":false}
+# The access layers' reminders agreed to already (AX-11.5): this script is about what comes after them.
+file home\Axit\consent.json {"items":[{"app":"axClaude","target":"Claude Code","version":"0","when":"2026-10-31T00:00:00"},{"app":"axGIT","target":"Git","version":"0","when":"2026-10-31T00:00:00"},{"app":"axTerminal","target":"Windows PowerShell","version":"0","when":"2026-10-31T00:00:00"},{"app":"axTerminal","target":"PowerShell 7","version":"0","when":"2026-10-31T00:00:00"},{"app":"axTerminal","target":"Command Prompt","version":"0","when":"2026-10-31T00:00:00"},{"app":"axTerminal","target":"Git Bash","version":"0","when":"2026-10-31T00:00:00"},{"app":"axPass","target":"KeePassXC","version":"0","when":"2026-10-31T00:00:00"}]}
 file home\Axit\axdown.json {"checkForUpdates":false}
 file notes.md # Notes\n\nA line.\n
 mkdir menu
@@ -15,7 +17,7 @@ expect said Ready
 # user's desktop: manual). Open windows, Open windows by type and Recently closed fill themselves as the menu opens,
 # and the command list leaves such submenus out: their steps (2, 4 and 5) are left manual.
 expect commands axDown, Axit, New window
-expect commands axClaude, Axit, New window
+expect commands axClaude, access layer for Claude Code, Axit, New window
 expect commands Close all windows, Axit
 expect commands Check for updates (Axit 3.
 expect commands Version, Axit, About

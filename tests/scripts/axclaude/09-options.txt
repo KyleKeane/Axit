@@ -2,6 +2,8 @@
 # steps 6 to 8, by name on the timeline (the run records sounds and plays none: how they sound is for the ear).
 # The update check off (GitHub's limit for unsigned requests made it fail and log an ERROR in runs).
 file home\Axit\axclaude.json {"checkForUpdates":false}
+# The access layers' reminders agreed to already (AX-11.5): this script is about what comes after them.
+file home\Axit\consent.json {"items":[{"app":"axClaude","target":"Claude Code","version":"0","when":"2026-10-31T00:00:00"},{"app":"axGIT","target":"Git","version":"0","when":"2026-10-31T00:00:00"},{"app":"axTerminal","target":"Windows PowerShell","version":"0","when":"2026-10-31T00:00:00"},{"app":"axTerminal","target":"PowerShell 7","version":"0","when":"2026-10-31T00:00:00"},{"app":"axTerminal","target":"Command Prompt","version":"0","when":"2026-10-31T00:00:00"},{"app":"axTerminal","target":"Git Bash","version":"0","when":"2026-10-31T00:00:00"},{"app":"axPass","target":"KeePassXC","version":"0","when":"2026-10-31T00:00:00"}]}
 mkdir opts
 # Step 3: the raw stream recorded from the start (--record, the command line's form of Options, Developer, Record raw
 # stream; the menu item's file picker is a Windows dialog, left manual).

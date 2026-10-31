@@ -6,11 +6,11 @@ file settings.json {\n  "model": "opus"\n}
 start json {temp}\settings.json
 expect focus settings.json
 # 4.1: Axit, New window lists every app of the bundle, as the palette reads the menu.
-expect commands "axClaude, Axit, New window"
+expect commands "axClaude, access layer for Claude Code, Axit, New window"
 expect commands "axDown, Axit, New window"
 expect commands "axJSON, Axit, New window"
-expect commands "axGIT, Axit, New window"
-expect commands "axTerminal, Axit, New window"
+expect commands "axGIT, access layer for Git, Axit, New window"
+expect commands "axTerminal, access layer for your shell, Axit, New window"
 expect commands "axFile, Axit, New window"
 expect commands "axMedia, Axit, New window"
 expect commands "axPreview, Axit, New window"
@@ -18,10 +18,11 @@ expect commands "axStart, Axit, New window"
 # 4.1 manual: Alt+A, N, J needs the menu bar's menu mode; the new axJSON window it starts is a process the runner
 # does not reach.
 # 4.2 manual: Open windows by type is a submenu filled as it opens, which the palette leaves out.
-# 4.2: Axit, About, Version names the nine apps.
+# 4.2: Axit, About, Version names the apps in their two kinds.
 menu Version
 expect state "notice":"Axit 3.
-expect state : axClaude, axTerminal, axGIT, axFile, axDown, axJSON, axPreview, axMedia, axTask, axPass, axStart, axClip, axCalc, axProcess.
+expect state Windows: axFile, axDown, axJSON, axPreview, axMedia, axTask, axStart, axClip, axCalc, axProcess.
+expect state axClaude for Claude Code, axTerminal for your shell, axGIT for Git, axPass for KeePassXC.
 keys escape
 expect state "notice":null
 expect focus settings.json

@@ -3,6 +3,8 @@
 mkdir work\myproject
 # The run's own settings: no update check, which would go to the network and log an ERROR when it fails.
 file home\Axit\axterminal.json {"checkForUpdates": false}
+# The access layers' reminders agreed to already (AX-11.5): this script is about what comes after them.
+file home\Axit\consent.json {"items":[{"app":"axClaude","target":"Claude Code","version":"0","when":"2026-10-31T00:00:00"},{"app":"axGIT","target":"Git","version":"0","when":"2026-10-31T00:00:00"},{"app":"axTerminal","target":"Windows PowerShell","version":"0","when":"2026-10-31T00:00:00"},{"app":"axTerminal","target":"PowerShell 7","version":"0","when":"2026-10-31T00:00:00"},{"app":"axTerminal","target":"Command Prompt","version":"0","when":"2026-10-31T00:00:00"},{"app":"axTerminal","target":"Git Bash","version":"0","when":"2026-10-31T00:00:00"},{"app":"axPass","target":"KeePassXC","version":"0","when":"2026-10-31T00:00:00"}]}
 start terminal {temp}\work\myproject
 expect said ♪ Ready
 
@@ -32,7 +34,7 @@ expect focus "value":"Command Prompt"}
 keys enter
 expect said New session in myproject
 expect said Ready
-expect state - Command Prompt - axTerminal"
+expect state - Command Prompt - axTerminal, access layer for your shell"
 keys ctrl+2
 expect focus "name":"Terminal"
 expect text "System: New session: Command Prompt in
@@ -58,7 +60,7 @@ keys ctrl+1
 menu Git Bash
 expect said Git Bash
 expect said Ready
-expect state "myproject - Git Bash - axTerminal"
+expect state "myproject - Git Bash - axTerminal, access layer for your shell"
 # The prompt in the status bar is the user's PS1 with its rows joined (user, host, MINGW64, the path), ending in $.
 expect state "status":["Idle",
 expect state $"]}
@@ -76,7 +78,7 @@ type cd ..
 keys enter
 expect said Done
 expect said ♪ Done
-expect state "work - Git Bash - axTerminal"
+expect state "work - Git Bash - axTerminal, access layer for your shell"
 type cd myproject
 keys enter
 expect said Done
@@ -84,14 +86,14 @@ expect said ♪ Done
 menu Windows PowerShell
 expect said Windows PowerShell
 expect said Ready
-expect state "myproject - Windows PowerShell - axTerminal"
+expect state "myproject - Windows PowerShell - axTerminal, access layer for your shell"
 
 # Step 3: cd .. in PowerShell: the title and the status bar name the parent folder; Ctrl+P says its full path.
 type cd ..
 keys enter
 expect said Done
 expect said ♪ Done
-expect state "work - Windows PowerShell - axTerminal"
+expect state "work - Windows PowerShell - axTerminal, access layer for your shell"
 expect state \\work\u003E"]
 keys ctrl+p
 expect said {temp}\work

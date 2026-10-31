@@ -60,10 +60,11 @@ keys ctrl+t
 expect said ! No next table
 keys escape
 expect focus a.md
-# Axit, About, Version names the version of Axit, the nine apps and the folders.
+# Axit, About, Version names the version of Axit, the apps in their two kinds and the folders.
 menu Version
 expect state "notice":"Axit 3.
-expect state : axClaude, axTerminal, axGIT, axFile, axDown, axJSON, axPreview, axMedia, axTask, axPass, axStart, axClip, axCalc, axProcess.
+expect state Windows: axFile, axDown, axJSON, axPreview, axMedia, axTask, axStart, axClip, axCalc, axProcess.
+expect state axClaude for Claude Code, axTerminal for your shell, axGIT for Git, axPass for KeePassXC.
 expect state Settings: 
 expect state Logs: 
 keys escape

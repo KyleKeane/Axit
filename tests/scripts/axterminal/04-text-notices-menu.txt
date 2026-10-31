@@ -3,6 +3,8 @@ mkdir myproject
 # The run's own settings: no update check (network, and an ERROR in the log when it fails); a small font in a
 # maximized window, so that no line wraps in the view, since the channel reads the caret's line by its visual row.
 file home\Axit\axterminal.json {"checkForUpdates": false, "fontSize": 6, "window": {"x": 0, "y": 0, "width": 1600, "height": 900, "maximized": true}}
+# The access layers' reminders agreed to already (AX-11.5): this script is about what comes after them.
+file home\Axit\consent.json {"items":[{"app":"axClaude","target":"Claude Code","version":"0","when":"2026-10-31T00:00:00"},{"app":"axGIT","target":"Git","version":"0","when":"2026-10-31T00:00:00"},{"app":"axTerminal","target":"Windows PowerShell","version":"0","when":"2026-10-31T00:00:00"},{"app":"axTerminal","target":"PowerShell 7","version":"0","when":"2026-10-31T00:00:00"},{"app":"axTerminal","target":"Command Prompt","version":"0","when":"2026-10-31T00:00:00"},{"app":"axTerminal","target":"Git Bash","version":"0","when":"2026-10-31T00:00:00"},{"app":"axPass","target":"KeePassXC","version":"0","when":"2026-10-31T00:00:00"}]}
 start terminal {temp}\myproject
 expect said ♪ Ready
 
@@ -93,7 +95,7 @@ expect focus "name":"Terminal"
 
 # Step 6: the Axit menu's New window lists axTerminal (Alt+A itself needs menu mode; the palette's list is the same
 # menu). Open windows by type stays manual: it is filled as it opens, so the palette does not list it.
-expect commands axTerminal, Axit, New window
+expect commands axTerminal, access layer for your shell, Axit, New window
 
 # Step 5 (last, since it closes the window): Alt+F4 while a command runs asks first; Escape keeps it; Alt+F4 again
 # (here the channel's close, which is Alt+F4's path, so that the runner knows the window closes on purpose), Enter

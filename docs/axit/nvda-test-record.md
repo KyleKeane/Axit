@@ -8,7 +8,7 @@ Add a section under this one, above the earlier passes, so that the newest comes
 
 ## 2026-10-31: the consent box's state, by the assistant (branch `licence`, after c634215)
 
-Run by the assistant through the NVDA tier (`tests/nvda-scripts/consent-checkbox.txt`, `docs/axit/automation.md`
+Run by the assistant through the NVDA tier (`tests/nvda-scripts/axterminal-consent-checkbox.txt`, `docs/axit/automation.md`
 section 3), the user away at its question; NVDA's speech read from the capture add-on. The user had reported that
 Space in the box said nothing.
 
@@ -24,7 +24,8 @@ Space in the box said nothing.
 Not run yet; before the branch merges:
 
 - The titles: each access layer's window title, New window, Open windows, Recently closed and Show in read "axClaude, access layer for Claude Code" and the like, after a separator below the standalone apps; F1 starts with the same line for the four.
-- The consent notice: axClaude's first start, axTerminal's first start of Windows PowerShell and of Command Prompt, axGIT's first open and first fetch to github.com, axPass's first unlock and New database. Each: the title "Before <app> connects to <program>", the text, Tab to "check box, not checked, I understand that …", Enter before checking says "Check the box first", Space checks, Enter connects; only two buttons, Connect and Not now; Not now leaves the line said in the spec. The second start asks nothing.
+- The consent notice (axGIT's first open and axTerminal's first shell are scripts since 2026-10-31,
+  `tests/scripts/axgit/06-consent.txt` and `tests/scripts/axterminal/07-consent.txt`, heard through `nvda-pass.ps1`): axClaude's first start, axTerminal's first start of Windows PowerShell and of Command Prompt, axGIT's first open and first fetch to github.com, axPass's first unlock and New database. Each: the title "Before <app> connects to <program>", the text, Tab to "check box, not checked, I understand that …", Enter before checking says "Check the box first", Space checks, Enter connects; only two buttons, Connect and Not now; Not now leaves the line said in the spec. The second start asks nothing.
 - Install it now in each app: "Before <app> installs <program>" with Install, then the installer.
 - The AI tools' pairing notice: Allow before checking says "Check the box first"; Enter is still Deny.
 - The update notice: the terms sentence first, and the buttons "I accept all terms, install and restart" and "… install and close" (axClaude plan steps 138 to 140, axDown's update steps).

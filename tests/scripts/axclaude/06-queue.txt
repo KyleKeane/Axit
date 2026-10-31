@@ -3,6 +3,8 @@
 # its manual permission mode, so that the slow command asks first. Claude Code 2.1.309 blocks "sleep 20" (it asks for
 # a waiting tool instead), so the slow command is a ping of about 20 seconds, allowed with 1 in the question's list.
 file home\Axit\axclaude.json {"checkForUpdates":false}
+# The access layers' reminders agreed to already (AX-11.5): this script is about what comes after them.
+file home\Axit\consent.json {"items":[{"app":"axClaude","target":"Claude Code","version":"0","when":"2026-10-31T00:00:00"},{"app":"axGIT","target":"Git","version":"0","when":"2026-10-31T00:00:00"},{"app":"axTerminal","target":"Windows PowerShell","version":"0","when":"2026-10-31T00:00:00"},{"app":"axTerminal","target":"PowerShell 7","version":"0","when":"2026-10-31T00:00:00"},{"app":"axTerminal","target":"Command Prompt","version":"0","when":"2026-10-31T00:00:00"},{"app":"axTerminal","target":"Git Bash","version":"0","when":"2026-10-31T00:00:00"},{"app":"axPass","target":"KeePassXC","version":"0","when":"2026-10-31T00:00:00"}]}
 mkdir queue
 start claude {temp}\queue -- --model haiku --permission-mode default
 expect said trust

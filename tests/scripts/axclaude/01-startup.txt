@@ -1,6 +1,8 @@
 # axClaude, docs/axclaude/nvda-test-plan.md section 1: startup and focus.
 # The update check is off: GitHub's limit for unsigned requests made it fail and log an ERROR in runs (section 11 checks it).
 file home\Axit\axclaude.json {"checkForUpdates":false}
+# The access layers' reminders agreed to already (AX-11.5): this script is about what comes after them.
+file home\Axit\consent.json {"items":[{"app":"axClaude","target":"Claude Code","version":"0","when":"2026-10-31T00:00:00"},{"app":"axGIT","target":"Git","version":"0","when":"2026-10-31T00:00:00"},{"app":"axTerminal","target":"Windows PowerShell","version":"0","when":"2026-10-31T00:00:00"},{"app":"axTerminal","target":"PowerShell 7","version":"0","when":"2026-10-31T00:00:00"},{"app":"axTerminal","target":"Command Prompt","version":"0","when":"2026-10-31T00:00:00"},{"app":"axTerminal","target":"Git Bash","version":"0","when":"2026-10-31T00:00:00"},{"app":"axPass","target":"KeePassXC","version":"0","when":"2026-10-31T00:00:00"}]}
 # Step 1: a folder never used with Claude; the title names the folder and its path, the focus starts in the field.
 mkdir fresh
 start claude {temp}\fresh -- --model haiku

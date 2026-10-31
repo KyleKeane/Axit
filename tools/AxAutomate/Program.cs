@@ -403,6 +403,12 @@ internal sealed class Run(string exe, string temp)
             case "spoken":
                 return (true, string.Join(" | ", _speech.TakeAll()));
             case "keys" when Nvda:
+                // Alt+F4 closes the window on purpose, as in the channel's branch below.
+                if (rest.Contains("alt+f4", StringComparison.OrdinalIgnoreCase))
+                {
+                    Current.Closing();
+                }
+
                 Native.Keys(rest);
                 return (true, null);
             case "type" when Nvda:
@@ -542,7 +548,8 @@ internal sealed class Run(string exe, string temp)
             {
                 if (window.Take(text) is { } taken)
                 {
-                    return (true, $"{clock.ElapsedMilliseconds} ms: {string.Join(" | ", taken.Select(e => e.Spoken))}");
+                    var detail = $"{clock.ElapsedMilliseconds} ms: {string.Join(" | ", taken.Select(e => e.Spoken))}";
+                    return Nvda ? Heard(text, detail) : (true, detail);
                 }
 
                 seen = string.Join(" | ", window.Pending().Select(e => e.Spoken));
@@ -566,6 +573,41 @@ internal sealed class Run(string exe, string temp)
         }
 
         return (false, $"not within {timeout / 1000} s; seen: {seen}");
+    }
+
+    /// <summary>
+    /// The NVDA tier's second half of <c>expect said</c> (2026-10-31): what the window announced or focused, NVDA must
+    /// speak too, within 5 s, so that every app script is an NVDA check when run with --nvda. The timeline's marks go
+    /// first ("! ", "→ ", "· "); a sound ("♪") is not speech and passes as it is.
+    /// </summary>
+    private (bool, string?) Heard(string text, string detail)
+    {
+        var words = text;
+        foreach (var mark in new[] { "! ", "→ ", "· " })
+        {
+            if (words.StartsWith(mark, StringComparison.Ordinal))
+            {
+                words = words[mark.Length..];
+            }
+        }
+
+        if (words.StartsWith('♪') || words.Trim().Length == 0)
+        {
+            return (true, detail);
+        }
+
+        var until = Stopwatch.StartNew();
+        while (until.ElapsedMilliseconds < 5_000)
+        {
+            if (_speech.Take(words) is { } heard)
+            {
+                return (true, detail + " || NVDA: " + string.Join(" | ", heard.Where(h => h != "[cancel]")));
+            }
+
+            Thread.Sleep(100);
+        }
+
+        return (false, $"{detail} || NVDA did not speak it within 5 s; it said: {string.Join(" | ", _speech.Pending())}");
     }
 
     private (bool, string?) Refuse(string rest)
@@ -752,7 +794,8 @@ internal sealed class Speech
     public static readonly string FlagPath = Path.Combine(Path.GetTempPath(), "axit-nvda-capture.on");
     public static readonly string LogPath = Path.Combine(Path.GetTempPath(), "axit-nvda-speech.log");
     private readonly List<string> _all = [];
-    private long _read;
+    // Each script's reader starts where the log ends, so that one script never matches what NVDA said in the one before.
+    private long _read = File.Exists(LogPath) ? new FileInfo(LogPath).Length : 0;
     private int _taken;
 
     /// <summary>

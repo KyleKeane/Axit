@@ -2,6 +2,8 @@
 # The update check off (GitHub's limit for unsigned requests made it fail and log an ERROR in runs).
 allow error Claude Code was not found
 file home\Axit\axclaude.json {"checkForUpdates":false}
+# The access layers' reminders agreed to already (AX-11.5): this script is about what comes after them.
+file home\Axit\consent.json {"items":[{"app":"axClaude","target":"Claude Code","version":"0","when":"2026-10-31T00:00:00"},{"app":"axGIT","target":"Git","version":"0","when":"2026-10-31T00:00:00"},{"app":"axTerminal","target":"Windows PowerShell","version":"0","when":"2026-10-31T00:00:00"},{"app":"axTerminal","target":"PowerShell 7","version":"0","when":"2026-10-31T00:00:00"},{"app":"axTerminal","target":"Command Prompt","version":"0","when":"2026-10-31T00:00:00"},{"app":"axTerminal","target":"Git Bash","version":"0","when":"2026-10-31T00:00:00"},{"app":"axPass","target":"KeePassXC","version":"0","when":"2026-10-31T00:00:00"}]}
 mkdir gone
 # Step 1: a claude.exe that does not exist: the notice "Claude Code was not found" in the conversation's place, the
 # focus in its text, read from its first line; Down: the path tried, the install command, the way back.
