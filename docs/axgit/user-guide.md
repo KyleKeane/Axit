@@ -1,6 +1,6 @@
 # axGIT user guide
 
-**axGIT, access layer for Git.** axGIT only shows what Git does and passes your commands to it; Git, which you install, does the work, and a fetch, pull or push reaches the server your repository's remote names, under its terms. Before axGIT first runs Git, and before the first fetch, pull or push to each server, it shows a notice with a check box: you agree that axGIT is only an access layer and that knowing and following those terms is your responsibility. Axit menu, About, Consents lists what you agreed to; About, Licence says who is responsible for what.
+**axGIT, access layer for Git.** axGIT only shows what Git does and passes your commands to it; Git, which you install, does the work, and a fetch, pull or push reaches the server your repository's remote names, under its terms. Before axGIT first runs Git, and before the first fetch, pull or push to each server, it shows a short reminder with a check box: you confirm that axGIT is only an access layer and that following those terms is up to you. Axit menu, About, Licence has these reminders and what you agreed to.
 
 axGIT is a git manager for one repository, made for screen reader users. One window shows one repository: a list of its changed files, its log or its branches, a text with the details of what you pick, and a status bar with the branch. Everything it does, it does with the git program you already have, so its messages are git's own.
 

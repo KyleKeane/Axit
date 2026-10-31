@@ -24,11 +24,22 @@ public sealed class BundleAboutTests
     public void The_licence_and_attribution_name_the_maker_and_the_terms()
     {
         // The licence notice is NOTICE.md (2026-10-29): the AGPL, its section 7 terms and the disclaimer.
-        Assert.StartsWith("# Licence, terms and disclaimer", BundleAbout.Licence());
+        Assert.StartsWith("# Licence and reminders", BundleAbout.Licence());
+        Assert.Contains("not a product or a service", BundleAbout.Licence());
         Assert.Contains("GNU Affero General Public License", BundleAbout.Licence());
         Assert.Contains("WITHOUT ANY WARRANTY", BundleAbout.Licence());
         Assert.Contains("Dr. Kyle Keane", BundleAbout.Attribution);
         Assert.Contains("no third-party packages", BundleAbout.Attribution);
+    }
+
+    /// <summary>AX-11.8: About, Licence ends with what was agreed to on this computer, with no menu of its own.</summary>
+    [Fact]
+    public void The_licence_notice_ends_with_what_was_agreed()
+    {
+        Assert.EndsWith("delete consent.json in " + Path.GetDirectoryName(AppPaths.ConsentFile) + ".\n", BundleAbout.LicenceWithAgreements([]));
+        Assert.Contains("Nothing yet.", BundleAbout.LicenceWithAgreements([]));
+        var text = BundleAbout.LicenceWithAgreements([new ConsentRecord("axClaude", "Claude Code", "3.8.0", new DateTime(2026, 10, 31))]);
+        Assert.Contains("- axClaude, Claude Code, 31 October 2026, Axit 3.8.0", text);
     }
 
     [Fact]

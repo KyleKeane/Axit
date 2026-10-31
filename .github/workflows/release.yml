@@ -70,7 +70,7 @@ jobs:
           # The SDK that built this release, so that a rebuild years later knows what to reproduce (docs/axit/longevity.md).
           Add-Content -Path notes.md -Value "`nBuilt with the .NET SDK $(dotnet --version)." -Encoding utf8
           # The terms of this release, which installing it accepts (AX-11.7): the update notice shows these notes.
-          Add-Content -Path notes.md -Value "`nInstalling this release means you accept its terms: the licence, https://github.com/KyleKeane/Axit/blob/$env:TAG/LICENSE, and NOTICE.md, https://github.com/KyleKeane/Axit/blob/$env:TAG/NOTICE.md (who is responsible for what: the standalone apps, the access layers and the programs they work through, and the disclaimer)." -Encoding utf8
+          Add-Content -Path notes.md -Value "`nAxit is a set of personal tools shared as they are, not a product or a service. Installing this release means accepting its licence, https://github.com/KyleKeane/Axit/blob/$env:TAG/LICENSE, and the reminders in NOTICE.md, https://github.com/KyleKeane/Axit/blob/$env:TAG/NOTICE.md." -Encoding utf8
           # Every release page links the code signing policy, the privacy page and the governance, as the signing
           # service's terms ask of the download pages (docs/axit/code-signing.md).
           Add-Content -Path notes.md -Value "`nCode signing policy, privacy and governance: https://github.com/KyleKeane/Axit#code-signing-policy, https://github.com/KyleKeane/Axit/blob/main/PRIVACY.md and https://github.com/KyleKeane/Axit/blob/main/GOVERNANCE.md" -Encoding utf8

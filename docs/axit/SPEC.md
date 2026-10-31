@@ -507,7 +507,7 @@ The apps are named ax and a word, the ax in lower case and the word as it is wri
   beside it is the AGPL),
   **Attribution** (A; the maker, the Anthropic note, what Axit is built with), **Privacy** (P; `PRIVACY.md`, embedded:
   everything Axit contacts over the network and when, the outside programs it runs, what stays on the computer; since
-  2026-10-25), **Consents ▸** (C; what the user has agreed to, each withdrawn from its item, AX-11.8), **Third-party notices** (N; `THIRD-PARTY-NOTICES.md`, embedded: the .NET runtime and Windows Forms in
+  2026-10-25), **Third-party notices** (N; `THIRD-PARTY-NOTICES.md`, embedded: the .NET runtime and Windows Forms in
   the program under MIT, the Unicode data), **Axit guide** (G; `docs/axit/README.md`,
   the zip's guide, embedded by `Axit.Core`: install, start, update, remove; its headings take the window's heading
   keys, AX-7.2), and **Axit on GitHub** (H; the repository page, `UpdateCheck.RepositoryPage`, in the browser).
@@ -605,14 +605,13 @@ terms are theirs to know. `NOTICE.md` ("Who is responsible for what") is the ful
   fails when an access layer stands before a standalone app.
 - AX-11.4 **The consent notice.** Before an access layer connects to a program or service for the first time, it shows
   a notice in its own window (AX-7.2; the window's input waits behind it), titled "Before <app> connects to
-  <program>". Its text: what the app does ("axClaude is only an access layer: it shows what Claude Code does and passes
-  your commands to it"), what the other program does and under whose terms, with their address ("Claude Code and
-  Anthropic's service do the work, under Anthropic's terms, https://www.anthropic.com/legal"), and that
-  Axit gives no warranty and its author answers for none of it (NOTICE.md). Below the text, one check box, unchecked:
-  "I understand that <app> is only an access layer, and I take full responsibility for knowing and following the
-  terms of <program>". Buttons: **Connect** (Enter; with the box unchecked it says "Check the box first" and nothing
-  else happens), **Open their terms** (the browser; the notice stays), **Open Axit's terms** (`NOTICE.md` beside the
-  program, in axPreview; the notice stays) and **Not now** (Escape: the window stays, not connected, with one line
+  <program>". A plain reminder, not a contract (2026-10-31, the user's ask: personal tools, not a product): "A reminder:
+  axClaude is only an access layer. It shows what Claude Code does and passes your commands to it; Claude Code is not
+  part of Axit", what the other program does, that its terms are between the user and its maker with their address in
+  the text, and that Axit is a set of personal tools shared as they are. Below the text, one check box, unchecked:
+  "I understand that <app> is only an access layer, and that following the terms of <program> is up to me". Two
+  buttons, the fewest that work (2026-10-31): **Connect** (Enter; with the box unchecked it says "Check the box first"
+  and nothing else happens) and **Not now** (Escape: the window stays, not connected, with one line
   saying so and how to connect, the app's Restart or Open). The check box is a real `CheckBox` with that text as its
   name, after the text and before the buttons in the Tab order; Space toggles it. `OverlayPanel` gains the check box
   as an optional part of a notice (`Notice.Consent`), for every app.
@@ -633,7 +632,7 @@ terms are theirs to know. `NOTICE.md` ("Who is responsible for what") is the ful
     "Before <app> installs <program>", with **Install** in place of Connect; its acceptance counts for the app's first
     connection, so the user agrees once, in the step they were already taking.
   The notice is the window base's (`AxitForm.WithConsent`), the programs' words and addresses `Axit.Core/ConsentTarget`.
-  A custom shell has no address for its terms: its notice says so and has no Open their terms.
+  A custom shell has no address for its terms: its notice says so.
 - AX-11.6 **Reminders at sign-in.** One line says whose account it is, without a check box: axClaude, on sending
   `/login`: "You are signing in to Anthropic through Claude Code; the account and its terms are between you and
   Anthropic", spoken after "Sent" and kept as a system line. axGIT, the first time a window reaches each server
@@ -641,19 +640,25 @@ terms are theirs to know. `NOTICE.md` ("Who is responsible for what") is the ful
   coming): "Connecting to github.com; if Git asks you to sign in, the account is between you and github.com". Still
   to come: Claude Code's own login screen at its first start, recognised once it is recorded
   (`docs/axclaude/claude-screens.md`).
-- AX-11.7 **Updates.** The update notice (AX-3.1) says first: "Installing this update means you accept the terms of
-  Axit <version>: its licence and NOTICE.md …, linked in the release notes below and on the release page". Its first
+- AX-11.7 **Updates.** The update notice (AX-3.1) says first: "A reminder: installing means you accept Axit
+  <version>'s licence and NOTICE.md, linked in the notes below". Its first
   two buttons read **I accept all terms, install and restart** (Enter) and **I accept all terms, install and close**;
   Open release page and Later stay. The acceptance is kept in `consent.json` with the version and the date. Every
   release's notes carry the same sentence with the links to that tag's `LICENSE` and `NOTICE.md` (`release.yml`,
   before the code signing policy line), so the update notice shows them too.
 - AX-11.8 **About.** About, Version lists the apps in the two kinds ("Standalone apps, which need only Windows: axFile,
   … Access layers, which only show and pass on the work of a program you install, under its maker's terms: axClaude
-  for Claude Code, …"). **Consents ▸** (C), after Privacy, lists what the user has agreed to, numbered, one line each
-  ("axClaude, Claude Code, 29 October 2026, Axit 3.8.0"; "Update to Axit 3.8.0, 29 October 2026"), "Nothing agreed
-  to yet" when empty. Enter on one: the notice "Withdraw this consent?" with **Withdraw** (Enter) and **Keep**
-  (Escape); withdrawn, that app asks again at its next connection. An update's acceptance is a record only: its notice
-  says so. About, Licence is `NOTICE.md` (AX-9.9).
+  for Claude Code, …"). About, Licence (AX-9.9) is `NOTICE.md` followed by "What you have agreed to on this computer",
+  one line each ("axClaude, Claude Code, 29 October 2026, Axit 3.8.0"; "Update to Axit 3.8.0, 29 October 2026"),
+  "Nothing yet." when empty, and how to be asked again: delete consent.json in the settings folder. No menu of its
+  own (2026-10-31: a Consents submenu with Withdraw was built on 2026-10-29 and folded in here, to keep the controls
+  few).
+- AX-11.10 **The framing** (2026-10-31, the user's decision): Axit is presented as the tools its maker uses every day
+  as a blind scientist, shared in case they help others, and never as a product or a service: no customers, no
+  support, no warranty. The texts the user meets (the consent reminder, the update notice, F1's access layer line, the
+  installer, the README, the guides, `NOTICE.md` outside the licence's own terms) are worded as plain reminders, to
+  the maker as the main user and to anyone else using the tools, not as a vendor's legal notices. The licence and its
+  section 7 terms keep their full words, since the licence needs them.
 - AX-11.9 **Tests.** The access layers are the last group and carry the keyword (`DispatchTests`); window titles are
   read back to their app (`AxitWindowsTests`); `Consent` records, reads, withdraws and takes a damaged file as nothing
   agreed (`ConsentTests`); the servers' hosts (`GitRemoteTests`); every program Install it now offers has its

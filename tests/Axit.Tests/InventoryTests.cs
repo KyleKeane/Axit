@@ -58,8 +58,8 @@ public sealed class InventoryTests
             Expect(name, Text("src/Axit/Program.cs").Contains($"{name}App.Run", StringComparison.Ordinal), "Program.cs's call");
             Expect(name, Text("src/Axit/Axit.csproj").Contains(shown, StringComparison.Ordinal), "Axit.csproj's description");
             Expect(name, Text("CLAUDE.md").Contains($"**{shown}**", StringComparison.Ordinal), "the root CLAUDE.md map");
-            Expect(name, Text("README.md").Contains($"**{shown}**", StringComparison.Ordinal), "README.md");
-            Expect(name, Text("docs/axit/README.md").Contains($"**{shown}**", StringComparison.Ordinal), "docs/axit/README.md");
+            Expect(name, Text("README.md").Contains($"**{app.Title}**", StringComparison.Ordinal), "README.md, by its title (AX-11.2)");
+            Expect(name, Text("docs/axit/README.md").Contains($"**{app.Title}**", StringComparison.Ordinal), "docs/axit/README.md, by its title (AX-11.2)");
             Expect(name, Text("docs/axit/SPEC.md").Contains($"**{shown}**", StringComparison.Ordinal), "docs/axit/SPEC.md section 3");
             Expect(name, Text("docs/axit/SPEC.md").Contains($"`{app.Verb}`", StringComparison.Ordinal), "docs/axit/SPEC.md AX-1.1's verb");
             Expect(name, Text(".github/ISSUE_TEMPLATE/bug.yml").Contains($"- {shown}", StringComparison.Ordinal), "the bug form's choices");

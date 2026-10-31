@@ -16,7 +16,7 @@ public static class BundleAbout
     public static string Version(string latestRelease) =>
         $"Axit {BundleInfo.Version}.\n" +
         $"Standalone apps, which need only Windows: {string.Join(", ", Dispatch.Apps.Where(app => !app.IsAccessLayer).Select(app => app.Name))}.\n" +
-        $"Access layers, which only show and pass on the work of a program you install, under its maker's terms: {string.Join(", ", Dispatch.Apps.Where(app => app.IsAccessLayer).Select(app => $"{app.Name} for {app.AccessLayerFor}"))}. About, Licence says who is responsible for what; About, Consents what you have agreed to.\n" +
+        $"Access layers, which only show and pass on the work of a program you install, under its maker's terms: {string.Join(", ", Dispatch.Apps.Where(app => app.IsAccessLayer).Select(app => $"{app.Name} for {app.AccessLayerFor}"))}. About, Licence has the reminders and what you have agreed to.\n" +
         "The Axit guide below says what each app is.\n\n" +
         $"Latest release on GitHub: {latestRelease}\nReleases: {UpdateCheck.ReleasesPage}\n\n" +
         $"Settings: {Path.GetDirectoryName(AppPaths.RecentlyClosedFile)}, one file per app ({string.Join(", ", Dispatch.Apps.Select(app => app.Name.ToLowerInvariant() + ".json"))})\nLogs: {AppPaths.LogsFolder}";
@@ -25,6 +25,17 @@ public static class BundleAbout
 
     /// <summary>NOTICE.md, embedded by Axit.Core.csproj (2026-10-29): the AGPL notice, the additional terms of the licence's section 7 and the disclaimer in full words, the same page as the repository's and the zip's; LICENSE is the licence itself.</summary>
     public static string Licence() => EmbeddedText.Read(typeof(BundleAbout).Assembly, "Notice.md", "NOTICE.md");
+
+    /// <summary>
+    /// About, Licence (AX-11.8): NOTICE.md, then what the user has agreed to on this computer, one line each, so that the
+    /// record needs no menu of its own. To be asked again, delete consent.json in the settings folder.
+    /// </summary>
+    public static string LicenceWithAgreements(IReadOnlyList<ConsentRecord> agreed) =>
+        Licence().TrimEnd() + "\n\n## What you have agreed to on this computer\n\n" +
+        (agreed.Count == 0
+            ? "Nothing yet."
+            : string.Join("\n", agreed.Select(item => "- " + Consent.Line(item)))) +
+        $"\n\nTo be asked again, delete consent.json in {Path.GetDirectoryName(AppPaths.ConsentFile)}.\n";
 
     public const string AttributionTitle = "Attribution";
 

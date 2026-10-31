@@ -4,7 +4,9 @@ How Axit is run, who decides, and what its users can count on.
 
 ## The project
 
-Axit is free and open-source software under the GNU Affero General Public License, version 3 only (`LICENSE`), with
+Axit is the set of tools its maker uses every day as a blind scientist, shared in case they help others; it is not a
+product or a service, and nobody is a customer. It is free and open-source software under the GNU Affero General
+Public License, version 3 only (`LICENSE`), with
 the additional terms in `NOTICE.md`, made for people who use a screen reader (versions up to 3.7.6 were released under
 the MIT licence). It has no company, no paid edition, no data collection (`PRIVACY.md`) and no dependency on any
 service of the developer's. Anyone may use, study, change and pass it on; a changed version that is shared or offered

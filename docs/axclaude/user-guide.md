@@ -1,6 +1,6 @@
 # axClaude user guide
 
-**axClaude, access layer for Claude Code.** axClaude only shows what Claude Code does and passes your messages and answers to it. Claude Code, Anthropic's program, and Anthropic's service do the work, under your Anthropic account and Anthropic's terms. Before axClaude first starts Claude Code it shows a notice with a check box: you agree that axClaude is only an access layer and that knowing and following Claude Code's terms is your responsibility. Axit menu, About, Consents lists what you agreed to; About, Licence says who is responsible for what.
+**axClaude, access layer for Claude Code.** axClaude only shows what Claude Code does and passes your messages and answers to it. Claude Code, Anthropic's program, and Anthropic's service do the work, under your Anthropic account and Anthropic's terms. Before axClaude first starts Claude Code it shows a short reminder with a check box: you confirm that axClaude is only an access layer and that following Claude Code's terms is up to you. Axit menu, About, Licence has these reminders and what you agreed to.
 
 axClaude is a Windows program for using Claude Code with a screen reader. It runs Claude Code for you and shows everything Claude says in a plain text window, one line at a time. You type to Claude in a text field at the bottom. It is made for NVDA and works with any screen reader that reads ordinary Windows text fields.
 

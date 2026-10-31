@@ -146,7 +146,7 @@ public abstract partial class AxitForm
         // AX-11.7: installing means accepting the release's terms, said first and in the buttons' own words.
         var text =
             $"You have Axit {BundleInfo.Version}. Axit {version} is available.\n" +
-            $"Installing this update means you accept the terms of Axit {version}: its licence and NOTICE.md (who is responsible for what, the access layers and the disclaimer), linked in the release notes below and on the release page; About, Licence shows them once it is installed.\n\n" +
+            $"A reminder: installing means you accept Axit {version}'s licence and NOTICE.md, linked in the notes below.\n\n" +
             (release.Notes.Length > 0 ? release.Notes + "\n\n" : string.Empty) +
             $"I accept all terms, install and restart downloads the new version, {UpdateRestartText}. I accept all terms, install and close installs without starting it again. " +
             $"A progress bar shows the download.{size}\n" +

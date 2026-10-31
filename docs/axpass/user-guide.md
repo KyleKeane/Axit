@@ -1,6 +1,6 @@
 # axPass user guide
 
-**axPass, access layer for KeePassXC.** axPass only shows what KeePassXC's command-line tool reads and passes your changes and your master password to it; KeePassXC, which you install, does all the encryption, under its own licence. Before axPass first unlocks or makes a database it shows a notice with a check box: you agree that axPass is only an access layer and that knowing and following KeePassXC's terms is your responsibility. Axit menu, About, Consents lists what you agreed to; About, Licence says who is responsible for what.
+**axPass, access layer for KeePassXC.** axPass only shows what KeePassXC's command-line tool reads and passes your changes and your master password to it; KeePassXC, which you install, does all the encryption, under its own licence. Before axPass first unlocks or makes a database it shows a short reminder with a check box: you confirm that axPass is only an access layer and that following KeePassXC's terms is up to you. Axit menu, About, Licence has these reminders and what you agreed to.
 
 axPass opens a KeePass password database (a `.kdbx` file) in a window that NVDA reads well: its groups and entries
 on the left, the selected entry's fields on the right. It is part of Axit, a bundle of apps for people who use a

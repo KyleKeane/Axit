@@ -1,6 +1,6 @@
 # Axit
 
-Axit is one Windows program that holds several apps for people who use a screen reader. It is made for NVDA and works with any screen reader that reads ordinary Windows text fields. Each app has its own window, its own Start menu entry, its place in File Explorer's Open with Axit submenu and its own console command, and all of them share this one installation and update together.
+Axit is the set of tools I use every day as a blind scientist, shared in case they help someone else: personal tools, not a product or a service, with no support and no warranty. It is one Windows program that holds several apps for people who use a screen reader. It is made for NVDA and works with any screen reader that reads ordinary Windows text fields. Each app has its own window, its own Start menu entry, its place in File Explorer's Open with Axit submenu and its own console command, and all of them share this one installation and update together.
 
 The apps come in two kinds. Standalone apps need only Windows and work with the network off:
 

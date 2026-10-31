@@ -264,7 +264,7 @@ public abstract partial class AxitForm
         var target = ConsentTarget.AiTool(name);
         var text = $"{name} asks to use Axit. It runs as {program}.\n\n"
             + "It can read what the Axit windows show (their text, lists and status) and open apps. It cannot change or delete anything, and it never reads axPass or axClip.\n\n"
-            + $"Axit is only the access layer here: {target.Work} Those terms are between you and its maker; Axit's author is not a party to them and is not responsible for what {name} does with what it reads (Axit menu, About, Licence).\n\n"
+            + $"A reminder: Axit is only the access layer here. {target.Work}\n\n"
             + "To allow it, check the box, then Allow. Options, General, Forget AI tools takes this back.";
         ShowNotice(new Notice($"{name} asks to use Axit", text,
         [
@@ -294,7 +294,7 @@ public abstract partial class AxitForm
         ])
         {
             Unprompted = true,
-            Consent = $"I understand that Axit is only an access layer for {name}, and I take full responsibility for knowing and following the terms of {name}",
+            Consent = $"I understand that Axit is only an access layer for {name}, and that following the terms of {name} is up to me",
         });
         // The window closing refuses; the handler goes with the answer, so that requests do not pile handlers up.
         FormClosedEventHandler refuse = (_, _) => answer.TrySetResult(false);

@@ -39,7 +39,7 @@ public static class BundleHelp
         // AX-11.2: an access layer says what it is before its keys.
         if (Dispatch.Apps.FirstOrDefault(a => string.Equals(a.Name, app, StringComparison.OrdinalIgnoreCase)) is { IsAccessLayer: true } layer)
         {
-            text.Append($"{layer.Title}: {layer.Name} only shows what {layer.AccessLayerFor} does and passes your commands to it; {layer.AccessLayerFor} does the work under its maker's terms, which you agreed to know before the first connection. Axit menu, About, Licence says who is responsible for what\r\n");
+            text.Append($"{layer.Title}: {layer.Name} only shows what {layer.AccessLayerFor} does and passes your commands to it; {layer.AccessLayerFor} does the work under its maker's terms, which are yours to follow. Axit menu, About, Licence has the reminders\r\n");
         }
 
         text.Append("\r\n");
