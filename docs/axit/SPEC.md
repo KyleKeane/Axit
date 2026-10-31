@@ -439,6 +439,9 @@ The apps are named ax and a word, the ax in lower case and the word as it is wri
   or the focus leaving the box, keeps the old name; Ctrl+Z in the box undoes the typing. Built into `AxitList`
   (`BeginRename`, `EndRename`, `Renaming`), so that a window only says what renaming means for its items. In axFile's
   folder list, axTask's and axPass's navigators, and the item apps' field titles.
+- AX-8.8 A check box says its new state when the user toggles it, "checked" or "not checked", as one announcement
+  (2026-10-31: NVDA said nothing on Space in the consent notice's box). Built into `Axit.Forms/AxitCheckBox`, the one
+  check box of the bundle; `CheckBoxTests` fails on a plain `CheckBox`.
 
 ### AX-9 The Axit menu
 

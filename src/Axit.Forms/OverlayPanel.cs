@@ -101,7 +101,7 @@ public sealed class OverlayPanel : Panel
     private readonly FlowLayoutPanel _buttons = new();
     private readonly ProgressBar _progress = new();
     private readonly ListBox _matches = new();
-    private readonly CheckBox _consent = new();
+    private readonly AxitCheckBox _consent = new();
     private OverlayInput? _inputSpec;
     private Control? _custom;
     private string? _headLine;
